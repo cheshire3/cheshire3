@@ -1,4 +1,4 @@
- 
+
 from baseObjects import Record
 from c3errors import C3Exception
 import types, utils, os, re
@@ -22,7 +22,7 @@ import unicodedata
 # 3 <text>
 # Characters
 # 9 <element hash>
-# Hash of locations
+# pickled hash of locations
 
 # Split to separate object to allow for DOM->SAX direct conversion
 # by throwing events from DOM tree to handler.
