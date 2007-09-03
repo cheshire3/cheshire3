@@ -1,0 +1,290 @@
+<config>
+  <subConfigs>
+
+    <subConfig type="documentFactory" id="normaliserDocumentFactory">
+      <objectType>documentFactory.BaseDocumentFactory</objectType>
+      <options>
+        <default type="format">termHash</default>
+        <default type="cache">0</default>
+      </options>
+    </subConfig>
+
+    <subConfig type="normaliser" id="WordNetNormaliser">
+      <objectType>textmining.tmNormaliser.WordNetNormaliser</objectType>
+      <imports>
+       <module>
+         <name>textmining</name>
+       </module>
+     </imports>
+    </subConfig>  
+
+    <subConfig type="normaliser" id="HypernymNormaliser">
+      <objectType>textmining.tmNormaliser.HypernymNormaliser</objectType>
+      <imports>
+       <module>
+         <name>textmining</name>
+       </module>
+     </imports>
+    </subConfig>  
+
+    <!-- string with /POS tags -->
+    <subConfig type="normaliser" id="TsuPosNormaliser">
+      <objectType>textmining.tmNormaliser.TsujiiPosNormaliser</objectType>
+      <imports>
+       <module>
+         <name>textmining</name>
+       </module>
+     </imports>
+     <paths>
+       <path type="taggerPath">/home/cheshire/cheshire3/code/textmining</path>
+     </paths>
+    </subConfig>  
+
+    <subConfig type="normaliser" id="PosTagStripNormaliser">
+      <objectType>normaliser.RegexpNormaliser</objectType>
+      <options>
+        <setting type="regexp">/[^/]+$</setting>
+      </options>
+    </subConfig>
+
+    <subConfig type="normaliser" id="PosTagKeepNormaliser">
+      <objectType>normaliser.RegexpNormaliser</objectType>
+      <options>
+        <setting type="regexp">^(.*)/</setting>
+      </options>
+    </subConfig>
+
+    <!-- string with XML for clauses -->
+    <subConfig type="preParser" id="EnjuNormaliser">
+      <objectType>textmining.tmNormaliser.EnjuNormaliser</objectType>
+      <imports>
+       <module>
+         <name>textmining</name>
+       </module>
+     </imports>
+       <paths>
+         <path type="enjuPath">/home/cheshire/install/bin/enju</path>
+       </paths>
+    </subConfig>  
+
+
+    <subConfig type="preParser" id="EnjuTextPreParser">
+      <objectType>textmining.tmPreParser.EnjuTextPreParser</objectType>
+      <imports>
+       <module>
+         <name>textmining</name>
+       </module>
+     </imports>
+       <paths>
+         <path type="enjuPath">/home/cheshire/install/bin/enju</path>
+       </paths>
+    </subConfig>  
+
+    <!-- raw genia output -->
+    <subConfig type="normaliser" id="UnparsedGeniaNormaliser">
+       <objectType>textmining.tmNormaliser.UnparsedGeniaNormaliser</objectType>
+       <imports>
+         <module>
+           <name>textmining</name>
+         </module>
+       </imports>
+       <paths>
+         <path type="filePath">/home/cheshire/cheshire3/code/textmining</path>
+       </paths>
+    </subConfig>  
+
+    <!-- recombine into string -->
+    <subConfig type="normaliser" id="PosStringGeniaNormaliser">
+       <objectType>textmining.tmNormaliser.ReconstructGeniaNormaliser</objectType>
+       <imports>
+         <module>
+           <name>textmining</name>
+         </module>
+       </imports>
+       <paths>
+         <path type="filePath">/home/cheshire/cheshire3/code/textmining</path>
+       </paths>
+       <options>
+         <setting type="pos">1</setting>
+       </options>
+    </subConfig> 
+
+    <!-- stems recombined -->
+    <subConfig type="normaliser" id="StemStringGeniaNormaliser">
+       <objectType>textmining.tmNormaliser.ReconstructGeniaNormaliser</objectType>
+       <imports>
+         <module>
+           <name>textmining</name>
+         </module>
+       </imports>
+       <paths>
+         <path type="filePath">/home/cheshire/cheshire3/code/textmining</path>
+       </paths>
+       <options>
+         <setting type="useStem">1</setting>
+       </options>
+    </subConfig> 
+
+    <subConfig type="normaliser" id="StemPosStringGeniaNormaliser">
+       <objectType>textmining.tmNormaliser.ReconstructGeniaNormaliser</objectType>
+       <imports>
+         <module>
+           <name>textmining</name>
+         </module>
+       </imports>
+       <paths>
+         <path type="filePath">/home/cheshire/cheshire3/code/textmining</path>
+       </paths>
+       <options>
+         <setting type="useStem">1</setting>
+         <setting type="pos">1</setting>
+       </options>
+    </subConfig> 
+
+    <subConfig type="normaliser" id="StemPosGeniaVerbSpanPreParser">
+       <objectType>textmining.tmPreParser.GeniaVerbSpanPreParser</objectType>
+       <imports>
+         <module>
+           <name>textmining</name>
+         </module>
+       </imports>
+       <paths>
+         <path type="filePath">/home/cheshire/cheshire3/code/textmining</path>
+       </paths>
+       <options>
+         <setting type="useStem">1</setting>
+         <setting type="pos">1</setting>
+	 <setting type="requireNoun">1</setting>
+       </options>
+    </subConfig> 
+
+
+
+
+    <!-- keyword, with 'stem' key in hash, /POS in term -->
+    <subConfig type="normaliser" id="KeywordGeniaNormaliser">
+       <objectType>textmining.tmNormaliser.KeywordGeniaNormaliser</objectType>
+       <imports>
+         <module>
+           <name>textmining</name>
+         </module>
+       </imports>
+       <paths>
+         <path type="filePath">/home/cheshire/cheshire3/code/textmining</path>
+       </paths>
+    </subConfig> 
+
+
+    <subConfig type="normaliser" id="GeniaStemNormaliser">
+       <objectType>textmining.tmNormaliser.GeniaStemNormaliser</objectType>
+       <imports>
+         <module>
+           <name>textmining</name>
+         </module>
+       </imports>
+    </subConfig>  
+
+
+    <!-- take POS tagged string, and keyword -->
+    <subConfig type="normaliser" id="PosKwdNormaliser">
+       <objectType>textmining.tmNormaliser.PosKeywordNormaliser</objectType>
+       <imports>
+         <module>
+           <name>textmining</name>
+         </module>
+       </imports>
+    </subConfig>  
+
+    <!-- take POS tagged string and discover phrases -->
+    <subConfig type="normaliser" id="PosPhraseNormaliser">
+       <objectType>textmining.tmNormaliser.PosPhraseNormaliser</objectType>
+       <imports>
+         <module>
+           <name>textmining</name>
+         </module>
+       </imports>
+       <options>
+         <setting type="pattern">JJ*NN+</setting>
+         <setting type="subPhrases">1</setting>
+         <setting type="minimumWords">2</setting>
+       </options>
+    </subConfig>  
+
+    <subConfig type="normaliser" id="PhraseStemNormaliser">
+       <objectType>normaliser.PhraseStemNormaliser</objectType>
+    </subConfig>  
+
+    <subConfig type="normaliser" id="NounVerbFilterNormaliser">
+       <objectType>textmining.tmNormaliser.PosTypeNormaliser</objectType>
+       <options>
+         <setting type="posTypes">NN NNP NNS VB VBD VBZ VBG VBN VBP</setting>
+         <!-- Can keep the pos tags: -->
+         <!-- <setting type="pos">1</setting> -->
+       </options>
+       <imports>
+         <module>
+           <name>textmining</name>
+         </module>
+       </imports>
+    </subConfig>  
+
+    <subConfig type="normaliser" id="NounVerbAdjFilterNormaliser">
+       <objectType>textmining.tmNormaliser.PosTypeNormaliser</objectType>
+       <options>
+         <setting type="posTypes">NN NNP NNS VB VBD VBZ VBG VBN VBP JJ JJR JJS</setting>
+         <!-- Can keep the pos tags: -->
+         <!-- <setting type="pos">1</setting> -->
+       </options>
+       <imports>
+         <module>
+           <name>textmining</name>
+         </module>
+       </imports>
+    </subConfig>  
+
+    <subConfig type="normaliser" id="NounFilterNormaliser">
+       <objectType>textmining.tmNormaliser.PosTypeNormaliser</objectType>
+       <options>
+         <setting type="posTypes">NN NNP NNS</setting>
+         <!-- Can keep the pos tags: -->
+         <!-- <setting type="pos">1</setting> -->
+       </options>
+       <imports>
+         <module>
+           <name>textmining</name>
+         </module>
+       </imports>
+    </subConfig>  
+
+    <subConfig type="normaliser" id="VerbFilterNormaliser">
+       <objectType>textmining.tmNormaliser.PosTypeNormaliser</objectType>
+       <options>
+         <setting type="posTypes">VB VBD VBZ VBG VBN VBP</setting>
+         <!-- Can keep the pos tags: -->
+         <!-- <setting type="pos">1</setting> -->
+       </options>
+       <imports>
+         <module>
+           <name>textmining</name>
+         </module>
+       </imports>
+    </subConfig>  
+
+  <subConfig type="normaliser" id="TsuTransformer">
+      <objectType>textmining.tmTransformer.TsujiiXPathTransformer</objectType>
+      <imports>
+       <module>
+         <name>textmining</name>
+       </module>
+     </imports>
+     <paths>
+       <path type="taggerPath">/home/cheshire/cheshire3/code/textmining</path>
+     </paths>
+     <xpath type="copy">PMID</xpath>
+     <xpath type="tag">ArticleTitle</xpath>
+     <xpath type="tag">AbstractText</xpath>
+  </subConfig>  
+
+  </subConfigs>
+</config>
+

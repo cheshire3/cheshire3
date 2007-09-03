@@ -1,0 +1,149 @@
+
+from configParser import C3Object
+from utils import elementType, getFirstData, verifyXPaths
+import time
+
+class XPathObject(C3Object):
+    sources = []
+
+    def _handleConfigNode(self, session, node):    
+        if (node.localName == "source"):
+            xpaths = []
+            for child in node.childNodes:
+                if child.nodeType == elementType:
+                    if child.localName == "xpath":
+                        # add XPath
+                        data = {'schema' : '', 'xpath': None, 'maps': {}}
+
+                        xp = getFirstData(child)
+                        data['xpath'] = verifyXPaths([xp])[0]
+
+                        for a in child.attributes.keys():
+                            # ConfigStore using 4Suite
+                            if type(a) == tuple:
+                                attrNode = child.attributes[a]
+                                a = attrNode.name
+                            if (a[:6] == "xmlns:"):
+                                pref = a[6:]
+                                uri = child.getAttributeNS('http://www.w3.org/2000/xmlns/', pref)
+                                if not uri:
+                                    uri = child.getAttribute(a)
+                                data['maps'][pref] = uri
+                            else:
+                                data[a] = child.getAttributeNS(None, a)
+                        xpaths.append(data)
+            self.sources.append(xpaths)
+
+    def __init__(self, session, config, parent):
+        self.sources = []
+        self.schema = ""
+        C3Object.__init__(self, session, config, parent)
+
+    def process_record(self, session, record):
+        # Extract XPath and return values
+        vals = []
+        for src in self.sources:
+            # list of {}s
+            for xp in src:
+                if xp['schema'] and record.schema != xp['schema']:
+                    continue                
+                vals.append(record.process_xpath(xp['xpath'], xp['maps']))
+        return vals
+
+
+# two xpaths, span between them
+class SpanXPath(XPathObject):
+    # extra attributes on xpath:
+    #   slide="N"    -- slide this many between components.
+    #                   Defaults to window  (eg non overlapping)
+    #                   On first xpath, = slide this many before first comp.
+    #                   Defaults to 0 (eg start at beginning)
+    #   window="N"   -- This is the number of elements in a single comp.
+    #                   Defaults to 1  (eg adjacent)
+
+    def process_record(self, session, record):
+        raw = record.process_xpath(self.sources[0][0]['xpath'])
+        initialSlide = int(self.sources[0][0].get('slide', 0))
+        endTag = self.sources[0][1]['xpath'][-1][0][1]
+        endNum = int(self.sources[0][1].get('window', '1'))
+        slide = int(self.sources[0][1].get('slide', endNum))
+        comps = []
+        # check if start and end are the same
+
+        for r in raw[initialSlide::slide]:
+            start = int(r[-1][r[-1].rfind(' ')+1:])            
+            comp = r
+            startTag = record._convert_elem(comp[0])[0]
+            usingNs = comp[0][0]
+            n = len(comp)-1
+            currNum = 0
+            okay = 1
+            saxlen = len(record.sax) -1
+            openTags = []
+            while okay and start + n < saxlen:
+                n += 1
+                line = record.sax[start+n]
+                if(line[0] in ['1', '4']):
+                    # Check it                            
+                    if (record._checkSaxXPathLine(self.sources[0][1]['xpath'][1], start + n)):
+                        # Matched end
+                        currNum += 1
+                        if currNum >= endNum:
+                            okay = 0
+                            continue
+                    # Add tags to close if not end or not endNum reached
+                    if line[0] == '4':
+                        end = line.rfind("}")
+                        stuff = eval(line[2:end+1])
+                        ns, tag = stuff[0], stuff[1]
+                        openTags.append((ns, tag))
+                    else:
+                        openTags.append(record._convert_elem(line)[0])
+                        comp.append(line)
+                elif (line[0] in ['2', '5']):
+                    # check we're open
+                    if (line[0] == '2'):
+                        end = line.rfind(' ')
+                        tag = line[2:end]
+                    else:
+                        tag = eval(line[2:line.rfind(',')])[0:2]
+                    if ((n == 1 and tag[1] == startTag) or (openTags and openTags[-1] == tag)):
+                        comp.append(line)
+                        if openTags:
+                            openTags.pop(-1)
+                elif (line[0] == '3'):
+                    comp.append(line)
+            if (openTags):
+                openTags.reverse()
+                for o in openTags:
+                    if usingNs == '1':
+                        comp.append("2 %s %s" % (o, start))
+                    else:
+                        comp.append("5 u'%s', u'%s', u'', None" % o)
+            comps.append(comp)
+        return [comps]
+
+
+class MetadataXPath(XPathObject):
+
+    def process_record(self, session, record):
+        # Check xpath name against record metadata
+        vals = []
+        for src in self.sources:
+            # list of {}s
+            for xp in src:
+                # just use last item
+                full = xp['xpath']
+                name = full[1][-1][1]
+                if hasattr(record, name):
+                    vals.append([str(getattr(record, name))])
+                elif name == 'now':
+                    # eg for lastModified/created etc
+                    now = time.strftime("%Y-%m-%d %H:%M:%S")
+                    vals.append([now])
+                else:
+                    vals.append(None)
+        return vals
+
+        
+    

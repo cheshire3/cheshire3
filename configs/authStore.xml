@@ -1,0 +1,8 @@
+
+<config type="authStore" id="defaultAuthStore">
+  <objectType>objectStore.BdbObjectStore</objectType>
+  <paths>
+     <path type="databasePath">authStore.bdb</path>
+  </paths>
+</config>
+

@@ -1,0 +1,337 @@
+<config>
+<subConfigs>
+
+<subConfig type="documentFactory" id="defaultDocumentFactory">
+  <objectType>documentFactory.BaseDocumentFactory</objectType>
+</subConfig>
+<subConfig type="documentFactory" id="ComponentDocumentFactory">
+  <objectType>documentFactory.ComponentDocumentFactory</objectType>
+</subConfig>
+
+
+
+<!-- Parser objects -->
+
+<subConfig type="parser" id="defaultParser">
+  <objectType>parser.MinidomParser</objectType>
+</subConfig>
+<subConfig type="parser" id="SaxParser">
+  <objectType>parser.SaxParser</objectType>
+</subConfig>
+<subConfig type="parser" id="NsSaxParser">
+  <objectType>parser.SaxParser</objectType>
+  <options>
+    <setting type="namespaces">1</setting>
+  </options>
+</subConfig>
+<subConfig type="parser" id="FtParser">
+  <objectType>parser.FtParser</objectType>
+</subConfig>
+<subConfig type="parser" id="defaultRecordStoreParser">
+  <objectType>parser.XmlRecordStoreParser</objectType> 
+</subConfig>
+<subConfig type="parser" id="LxmlParser">
+  <objectType>parser.LxmlParser</objectType>
+</subConfig>
+
+
+<!-- PreParser objects -->
+
+
+<subConfig type="preParser" id="PrintableOnlyPreParser">
+  <objectType>preParser.PrintableOnlyPreParser</objectType>
+</subConfig>
+<subConfig type="preParser" id="CharacterEntityPreParser">
+  <objectType>preParser.CharacterEntityPreParser</objectType>
+</subConfig>
+<subConfig type="preParser" id="AmpPreParser">
+  <objectType>preParser.AmpPreParser</objectType>
+</subConfig>
+
+<subConfig type="preParser" id="SgmlPreParser">
+  <objectType>preParser.SgmlPreParser</objectType>
+  <options>
+    <setting type="emptyElements">lb br hr</setting>
+  </options>
+</subConfig>
+
+<subConfig type="preParser" id="PicklePreParser">
+  <objectType>preParser.PicklePreParser</objectType>
+</subConfig>
+<subConfig type="preParser" id="UnpicklePreParser">
+  <objectType>preParser.UnpicklePreParser</objectType>
+</subConfig>
+
+<subConfig type="preParser" id="GzipPreParser">
+  <objectType>preParser.GzipPreParser</objectType>
+</subConfig>
+
+<subConfig type="preParser" id="MarcToSgmlPreParser">
+  <objectType>preParser.MarcToSgmlPreParser</objectType>
+</subConfig>
+<subConfig type="preParser" id="MarcToXmlPreParser">
+  <objectType>preParser.MarcToXmlPreParser</objectType>
+</subConfig>
+<subConfig type="preParser" id="HtmlSmashPreParser">
+  <objectType>preParser.HtmlSmashPreParser</objectType>
+</subConfig>
+
+  <subConfig type="preParser" id="Latin1PreParser">
+     <objectType>preParser.UnicodeDecodePreParser</objectType>
+     <options>
+       <setting type="codec">latin_1</setting>
+     </options>
+  </subConfig>
+
+  <subConfig type="preParser" id="Utf8PreParser">
+     <objectType>preParser.UnicodeDecodePreParser</objectType>
+  </subConfig>
+
+
+
+  <subConfig type="preParser" id="PdfXmlPreParser">
+     <objectType>preParser.CmdLinePreParser</objectType>
+     <paths>
+       <path type="commandLine">pdftohtml -xml %INDOC% %OUTDOC%</path>
+     </paths>
+  </subConfig>
+
+  <subConfig type="preParser" id="PdfXmlFix1PreParser">
+    <objectType>preParser.RegexpSmashPreParser</objectType>
+    <options>
+      <setting type="regexp">&lt;/?[ib]&gt;</setting>
+    </options>
+  </subConfig>
+
+  <subConfig type="preParser" id="PdfXmlFix2PreParser">
+    <objectType>preParser.RegexpSmashPreParser</objectType>
+    <options>
+      <setting type="regexp">&lt;A</setting>
+      <setting type="char">&lt;a</setting>
+    </options>
+  </subConfig>
+
+  <subConfig type="preParser" id="PdfXmlFix3PreParser">
+    <objectType>preParser.RegexpSmashPreParser</objectType>
+    <options>
+      <setting type="regexp">Error: PDF version (.*?) \(continuing anyway\)\n</setting>
+    </options>
+  </subConfig>
+
+  <subConfig type="preParser" id="PdfXmlFix4PreParser">
+    <objectType>preParser.RegexpSmashPreParser</objectType>
+    <options>
+      <setting type="regexp">&lt;\?xml(.*?)dtd"&gt;</setting>
+    </options>
+  </subConfig>
+
+
+   <subConfig type="preParser" id="PsPdfPreParser">
+     <objectType>preParser.CmdLinePreParser</objectType>
+     <paths>
+       <path type="commandLine">ps2pdf - -</path>
+     </paths>
+   </subConfig>
+
+
+
+   <subConfig type="preParser" id="PdfToTxtPreParser">
+     <objectType>preParser.CmdLinePreParser</objectType>
+     <paths>
+       <path type="commandLine">pdftotext -raw -nopgbrk %INDOC% %OUTDOC%</path>
+     </paths>
+   </subConfig>
+
+  <subConfig type="preParser" id="PdfTxtFixPreParser">
+    <objectType>preParser.RegexpSmashPreParser</objectType>
+    <options>
+      <setting type="regexp">\n[0-9]+\n</setting>
+      <setting type="char"> </setting>
+    </options>
+  </subConfig>
+
+
+  <subConfig type="preParser" id="HtmlTidyPreParser">
+     <objectType>preParser.CmdLinePreParser</objectType>
+     <paths>
+       <path type="commandLine">tidy -asxml -i -o %OUTDOC% %INDOC%</path>
+     </paths>
+  </subConfig>
+
+  <subConfig type="preParser" id="TidyFixPreParser">
+    <objectType>preParser.RegexpSmashPreParser</objectType>
+    <options>
+      <setting type="regexp">&lt;!doctype(.*?)&gt;</setting>
+    </options>
+  </subConfig>
+
+
+<subConfig type="preParser" id="TxtToXmlPreParser">
+  <objectType>preParser.TxtToXmlPreParser</objectType>
+</subConfig>
+
+<!-- Extracter objects -->
+
+<subConfig type="extracter" id="ExactExtracter">
+  <objectType>extracter.SimpleExtracter</objectType>
+</subConfig>
+<subConfig type="extracter" id="KeywordExtracter">
+  <objectType>extracter.KeywordExtracter</objectType>
+</subConfig>
+<subConfig type="extracter" id="ProximityExtracter">
+  <objectType>extracter.ProximityExtracter</objectType>
+</subConfig>
+<subConfig type="extracter" id="ExactProximityExtracter">
+  <objectType>extracter.ExactProximityExtracter</objectType>
+</subConfig>
+<subConfig type="extracter" id="ParentProximityExtracter">
+  <objectType>extracter.ProximityExtracter</objectType>
+  <options>
+     <setting type="parent">1</setting>
+  </options>
+</subConfig>
+<subConfig type="extracter" id="ExactParentProximityExtracter">
+  <objectType>extracter.ExactProximityExtracter</objectType>
+  <options>
+     <setting type="parent">1</setting>
+  </options>
+</subConfig>
+
+
+
+
+
+<subConfig type="extracter" id="DateExtracter">
+  <objectType>extracter.DateExtracter</objectType>
+  <docs>
+  	Extracts multiple dates as separate keys, but probably does this slowly and less reliably than for single dates.
+  </docs>
+  <options>
+  	<!-- in ambiguous cases, UK style dates take priority e.g. dd/mm/yyyy-->
+  	<setting type="dayfirst">1</setting>
+  </options>
+</subConfig>
+<subConfig type="extracter" id="RangeExtracter">
+  <objectType>extracter.RangeExtracter</objectType>
+  <docs>
+  	Extracts a range for use in RangeIndexes.
+  	Currently extracts the highest and lowest keys input and returns them as a single key denoting the range between them.
+  </docs>
+</subConfig>
+<subConfig type="extracter" id="DateRangeExtracter">
+  <objectType>extracter.DateRangeExtracter</objectType>
+  <docs>
+  	Extracts a range of dates by sub-classing DateExtracter and RangeExtracter.
+  	i.e. first extracts multiple dates, then returns the range of them.
+  </docs>
+  <options>
+  	<!-- in ambiguous cases, UK style dates take priority e.g. dd/mm/yyyy -->
+  	<setting type="dayfirst">1</setting>
+  </options>
+</subConfig>
+
+<subConfig type="extracter" id="PreserveMaskingKeywordExtracter">
+	<objectType>extracter.KeywordExtracter</objectType>
+	<docs>Keyword Extracter which doesn't split at CQL masking characters (^*?)</docs>
+	<options>
+		<setting type="regexp">((?&lt;!\s)'|[-.,]((?=\s)|$)|(^|(?&lt;=\s))[-.,']|[.,'-][.,'-]|[~`!@+=\#\&amp;()\[\]{}\\\|\":;&lt;&gt;/])</setting>
+	</options>				
+</subConfig>
+<subConfig type="extracter" id="PreserveMaskingProximityExtracter">
+	<objectType>extracter.ProximityExtracter</objectType>
+	<docs>Proximity Extracter which doesn't split at CQL masking characters (^*?)</docs>
+	<options>
+		<setting type="regexp">((?&lt;!\s)'|[-.,]((?=\s)|$)|(^|(?&lt;=\s))[-.,']|[.,'-][.,'-]|[~`!@+=\#\&amp;()\[\]{}\\\|\":;&lt;&gt;/])</setting>
+	</options>				
+</subConfig>
+
+
+
+<!-- Normaliser Objects -->
+
+<subConfig type="normaliser" id="UndocumentNormaliser">
+  <objectType>normaliser.UndocumentNormaliser</objectType>
+</subConfig>
+
+<subConfig type="normaliser" id="DataExistsNormaliser">
+  <objectType>normaliser.DataExistsNormaliser</objectType>
+</subConfig>
+<subConfig type="normaliser" id="CaseNormaliser">
+  <objectType>normaliser.CaseNormaliser</objectType>
+</subConfig>
+<subConfig type="normaliser" id="SpaceNormaliser">
+  <objectType>normaliser.SpaceNormaliser</objectType>
+</subConfig>
+<subConfig type="normaliser" id="ArticleNormaliser">
+  <objectType>normaliser.ArticleNormaliser</objectType>
+</subConfig>
+<subConfig type="normaliser" id="StripperNormaliser">
+  <objectType>normaliser.RegexpNormaliser</objectType>
+  <options>
+    <setting type="regexp">["%#@~!*{}]</setting>
+  </options>
+</subConfig>
+<subConfig type="normaliser" id="PrintableNormaliser">
+  <objectType>normaliser.RegexpNormaliser</objectType>
+  <options>
+    <setting type="regexp">([\x0e-\x1f]|[\x7b-\xff])</setting>
+  </options>
+</subConfig>
+
+<subConfig type="normaliser" id="PossessiveNormaliser">
+  <objectType>normaliser.PossessiveNormaliser</objectType>
+</subConfig>
+<subConfig type="normaliser" id="DiacriticNormaliser">
+  <objectType>normaliser.DiacriticNormaliser</objectType>
+</subConfig>
+<subConfig type="normaliser" id="IntNormaliser">
+  <objectType>normaliser.IntNormaliser</objectType>
+</subConfig>
+<subConfig type="normaliser" id="StringIntNormaliser">
+  <objectType>normaliser.StringIntNormaliser</objectType>
+</subConfig>
+<subConfig type="normaliser" id="EnglishStemNormaliser">
+  <objectType>normaliser.StemNormaliser</objectType>
+  <options>
+    <setting type="language">english</setting>
+  </options>
+</subConfig>
+
+<subConfig type="normaliser" id="KeywordNormaliser">
+  <objectType>normaliser.KeywordNormaliser</objectType>
+</subConfig>
+<subConfig type="normaliser" id="ProximityNormaliser">
+  <objectType>normaliser.KeywordNormaliser</objectType>
+  <options>
+    <setting type="prox">1</setting>
+  </options>
+</subConfig>
+<subConfig type="normaliser" id="ExactExpansionNormaliser">
+  <objectType>normaliser.ExactExpansionNormaliser</objectType>
+</subConfig>
+<subConfig type="normaliser" id="WordExpansionNormaliser">
+  <objectType>normaliser.WordExpansionNormaliser</objectType>
+</subConfig>
+<subConfig type="normaliser" id="DateStringNormaliser">
+  <objectType>normaliser.DateStringNormaliser</objectType>
+</subConfig>
+
+
+
+<!-- Transformer Objects -->
+
+<subConfig type="transformer" id="XmlTransformer">
+  <objectType>transformer.XmlTransformer</objectType>
+</subConfig>
+<subConfig type="transformer" id="GRS1Transformer">
+  <objectType>transformer.GRS1Transformer</objectType>
+</subConfig>
+<subConfig type="transformer" id="defaultRecordStoreTransformer">
+  <objectType>transformer.XmlRecordStoreTransformer</objectType>
+</subConfig>
+
+
+</subConfigs>
+
+</config>
+  
