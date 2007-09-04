@@ -1,4 +1,3 @@
-
 from baseObjects import PreParser
 from document import StringDocument
 import re, gzip, string, binascii, cStringIO as StringIO
@@ -8,6 +7,16 @@ from PyZ3950.zmarc import MARC
 from xml.sax.saxutils import escape
 
 # TODO: All PreParsers should set mimetype, and record in/out mimetype
+
+
+class TypedPreParser(PreParser):
+    _possibleSettings = {"inMimeType" : {'docs' : "The mimetype expected for incoming documents"},
+                         "outMimeType" : {'docs' : "The mimetype set on outgoing documents"}
+                         }
+    def __init__(self, session, config, parent):
+        PreParser.__init__(self, session, config, parent)
+        self.inMimeType = self.get_setting(session, 'inMimeType', '')
+        self.outMimeType = self.get_setting(session, 'outMimeType', '')
 
 
 # --- Wrapper ---
@@ -45,12 +54,12 @@ class UnicodeDecodePreParser(PreParser):
         return StringDocument(data, self.id, doc.processHistory, mimeType=doc.mimeType, parent=doc.parent, filename=doc.filename)
         
 
-class CmdLinePreParser(PreParser):
+class CmdLinePreParser(TypedPreParser):
 
     _possiblePaths = {'commandLine' : {'docs' : "Command line to use.  %INDOC% is substituted to create a temporary file to read, and %OUTDOC% is substituted for a temporary file for the process to write to"}}
 
     def __init__(self, session, server, config):
-        PreParser.__init__(self, session, server, config)
+        TypedPreParser.__init__(self, session, server, config)
         self.cmd = self.get_path(session, 'commandLine', '')
         if not self.cmd:
             raise ConfigFileException("Missing mandatory 'commandLine' path in %s" % self.id)
@@ -65,7 +74,10 @@ class CmdLinePreParser(PreParser):
             if doc.mimeType:
                 # guess our extn~n
                 suff = mimetypes.guess_extension(doc.mimeType[0])
-                (qq, infn) = tempfile.mkstemp("." + suff)
+                if suff:
+                    (qq, infn) = tempfile.mkstemp("." + suff)
+                else:
+                    (qq, infn) = tempfile.mkstemp()                    
             else:
                 (qq, infn) = tempfile.mkstemp()
             fh = file(infn, 'w')
@@ -98,8 +110,97 @@ class CmdLinePreParser(PreParser):
                 fh.close()
                 os.remove(outfn)
 
-        return StringDocument(result, self.id, doc.processHistory, mimeType=doc.mimeType, parent=doc.parent, filename=doc.filename) 
-    
+        mt = self.outMimeType
+        if not mt:
+            mt = doc.mimeType
+        return StringDocument(result, self.id, doc.processHistory, mimeType=mt, parent=doc.parent, filename=doc.filename) 
+
+
+
+class FileUtilPreParser(TypedPreParser):
+    # Call 'file' util to find out the current type of file
+
+    def process_document(self, session, doc):
+
+        cmd = "file -i -b %INDOC%"
+        (qq, infn) = tempfile.mkstemp()
+        fh = file(infn, 'w')
+        fh.write(doc.get_raw())
+        fh.close()
+        cmd = cmd.replace("%INDOC%", infn)
+        res = commands.getoutput(cmd)
+        mt = res.strip()
+
+        if mt.find(';') > -1:
+            bits = mt.split(';')
+            mt = bits[0]
+            for b in bits[1:]:
+                # just stuff them on doc for now
+                (type, value) = b.split('=')
+                setattr(doc, type, value)
+        if mt == "text/plain":
+            # we might be sgml, xml, text etc
+            res = commands.getoutput("file -b %s" % infn)
+            mt2 = res.strip()
+            if mt2 == "exported SGML document text":
+                mt = "text/sgml"
+            elif mt2 == "XML document text":
+                mt = "text/xml"
+            # others include java, etc. but not very useful to us
+
+        doc.mimeType = mt
+        return doc
+
+class MagicRedirectPreParser(TypedPreParser):
+
+    def _handleConfigNode(self, session, node):
+        if node.localName == "hash":
+            # <hash> <object mimeType="" ref=""/> </hash>
+            for c in node.childNodes:
+                if c.nodeType == elementType and c.localName == "object":
+                    mt = c.getAttributeNS(None, 'mimeType')
+                    ref = c.getAttributeNS(None, 'ref')
+                    self.mimeTypeHash[mt] = ref
+                    
+    def __init__(self, session, config, parent):
+        self.mimeTypeHash = {"application/x-gzip" : "GzipPreParser",
+                             "application/postscript" : "PsPdfPreParser",
+                             "application/pdf" : "PdfXmlPreParser",
+                             "text/html" : "HtmlSmashPreParser",
+                             "text/plain" : "TxtToXmlPreParser",
+                             "text/sgml" : "SgmlPreParser",
+                             "application/x-bzip2" : "BzipPreParser"
+                             # "application/x-zip" : "single zip preparser ?"
+                             }
+
+        # now override from config in init:
+        TypedPreParser.__init__(self, session, config, parent)
+
+
+    def process_document(self, session, doc):
+        mt = doc.mimeType
+        db = session.server.get_object(session, session.database)
+        if not mt:
+            # nasty
+            fu = db.get_object(session, 'FileUtilPreParser')
+            doc2 = fu.process_document(session, doc)
+            mt = doc.mimeType
+            if not mt and doc.filename:
+                # try and guess from filename
+                mts = mimetypes.guess_type(doc.filename)
+                if mts and mts[0]:
+                    mt = mts[0]
+        if self.mimeTypeHash.has_key(mt):
+            db = session.server.get_object(session, session.database)
+            redirect = db.get_object(session, self.mimeTypeHash[mt])
+            if isinstance(redirect, PreParser):
+                return redirect.process_document(session, doc)
+            else:
+                # only other thing is workflow
+                return redirect.process(session, doc)
+        else:
+            # should we return or raise?
+            return doc
 
 
 # --- HTML PreParsers ---
