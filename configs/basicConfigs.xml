@@ -87,6 +87,21 @@
      <objectType>preParser.UnicodeDecodePreParser</objectType>
   </subConfig>
 
+<subConfig type="preParser" id="FileUtilPreParser">
+  <objectType>preParser.FileUtilPreParser</objectType>
+</subConfig>
+
+<subConfig type="preParser" id="MagicRedirectPreParser">
+  <objectType>preParser.MagicRedirectPreParser</objectType>
+
+  <!-- 
+        need to set a hash of what to redirect to for each mime type
+  <hash>
+    <object type="preParser" mimeType="application/x-gzip" ref="GzipPreParser"/>
+  </hash>
+  -->
+
+</subConfig>
 
 
   <subConfig type="preParser" id="PdfXmlPreParser">
@@ -94,6 +109,9 @@
      <paths>
        <path type="commandLine">pdftohtml -xml %INDOC% %OUTDOC%</path>
      </paths>
+     <options>
+       <setting type="outMimeType">text/xml</setting>
+     </options>
   </subConfig>
 
   <subConfig type="preParser" id="PdfXmlFix1PreParser">
@@ -131,6 +149,9 @@
      <paths>
        <path type="commandLine">ps2pdf - -</path>
      </paths>
+     <options>
+       <setting type="outMimeType">application/pdf</setting>
+     </options>
    </subConfig>
 
 
@@ -140,6 +161,9 @@
      <paths>
        <path type="commandLine">pdftotext -raw -nopgbrk %INDOC% %OUTDOC%</path>
      </paths>
+     <options>
+       <setting type="outMimeType">text/plain</setting>
+     </options>
    </subConfig>
 
   <subConfig type="preParser" id="PdfTxtFixPreParser">
@@ -156,6 +180,9 @@
      <paths>
        <path type="commandLine">tidy -asxml -i -o %OUTDOC% %INDOC%</path>
      </paths>
+     <options>
+       <setting type="outMimeType">text/xml</setting>
+     </options>
   </subConfig>
 
   <subConfig type="preParser" id="TidyFixPreParser">
