@@ -1,0 +1,275 @@
+<div id="wrapper">
+  <div id="single">
+	<h3 class="bar">Contents</h3>
+	<div id="contents">
+		<ul>
+			<li>
+				<a href="#files" title="Jump to help on file management">File Management</a>
+				<ul>
+					<li>
+						<a href="#files_upload">Upload File</a>
+						<ul>
+							<li><a href="#files_upload+index">Upload + index</a></li>
+							<li><a href="#files_uploadonly">Upload only</a></li>
+							<li><a href="#files_preview">Preview</a></li>
+							<li><a href="#files_upload_walkthrough">Upload Stages Walk-through</a></li>
+						</ul>
+					</li>
+					<li><a href="#files_review">Review File</a></li>
+					<li><a href="#files_rename">Rename File</a></li>
+					<li><a href="#files_unindex">Unindex File</a></li>
+					<li><a href="#files_delete">Delete File</a></li>
+				</ul>
+			</li>
+			<li>
+				<a href="#database" title="Jump to help on database management">Database Management</a>
+				<ul>
+					<li><a href="#database_rebuild">Rebuild Database</a></li>
+					<li><a href="#database_reindex">Reindex Database</a></li>
+					<li><a href="#database_deletehtml">Delete Cached HTML</a></li>
+					<li><a href="#database_buildhtml">Build HTML</a></li>
+				</ul>
+			</li>
+			<li><a href="#stats" title="Jump to help on statistics">View Statistics</a></li>
+		</ul>
+	</div>
+	<br/>
+	<div id="help">
+		<div>
+			<a name="files" style="padding-top:8em;"></a>
+			<h3 class="bar">File Management</h3>
+			<p>
+				When you select 'File Management', you will be presented with a page containing a form to <a href="#files_upload">upload new files</a>, 
+				and underneath, a directory tree representing the source directory, as configured in localConfig.py. 
+				If your source directory contains sub-directories, 
+				you will be able to navigate these by clicking on the folder icon to expand or contract the relevant sub-directory.
+			</p>
+			<!-- upload file -->
+			<a name="files_upload" style="padding-top:8em;"></a>
+			<h4>Upload File</h4>
+			<p>
+				The form allows you to upload a file to the server. Three modes of action are provided: <a href="#files_upload+index">Upload + index</a>, 
+				<a href="#files_uploadonly">Upload only</a>, and  <a href="#files_preview">Preview</a>.
+				The action of each of these modes will be explained briefly.
+				Details of the common and differing stages of each operation are illustrated in the <a href="#files_upload_walkthrough">Upload Stages Walk-through</a>.
+			</p>
+			<a name="files_upload+index" style="padding-top:8em;"></a>
+			<h5>Upload + index</h5>
+			<p>	
+				Upload + index is the default option. When this option is selected the file will be indexed and inserted into the database immediately.
+				This may take up to several minutes depending on the size of the file, how many (if any) item level descriptions it contains, and the size of the existing database.
+			</p>
+			<p>
+				<strong>N.B.</strong>:
+				When adding files in this manner you must ensure that you wait for the process to completely finish.
+				If the uploading process is interupted (using the stop/refresh buttons, or by navigating to another web-page), 
+				it is likely that the database will become corrupted, and will have to be rebuilt or reindexed from scratch.
+			</p>
+			<a name="files_uploadonly" style="padding-top:8em;"></a>
+			<h5>Upload only</h5>
+			<p>
+				This option has been provided to save time when adding several files at once
+				(if you are adding a single file, it is probably best to use the <a href="#upload+index">Upload + index</a> option).
+				The file is not indexed for immediate inclusion in the database, it is merely added to the source directory to be added next time the database is rebuilt.
+				This can be done via the <a href="#databaserebuild">Rebuild Database</a> option in the <a href="#database">Database Management</a> section,
+				or by some scheduled process (contact the <a href="mailto:archiveshub@mimas.co.uk">Archives Hub Helpdesk</a> for details on how to set up scheduling.)
+			</p>
+			<a name="files_preview" style="padding-top:8em;"></a>
+			<h5>Preview</h5>
+			<p>
+				The 'Preview' option allows you to validate and preview what a file will look like when displayed through the spoke, before it is added to the database for real.
+				The file is transformed into HTML which is stored on the server in a directory accessable only by you and other administrative users of your spoke.
+				The HTML produced will be the same as that produced by the spoke when the file is requested by an end user, including multiple pages and a navigable Table of Contents where appropriate.
+			</p>
+			<p>
+				<strong>N.B.</strong>:
+				Each administrative user can preview 1 file at a time (previewing a second file will overwrite the first).
+			</p>
+			<a name="files_upload_walkthrough" style="padding-top:8em;"></a>
+			<h5>Upload Stages Walk-through</h5>
+			<table class="nassischneiderman">
+				<tr class="headrow">
+					<td>Step</td>
+					<td colspan="3">All Modes</td>
+				</tr>
+				<tr>
+					<td>1.</td>
+					<td colspan="3">
+						<p>The form allows you to browse the devices (e.g. hard/floppy/compact discs) accessible to your local system to locate the desired file.</p>
+						
+					</td>
+				</tr>
+				<tr>
+					<td>2.</td>
+					<td colspan="3">
+						<p>The selected file is parsed to check for well-formedness (e.g. no mismatched tags, no unquoted attribute values, unrecognized unencoded characters etc.)</p>
+					</td>
+				</tr>
+				<tr>
+					<td>3.</td>
+					<td colspan="3">
+						<p>
+							The files is validated. This is NOT a complete check of the file's compliance with either the DTD or XML schema for EAD.
+							The file is simply checked for several fields that the Archives Hub considers to be <a href="http://www.archiveshub.ac.uk/arch/formats.shtml" title="Archives Hub mandatory fields.">mandatory</a>.
+							Details on modifying these mandatory field are available on request.
+							This may take a minute or two depending on the size of the file.
+						</p>
+					</td>
+				</tr>
+				<tr class="headrow">
+					<td/>
+					<td colspan="2" width="60%">'Upload + index' and 'Upload only' modes</td>
+					<td width="30%">'Preview' mode</td>
+				</tr>
+				<tr>
+					<td>4.</td>
+					<!-- upload operations -->
+					<td colspan="2">
+						<p>
+							The file is stored to the server's hard-disk. This requires that it be issued with a filename which is guaranteed to be unique.
+							To achieve this, uploaded files are named in the following way:
+							<blockquote>&lt;original filename minus the trailing extension&gt;-&lt;username&gt;-&lt;timestamp&gt;.&lt;original file extension&gt;</blockquote>
+						</p>
+						<p>
+							The timestamp used may may look like a random string of digits but it is actually a structured representation of the exact time the upload took place. 
+							It takes the form:
+							<blockquote>YYYY-MM-DDThhmmss (year-month-day T hour minute second)</blockquote>
+						</p>
+
+					</td>
+					<!-- preview -->
+					<td>
+						<p>
+							The file is transformed into HTML, and stored in the password protected <a href="/ead/html/preview">preview</a> directory, with filename in the form:
+							<blockquote>&lt;username&gt;-p1.shtml</blockquote>
+						</p>
+						<p><strong>END</strong></p>
+					</td>
+				</tr>
+			<tr class="headrow">
+				<td/>
+				<td>Upload + index</td>
+				<td>Upload only</td>
+			</tr>
+			<tr>
+				<!-- upload + index -->
+				<td>5.</td>
+				<td width="30%">
+					<p>
+					The file is indexed, component items are located and also indexed.<br/>
+					...<br/>
+					This may take up to several minutes depending on the size of the file, 
+					how many (if any) item level descriptions it contains, and the size of the existing database.
+					</p>
+					<p><strong>END</strong></p>
+				</td>
+				<td width="30%"><p><strong>END</strong></p></td>
+			</tr>
+			</table>
+
+			<!-- view file -->
+			<a name="files_review" style="padding-top:8em;"></a>
+			<h4>Review Files</h4>
+			<p>
+				You can review the contents of a file by clicking on the file name in the directory tree. 
+				This will show you the raw contents of the file, including the mark-up.
+			</p>
+			<p>
+				The following options are also available for each file (including those uploaded using the interface): 
+				<a href="#files_rename">Rename</a>, <a href="#files_unindex">Unindex</a>, and <a href="#files_delete">Delete</a>.
+				To activate access one of these functions, select the checkbox next to the file, and click on the button for the desired operation.
+				For convenience these operation buttons are provided both at the top, and bottom of the file list.
+			</p>
+			<!-- rename file -->
+			<a name="files_rename" style="padding-top:8em;"></a>
+			<h4>Rename File</h4>
+			<p>You can rename any of the files in the source directory. Select the file you wish to rename and click the 'rename' button. You will be presented with a form containing the current name of the file (minus the mandatory file extension which added automatically). You should edit this file name and then click on the submit button. If you choose a filename which already exists in the present directory, the rename operation will fail. If you wish to replace the existing file, you should delete it first using the <a href="#filedelete">delete file</a> option.</p>
+			<!-- unindex file -->
+			<a name="files_unindex" style="padding-top:8em;"></a>
+			<h4>Unindex File</h4>
+			<p>
+				Unindexing a file will remove it from the database (from both the data store and the indexes) and permanently delete the source SGML/XML 
+				from the server's hard-disk. You should therefore ensure that this is NOT the only copy of the file that exists.
+				Any cached HTML files that have been built due to a user requesting to view this file will also be deleted.
+			</p>
+			<p>As the all references to the file need to be removed from the indexes, this operation may take several minutes, depending on the complexity of the existing indexes. Once the operation is complete, the file will no longer be available to users.</p>
+			<p>
+				<strong>N.B.</strong>:
+				When removing a file in this manner you must ensure that you wait for the process to completely finish.
+				If the unindexing process is interupted (using the stop/refresh buttons, or by navigating to another web-page), 
+				it is likely that the database will be corrupted, and will have to be rebuilt or reindexed from scratch.
+			</p>
+			<!-- delete file -->
+			<a name="files_delete" style="padding-top:8em;"></a>
+			<h4>Delete File</h4>
+			<p>
+				This option has been provided to save time when you need to remove several files at once
+				(if you are removing a single file, it's probably best to use the <a href="#files_unindex">Unindex</a> option).
+				When you carry out this operation, the source file is permanently deleted from the server's hard-disk.
+				You should therefore ensure that this is NOT the only copy of the file that exists.
+				The deletion will not be reflected in the database (i.e. the ability to search or view the file) until the next time the database is rebuilt.
+				Rebuilding can be done via the <a href="#databaserebuild">Rebuild Database</a> option in the <a href="#database">Database Management</a> section,
+				or by some scheduled process (contact the <a href="mailto:archiveshub@mimas.co.uk">Archives Hub Helpdesk</a> for details on how to set up scheduling.)
+			</p>
+			
+			
+		</div>
+		<div>
+			<a name="database" style="padding-top:8em;"></a>
+			<h3 class="bar">Database Management</h3>
+			<!-- rebuild -->
+			<a name="databaserebuild" style="padding-top:8em;"></a>
+			<h4>Rebuild Database</h4>
+			<p>
+				This operation will completely rebuild the database from the files stored on the server's hard-disk. 
+				As dicussed in the <a href="#files_upload">upload file</a> section earlier, this will include any files previously uploaded to the server 
+				using the administration interface.
+			</p>
+			<p>
+				This is a time consuming operation, and while it is taking place, the search interface may be inaccessible to users. 
+				It should therefore only be used when absolutely necessary. For example when a large number of files need to be added to the database, 
+				and these have been transferred to the source directory using FTP or some similar means.
+			</p>
+			<p>
+				This one-click operation will automatically store and index records, subject clusters, and extract and index components. 
+				When the operation is complete, your database and search interface should be fully operational again.
+			</p>
+			<p>
+				<strong>N.B.</strong>:
+				Once initialised, you must wait for this process to completely finish.
+				If the rebuilding process is interupted (using the stop/refresh buttons, or by navigating to another web-page), 
+				the database will be incomplete and non-functional.
+			</p>
+			<!-- reindex -->
+			<a name="databasereindex" style="padding-top:8em;"></a>
+			<h4>Reindex Database</h4>
+			<p>
+				This operation will re-index all of the data stored in your database. 
+				This is substantially quicker than rebuilding the database from scratch, as it simply re-builds the index files, using stored data.
+			</p>
+			<p>This operation may be useful if you start to experience strange behaviour from your search interface after numerous file uploads and deletions.</p>
+			<p>
+				<strong>N.B.</strong>:
+				Once initialised, you must wait for this process to completely finish.
+				If the reindexing process is interupted (using the stop/refresh buttons, or by navigating to another web-page), 
+				the database will be incomplete and non-functional.
+			</p>
+			<!-- delete cached HTML -->
+			<a name="databasedeletehtml" style="padding-top:8em;"></a>
+			<h4>Delete Cached HTML</h4>
+			<p>This operation will remove all of the static cached HTML version of finding aids stored on your server. Whenever a user requests the full-text of a finding aid or component record, the HTML generated by the XSLT transformation is cached on the server's hard-disk to allow faster retrieval of this record by the next user.</p>
+			<!-- build cached HTML -->
+			<a name="databasebuildhtml" style="padding-top:8em;"></a>
+			<h4>Build HTML</h4>
+			<p>This option allows you to pre-generate static cached copies of all files over a certain size. By default this is set to 100kB.</p>
+		</div>
+		<div>
+			<a name="stats" style="padding-top:8em;"></a>
+			<h3 class="barheading">View Statistics</h3>
+			<p>The 'View Statistics' option will display some basic statistics about the use of your search interface for the period specified. This includes the number of each type of operation, and the average time taken to perform these operations.</p>
+			<p>There is also a section which displays the top five most requested records or components in each type of display (summary, full-text, and email).</p>
+			<p>The 'Reset Statistics' button will move the existing log file (from which these statistics are derived), marking it with a timestamp like those used for uploaded files. This effectively resets the statistics.</p>
+		</div>
+	</div>
+  </div>
+</div>

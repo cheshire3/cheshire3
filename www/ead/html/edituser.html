@@ -1,0 +1,33 @@
+<form action="users.html" method="post">
+  <input type="hidden" name="operation" value="edit"/>
+  <table>
+    <tr>
+      <td>Username: </td>
+      <td><input type="hidden" name="userid" value="%USERNAME%"/>%USERNAME%</td>
+    </tr>
+    <tr>
+      <td>Full Name: </td>
+      <td><input type="text" name="realName" value="%realName%"/></td>
+    </tr>
+    <tr>
+      <td>Email: </td>
+      <td><input type="text" name="email" value="%email%"/></td>
+    </tr>
+    <tr>
+      <td>Telephone: </td>
+      <td><input type="text" name="tel" value="%tel%"/></td>
+    </tr>
+    <tr title="Leave blank if you do not want to change your password.">
+      <td>New Password: </td>
+      <td><input type="password" name="passwd1"/></td>
+    </tr>
+    <tr title="This MUST be the same as the New Password you just entered.">
+      <td>Re-enter New Password: </td>
+      <td><input type="password" name="passwd2"/></td>
+    </tr>
+  </table>
+  <div class="passwdconfirm" title="You MUST confirm your existing password when making any changes.">
+      Password : <input type="password" name="passwd"/>
+      <input type="submit" name="submit" value="Submit"/>
+  </div>
+</form>

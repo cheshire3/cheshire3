@@ -1,0 +1,20 @@
+    <form action="files.html" method="post" enctype="multipart/form-data">
+      <p>
+		<input type="radio" name="operation" value="insert" id="insert" checked="checked"/>
+		<label for="insert" title="Upload, validate, and index file for immediate inclusion in the database.">Upload + index.</label>
+		<a href="/ead/admin/help.html#files_upload+index" title="What is this?"><img src="/images/whatisthis.gif" alt="[What is this?]"/></a>
+		<br/>
+		<input type="radio" name="operation" value="upload" id="upload"/>
+		<label for="upload" title="Upload and validate, DO NOT index yet. I will rebuild the database myself later.">Upload only.</label>
+		<a href="/ead/admin/help.html#files_uploadonly" title="What is this?"><img src="/images/whatisthis.gif" alt="[What is this?]"/></a>
+		<br/>
+		<input type="radio" name="operation" value="preview" id="preview"/>
+		<label for="preview" title="Validate, and preview only.">Preview.</label>
+		<a href="/ead/admin/help.html#files_preview" title="What is this?"><img src="/images/whatisthis.gif" alt="[What is this?]"/></a>
+	  </p>
+      <p>
+        File :
+        <input type="file" name="eadfile" size="80"/>
+      </p>
+      <input type="submit" value=" Upload File "/>
+    </form>

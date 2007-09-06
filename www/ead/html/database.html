@@ -1,0 +1,33 @@
+<div id="single">
+    <h4>Please ensure that you know what these operations do, and be certain that this is what you want to do before using them.</h4>
+
+    <table summary="operations and descriptions table" class="adminmenu" border="1" cellspacing="0" cellpadding="2">
+      <tr class="headrow">
+				<td width="100">Operation</td>
+				<td>Description</td>
+      </tr>
+	 <tr>
+			<td><a href="database.html?operation=rebuild" class="buttonlink" onclick="return confirmOp('This operation could take some time, during which your database will be unavailable for searching.\n\nAre you sure you want to rebuild database?');">Re-build</a></td>
+			<td>
+	  		Rebuild all data stores and indexes using the files in the configured source directory. This includes extracting and indexing components, and subject clusters. You should use this option if you have added or edited files by any means other than this interface (e.g. FTP, direct editing of file contents).<br/>
+			</td>
+     </tr>
+     <tr>
+			<td><a href="database.html?operation=reindex" class="buttonlink" onclick="return confirmOp('This operation could take some time, during which your database will be unavailable for searching.\n\nAre you sure you want to reindex database?');">Re-index</a></td>
+			<td>Re-index the data which currently exists in the datastores. You should use this option if you have not added or edited any files, but wish to re-index the data for any other reason (e.g. index files have been corrupted).<br/>
+			</td>
+     </tr>
+     <tr>
+			<td><a href="database.html?operation=deletehtml" class="buttonlink" onclick="return confirmOp('This option will remove all pre-built HTML copies of your finding aids.\n\nAre you sure you want to continue?');">Delete HTML</a></td>
+			<td>
+	  		Delete all cached static HTML (i.e. the HTML version of the records, NOT the search pages) in the configured cache directory. Also deletes any existing previews.<br/>
+			</td>
+		</tr>
+     <tr>
+			<td><a href="database.html?operation=buildhtml" class="buttonlink" onclick="return confirmOp('This operation could take some time.\n\nAre you sure you want to build HTML copies?');">Build HTML</a></td>
+			<td>
+	  		Build static HTML copies of all files, in the configured cache directory. You should use this option if you have rebuilt the database so that the cached HTML is up to date.<br/>
+			</td>
+		</tr>
+	</table>
+</div>
