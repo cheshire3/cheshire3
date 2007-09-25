@@ -481,14 +481,6 @@ class FtDomRecord(DomRecord):
 try:
     from lxml import etree, sax
     class LxmlRecord(DomRecord):
-        
-        def __repr__(self):
-            if self.recordStore != None:
-                return "Ptr:%s/%s" % (self.recordStore, self.id)            
-            elif self.id:
-                return "Ptr:None/%d" % self.id
-            else:
-                return "Ptr:None/None"
 
         def process_xpath(self, xpath, maps={}):
 
@@ -497,8 +489,8 @@ try:
             if xpath[0] != "/" and xpath[-1] != ')':
                 xpath = "//" + xpath
             if maps:                
-		return self.dom.xpath(xpath, maps)
-	    else:
+        		return self.dom.xpath(xpath, maps)
+    	    else:
                 return self.dom.xpath(xpath)
 
         def get_xml(self):
@@ -518,12 +510,6 @@ except:
 
 
 class SaxRecord(Record):
-
-    def __repr__(self):
-        if self.recordStore != None:
-            return "%s/%s" % (self.recordStore, self.id)
-        else:
-            return "Record-%d" % self.id
 
     def __init__(self, saxList, xml="", docid=None, wordCount=0, byteCount=0):
         self.sax = saxList
@@ -985,12 +971,6 @@ class SaxRecord(Record):
 
 class MarcRecord(Record):
 
-    def __repr__(self):
-        if self.recordStore != None:
-            return "%s/%s" % (self.recordStore, self.id)
-        else:
-            return "Record-%d" % self.id
-    
     def __init__(self, doc, docid=0, store=""):
         txt = doc.get_raw()
         self.marc = MARC(txt)
