@@ -543,6 +543,12 @@ class Record:
 
     def __init__(self, data, xml, docid=None):
         raise(NotImplementedError)
+    
+    def __repr__(self):
+            if self.recordStore != None:
+                return "%s/%s" % (self.recordStore, self.id)            
+            else:
+                return "%s-%s" % (self.__class__, self.id)
 
     def get_dom(self):
         """Return the DOM document node for the record."""
