@@ -525,7 +525,7 @@ class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
         try:
             rdict = res.dictresult()[0]
         except IndexError:
-            raise ObjectDoesNotExistException(self.id + '/' + sid)
+            raise ObjectDoesNotExistException('%s/%s' % (self.id, sid))
 
         data = rdict['data']
         data = data.replace('\\000', '\x00')
