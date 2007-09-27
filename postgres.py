@@ -532,8 +532,9 @@ class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
         data = data.replace('\\012', '\n')
         # data is res.dictresult()
         cl = rdict['class']
-        rset = dynamic.buildObject(session, cl, [])            
+        rset = dynamic.buildObject(session, cl, [])
         rset.deserialise(session,data)
+        rset.id = rsid
         
         # Update expires 
         now = time.time()
