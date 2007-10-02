@@ -294,11 +294,13 @@ class reqHandler:
                     xmlresp = oaixml.handleException(args, sys.exc_info())
 
             self.send_xml(xmlresp, req)
-        elif os.path.exists(os.path.join(apache.server_root(), 'htdocs', path)):
-            req.sendfile(os.path.join(apache.server_root(), 'htdocs', path))
         else:
-            # TODO: send proper OAI error
-            self.send_xml('<error>Incomplete baseURL, requires a database path from: %s</error>' % (repr(configs.keys())), req)
+            fullPath = os.path.join(apache.server_root(), 'htdocs', path)
+            if os.path.exists(fullPath) and not os.path.isdir(fullPath):
+                req.sendfile(os.path.join(apache.server_root(), 'htdocs', path))
+            else:
+                # TODO: send proper OAI error
+                self.send_xml('<error>Incomplete baseURL, requires a database path from: %s</error>' % (repr(configs.keys())), req)
                     
 #- end reqHandler -------------------------------------------------------------
     
