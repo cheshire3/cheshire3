@@ -88,7 +88,7 @@ class Cheshire3OaiServer:
                 datestamp = tl[0][0]
             except IndexError:
                 #something went wrong :( - use the epoch
-                self.earliestDatestamp = datetime.datetime.utcfromdatestamp(0)
+                self.earliestDatestamp = datetime.datetime.utcfromtimestamp(0)
             else:
                 self.earliestDatestamp = datetime.datetime.strptime(datestamp, '%Y-%m-%d %H:%M:%S')
         
