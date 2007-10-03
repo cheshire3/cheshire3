@@ -4,7 +4,7 @@ from mod_python import apache
 from mod_python.util import FieldStorage
 
 # Apache Config:
-#<Directory /usr/local/apache2/htdocs/OAI-PMH>
+#<Directory /usr/local/apache2/htdocs/OAI/2.0>
 #  SetHandler mod_python
 #  PythonDebug On
 #  PythonPath "['/home/cheshire/cheshire3/code', ...]+sys.path"
@@ -18,7 +18,7 @@ from baseObjects import Session
 from resultSet import SimpleResultSet
 from document import StringDocument
 from PyZ3950 import CQLParser, SRWDiagnostics
-from c3errors import ConfigFileException
+from c3errors import *
 
 import datetime
 # import bits from oaipmh module
@@ -62,7 +62,7 @@ class Cheshire3OaiMetadataWriter:
         dom = lxmlRec.get_dom()
         return element.append(dom)
       
-#= end OaiMetadataWriter ------------------------------------------------------
+    #= end OaiMetadataWriter ------------------------------------------------------
 
 
 class Cheshire3OaiServer:
@@ -100,6 +100,7 @@ class Cheshire3OaiServer:
         self.compression = []        # Cheshire3 does not support compressions at this time
         self.metadataRegistry = OaiMetadataRegistry()
     
+    
     def getRecord(self, metadataPrefix, identifier):
         """ Get a record for a metadataPrefix and identifier.
             metadataPrefix - identifies metadata set to retrieve
@@ -119,7 +120,11 @@ class Cheshire3OaiServer:
             self.metadataRegistry.registerWriter(metadataPrefix, mdw)
             
         q = CQLParser.parse('rec.identifier exact "%s"' % (identifier))
-        rs = self.db.search(session, q)
+        try:
+            rs = self.db.search(session, q)
+        except SRWDiagnostics.Diagnostic16:
+            raise ConfigFileException('Index map for rec.identifier required in protocolMap: %s' % self.db.get_path(session, 'protocolMap').id)
+            
         if not len(rs) or len(rs) > 1:
             raise IdDoesNotExistError('%s records exist for this identifier' % (len(rs)))
         
@@ -292,6 +297,8 @@ class reqHandler:
                     raise BadArgumentError('Invalid date format supplied.')
                 except:
                     xmlresp = oaixml.handleException(args, sys.exc_info())
+            except C3Exception, e:
+                xmlresp = '<c3error code="%s">%s</c3error>' % (str(e.__class__).split('.')[-1], e.reason)
 
             self.send_xml(xmlresp, req)
         else:
@@ -300,7 +307,8 @@ class reqHandler:
                 req.sendfile(os.path.join(apache.server_root(), 'htdocs', path))
             else:
                 # TODO: send proper OAI error
-                self.send_xml('<error>Incomplete baseURL, requires a database path from: %s</error>' % (repr(configs.keys())), req)
+                dbps = ['<database>%s</database>' % dbp for dbp in configs.keys()]
+                self.send_xml('<c3error>Incomplete baseURL, requires a database path from: <databases>%s</databases></c3error>' % (''.join(dbps)), req)
                     
 #- end reqHandler -------------------------------------------------------------
     
