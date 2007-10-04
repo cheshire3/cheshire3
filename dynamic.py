@@ -2,6 +2,7 @@
 # Module wrapper into which we're going to import anything
 # defined in configfiles
 from utils import getFirstData, elementType
+from c3errors import ConfigFileException
 import sys
 
 def makeObjectFromDom(session, topNode, parentObject):
