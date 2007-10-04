@@ -51,7 +51,7 @@ class reqHandler:
     def processUnknownOperation(self, operation, err, config):
         result = SRW.types.ExplainResponse('explainResponse')
         req = SRW.types.ExplainRequest('explainRequest', opts={'recordPacking' : 'xml', 'version' : "1.1"}, config=config)
-        result.processQuery(req)
+        result.processQuery(session, req)
         if isinstance(err, SRWDiagnostics.SRWDiagnostic):
             result.diagnostics = [err]
         else:
