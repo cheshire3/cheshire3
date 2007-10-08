@@ -52,6 +52,7 @@ class SummaryObject(object):
     minByteCount = 0
     maxByteCount = 0
     meanByteCount = 0
+    lastModified = ''
 
     _possiblePaths = {'metadataPath' : {'docs' : "Path to file where the summary metadata will be kept."}}
 
@@ -87,6 +88,8 @@ class SummaryObject(object):
                 self.totalByteCount = long(cxn.get("totalByteCount"))
                 self.minByteCount = long(cxn.get("minByteCount"))
                 self.maxByteCount = long(cxn.get("maxByteCount"))
+                
+                self.lastModified = str(cxn.get("lastModified"))
 
                 if self.totalItems != 0:
                     self.meanWordCount = self.totalWordCount / self.totalItems
@@ -119,6 +122,7 @@ class SummaryObject(object):
             cxn.open(mp, dbtype=bdb.db.DB_BTREE, flags = bdb.db.DB_CREATE, mode=0660)
         except:
             raise ValueError("Could not create %s" % mp)
+        cxn.put("lastModified", time.strftime('%Y-%m-%d %H:%M:%S'))
         cxn.close()
 
     def commit_metadata(self, session):
@@ -131,6 +135,8 @@ class SummaryObject(object):
             except ZeroDivisionError:
                 self.meanWordCount = 1
                 self.meanByteCount = 1
+                
+            self.lastModified = time.strftime('%Y-%m-%d %H:%M:%S')
             try:
                 cxn.open(mp)
                 cxn.put("totalItems", str(self.totalItems))
@@ -140,6 +146,7 @@ class SummaryObject(object):
                 cxn.put("totalByteCount", str(self.totalByteCount))
                 cxn.put("minByteCount", str(self.minByteCount))
                 cxn.put("maxByteCount", str(self.maxByteCount))
+                cxn.put("lastModified", self.lastModified)
                 cxn.close()
             except:
                 # TODO: Nicer failure?
