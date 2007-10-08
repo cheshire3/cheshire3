@@ -1,7 +1,11 @@
 
 # Handlers for SRW Operations
-# Version: 1.1
+# Version: 1.2
 # Author:  Rob Sanderson (azaroth@liv.ac.uk)
+#          John Harrison (john.harrison@liv.ac.uk)
+#
+# Version History:
+# 1.2    08/10/2007 - JH - Automatic insertion of database metadata into explain response
 
 import os, sys, re
 import SRW
@@ -270,6 +274,46 @@ def process_explain(self, session, req):
     f = open(p, "r")
     if f:
         filestr = f.read()
+        # insert some database metadata
+        db = config.parent
+        session.database = db.id
+        try:
+            from lxml import etree
+        except ImportError:
+            # possibly try a slower DOM API, but for now...
+            pass
+        else:
+            nsHash = {'zrx':"http://explain.z3950.org/dtd/2.0/" ,'c3':"http://www.cheshire3.org/schemas/explain/"}
+            et = etree.XML(filestr)
+            dbNode = et.xpath('//zrx:explain/zrx:databaseInfo', nsHash)[0]
+            try: impNode = dbNode.xpath('//zrx:implementation', nsHash)[0]
+            except IndexError:
+                impNode = etree.XML('''<implementation identifier="http://www.cheshire3.org" version="0.9.9">
+                <title>Cheshire3 SRW/U Server</title>
+                <agents>
+                    <agent type="vendor">The University of Liverpool</agent>
+                </agents>
+                </implementation>''')
+                dbNode.append(impNode)
+                
+            if db.totalItems:
+                try: extNode = dbNode.xpath('//zrx:extent', nsHash)[0]
+                except IndexError:
+                    etree.SubElement(dbNode, 'extent', {'numberOfRecords': str(db.totalItems)})
+                else:
+                    extNode.set('numberOfRecords', str(db.totalItems))
+                
+            if db.lastModified:
+                try: histNode = dbNode.xpath('//zrx:history', nsHash)[0]
+                except IndexError:
+                    # create history and append node
+                    etree.SubElement(dbNode, 'history', {'lastUpdate': db.lastModified})
+                else:
+                    histNode.set('lastUpdate', db.lastModified)
+            
+
+            filestr = etree.tostring(et) # serialise modified record to string
+            
         # Create a record object and populate
         rec = SRW.types.Record('record')
         rec.recordPacking = req.recordPacking
