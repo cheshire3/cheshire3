@@ -1,11 +1,11 @@
 
 # Handlers for SRW Operations
-# Version: 1.2
+# Version: 1.1
 # Author:  Rob Sanderson (azaroth@liv.ac.uk)
 #          John Harrison (john.harrison@liv.ac.uk)
 #
 # Version History:
-# 1.2    08/10/2007 - JH - Automatic insertion of database metadata into explain response
+# 08/10/2007 - JH - Automatic insertion of database metadata into explain response
 
 import os, sys, re
 import SRW
