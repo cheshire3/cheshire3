@@ -8,7 +8,7 @@ from xml.sax.saxutils import escape
 from PyZ3950.zmarc_relaxed import MARC, MARC8_to_Unicode
 from xml.sax import ContentHandler
 
-from utils import Context, flattenTexts
+from utils import Compile, Context, flattenTexts
 import unicodedata
 
 # 1 <name> <attrHash> parent predicate end
@@ -471,10 +471,21 @@ class FtDomRecord(DomRecord):
             return self.xml
 
 
-    def process_xpath(self, tuple, maps={}):
-        xp = tuple[0]
+    def process_xpath(self, xpTuple, maps={}):
+        if (not isinstance(xpTuple, list)):
+            # Raw XPath
+            c = utils.verifyXPaths([xpTuple])
+            if (not c or not c[0][1]):
+                print "BAD XPATH"
+                return []
+            else:
+                xpTuple = c[0]
+
+        xp = xpTuple[0]
         if (not self.context):
             self.context = Context.Context(self.dom)
+
+        self.context.processorNss.update(maps)
         return xp.evaluate(self.context)
 
 try:
