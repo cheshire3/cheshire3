@@ -455,7 +455,7 @@ class MinidomRecord(DomRecord):
         elif node.nodeType == utils.textType:
             self.handler.characters(node.data)
             
-    def process_xpath(self, tuple):
+    def process_xpath(self, tuple, maps={}):
         raise NotImplementedError
 
 class FtDomRecord(DomRecord):
@@ -471,24 +471,23 @@ class FtDomRecord(DomRecord):
             return self.xml
 
 
-    def process_xpath(self, tuple):
+    def process_xpath(self, tuple, maps={}):
         xp = tuple[0]
         if (not self.context):
             self.context = Context.Context(self.dom)
         return xp.evaluate(self.context)
-
 
 try:
     from lxml import etree, sax
     class LxmlRecord(DomRecord):
 
         def process_xpath(self, xpath, maps={}):
-
+            global prefixRe
             if (isinstance(xpath, list)):
                 xpath = repr(xpath[0])
             if xpath[0] != "/" and xpath[-1] != ')':
                 xpath = "//" + xpath
-            if maps:                
+            if maps:
         		return self.dom.xpath(xpath, maps)
     	    else:
                 return self.dom.xpath(xpath)
