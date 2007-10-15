@@ -97,6 +97,7 @@ class SimpleIndex(Index):
                          , 'vectorMaxGlobalOccs' : {"docs" : ""}
                          , 'vectorMinLocalFreq' : {"docs" : ""}
                          , 'vectorMaxLocalFreq' : {"docs" : ""}
+                         , 'freqList' : {'docs' : '', 'options' : 'rec|occ|rec occ|occ rec'}
                          , 'longSize' : {"docs" : "Size of a long integer in this index's underlying data structure (eg to migrate between 32 and 64 bit platforms)"}
                          , 'recordStoreSizes' : {"docs" : ""},
                          'maxVectorCacheSize' : {'docs' : "Number of terms to cache when building vectors", 'type' :int}
@@ -222,7 +223,7 @@ class SimpleIndex(Index):
         else:
             processed = process.process(session, record)
         return processed
-        
+
 
     def extract_data(self, session, record):
         processed = self._processRecord(session, record, self.sources[u'data'][0])
@@ -542,6 +543,13 @@ class SimpleIndex(Index):
     def fetch_proxVector(self, session, rec, elemId):
         return self.indexStore.fetch_proxVector(session, self, rec, elemId)
 
+    def fetch_summary(self, session):
+	return self.indexStore.fetch_summary(session, self)
+
+    def fetch_termFrequencies(self, session, which='rec', position=-1, number=100, direction="<="):
+        return self.indexStore.fetch_termFrequencies(session, self, which, position, number, direction)
+
+    
 
 class ProximityIndex(SimpleIndex):
     """ Need to use prox extracter """

@@ -48,6 +48,7 @@ class BdbIndexStore(IndexStore):
         self.vectorCxn = {}
         self.proxVectorCxn = {}
         self.termIdCxn = {}
+        self.termFreqCxn = {}
         self.reservedLongs = 3
         rsh = self.get_path(session, 'recordStoreHash')
         if rsh:
@@ -201,6 +202,30 @@ class BdbIndexStore(IndexStore):
         data = fh.read()
         fh.close()
         return data
+
+
+    def fetch_summary(self, session, index):
+        # Fetch summary data for all terms in index
+        # eg for sorting, then iterating
+        # USE WITH CAUTION
+        # Everything done here for speed
+
+        cxn = self._openIndex(session, index)
+        cursor = cxn.cursor()
+        dataLen = index.longStructSize * self.reservedLongs
+        terms = []
+
+        (term, val) = cursor.first(doff=0, dlen=dataLen)
+        while (val):
+            (termid, recs, occs) = struct.unpack('lll', val)
+            terms.append({'t': term, 'i' : termid, 'r' : recs, 'o' : occs})
+            try:
+                (term, val) = cursor.next(doff=0, dlen=dataLen)
+            except:
+                val = 0
+
+        self._closeIndex(session, index)
+        return terms
         
 
     def begin_indexing(self, session, index):
@@ -571,7 +596,48 @@ class BdbIndexStore(IndexStore):
             cxn.close()
             os.remove(base)
 
-        print "commited %s:  %s" % (index.id, time.time() - start)
+        fl = index.get_setting(session, 'freqList', "")
+        if fl:
+            cxn = self._openIndex(session, index)
+            cursor = cxn.cursor()
+            dataLen = index.longStructSize * self.reservedLongs
+            terms = []
+
+            (term, val) = cursor.first(doff=0, dlen=dataLen)
+            while (val):
+                (termid, recs, occs) = struct.unpack('lll', val)
+                terms.append({'i' : termid, 'r' : recs, 'o' : occs})
+                try:
+                    (term, val) = cursor.next(doff=0, dlen=dataLen)
+                except:
+                    val = 0
+
+            self._closeIndex(session, index)
+
+            # now create bdbs for recs and/or occs
+            # have to merge termids, so have to do separately at end
+
+            lt = len(terms)
+            if fl.find('rec') > -1:
+                terms.sort(key=lambda x: x['r'])
+                cxn = bdb.db.DB()
+                cxn.open(dbname + "_FREQ_REC")
+                for t in range(len(terms)):
+                    termidstr = struct.pack('ll', terms[t]['i'], terms[t]['r'])
+                    cxn.put("%012d" % t, termidstr)                                        
+                cxn.close()
+
+            if fl.find('occ') > -1:
+                terms.sort(key=lambda x: x['o'])                
+                cxn = bdb.db.DB()
+                cxn.open(dbname + "_FREQ_OCC")
+                for t in range(len(terms)):
+                    termidstr = struct.pack('ll', terms[t]['i'], terms[t]['o'])
+                    cxn.put("%012d" % t, termidstr)                                        
+                cxn.close()                
+
+
+        # print "commited %s:  %s" % (index.id, time.time() - start)
         return None
 
 
@@ -668,6 +734,70 @@ class BdbIndexStore(IndexStore):
         else:
             return data
 
+
+    def _openTermFreq(self, session, index, which):
+
+        fl = index.get_setting(session, "freqList", "") 
+        if fl.find(which) == -1:
+            return None
+
+        cxns = self.termFreqCxn.get(index, {})
+        tfcxn = cxns.get(which, None)
+        if tfcxn != None:
+            return tfcxn
+        
+        tfcxn = bdb.db.DB()
+        dfp = self.get_path(session, 'defaultPath')
+        basename = self._generateFilename(index)
+        dbname = os.path.join(dfp, basename)
+        if which == 'rec':
+            tfcxn.open(dbname + "_FREQ_REC")
+            if cxns == {}:
+                self.termFreqCxn[index] = {'rec' : tfcxn}
+            else:
+                self.termFreqCxn[index]['rec'] = tfcxn
+        elif which == 'occ':
+            tfcxn.open(dbname + "_FREQ_OCC")
+            if cxns == {}:
+                self.termFreqCxn[index] = {'occ' : tfcxn}
+            else:
+                self.termFreqCxn[index]['occ'] = tfcxn
+        return tfcxn
+
+
+    def fetch_termFrequencies(self, session, index, which='rec', position=-1, number=100, direction="<="):
+        cxn = self._openTermFreq(session, index, which)
+        if not cxn:
+            return []
+        else:
+            c = cxn.cursor()
+            freqs = []
+            
+            if position < 0:
+                # go to end and reverse
+                (t,v) = c.last()
+                if position != -1:
+                    slot = int(t) + position + 1
+                    (t,v) = c.set_range("%012d" % slot)
+            elif position == 0:
+                (t,v) = c.first()
+            else:
+                (t,v) = c.set_range("%012d" % position)
+            if direction[0] == "<":
+                next = c.prev
+            else:
+                next = c.next
+            while len(freqs) < number:
+                (tid, fr) = struct.unpack('ll', v)
+                freqs.append((int(t), tid, fr))
+                try:
+                    (t,v) = next()
+                except TypeError:
+                    break
+            return freqs
+        
+
+
     def create_term(self, session, index, termid, resultSet):
         # Take resultset and munge to index format, serialise, store
 
@@ -752,6 +882,25 @@ class BdbIndexStore(IndexStore):
 
             except:
                 raise(ValueError)
+        fl = index.get_setting(session, "freqList", "") 
+        if fl:
+            if fl.find('rec') > -1: 
+                try:
+                    oxn = bdb.db.DB()
+                    oxn.set_flags(bdb.db.DB_RECNUM)
+                    oxn.open(fullname + "_FREQ_REC", dbtype=bdb.db.DB_BTREE, flags=bdb.db.DB_CREATE, mode=0660)
+                    oxn.close()
+                except:
+                    raise
+            if fl.find('occ') > -1:
+                try:
+                    oxn = bdb.db.DB()
+                    oxn.set_flags(bdb.db.DB_RECNUM)
+                    oxn.open(fullname + "_FREQ_OCC", dbtype=bdb.db.DB_BTREE, flags=bdb.db.DB_CREATE, mode=0660)
+                    oxn.close()
+                except:
+                    raise
+
         return 1
 
 
