@@ -125,8 +125,8 @@ class ARMVectorPreParser(PreParser):
 
 class ARMPreParser(PreParser):
 
-    _possibleSettings = {'support' : {'docs' : "Support value", 'type' : int},
-                         'confidence' : {'docs' : "Confidence value", 'type' : int},
+    _possibleSettings = {'support' : {'docs' : "Support value", 'type' : float},
+                         'confidence' : {'docs' : "Confidence value", 'type' : float},
                          } 
 
 
@@ -134,6 +134,7 @@ class ARMPreParser(PreParser):
         PreParser.__init__(self, session, config, parent)
         self.support = self.get_setting(session, 'support', 10)
         self.confidence = self.get_setting(session, 'confidence', 75)
+
 
 class TFPPreParser(ARMPreParser):
 
@@ -181,6 +182,235 @@ class TFPPreParser(ARMPreParser):
             return StringDocument(results)
         matches.sort(reverse=True)
         return StringDocument(matches)
+
+
+
+class Fimi1PreParser(ARMPreParser):
+
+    _possiblePaths = {'filePath' : {'docs' : 'Directory where fimi01 executable lives'}
+                      }
+
+    def __init__(self, session, config, parent):
+        ARMPreParser.__init__(self, session, config, parent)
+
+        # Check we know where TFP is etc
+        self.filePath = self.get_setting(session, 'filePath', None)
+        if not self.filePath:
+            raise ConfigFileException("%s requires the path: filePath" % self.id)
+        self.fisre = re.compile("([0-9 ]+) \(([0-9]+)\)")
+
+
+    def process_document(self, session, doc):
+
+        # write out our temp file
+        (qq, infn) = tempfile.mkstemp(".arm")
+        fh = file(infn, 'w')
+        fh.write(doc.get_raw())
+        fh.close()
+
+        (qq, outfn) = tempfile.mkstemp(".txt")
+        # go to directory and run
+        o = os.getcwd()
+        os.chdir(self.filePath)
+        results = commands.getoutput("./apriori %s %s %s" % (infn, outfn, self.support/100))
+        os.chdir(o)
+
+        inh = file(outfn)
+        fis = self.fisre
+        for line in inh:
+            # matching line looks like N N N (N)
+            # rules look like N N ==> N (f, N)
+            m = fis.match(line)
+            if m:
+                (set, freq) = m.groups()
+                if set.find(' ') > -1:
+                    matches.append((int(freq), set))
+        inh.close()
+
+        if not matches:
+            # no FIS for some reason, return results??
+            return StringDocument(results)
+
+        matches.sort(reverse=True)
+        os.chdir(o)
+        return StringDocument(matches)
+
+
+
+class FrequentSet(object):
+
+    freq = 0
+    termids = []
+    avgs = []
+    avg = 0
+    pctg = 0
+    opctg = 0
+    ll = 0
+    surprise = 0
+    termidFreqs = {}
+    termidRules = {}
+    document = None
+
+    def __repr__(self):
+        termList = []
+        ts = self.termidRules.items()
+        ts.sort(key=lambda x: x[1], reverse=True)
+
+        for t in ts:
+            termList.append("%s %s" % (self.document.termHash[t[0]], t[1]))
+        terms = " ".join(termList)
+        return "<Rule Object:  %s (%s)>" % (terms, self.freq)
+
+    def __str__(self):
+        termList = []
+        ts = self.termidRules.items()
+        ts.sort(key=lambda x: x[1], reverse=True)
+
+        for t in ts:
+            termList.append(self.document.termHash[t[0]])
+        return " ".join(termList)
+
+
+    def __init__(self, session, m, doc, unrenumber):
+
+        self.document = doc
+        self.freq = m[0]
+
+        # unmap termids
+        termids = m[1].split()
+        termids = map(int, termids)
+        if unrenumber:
+            doc = StringDocument([termids])
+            doc2 = unrenumber.process_document(session, doc)
+            termids = doc2.get_raw()[0]
+        termids.sort()
+        self.termids = termids
+        self.termidFreqs = dict(zip(termids, [self.freq]*len(termids)))
+        self.termidRules = dict(zip(termids, [1]*len(termids)))
+        self.combinations = [termids]
+
+   def merge(self, orule):
+        self.combinations.extend(orule.combinations)
+        for t in orule.termids:
+            if self.termidRules.has_key(t):
+                self.termidRules[t] += orule.termidRules[t]
+            else:
+                self.termidRules[t] = orule.termidRules[t]
+                self.termids.append(t)
+
+
+# XXX This whole setup is kinda kludgey, ya know? :(
+# This should be a workflow somehow?
+
+class MatchToRulePreParser(PreParser):
+
+    
+    _possiblePaths = {'renumberPreParser' : {'docs' : ''},
+                      'recordStore' : {'docs' : ''},
+                      'index' : {'docs' : ''}}
+    
+    _possibleSettings = {'calcRuleLengths' : {'docs' :'', 'type': int},
+                         'calcRankings' : {'docs' :'', 'type' : int},
+                         'sortBy' : {'docs' : '', 'options' : 'll|surprise|length|support|totalFreq'}}
+    
+    def __init__(self, session, config, parent):
+        PreParser.__init__(self, session, config, parent)
+        # need to know which unrenumber preParser to use
+        self.renumber = self.get_path(session, 'renumberPreParser', None)
+        self.recordStore = self.get_path(session, 'recordStore', None)
+        self.calcRuleLengths = self.get_setting(session, 'calcRuleLengths', 0)
+        self.index = self.get_path(session, 'index', None)
+        self.calcRankings = self.get_setting(session, 'calcRankings', 0)
+        self.sortBy = self.get_setting(session, 'sortBy', '')
+
+        self.sortFuncs = {
+            'll' :lambda x: x.ll,
+            'surprise' : lambda x: x.surprise,
+            'length' : lambda x: len(x.termids),
+            'support' : lambda x: x.freq,
+            'totalFreq' : lambda x: sum(x.freqs)
+            }
+
+    def process_document(session, doc):
+        # take in Doc with match list, return doc with rule object list
+        matches = doc.get_raw()
+
+        out = StringDocument([])
+
+        # Initial setup
+        termHash = {}
+        termFreqHash = {}
+        termRuleFreq
+        rules = []
+        ruleLengths = {}
+
+        if self.recordStore:
+            totalDocs = self.recordStore.get_dbsize(session)
+        else:
+            # get default from session's database
+            db = session.server.get_object(session, session.database)
+            recStore = db.get_path(session, 'recordStore', None)
+            if recStore:
+                totalDocs = recStore.get_dbsize(session)
+        if totalDocs = 0:
+            # avoid e_divzero
+            totalDocs = 1
+        totalDocs = float(totalDocs)
+
+        # step through rules and turn into objects, do math, do global stats
+        for m in matches:
+            r = FrequentSet(session, m, doc, self.unrenumber)
+            
+            freqs = []
+            for t in r.termids:
+                try:
+                    termFreq = termFreqHash[t]
+                    termRuleFreq[t] += 1
+                except:
+                    termRuleFreq[t] = 1
+                    term = self.index.fetch_termById(session, t)
+                    termHash[t] = term
+                    termFreq = self.index.fetch_term(session, term, summary=True)[1]
+                    termFreqHash[t] = termFreq
+                freqs.append(termFreq)
+            r.freqs = freqs
+
+            if self.calcRankings:
+                if self.calcRuleLengths:
+                    try:
+                        ruleLengths[(len(r.termids))] += 1
+                    except:
+                        ruleLengths[(len(r.termids))] = 1
+
+                # some basic stats needed
+                avgs = []
+                for t in freqs:
+                    avgs.append(float(t)/totalDocs)
+                r.pctg = reduce(operator.mul, avgs)
+                r.avg = r.pctg * totalDocs
+                r.opctg = float(r.freq) / totalDocs
+
+                # This is log-likelihood.  Better than just support
+                ei = float(totalDocs * (r.avg + r.freq)) / (totalDocs * 2.0)
+                g2 = 2 * ((r.avg * math.log( r.avg / ei,10)) + (r.freq * math.log(r.freq / ei,10)))
+                if r.freq < r.avg:
+                    g2 = 0 - g2
+                r.ll = g2
+                # Dunno what this is but it works quite well
+                r.surprise = (totalDocs / r.avg) * r.freq
+            rules.append(r)
+
+        if self.sortBy:
+            rules.sort(key=self.sortFuncs[self.sortBy], reverse=True)
+
+        out.text = rules
+        out.termHash = termHash
+        out.termRuleFreq = termRuleFreq
+        out.ruleLengths = ruleLengths
+        # XXX this is even nastier, but useful
+        out.sortFuncs = self.sortFuncs
+
+        return out
 
 
 class ClassificationPreParser(PreParser):
