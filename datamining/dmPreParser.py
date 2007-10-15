@@ -4,6 +4,7 @@ from document import StringDocument
 from c3errors import ConfigFileException
 
 import os, random, cPickle, tempfile
+import commands, math, re, operator
 import numarray as na
 
 import svm
@@ -187,14 +188,14 @@ class TFPPreParser(ARMPreParser):
 
 class Fimi1PreParser(ARMPreParser):
 
-    _possiblePaths = {'filePath' : {'docs' : 'Directory where fimi01 executable lives'}
+    _possiblePaths = {'filePath' : {'docs' : 'Directory where fimi01 executable (apriori) lives'}
                       }
 
     def __init__(self, session, config, parent):
         ARMPreParser.__init__(self, session, config, parent)
 
         # Check we know where TFP is etc
-        self.filePath = self.get_setting(session, 'filePath', None)
+        self.filePath = self.get_path(session, 'filePath', None)
         if not self.filePath:
             raise ConfigFileException("%s requires the path: filePath" % self.id)
         self.fisre = re.compile("([0-9 ]+) \(([0-9]+)\)")
@@ -217,6 +218,7 @@ class Fimi1PreParser(ARMPreParser):
 
         inh = file(outfn)
         fis = self.fisre
+        matches = []
         for line in inh:
             # matching line looks like N N N (N)
             # rules look like N N ==> N (f, N)
@@ -247,6 +249,8 @@ class FrequentSet(object):
     opctg = 0
     ll = 0
     surprise = 0
+    entropy = 0
+    gini = 0
     termidFreqs = {}
     termidRules = {}
     document = None
@@ -289,7 +293,7 @@ class FrequentSet(object):
         self.termidRules = dict(zip(termids, [1]*len(termids)))
         self.combinations = [termids]
 
-   def merge(self, orule):
+    def merge(self, orule):
         self.combinations.extend(orule.combinations)
         for t in orule.termids:
             if self.termidRules.has_key(t):
@@ -303,7 +307,6 @@ class FrequentSet(object):
 # This should be a workflow somehow?
 
 class MatchToRulePreParser(PreParser):
-
     
     _possiblePaths = {'renumberPreParser' : {'docs' : ''},
                       'recordStore' : {'docs' : ''},
@@ -311,12 +314,12 @@ class MatchToRulePreParser(PreParser):
     
     _possibleSettings = {'calcRuleLengths' : {'docs' :'', 'type': int},
                          'calcRankings' : {'docs' :'', 'type' : int},
-                         'sortBy' : {'docs' : '', 'options' : 'll|surprise|length|support|totalFreq'}}
+                         'sortBy' : {'docs' : '', 'options' : 'gini|entropy|ll|surprise|length|support|totalFreq'}}
     
     def __init__(self, session, config, parent):
         PreParser.__init__(self, session, config, parent)
         # need to know which unrenumber preParser to use
-        self.renumber = self.get_path(session, 'renumberPreParser', None)
+        self.unrenumber = self.get_path(session, 'unRenumberPreParser', None)
         self.recordStore = self.get_path(session, 'recordStore', None)
         self.calcRuleLengths = self.get_setting(session, 'calcRuleLengths', 0)
         self.index = self.get_path(session, 'index', None)
@@ -326,12 +329,14 @@ class MatchToRulePreParser(PreParser):
         self.sortFuncs = {
             'll' :lambda x: x.ll,
             'surprise' : lambda x: x.surprise,
+            'entropy' : lambda x: x.entropy,
+            'gini' : lambda x: x.gini,
             'length' : lambda x: len(x.termids),
             'support' : lambda x: x.freq,
             'totalFreq' : lambda x: sum(x.freqs)
             }
 
-    def process_document(session, doc):
+    def process_document(self, session, doc):
         # take in Doc with match list, return doc with rule object list
         matches = doc.get_raw()
 
@@ -340,7 +345,7 @@ class MatchToRulePreParser(PreParser):
         # Initial setup
         termHash = {}
         termFreqHash = {}
-        termRuleFreq
+        termRuleFreq = {}
         rules = []
         ruleLengths = {}
 
@@ -352,14 +357,14 @@ class MatchToRulePreParser(PreParser):
             recStore = db.get_path(session, 'recordStore', None)
             if recStore:
                 totalDocs = recStore.get_dbsize(session)
-        if totalDocs = 0:
+        if totalDocs == 0:
             # avoid e_divzero
             totalDocs = 1
         totalDocs = float(totalDocs)
 
         # step through rules and turn into objects, do math, do global stats
         for m in matches:
-            r = FrequentSet(session, m, doc, self.unrenumber)
+            r = FrequentSet(session, m, out, self.unrenumber)
             
             freqs = []
             for t in r.termids:
@@ -384,11 +389,20 @@ class MatchToRulePreParser(PreParser):
 
                 # some basic stats needed
                 avgs = []
+                entropy = []
+                gini = []
+                ftd = float(totalDocs)
                 for t in freqs:
-                    avgs.append(float(t)/totalDocs)
+                    bit = float(t)/ftd
+                    avgs.append(bit)
+                    entropy.append((0-bit) * math.log(bit, 2))
+                    gini.append(bit**2)
+
                 r.pctg = reduce(operator.mul, avgs)
-                r.avg = r.pctg * totalDocs
-                r.opctg = float(r.freq) / totalDocs
+                r.avg = r.pctg * float(totalDocs)
+                r.opctg = (float(r.freq) / ftd)
+                r.entropy = reduce(operator.add, entropy)
+                r.gini = 1.0 - reduce(operator.add, gini)
 
                 # This is log-likelihood.  Better than just support
                 ei = float(totalDocs * (r.avg + r.freq)) / (totalDocs * 2.0)
@@ -396,8 +410,9 @@ class MatchToRulePreParser(PreParser):
                 if r.freq < r.avg:
                     g2 = 0 - g2
                 r.ll = g2
-                # Dunno what this is but it works quite well
+                # Dunno what this is but it works quite well (for some things)
                 r.surprise = (totalDocs / r.avg) * r.freq
+                # r.surprise2 = (1.0/r.pctg) * r.freq
             rules.append(r)
 
         if self.sortBy:
