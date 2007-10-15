@@ -103,10 +103,11 @@ class KeywordExtracter(SimpleExtracter):
         # compiled regex is MUCH faster than interpreted loop
         # \u2026 is unicode ellipsis character
         # \u2014 is mdash, ndash is \u2013
-        # smark apos are 2018, 2019
+        # smart apos are 2018, 2019
         # smart quotes are 201c 201d
+        # pre = self.get_setting(session, 'regexp', u"((?<!\s)'|[-.,]((?=\s)|$)|(^|(?<=\s))[-.,']|[\".,'-][\".,'-]|[~`!@+=\#\&\^*()\[\]{}\\\|\":;<>?/\u2026\u2013\u2014\u2018\u2019\u201c\u201d])")
 
-        pre = self.get_setting(session, 'regexp', u"((?<!\s)'|[-.,]((?=\s)|$)|(^|(?<=\s))[-.,']|[\".,'-][\".,'-]|[~`!@+=\#\&\^*()\[\]{}\\\|\":;<>?/\u2026\u2013\u2014\u2018\u2019\u201c\u201d])")
+        pre = self.get_setting(session, 'regexp',  u"""([-.,'\")}\]]+((?=\s)|$)|(^|(?<=\s))[-.,']+|[`~!@+=\#\&\^*()\[\]{}\\\|\":;<>?/\u2026\u2013\u2014\u2018\u2019\u201c\u201d])""")
         self.punctuationRe = re.compile(pre)
 
     def _keywordify(self, session, data):
