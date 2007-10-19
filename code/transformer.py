@@ -44,12 +44,15 @@ try:
             xfrPath = self.get_path(session, "xsltPath")
             dfp = self.get_path(session, "defaultPath")
             path = os.path.join(dfp, xfrPath)
-            et = etree.parse(path)
-            self.txr = etree.XSLT(et)
+            self.parsedXslt = etree.parse(path)
+            self.txr = etree.XSLT(self.parsedXslt)
 
         def process_record(self, session, rec):
             # return StringDocument
             dom = rec.get_dom()
+            if (session.environment == 'apache'):
+                self.txr = etree.XSLT(self.parsedXslt)
+
             result = self.txr(dom)
             return StringDocument(str(result))
 
