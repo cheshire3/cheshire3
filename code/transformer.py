@@ -63,14 +63,14 @@ class XsltTransformer(Transformer):
     _possiblePaths = {'xsltPath' : {'docs' : "Path to the XSLT file to use."}}
 
     def __init__(self, session, config, parent):
-	Transformer.__init__(self, session, config, parent)
-	xfrPath = self.get_path(session, "xsltPath")
-	dfp = self.get_path(session, "defaultPath")
-	path = os.path.join(dfp, xfrPath)
-	xfr = InputSource.DefaultFactory.fromStream(file(path), "file://" + path)
-	processor = Processor()
-	processor.appendStylesheet(xfr)
-	self.processor = processor
+        Transformer.__init__(self, session, config, parent)
+        xfrPath = self.get_path(session, "xsltPath")
+        dfp = self.get_path(session, "defaultPath")
+        path = os.path.join(dfp, xfrPath)
+        xfr = InputSource.DefaultFactory.fromStream(file(path), "file://" + path)
+        processor = Processor()
+        processor.appendStylesheet(xfr)
+        self.processor = processor
 
     def process_record(self, session, rec):
         p = self.permissionHandlers.get('info:srw/operation/2/transform', None)
@@ -86,7 +86,6 @@ class XsltTransformer(Transformer):
             # Probably LXML
             raise ConfigFileException("Record given to %s is not the right class. Should probably be LxmlXsltTransformer." % self.id)
 
-        dfp = self.get_path(session, "defaultPath")
         result = self.processor.runNode(dom, u'')
         return StringDocument(result, self.id, rec.processHistory, parent=rec.parent)
 
