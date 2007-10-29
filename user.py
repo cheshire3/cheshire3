@@ -58,7 +58,7 @@ class SimpleUser(User):
                         f = self.flags.get(flag, [])
                         if f != "":
                             f.append(obj)
-                            self.flags[flag] = obj
+                            self.flags[flag] = f
                     else:
                         self.flags[flag] = ""
         elif (node.localName == "history"):
