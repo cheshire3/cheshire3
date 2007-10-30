@@ -68,6 +68,11 @@ class SimpleUser(User):
             # Extract allowed hostmask list
             pass
 
+    def __init__(self, session, config, parent):
+        self.flags = {}
+        User.__init__(self, session, config, parent)
+
+
     def hasFlag(self, session, flag, object=""):
         # Does the user have the flag for this object/all objects
         f = self.flags.get(flag, [])
