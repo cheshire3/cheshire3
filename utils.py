@@ -23,22 +23,13 @@ textType = Node.TEXT_NODE
 nonTextToken = "\x00\t"
 
 
-def saxToString(data):
-    txt = []
-    for e in data:
-        if (e[0] == "3"):
-            if (len(txt) and txt[-1][-1] != ' ' and repr(e[2]).isalnum()):
-                txt.append(' ')
-            txt.append(e[2:])
-    txt = ''.join(txt)
-    return txt
-
 def fixString(s):
     l = []
     for c in s:
         if (ord(c) > 31 or c in ['\n', '\t', '\r']):
             l.append(c)
     return ''.join(l)
+
 
 if (0):
     from Ft.Xml.Domlette import NonvalidatingReaderBase
@@ -69,12 +60,7 @@ else:
 
 # --- Definitions ---
 
-def evaluateXPath(xp, dom):
-    if (use4Suite):
-        context = Context.Context(dom)
-        return xp.evaluate(context)
-    else:
-        return xp.evaluate(dom)
+
 
 def flattenTexts(elem):
     # recurse down tree and flatten all text nodes into one string.
@@ -88,7 +74,7 @@ def flattenTexts(elem):
                 # Recurse
                 texts.append(flattenTexts(e))
     else:
-        # libxml2 walker/iterator        
+        # libxml2 walker/iterator
         walker = elem.getiterator()
         for c in walker:
             if c.text:
@@ -97,6 +83,13 @@ def flattenTexts(elem):
                 texts.append(c.tail)
     return ''.join(texts)
 
+
+def evaluateXPath(xp, dom):
+    if (use4Suite):
+        context = Context.Context(dom)
+        return xp.evaluate(context)
+    else:
+        return xp.evaluate(dom)
 
 
 def getFirstElement(elem):
@@ -122,8 +115,6 @@ def getFirstData(elem):
             if (c.type == "text"):
                 return c.data.strip()
     return ""
-
-    
 
 
 def getFirstElementByTagName(node, local):
@@ -280,14 +271,17 @@ def verifyXPaths(paths):
 # ------------- Bitfield ---------------
 
 
+nonbinaryre = re.compile('[2-9a-f]')
+
 class SimpleBitfield(object):
     def __init__(self,value=0):
         if not value:
             value = 0
         if type(value) == types.StringType:
             if value[0:2] == "0x":
-                # Potential security issue?
-                value = eval(value)
+                value = int(value, 16)                
+            elif nonbinaryre.search(value):
+                value = int("0x" + value, 16)
             else:
                 value = int(value, 2)
         self._d = value
