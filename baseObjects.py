@@ -305,7 +305,7 @@ class User(C3Object):
     realName = ''
     flags = []
 
-    def hasFlag(self, session, flag, object=None):
+    def has_flag(self, session, flag, object=None):
         """Check whether or not the user has the specified flag.  This
         flag may be set regarding a particular object, for example
         write access to a particular store."""
