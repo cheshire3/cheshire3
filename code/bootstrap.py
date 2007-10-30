@@ -55,7 +55,7 @@ class BootstrapUser:
     password = ""
     flags = {'' : 'c3r:administrator'}
 
-    def hasFlag(self, session, flag, object=""):
+    def has_flag(self, session, flag, object=""):
         return True
     
 class BootstrapSession:

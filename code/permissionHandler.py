@@ -44,7 +44,7 @@ class PermissionHandler:
             self.code.append(")")
         elif node.localName == "flag":
             f = getFirstData(node)
-            self.code.append("user.hasFlag(session, \"%s\", object)" % f)
+            self.code.append("user.has_flag(session, \"%s\", object)" % f)
         elif node.localName == "environment":
             e = getFirstData(node)
             self.code.append("session.environment == \"%s\"" % e)
