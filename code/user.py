@@ -73,17 +73,21 @@ class SimpleUser(User):
         User.__init__(self, session, config, parent)
 
 
-    def hasFlag(self, session, flag, object=""):
+    def has_flag(self, session, flag, object=""):
         # Does the user have the flag for this object/all objects
         f = self.flags.get(flag, [])
-        if f == "c3r:administrator" or object in f:
+        if object in f:
             return True
         else:
             # Does the user have a global flag for this object/all objects
             f = self.flags.get("", [])
-            if f == "c3r:administrator" or object in f:
+            if object in f:
                 return True
-            return False
+            else :
+                f = self.flags.get("c3r:administrator", [])
+                if object in f or f == "":
+                    return True                
+                return False
 
     def check_password(self, session, password):
         # Check password type
