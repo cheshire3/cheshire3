@@ -1,4 +1,4 @@
-# Version 0.9.1
+# Version 0.9.9
 
 from configParser import C3Object
 
@@ -201,6 +201,25 @@ class Extracter(C3Object):
         function to wrap the other process_* functions and do type
         checking."""
         raise(NotImplementedError)
+
+class Tokenizer(C3Object):
+    # take a string of language, return ordered list of tokens
+    # string is actually in hash, as per output from Extracter
+
+    def process_string(self, session, data):
+        raise NotImplementedError
+    def process_hash(self, session, data):
+        raise NotImplementedError
+
+class TokenMerge(C3Object):
+    # take an ordered list of tokens, merge into a hash
+    # Maybe combining multiple tokens per key
+
+    def process_string(self, session, data):
+        raise NotImplementedError
+    def process_hash(self, session, data):
+        raise NotImplementedError
+
 
 # Takes a string, returns a list of normalised values
 class Normaliser(C3Object):

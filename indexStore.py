@@ -444,6 +444,8 @@ class BdbIndexStore(IndexStore):
                             packed = t2s(termid, currData, recs=totalRecs, occs=totalOccs)
                         except:
                             print "%s failed to t2s %s" % (self.id, currTerm)
+                            print termid
+                            print currData
                             raise
                     cxn.put(currTerm, packed)
                     if vectors:
@@ -564,13 +566,16 @@ class BdbIndexStore(IndexStore):
                     totalTerms += 1
                     totalFreq += long(freq)                    
                 if proxVectors:
+                    nProxInts = index.get_setting(session, 'nProxInts', 2)
                     proxInfo = map(long, bits[4:])
-                    tups = [(proxInfo[x], proxInfo[x+1]) for x in range(0,len(proxInfo),2)]
+                    tups = [proxInfo[x:x+nProxInts] for x in range(0,len(proxInfo),nProxInts)]
                     for t in tups:
+                        val = [t[1], tid]
+                        val.extend(t[2:])                        
                         try:
-                            proxHash[t[0]].append((t[1], tid))
+                            proxHash[t[0]].append(val)
                         except KeyError:
-                            proxHash[t[0]] = [(t[1], tid)]
+                            proxHash[t[0]] = [val]
                     
             # Catch final document
             if docArray:
@@ -714,10 +719,11 @@ class BdbIndexStore(IndexStore):
         key = str(self.storeHashReverse[rec.recordStore]) + "|" +  key
         data = cxn.get(key)
         if data:
-            # [(wordId, termId)...]
+            # [(wordId, termId, charOffset?, ...)...]
+            nProxInts = index.get_setting(session, 'nProxInts', 2)
             flat = struct.unpack('L' * (len(data)/4), data)
             lf = len(flat)
-            unflat = [(flat[x], flat[x+1]) for x in range(0,lf,2)]
+            unflat = [flat[x:x+nProxInts] for x in range(0,lf,nProxInts)]
             return unflat
         else:
             return []
@@ -1240,10 +1246,11 @@ class BdbIndexStore(IndexStore):
             try:
                 unpacked = index.deserialise_terms(val, prox)
             except:
+                raise
                 print "%s failed to deserialise %s %s %s" % (self.id, index.id, term, val)
         return unpacked
 
-    def fetch_packed(self, session, index, term, summary=False):
+    def fetch_packed(self, session, index, term, summary=False, numReq=0, start=0):
         try:
             term = term.encode('utf-8')
         except:
@@ -1252,6 +1259,29 @@ class BdbIndexStore(IndexStore):
         if summary:
             dataLen = index.longStructSize * self.reservedLongs
             val = cxn.get(term, doff=0, dlen=dataLen)
+        elif (start != 0 or numReq != 0) and index.canExtractSection:
+            # try to extract only section...
+
+            fulllen = cxn.get_size(term)
+            offsets = index.calc_sectionOffsets(session, start, numReq, fulllen)
+
+            if not numReq:
+                numReq = 100
+
+            # first get summary
+            vals = []
+            dataLen = index.longStructSize * self.reservedLongs
+            val = cxn.get(term, doff=0, dlen=dataLen)
+            vals.append(val)
+            # now step through offsets, prolly only 1
+            for o in offsets:
+                val = cxn.get(term, doff=o[0], dlen=o[1])
+                if len(o) > 2:
+                    val = o[2] + val
+                if len(o) > 3:
+                    val = val + o[3]
+                vals.append(val)
+            return ''.join(vals)
         else:
             val = cxn.get(term)
         return val

@@ -65,6 +65,7 @@ class SimpleIndex(Index):
     currentFullPath = []
     currentPath = []
     storeOrig = 0
+    canExtractSection = 1
 
     indexingTerm = ""
     indexingData = []
@@ -444,6 +445,12 @@ class SimpleIndex(Index):
         fmt = 'lll' * (len(data) / (3 * self.longStructSize))
         return struct.unpack(fmt, data)
 
+    def calc_sectionOffsets(self, session, start, num, dlen=0):
+        #tid, recs, occs, (store, rec, freq)+
+        a = (self.longStructSize * 3) + (self.longStructSize *start * 3)
+        b = (self.longStructSize * 3 * num)
+        return [(a,b)]
+
     def merge_terms(self, structTerms, newTerms, op="replace", recs=0, occs=0):
         # structTerms = output of deserialiseTerms
         # newTerms = flat list
@@ -523,6 +530,9 @@ class SimpleIndex(Index):
         return s
 
 
+
+
+
     # pass-throughs to indexStore
 
     def store_terms(self, session, data, record):
@@ -549,10 +559,19 @@ class SimpleIndex(Index):
     def fetch_termFrequencies(self, session, which='rec', position=-1, number=100, direction="<="):
         return self.indexStore.fetch_termFrequencies(session, self, which, position, number, direction)
 
+
+
     
 
 class ProximityIndex(SimpleIndex):
     """ Need to use prox extracter """
+
+    canExtractSection = 0
+    _possibleSettings = {'nProxInts' : {'docs' : "", 'type' : int}}
+
+    def __init__(self, session, node, parent):
+        SimpleIndex.__init__(self, session, node, parent)
+        self.nProxInts = self.get_setting(session, 'nProxInts', 2)
 
     def serialise_terms(self, termid, terms, recs=0, occs=0):
         # in: list of longs
@@ -573,7 +592,7 @@ class ProximityIndex(SimpleIndex):
         docs = [termid, totalRecs, totalOccs]
         while idx < len(flat):
             doc = list(flat[idx:idx+3])
-            nidx = idx + 3 + (doc[2]*2)
+            nidx = idx + 3 + (doc[2]*self.nProxInts)
             doc.extend(flat[idx+3:nidx])
             idx = nidx
             docs.append(doc)
@@ -610,7 +629,7 @@ class ProximityIndex(SimpleIndex):
 
             idx = 0
             while idx < len(newTerms):
-                end = idx + 3 + (newTerms[idx+2]*2)
+                end = idx + 3 + (newTerms[idx+2]*self.nProxInts)
                 new = list(newTerms[idx:end])
                 idx = end
                 docid = new[0]
@@ -637,7 +656,7 @@ class ProximityIndex(SimpleIndex):
             idx = 0
             while idx < len(newTerms):
                 doc = list(newTerms[idx:idx+3])
-                idx = idx + 3 + (doc[2]*2)
+                idx = idx + 3 + (doc[2]*self.nProxInts)
                 for x in range(len(structTerms)):
                     old = structTerms[x]
                     if old[0] == doc[0] and old[1] == doc[1]:
@@ -682,7 +701,8 @@ class ProximityIndex(SimpleIndex):
             s.queryTerm = queryHash['text']
             s.queryFreq = queryHash['occurences']
             s.queryPositions = []
-            for x in queryHash['positions'][1::2]:
+            # not sure about this nProxInts??
+            for x in queryHash['positions'][1::self.nProxInts]:
                 s.queryPositions.append(x)
         if (terms):
             s.termid = terms[0]
@@ -796,6 +816,15 @@ class BitmapIndex(SimpleIndex):
         pack = struct.pack('lll', termid, recs, occs)
         val = pack + str(bf)
         return val
+
+    def calc_sectionOffsets(self, session, start, num, dlen):
+        # order is (of course) backwards
+        # so we need length etc etc.
+
+        start = (dlen - (start / 4) +1)  - (num/4)
+        packing = dlen - (start + (num/4)+1)
+        return [(start, (num/4)+1, '0x', '0'*packing)]
+
         
     def deserialise_terms(self, data, prox=1):
 	lsize = 3 * self.longStructSize
@@ -990,7 +1019,7 @@ try:
             pack = struct.pack(fmt, termid, totalRecs, totalOccs)
             return pack + tval
 
-        def deserialise_terms(self, data, prox=1):
+        def deserialise_terms(self, data, prox=0):
             # in: tostring()ified array
             # w/ metadata
 	    lsize = 3 * self.longStructSize
@@ -1000,6 +1029,11 @@ try:
                 return [termid, totalRecs, totalOccs, na.fromstring(data[lsize:], 'u4', shape)]
             else:
                 return [termid, totalRecs, totalOccs]            
+
+        def calc_sectionOffsets(self, session, start, num, dlen=0):
+            a = (self.longStructSize * 3) + (self.longStructSize *start * 2)
+            b = (self.longStructSize * 2 * num)
+            return [(a,b)]
 
         def merge_terms(self, structTerms, newTerms, op="replace", recs=0, occs=0):
             # newTerms is a flat list
@@ -1069,6 +1103,17 @@ try:
 
 
     class ProximityArrayIndex(ArrayIndex):
+
+        _possibleSettings = {'nProxInts' : {'docs' : "", 'type' : int}}
+        
+        def __init__(self, session, node, parent):
+            ArrayIndex.__init__(self, session, node, parent)
+            self.nProxInts = self.get_setting(session, 'nProxInts', 2)
+
+        def calc_sectionOffsets(self, session, start, num, dlen=0):
+            a = (self.longStructSize * 3) + (self.longStructSize *start * 2)
+            b = (self.longStructSize * self.nProxInts * num)
+            return [(a,b)]
         
         def serialise_terms(self, termid, terms, recs=0, occs=0):
             # in: list of longs
@@ -1085,8 +1130,8 @@ try:
                 while t < lt:
                     # rec, store, freq, [elem, idx]+
                     (id, freq) = terms[t], terms[t+2]
-                    end = t+3+(freq*2)
-                    itemprox = terms[t+3:t+3+(freq*2)]
+                    end = t+3+(freq*self.nProxInts)
+                    itemprox = terms[t+3:t+3+(freq*self.nProxInts)]
                     flat.extend([id, freq])
                     prox.extend(itemprox)                
                     t = end
@@ -1099,12 +1144,17 @@ try:
             head = struct.pack('lll', termid, recs, occs)
             return head + arraystr + proxstr
         
-        def deserialise_terms(self, data, prox=1):
+        def deserialise_terms(self, data, prox=1, numReq=0 ):
             lss = self.longStructSize * 3
             (termid, totalRecs, totalOccs) = struct.unpack('lll', data[:lss])
             if len(data) > lss:
-                arrlen = totalRecs * 8
-                shape = (totalRecs, 2)        
+                if numReq:
+                    arrlen = numReq * 8
+                    shape = (numReq, 2)
+                    prox = 0
+                else:
+                    arrlen = totalRecs * 8
+                    shape = (totalRecs, 2)        
                 arr = na.fromstring(data[lss:arrlen+lss], 'u4', shape)
                 
                 if prox:
@@ -1115,8 +1165,8 @@ try:
                     itemhash = {}
                     c = 0
                     for item in arr:
-                        end = c + (item[1] * 2)
-                        itemhash[item[0]] = na.array(prox[c:end], 'u4', shape=((end-c)/2, 2))
+                        end = c + (item[1] * self.nProxInts)
+                        itemhash[item[0]] = na.array(prox[c:end], 'u4', shape=((end-c)/self.nProxInts, self.nProxInts))
                         c = end
                 else:
                     itemhash = {}
@@ -1151,8 +1201,8 @@ try:
                 while t < lt:
                     # rec, store, freq, [elem, idx]+
                     (id, freq) = newTerms[t], newTerms[t+2]
-                    end = t+3+(freq*2)
-                    itemprox = newTerms[t+3:t+3+(freq*2)]
+                    end = t+3+(freq*self.nProxInts)
+                    itemprox = newTerms[t+3:t+3+(freq*self.nProxInts)]
                     arraydict[id] = freq
                     prox[id] = itemprox
                     t = end
@@ -1169,7 +1219,7 @@ try:
                 while t < lt:
                     # rec, store, freq, [elem, idx]+
                     (id, freq) = newTerms[t], newTerms[t+2]
-                    end = t+3+(freq*2)
+                    end = t+3+(freq*self.nProxInts)
                     try:
                         del arraydict[id]
                         del prox[id]
@@ -1196,7 +1246,8 @@ try:
                 rs.queryTerm = queryHash['text']
                 rs.queryFreq = queryHash['occurences']            
                 rs.queryPositions = []
-                for x in queryHash['positions'][1::2]:
+                # XXX also not sure about this nProxInts?
+                for x in queryHash['positions'][1::self.nProxInts]:
                     rs.queryPositions.append(x)
             if (len(terms)):
                 rs.termid = terms[0]
