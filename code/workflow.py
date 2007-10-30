@@ -39,7 +39,10 @@ class SimpleWorkflow(Workflow):
                        u'queryStore' : 'create_query',                       
                        u'workflow' : 'process',
                        u'index' : 'store_terms',
-                       u'database' : 'search'}
+                       u'database' : 'search',
+                       u'tokenMerge' : 'process_hash',
+                       u'tokenizer' : 'process_hash'
+                       }
         self.singleFunctions = [u'begin_indexing', u'commit_indexing',
                                 u'commit_metadata', u'begin_storing',
                                 u'commit_storing']
