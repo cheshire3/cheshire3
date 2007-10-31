@@ -11,7 +11,7 @@ from Ft.Xml.Domlette import ConvertDocument
 from PyZ3950 import z3950, grs1
 from PyZ3950.zmarc import MARC
 
-from utils import verifyXPaths, saxToString
+from utils import verifyXPaths
 from utils import nonTextToken
 from utils import elementType, flattenTexts, verifyXPaths
 
