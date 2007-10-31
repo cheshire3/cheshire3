@@ -8,7 +8,7 @@ from xml.sax.saxutils import escape
 from PyZ3950.zmarc_relaxed import MARC, MARC8_to_Unicode
 from xml.sax import ContentHandler
 
-from utils import Compile, Context, flattenTexts
+from utils import Compile, Context, flattenTexts, elementType
 import unicodedata
 
 # 1 <name> <attrHash> parent predicate end
@@ -471,6 +471,13 @@ class FtDomRecord(DomRecord):
             return self.xml
 
 
+    def _checkType(self, node):
+        if node.nodeType == elementType:
+            return node
+        else:
+            return node.nodeValue
+            
+
     def process_xpath(self, xpTuple, maps={}):
         if (not isinstance(xpTuple, list)):
             # Raw XPath
@@ -486,7 +493,8 @@ class FtDomRecord(DomRecord):
             self.context = Context.Context(self.dom)
 
         self.context.processorNss.update(maps)
-        return xp.evaluate(self.context)
+        res = xp.evaluate(self.context)
+        return map(self._checkType, res)
 
 try:
     from lxml import etree, sax
