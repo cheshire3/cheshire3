@@ -223,7 +223,7 @@ def process_scan(self, session, req):
         raise f
 
     if (not clause.term.value):
-	clause.term.value = 'a'
+	clause.term.value = chr(0)
     clause.config = config
 
     if (rp == 1):
