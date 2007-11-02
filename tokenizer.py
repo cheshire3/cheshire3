@@ -44,12 +44,6 @@ class RegexpSubTokenizer(SimpleTokenizer):
 
 
 
-# Medline terms that fail:
-# Cbl-/- B cells      -- can be +/+, +/-, or -/-
-# Na+-K+-ATPase, alphabeta+ blocker   (or whatever?!)
-# R(0) transitions
-
-        
 class RegexpFindTokenizer(SimpleTokenizer):
     # Simple re-implementation of NLTK's RegexpTokenizer
 
@@ -139,7 +133,7 @@ class SentenceTokenizer(SimpleTokenizer):
         self.sentenceRe = re.compile('.+?(?<!\.\.)[\.!?:]["\'\)]?(?=\s+|$)(?![a-z])')
         self.abbrMashRe = re.compile('(^|\s)([^\s]+?\.[a-zA-Z]+|Prof|Dr|Sr|Mr|Mrs|Ms|Jr|Capt|Gen|Col|Sgt|[ivxjCcl]+|[A-Z])\.(\s|$)')
 
-    def process_string(self, data):
+    def process_string(self, session, data):
         ps = self.paraRe.split(data)
         sents = []
         for p in ps:
@@ -150,6 +144,13 @@ class SentenceTokenizer(SimpleTokenizer):
                 sl = self.sentenceRe.findall(s)
             sents.extend(sl)
         return sents
+
+
+# trivial, but potentially useful
+class LineTokenizer(SimpleTokenizer):
+    def process_string(self, session, data):
+        return data.split('\n')
+
 
 
 class DateTokenizer(SimpleTokenizer):
