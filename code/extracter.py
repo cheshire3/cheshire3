@@ -73,17 +73,12 @@ class SimpleExtracter(Extracter):
         if self.get_setting(session, 'reversable', 0):
             tree = node.getroottree()
             root = tree.getroot()
-
-            if root == self.cachedRoot:
-                lno = self.cachedElems[node]
-            else:
-                lno = 0
+            if root != self.cachedRoot:
                 self.cachedRoot = root
                 self.cachedElems = {}
-                for n in tree.getiterator():
+                for lno, n in enumerate(tree.getiterator()):
                     self.cachedElems[n] = lno
-                    lno += 1
-                lno = self.cachedElems[node]
+            lno = self.cachedElems[node]
         else:
             tree = node.getroottree()
             lno = abs(hash(tree.getpath(node)))
