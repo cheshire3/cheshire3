@@ -33,6 +33,9 @@
 <subConfig type="parser" id="LxmlParser">
   <objectType>parser.LxmlParser</objectType>
 </subConfig>
+<subConfig type="parser" id="LxmlHtmlParser">
+  <objectType>parser.LxmlHtmlParser</objectType>
+</subConfig>
 
 
 <!-- PreParser objects -->
@@ -199,79 +202,116 @@
 
 <!-- Extracter objects -->
 
-<subConfig type="extracter" id="ExactExtracter">
+<subConfig type="extracter" id="SimpleExtracter">
   <objectType>extracter.SimpleExtracter</objectType>
 </subConfig>
-<subConfig type="extracter" id="KeywordExtracter">
-  <objectType>extracter.KeywordExtracter</objectType>
-</subConfig>
-<subConfig type="extracter" id="ProximityExtracter">
-  <objectType>extracter.ProximityExtracter</objectType>
-</subConfig>
-<subConfig type="extracter" id="ExactProximityExtracter">
-  <objectType>extracter.ExactProximityExtracter</objectType>
-</subConfig>
-<subConfig type="extracter" id="ParentProximityExtracter">
-  <objectType>extracter.ProximityExtracter</objectType>
+
+<subConfig type="extracter" id="ProxExtracter">
+  <objectType>extracter.SimpleExtracter</objectType>
   <options>
-     <setting type="parent">1</setting>
-  </options>
-</subConfig>
-<subConfig type="extracter" id="ExactParentProximityExtracter">
-  <objectType>extracter.ExactProximityExtracter</objectType>
-  <options>
-     <setting type="parent">1</setting>
+    <setting type="prox">1</setting>
+    <setting type="reversable">1</setting>
   </options>
 </subConfig>
 
+<subConfig type="extracter" id="TeiExtracter">
+  <objectType>extracter.TeiExtracter</objectType>
+</subConfig>
 
 
+<!-- Tokenizers -->
+
+<subConfig type="tokenizer" id="SimpleTokenizer">
+  <objectType>tokenizer.SimpleTokenizer</objectType>
+</subConfig>
+
+<subConfig type="tokenizer" id="RegexpSubTokenizer">
+  <objectType>tokenizer.RegexpSubTokenizer</objectType>
+</subConfig>
+
+<subConfig type="tokenizer" id="RegexpFindTokenizer">
+  <objectType>tokenizer.RegexpFindTokenizer</objectType>
+</subConfig>
+
+<subConfig type="tokenizer" id="RegexpFindOffsetTokenizer">
+  <objectType>tokenizer.RegexpFindOffsetTokenizer</objectType>
+</subConfig>
 
 
-<subConfig type="extracter" id="DateExtracter">
-  <objectType>extracter.DateExtracter</objectType>
-  <docs>
-  	Extracts multiple dates as separate keys, but probably does this slowly and less reliably than for single dates.
-  </docs>
+<subConfig type="tokenizer" id="PunktTokenizer">
+  <objectType>tokenizer.PunktWordTokenizer</objectType>
+</subConfig>
+
+<subConfig type="tokenizer" id="PunktSentenceTokenizer">
+  <objectType>tokenizer.PunktSentenceTokenizer</objectType>
+</subConfig>
+
+<subConfig type="tokenizer" id="SentenceTokenizer">
+  <objectType>tokenizer.SentenceTokenizer</objectType>
+</subConfig>
+
+<subConfig type="tokenizer" id="DateTokenizer">
+  <objectType>tokenizer.DateTokenizer</objectType>
   <options>
-  	<!-- in ambiguous cases, UK style dates take priority e.g. dd/mm/yyyy-->
   	<setting type="dayfirst">1</setting>
   </options>
 </subConfig>
-<subConfig type="extracter" id="RangeExtracter">
-  <objectType>extracter.RangeExtracter</objectType>
-  <docs>
-  	Extracts a range for use in RangeIndexes.
-  	Currently extracts the highest and lowest keys input and returns them as a single key denoting the range between them.
-  </docs>
-</subConfig>
-<subConfig type="extracter" id="DateRangeExtracter">
-  <objectType>extracter.DateRangeExtracter</objectType>
-  <docs>
-  	Extracts a range of dates by sub-classing DateExtracter and RangeExtracter.
-  	i.e. first extracts multiple dates, then returns the range of them.
-  </docs>
-  <options>
-  	<!-- in ambiguous cases, UK style dates take priority e.g. dd/mm/yyyy -->
-  	<setting type="dayfirst">1</setting>
-  </options>
-</subConfig>
 
-<subConfig type="extracter" id="PreserveMaskingKeywordExtracter">
-	<objectType>extracter.KeywordExtracter</objectType>
-	<docs>Keyword Extracter which doesn't split at CQL masking characters (^*?)</docs>
-	<options>
-		<setting type="regexp">((?&lt;!\s)'|[-.,]((?=\s)|$)|(^|(?&lt;=\s))[-.,']|[.,'-][.,'-]|[~`!@+=\#\&amp;()\[\]{}\\\|\":;&lt;&gt;/])</setting>
-	</options>				
-</subConfig>
-<subConfig type="extracter" id="PreserveMaskingProximityExtracter">
-	<objectType>extracter.ProximityExtracter</objectType>
-	<docs>Proximity Extracter which doesn't split at CQL masking characters (^*?)</docs>
+<subConfig type="tokenizer" id="PreserveMaskingTokenizer">
+	<objectType>tokenizer.RegexpSubTokenizer</objectType>
+	<docs>Keyword Tokenizer which doesn't split at CQL masking characters (^*?)</docs>
 	<options>
 		<setting type="regexp">((?&lt;!\s)'|[-.,]((?=\s)|$)|(^|(?&lt;=\s))[-.,']|[.,'-][.,'-]|[~`!@+=\#\&amp;()\[\]{}\\\|\":;&lt;&gt;/])</setting>
 	</options>				
 </subConfig>
 
+
+<!-- TokenMerge -->
+
+<subConfig type="tokenMerge" id="SimpleTokenMerge">
+  <objectType>tokenMerge.SimpleTokenMerge</objectType>
+</subConfig>
+
+<subConfig type="tokenMerge" id="ProxTokenMerge">
+  <objectType>tokenMerge.ProximityTokenMerge</objectType>
+</subConfig>
+
+<subConfig type="tokenMerge" id="OffsetProxTokenMerge">
+  <objectType>tokenMerge.OffsetProximityTokenMerge</objectType>
+</subConfig>
+
+<subConfig type="tokenMerge" id="NGramTokenMerge">
+  <objectType>tokenMerge.NGramTokenMerge</objectType>
+</subConfig>
+
+<subConfig type="tokenMerge" id="SequenceRangeTokenMerge">
+  <objectType>tokenMerge.SequenceRangeTokenMerge</objectType>
+</subConfig>
+
+<subConfig type="tokenMerge" id="MinMaxRangeTokenMerge">
+  <objectType>tokenMerge.MinMaxRangeTokenMerge</objectType>
+</subConfig>
+
+
+<!-- Some 'Extracter' workflows -->
+
+<subConfig type="workflow" id="KeywordExtracterWorkflow">
+  <objectType>workflow.SimpleWorkflow</objectType>
+  <workflow>
+    <object type="extracter" ref="SimpleExtracter"/>
+    <object type="tokenizer" ref="RegexpSubTokenizer"/>
+    <object type="tokenMerge" ref="SimpleTokenMerge"/>
+  </workflow>
+</subConfig>
+
+<subConfig type="workflow" id="ProxExtracterWorkflow">
+  <objectType>workflow.SimpleWorkflow</objectType>
+  <workflow>
+    <object type="extracter" ref="ProxExtracter"/>
+    <object type="tokenizer" ref="RegexpSubTokenizer"/>
+    <object type="tokenMerge" ref="ProxTokenMerge"/>
+  </workflow>
+</subConfig>
 
 
 <!-- Normaliser Objects -->
@@ -324,6 +364,7 @@
   </options>
 </subConfig>
 
+<!-- Deprecate ? -->
 <subConfig type="normaliser" id="KeywordNormaliser">
   <objectType>normaliser.KeywordNormaliser</objectType>
 </subConfig>
@@ -333,6 +374,7 @@
     <setting type="prox">1</setting>
   </options>
 </subConfig>
+
 <subConfig type="normaliser" id="ExactExpansionNormaliser">
   <objectType>normaliser.ExactExpansionNormaliser</objectType>
 </subConfig>
