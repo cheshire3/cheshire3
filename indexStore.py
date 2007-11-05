@@ -539,8 +539,17 @@ class BdbIndexStore(IndexStore):
                 currStore = storeid
                 tid = termCache.get(term, None)
                 if tid == None:
+                    if not term:
+                        #???
+                        continue
                     tdata = self.fetch_term(session, index, term, summary=True)
-                    (tid, tdocs, tfreq) = tdata[:3]
+                    try:
+                        (tid, tdocs, tfreq) = tdata[:3]
+                    except:
+                        print term
+                        print index.id
+                        print tdata
+                        raise
                     termCache[term] = tid
                     freqCache[term] = [tdocs, tfreq]
                     # check caches aren't exploding
@@ -699,7 +708,7 @@ class BdbIndexStore(IndexStore):
             return []
 
 
-    def fetch_proxVector(self, session, index, rec, elemid):
+    def fetch_proxVector(self, session, index, rec, elemid=-1):
         # rec can be resultSetItem or record
 
         cxn = self.proxVectorCxn.get(index, None)
@@ -714,19 +723,40 @@ class BdbIndexStore(IndexStore):
             else:
                 # Look up identifier in local bdb
                 docid = self._get_internalId(session, rec)         
-        key = struct.pack('LL', docid, elemid)
-        # now add in store
-        key = str(self.storeHashReverse[rec.recordStore]) + "|" +  key
-        data = cxn.get(key)
-        if data:
-            # [(wordId, termId, charOffset?, ...)...]
-            nProxInts = index.get_setting(session, 'nProxInts', 2)
+
+
+        nProxInts = index.get_setting(session, 'nProxInts', 2)
+        def unpack(data):
             flat = struct.unpack('L' * (len(data)/4), data)
             lf = len(flat)
             unflat = [flat[x:x+nProxInts] for x in range(0,lf,nProxInts)]
             return unflat
+
+        if elemid == -1:
+            # fetch all for this record
+            key = struct.pack('LL', docid, 0)
+            keyid = key[:4]
+            key = str(self.storeHashReverse[rec.recordStore]) + "|" +  key
+            c = cxn.cursor()
+            (k, v) = c.set_range(key)
+            vals = []
+            # XXX won't work for > 9 recordStores...
+
+            while k[2:6] == keyid:
+                vals.append(unpack(v))
+                (k,v) = c.next()
+            return vals
+            
         else:
-            return []
+            key = struct.pack('LL', docid, elemid)
+            # now add in store
+            key = str(self.storeHashReverse[rec.recordStore]) + "|" +  key
+            data = cxn.get(key)
+            if data:
+                # [(wordId, termId, charOffset?, ...)...]
+                return unpack(val)
+            else:
+                return []
 
     def fetch_termById(self, session, index, termid):
         tidcxn = self.termIdCxn.get(index, None)
