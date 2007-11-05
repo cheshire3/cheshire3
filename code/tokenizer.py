@@ -141,9 +141,12 @@ class SentenceTokenizer(SimpleTokenizer):
             sl = self.sentenceRe.findall(s)
             if not sl:
                 s += '.'
-                sl = self.sentenceRe.findall(s)
+                sl = self.sentenceRe.findall(s)                
             sents.extend(sl)
-        return sents
+        ns = []
+        for s in sents:
+            ns.append(s.replace("&#46;", '.'))
+        return ns
 
 
 # trivial, but potentially useful

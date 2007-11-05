@@ -20,6 +20,8 @@ def makeObjectFromDom(session, topNode, parentObject):
 
 def buildObject(session, objectType, args):
     objs = objectType.split('.')
+    if len(objs) < 2:
+        raise ConfigFileException("Need module.class instead of %s" % objectType) 
     globalImport(objs[0], [objs[1]])
     parentClass = globals()[objs[0]]
     for o in objs[1:]:

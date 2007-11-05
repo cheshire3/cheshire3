@@ -6,27 +6,6 @@ import os, re
 from utils import getFirstData, elementType, verifyXPaths
 import commands
 
-class SimpleTokenizer:
-    def __init__(self):
-
-        # XXX to config, somewhere?
-        self.paraRe = re.compile('\n\n+')
-        self.sentenceRe = re.compile('.+?(?<!\.\.)[\.!?:]["\'\)]?(?=\s+|$)(?![a-z])')
-        self.abbrMashRe = re.compile('(^|\s)([^\s]+?\.[a-zA-Z]+|Prof|Dr|Sr|Mr|Mrs|Ms|Jr|Capt|Gen|Col|Sgt|[ivxjCcl]+|[A-Z])\.(\s|$)')
-
-    def split_paragraphs(self, data):
-        return self.paraRe.split(data)
-        
-    def split_sentences(self, data):
-        data = self.abbrMashRe.sub('\\1\\2&#46;\\3', data)
-        sents = self.sentenceRe.findall(data)
-	if not sents:
-	    data += '.'
-	    sents = self.sentenceRe.findall(data)
-	return sents
-	
-myTokenizer = SimpleTokenizer()
-
 class TsujiiObject:
     inh = None
     outh = None
@@ -78,6 +57,9 @@ class EnjuObject:
     tokenizer = None
 
     _possiblePaths = {'enjuPath'  : {'docs' : "Path to enju executable."}}
+    _possibleSettings = {'xml' : {'docs' : 'Should return XML form (1, default) or text (0)',
+                                  'type' : int,
+                                  'options' : '0|1'}}
 
     def __init__(self, session, node, parent):
         tp = self.get_path(session, 'enjuPath')
@@ -85,33 +67,31 @@ class EnjuObject:
             tp = commands.getoutput('which enju')
         if not tp:
             raise ConfigFileException("%s requires the path: enjuPath" % self.id)
-        (a,b,c) = os.popen3("%s -xml" % tp)
+        xml = self.get_setting(session, 'xml', 1)
+        if xml:            
+            (a,b,c) = os.popen3("%s -xml" % tp)
+        else:
+            (a,b,c) = os.popen3(tp)
         self.inh = a
         self.outh = b
         self.errh = c
         l = ""
         while l != 'Ready\n':
             l = c.readline()
-
         
     def tag(self, session, data, xml=0):
-        paras = myTokenizer.split_paragraphs(data)
-        all = []
-        for p in paras:
-            sents = myTokenizer.split_sentences(p)
-            for s in sents:
-                s = s.strip()
-                if not s:
-                    continue
-		try:
-		    self.inh.write(s)
-		except UnicodeEncodeError:
-		    self.inh.write(s.encode('utf-8'))
-		self.inh.write("\n")
-                self.inh.flush()
-                tagd = self.outh.readline()                
-                all.append("<sentence>%s</sentence>" % tagd)
-        return all
+        s = data.strip()
+        if not s:
+            return ""
+        try:
+            self.inh.write(s)
+        except UnicodeEncodeError:
+            self.inh.write(s.encode('utf-8'))
+        self.inh.write("\n")
+        self.inh.flush()
+        tagd = self.outh.readline()                
+        return tagd
+
 
 class GeniaObject:
     inh = None
@@ -144,33 +124,30 @@ class GeniaObject:
 
         
     def tag(self, session, data, xml=0):
-        paras = myTokenizer.split_paragraphs(data)
         words = []
-        for p in paras:
-            sents = myTokenizer.split_sentences(p)
-            for s in sents:
-                s = s.strip()
-                if not s:
-                    continue
-		try:
-		    self.inh.write(s)
-		except UnicodeEncodeError:
-		    self.inh.write(s.encode('utf-8'))
-		self.inh.write("\n")
-                self.inh.flush()
-                tagline = ""
-                while 1:
-                    tagline = self.outh.readline()
-                    if tagline == "\n":
-                        if self.unparsedOutput:
-                            words.append(tagline)
-                        break
-                    else:
-                        if self.unparsedOutput:
-                            words.append(tagline)
-                        else:
-                            (word, stem, type, type2, something) = tagline[:-1].split('\t')
-                            words.append({'text' : word, 'stem' : stem, 'pos' : type, 'phr' : type2})
+        s = data.strip()
+        if not s:
+            return []
+        try:
+            self.inh.write(s)
+        except UnicodeEncodeError:
+            self.inh.write(s.encode('utf-8'))
+        self.inh.write("\n")
+        self.inh.flush()
+        tagline = ""
+        while 1:
+            tagline = self.outh.readline()
+            tagline = tagline.decode('utf-8')
+            if tagline == "\n":
+                if self.unparsedOutput:
+                    words.append(tagline)
+                break
+            else:
+                if self.unparsedOutput:
+                    words.append(tagline)
+                else:
+                    (word, stem, type, type2, ner) = tagline[:-1].split('\t')
+                    words.append({'text' : word, 'stem' : stem, 'pos' : type, 'phr' : type2})
         return words
 
 

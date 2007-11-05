@@ -550,7 +550,7 @@ class SimpleIndex(Index):
     def fetch_vector(self, session, rec, summary=False):
         return self.indexStore.fetch_vector(session, self, rec, summary)
 
-    def fetch_proxVector(self, session, rec, elemId):
+    def fetch_proxVector(self, session, rec, elemId=-1):
         return self.indexStore.fetch_proxVector(session, self, rec, elemId)
 
     def fetch_summary(self, session):

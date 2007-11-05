@@ -18,8 +18,14 @@ class SimpleTokenMerge(TokenMerge):
                         # this will discard any second or further locations
                         # -very- minor edge case when this will break things
                         # if important, use ProximityTokenMerge.
-                        new[t] = {'text' : t, 'occurences' : 1,
-                                  'proxLoc' : val['proxLoc']}
+                        try:
+                            new[t] = {'text' : t, 'occurences' : 1,
+                                      'proxLoc' : val['proxLoc']}
+                        except KeyError:
+                            # may already have been tokenized and merged
+                            new[t] = {'text' : t, 'occureces' : 1,
+                                      'positions' : val['positions']}
+                        
         return new
 
 class ProximityTokenMerge(SimpleTokenMerge):
@@ -32,9 +38,16 @@ class ProximityTokenMerge(SimpleTokenMerge):
                 for t in val['text']:
                     if has(t):
                         new[t]['occurences'] += 1
-                        new[t]['positions'].extend((val['proxLoc'], x))
+                        try:
+                            new[t]['positions'].extend((val['proxLoc'], x))
+                        except KeyError:
+                            new[t]['positions'].extend(val['positions'])
                     else:
-                        new[t] = {'text' : t, 'occurences' : 1, 'positions' : [val['proxLoc'],x]}
+                        try:
+                            new[t] = {'text' : t, 'occurences' : 1, 'positions' : [val['proxLoc'],x]}
+                        except KeyError:
+                            new[t] = {'text' : t, 'occurences' : 1,
+                                      'positions' : val['positions']}
                     x += 1
         return new
 
