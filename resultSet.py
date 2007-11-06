@@ -466,7 +466,7 @@ class SimpleResultSet(RankedResultSet):
                 if finish:
                     return self
 
-        if len(others) == 1:
+        if len(others) == 1 and len(others[0].queryPositions) < 2:
             if relevancy:
                 # Just adding relevance to items?
                 others[0].relevancy = 1
@@ -1106,6 +1106,7 @@ try:
 
         # SLOW
         def combine(self, session, others, clause, db=None):
+
             if (isinstance(clause, CQLParser.Triple)):
                 cql = clause.boolean
             else:
@@ -1163,7 +1164,7 @@ try:
                     if finish:
                         return self
 
-            if len(others) == 1:
+            if len(others) == 1 and len(others[0].queryPositions) < 2:
                 # Just adding relevance to items?
                 if relevancy:
                     self.relevancy = 1
