@@ -8,7 +8,8 @@ class SimpleExtracter(Extracter):
     _possibleSettings = {'extraSpaceElements' : {'docs' : "Space separated list of elements after which to append a space so as to not run words together."},
                          'prox' : {'docs' : ''},
                          'parent' : {"docs" : "Should the parent element's identifier be used instead of the current element."},
-                         'reversable' : {"docs" : "Use a hopefully reversable identifier even when the record is a DOM tree. 1 = Yes (expensive), 0 = No (default)", 'type': int, 'options' : '0|1'}
+                         'reversable' : {"docs" : "Use a hopefully reversable identifier even when the record is a DOM tree. 1 = Yes (expensive), 0 = No (default)", 'type': int, 'options' : '0|1'},
+                         'stripWhitespace' : {'docs' : 'Should the extracter strip leading/trailing whitespace from extracted text. 1 = Yes, 0 = No (default)', 'type' : int, 'options' : '0|1'}
                          }
 
     def __init__(self, session, config, parent):
@@ -16,9 +17,10 @@ class SimpleExtracter(Extracter):
         self.spaceRe = re.compile('\s+')
         extraSpaceElems = self.get_setting(session, 'extraSpaceElements', '')
         self.extraSpaceElems = extraSpaceElems.split()
-
+        self.strip = self.get_setting(session, 'stripWhitespace', 0)
         self.cachedRoot = None
         self.cachedElems = {}
+        
 
 
     def mergeHash(self, a, b):
@@ -73,12 +75,17 @@ class SimpleExtracter(Extracter):
         if self.get_setting(session, 'reversable', 0):
             tree = node.getroottree()
             root = tree.getroot()
-            if root != self.cachedRoot:
+
+            if root == self.cachedRoot:
+                lno = self.cachedElems[node]
+            else:
+                lno = 0
                 self.cachedRoot = root
                 self.cachedElems = {}
-                for lno, n in enumerate(tree.getiterator()):
+                for n in tree.getiterator():
                     self.cachedElems[n] = lno
-            lno = self.cachedElems[node]
+                    lno += 1
+                lno = self.cachedElems[node]
         else:
             tree = node.getroottree()
             lno = abs(hash(tree.getpath(node)))
@@ -88,8 +95,9 @@ class SimpleExtracter(Extracter):
     def process_node(self, session, data):
         # Walk a DOM structure and extract
         txt = self.flattenTexts(data)
-        txt = txt.replace('\n', ' ')
-        txt = txt.strip()
+        if self.strip:
+            txt = txt.replace('\n', ' ')
+            txt = txt.strip()
         if self.get_setting(session, 'prox', 0):
             lno = self.get_proxLoc_node(session, data)
         else:
@@ -114,7 +122,8 @@ class SimpleExtracter(Extracter):
                     txt.append(' ')
                 txt.append(e[2:])
         txt = ''.join(txt)
-        txt = self.spaceRe.sub(' ', txt)
+        if self.strip:
+            txt = self.spaceRe.sub(' ', txt)
 
         if self.get_setting(session, 'prox', 0):
             lno = self.get_proxLoc_eventList(session, data)
