@@ -56,7 +56,7 @@ class SummaryObject(object):
 
     _possiblePaths = {'metadataPath' : {'docs' : "Path to file where the summary metadata will be kept."}}
 
-    def __init__(self, session, node, parent):
+    def __init__(self, session, config, parent):
 
         # don't want to inherit from database!
         mp = self.paths.get('metadataPath', '')
@@ -195,11 +195,11 @@ class SimpleStore(C3Object, SummaryObject):
 
     _possibleDefaults = {'expires': {"docs" : 'Default time after ingestion at which to delete the data object in number of seconds.  Can be overridden by the individual object.', 'type' : int}}
     
-    def __init__(self, session, node, parent):
+    def __init__(self, session, config, parent):
 
         # don't inherit metadataPath!
-        C3Object.__init__(self, session, node, parent)
-        SummaryObject.__init__(self, session, node, parent)
+        C3Object.__init__(self, session, config, parent)
+        SummaryObject.__init__(self, session, config, parent)
         self.idNormaliser = self.get_path(session, 'idNormaliser', None)
         self.outIdNormaliser = self.get_path(session, 'outIdNormaliser', None)
         self.inWorkflow = self.get_path(session, 'inWorkflow', None)
@@ -329,9 +329,9 @@ class BdbStore(SimpleStore):
     """ Berkeley DB based storage """
     cxns = {}
 
-    def __init__(self, session, node, parent):
+    def __init__(self, session, config, parent):
         self.cxns = {}
-        SimpleStore.__init__(self, session, node, parent)
+        SimpleStore.__init__(self, session, config, parent)
 
     def __iter__(self):
         # Return an iterator object to iter through... keys?

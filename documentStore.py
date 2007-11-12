@@ -22,9 +22,9 @@ class SimpleDocumentStore(DocumentStore):
                       , 'outPreParser' : {'docs' : "Identifier for a preParser through which to pass the documets being requested"}
                       }
 
-    def __init__(self, session, node, parent):
+    def __init__(self, session, config, parent):
         if (not self.paths):
-            DocumentStore.__init__(self, session, node, parent)
+            DocumentStore.__init__(self, session, config, parent)
         self.inPreParser = self.get_path(session, 'inPreParser', None)
         self.outPreParser = self.get_path(session, 'outPreParser', None)
         self.inWorkflow = self.get_path(session, 'inWorkflow', None)
@@ -129,18 +129,18 @@ class BdbDocIter(BdbIter):
 
 class BdbDocumentStore(BdbStore, SimpleDocumentStore):
     # Instantiate some type of simple doc store
-    def __init__(self, session, node, parent):
-        BdbStore.__init__(self, session, node, parent)
-        SimpleDocumentStore.__init__(self, session, node, parent)
+    def __init__(self, session, config, parent):
+        BdbStore.__init__(self, session, config, parent)
+        SimpleDocumentStore.__init__(self, session, config, parent)
 
     def __iter__(self):
         return BdbDocIter(self)
 
 
 class FileSystemDocumentStore(FileSystemStore, SimpleDocumentStore):
-    def __init__(self, session, node, parent):
-        FileSystemStore.__init__(self, session, node, parent)
-        SimpleDocumentStore.__init__(self, session, node, parent)
+    def __init__(self, session, config, parent):
+        FileSystemStore.__init__(self, session, config, parent)
+        SimpleDocumentStore.__init__(self, session, config, parent)
 
     def get_storageTypes(self, session):
         types = ['filename', 'byteCount', 'byteOffset']

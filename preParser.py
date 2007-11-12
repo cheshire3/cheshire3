@@ -42,8 +42,8 @@ class UnicodeDecodePreParser(PreParser):
 
     _possibleSettings = {'codec': {'docs' : 'Codec to use to decode to unicode. Defaults to UTF-8'}}
 
-    def __init__(self, session, server, config):
-        PreParser.__init__(self, session, server, config)
+    def __init__(self, session, config, parent):
+        PreParser.__init__(self, session, config, parent)
         self.codec = self.get_setting(session, 'codec', 'utf-8')
     def process_document(self, session, doc):
         try:
@@ -58,8 +58,8 @@ class CmdLinePreParser(TypedPreParser):
 
     _possiblePaths = {'commandLine' : {'docs' : "Command line to use.  %INDOC% is substituted to create a temporary file to read, and %OUTDOC% is substituted for a temporary file for the process to write to"}}
 
-    def __init__(self, session, server, config):
-        TypedPreParser.__init__(self, session, server, config)
+    def __init__(self, session, config, parent):
+        TypedPreParser.__init__(self, session, config, parent)
         self.cmd = self.get_path(session, 'commandLine', '')
         if not self.cmd:
             raise ConfigFileException("Missing mandatory 'commandLine' path in %s" % self.id)
@@ -310,9 +310,8 @@ class SgmlPreParser(PreParser):
 
     _possibleSettings = {'emptyElements' : {'docs' : 'Space separated list of empty elements in the SGML to turn into empty XML elements.'}}
 
-    def __init__(self, session, server, config):
-
-        PreParser.__init__(self, session, server, config)
+    def __init__(self, session, config, parent):
+        PreParser.__init__(self, session, config, parent)
         self.doctype_re = (re.compile('<!DOCTYPE (.+?)"(.+?)">'))
         self.attr_re = re.compile(' ([a-zA-Z0-9_]+)[ ]*=[ ]*([-:_.a-zA-Z0-9]+)([ >])')
         self.pi_re = re.compile("<\?(.*?)\?>")
@@ -363,8 +362,8 @@ class AmpPreParser(PreParser):
     """ Escape lone ampersands in otherwise XML text """
     entities = {}
 
-    def __init__(self, session, server, config):
-        PreParser.__init__(self, session, server, config)
+    def __init__(self, session, config, parent):
+        PreParser.__init__(self, session, config, parent)
         self.amp_re = re.compile('&([^\s;]*)(\s|$)')
 	self.entities = {}
 

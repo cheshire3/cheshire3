@@ -18,7 +18,7 @@ class SimpleWorkflow(Workflow):
     splitN = 0
     splitCode = {}
 
-    def __init__(self, session, node, parent):
+    def __init__(self, session, config, parent):
         self.splitN = 0
         self.splitCode = {}
         self.fnHash = {u'preParser' : 'process_document',
@@ -47,7 +47,7 @@ class SimpleWorkflow(Workflow):
                                 u'commit_metadata', u'begin_storing',
                                 u'commit_storing']
 
-        Workflow.__init__(self, session, node, parent)
+        Workflow.__init__(self, session, config, parent)
         # Somewhere at the top there must be a server
         self.server = parent
 
@@ -219,12 +219,12 @@ class CachingWorkflow(SimpleWorkflow):
     database = None
     defaultLogger = None
 
-    def __init__(self, session, node, parent):
+    def __init__(self, session, config, parent):
         self.objcache = {}
         self.objrefs = set()
         self.database = None
         self.defaultLogger = None
-        SimpleWorkflow.__init__(self, session, node, parent)
+        SimpleWorkflow.__init__(self, session, config, parent)
 
 
     def load_cache(self, session, db):

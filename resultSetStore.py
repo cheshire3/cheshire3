@@ -21,8 +21,8 @@ class SimpleResultSetStore(ResultSetStore):
     _possiblePaths = {'recordStoreHash' : {'docs' : "List of recordStore identifiers. Maps from position in list to int stored."},
                       'databaseHash' : {'docs' : "List of database identifiers. Maps from position in list to int stored."}}
 
-    def __init__(self, session, parent, config):
-        ResultSetStore.__init__(self, session, parent, config)
+    def __init__(self, session, config, parent):
+        ResultSetStore.__init__(self, session, config, parent)
         rsh = self.get_path(session, 'recordStoreHash')
         if rsh:
             wds = rsh.split()
@@ -41,10 +41,10 @@ class BdbResultSetStore(SimpleResultSetStore, BdbStore):
 
     _possibleSettings = {'onlyRecordId' : {'docs' : "Store only the record identifier and discard all other information.", 'type' : int, 'options' : "0|1"}}
 
-    def __init__(self, session, parent, config):
+    def __init__(self, session, config, parent):
         self.databaseTypes = ['database', 'expires']
-        SimpleResultSetStore.__init__(self, session, parent, config)
-        BdbStore.__init__(self, session, parent, config)
+        SimpleResultSetStore.__init__(self, session, config, parent)
+        BdbStore.__init__(self, session, config, parent)
         self.onlyRecordId = self.get_setting(session, 'onlyRecordId', 0)
 
     def create_resultSet(self, session, rset=None):
