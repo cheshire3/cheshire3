@@ -58,7 +58,7 @@ class Database(C3Object):
         function does not ensure persistence of the record, not index
         it, just perform registration"""
         raise(NotImplementedError)
-    def remove_record(self, session, req):
+    def remove_record(self, session, record):
         """Unregister the record."""
         raise(NotImplementedError)
 
@@ -140,10 +140,10 @@ class Index(C3Object):
         that was indexed."""
         raise(NotImplementedError)
 
-    def scan(self, session, clause):
+    def scan(self, session, clause, numReq, direction):
         """Produce an ordered term list with document frequencies and total occurences """
         raise(NotImplementedError)
-    def search(self, session, clause):
+    def search(self, session, clause, db):
         """Search this particular index given a CQL clause, return a resultSet object"""
         raise(NotImplementedError)
     def sort(self, session, resultSet):
@@ -244,7 +244,7 @@ class Normaliser(C3Object):
 
 class DocumentFactory(C3Object):
     """ Object Docs """
-    def load(self, session, data, cache=None, format=None, tag=None, documentType=None, codec=""):
+    def load(self, session, data, cache=None, format=None, schema=None, codec=""):
         raise(NotImplementedError)
     def get_document(self, session, idx=-1):
         raise(NotImplementedError)
@@ -326,10 +326,10 @@ class ProtocolMap(C3Object):
 class IndexStore(C3Object):
     """A persistent storage mechanism for extracted terms."""
 
-    def begin_indexing(self, session, req):
+    def begin_indexing(self, session, index):
         """Perform tasks as required before indexing begins, for example setting batch files."""
         raise(NotImplementedError)
-    def commit_indexing(self, session, req):
+    def commit_indexing(self, session, index):
         """Commit the data to disk from the indexing process."""
         raise(NotImplementedError)
 
@@ -359,7 +359,7 @@ class IndexStore(C3Object):
     def store_terms(self, session, index, terms, record):
         """Store terms in the index for a given record."""
         raise(NotImplementedError)
-    def fetch_term(self, session, index, term, summary=0, reverse=0):
+    def fetch_term(self, session, index, term, summary=0, prox=0):
         """Fetch a single term."""
         raise(NotImplementedError)
     def fetch_termList(self, session, index, term, numReq=0, relation="", end="", summary=0, reverse=0):
@@ -371,7 +371,7 @@ class IndexStore(C3Object):
         reverse: Use the reversed index if available (eg 'xedni' not 'index').
         """
         raise(NotImplementedError)
-    def fetch_sortValue(self, session, index, record):
+    def fetch_sortValue(self, session, index, item):
         """Fetch a stored data value for the given record."""
         raise(NotImplementedError)
 
@@ -427,10 +427,10 @@ class RecordStore(ObjectStore):
     def replace_record(self, session, record):
         """Permissions checking hook for store_record if the record does not already exist."""
         raise(NotImplementedError)
-    def store_record(self, session, record):
+    def store_record(self, session, record, transformer=None):
         """Store an existing record. It must already have an identifier assigned to it."""
         raise(NotImplementedError)
-    def fetch_record(self, session, id):
+    def fetch_record(self, session, id, parser=None):
         """Return the record with the given identifier."""
         raise(NotImplementedError)
     def delete_record(self, session, id):
@@ -462,13 +462,13 @@ class ResultSetStore(ObjectStore):
     """A persistent storage mechanism for result sets."""
     def create_resultSet(self, session, rset=None):
         raise(NotImplementedError)
-    def delete_resultSet(self, session, req):
+    def delete_resultSet(self, session, rsid):
         raise(NotImplementedError)
-    def fetch_resultSet(self, session, req):
+    def fetch_resultSet(self, session, rsid):
         raise(NotImplementedError)
-    def fetch_resultSetList(self, session, req):
+    def fetch_resultSetList(self, session, numReq, start):
         raise(NotImplementedError)
-    def store_resultSet(self, session, req):
+    def store_resultSet(self, session, rset):
         raise(NotImplementedError)
 
 

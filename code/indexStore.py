@@ -37,8 +37,8 @@ class BdbIndexStore(IndexStore):
 
     _possibleSettings = {'maxVectorCacheSize' : {'docs' : "Number of terms to cache when building vectors", 'type' :int}}
 
-    def __init__(self, session, parent, config):
-        IndexStore.__init__(self, session, parent, config)
+    def __init__(self, session, config, parent):
+        IndexStore.__init__(self, session, config, parent)
         self.outFiles = {}
         self.storeHash = {}
         self.outSortFiles = {}
@@ -981,7 +981,7 @@ class BdbIndexStore(IndexStore):
             self.sortStoreCxn[index] = cxn
         return cxn.get(repr(item))
 
-    def store_terms(self, session, index, termhash, record):
+    def store_terms(self, session, index, terms, record):
         # Store terms from hash
         # Need to store:  term, totalOccs, totalRecs, (record id, recordStore id, number of occs in record)
         # hash is now {tokenA:tokenA, ...}
@@ -994,7 +994,7 @@ class BdbIndexStore(IndexStore):
             if not okay:
                 raise PermissionException("Permission required to add to indexStore %s" % self.id)
 
-        if (not termhash):
+        if (not terms):
             # No terms to index
             return
 
@@ -1022,7 +1022,7 @@ class BdbIndexStore(IndexStore):
         
         if self.outFiles.has_key(index):
             # Batch loading
-            value = termhash.values()[0]['text']
+            value = terms.values()[0]['text']
             if (self.outSortFiles.has_key(index) and value):
                 if type(value) == unicode:
                     sortVal = value.encode('utf-8')
@@ -1030,8 +1030,8 @@ class BdbIndexStore(IndexStore):
                     sortVal = value
                 self.outSortFiles[index].put("%s/%s" % (str(record.recordStore), docid), sortVal)
 
-            prox = termhash[value].has_key('positions')
-            for k in termhash.values():
+            prox = terms[value].has_key('positions')
+            for k in terms.values():
                 kw = k['text']
                 if type(kw) != unicode:
                     try:
@@ -1053,7 +1053,7 @@ class BdbIndexStore(IndexStore):
             # This is going to be ... slow ... with lots of i/o
             # Use commit method unless only doing very small amounts of work.
 
-            for k in termhash.values():
+            for k in terms.values():
                 key = k['text']
                 stuff = [docid, storeid, k['occurences']]
                 try:

@@ -156,7 +156,7 @@ class C3Object(object):
                     if ot == 'database':
                         self.databaseConfigs[id] = dom.childNodes[0]
 
-    def __init__(self, session, topNode, parentObject=None):
+    def __init__(self, session, config, parent=None):
         """The constructor for all Cheshire3 objects take the same arguments:
         session:  A Session object
         topNode:  The <config> or <subConfig> domNode for the configuration
@@ -164,7 +164,7 @@ class C3Object(object):
         """
 
         self.docstring = ""
-        self.parent = parentObject
+        self.parent = parent
         self.subConfigs = {}
         self.paths = {}
         self.objects = {}
@@ -178,10 +178,10 @@ class C3Object(object):
         
         pathObjects = {}
         
-        if (topNode.hasAttributeNS(None, 'id')):
-            self.id = topNode.getAttributeNS(None, 'id')
+        if (config.hasAttributeNS(None, 'id')):
+            self.id = config.getAttributeNS(None, 'id')
 
-        for child in topNode.childNodes:
+        for child in config.childNodes:
             if child.nodeType == elementType:
                 if child.localName == "name":
                     self.name = getFirstData(child)

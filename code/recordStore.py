@@ -28,9 +28,9 @@ class SimpleRecordStore(RecordStore):
                       , 'outParser'  : {'docs' : "Identifier for parser to use to transform outgoing data into a record"}
                       }
 
-    def __init__(self, session, node, parent):
+    def __init__(self, session, config, parent):
         if (not self.paths):
-            RecordStore.__init__(self, session, node, parent)
+            RecordStore.__init__(self, session, config, parent)
         self.inTransformer = self.get_path(session, 'inTransformer', None)
         self.outParser = self.get_path(session, 'outParser', None)
 
@@ -184,9 +184,9 @@ class BdbRecordIter(BdbIter):
         return rec
 
 class BdbRecordStore(BdbStore, SimpleRecordStore):
-    def __init__(self, session, node, parent):
-        BdbStore.__init__(self, session, node, parent)
-        SimpleRecordStore.__init__(self, session, node, parent)
+    def __init__(self, session, config, parent):
+        BdbStore.__init__(self, session, config, parent)
+        SimpleRecordStore.__init__(self, session, config, parent)
 
     def get_storageTypes(self, session):
         types = ['database', 'wordCount', 'byteCount']
@@ -203,9 +203,9 @@ class BdbRecordStore(BdbStore, SimpleRecordStore):
 try:
     from baseStore import PostgresStore
     class PostgresRecordStore(PostgresStore, SimpleRecordStore):
-        def __init__(self, session, node, parent):
-            PostgresStore.__init__(self, session, node, parent)
-            SimpleRecordStore.__init__(self, session, node, parent)
+        def __init__(self, session, config, parent):
+            PostgresStore.__init__(self, session, config, parent)
+            SimpleRecordStore.__init__(self, session, config, parent)
 except:
     pass
 

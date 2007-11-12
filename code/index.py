@@ -155,7 +155,7 @@ class SimpleIndex(Index):
             for m in modes:
                 self.sources.setdefault(m, []).append((xp, process, preprocess))
 
-    def __init__(self, session, node, parent):
+    def __init__(self, session, config, parent):
         self.sources = {}
         self.xPathAttributesRequired = []
         self.xPathsNormalized = {}
@@ -168,7 +168,7 @@ class SimpleIndex(Index):
         self.qmarkRe = re.compile(r'(?<!\\)\?')
         self.astxRe = re.compile(r'(?<!\\)\*')
 
-        Index.__init__(self, session, node, parent)
+        Index.__init__(self, session, config, parent)
         lss = self.get_setting(session, 'longSize')
         if lss:
             self.longStructSize = int(lss)
@@ -569,8 +569,8 @@ class ProximityIndex(SimpleIndex):
     canExtractSection = 0
     _possibleSettings = {'nProxInts' : {'docs' : "", 'type' : int}}
 
-    def __init__(self, session, node, parent):
-        SimpleIndex.__init__(self, session, node, parent)
+    def __init__(self, session, config, parent):
+        SimpleIndex.__init__(self, session, config, parent)
         self.nProxInts = self.get_setting(session, 'nProxInts', 2)
 
     def serialise_terms(self, termid, terms, recs=0, occs=0):
@@ -793,8 +793,8 @@ class BitmapIndex(SimpleIndex):
 
     _possiblePaths = {'recordStore' : {"docs" : "The recordStore in which the records are kept (as this info not maintained in the index)"}}
 
-    def __init__(self, session, a, b):
-        SimpleIndex.__init__(self, session, a, b)
+    def __init__(self, session, config, parent):
+        SimpleIndex.__init__(self, session, config, parent)
         self.indexingData = SimpleBitfield()
         self.indexingTerm = ""
         self.recordStore = self.get_setting(session, 'recordStore', None)
@@ -896,7 +896,7 @@ class RecordIdentifierIndex(Index):
     def delete_record(self, session, record):
         pass
 
-    def scan(self, session, clause, db):
+    def scan(self, session, clause, numReq, direction):
         raise NotImplementedError()
 
     def search(self, session, clause, db):
@@ -947,7 +947,7 @@ class ReverseMetadataIndex(Index):
     def delete_record(self, session, record):
         pass
 
-    def scan(self, session, clause, db):
+    def scan(self, session, clause, numReq, direction):
         raise NotImplementedError()
 
     def search(self, session, clause, db):
@@ -989,8 +989,8 @@ try:
 
         _possibleSettings = {'recordStore' : {"docs" : "The recordStore in which the records are kept (as this info not maintained in the index)"}}
     
-        def __init__(self, session, node, parent):
-            SimpleIndex.__init__(self, session, node, parent)
+        def __init__(self, session, config, parent):
+            SimpleIndex.__init__(self, session, config, parent)
             self.indexStore = self.get_path(session, 'indexStore')
             self.recordStore = self.get_path(session, 'recordStore')        
             self.resultSetClass = ArrayResultSet
@@ -1106,8 +1106,8 @@ try:
 
         _possibleSettings = {'nProxInts' : {'docs' : "", 'type' : int}}
         
-        def __init__(self, session, node, parent):
-            ArrayIndex.__init__(self, session, node, parent)
+        def __init__(self, session, config, parent):
+            ArrayIndex.__init__(self, session, config, parent)
             self.nProxInts = self.get_setting(session, 'nProxInts', 2)
 
         def calc_sectionOffsets(self, session, start, num, dlen=0):

@@ -47,8 +47,8 @@ class SaxParser(BaseParser):
 			 'attrHash' : {'docs' : "Tag/Attribute combinations to include in hash."}
 			 }
 
-    def __init__(self, session, parent, config):
-        Parser.__init__(self, session, parent, config)
+    def __init__(self, session, config, parent):
+        Parser.__init__(self, session, config, parent)
         self.parser = make_parser()
         self.errorHandler = ErrorHandler()
         self.parser.setErrorHandler(self.errorHandler)
@@ -168,8 +168,8 @@ class FtSaxParser(BaseParser):
     _possibleSettings = {'attrHash' : {'docs' : "list of attributes to include in the hash. element@attr, space separated"}
                          , 'stripWhitespace' : {'docs' : "Should the parser strip extra whitespace."}}
 
-    def __init__(self, session, parent, config):
-        Parser.__init__(self, session, parent, config)
+    def __init__(self, session, config, parent):
+        Parser.__init__(self, session, config, parent)
         self.parser = Sax.CreateParser()
         ch = SaxContentHandler()
         self.contentHandler  = ch

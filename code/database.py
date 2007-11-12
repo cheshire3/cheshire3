@@ -37,14 +37,14 @@ class SimpleDatabase(Database, SummaryObject):
     protocolMapConfigs = {}
     records = {}
 
-    def __init__(self, session, node, parent):
+    def __init__(self, session, config, parent):
         self.indexes = {}
         self.protocolMaps = {}
         self.indexConfigs = {}
         self.protocolMapConfigs = {}
         self.records = {}
-        Database.__init__(self, session, node, parent)
-        SummaryObject.__init__(self, session, node, parent)
+        Database.__init__(self, session, config, parent)
+        SummaryObject.__init__(self, session, config, parent)
 
     def _cacheIndexes(self, session):
         storeList = self.get_path(session, 'indexStoreList')
@@ -223,7 +223,7 @@ class SimpleDatabase(Database, SummaryObject):
             d.details = query.index.toCQL()
             raise d
 
-    def sort(self, session, sets, keys):
+    def sort(self, session, resultSets, sortKeys):
         # XXX Needed for Z sorts by index
         pass
 

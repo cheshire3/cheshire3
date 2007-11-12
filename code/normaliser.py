@@ -23,9 +23,15 @@ class SimpleNormaliser(Normaliser):
         if not vals:
             return kw
         prox = vals[0].has_key('positions')
-        process = self.process_string
+        process = self.process_string        
         for d in vals:
-            new = process(session, d['text'])
+            dv = d['text']
+            if type(dv) == list:
+                new = []
+                for dvi in dv:
+                    new.append(process(session, dv))
+            else:
+                new = process(session, d['text'])
             if type(new) == types.DictType:
                 # from string to hash
                 for k in new.values():
@@ -279,7 +285,11 @@ try:
             return self.stemmer.stem([data])[0]
 
     class PhraseStemNormaliser(SimpleNormaliser):
-        """ Use a Snowball stemmer to stem multiple words in a phrase (eg from PosPhraseNormaliser) """
+        """ Use a Snowball stemmer to stem multiple words in a phrase (eg from PosPhraseNormaliser).
+        Deprecated: Should instead use normaliser after tokenizer and before tokenMerger.
+        """
+        
+
         stemmer = None
 
         def __init__(self, session, config, parent):
@@ -314,8 +324,10 @@ class DateStringNormaliser(SimpleNormaliser):
         # str() defaults to iso8601 format
         return str(data)   
 
+
+
 class RangeNormaliser(SimpleNormaliser):
-    """ Should normalise ranges... unfinished """
+    """ TODO XXX: Should normalise ranges?... unfinished??? delete??? """ 
 
     def process_hash(self, session, data):
         # Need to step through positions in order
@@ -351,84 +363,6 @@ class RangeNormaliser(SimpleNormaliser):
         return kw
         
 
-class KeywordNormaliser(SimpleNormaliser):
-    """ Given a string, keyword it with proximity.  Eg for chaining after ExactExtracter + other normalisers """
-
-    # Including Proximity
-
-    _possibleSettings = {'regexp':
-                         {'docs' : "Word separating characters regular expression"},
-                         'prox':
-                         {'docs' : "Should also generate Proximity information", 'type' : int, 'options' : '0|1'}
-                         }
-    
-    def __init__(self, session, config, parent):
-        SimpleNormaliser.__init__(self, session, config, parent)
-        pre = self.get_setting(session, 'regexp', "((?<!s)'|[-.,]((?=\s)|$)|(^|(?<=\s))[-.,']|[~`!@+=\#\&\^*()\[\]{}\\\|\":;<>?/])")
-        self.punctuationRe = re.compile(pre)
-
-
-    def process_string(self, session, data):
-        kw = {}
-        has = kw.has_key
-        s = self.punctuationRe.sub(' ', data)
-        # Force proximity
-        if (self.get_setting(session, 'prox')):
-            prox = 1
-        else:
-            prox = 0
-        w = 0
-        for t in s.split():
-            if has(t):
-                kw[t]['occurences'] += 1
-                if prox:
-                    kw[t]['positions'].extend([0, w])
-                    w += 1
-            elif prox:
-                kw[t] = {'text' : t, 'occurences' : 1,
-                         'positions' : [0, w]}
-                w += 1
-            else:
-                kw[t] = {'text' : t, 'occurences' : 1}
-        return kw
-
-    def process_hash(self, session, data):
-        kw = {}
-        vals = data.values()
-        if (vals and vals[0].has_key('positions')) or self.get_setting(session, 'prox'):
-            prox = 1
-        else:
-            prox = 0
-        reSub = self.punctuationRe.sub
-        has = kw.has_key
-        for d in vals:            
-            t = d['text']
-            s = reSub(' ', t)
-            w = 0
-            if prox:
-                try:
-                    lno = d['positions'][0]
-                except:
-                    lno = 0
-            for t in s.split():
-                if has(t):
-                    kw[t]['occurences'] += 1
-                    if prox:
-                        kw[t]['positions'].extend([lno, w])
-                        w += 1
-                elif prox:
-                    kw[t] = {'text' : t, 'occurences' : 1,
-                             'positions' : [lno, w]}
-                    w += 1
-                else:
-                    kw[t] = {'text' : t, 'occurences' : 1}
-        return kw
-
-
-
-# These are very simple. Should read in map from file
-# Maybe determine expansions file based on context
-# etc.
 
 class ExactExpansionNormaliser(SimpleNormaliser):
     # Expand stuff within a string
@@ -466,47 +400,6 @@ class ExactExpansionNormaliser(SimpleNormaliser):
             data = data.replace(m[0], m[1])
         return data
        
-
-class WordExpansionNormaliser(SimpleNormaliser):
-    # Expand acronyms or abbreviations
-    # Only for words, not strings.
-    map = {
-        'USA' :['United', 'States', 'of', 'America'],
-        'UK' : ['United', 'Kingdom'],
-        'XML' : ['Extensible', 'Markup', 'Language'],
-        'SOAP' : ['Simple', 'Object', 'Access', 'Protocol'],
-        'SRW' : ['Search', 'Retrieve', 'Webservice']
-        }       
-
-    def process_string(self, session, data):
-        if self.map.has_key(data):
-            return ' '.join(map[data])
-
-    # Need own process_hash in order to merge
-    # Will be same for any 1 -> many normaliser
-    def process_hash(self, session, data):
-        vals = data.values()
-        if vals[0].has_key('positions'):
-            raise NotImplementedError            
-        kw = {}
-        store = self.storeOriginal
-        has = kw.has_key
-        process = self.process_string
-        map = self.map
-        maphas = map.has_key
-        for d in vals:
-            t = d['text']
-            if maphas(t):
-                dlist = map[t]
-                p = 0
-                for new in dlist:
-                    if has(new):
-                        kw[new]['occurences'] += 1
-                    else:
-                        kw[new] = d
-            else:
-                kw[t] = d
-        return kw
 
 
 class DiacriticNormaliser(SimpleNormaliser):
