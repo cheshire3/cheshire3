@@ -115,11 +115,12 @@ class MinMaxRangeTokenMerge(SimpleTokenMerge):
                
 class NGramTokenMerge(SimpleTokenMerge):
 
-    _possibleSettings = {}
+    _possibleSettings = {'nValue' : {'docs' : '', 'type' : int}}
 
     def __init__(self, session, config, parent):
+        SimpleTokenMerge.__init__(self, session, config, parent)
         self.n = self.get_setting(session, 'nValue', 2)
-
+               
     def process_hash(self, session, data):
         kw = {}
         has = kw.has_key
