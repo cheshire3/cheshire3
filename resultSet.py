@@ -684,12 +684,10 @@ class SimpleResultSet(RankedResultSet):
                 # must be something else !?
                 raise NotImplementedError
             f = utils.flattenTexts
-            # check for existence of data from XPath while extracting
-            import time
-            st = time.time()
             tmplist = []
             for x in l:
                 xpr = x.fetch_record(session).process_xpath(spec)
+                # check for existence of data from XPath while extracting
                 if not xpr:
                     print 'XPath not present in all records, re-ordering not possible'
                     return
@@ -698,8 +696,7 @@ class SimpleResultSet(RankedResultSet):
             try:
                 tmplist = [(map(f, k),x) for (k,x) in tmplist]
             except (AttributeError, TypeError):
-                # XPath not returning list of elements - leave as strings or whatever they are
-                pass
+                pass # XPath not returning list of elements - leave as strings or whatever they are
         else:
             raise NotImplementedError
         
