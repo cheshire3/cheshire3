@@ -754,7 +754,7 @@ class BdbIndexStore(IndexStore):
             data = cxn.get(key)
             if data:
                 # [(wordId, termId, charOffset?, ...)...]
-                return unpack(val)
+                return unpack(data)
             else:
                 return []
 
