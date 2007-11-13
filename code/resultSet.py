@@ -649,7 +649,7 @@ class SimpleResultSet(RankedResultSet):
                 self.maxWeight = maxWeight
             return self
 
-    def order(self, session, spec, reversed=False):
+    def order(self, session, spec, **kw):
         # sort according to some spec
         # spec can be index, "docid", xpath, other?
         # XXX Need secondary sort specs
@@ -675,8 +675,8 @@ class SimpleResultSet(RankedResultSet):
         elif (type(spec) == str and hasattr(self[0], spec)):
               # Sort by attribute of item
               tmplist = [(getattr(x, spec), x) for x in l]
-              if spec != 'id':
-                  reversed=True
+              if spec in ['occurences','scaledWeight','weight'] and not kw.has_key('reverse'):
+                  kw['reverse'] = True
         elif isinstance(spec, str):
             # XPath?
             try: utils.verifyXPaths([spec])
@@ -700,7 +700,8 @@ class SimpleResultSet(RankedResultSet):
         else:
             raise NotImplementedError
         
-        tmplist.sort(reverse=reversed)
+        try: tmplist.sort(reverse=kw['reverse'])
+        except KeyError: tmplist.sort()
         self._list = [x for (key,x) in tmplist]
         
     def reverse(self, session):
