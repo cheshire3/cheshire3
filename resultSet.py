@@ -649,23 +649,19 @@ class SimpleResultSet(RankedResultSet):
                 self.maxWeight = maxWeight
             return self
 
-    def order(self, session, spec):
+    def order(self, session, spec, reversed=False):
         # sort according to some spec
         # spec can be index, "docid", xpath, other?
         # XXX Need secondary sort specs
 
         l = self._list
-
         if not l:
             # don't try to sort empty set
             return
-
         if (isinstance(spec, Index) and spec.get_setting(session, 'sortStore')):
             # check pre-processed db
             istore = spec.get_path(session, 'indexStore')
             tmplist = [(istore.fetch_sortValue(session, spec, x), x) for x in l]
-            tmplist.sort()
-            self._list = [x for (key,x) in tmplist]
         elif isinstance(spec, Index):
             # Extract data as per indexing, MUCH slower
             recs = []
@@ -676,22 +672,40 @@ class SimpleResultSet(RankedResultSet):
                 storeHash[store] = o
                 recs.append(o.fetch_record(session, r.id))
             tmplist = [(spec.extract_data(session, recs[x]), l[x]) for x in range(len(l))]
-            tmplist.sort()
-            self._list = [x for (key,x) in tmplist]
         elif (type(spec) == str and hasattr(self[0], spec)):
               # Sort by attribute of item
               tmplist = [(getattr(x, spec), x) for x in l]
-              if spec  == 'docid':
-                  tmplist.sort()
-              else:
-                  tmplist.sort(reverse=True)
-              self._list = [x for (key, x) in tmplist]
+              if spec != 'id':
+                  reversed=True
         elif isinstance(spec, str):
             # XPath?
-            raise NotImplementedError
+            try: utils.verifyXPaths([spec])
+            except:
+                # must be something else !?
+                raise NotImplementedError
+            f = utils.flattenTexts
+            # check for existence of data from XPath while extracting
+            import time
+            st = time.time()
+            tmplist = []
+            for x in l:
+                xpr = x.fetch_record(session).process_xpath(spec)
+                if not xpr:
+                    print 'XPath not present in all records, re-ordering not possible'
+                    return
+                tmplist.append((xpr,x))
+            
+            try:
+                tmplist = [(map(f, k),x) for (k,x) in tmplist]
+            except (AttributeError, TypeError):
+                # XPath not returning list of elements - leave as strings or whatever they are
+                pass
         else:
             raise NotImplementedError
-
+        
+        tmplist.sort(reverse=reversed)
+        self._list = [x for (key,x) in tmplist]
+        
     def reverse(self, session):
         self._list.reverse()
 
