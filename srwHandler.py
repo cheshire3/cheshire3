@@ -72,6 +72,8 @@ def process_extraData(hash, req, resp, other=None):
 
 # ---- Main query handler ----
 
+xmlver = re.compile("[ ]*<\?xml[^>]+>")
+
 def process_searchRetrieve(self, session, req):
 
     if (not req.version):
@@ -152,8 +154,7 @@ def process_searchRetrieve(self, session, req):
             if (txr != None):
                 doc = txr.process_record(session, r)
                 rec = doc.get_raw()
-                rec = rec.replace('<?xml version="1.0" encoding="UTF-8"?>', '')
-                rec = rec.replace('<?xml version="1.0"?>', '')
+                rec = xmlver.sub("", rec)
             else:
                 rec = r.get_xml()
 
@@ -166,9 +167,9 @@ def process_searchRetrieve(self, session, req):
             recs.append(ro)
 
         self.records = recs
-        nrp = startRecord + end
+        nrp = startRecord + end+1
         if ( nrp < self.numberOfRecords and nrp > 0):
-            self.nextRecordPosition = startRecord + end
+            self.nextRecordPosition = nrp
         if (rsn):
             self.resultSetId = rsn
             self.resultSetIdleTime = ttl
