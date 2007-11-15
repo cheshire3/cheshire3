@@ -89,7 +89,7 @@ def process_searchRetrieve(self, session, req):
 
     # Setup for processing
     if (req.query != ""):
-	req.queryStructure = CQLParser.parse(req.query)
+        req.queryStructure = CQLParser.parse(req.query)
     else:
         # No Query, Request is seriously Broken
         f = Diagnostic7()
@@ -153,6 +153,7 @@ def process_searchRetrieve(self, session, req):
                 doc = txr.process_record(session, r)
                 rec = doc.get_raw()
                 rec = rec.replace('<?xml version="1.0" encoding="UTF-8"?>', '')
+                rec = rec.replace('<?xml version="1.0"?>', '')
             else:
                 rec = r.get_xml()
 
@@ -165,16 +166,16 @@ def process_searchRetrieve(self, session, req):
             recs.append(ro)
 
         self.records = recs
-        nrp = startRecord + last
+        nrp = startRecord + end
         if ( nrp < self.numberOfRecords and nrp > 0):
-            self.nextRecordPosition = startRecord + last
+            self.nextRecordPosition = startRecord + end
         if (rsn):
             self.resultSetId = rsn
             self.resultSetIdleTime = ttl
     else:
         self.numberOfRecords = 0
-    process_extraData(config.searchExtensionHash, req, self)
-    process_extraData(config.responseExtensionHash, req, self)
+        process_extraData(config.searchExtensionHash, req, self)
+        process_extraData(config.responseExtensionHash, req, self)
 
 
 SRW.types.SearchRetrieveResponse.processQuery = process_searchRetrieve
