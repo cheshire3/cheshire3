@@ -76,31 +76,31 @@ class SimpleIndex(Index):
                       , 'tempPath' : {"docs" : "Path to a directory where temporary files will be stored during batch mode indexing"}
                       }
 
-    _possibleSettings = {'cori_constant0' : {"docs" : ""}
-                         , 'cori_constant1' : {"docs" : ""}
-                         , 'cori_constant2' : {"docs" : ""}
-                         , 'lr_constant0' : {"docs" : ""}
-                         , 'lr_constant1' : {"docs" : ""}
-                         , 'lr_constant2' : {"docs" : ""}
-                         , 'lr_constant3' : {"docs" : ""}
-                         , 'lr_constant4' : {"docs" : ""}
-                         , 'lr_constant5' : {"docs" : ""}
-                         , 'lr_constant6' : {"docs" : ""}
-                         , 'noIndexDefault' : {"docs" : "If true, the index should not be called from db.index_record()", "type" : int, "options" : "0|1"}
-                         , 'noUnindexDefault' : {"docs" : "If true, the index should not be called from db.unindex_record()", "type" : int, "options" : "0|1"}
-                         , 'sortStore' : {"docs" : "Should the index build a sort store"}
-                         , 'vectors' : {"docs" : "Should the index store vectors (doc -> list of termIds"}
-                         , 'proxVectors' : {"docs" : "Should the index store vectors that also maintain proximity for their terms"}
-                         ,  'minimumSupport' : {"docs" : ""}
-                         , 'vectorMinGlobalFreq' : {"docs" : ""}
-                         , 'vectorMaxGlobalFreq' : {"docs" : ""}
-                         , 'vectorMinGlobalOccs' : {"docs" : ""}
-                         , 'vectorMaxGlobalOccs' : {"docs" : ""}
-                         , 'vectorMinLocalFreq' : {"docs" : ""}
-                         , 'vectorMaxLocalFreq' : {"docs" : ""}
-                         , 'freqList' : {'docs' : '', 'options' : 'rec|occ|rec occ|occ rec'}
-                         , 'longSize' : {"docs" : "Size of a long integer in this index's underlying data structure (eg to migrate between 32 and 64 bit platforms)"}
-                         , 'recordStoreSizes' : {"docs" : ""},
+    _possibleSettings = {'cori_constant0' : {"docs" : ""},
+                         'cori_constant1' : {"docs" : ""},
+                         'cori_constant2' : {"docs" : ""},
+                         'lr_constant0' : {"docs" : ""},
+                         'lr_constant1' : {"docs" : ""},
+                         'lr_constant2' : {"docs" : ""},
+                         'lr_constant3' : {"docs" : ""},
+                         'lr_constant4' : {"docs" : ""},
+                         'lr_constant5' : {"docs" : ""},
+                         'lr_constant6' : {"docs" : ""},
+                         'noIndexDefault' : {"docs" : "If true, the index should not be called from db.index_record()", "type" : int, "options" : "0|1"},
+                         'noUnindexDefault' : {"docs" : "If true, the index should not be called from db.unindex_record()", "type" : int, "options" : "0|1"},
+                         'sortStore' : {"docs" : "Should the index build a sort store", 'type' : int, 'options' : '0|1'},
+                         'vectors' : {"docs" : "Should the index store vectors (doc -> list of termIds", 'type' : int, 'options' : '0|1'},
+                         'proxVectors' : {"docs" : "Should the index store vectors that also maintain proximity for their terms", 'type' : int, 'options' : '0|1'},
+                         'minimumSupport' : {"docs" : "", 'type' : int},
+                         'vectorMinGlobalFreq' : {"docs" : "", 'type' : int},
+                         'vectorMaxGlobalFreq' : {"docs" : "", 'type' : int},
+                         'vectorMinGlobalOccs' : {"docs" : "", 'type' : int},
+                         'vectorMaxGlobalOccs' : {"docs" : "", 'type' : int},
+                         'vectorMinLocalFreq' : {"docs" : "", 'type' : int},
+                         'vectorMaxLocalFreq' : {"docs" : "", 'type' : int},
+                         'freqList' : {'docs' : '', 'options' : 'rec|occ|rec occ|occ rec'},
+                         'longSize' : {"docs" : "Size of a long integer in this index's underlying data structure (eg to migrate between 32 and 64 bit platforms)", 'type' : int},
+                         'recordStoreSizes' : {"docs" : ""},
                          'maxVectorCacheSize' : {'docs' : "Number of terms to cache when building vectors", 'type' :int}
                          }
 
