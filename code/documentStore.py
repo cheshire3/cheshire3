@@ -65,7 +65,7 @@ class SimpleDocumentStore(DocumentStore):
             doc = self.inPreParser.process_document(session, doc)
         elif self.inWorkflow != None:
             doc = self.inWorkflow.process(session, doc)            
-        data = doc.get_raw()
+        data = doc.get_raw(session)
         md = {}
         if doc.wordCount:
             md['wordCount'] = doc.wordCount

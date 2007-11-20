@@ -378,24 +378,26 @@ class DomRecord(Record):
     context = None
     size = 0    
 
-    def __init__(self, domNode, xml="", docid=None):
-        self.dom = domNode
+    def __init__(self, data, xml="", docId=None, wordCount=0, byteCount=0):
+        self.dom = data
         self.xml = xml
-        self.id = docid
+        self.id = docId
         self.parent = ('','',-1)
         self.context = None
-        try:
-            # Sometimes this blows up
-            self.wordCount = len(flattenTexts(domNode).split())
-        except:
-            self.wordCount = 0
-        self.byteCount = 0
-
+        if wordCount:
+            self.wordCount = wordCount
+        else:
+            try:
+                # Sometimes this blows up
+                self.wordCount = len(flattenTexts(domNode).split())
+            except:
+                self.wordCount = 0
+        self.byteCount = byteCount
 
     def _walk(self, node):
         pass
 
-    def get_sax(self):
+    def get_sax(self, session):
         if (not self.sax):
             self.handler = SaxContentHandler()
             for c in self.dom.childNodes:
@@ -405,7 +407,7 @@ class DomRecord(Record):
             self.handler = None            
         return self.sax
 
-    def get_dom(self):
+    def get_dom(self, session):
         return self.dom
 
     def fetch_vector(self, session, index, summary=False):
@@ -415,7 +417,7 @@ class DomRecord(Record):
 class MinidomRecord(DomRecord):
     useNamespace = 1
 
-    def get_xml(self):
+    def get_xml(self, session):
         if (self.xml):
             return self.xml
         else:
@@ -455,12 +457,12 @@ class MinidomRecord(DomRecord):
         elif node.nodeType == utils.textType:
             self.handler.characters(node.data)
             
-    def process_xpath(self, tuple, maps={}):
+    def process_xpath(self, session, xpath, maps={}):
         raise NotImplementedError
 
 class FtDomRecord(DomRecord):
 
-    def get_xml(self):
+    def get_xml(self, session):
         if (self.xml):
             return self.xml
         else:
@@ -478,17 +480,17 @@ class FtDomRecord(DomRecord):
             return node.nodeValue
             
 
-    def process_xpath(self, xpTuple, maps={}):
-        if (not isinstance(xpTuple, list)):
+    def process_xpath(self, session, xpath, maps={}):
+        if (not isinstance(xpath, list)):
             # Raw XPath
-            c = utils.verifyXPaths([xpTuple])
+            c = utils.verifyXPaths([xpath])
             if (not c or not c[0][1]):
                 print "BAD XPATH"
                 return []
             else:
-                xpTuple = c[0]
+                xpath = c[0]
 
-        xp = xpTuple[0]
+        xp = xpath[0]
         if (not self.context):
             self.context = Context.Context(self.dom)
 
@@ -500,7 +502,7 @@ try:
     from lxml import etree, sax
     class LxmlRecord(DomRecord):
 
-        def process_xpath(self, xpath, maps={}):
+        def process_xpath(self, session, xpath, maps={}):
             global prefixRe
             if (isinstance(xpath, list)):
                 xpath = repr(xpath[0])
@@ -511,13 +513,13 @@ try:
     	    else:
                 return self.dom.xpath(xpath)
 
-        def get_xml(self):
+        def get_xml(self, session):
             return etree.tostring(self.dom)
 
-        def get_sax(self):
+        def get_sax(self, session):
             if (not self.sax):
                 handler = SaxContentHandler()
-                sax.saxify(self.dom, handler)
+                sax.saxify(session, self.dom, handler)
                 self.sax = handler.currentText
                 self.sax.append("9 %r" % handler.elementHash)
             return self.sax
@@ -529,9 +531,9 @@ except:
 
 class SaxRecord(Record):
 
-    def __init__(self, saxList, xml="", docid=None, wordCount=0, byteCount=0):
-        self.sax = saxList
-        self.id = docid
+    def __init__(self, data, xml="", docId=None, wordCount=0, byteCount=0):
+        self.sax = data
+        self.id = docId
         self.xml = xml
         self.history = []
         self.rights = []
@@ -544,25 +546,25 @@ class SaxRecord(Record):
         self.recordStore = ""
 
         
-    def process_xpath(self, xpTuple, maps={}):
-        if (not isinstance(xpTuple, list)):
+    def process_xpath(self, session, xpath, maps={}):
+        if (not isinstance(xpath, list)):
             # Raw XPath
-            c = utils.verifyXPaths([xpTuple])
+            c = utils.verifyXPaths([xpath])
             if (not c or not c[0][1]):
 		print "BAD XPATH"
 		return []
             else:
-                xpTuple = c[0]
+                xpath = c[0]
 
-        xp = xpTuple[1]
+        xp = xpath[1]
         try:
             flatten = 0
             if xp[0][0] == "FUNCTION" and xp[0][1] == 'count':
                 # process xpath and return number of matches
                 if isinstance(xp[0][2][0], str) and xp[0][2][0] != '/':
-                    data = self.process_xpath([None, [xp[0][2]]], maps)
+                    data = self.process_xpath(session, [None, [xp[0][2]]], maps)
                 else:
-                    data = self.process_xpath([None, xp[0][2]], maps)
+                    data = self.process_xpath(session, [None, xp[0][2]], maps)
                     
                 return len(data)
 
@@ -643,7 +645,7 @@ class SaxRecord(Record):
                 return data
         except NotImplementedError:
             # Convert to DOM (slow) and reapply (slower still)
-            dom = self.get_dom()
+            dom = self.get_dom(session)
             xp = xpTuple[0]
             try:
 		return utils.evaluateXPath(xp, dom)
@@ -910,11 +912,11 @@ class SaxRecord(Record):
         else:
             raise ValueError("Called convert on non element.")
 
-    def saxify(self, handler=None, sax=[]):
+    def saxify(self, session, handler=None, sax=[]):
         if handler == None:
             handler = self
         if not sax:
-            sax = self.get_sax()
+            sax = self.get_sax(session)
             
 	for l in sax:
             line = l
@@ -953,17 +955,17 @@ class SaxRecord(Record):
                 raise ValueError(line)
 
 
-    def get_dom(self):
+    def get_dom(self, session):
         if (self.dom):
             return self.dom
         else:
             # Turn SAX into DOM and cache
             s2dhandler.initState()
-            self.saxify(s2dhandler);
+            self.saxify(session, s2dhandler);
             self.dom = s2dhandler.getRootNode()
             return self.dom
 
-    def get_xml(self, events=[]):
+    def get_xml(self, session, events=[]):
         if (not events and self.xml):
             return self.xml
         else:
@@ -973,14 +975,14 @@ class SaxRecord(Record):
             else:
                 process = events
             s2xhandler.initState()
-            self.saxify(s2xhandler, process)
+            self.saxify(session, s2xhandler, process)
             if not events:
                 self.xml = s2xhandler.get_raw()
                 return self.xml
             else:
                 return s2xhandler.get_raw()
             
-    def get_sax(self):
+    def get_sax(self, session):
         return self.sax
 
     def fetch_vector(self, session, index, summary=False):
@@ -989,28 +991,33 @@ class SaxRecord(Record):
 
 class MarcRecord(Record):
 
-    def __init__(self, doc, docid=0, store=""):
-        txt = doc.get_raw()
+    def __init__(self, data, xml="", docId=0, wordCount=0, byteCount=0):
+        txt = doc.get_raw(session)
         self.marc = MARC(txt)
-        self.id = docid
-        self.recordStore = store
+        self.id = docId
         # Estimate number of words...
         display = str(self.marc)
-        self.wordCount = len(display.split()) - ( len(display.split('\n')) * 2)
-        self.byteCount = len(display)
+        if wordCount:
+            self.wordCount=wordCount
+        else:
+            self.wordCount = len(display.split()) - ( len(display.split('\n')) * 2)
+        if byteCount:
+            self.byteCount = byteCount
+        else:
+            self.byteCount = len(display)
         self.decoder = MARC8_to_Unicode()
         self.asciiRe = re.compile('([\x0e-\x1f]|[\x7b-\xff])')
 
-    def process_xpath(self, xpTuple, maps={}):
-        if (not isinstance(xpTuple, list)):
+    def process_xpath(self, session, xpath, maps={}):
+        if (not isinstance(xpath, list)):
             # Raw XPath
-            c = utils.verifyXPaths([xpTuple])
+            c = utils.verifyXPaths([xpath])
             if (not c or not c[0][1]):
                 return []
             else:
-                xpTuple = c[0]
+                xpath = c[0]
 
-        xp = xpTuple[1]
+        xp = xpath[1]
         # format:  fldNNN/a
         try:
             fld = int(xp[0][1][3:])
@@ -1074,11 +1081,11 @@ class MarcRecord(Record):
                     nvals.append(v)
         return nvals
 
-    def get_dom(self):
+    def get_dom(self, session):
         raise(NotImplementedError)
-    def get_sax(self):
+    def get_sax(self, session):
         raise(NotImplementedError)
-    def get_xml(self):
+    def get_xml(self, session):
         return self.marc.toMARCXML()
     def fetch_vector(self, session, index, summary=False):
         return index.indexStore.fetch_vector(session, index, self, summary)

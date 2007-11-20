@@ -25,7 +25,9 @@ class SimpleRecordStore(RecordStore):
     outParser = None
 
     _possiblePaths = {'inTransformer' : {'docs' : "Identifier for transformer to use to transform incoming record into document for storage"}
-                      , 'outParser'  : {'docs' : "Identifier for parser to use to transform outgoing data into a record"}
+                      , 'outParser'  : {'docs' : "Identifier for parser to use to transform outgoing data into a record"},
+                      'inWorkflow' : {'docs' : "Identifier for a transforming workflow to use to transform incoming record in to document for storage"},
+                      'outWorkflow' : {'docs' : 'Identifier for a parsing workflow to use to transform outgoing data into a record'} 
                       }
 
     def __init__(self, session, config, parent):
@@ -33,8 +35,10 @@ class SimpleRecordStore(RecordStore):
             RecordStore.__init__(self, session, config, parent)
         self.inTransformer = self.get_path(session, 'inTransformer', None)
         self.outParser = self.get_path(session, 'outParser', None)
+        self.inWorkflow = self.get_path(session, 'inWorkflow', None)
+        self.outWorkflow = self.get_path(session, 'outWorkflow', None)
 
-    def create_record(self, session, record=None):
+    def create_record(self, session, rec=None):
 
         p = self.permissionHandlers.get('info:srw/operation/1/create', None)
         if p:
@@ -44,16 +48,17 @@ class SimpleRecordStore(RecordStore):
             if not okay:
                 raise PermissionException("Permission required to create an object in %s" % self.id)
 
+
         id = self.generate_id(session)
-        if (record == None):
+        if (rec == None):
             # Create a placeholder
-            record = SaxRecord([], "", id)
+            rec = SaxRecord([], "", id)
         else:
-            record.id = id
-        record.recordStore = self.id
+            rec.id = id
+        rec.recordStore = self.id
 
         try:
-            self.store_record(session, record)
+            self.store_record(session, rec)
         except ObjectAlreadyExistsException:
             # Back out id change
             if type(id) == long:
@@ -61,9 +66,9 @@ class SimpleRecordStore(RecordStore):
             raise
         except:
             raise
-        return record
+        return rec
 
-    def replace_record(self, session, record):
+    def replace_record(self, session, rec):
         # Hook for permissions check
         p = self.permissionHandlers.get('info:srw/operation/1/replace', None)
         if p:
@@ -74,35 +79,34 @@ class SimpleRecordStore(RecordStore):
                 raise PermissionException("Permission required to replace an object in %s" % self.id)
         self.store_record(session, record)
 
-    def store_record(self, session, record, transformer=None):
-        record.recordStore = self.id        
+    def store_record(self, session, rec, transformer=None):
+        rec.recordStore = self.id        
 
         # Maybe add metadata, etc.
         if transformer != None:
             # Allow custom transformer
-            doc = transformer.process_record(session, record)
-            data = doc.get_raw()            
+            doc = transformer.process_record(session, rec)
+            data = doc.get_raw(session)            
         elif self.inTransformer != None:
-            doc = self.inTransformer.process_record(session, record)
-            data = doc.get_raw()
+            doc = self.inTransformer.process_record(session, rec)
+            data = doc.get_raw(session)
         elif self.inWorkflow != None:
-            doc = self.inWorkflow.process(session, record)
-            data = doc.get_raw()
+            doc = self.inWorkflow.process(session, rec)
+            data = doc.get_raw(session)
         else:
-            sax = [x.encode('utf8') for x in record.get_sax()]
+            sax = [x.encode('utf8') for x in rec.get_sax(session)]
             sax.append("9 " + cPickle.dumps(record.elementHash))
             data = nonTextToken.join(sax)       
 
         dig = self.generate_checkSum(session, data)
-        md = {'byteCount' : record.byteCount,
-              'wordCount' : record.wordCount,
+        md = {'byteCount' : rec.byteCount,
+              'wordCount' : rec.wordCount,
               'digest' : dig}
         # Might raise ObjectAlreadyExistsException
-        self.store_data(session, record.id, data, metadata=md)
+        self.store_data(session, rec.id, data, metadata=md)
         # Now accumulate metadata
-        self.accumulate_metadata(session, record)
-
-	return record
+        self.accumulate_metadata(session, rec)
+	return rec
 
     def fetch_record(self, session, id, parser=None):
         p = self.permissionHandlers.get('info:srw/operation/2/retrieve', None)
@@ -115,7 +119,7 @@ class SimpleRecordStore(RecordStore):
       
         data = self.fetch_data(session, id)
         if (data):
-            rec = self.process_data(session, id, data, parser)
+            rec = self._process_data(session, id, data, parser)
             # fetch metadata
             for attr in ['byteCount', 'wordCount', 'digest']:
                 try:
@@ -143,10 +147,10 @@ class SimpleRecordStore(RecordStore):
             id = id.id
         self.delete_data(session, id)
 
-    def fetch_recordMetadata(self, session, id, mtype):
-        return self.fetch_metadata(session, id, mtype)
+    def fetch_recordMetadata(self, session, id, mType):
+        return self.fetch_metadata(session, id, mType)
 
-    def process_data(self, session, id, data, parser=None):
+    def _process_data(self, session, id, data, parser=None):
         # Split from fetch record for Iterators
         if (parser != None):
             doc = StringDocument(data)
@@ -180,7 +184,7 @@ class BdbRecordIter(BdbIter):
 
     def next(self):
         d = BdbIter.next(self)
-        rec = self.store.process_data(None, d[0], d[1])
+        rec = self.store._process_data(None, d[0], d[1])
         return rec
 
 class BdbRecordStore(BdbStore, SimpleRecordStore):
@@ -211,39 +215,11 @@ except:
 
 
 
-class ParsingIter(object):
-    recordStore = None
-    documentStore = None
-    workflow = None
-    docStoreIter = None
-    
-    def __init__(self, recStore):
-        self.recordStore = recStore
-        self.workflow = recStore.workflow
-        self.parser = recStore.parser
-        self.docStoreIter = recStore.documentStore.__iter__()
-    
-    def next(self):
-        d = self.docStoreIter.next()
-        doc = StringDocument(d[1])
-        if self.workflow:
-            rec = self.workflow.process(self.docStoreIter.session, doc)
-        elif self.parser:
-            rec = self.parser.process_document(self.docStoreIter.session, doc)
-        rec.recordStore = self.recordStore.id
-        rec.id = d[0]
-        return rec
-
-
-class ParsingRecordStore(SimpleRecordStore, SimpleStore):
+class RedirectRecordStore(SimpleRecordStore, SimpleStore):
     # Store in unparsed format. Parse on load
     # cf buildassoc vs datastore in C2
-    
-    documentStore = None
-    workflow = None
-    parser = None
-
     _possiblePaths = {'documentStore' : {'docs' : "documentStore identifier where the data is held"}}
+    documentStore = None
 
     def __iter__(self):
         # Return an iterator object that calls self.workflow
@@ -252,83 +228,38 @@ class ParsingRecordStore(SimpleRecordStore, SimpleStore):
     def __init__(self, session, config, parent):
         SimpleRecordStore.__init__(self, session, config, parent)
         self.documentStore = self.get_path(session, 'documentStore')
-        self.workflow = self.get_path(session, 'outWorkflow', None)
-        self.parser = self.get_path(session, 'outParser', None)
 
-
-    def create_record(self, session, record):
-        # just copy some stuff around...
+    def create_record(self, session, rec):
+        # maybe just copy some stuff around...
         record.recordStore = self.id
-        record.id = record.parent[2]
-        if record.id == -1:
-            raise ValueError
-        return record
-
-    def fetch_record(self, session, id):
-        # Fetch record from docStore, preparse, parse, return
-        doc = self.documentStore.fetch_document(session, id)
-        if self.workflow:
-            rec = self.workflow.process(session, doc)
-        elif self.parser:
-            rec = self.parser.process_document(session, doc)
+        if rec.parent and rec.parent[2]:            
+            record.id = record.parent[2]
+            if record.id == -1:
+                raise ValueError
+            return record
         else:
-            raise ConfigFileException("%s does not have an outWorkflow or outParser." % self.id)
-        rec.recordStore = self.id
-        rec.id = id
-        return rec
+            return SimpleRecordStore.create_record(self, session, rec)
 
-    def store_record(self, session, record):
-        raise NotImplementedError
+    def store_data(self, session, id, data, metadata={}):
+        # write this to documentStore as document
+        return self.documentStore.store_data(session, id, data, metadata)
+
+    def fetch_data(self, session, id):
+        # read from documentStore
+        return self.documentStore.fetch_data(session, id)
 
     def begin_storing(self, session):
-        # Should we error?
-        return None
+        return self.documentStore.begin_storing(session)
 
     def commit_storing(self, session):
-        return None
+        return self.documentStore.commit_storing(session)
+
+    def fetch_recordMetadata(self, session, id, mType):
+        return self.documentStore.fetch_documentMetadata(session, id, mType)
 
 
-
-from record import MarcRecord
-
-class MarcIter(BdbIter):
-    recordStore = None
-    documentStore = None
-    workflow = None
-    
-    def __init__(self, recStore):
-        self.recordStore = recStore
-        self.workflow = recStore.workflow
-        BdbIter.__init__(self, recStore.documentStore)
-    
-    def next(self):
-        d = BdbIter.next(self)
-        # d[0] is id
-        # d[1] is raw data
-        rec = MarcRecord(StringDocument(d[1]))
-        rec.recordStore = self.recordStore.id
-        rec.id = d[0]
-        return rec
-
-class MarcRecordStore(ParsingRecordStore):
-    documentStore = None
-
-    def __iter__(self):
-        # Return an iterator object that calls self.workflow
-        return MarcIter(self)
-    
-    def fetch_record(self, session, id):
-        doc = self.documentStore.fetch_document(session, id)
-        try:
-            rec = MarcRecord(doc)
-        except:
-            rec = SaxRecord([])
-        rec.recordStore = self.id
-        rec.id = id
-        return rec
-
-    def fetch_recordMetadata(self, session, id, mtype):
-        return self.documentStore.fetch_documentMetadata(session, id, mtype)
+# MarcRecordStore becomes a RedirectRecordStore with
+#   an outParser of MarcParser
 
 
 # Task API for PVM/MPI/SOAP/etc
@@ -370,33 +301,30 @@ class RemoteSlaveRecordStore(SimpleRecordStore):
             else:
                 raise ConfigFileException('Unknown or missing protocol: %s' % self.protocol)
             
-        def begin_storing(self, session, wt=None):
+        def begin_storing(self, session, task=None):
             # set tasks
-            if wt:
-                self.writeTask = self.taskType(wt)
+            if task:
+                self.writeTask = self.taskType(task)
             return None
 
-        def create_record(self, session, record=None):
+        def create_record(self, session, rec=None):
             # Is this actually useful?
-            if (record == None):
-                record = SaxRecord([], "", "__new")
+            if (rec == None):
+                rec = SaxRecord([], "", "__new")
             else:
-                record.id = "__new"
-            self.store_record(session, record)
-            return record
+                rec.id = "__new"
+            self.store_record(session, rec)
+            return rec
 
-        def store_record(self, session, record):
+        def store_record(self, session, rec, transformer=None):
             # str()ify
             if (self.inTransformer != None):
-                doc = self.inTransformer.process_record(session, record)
-                data = doc.get_raw()
+                doc = self.inTransformer.process_record(session, rec)
+                data = doc.get_raw(session)
             else:
-                sax = record.get_sax()
-                sax.append("9 " + cPickle.dumps(record.elementHash))
+                sax = rec.get_sax(session)
+                sax.append("9 " + cPickle.dumps(rec.elementHash))
                 data = nonTextToken.join(sax)       
-
-            # Now send to task
-            size = record.size
 
             md = {'wordCount' : record.wordCount,
                   'byteCount' : record.byteCount}
@@ -406,11 +334,11 @@ class RemoteSlaveRecordStore(SimpleRecordStore):
                 msg = self.writeTask.recv()
             else:
                 raise ValueError('WriteTask is None... did you call begin_storing?')
-            record.recordStore = self.recordStore
-            record.id = msg.data
-            return record
+            rec.recordStore = self.recordStore
+            rec.id = msg.data
+            return rec
 
-        def fetch_record(self, session, record):
+        def fetch_record(self, session, id, parser=None):
             raise NotImplementedError
 
 

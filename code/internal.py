@@ -1,14 +1,14 @@
 
 storeTypes = ['authStore', 'objectStore', 'configStore', 'recordStore', 'documentStore', 'resultSetStore', 'indexStore', 'queryStore']
 collTypes = ['server', 'database', 'index', 'workflow']
-processTypes = ['preParser', 'parser', 'normaliser', 'extracter', 'transformer', 'documentFactory', 'XPathObject', 'logger']
+processTypes = ['preParser', 'parser', 'normalizer', 'extractor', 'transformer', 'documentFactory', 'xpathProcessor', 'logger', 'tokenMerger', 'tokenizer']
 
 
 # modules in which we can find configurable objects
-modules = ['database', 'documentFactory', 'documentStore', 'extracter', 'index', 'indexStore', 'logger', 'normaliser', 'objectStore', 'parser', 'postgres', 'preParser', 'protocolMap', 'queryFactory', 'queryStore', 'recordStore', 'resultSetStore', 'server', 'transformer', 'workflow', 'xpathObject', 'textmining.tmNormaliser', 'textmining.tmDocumentFactory', 'textmining.tmPreParser', 'textmining.tmTransformer', 'datamining.dmPreParser', 'datamining.dmTransformer', 'grid.srbIndex', 'grid.srbStore']
+modules = ['database', 'documentFactory', 'documentStore', 'extractor', 'index', 'indexStore', 'logger', 'normalizer', 'objectStore', 'parser', 'postgres', 'preParser', 'protocolMap', 'queryFactory', 'queryStore', 'recordStore', 'resultSetStore', 'server', 'transformer', 'workflow', 'xpathProcessor', 'textmining.tmNormalizer', 'textmining.tmDocumentFactory', 'textmining.tmPreParser', 'textmining.tmTransformer', 'datamining.dmPreParser', 'datamining.dmTransformer', 'grid.srbIndex', 'grid.srbStore']
 
 
-cheshireVersion = (0,9,5)
+cheshireVersion = (0,9,10)
 
 
 class Architecture(object):

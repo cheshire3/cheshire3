@@ -17,9 +17,9 @@ import cStringIO, StringIO
     
 
 class BaseParser(Parser):
-    def copy_data(self, doc, rec):
+    def _copyData(self, doc, rec):
         rec.filename = doc.filename
-        rec.schema = doc.schema
+        rec.tagName = doc.tagName
         rec.processHistory = doc.processHistory
         rec.processHistory.append(self.id)
         if doc.documentStore:
@@ -32,10 +32,10 @@ class MinidomParser(BaseParser):
     """ Use default Python Minidom implementation to parse document """
 
     def process_document(self, session, doc):
-        xml = doc.get_raw()
+        xml = doc.get_raw(session)
         dom = domParseString(xml)
         rec = MinidomRecord(dom, xml)
-        self.copy_data(doc, rec)
+        self._copyData(doc, rec)
         return rec
 
 
@@ -74,7 +74,7 @@ class SaxParser(BaseParser):
 
     def process_document(self, session, doc):
 
-        xml = doc.get_raw()        
+        xml = doc.get_raw(session)        
         self.inputSource.setByteStream(cStringIO.StringIO(xml))        
         ch = self.contentHandler
         ch.reinit()
@@ -97,7 +97,7 @@ class SaxParser(BaseParser):
         rec = SaxRecord(ch.currentText, xml, wordCount=ch.recordWordCount)
         rec.elementHash = ch.elementHash
         rec.byteCount = len(xml)
-        self.copy_data(doc, rec)
+        self._copyData(doc, rec)
         ch.reinit()
         return rec
 
@@ -108,7 +108,7 @@ try:
         """ lxml based Parser.  Creates LxmlRecords """
         def process_document(self, session, doc):
             # input must be stream
-            data = doc.get_raw()
+            data = doc.get_raw(session)
             try:
                 et = etree.XML(data)
             except AssertionError:
@@ -116,7 +116,7 @@ try:
                 et = etree.XML(data)
             rec = LxmlRecord(et)
             rec.byteCount = len(data)
-            self.copy_data(doc, rec)
+            self._copyData(doc, rec)
             return rec
 
     class LxmlSchemaParser(Parser):
@@ -132,11 +132,11 @@ try:
             self.parser = etree.HTMLParser()
 
         def process_document(self, session, doc):
-            data = doc.get_raw()
+            data = doc.get_raw(session)
             et = etree.parse(StringIO.StringIO(data), self.parser)
             rec = LxmlRecord(et)
             rec.byteCount = len(data)
-            self.copy_data(doc, rec)
+            self._copyData(doc, rec)
             return rec
     
 except:
@@ -155,11 +155,11 @@ class FtParser(BaseParser, NonvalidatingReaderBase):
         NonvalidatingReaderBase.__init__(self)
 
     def process_document(self, session, doc):
-        data = doc.get_raw()
+        data = doc.get_raw(session)
         dom = self.parseString(data, 'urn:foo')
         rec = FtDomRecord(dom, data)
         rec.byteCount = len(data)
-        self.copy_data(doc, rec)
+        self._copyData(doc, rec)
         return rec
 
 class FtSaxParser(BaseParser):
@@ -189,7 +189,7 @@ class FtSaxParser(BaseParser):
 
     def process_document(self, session, doc):
 
-        xml = doc.get_raw()
+        xml = doc.get_raw(session)
         src = FtInput.InputSource(StringIO.StringIO(xml))        
         ch = self.contentHandler
         ch.reinit()
@@ -203,7 +203,7 @@ class FtSaxParser(BaseParser):
         rec = SaxRecord(ch.currentText, xml, recordSize=ch.recordSize)
         rec.elementHash = ch.elementHash
         rec.byteCount = len(xml)
-        self.copy_data(doc, rec)
+        self._copyData(doc, rec)
         return rec
     
 
@@ -212,12 +212,12 @@ class PassThroughParser(BaseParser):
 
     def process_document(self, session, doc):
         # Simply copy data into a record of appropriate type
-        data = doc.get_raw()
+        data = doc.get_raw(session)
         if (typeof(data) == types.ListType):
             rec = SaxRecord(data)
         else:
             rec = DomRecord(data)
-        self.copy_data(doc, rec)
+        self._copyData(doc, rec)
         return rec
 
 
@@ -251,7 +251,7 @@ class XmlRecordStoreParser(BaseParser):
         # Take xml wrapper and convert onto object
         # Strip out SAX events first
 
-        data = doc.get_raw()
+        data = doc.get_raw(session)
 
         # Strip out sax to list
         match = self.saxre.search(data)
@@ -305,10 +305,8 @@ class XmlRecordStoreParser(BaseParser):
                         if (c2.nodeType == elementType and c2.localName == 'object'):
                             foo.append(flattenTexts(c2))
                     rec.processHistory = foo
-                elif (c.localName == "schema"):
-                    rec.schema = flattenTexts(c)
-                elif (c.localName == "schemaType"):
-                    rec.schemaType = flattenTexts(c)
+                elif (c.localName == "tagName"):
+                    rec.tagName = flattenTexts(c)
                 elif (c.localName == "size"):
                     rec.wordCount = long(flattenTexts(c))
                 elif (c.localName == "technicalRights"):

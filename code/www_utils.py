@@ -1,33 +1,32 @@
 #
 # Program:   www_utils.py
-# Version:   0.10
+# Version:   0.9
 # Description:
-#            Generic web search functions for Cheshire 3
+#            Generic search functions for Cheshire 3
 #
 # Language:  Python
 # Author:    John Harrison <john.harrison@liv.ac.uk>
-# Date:      14 November 2007
+# Date:      7 September 2007
 #
 # Copyright: &copy; University of Liverpool 2005-2007
 #
 # Version History:
-# 0.01 - 13/04/2005 - JH - Ported from Cheshire II compatible scripts
-# 0.02 - 14/06/2005 - JH - Improved CGI encoding/decoding
-#                        - Mixed phrase and plain term searching handled
+# 0.1 - 13/04/2005 - JH - Ported from Cheshire II compatible scripts
+# 0.2 - 14/06/2005 - JH - Improved CGI encoding/decoding
+#                       - Mixed phrase and plain term searching handled
 #                         (e.g. wyndham "science fiction" triffids)
-# 0.03 - 17/10/2005 - JH - File logger class added
+# 0.3 - 17/10/2005 - JH - File logger class added
 #                           keeps all logs for a single request in mem until complete, then flushes to file
-#                        - html_encode() added to allow display of raw SGML in the browser
-# 0.04 - 26/01/2006 - JH - Modifications to cgiReplacements
-# 0.05 - 31/01/2006 - JH - More tweaks to cgiReplacement characters
-#                        - Speech marks handled sensibly in exact or /string searches
-# 0.06 - 27/02/2006 - JH - Booleans extracted first in generate_cqlQuery() - debugs 'NOT' searches
-# 0.07 - 04/01/2007 - JH - Check for noComponents moved out of generic generate_cqlQuery function
-#                        - Allow limit to collection
-# 0.08 - 25/01/2007 - JH - Mods to allow date searching - decode < > etc from form
-# 0.09 - 07/09/2007 - JH - renamed: wwwSearch.py --> www_utils.py
-# 0.10 - 14/11/2007 - JH - cgi_encode/cgi_decode now alias urllib.quote/urllib.unquote
-#                        - charset detection added to generate_cqlQuery() - defaults to UTF8
+#                       - html_encode() added to allow display of raw SGML in the browser
+# 0.4 - 26/01/2006 - JH - Modifications to cgiReplacements
+# 0.5 - 31/01/2006 - JH - More tweaks to cgiReplacement characters
+#                       - Speech marks handled sensibly in exact or /string searches
+# 0.6 - 27/02/2006 - JH - Booleans extracted first in generate_cqlQuery() - debugs 'NOT' searches
+# 0.7 - 04/01/2007 - JH - Check for noComponents moved out of generic generate_cqlQuery function
+#                       - Allow limit to collection
+# 0.8 - 25/01/2007 - JH - Mods to allow date searching - decode < > etc from form
+# 0.9 - 07/09/2007 - JH - renamed: wwwSearch.py --> www_utils.py
+#
 #
 
 
@@ -45,7 +44,7 @@ def generate_cqlQuery(form):
         
     i = 1
     while (form.has_key('fieldcont%d' % i)):
-        cont = cgi_decode(form.getfirst('fieldcont%d' % i))
+        cont = form.getfirst('fieldcont%d' % i)
         idx = cgi_decode(form.getfirst('fieldidx%d' % i, 'cql.anywhere'))
         rel = cgi_decode(form.getfirst('fieldrel%d'  % i, 'all/relevant/proxinfo'))
         #if 'not' in bools:
@@ -79,85 +78,73 @@ def generate_cqlQuery(form):
         i += 1
         
     qString = ' '.join(qClauses)
-    charset = form.getfirst('_charset_', 'utf-8')
-    return qString.decode(charset).encode('utf-8')
+    return qString.decode('iso-8859-1').encode('utf8')
            
 #- end generateCqlQuery()
 
-def multiReplace(txt, params):
-    for k,v in params.iteritems():
-        txt = txt.replace(k,v)
+
+cgiReplacements = {
+#'%': '%25',
+'+': '%2B',
+' ': '%20',
+'<': '%3C',
+'>': '%3E',
+'#': '%23',
+'{': '%7B',
+'}': '%7D',
+'|': '%7C',
+'"': '%22',
+"'": '%27',
+'^': '%5E',
+'~': '%7E',
+'[': '%5B',
+']': '%5D',
+'`': '%60',
+';': '%3B',
+'/': '%2F',
+'?': '%3F',
+':': '%3A',
+'@': '%40',
+'=': '%3D',
+'&': '%26',
+'$': '%24'
+#'=': "%3D", 
+#'\n\t': "%0A", 
+#',': "%2C", 
+#'\'': "%27",
+#'/': "%2F",
+#'"': "%22",
+#'@': "%40",
+#'#': "%23",
+#'{': "%7B",
+#'}': "%7D",
+#'[': "%5B",
+#']': "%5D",
+#'\\': "%5C",
+#';': "%3B"
+}
+
+def cgi_encode(txt):
+    global cgiReplacements
+    txt = txt.replace('%', '%25')
+    #txt = txt.strip()
+    for key, val in cgiReplacements.iteritems():
+        txt =  txt.replace(key, val)
+
     return txt
 
-#- end multiReplace
+#- end cgi_encode
 
-try:
-    import urllib
-    cgi_encode = urllib.quote
-    cgi_decode = urllib.unquote
-except ImportError:
-    cgiReplacements = {
-    '%': '%25'
-    ,'+': '%2B'
-    ,' ': '%20'
-    ,'<': '%3C'
-    ,'>': '%3E'
-    ,'#': '%23'
-    ,'{': '%7B'
-    ,'}': '%7D'
-    ,'|': '%7C'
-    ,'"': '%22'
-    ,"'": '%27'
-    ,'^': '%5E'
-    ,'~': '%7E'
-    ,'[': '%5B'
-    ,']': '%5D'
-    ,'`': '%60'
-    ,';': '%3B'
-    ,'/': '%2F'
-    ,'?': '%3F'
-    ,':': '%3A'
-    ,'@': '%40'
-    ,'=': '%3D'
-    ,'&': '%26'
-    ,'$': '%24'
-    ,'=': "%3D" 
-    ,'\n\t': "%A" 
-    ,',': "%2C" 
-    ,'\'': "%27"
-    ,'/': "%2F"
-    ,'"': "%22"
-    ,'@': "%40"
-    ,'#': "%23"
-    ,'{': "%7B"
-    ,'}': "%7D"
-    ,'[': "%5B"
-    ,']': "%5D"
-    ,'\\': "%5C"
-    ,';': "%3B"
-    }
-    
-    def cgi_encode(txt):
-        global cgiReplacements
-        txt = txt.replace('%', '%25')
-        #txt = txt.strip()
-        for key, val in cgiReplacements.iteritems():
-            txt =  txt.replace(key, val)
-    
-        return txt
-    
-    #- end cgi_encode
-    
-    def cgi_decode(txt):
-        global cgiReplacements
-        #txt = txt.strip()
-        for key, val in cgiReplacements.iteritems():
-            txt =  txt.replace(val, key)
-    
-        txt = txt.replace('%25', '%')
-        return txt
-    
-    #- end cgi_decode
+def cgi_decode(txt):
+    global cgiReplacements
+    #txt = txt.strip()
+    for key, val in cgiReplacements.iteritems():
+        txt =  txt.replace(val, key)
+
+    txt = txt.replace('%25', '%')
+    return txt
+
+#- end cgi_decode
 
 rawSgmlReplacements = {
     '<': '&lt;',
@@ -167,10 +154,20 @@ rawSgmlReplacements = {
 def html_encode(txt):
     global rawSgmlReplacements
     txt = txt.replace('&', '&amp;')
-    return multiReplace(txt, rawSgmlReplacements)
+    for key, val in rawSgmlReplacements.iteritems():
+        txt =  txt.replace(key, val)
+
+    return txt
+
 
 #- end html_encode
 
+def multiReplace(txt, params):
+    for k,v in params.iteritems():
+        txt = txt.replace(k,v)
+    return txt
+
+#- end multiReplace
 
 def read_file(fileName):
     fileH = open(fileName, 'r')

@@ -153,10 +153,10 @@ def process_searchRetrieve(self, session, req):
 
             if (txr != None):
                 doc = txr.process_record(session, r)
-                rec = doc.get_raw()
+                rec = doc.get_raw(session)
                 rec = xmlver.sub("", rec)
             else:
-                rec = r.get_xml()
+                rec = r.get_xml(session)
 
             if recordPacking == "string":
                 ro.recordData = escape(rec)

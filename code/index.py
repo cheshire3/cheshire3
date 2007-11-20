@@ -16,7 +16,7 @@ try:
 except:
     pass
 
-from xpathObject import XPathObject
+from xpathProcessor import SimpleXPathProcessor
 
 
 class IndexIter(object):
@@ -124,7 +124,7 @@ class SimpleIndex(Index):
                             if ref:
                                 xp = self.get_object(session, ref)
                             else:
-                                xp = XPathObject(session, node, self)
+                                xp = SimpleXPathProcessor(session, node, self)
                                 xp._handleConfigNode(session, node)
                     elif child.localName == "preprocess":
                         # turn preprocess chain to workflow
@@ -226,8 +226,8 @@ class SimpleIndex(Index):
         return processed
 
 
-    def extract_data(self, session, record):
-        processed = self._processRecord(session, record, self.sources[u'data'][0])
+    def extract_data(self, session, rec):
+        processed = self._processRecord(session, rec, self.sources[u'data'][0])
         if processed:
             keys = processed.keys()
             keys.sort()
@@ -235,7 +235,7 @@ class SimpleIndex(Index):
         else:
             return None
 
-    def index_record(self, session, record):
+    def index_record(self, session, rec):
         # First extract simple paths, the majority of cases
         p = self.permissionHandlers.get('info:srw/operation/2/index', None)
         if p:
@@ -245,11 +245,11 @@ class SimpleIndex(Index):
             if not okay:
                 raise PermissionException("Permission required to add to index %s" % self.id)
         for src in self.sources[u'data']:
-            processed = self._processRecord(session, record, src)
-            self.indexStore.store_terms(session, self, processed, record)
-        return record
+            processed = self._processRecord(session, rec, src)
+            self.indexStore.store_terms(session, self, processed, rec)
+        return rec
 
-    def delete_record(self, session, record):
+    def delete_record(self, session, rec):
         # Extract terms, and remove from store
         p = self.permissionHandlers.get('info:srw/operation/2/unindex', None)
         if p:
@@ -263,21 +263,19 @@ class SimpleIndex(Index):
         if self.get_setting(session, 'vectors', 0):
             # use vectors to unindex instead of reprocessing
             # faster, only way for 'now' metadata.
-            vec = self.fetch_vector(session, record)
+            vec = self.fetch_vector(session, rec)
             # [totalUniqueTerms, totalFreq, [(tid, freq)+]]
             processed = {}
             for (t,f) in vec[2]:
                 term = self.fetch_termById(session, t)
                 processed[term] = {'occurences' : f}
-            #print "VECTOR processed: %r" % processed
             if istore != None:
-                istore.delete_terms(session, self, processed, record)
+                istore.delete_terms(session, self, processed, rec)
         else:
             for src in self.sources[u'data']:
-                processed = self._processRecord(session, record, src)
-                #print "NORMAL processed: %r" % processed
+                processed = self._processRecord(session, rec, src)
                 if (istore != None):
-                    istore.delete_terms(session, self, processed, record)
+                    istore.delete_terms(session, self, processed, rec)
                 
     def begin_indexing(self, session):
         # Find all indexStores
@@ -409,7 +407,7 @@ class SimpleIndex(Index):
                     rs.termWeight += w                    
             return rs
 
-    def scan(self, session, clause, numReq, direction=">="):
+    def scan(self, session, clause, nTerms, direction=">="):
         # Process term.
         p = self.permissionHandlers.get('info:srw/operation/2/scan', None)
         if p:
@@ -423,91 +421,97 @@ class SimpleIndex(Index):
         for src in self.sources.get(clause.relation.toCQL(), self.sources.get(clause.relation.value, self.sources[u'data'])):
             res.update(src[1].process(session, [[clause.term.value]]))
 
-        if (len(res) <> 1):
+        if len(res) == 0:
+            # no term, so start at the beginning
+            res = {'' : ''}
+        elif (len(res) != 1):
             d = SRWDiagnostics.Diagnostic24()
             d.details = "%s" % (clause.term.value)
             raise d
         store = self.get_path(session, 'indexStore')
-        tList = store.fetch_termList(session, self, res.keys()[0], numReq=numReq, relation=direction, summary=1)
+        tList = store.fetch_termList(session, self, res.keys()[0], nTerms=nTerms, relation=direction, summary=1)
         # list of (term, occs)
         return tList
 
-    def serialise_terms(self, termid, terms, recs=0, occs=0):
+    def serialize_term(self, session, termId, data, nRecs=0, nOccs=0):
         # in: list of longs
-        if not recs:
-            recs = len(terms) / 3
-            occs = sum(terms[2::3])
-        fmt = 'lll' * (recs + 1)
-        params = [fmt, termid, recs, occs] + terms
+        if not nRecs:
+            nRecs = len(data) / 3
+            nOccs = sum(data[2::3])
+        fmt = 'lll' * (nRecs + 1)
+        params = [fmt, termId, nRecs, nOccs] + data
         return struct.pack(*params)
         
-    def deserialise_terms(self, data, prox=1):
-        fmt = 'lll' * (len(data) / (3 * self.longStructSize))
-        return struct.unpack(fmt, data)
+    def deserialize_term(self, session, data, nRecs=-1, prox=1):
+        if nRecs == -1:
+            fmt = 'lll' * (len(data) / (3 * self.longStructSize))
+            return struct.unpack(fmt, data)
+        else:
+            fmt = "lll" * (nRecs + 1)
+            return struct.unpack(fmt, data[:(nRecs+1) *3 * self.longStructSize])
 
-    def calc_sectionOffsets(self, session, start, num, dlen=0):
+    def calc_sectionOffsets(self, session, start, nRecs, dataLen=0):
         #tid, recs, occs, (store, rec, freq)+
         a = (self.longStructSize * 3) + (self.longStructSize *start * 3)
-        b = (self.longStructSize * 3 * num)
+        b = (self.longStructSize * 3 * nRecs)
         return [(a,b)]
 
-    def merge_terms(self, structTerms, newTerms, op="replace", recs=0, occs=0):
+    def merge_term(self, session, currentData, newData, op="replace", nRecs=0, nOccs=0):
         # structTerms = output of deserialiseTerms
         # newTerms = flat list
         # op = replace, add, delete
         # recs, occs = total recs/occs in newTerms
 
-        (termid, oldTotalRecs, oldTotalOccs) = structTerms[0:3]
-        structTerms = list(structTerms[3:])
+        (termid, oldTotalRecs, oldTotalOccs) = currentData[0:3]
+        currentData = list(currentData[3:])
 
         if op == 'add':
-            structTerms.extend(newTerms)
-            if recs:
-                trecs = oldTotalRecs + recs
-                toccs = oldTotalOccs + occs
+            currentData.extend(newData)
+            if nRecs:
+                trecs = oldTotalRecs + nRecs
+                toccs = oldTotalOccs + nOccs
             else:
-                trecs = oldTotalRecs + len(newTerms) / 3
-                toccs = oldTotalOccs + sum(newTerms[2::3])
+                trecs = oldTotalRecs + len(newData) / 3
+                toccs = oldTotalOccs + sum(newData[2::3])
         elif op == 'replace':
-            for n in range(0,len(newTerms),3):
-                docid = newTerms[n]
-                storeid = newTerms[n+1]                
+            for n in range(0,len(newData),3):
+                docid = newData[n]
+                storeid = newData[n+1]                
                 replaced = 0
-                for x in range(3, len(structTerms), 3):
-                    if structTerms[x] == docid and structTerms[x+1] == storeid:
-                        structTerms[x+2] == newTerms[n+2]
+                for x in range(3, len(currentData), 3):
+                    if currentData[x] == docid and currentData[x+1] == storeid:
+                        currentData[x+2] == newData[n+2]
                         replaced = 1
                         break
                 if not replaced:
-                    structTerms.extend([docid, storeid, newTerms[n+2]])
-
-            trecs = len(structTerms) / 3
-            toccs = sum(structTerms[2::3])
+                    currentData.extend([docid, storeid, newData[n+2]])
+            trecs = len(currentData) / 3
+            toccs = sum(currentData[2::3])
         elif op == 'delete':            
-            for n in range(0,len(newTerms),3):
-                docid = newTerms[n]
-                storeid = newTerms[n+1]                
-                for x in range(0, len(structTerms), 3):
-                    if structTerms[x] == docid and structTerms[x+1] == storeid:
-                        del structTerms[x:x+3]
+            for n in range(0,len(newData),3):
+                docid = newData[n]
+                storeid = newData[n+1]                
+                for x in range(0, len(currentData), 3):
+                    if currentData[x] == docid and currentData[x+1] == storeid:
+                        del currentData[x:x+3]
                         break
-            trecs = len(structTerms) / 3
-            toccs = sum(structTerms[2::3])
+            trecs = len(currentData) / 3
+            toccs = sum(currentData[2::3])
                     
-        merged = [termid, trecs, toccs] + structTerms
+        merged = [termid, trecs, toccs] + currentData
         return merged
 
-    def construct_item(self, session, term, rsitype="SimpleResultSetItem"):
+    def construct_resultSetItem(self, session, term, rsiType="SimpleResultSetItem"):
         # in: single triple
         # out: resultSetItem
         # Need to map recordStore and docid at indexStore
-        return self.indexStore.create_item(session, term[0], term[1], term[2], rsitype)
+        return self.indexStore.construct_resultSetItem(session, term[0], term[1], term[2], rsitype)
 
     def construct_resultSet(self, session, terms, queryHash={}):
         # in: unpacked
         # out: resultSet
         l = len(terms)        
-        ci = self.indexStore.create_item
+        ci = self.indexStore.construct_resultSetItem
 
         s = self.resultSetClass(session, [])
         rsilist = []
@@ -530,19 +534,16 @@ class SimpleIndex(Index):
         return s
 
 
-
-
-
     # pass-throughs to indexStore
 
-    def store_terms(self, session, data, record):
-        self.indexStore.store_terms(session, self, data, record)
+    def store_terms(self, session, data, rec):
+        self.indexStore.store_terms(session, self, data, rec)
 
     def fetch_term(self, session, term, summary=False, prox=True):
         return self.indexStore.fetch_term(session, self, term, summary, prox)
 
-    def fetch_termList(self, session, term, numReq=0, relation="", end="", summary=0):
-        return self.indexStore.fetch_termList(session, self, term, numReq, relation, end, summary)
+    def fetch_termList(self, session, term, nTerms=0, relation="", end="", summary=0):
+        return self.indexStore.fetch_termList(session, self, term, nTerms, relation, end, summary)
 
     def fetch_termById(self, session, termId):
         return self.indexStore.fetch_termById(session, self, termId)
@@ -556,15 +557,15 @@ class SimpleIndex(Index):
     def fetch_summary(self, session):
 	return self.indexStore.fetch_summary(session, self)
 
-    def fetch_termFrequencies(self, session, which='rec', position=-1, number=100, direction="<="):
-        return self.indexStore.fetch_termFrequencies(session, self, which, position, number, direction)
+    def fetch_termFrequencies(self, session, mType='rec', start=-1, nTerms=100, direction="<="):
+        return self.indexStore.fetch_termFrequencies(session, self, mType, start, nTerms, direction)
 
 
 
     
 
 class ProximityIndex(SimpleIndex):
-    """ Need to use prox extracter """
+    """ Need to use prox extractor """
 
     canExtractSection = 0
     _possibleSettings = {'nProxInts' : {'docs' : "", 'type' : int}}
@@ -573,10 +574,10 @@ class ProximityIndex(SimpleIndex):
         SimpleIndex.__init__(self, session, config, parent)
         self.nProxInts = self.get_setting(session, 'nProxInts', 2)
 
-    def serialise_terms(self, termid, terms, recs=0, occs=0):
+    def serialize_term(self, session, termId, data, nRecs=0, nOccs=0):
         # in: list of longs
-        fmt = 'l' * (len(terms) + 3)
-        params = [fmt, termid, recs, occs] + terms
+        fmt = 'l' * (len(data) + 3)
+        params = [fmt, termId, nRecs, nOccs] + data
         try:
             val =  struct.pack(*params)
         except:
@@ -584,7 +585,7 @@ class ProximityIndex(SimpleIndex):
             raise
         return val
         
-    def deserialise_terms(self, data, prox=1):
+    def deserialize_term(self, session, data, nRecs=-1, prox=1):
         fmt = 'L' * (len(data) / self.longStructSize)
         flat = struct.unpack(fmt, data)
         (termid, totalRecs, totalOccs) = flat[:3]
@@ -598,88 +599,88 @@ class ProximityIndex(SimpleIndex):
             docs.append(doc)
         return docs
 
-    def merge_terms(self, structTerms, newTerms, op="replace", recs=0, occs=0):
+    def merge_term(self, session, currentData, newData, op="replace", nRecs=0, nOccs=0):
         # in: struct: deserialised, new: flag
         # out: flat
         
-        (termid, oldTotalRecs, oldTotalOccs) = structTerms[0:3]
-        structTerms = list(structTerms[3:])
+        (termid, oldTotalRecs, oldTotalOccs) = currentData[0:3]
+        currentData = list(currentData[3:])
 
         if op == 'add':
             # flatten
             terms = []
-            for t in structTerms:
+            for t in currentData:
                 terms.extend(t)
-            terms.extend(newTerms)
-            structTerms = terms
-            if recs != 0:
-                trecs = oldTotalRecs + recs
-                toccs = oldTotalOccs + occs
+            terms.extend(newData)
+            currentData = terms
+            if nRecs != 0:
+                trecs = oldTotalRecs + nRecs
+                toccs = oldTotalOccs + nOccs
             else:
                 # ...
-                trecs = oldTotalRecs + len(newTerms)
+                trecs = oldTotalRecs + len(newData)
                 toccs = oldTotalOccs 
-                for t in newTerms:            
+                for t in newData:            
                     toccs = toccs + t[2]
                 raise ValueError("FIXME:  mergeTerms needs recs/occs params")
         elif op == 'replace':
 
-            recs = [(x[0], x[1]) for x in structTerms]
+            recs = [(x[0], x[1]) for x in currentData]
             newOccs = 0
 
             idx = 0
-            while idx < len(newTerms):
-                end = idx + 3 + (newTerms[idx+2]*self.nProxInts)
-                new = list(newTerms[idx:end])
+            while idx < len(newData):
+                end = idx + 3 + (newData[idx+2]*self.nProxInts)
+                new = list(newData[idx:end])
                 idx = end
                 docid = new[0]
                 storeid = new[1]                                
                 if (docid, storeid) in recs:
                     loc = recs.index((docid, storeid))
                     # subtract old occs
-                    occs = structTerms[loc][2]
+                    occs = currentData[loc][2]
                     newOccs -= occs
-                    structTerms[loc] = new
+                    currentData[loc] = new
                 else:
-                    structTerms.append(new)
+                    currentData.append(new)
                 newOccs += new[2]
-            trecs = len(structTerms)
+            trecs = len(currentData)
             toccs = oldTotalOccs + newOccs            
-            # now flatten structTerms
+            # now flatten currentData
             n = []
-            for s in structTerms:
+            for s in currentData:
                 n.extend(s)
-            structTerms = n
+            currentData = n
                 
         elif op == 'delete':            
             delOccs = 0
             idx = 0
-            while idx < len(newTerms):
-                doc = list(newTerms[idx:idx+3])
+            while idx < len(newData):
+                doc = list(newData[idx:idx+3])
                 idx = idx + 3 + (doc[2]*self.nProxInts)
-                for x in range(len(structTerms)):
-                    old = structTerms[x]
+                for x in range(len(currentData)):
+                    old = currentData[x]
                     if old[0] == doc[0] and old[1] == doc[1]:
                         delOccs = delOccs + old[2]
-                        del structTerms[x]
+                        del currentData[x]
                         break
-            trecs = len(structTerms) -3
+            trecs = len(currentData) -3
             toccs = oldTotalOccs - delOccs
             # now flatten
             terms = []
-            for t in structTerms:
+            for t in currentData:
                 terms.extend(t)
-            structTerms = terms
+            currentData = terms
                     
         merged = [termid, trecs, toccs]
-        merged.extend(structTerms)
+        merged.extend(currentData)
         return merged
 
-    def construct_item(self, session, term):
+    def construct_resultSetItem(self, session, term, rsiType=""):
         # in: single triple
         # out: resultSetItem
         # Need to map recordStore and docid at indexStore
-        item = self.indexStore.create_item(session, term[0], term[1], term[2])
+        item = self.indexStore.construct_resultSetItem(session, term[0], term[1], term[2])
         item.proxInfo = term[3:]
         return item
 
@@ -688,7 +689,7 @@ class ProximityIndex(SimpleIndex):
         # out: resultSet
 
         rsilist = []
-        ci = self.indexStore.create_item
+        ci = self.indexStore.construct_resultSetItem
         s = self.resultSetClass(session, [])
         for t in terms[3:]:
             item = ci(session, t[0], t[1], t[2])
@@ -716,7 +717,7 @@ class ProximityIndex(SimpleIndex):
 
 
 class RangeIndex(SimpleIndex):
-    """ Need to use a RangeExtracter """
+    """ Need to use a RangeExtractor """
     # 1 3 should make 1, 2, 3
     # a c should match a* b* c
     # unsure about this - RangeIndex only necessary for 'encloses' queries - John
@@ -754,7 +755,7 @@ class RangeIndex(SimpleIndex):
             startK = keys[0]
             endK = keys[1]
             if clause.relation.value == 'encloses':
-                # RangeExtracter should already return the range in ascending order
+                # RangeExtractor should already return the range in ascending order
                 termList = store.fetch_termList(session, self, startK, relation='<')
                 termList = filter(lambda t: endK < t[0].split('\t', 1)[1], termList)
                 matches.extend([self.construct_resultSet(session, t[1]) for t in termList])
@@ -804,29 +805,28 @@ class BitmapIndex(SimpleIndex):
                 self.recordStore = rs.id
         self.resultSetClass = BitmapResultSet
 
-    def serialise_terms(self, termid, terms, recs=0, occs=0):
+    def serialize_term(self, session, termId, data, nRecs=0, nOccs=0):
         # in: list of longs
-        if len(terms) == 1:
+        if len(data) == 1 and isinstance(data[0], SimpleBitfield):
             # HACK.  Accept bitfield from mergeTerms
-            bf = terms[0]
+            bf = data[0]
         else:
             bf = SimpleBitfield()
-            for item in terms[::3]:
+            for item in data[::3]:
                 bf[item] = 1
-        pack = struct.pack('lll', termid, recs, occs)
+        pack = struct.pack('lll', termId, nRecs, nOccs)
         val = pack + str(bf)
         return val
 
-    def calc_sectionOffsets(self, session, start, num, dlen):
+    def calc_sectionOffsets(self, session, start, nRecs, dataLen):
         # order is (of course) backwards
-        # so we need length etc etc.
-
-        start = (dlen - (start / 4) +1)  - (num/4)
-        packing = dlen - (start + (num/4)+1)
-        return [(start, (num/4)+1, '0x', '0'*packing)]
+        # so we need length of data etc etc.
+        start = (dataLen - (start / 4) +1)  - (nRecs/4)
+        packing = dataLen - (start + (nRecs/4)+1)
+        return [(start, (nRecs/4)+1, '0x', '0'*packing)]
 
         
-    def deserialise_terms(self, data, prox=1):
+    def deserialize_term(self, session, data, nRecs=-1, prox=0):
 	lsize = 3 * self.longStructSize
 	longs = data[:lsize]
         terms = list(struct.unpack('lll', longs))
@@ -835,24 +835,24 @@ class BitmapIndex(SimpleIndex):
             terms.append(bf)
         return terms
 
-    def merge_terms(self, structTerms, newTerms, op="replace", recs=0, occs=0):
-        (termid, oldTotalRecs, oldTotalOccs, oldBf) = structTerms
+    def merge_term(self, session, currentData, newData, op="replace", nRecs=0, nOccs=0):
+        (termid, oldTotalRecs, oldTotalOccs, oldBf) = currentData
         if op in['add', 'replace']:
-            for t in newTerms[1::3]:
+            for t in newData[1::3]:
                 oldBf[t] = 1
         elif op == 'delete':            
-            for t in newTerms[1::3]:
+            for t in newData[1::3]:
                 oldBf[t] = 0
         trecs = oldBf.lenTrueItems()
         toccs = trecs
         merged = [termid, trecs, toccs, oldBf]
         return merged
 
-    def construct_item(self, session, term):
+    def construct_resultSetItem(self, session, term, rsiType=""):
         # in: single triple
         # out: resultSetItem
         # Need to map recordStore and docid at indexStore
-        return self.indexStore.create_item(session, term[0], term[1], term[2])
+        return self.indexStore.construct_resultSetItem(session, term[0], term[1], term[2])
 
     def construct_resultSet(self, session, terms, queryHash={}):
         # in: unpacked
@@ -877,12 +877,6 @@ class BitmapIndex(SimpleIndex):
         return s
         
 
-try:
-    from resultSet import ArrayResultSet
-except:
-    raise
-
-
 class RecordIdentifierIndex(Index):
 
     _possibleSettings = {'recordStore' : {"docs" : "The recordStore in which the records are kept (as this info not maintained in the index)"}}
@@ -891,12 +885,12 @@ class RecordIdentifierIndex(Index):
         pass
     def commit_indexing(self, session):
         pass
-    def index_record(self, session, record):
-        return record
-    def delete_record(self, session, record):
+    def index_record(self, session, rec):
+        return rec
+    def delete_record(self, session, rec):
         pass
 
-    def scan(self, session, clause, numReq, direction):
+    def scan(self, session, clause, nTerms, direction):
         raise NotImplementedError()
 
     def search(self, session, clause, db):
@@ -942,12 +936,12 @@ class ReverseMetadataIndex(Index):
         pass
     def commit_indexing(self, session):
         pass
-    def index_record(self, session, record):
+    def index_record(self, session, rec):
         return record
-    def delete_record(self, session, record):
+    def delete_record(self, session, rec):
         pass
 
-    def scan(self, session, clause, numReq, direction):
+    def scan(self, session, clause, nTerms, direction):
         raise NotImplementedError()
 
     def search(self, session, clause, db):
@@ -983,6 +977,8 @@ class ReverseMetadataIndex(Index):
 
 try:
     import numarray as na
+    from resultSet import ArrayResultSet
+
         
     class ArrayIndex(SimpleIndex):
         # Store tuples of docid, occurences only
@@ -995,31 +991,32 @@ try:
             self.recordStore = self.get_path(session, 'recordStore')        
             self.resultSetClass = ArrayResultSet
 
-        def serialise_terms(self, termid, terms, recs=0, occs=0):
+        def serialize_term(self, session, termId, data, nRecs=0, nOccs=0):
             # in:  list or array
-            if type(terms) == types.ListType:
-                if len(terms) == 1:
+            if type(data) == types.ListType:
+                if len(data) == 1:
                     # [array()]
-                    terms = terms[0]
+                    data = data[0]
                 else:
                     # Will actually be list of triples as we haven't thrown out recStore                
-                    nterms = len(terms) / 3
-                    terms = na.array(terms, 'u4', shape=(nterms, 3))
+                    nterms = len(data) / 3
+                    data = na.array(data, 'u4', shape=(nterms, 3))
                     # now throw out recStore by array mashing
-                    arr2 = na.transpose(terms)
-                    terms = na.transpose(
+                    arr2 = na.transpose(data)
+                    data = na.transpose(
                         na.reshape(
                         na.concatenate([arr2[0], arr2[2]])
                         , (2,nterms)
                         ))
-            tval = terms.tostring()
+            tval = data.tostring()
             fmt = 'lll' 
-            totalRecs = len(terms)
-            totalOccs = sum(terms[:,1])
-            pack = struct.pack(fmt, termid, totalRecs, totalOccs)
+            if not nRecs:
+                nRecs = len(data)
+                nOccs = sum(data[:,1])
+            pack = struct.pack(fmt, termId, nRecs, nOccs)
             return pack + tval
 
-        def deserialise_terms(self, data, prox=0):
+        def deserialize_term(self, session, data, nRecs=-1, prox=0):
             # in: tostring()ified array
             # w/ metadata
 	    lsize = 3 * self.longStructSize
@@ -1030,20 +1027,20 @@ try:
             else:
                 return [termid, totalRecs, totalOccs]            
 
-        def calc_sectionOffsets(self, session, start, num, dlen=0):
+        def calc_sectionOffsets(self, session, start, nRecs, dataLen=0):
             a = (self.longStructSize * 3) + (self.longStructSize *start * 2)
-            b = (self.longStructSize * 2 * num)
+            b = (self.longStructSize * 2 * nRecs)
             return [(a,b)]
 
-        def merge_terms(self, structTerms, newTerms, op="replace", recs=0, occs=0):
-            # newTerms is a flat list
+        def merge_term(self, session, currentData, newData, op="replace", nRecs=0, nOccs=0):
+            # newData is a flat list
             # oldTerms is an array of pairs
 
-            (termid, oldTotalRecs, oldTotalOccs, oldTerms) = structTerms
+            (termid, oldTotalRecs, oldTotalOccs, oldTerms) = currentData
             
             if op == 'add':
-                nterms = len(newTerms) / 3
-                terms = na.array(newTerms, 'u4', shape=(nterms, 3))
+                nterms = len(newData) / 3
+                terms = na.array(newData, 'u4', shape=(nterms, 3))
                 # now throw out recStore by array mashing
                 arr2 = na.transpose(terms)
                 occsArray = arr2[2]
@@ -1053,25 +1050,25 @@ try:
                     , (2,nterms)
                     ))
                 merged = na.concatenate([oldTerms, terms])
-                if recs != 0:
-                    trecs = oldTotalRecs + recs
-                    toccs = oldTotalOccs + occs
+                if nRecs != 0:
+                    trecs = oldTotalRecs + nRecs
+                    toccs = oldTotalOccs + nOccs
                 else:
                     trecs = oldTotalRecs + nterms
                     toccs = oldTotalOccs + sum(occs)
             elif op == 'replace':
                 arraydict = dict(oldTerms)
-                for n in range(0,len(newTerms),3):
-                    docid = newTerms[n]
-                    freq = newTerms[n+2]
+                for n in range(0,len(newData),3):
+                    docid = newData[n]
+                    freq = newData[n+2]
                     arraydict[docid] = freq
                 merged = na.array(arraydict.items())
                 trecs = len(arraydict)
                 toccs = sum(arraydict.values())
             elif op == 'delete':            
                 arraydict = dict(oldTerms)
-                for n in range(0,len(newTerms),3):
-                    docid = newTerms[n]
+                for n in range(0,len(newData),3):
+                    docid = newData[n]
                     try:
                         del arraydict[docid]
                     except:
@@ -1110,28 +1107,28 @@ try:
             ArrayIndex.__init__(self, session, config, parent)
             self.nProxInts = self.get_setting(session, 'nProxInts', 2)
 
-        def calc_sectionOffsets(self, session, start, num, dlen=0):
+        def calc_sectionOffsets(self, session, start, nRecs, dataLen=0):
             a = (self.longStructSize * 3) + (self.longStructSize *start * 2)
-            b = (self.longStructSize * self.nProxInts * num)
+            b = (self.longStructSize * self.nProxInts * nRecs)
             return [(a,b)]
         
-        def serialise_terms(self, termid, terms, recs=0, occs=0):
+        def serialize_term(self, session, termId, data, nRecs=0, nOccs=0):
             # in: list of longs
             # out: LLL array L+
             flat = []
             prox = []
             t = 0
-            lt = len(terms)
+            lt = len(data)
             if lt == 2:
                 # already in right format
-                a = terms[0]
-                prox = terms[1]
+                a = data[0]
+                prox = data[1]
             else:
                 while t < lt:
                     # rec, store, freq, [elem, idx]+
-                    (id, freq) = terms[t], terms[t+2]
+                    (id, freq) = data[t], data[t+2]
                     end = t+3+(freq*self.nProxInts)
-                    itemprox = terms[t+3:t+3+(freq*self.nProxInts)]
+                    itemprox = data[t+3:t+3+(freq*self.nProxInts)]
                     flat.extend([id, freq])
                     prox.extend(itemprox)                
                     t = end
@@ -1141,16 +1138,16 @@ try:
             params = [fmt]
             params.extend(prox)
             proxstr = struct.pack(*params)            
-            head = struct.pack('lll', termid, recs, occs)
+            head = struct.pack('lll', termId, nRecs, nOccs)
             return head + arraystr + proxstr
         
-        def deserialise_terms(self, data, prox=1, numReq=0 ):
+        def deserialize_term(self, session, data, nRecs=-1, prox=1 ):
             lss = self.longStructSize * 3
             (termid, totalRecs, totalOccs) = struct.unpack('lll', data[:lss])
             if len(data) > lss:
-                if numReq:
-                    arrlen = numReq * 8
-                    shape = (numReq, 2)
+                if nRecs != -1:
+                    arrlen = nRecs * 8
+                    shape = (nRecs, 2)
                     prox = 0
                 else:
                     arrlen = totalRecs * 8
@@ -1174,9 +1171,9 @@ try:
             else:
                 return [termid, totalRecs, totalOccs]
 
-        def merge_terms(self, structTerms, newTerms, op="replace", recs=0, occs=0):
-            # newTerms is a flat list
-            (termid, oldTotalRecs, oldTotalOccs, oldTerms, prox) = structTerms
+        def merge_term(self, session, currentData, newData, op="replace", nRecs=0, nOccs=0):
+            # newData is a flat list
+            (termid, oldTotalRecs, oldTotalOccs, oldTerms, prox) = currentData
             if op == 'add':
                 # flatten existing and let serialise reshape
                 terms = []
@@ -1184,10 +1181,10 @@ try:
                     terms.extend([t[0], 0, t[1]])
                     for p in prox[t[0]]:
                         terms.extend(list(p))
-                terms.extend(newTerms)
-                if recs != 0:
-                    trecs = oldTotalRecs + recs
-                    toccs = oldTotalOccs + occs
+                terms.extend(newData)
+                if nRecs != 0:
+                    trecs = oldTotalRecs + nRecs
+                    toccs = oldTotalOccs + nOccs
                 else:
                     raise NotImplementedError                
                 full = [termid, trecs, toccs]
@@ -1195,14 +1192,14 @@ try:
                 return full
             elif op == "replace":
                 arraydict = dict(oldTerms)
-                # now step through flat newTerms list
-                lt = len(newTerms)
+                # now step through flat newData list
+                lt = len(newData)
                 t = 0
                 while t < lt:
                     # rec, store, freq, [elem, idx]+
-                    (id, freq) = newTerms[t], newTerms[t+2]
+                    (id, freq) = newData[t], newData[t+2]
                     end = t+3+(freq*self.nProxInts)
-                    itemprox = newTerms[t+3:t+3+(freq*self.nProxInts)]
+                    itemprox = newData[t+3:t+3+(freq*self.nProxInts)]
                     arraydict[id] = freq
                     prox[id] = itemprox
                     t = end
@@ -1213,12 +1210,12 @@ try:
                 
             elif op == "delete":
                 arraydict = dict(oldTerms)
-                # now step through flat newTerms list
-                lt = len(newTerms)
+                # now step through flat newData list
+                lt = len(newData)
                 t = 0
                 while t < lt:
                     # rec, store, freq, [elem, idx]+
-                    (id, freq) = newTerms[t], newTerms[t+2]
+                    (id, freq) = newData[t], newData[t+2]
                     end = t+3+(freq*self.nProxInts)
                     try:
                         del arraydict[id]
@@ -1263,6 +1260,9 @@ except:
     raise
 
 
+
+
+# XXX This should be deprecated by now right?
 class ClusterExtractionIndex(SimpleIndex):
 
     def _handleConfigNode(self, session, node):
@@ -1294,8 +1294,8 @@ class ClusterExtractionIndex(SimpleIndex):
                             map.append(process)
                     vxp = verifyXPaths([map[0]])
                     if (len(map) < 3):
-                        # default ExactExtracter
-                        map.append([['extracter', 'ExactExtracter']])
+                        # default ExactExtractor
+                        map.append([['extractor', 'ExactExtractor']])
                     if (t == u'key'):
                         self.keyMap = [vxp[0], map[1], map[2]]
                     else:
@@ -1346,11 +1346,11 @@ class ClusterExtractionIndex(SimpleIndex):
             if not okay:
                 raise PermissionException("Permission required to cluster using %s" % self.id)
 
-        raw = rec.process_xpath(self.keyMap[0])
+        raw = rec.process_xpath(session, self.keyMap[0])
         keyData = self.keyMap[2].process(session, [raw])
         fieldData = []
         for map in self.maps:
-            raw = rec.process_xpath(map[0])
+            raw = rec.process_xpath(session, map[0])
             fd = map[2].process(session, [raw])
             for f in fd.keys():
                 fieldData.append("%s\x00%s\x00" % (map[1], f))
@@ -1363,5 +1363,5 @@ class ClusterExtractionIndex(SimpleIndex):
                 print "%s failed to write: %r" % (self.id, k)
                 raise
 
-    def delete_record(self, session, record):
+    def delete_record(self, session, rec):
         pass

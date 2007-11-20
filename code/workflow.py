@@ -24,9 +24,9 @@ class SimpleWorkflow(Workflow):
         self.fnHash = {u'preParser' : 'process_document',
                        u'parser' : 'process_document',
                        u'transformer' : 'process_record',
-                       u'extracter' : 'process_xpathResult',
-                       u'normaliser' : 'process_hash',
-                       u'xpathObject' : 'process_record',
+                       u'extractor' : 'process_xpathResult',
+                       u'normalizer' : 'process_hash',
+                       u'xpathProcessor' : 'process_record',
                        u'documentFactory' : 'load',
                        u'logger' : 'log',
                        u'documentStore' : 'create_document',
@@ -40,7 +40,7 @@ class SimpleWorkflow(Workflow):
                        u'workflow' : 'process',
                        u'index' : 'store_terms',
                        u'database' : 'search',
-                       u'tokenMerge' : 'process_hash',
+                       u'tokenMerger' : 'process_hash',
                        u'tokenizer' : 'process_hash'
                        }
         self.singleFunctions = [u'begin_indexing', u'commit_indexing',
@@ -158,13 +158,13 @@ class SimpleWorkflow(Workflow):
         elif type == 'documentFactory' and function == 'load' and input == None:
             code.append('input = object.load(session)')
         elif type == 'documentStore':
-            # Check for normaliser output  (deprecated, use documentFactory)
+            # Check for normalizer output  (deprecated, use documentFactory)
             code.append('if type(input) == {}.__class__:')
             code.append('    for k in input.keys():')
             code.append('        object.%s(session, k)' % function)
             code.append('else:')
             code.append('    object.%s(session, input)' % function)
-        elif type == 'xpathObject':
+        elif type == 'xpathProcessor':
             code.append('global inRecord')
             code.append('inRecord = input')
             code.append('input = object.process_record(session, input)')
@@ -296,13 +296,13 @@ class CachingWorkflow(SimpleWorkflow):
         elif type == 'documentFactory' and function == 'load' and input == None:
             code.append('input = %s.load(session)' % o)
         elif type == 'documentStore':
-            # Check for normaliser output
+            # Check for normalizer output
             code.append('if type(input) == {}.__class__:')
             code.append('    for k in input.keys():')
             code.append('        %s.%s(session, k)' % (o, function))
             code.append('else:')
             code.append('    %s.%s(session, input)' % (o, function))
-        elif type == 'xpathObject':
+        elif type == 'xpathProcessor':
             code.append('global inRecord')
             code.append('inRecord = input')
             code.append('input = %s.process_record(session, input)' % o)

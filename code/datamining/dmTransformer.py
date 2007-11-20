@@ -117,14 +117,16 @@ class VectorTransformer(Transformer):
             v = nv
 
         # now convert to {}
+        # Slow: [vhash.__setitem__(x[0], x[1]) for x in v]
+
         vhash = {}
-        [vhash.__setitem__(x[0], x[1]) for x in v]
+        vhash.update(v)
 
         # Find label from self or data
         l = self.label
         if l == "":
             if self.labelXPath:
-                l = rec.process_xpath(self.labelXPath)
+                l = rec.process_xpath(session, self.labelXPath)
             elif self.labelXPathObject:
                 l = self.labelXPathObject.process_record(session, rec)
             else:
@@ -153,7 +155,7 @@ class SVMFileTransformer(VectorTransformer):
 
     def process_record(self, session, rec):
         doc = BaseSVMTransformer.process_record(self, session, rec)
-        (l,v) = doc.get_raw()
+        (l,v) = doc.get_raw(session)
         full = v.items()
         full.sort()
         vstr = ' '.join(["%s:%s" % tuple(x) for x in full])

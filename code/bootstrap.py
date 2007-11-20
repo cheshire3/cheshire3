@@ -1,6 +1,6 @@
 
 # We need some objects that don't need configuring in order to bootstrap
-# Eg:  Need a parser to parser the configuration files for parsers!
+# Eg:  Need a parser to parse the configuration files for parsers!
 # (Also to avoid import errors in Python)
 
 from xml.dom.minidom import parseString
@@ -8,7 +8,7 @@ from xml.dom.minidom import parseString
 class BootstrapParser:
 
     def process_document(self, session, doc):
-        xml = doc.get_raw()
+        xml = doc.get_raw(session)
         dom = parseString(xml)
         rec = BootstrapRecord(dom, xml)
         return rec
@@ -22,13 +22,13 @@ class BootstrapRecord:
         self.dom = dom
         self.xml = xml
 
-    def get_dom(self):
+    def get_dom(self, session):
         return self.dom
 
-    def get_xml(self):
+    def get_xml(self, session):
         return self.xml
 
-    def get_sax(self):
+    def get_sax(self, session):
         raise(NotImplementedError)
 
 class BootstrapDocument:
@@ -39,7 +39,7 @@ class BootstrapDocument:
         # This means we have hanging file handles, but less memory usage...
         self.handle = fileHandle
 
-    def get_raw(self):
+    def get_raw(self, session):
         if (self.txt):
             return self.txt
         elif (self.handle <> None):

@@ -56,10 +56,10 @@ class Cheshire3OaiMetadataWriter:
         if self.txr:
             doc = self.txr.process_record(session, rec) # use transformer obejct
         else:
-            doc = StringDocument(rec.get_xml()) # make no assumptions about class of record
+            doc = StringDocument(rec.get_xml(session)) # make no assumptions about class of record
 
         lxmlRec = lxmlParser.process_document(session, doc)
-        dom = lxmlRec.get_dom()
+        dom = lxmlRec.get_dom(session)
         return element.append(dom)
       
     #= end OaiMetadataWriter ------------------------------------------------------

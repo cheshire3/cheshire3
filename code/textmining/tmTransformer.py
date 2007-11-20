@@ -54,12 +54,12 @@ class TsujiiXPathTransformer(PosTransformer, TsujiiObject):
     def process_record(self, session, rec):
         doc = []
         for c in self.copyElems:
-            res = rec.process_xpath(c[0], c[1])
+            res = rec.process_xpath(session, c[0], c[1])
             for match in res:
-                txt = rec.get_xml(match)
+                txt = rec.get_xml(session, match)
                 doc.append(txt)
         for t in self.tagElems:
-            res = rec.process_xpath(t[0], t[1])
+            res = rec.process_xpath(session, t[0], t[1])
             for match in res:
                 # Process all text nodes together
                 totag = []

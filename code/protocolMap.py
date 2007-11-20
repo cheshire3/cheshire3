@@ -1,7 +1,7 @@
 # Map incoming request stuff into local objects
 # Eg dc.title -> l5r-idx-cardname object
 
-from baseObjects import ProtocolMap, Extracter
+from baseObjects import ProtocolMap, Extractor
 from configParser import C3Object
 from c3errors import ConfigFileException, ObjectDoesNotExistException
 from utils import elementType, textType, flattenTexts

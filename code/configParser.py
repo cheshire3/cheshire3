@@ -57,7 +57,7 @@ class C3Object(object):
                 record = BSParser.process_document(session,doc)
         except Exception, e:
             raise ConfigFileException("Cannot parse %s: %s" % (fileName, e))
-        dom = record.get_dom()
+        dom = record.get_dom(session)
 
         return dom
 
@@ -262,14 +262,14 @@ class C3Object(object):
         
         for p in self.permissionHandlers.keys():
             if p[0:5] == 'c3fn:':
-                self.auth_function(p[5:])
+                self.add_auth(p[5:])
 
         # Built, maybe set function logging
         log = self.get_setting(session, 'log')
         if (log):
             logList = log.strip().split()
             for l in logList:
-                self.log_function(l)
+                self.add_logging(l)
             del self.settings['log']
 
         # Dynamically Instantiate objects. This is mindbending :}
@@ -290,7 +290,7 @@ class C3Object(object):
             if confStore != None:
                 for rec in confStore:
                     # do something with config
-                    node = rec.get_dom()
+                    node = rec.get_dom(session)
                     node= node.childNodes[0]
                     nid = node.getAttributeNS(None, 'id')
                     node.setAttributeNS(None, 'configStore', confStore.id)
@@ -361,7 +361,7 @@ class C3Object(object):
         else:
             return default
 
-    def log_function(self, name):
+    def add_logging(self, name):
         """ Set a named function to log invocations."""
         if (name == "__all__"):
             names = dir(self)
@@ -375,7 +375,7 @@ class C3Object(object):
                 exec code
                 setattr(self, name, MethodType(locals()['mylogfn'], self, self.__class__))
 
-    def unlog_function(self, name):
+    def remove_logging(self, name):
         """Remove the logging from a named function."""
         if (name == "__all__"):
             names = dir(self)
@@ -386,7 +386,7 @@ class C3Object(object):
                 setattr(self, name, getattr(self, '__postlog_%s' % name))
                 delattr(self, '__postlog_%s' % name)
 
-    def auth_function(self, name):
+    def add_auth(self, name):
         """Add an authorisation layer on top of a named function."""
         if (hasattr(self, name) and callable(getattr(self,name)) and name[0] <> '_'):
             func = getattr(self, name)
@@ -405,7 +405,7 @@ def myauthfn(self, session, *args, **kw):
             setattr(self, name, MethodType(locals()['myauthfn'], self, self.__class__))
 
 
-    def unauth_function(self, name):
+    def remove_auth(self, name):
         """Remove the authorisation requirement from the named function."""
         if (name == "__all__"):
             names = dir(self)

@@ -4,7 +4,7 @@ from configParser import C3Object
 from baseStore import SimpleStore
 from recordStore import SimpleRecordStore
 from resultSet import SimpleResultSetItem
-from documentFactory import BaseDocumentStream, BaseDocumentFactory
+from documentFactory import BaseDocumentStream, SimpleDocumentFactory
 from resultSetStore import SimpleResultSetStore
 from resultSet import SimpleResultSet
 from baseObjects import IndexStore
@@ -86,7 +86,7 @@ class PostgresDocumentStream(BaseDocumentStream):
     def find_documents(self, cache=0):
         pass
     
-class PostgresDocumentFactory(BaseDocumentFactory):
+class PostgresDocumentFactory(SimpleDocumentFactory):
     database = ''
     host = ''
     port = 0
@@ -96,7 +96,7 @@ class PostgresDocumentFactory(BaseDocumentFactory):
                          , 'port'  : {'docs' : 'Port for where the SQL database is'}}
 
     def __init__(self, session, config, parent):        
-        BaseDocumentFactory.__init__(self, session, config, parent)
+        SimpleDocumentFactory.__init__(self, session, config, parent)
         self.database = self.get_setting(session, 'databaseName', '')
         self.host = self.get_setting(session, 'host', 'localhost')
         self.port = int(self.get_setting(session, 'port', '5432'))
@@ -110,13 +110,13 @@ class PostgresStore(SimpleStore):
     _possiblePaths = {'databaseName' : {'docs' : "Database in which to store the data"}
                       , 'tableName' : {'docs' : "Table in the database in which to store the data"}
                       }
-    # , 'idNormaliser'  : {'docs' : ""}}
+    # , 'idNormalizer'  : {'docs' : ""}}
 
     def __init__(self, session, config, parent):
         SimpleStore.__init__(self, session, config, parent)
         self.database = self.get_path(session, 'databaseName', 'cheshire3')
         self.table = self.get_path(session, 'tableName', parent.id + '_' + self.id)
-        self.idNormaliser = self.get_path(session, 'idNormaliser', None)
+        self.idNormalizer = self.get_path(session, 'idNormalizer', None)
         self._verifyDatabases(session)
 
         
@@ -161,7 +161,7 @@ class PostgresStore(SimpleStore):
             byteCount INT,
             wordCount INT,
             expires TIMESTAMP,
-            schema VARCHAR,
+            tagName VARCHAR,
             parentStore VARCHAR,
             parentIdentifier VARCHAR,
             timeCreated TIMESTAMP,
@@ -195,7 +195,7 @@ class PostgresStore(SimpleStore):
         self.cxn.close()
         self.cxn = None
 
-    def query(self, query):           
+    def _query(self, query):           
         query = query.encode('utf-8')
         res = self.cxn.query(query)
         return res
@@ -213,7 +213,7 @@ class PostgresStore(SimpleStore):
         # Find greatest current id
         if (self.currentId == -1 or session.environment == 'apache'):
             query = "SELECT identifier FROM %s ORDER BY identifier DESC LIMIT 1;" % self.table
-            res = self.query(query)
+            res = self._query(query)
             try:
                 id = int(res.dictresult()[0]['identifier']) +1
             except:
@@ -228,13 +228,13 @@ class PostgresStore(SimpleStore):
         self._openContainer(session)
         id = str(id)
         now = time.strftime("%Y-%m-%d %H:%M:%S")
-        if (self.idNormaliser <> None):
-            id = self.idNormaliser.process_string(session, id)
+        if (self.idNormalizer <> None):
+            id = self.idNormalizer.process_string(session, id)
         data = data.replace(nonTextToken, '\\\\000\\\\001')
 
         query = "INSERT INTO %s (identifier, timeCreated) VALUES ('%s', '%s');" % (self.table, id, now)
         try:
-            self.query(query)
+            self._query(query)
         except:
             # already exists
             pass
@@ -254,7 +254,7 @@ class PostgresStore(SimpleStore):
             query = "UPDATE %s SET data = '%s', timeModified = '%s' WHERE  identifier = '%s';" % (self.table, ndata, now, id)
 
         try:
-            self.query(query)
+            self._query(query)
         except:
             # Uhhh...
             raise
@@ -264,10 +264,10 @@ class PostgresStore(SimpleStore):
     def fetch_data(self, session, id):
         self._openContainer(session)
         sid = str(id)
-        if (self.idNormaliser != None):
-            sid = self.idNormaliser.process_string(session, sid)
+        if (self.idNormalizer != None):
+            sid = self.idNormalizer.process_string(session, sid)
         query = "SELECT data FROM %s WHERE identifier = '%s';" % (self.table, sid)
-        res = self.query(query)
+        res = self._query(query)
         data = res.dictresult()[0]['data']
         data = data.replace('\\000\\001', nonTextToken)
         data = data.replace('\\012', '\n')
@@ -276,73 +276,62 @@ class PostgresStore(SimpleStore):
     def delete_data(self, session, id):
         self._openContainer(session)
         sid = str(id)
-        if (self.idNormaliser != None):
-            sid = self.idNormaliser.process_string(session, str(id))
+        if (self.idNormalizer != None):
+            sid = self.idNormalizer.process_string(session, str(id))
         query = "DELETE FROM %s WHERE identifier = '%s';" % (self.table, sid)
-        self.query(query)
+        self._query(query)
         return None
 
-    def fetch_metadata(self, session, key, mtype):
-        if (self.idNormaliser != None):
-            key = self.idNormaliser.process_string(session, key)
-        elif type(key) == unicode:
-            key = key.encode('utf-8')
+    def fetch_metadata(self, session, id, mType):
+        if (self.idNormalizer != None):
+            id = self.idNormalizer.process_string(session, id)
+        elif type(id) == unicode:
+            id = id.encode('utf-8')
         else:
-            key = str(key)
+            id = str(id)
         self._openContainer(session)
-        query = "SELECT %s FROM %s WHERE identifier = %s;" % (mtype, self.table, key)
-        res = self.query(query)
+        query = "SELECT %s FROM %s WHERE identifier = %s;" % (mType, self.table, id)
+        res = self._query(query)
         try:
             data = res.dictresult()[0][mtype]
         except:
             return None
         return data
 
-    def set_metadata(self, session, key, mtype, value):
-        if (self.idNormaliser != None):
-            key = self.idNormaliser.process_string(session, key)
-        elif type(key) == unicode:
-            key = key.encode('utf-8')
+    def store_metadata(self, session, key, mType, value):
+        if (self.idNormalizer != None):
+            id = self.idNormalizer.process_string(session, id)
+        elif type(id) == unicode:
+            id = id.encode('utf-8')
         else:
-            key = str(key)
+            id = str(id)
         self._openContainer(session)
-        query = "UPDATE %s SET %s = %r WHERE identifier = '%s';" % (self.table, mtype, value, key)
+        query = "UPDATE %s SET %s = %r WHERE identifier = '%s';" % (self.table, mType, value, id)
         try:
-            self.query(query)
+            self._query(query)
         except:
             return None
         return value
 
-    def fetch_idList(self, session, numReq=-1, start=""):
-        # return numReq ids from start
-        ids = []
-        self._openContainer(session)
-        sid = str(start)
-        if self.idNormaliser != None:
-            sid = self.idNormaliser.process_string(session, sid)
-        query = "SELECT identifier FROM %s ORDER BY identifier DESC" % (self.table)
-        if numReq != -1:
-            query += (" LIMIT %d" % numReq)
-        res = self.query(query)            
-        all = res.dictresult()
-        for item in all:
-            ids.append(item['identifier'])
-        return ids
-
-
-    def clean(self, session):
+    def clean(self, session, force=False):
         # here is where sql is nice...
         self._openContainer(session)
-        nowStr = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time.time()))
-        query = "DELETE FROM %s WHERE expires < '%s';" % (self.table, nowStr)
-        self.query(query)
+        if not force:
+            nowStr = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time.time()))
+            query = "DELETE FROM %s WHERE expires < '%s';" % (self.table, nowStr)
+        else:
+            # drop all
+            query = "DELETE FROM %s" % (self.table)
+        self._query(query)
 
-    def get_dbsize(self, ession):
+
+    def get_dbSize(self, ession):
         query = "SELECT count(identifier) AS count FROM %s;" % (self.table)
-        res = self.query(query)
+        res = self._query(query)
         return res.dictresult()[0]['count']
 
 
+    # NOT API
     def link(self, session, relation, *args, **kw):
         # create a new row in the named relation
         fields = []
@@ -350,8 +339,8 @@ class PostgresStore(SimpleStore):
         for obj in args:
             fields.append(obj.recordStore)
             oid = obj.id
-            if (self.idNormaliser):
-                oid = self.idNormaliser.process_string(session, oid)                
+            if (self.idNormalizer):
+                oid = self.idNormalizer.process_string(session, oid)                
             values.append(oid)
         for (name, value) in kw.items():
             fields.append(name)
@@ -364,32 +353,35 @@ class PostgresStore(SimpleStore):
             valstr += ("%r, " % values[x])
 
         query = "INSERT INTO %s_%s (%s) VALUES (%s);" % (self.table, relation, fstr[:-2], valstr[:-2])
-        self.query(query)
+        self._query(query)
 
 
+    # Also NOT API
     def unlink(self, session, relation, *args, **kw):
         cond = ""
         for obj in args:
             oid = obj.id
-            if (self.idNormaliser):
-                oid = self.idNormaliser.process_string(session, oid)                
+            if (self.idNormalizer):
+                oid = self.idNormalizer.process_string(session, oid)                
             cond += ("%s = %r, " % (obj.recordStore, oid))
         for (name, value) in kw.items():
             cond += ("%s = %r, " % (name, value))
         query = "DELETE FROM %s_%s WHERE %s;" % (self.table, relation, cond[:-2])
-        self.query(query)
+        self._query(query)
 
+
+    # STILL NOT API
     def get_links(self, session, relation, *args, **kw):
         cond = ""
         for obj in args:
             oid = obj.id
-            if (self.idNormaliser):
-                oid = self.idNormaliser.process_string(session, oid)                
+            if (self.idNormalizer):
+                oid = self.idNormalizer.process_string(session, oid)                
             cond += ("%s = %r, " % (obj.recordStore, oid))
         for (name, value) in kw.items():
             cond += ("%s = %r, " % (name, value))           
         query = "SELECT * FROM %s_%s WHERE %s;" % (self.table, relation, cond[:-2])
-        res = self.query(query)
+        res = self._query(query)
 
         links = []
         reln = self.relations[relation]
@@ -432,7 +424,7 @@ class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
 
         try:
             query = "SELECT identifier FROM %s LIMIT 1" % self.table
-            res = self.query(query)
+            res = self._query(query)
         except pg.ProgrammingError, e:
             # no table for self, initialise
             query = """
@@ -444,7 +436,7 @@ class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
             timeAccessed TIMESTAMP,
             expires TIMESTAMP);
             """ % self.table
-            self.query(query)
+            self._query(query)
             # rs.id, rs.serialise(), digest, len(rs), rs.__class__, now, expireTime
             # NB: rs can't be modified
 
@@ -452,7 +444,7 @@ class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
         for (name, fields) in self.relations.items():
             try:
                 query = "SELECT identifier FROM %s_%s LIMIT 1" % (self.table,name)
-                res = self.query(query)
+                res = self._query(query)
             except pg.ProgrammingError, e:
                 # No table for relation, initialise
                 query = "CREATE TABLE %s_%s (identifier SERIAL PRIMARY KEY, " % (self.table, name)
@@ -463,7 +455,7 @@ class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
                         query += (" REFERENCES %s (identifier)" % f[2])
                     query += ", "
                 query = query[:-2] + ");"                        
-                res = self.query(query)
+                res = self._query(query)
 
 
     def store_data(self, session, id, data, size=0):        
@@ -488,8 +480,8 @@ class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
         rset.timeExpires = expires
         expiresStr = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(expires))
         id = rset.id
-        if (self.idNormaliser != None):
-            id = self.idNormaliser.process_string(session, id)
+        if (self.idNormalizer != None):
+            id = self.idNormalizer.process_string(session, id)
 
         # Serialise and store
         srlz = rset.serialise(session)
@@ -500,28 +492,28 @@ class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
         query = "INSERT INTO %s (identifier, data, size, class, timeCreated, timeAccessed, expires) VALUES ('%s', '%s', %s, '%s', '%s', '%s', '%s')" % (self.table, id, ndata, len(rset), cl, nowStr, nowStr, expiresStr)
 
         try:
-            self.query(query)
+            self._query(query)
         except pg.ProgrammingError, e:
             # already exists, retry for create
             if hasattr(rset, 'retryOnFail'):
                 # generate new id, re-store
                 id = self.generate_id(session)
-                if (self.idNormaliser != None):
-                    id = self.idNormaliser.process_string(session, id)
+                if (self.idNormalizer != None):
+                    id = self.idNormalizer.process_string(session, id)
                 query = "INSERT INTO %s (identifier, data, size, class, timeCreated, timeAccessed, expires) VALUES ('%s', '%s', %s, '%s', '%s', '%s', '%s')" % (self.table, id, ndata, len(rset), cl, nowStr, nowStr, expiresStr)
-                self.query(query)
+                self._query(query)
             else:
                 raise ObjectAlreadyExistsException(self.id + '/' + id)
         return rset
 
-    def fetch_resultSet(self, session, rsid):
+    def fetch_resultSet(self, session, id):
         self._openContainer(session)
 
-        sid = str(rsid)
-        if (self.idNormaliser != None):
-            sid = self.idNormaliser.process_string(session, sid)
+        sid = str(id)
+        if (self.idNormalizer != None):
+            sid = self.idNormalizer.process_string(session, sid)
         query = "SELECT class, data FROM %s WHERE identifier = '%s';" % (self.table, sid)
-        res = self.query(query)
+        res = self._query(query)
         try:
             rdict = res.dictresult()[0]
         except IndexError:
@@ -534,7 +526,7 @@ class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
         cl = rdict['class']
         rset = dynamic.buildObject(session, cl, [])
         rset.deserialise(session,data)
-        rset.id = rsid
+        rset.id = id
         
         # Update expires 
         now = time.time()
@@ -544,20 +536,17 @@ class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
         expiresStr = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(expires))
 
         query = "UPDATE %s SET timeAccessed = '%s', expires = '%s' WHERE identifier = '%s';" % (self.table, nowStr, expiresStr, sid)
-        self.query(query)
+        self._query(query)
         return rset
 
 
-    def delete_resultSet(self, session, rsid):
+    def delete_resultSet(self, session, id):
         self._openContainer(session)
-        sid = str(rsid)
-        if (self.idNormaliser != None):
-            sid = self.idNormaliser.process_string(session, sid)
+        sid = str(id)
+        if (self.idNormalizer != None):
+            sid = self.idNormalizer.process_string(session, sid)
         query = "DELETE FROM %s WHERE identifier = '%s';" % (self.table, sid)
-        self.query(query)
-
-    def fetch_resultSetList(self, session):
-        pass
+        self._query(query)
 
 
 # -- non proximity, just store occurences of type per record
@@ -592,72 +581,72 @@ class PostgresIndexStore(IndexStore, PostgresStore):
         # multiple tables, one per index 
         self.transaction = 0
 
-    def generate_tableName(self, session, index):
+    def _generate_tableName(self, session, index):
         base = self.parent.id + "__" + self.id + "__" + index.id
         return base.replace('-', '_').lower()
 
     def contains_index(self, session, index):
         self._openContainer(session)
-        table = self.generate_tableName(session, index)
+        table = self._generate_tableName(session, index)
         query = "SELECT relname FROM pg_stat_user_tables WHERE relname = '%s'" % table;
-        res = self.query(query)
+        res = self._query(query)
         return len(res.dictresult()) == 1
 
     def create_index(self, session, index):
         self._openContainer(session)
-        table = self.generate_tableName(session, index)
+        table = self._generate_tableName(session, index)
         query = "CREATE TABLE %s (identifier SERIAL PRIMARY KEY, term VARCHAR, occurences INT, recordId VARCHAR, stem VARCHAR, pos VARCHAR)" % table
         query2 = "CREATE INDEX %s ON %s (term)" % (table + "_INDEX", table)
         self._openContainer(session)
-        self.query(query)
-        self.query(query2)
+        self._query(query)
+        self._query(query2)
 
     def begin_indexing(self, session, index):
         self._openContainer(session)
         if not self.transaction:
-            self.query('BEGIN')
+            self._query('BEGIN')
             self.transaction = 1
 
     def commit_indexing(self, session, index):
         if self.transaction:
-            self.query('COMMIT')
+            self._query('COMMIT')
             self.transaction = 0
-        table = self.generate_tableName(session, index)
+        table = self._generate_tableName(session, index)
         termIdx = table + "_INDEX"
-        self.query('CLUSTER %s ON %s' % (termIdx, table))
+        self._query('CLUSTER %s ON %s' % (termIdx, table))
 
     def store_terms(self, session, index, termhash, record):
         # write directly to db, as sort comes as CLUSTER later
-        table = self.generate_tableName(session, index)
+        table = self._generate_tableName(session, index)
         queryTmpl = "INSERT INTO %s (term, occurences, recordId) VALUES ('%%s', %%s, '%r')" % (table, record)
 
         for t in termhash.values():
             term = t['text'].replace("'", "''")
             query = queryTmpl % (term, t['occurences'])
-            self.query(query)
+            self._query(query)
 
     def delete_terms(self, session, index, termHash, record):
-        table = self.generate_tableName(session, index)
+        table = self._generate_tableName(session, index)
         query = "DELETE FROM %s WHERE recordId = '%r'" % (table, record)
-        self.query(query)
+        self._query(query)
 
 
     def fetch_term(self, session, index, term, prox=True):
         # should return info to create result set
         # --> [(rec, occs), ...]
-        table = self.generate_tableName(session, index)
+        table = self._generate_tableName(session, index)
         term = term.replace("'", "\\'");
         query = "SELECT recordId, occurences FROM %s WHERE term='%s'" % (table, term)
-        res = self.query(query)
+        res = self._query(query)
         dr = res.dictresult()
         totalRecs = len(dr)
         occq = "SELECT SUM(occurences) as sum FROM %s WHERE term='%s'" % (table, term)
-        res = self.query(occq)
+        res = self._query(occq)
         totalOccs = res.dictresult()[0]['sum']
         return {'totalRecs' : totalRecs, 'records' : dr, 'totalOccs' : totalOccs}
 
     def fetch_termList(self, session, index, term, numReq=0, relation="", end="", summary=0, reverse=0):
-        table = self.generate_tableName(session, index)
+        table = self._generate_tableName(session, index)
 
         if (not (numReq or relation or end)):
             numReq = 20
@@ -680,7 +669,7 @@ class PostgresIndexStore(IndexStore, PostgresStore):
         # term, total recs, total occurences
 
         occq = "SELECT term, count(term), sum(occurences) FROM %s WHERE term%s'%s' group by term %sLIMIT %s" % (table, relation, term, order, numReq)
-        res = self.query(occq)
+        res = self._query(occq)
         # now construct list from query result
 
         tlist = res.getresult()
@@ -714,7 +703,7 @@ class PostgresIndexStore(IndexStore, PostgresStore):
                     termCol = 'stem'
                 else:
                     termCol = 'term'
-                table = self.generate_tableName(session, idx)
+                table = self._generate_tableName(session, idx)
                 qrval = query.relation.value
                 
                 if qrval == "any":
@@ -769,7 +758,7 @@ class PostgresIndexStore(IndexStore, PostgresStore):
             pm = db.protocolMaps.get('http://www.loc.gov/zing/srw/')
             db.paths['protocolMap'] = pm
         query = self._cql_to_sql(session, query, pm)
-        res = self.query(query)
+        res = self._query(query)
         dr = res.dictresult()
         rset = SimpleResultSet([])
         rsilist = []

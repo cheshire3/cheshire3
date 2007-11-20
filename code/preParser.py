@@ -21,20 +21,20 @@ class TypedPreParser(PreParser):
 
 # --- Wrapper ---
 
-class NormaliserPreParser(PreParser):
-    """ Calls a named Normaliser to do the conversion """
+class NormalizerPreParser(PreParser):
+    """ Calls a named Normalizer to do the conversion """
 
-    _possiblePaths = {'normaliser': {'docs' : "Normaliser identifier to call to do the transformation", 'required' : True}}
+    _possiblePaths = {'normalizer': {'docs' : "Normalizer identifier to call to do the transformation", 'required' : True}}
     
     def __init__(self, session, config, parent):
         PreParser.__init__(self, session, config, parent)
-        self.normaliser = self.get_path(session, 'normaliser', None)
-        if self.normaliser == None:
-            raise ConfigFileException("Normaliser for %s does not exist." % self.id)
+        self.normalizer = self.get_path(session, 'normalizer', None)
+        if self.normalizer == None:
+            raise ConfigFileException("Normalizer for %s does not exist." % self.id)
 
     def process_document(self, session, doc):
-        data = doc.get_raw()
-        new = self.normaliser.process_string(session, data)
+        data = doc.get_raw(session)
+        new = self.normalizer.process_string(session, data)
         return StringDocument(data, self.id, doc.processHistory, mimeType=doc.mimeType, parent=doc.parent, filename=doc.filename)
         
 
@@ -47,7 +47,7 @@ class UnicodeDecodePreParser(PreParser):
         self.codec = self.get_setting(session, 'codec', 'utf-8')
     def process_document(self, session, doc):
         try:
-            data = doc.get_raw().decode(self.codec)
+            data = doc.get_raw(session).decode(self.codec)
         except UnicodeDecodeError, e:
             raise
         
@@ -81,7 +81,7 @@ class CmdLinePreParser(TypedPreParser):
             else:
                 (qq, infn) = tempfile.mkstemp()
             fh = file(infn, 'w')
-            fh.write(doc.get_raw())
+            fh.write(doc.get_raw(session))
             fh.close()
             cmd = cmd.replace("%INDOC%", infn)
         if not stdOut:
@@ -95,7 +95,7 @@ class CmdLinePreParser(TypedPreParser):
 
         if stdIn:
             (i,o,e) = os.popen3(cmd)
-            i.write(doc.get_raw())
+            i.write(doc.get_raw(session))
             i.close()
             result = o.read()
             o.close()
@@ -125,7 +125,7 @@ class FileUtilPreParser(TypedPreParser):
         cmd = "file -i -b %INDOC%"
         (qq, infn) = tempfile.mkstemp()
         fh = file(infn, 'w')
-        fh.write(doc.get_raw())
+        fh.write(doc.get_raw(session))
         fh.close()
         cmd = cmd.replace("%INDOC%", infn)
         res = commands.getoutput(cmd)
@@ -218,7 +218,7 @@ class HtmlSmashPreParser(PreParser):
 	self.comment = re.compile('<!--(.*?)-->', re.S | re.I)
 
     def process_document(self, session, doc):
-	data = self.script.sub('', doc.get_raw())
+	data = self.script.sub('', doc.get_raw(session))
 	data = self.style.sub('', data)
 	data = self.comment.sub('', data)
 	tm = self.title.search(data)
@@ -268,7 +268,7 @@ class RegexpSmashPreParser(PreParser):
             self.char = ''
 
     def process_document(self, session, doc):
-        data = doc.get_raw()
+        data = doc.get_raw(session)
         if self.keep:
             l = self.regexp.findall(data)
             if l and l[0] and type(l[0]) == tuple:
@@ -288,7 +288,7 @@ try:
     class HtmlTidyPreParser(PreParser):
         """ Uses TidyLib to turn HTML into XHTML for parsing """
         def process_document(self, session, doc):
-            d = tidy.parseString(doc.get_raw(), output_xhtml=1, add_xml_decl=0, tidy_mark=0, indent=0)
+            d = tidy.parseString(doc.get_raw(session), output_xhtml=1, add_xml_decl=0, tidy_mark=0, indent=0)
             return StringDocument(str(d), self.id, doc.processHistory, mimeType=doc.mimeType, parent=doc.parent, filename=doc.filename) 
 except:
     pass
@@ -333,7 +333,7 @@ class SgmlPreParser(PreParser):
         return "<%s/>" % (match.group(1))
 
     def process_document(self, session, doc):
-        txt = doc.get_raw()
+        txt = doc.get_raw(session)
 
         txt = txt.replace('\n', ' ')
         txt = txt.replace('\r', ' ')
@@ -371,7 +371,7 @@ class AmpPreParser(PreParser):
         return '&amp;%s ' % match.group(1)
 
     def process_document(self, session, doc):
-        txt = doc.get_raw()
+        txt = doc.get_raw(session)
         for e in self.entities.keys():
             txt = txt.replace("&%s;" % (e), self.entities[e])
         txt = self.amp_re.sub(self._loneAmpersand, txt)
@@ -386,7 +386,7 @@ class MarcToXmlPreParser(PreParser):
     outMimeType = "text/xml"
 
     def process_document(self, session, doc):
-        data = doc.get_raw()
+        data = doc.get_raw(session)
         m = MARC(data)
         return StringDocument(m.toMARCXML(), self.id, doc.processHistory, mimeType='text/xml', parent=doc.parent, filename=doc.filename)
 
@@ -396,7 +396,7 @@ class MarcToSgmlPreParser(PreParser):
     outMimeType = "text/sgml"
 
     def process_document(self, session, doc):
-        data = doc.get_raw()
+        data = doc.get_raw(session)
         m = MARC(data)
         return StringDocument(m.toSGML(), self.id, doc.processHistory, mimeType='text/sgml', parent=doc.parent, filename=doc.filename)
 
@@ -410,7 +410,7 @@ class TxtToXmlPreParser(PreParser):
     outMimeType = "text/xml"
 
     def process_document(self, session, doc):
-        txt = doc.get_raw()
+        txt = doc.get_raw(session)
         txt = escape(txt)
         return StringDocument("<data>" + txt + "</data>", self.id, doc.processHistory, mimeType='text/xml', parent=doc.parent, filename=doc.filename)
 
@@ -421,13 +421,13 @@ class TxtToXmlPreParser(PreParser):
 
 class PicklePreParser(PreParser):
     def process_document(self, session, doc):
-        data = doc.get_raw()
+        data = doc.get_raw(session)
         string = cPickle.dumps(data)
         return StringDocument(string, self.id, doc.processHistory, mimeType='text/pickle', parent=doc.parent, filename=doc.filename)
     
 class UnpicklePreParser(PreParser):
     def process_document(self, session, doc):
-        data = doc.get_raw()
+        data = doc.get_raw(session)
         string = cPickle.loads(data)
         return StringDocument(string, self.id, doc.processHistory, mimeType='text/pickle', parent=doc.parent, filename=doc.filename)
     
@@ -437,14 +437,14 @@ class GzipPreParser(PreParser):
     outMimeType = ""
     
     def process_document(self, session, doc):
-        buffer = StringIO.StringIO(doc.get_raw())
+        buffer = StringIO.StringIO(doc.get_raw(session))
         zfile = gzip.GzipFile(mode = 'rb', fileobj=buffer)
         data = zfile.read()
         return StringDocument(data, self.id, doc.processHistory, parent=doc.parent, filename=doc.filename)
 
 class BzipPreParser(PreParser):
     def process_document(self, session, doc):
-        buffer = StringIO.StringIO(doc.get_raw())
+        buffer = StringIO.StringIO(doc.get_raw(session))
         zfile = bz2.BZ2File(mode = 'rb', fileobj=buffer)
         data = zfile.read()
         return StringDocument(data, self.id, doc.processHistory, parent=doc.parent, filename=doc.filename)
@@ -453,7 +453,7 @@ class B64EncodePreParser(PreParser):
     """ Encode document in Base64 """
 
     def process_document(self, session, doc):
-        data = doc.get_raw()
+        data = doc.get_raw(session)
         return StringDocument(binascii.a2b_base64(data), self.id, doc.processHistory, parent=doc.parent, filename=doc.filename)
     
     
@@ -461,7 +461,7 @@ class B64DecodePreParser(PreParser):
     """ Decode document from Base64 """
 
     def process_document(self, session, doc):
-        data = doc.get_raw()
+        data = doc.get_raw(session)
         return StringDocument(binascii.b2a_base64(data), self.id, doc.processHistory, parent=doc.parent, filename=doc.filename)
 
 
@@ -473,15 +473,15 @@ class UrlPreParser(PreParser):
 
     _possiblePaths = {'remoteUrl' : {'docs' : 'URL at which the OpenOffice handler is listening'}}
 
-    def post_multipart(self, host, selector, fields, files):
-        content_type, body = self.encode_multipart_formdata(fields, files)
+    def _post_multipart(self, host, selector, fields, files):
+        content_type, body = self._encode_multipart_formdata(fields, files)
         h = httplib.HTTPConnection(host)
         headers = {'content-type': content_type}
         h.request('POST', selector, body, headers)
         resp = h.getresponse()
         return resp.read()
 
-    def encode_multipart_formdata(self, fields, files):
+    def _encode_multipart_formdata(self, fields, files):
         BOUNDARY = '----------ThIs_Is_tHe_bouNdaRY_$'
         CRLF = '\r\n'
         L = []
@@ -493,7 +493,7 @@ class UrlPreParser(PreParser):
         for (key, filename, value) in files:
             L.append('--' + BOUNDARY)
             L.append('Content-Disposition: form-data; name="%s"; filename="%s"' % (key, filename))
-            L.append('Content-Type: %s' % self.get_content_type(filename))
+            L.append('Content-Type: %s' % self._get_content_type(filename))
             L.append('')
             L.append(value)
         L.append('--' + BOUNDARY + '--')
@@ -502,10 +502,10 @@ class UrlPreParser(PreParser):
         content_type = 'multipart/form-data; boundary=%s' % BOUNDARY
         return content_type, body
 
-    def get_content_type(self, filename):
+    def _get_content_type(self, filename):
         return mimetypes.guess_type(filename)[0] or 'application/octet-stream'
 
-    def send_request(self, session, data=None):
+    def _send_request(self, session, data=None):
         url = self.get_path(session, 'remoteUrl')
         if (url[:7] == "http://"):
             url = url[7:]
@@ -518,7 +518,7 @@ class UrlPreParser(PreParser):
         # TODO:  Remove dependency
         fields = ()
         files = [("file", "foo.doc", data)]
-        return self.post_multipart(host, selector, fields, files)
+        return self._post_multipart(host, selector, fields, files)
     
 class OpenOfficePreParser(UrlPreParser):
     """ Use OpenOffice server to convert documents into OpenDocument XML """
@@ -526,9 +526,9 @@ class OpenOfficePreParser(UrlPreParser):
     outMimeType = "text/xml"
 
     def process_document(self, session, doc):
-        data = doc.get_raw()
+        data = doc.get_raw(session)
         try:
-            xml = self.send_request(session, data)
+            xml = self._send_request(session, data)
         except:
             xml = "<error/>"
         return StringDocument(xml, self.id, doc.processHistory, mimeType='text/xml', parent=doc.parent, filename=doc.filename)
@@ -552,7 +552,7 @@ class PrintableOnlyPreParser(PreParser):
 	
     # Strip any non printable characters
     def process_document(self, session, doc):
-        data = doc.get_raw()
+        data = doc.get_raw(session)
         # This is bizarre, but otherwise:
         # UnicodeDecodeError: 'ascii' codec can't decode byte ...
         if type(data) == unicode:
@@ -654,7 +654,7 @@ class CharacterEntityPreParser(PreParser):
         self.entities = ['nbsp', 'iexcl', 'cent', 'pound', 'curren', 'yen', 'brvbar', 'sect', 'uml',    'copy',   'ordf',   'laquo',  'not',    'shy',    'reg',    'macr',   'deg',    'plusmn', 'sup2',   'sup3',   'acute',  'micro',  'para',   'middot', 'cedil',  'sup1',   'ordm',   'raquo',  'frac14', 'frac12', 'frac34', 'iquest', 'Agrave', 'Aacute', 'Acirc',  'Atilde', 'Auml',   'Aring',  'AElig',  'Ccedil','Egrave','Eacute','Ecirc', 'Euml',  'Igrave', 'Iacute','Icirc', 'Iuml',  'ETH',   'Ntilde','Ograve','Oacute','Ocirc', 'Otilde','Ouml',  'times', 'Oslash','Ugrave','Uacute','Ucirc', 'Uuml',  'Yacute','THORN', 'szlig', 'agrave','aacute','acirc', 'atilde','auml',  'aring', 'aelig', 'ccedil','egrave','eacute','ecirc', 'euml',  'igrave', 'iacute','icirc', 'iuml',  'eth',   'ntilde','ograve', 'oacute','ocirc', 'otilde','ouml',  'divide','oslash','ugrave','uacute','ucirc', 'uuml',  'yacute','thorn', 'yuml']
                 
     def process_document(self, session, doc):
-        txt = doc.get_raw()
+        txt = doc.get_raw(session)
         # Fix some common mistakes
         for (fromEnt, toEnt) in self.inane.items():
             txt = txt.replace("&%s;" % fromEnt, toEnt)

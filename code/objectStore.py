@@ -21,7 +21,7 @@ class BdbObjectStore(BdbRecordStore, ObjectStore):
 
 
     # NB Use create_record() to store configurations
-    def create_object(self, session, object=None):
+    def create_object(self, session, obj=None):
         # Need to implement object -> config xml for all objects!
         # Check doesn't exist, then call store_object
         raise(NotImplementedError)
@@ -34,7 +34,7 @@ class BdbObjectStore(BdbRecordStore, ObjectStore):
         if (not rec):
             return None
 
-        dom = rec.get_dom()
+        dom = rec.get_dom(session)
         for d in dom.childNodes:
             if d.nodeType == elementType:
                 topNode = d
@@ -63,11 +63,7 @@ class BdbObjectStore(BdbRecordStore, ObjectStore):
         object = dynamic.makeObjectFromDom(session, topNode, self)
         return object
 
-    def fetch_objectList(self, session, req):
-        # Scan like interface?
-        raise(NotImplementedError)
-
-    def store_object(self, session, object):
+    def store_object(self, session, obj):
         raise(NotImplementedError)
 
 

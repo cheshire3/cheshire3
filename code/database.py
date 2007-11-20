@@ -17,7 +17,7 @@ except:
     import bsddb as bdb
 
 
-class SimpleDatabase(Database, SummaryObject):
+class SimpleDatabase(SummaryObject, Database):
     """ Default database implementation """
 
     _possibleSettings = {'srw' : {'docs' : 'Should the database be available via the SRW protocol', 'type' : int, 'options' : "0|1"},
@@ -72,48 +72,49 @@ class SimpleDatabase(Database, SummaryObject):
             self.protocolMaps[pm.protocol] = pm
 
 
-    def add_record(self, session, record=None):
-        if record:
-            (storeid, id) = (record.recordStore, record.id)
-	    try:
-		full = self.records.get(storeid, [[]])
-		k = full[-1]
-		if (len(k) > 1 and k[1] == id -1):
-		    k[1] = id
-		elif ((len(k) == 1 and k[0] == id -1) or not k):
-		    k.append(id)
-		else:
-		    full.append([id])
-		self.records[storeid] = full
-	    except:
-		 pass
-            # And record size
-            self.accumulate_metadata(session, record)
-        return record
+    def add_record(self, session, rec):
+        (storeid, id) = (rec.recordStore, rec.id)
+        try:
+            full = self.records.get(storeid, [[]])
+            k = full[-1]
+            if (len(k) > 1 and k[1] == id -1):
+                k[1] = id
+            elif ((len(k) == 1 and k[0] == id -1) or not k):
+                k.append(id)
+            else:
+                full.append([id])
+            self.records[storeid] = full
+        except:
+            pass
+        self.accumulate_metadata(session, rec)
+        return rec
 
 
-    def index_record(self, session, record):        
+    def index_record(self, session, rec):        
         if not self.indexes:
             self._cacheIndexes(session)
         for idx in self.indexes.values():
             if not idx.get_setting(session, 'noIndexDefault', 0):
-                idx.index_record(session, record)
-        return record
+                idx.index_record(session, rec)
+        return rec
 
-    def remove_record(self, session, record):
+    def remove_record(self, session, rec):
         self.totalItems -= 1
-        (storeid, id) = (record.recordStore, record.id)        
-        if (record.wordCount):
-            self.totalWordCount -= record.wordCount
-        if (record.byteCount):
-            self.totalByteCount -= record.byteCount
+        (storeid, id) = (rec.recordStore, rec.id)        
+        # XXX remove from self.records
+        
+        # XXX this should be SummaryObject.unaccumulate_metadata() ?
+        if (rec.wordCount):
+            self.totalWordCount -= rec.wordCount
+        if (rec.byteCount):
+            self.totalByteCount -= rec.byteCount
 
-    def unindex_record(self, session, record):
+    def unindex_record(self, session, rec):
         if not self.indexes:
             self._cacheIndexes(session)
         for idx in self.indexes.values():
             if not idx.get_setting(session, 'noUnindexDefault', 0):
-                idx.delete_record(session, record)
+                idx.delete_record(session, rec)
         return None       
 
     def begin_indexing(self, session):
@@ -205,8 +206,8 @@ class SimpleDatabase(Database, SummaryObject):
         query.resultSet = rs
         return rs
 
-    def scan(self, session, query, numReq, direction=">="):
-        if (not isinstance(query, cql.SearchClause)):
+    def scan(self, session, clause, nTerms, direction=">="):
+        if (not isinstance(clause, cql.SearchClause)):
             d = SRWDiagnostics.Diagnostic38()
             d.details = "Cannot use boolean in scan"
             raise d
@@ -215,9 +216,9 @@ class SimpleDatabase(Database, SummaryObject):
             self._cacheProtocolMaps(session)
             pm = self.protocolMaps.get('http://www.loc.gov/zing/srw/')
             self.paths['protocolMap'] = pm
-        idx = pm.resolveIndex(session, query)
+        idx = pm.resolveIndex(session, clause)
         if (idx != None):
-            return idx.scan(session, query, numReq, direction)
+            return idx.scan(session, clause, nTerms, direction)
         else:
             d = SRWDiagnostics.Diagnostic16()
             d.details = query.index.toCQL()
@@ -225,7 +226,13 @@ class SimpleDatabase(Database, SummaryObject):
 
     def sort(self, session, resultSets, sortKeys):
         # XXX Needed for Z sorts by index
-        pass
+        raise NotImplementedError("Please Implement Me!")
+
+
+    def reindex(self, session):
+        # XXX Implement!
+        raise NotImplementedError("Please Implement Me!")
+        
 
 
 class OptimisingDatabase(SimpleDatabase):

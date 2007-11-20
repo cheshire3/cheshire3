@@ -27,7 +27,7 @@ class FilepathTransformer(Transformer):
 class XmlTransformer(Transformer):
     """ Return the raw XML string of the record """
     def process_record(self,session, rec):
-        return StringDocument(rec.get_xml())
+        return StringDocument(rec.get_xml(session))
 
 
 # --- XSLT Transformers ---
@@ -49,7 +49,7 @@ try:
 
         def process_record(self, session, rec):
             # return StringDocument
-            dom = rec.get_dom()
+            dom = rec.get_dom(session)
             if (session.environment == 'apache'):
                 self.txr = etree.XSLT(self.parsedXslt)
 
@@ -83,7 +83,7 @@ class XsltTransformer(Transformer):
             okay = p.hasPermission(session, session.user)
             if not okay:
                 raise PermissionException("Permission required to transform using %s" % self.id)
-        dom = rec.get_dom()
+        dom = rec.get_dom(session)
 
         if not hasattr(dom, 'nodeType'):
             # Probably LXML
@@ -100,7 +100,7 @@ class CSVTransformer(Transformer):
 
     def _handleConfigNode(self, session, node):
         # fields
-        #   path type=index|workflow|xpathObject ref=id
+        #   path type=index|workflow|xpathProcessor ref=id
         # --> ordered list of fields
         if node.localname == "fields":
             fields = []
@@ -108,8 +108,8 @@ class CSVTransformer(Transformer):
                 if child.nodeType == elementType:
                     if child.localname == "path":
                         otype = child.getAttributeNS(None, 'type')
-                        if not otype in ['index', 'workflow', 'xpathObject']:
-                            raise ConfigFileException("'%s' type not allowed for CSVTransformer %s (index, workflow, xpathObject)" % (otype, self.id))
+                        if not otype in ['index', 'workflow', 'xpathProcessor']:
+                            raise ConfigFileException("'%s' type not allowed for CSVTransformer %s (index, workflow, xpathProcessor)" % (otype, self.id))
                         ref = child.getAttributeNS(None, 'ref')
                         obj = self.get_object(session, ref)
                         fields.append((type, obj))
@@ -125,7 +125,7 @@ class CSVTransformer(Transformer):
         data = []
         for xp in self.fields:
             try:
-                data.append(saxToString(rec.process_xpath(xp)[0]))
+                data.append(saxToString(rec.process_xpath(session, xp)[0]))
             except IndexError:
                 # Missing Value
                 data.append('?')
@@ -137,6 +137,8 @@ class CSVTransformer(Transformer):
 
 class GRS1Transformer(Transformer):
     """ Create representation of the XML tree in Z39.50's GRS1 format """
+
+    # have to be called these due to SaxContentHandler regulations
 
     def initState(self):
         self.top = None
@@ -166,7 +168,7 @@ class GRS1Transformer(Transformer):
         self.nodeStack.append(node)
 
         
-    def endElement(self, foo):
+    def endElement(self, elem):
         if (self.nodeStack[-1].content[1] == []):
             self.nodeStack[-1].content = ('elementEmpty', None)
         self.nodeStack.pop()
@@ -194,7 +196,7 @@ class GRS1Transformer(Transformer):
             if not okay:
                 raise PermissionException("Permission required to transform using %s" % self.id)
         self.initState()
-        rec.saxify(self)
+        rec.saxify(session, self)
         return StringDocument(self.top, self.id, rec.processHistory, parent=rec.parent)
 
 
@@ -226,7 +228,7 @@ class GrsMapTransformer(Transformer):
     
     def _resolveData(self, session, rec, xpath):
         if xpath[0] != '#': 
-                data = rec.process_xpath(xpath)
+                data = rec.process_xpath(session, xpath)
                 try: data = ' '.join(data)
                 except TypeError:
                     # data isn't sequence, maybe a string or integer
@@ -248,10 +250,10 @@ class GrsMapTransformer(Transformer):
         elif xpath[:8] == '#PARENT#':
             # Get parent docid out of record
             try: 
-                parent = rec.process_xpath('/c3:component/@parent', {'c3':'http://www.cheshire3.org/'})[0]
+                parent = rec.process_xpath(session, '/c3:component/@parent', {'c3':'http://www.cheshire3.org/'})[0]
             except IndexError:
                 # probably no namespaces
-                parent = rec.process_xpath('/c3component/@parent')[0]
+                parent = rec.process_xpath(session, '/c3component/@parent')[0]
             parentStore, parentId = parent.split('/', 1)
 
             xtrapath = xpath[8:]
@@ -292,9 +294,8 @@ class XmlRecordStoreTransformer(Transformer):
 
     def process_record(self, session, rec):
 
-        vars = {'id' : rec.id, 'baseUri': rec.baseUri, 'schema' : rec.schema,
-                'schemaType' : rec.schemaType, 'status' : rec.status,
-                'size': rec.wordCount}
+        vars = {'id' : rec.id, 'baseUri': rec.baseUri, 'tagName' : rec.tagName,
+                'status' : rec.status, 'size': rec.wordCount}
         if session == None or session.user == None:
             vars['user'] = 'admin'
         else:
@@ -320,7 +321,7 @@ class XmlRecordStoreTransformer(Transformer):
                 rightslist.append('<c3:%(userType)s role="%(role)s">%(user)</c3:%(userType)s>' % ({'userType' : r[1], 'role' : r[2], 'user': r[0]}))
             rightstxt = '\n'.join(rightslist)
 
-            saxList = rec.get_sax()
+            saxList = rec.get_sax(session)
 	    saxList.append('9 ' + repr(rec.elementHash))
 	    sax = nonTextToken.join(saxList)
 
@@ -348,8 +349,7 @@ class XmlRecordStoreTransformer(Transformer):
         <c3:id>%(id)s</c3:id>
         <c3:status>%(status)s</c3:status>
         <c3:baseUri>%(baseUri)s</c3:baseUri>
-        <c3:schema>%(schema)s</c3:schema>
-        <c3:schemaType>%(schemaType)s</c3:schemaType>
+        <c3:tagName>%(tagName)s</c3:schema>
         <c3:size>%(size)d</c3:size>
         <c3:parent>%(parent)s</c3:parent>
         <c3:technicalRights>

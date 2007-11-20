@@ -92,9 +92,9 @@ class reqHandler:
         doc = document.StringDocument(xmlstr)
         rec = mdp.process_document(session, doc)
         
-        self.log.write('rec.get_xml():\n%s\n' % rec.get_xml())
+        self.log.write('rec.get_xml():\n%s\n' % rec.get_xml(session))
         
-        dom = rec.get_dom()
+        dom = rec.get_dom(session)
         #now do some clever dynamic object stuff
         wfNode = dom.childNodes[0]
         wfNode = dom.getElementsByTagName('workflow')[0]
@@ -192,7 +192,7 @@ class reqHandler:
         session.database = db.id
         returnstuff = self.handle_workflowRequest(config, req)
         # if a document is return, we probably want to return the contents rather than the object
-        try: returnstuff = returnstuff.get_raw()
+        try: returnstuff = returnstuff.get_raw(session)
         except: pass
         
         time.sleep(1);

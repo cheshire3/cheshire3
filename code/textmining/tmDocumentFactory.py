@@ -15,7 +15,7 @@ class EnjuRecordDocumentStream(BaseDocumentStream):
 
 	rec = self.stream
         # Find verbs, one verb per document
-        vs = rec.process_xpath('phrase[@cat="VP"]/word')   
+        vs = rec.process_xpath(session, 'phrase[@cat="VP"]/word')   
         docs = []
         processed = []
         sentn = 0
@@ -30,7 +30,7 @@ class EnjuRecordDocumentStream(BaseDocumentStream):
             if vid in processed:
                 continue
             verb = ['<verb>', '<w pos="%s" base="%s">%s</w>' % (attrs['pos'], attrs['base'], vtxt)]
-            el1 = rec.process_xpath('phrase[@id="%s"]/descendant::word' % arg1)
+            el1 = rec.process_xpath(session, 'phrase[@id="%s"]/descendant::word' % arg1)
             txt = ['<subject>']
             for w in el1:
                 (name, nattrs) = rec._convert_elem(w[0])
@@ -42,11 +42,11 @@ class EnjuRecordDocumentStream(BaseDocumentStream):
                 arg2 = attrs[u'arg2']
                 # arg2 might be more verb
                 # eg 'will -> be -> treating'
-                el2 = rec.process_xpath('phrase[@id="%s"]' % arg2)
+                el2 = rec.process_xpath(session, 'phrase[@id="%s"]' % arg2)
                 (name, nattrs) = rec._convert_elem(el2[0][0])
                 nid = nattrs['id']
                 while nattrs[u'cat'] == "VP":
-                    allv = rec.process_xpath('phrase[@id="%s"]/descendant::word' % nid)
+                    allv = rec.process_xpath(session, 'phrase[@id="%s"]/descendant::word' % nid)
                     (name, avattrs) = rec._convert_elem(allv[0][0])
                     verb.append('<w pos="%s" base="%s">%s</w>' % (avattrs['pos'], avattrs['base'], allv[0][1][2:]))
                     processed.append(avattrs['id'])
@@ -56,11 +56,11 @@ class EnjuRecordDocumentStream(BaseDocumentStream):
                         if avarg2 == '-1':
                             # no arg2, fall back
                             break
-                    el2 = rec.process_xpath('phrase[@id="%s"]' % avarg2 )
+                    el2 = rec.process_xpath(session, 'phrase[@id="%s"]' % avarg2 )
                     (name, nattrs) = rec._convert_elem(el2[0][0])
                     nid = nattrs['id']
                     
-                el2 = rec.process_xpath('phrase[@id="%s"]/descendant::word' % nid)
+                el2 = rec.process_xpath(session, 'phrase[@id="%s"]/descendant::word' % nid)
                 txt = ['<object>']
                 for w in el2:
                     (name, nattrs) = rec._convert_elem(w[0])
@@ -70,13 +70,13 @@ class EnjuRecordDocumentStream(BaseDocumentStream):
             except KeyError:
                 obj = "<object/>"
             # Try for Prep + Iobjstr
-            ppxp = rec.process_xpath("word[@arg1='%s%s']" % (vid[0], int(vid[1:]) -1))
+            ppxp = rec.process_xpath(session, "word[@arg1='%s%s']" % (vid[0], int(vid[1:]) -1))
             if ppxp:
                 (name, attrs) = rec._convert_elem(ppxp[0][0])
                 ptag = '<w pos="%s">%s</w>' % (attrs['pos'], ppxp[0][1][2:])
                 prepstr = "<prep>%s</prep>\n" % ptag
                 try:
-                    iobjxp = rec.process_xpath("phrase[@id='%s']/descendant::word" % attrs['arg2'])
+                    iobjxp = rec.process_xpath(session, "phrase[@id='%s']/descendant::word" % attrs['arg2'])
                     iobjlist = ['<iobject>']
                     for w in iobjxp:
                         (name, nattrs) = rec._convert_elem(w[0])
