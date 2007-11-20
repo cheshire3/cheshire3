@@ -30,17 +30,6 @@ class Server(C3Object):
         """
         raise(NotImplementedError)
 
-    def connect(self, session, connection):
-        """Accept a connection to the server and perform any per session initialisation"""
-        raise(NotImplementedError)
-
-    def disconnect(self, session, req):
-        """Called when a connection is dropped to perform any end of session tidying."""
-        raise(NotImplementedError)
-
-    def authenticate(self, session, req):
-        "Handle authentication of session/request and establish user profile."
-        raise(NotImplementedError)
 
 
 class Database(C3Object):
@@ -53,58 +42,60 @@ class Database(C3Object):
     protocolMaps = {}
     recordStore = None
 
-    def add_record(self, session, record):
+    def add_record(self, session, rec):
         """Ensure that a record is registered with the database.  This
         function does not ensure persistence of the record, not index
         it, just perform registration"""
         raise(NotImplementedError)
-    def remove_record(self, session, record):
+
+    def remove_record(self, session, rec):
         """Unregister the record."""
         raise(NotImplementedError)
 
-    def index_record(self, session, record):
+    def index_record(self, session, rec):
         """Sends the record to all indexes registered with the database to be indexes"""
         raise(NotImplementedError)
-    def reindex(self, session):
-        """ Reindex all records registered with the database"""
-        raise(NotImplementedError)
-    def unindex_record(self, session, record):
+
+    def unindex_record(self, session, rec):
         """Sends the record to all indexes registered with the database to be removed/unindexed"""
         raise(NotImplementedError)
+
 
     def begin_indexing(self, session):
         """Perform tasks before records are to be indexed"""
         raise(NotImplementedError)
+
     def commit_indexing(self, session):
         """Perform tasks after records have been sent to indexes.  For
         example, commit any temporary data to IndexStores"""
         raise(NotImplementedError)
 
-    #def commit_metadata(self, session):
-    #    """Ensure persistence of database metadata"""
-    #    raise(NotImplementedError)
+    def reindex(self, session):
+        """ Reindex all records registered with the database"""
+        raise(NotImplementedError)
 
-    def scan(self, session, query, numReq, direction=">="):
+
+    def scan(self, session, clause, nTerms, direction=">="):
         """Given a CQL query (single searchClause), resolve the index
         and return a section of the term list"""
         raise(NotImplementedError)
+
     def search(self, session, query):
         """ Given a CQL query, perform the query and return a resultSet"""
         raise(NotImplementedError)
+
     def sort(self, session, resultSets, sortKeys):
         """ Take one or more resultSets and sort/merge by sortKeys """
         raise(NotImplementedError)
 
-    def authenticate(self, session, user):
-        """ Authenticate user against database """
-        raise(NotImplementedError)
-    def connect(self, session):
-        """ Perform database specific session initialisation """
-        raise(NotImplementedError)
-    def disconnect(self, session):
-        """ Perform any database specific session tidying on completion """
+
+    def commit_metadata(self, session):
+        """Ensure persistence of database metadata"""
         raise(NotImplementedError)
 
+    def accumulate_metadata(self, session, obj):
+        """ """
+        raise(NotImplementedError)
 
 
 class Index(C3Object):
@@ -114,64 +105,105 @@ class Index(C3Object):
     IndexStore. The entry point can be defined using one or more XPath
     expressions, and the extraction process can be defined using a
     workflow chain of standard objects. These chains must start with
-    an Extracter, but from there might then include PreParsers,
-    Parsers, Transformers, Normalisers and even other Indexes.  The
+    an Extractor, but from there might then include PreParsers,
+    Parsers, Transformers, Normalizers and even other Indexes.  The
     index can also be the last object in a regular Workflow, so long
     as an XPath object is used to find the data in the record
-    immediately before an Extracter."""
+    immediately before an Extractor."""
     indexStore = None
 
     def begin_indexing(self, session):
         """ Perform tasks before indexing any records """
         raise(NotImplementedError)
+
     def commit_indexing(self, session):
         """ Perform tasks after records have been indexed """
         raise(NotImplementedError)
-    def index_record(self, session, record):
+
+    def index_record(self, session, rec):
         """ Accept a record to index.  If begin indexing has been
         called, the index might not commit any data until
         commit_indexing is called.  If it is not in batch mode, then
         index_record will also commit the terms to the indexStore."""
         raise(NotImplementedError)
-    def delete_record(self, session, record):
+
+    def delete_record(self, session, rec):
         """ Delete all the terms of the given record from the indexes.
         Does this by extracting the terms from the record, finding and
         removing them. Hence the record must be the same as the one
         that was indexed."""
         raise(NotImplementedError)
 
-    def scan(self, session, clause, numReq, direction):
+    def store_terms(self, session, data, rec):
+        raise(NotImplementedError)
+
+    def extract_data(self, session, rec):
+        raise(NotImplementedError)
+
+    def fetch_term(self, session, term, summary, prox):
+        raise(NotImplementedError)
+
+    def fetch_termById(self, session, termId):
+        raise(NotImplementedError)
+
+    def fetch_termList(self, session, term, nTerms, relation, end, summary):
+        raise(NotImplementedError)
+
+    def fetch_vector(self, session, rec, summary):
+        raise(NotImplementedError)
+
+    def fetch_proxVector(self, session, rec, elemId=-1):
+        raise(NotImplementedError)
+
+    def fetch_summary(self, session):
+        raise(NotImplementedError)
+
+    def fetch_termFrequencies(self, session, mType, start, nTerms, direction):
+        raise(NotImplementedError)
+
+
+    def scan(self, session, clause, nTerms, direction=">="):
         """Produce an ordered term list with document frequencies and total occurences """
         raise(NotImplementedError)
+
     def search(self, session, clause, db):
         """Search this particular index given a CQL clause, return a resultSet object"""
         raise(NotImplementedError)
-    def sort(self, session, resultSet):
+
+    def sort(self, session, rset):
         """Sort a result set based on the values extracted according to this index."""
         raise(NotImplementedError)
 
-    def serialise_terms(self, session, termId, terms, recs=0, occs=0):
+
+    def serialize_term(self, session, termId, data, nRecs=0, nOccs=0):
         """Callback from IndexStore to serialise list of terms and
         document references to be stored"""
         raise(NotImplementedError)
-    def deserialise_terms(self, session, data):
+
+    def deserialize_term(self, session, data, nRecs=-1, prox=1):
         """Callback from IndexStore to take serialised data and
         produce list of terms and document references."""
         raise(NotImplementedError)
-    def merge_terms(self, session, structTerms, newTerms, op="replace", recs=0, occs=0):
+
+    def merge_term(self, session, currentData, newData, op="replace", nRecs=0, nOccs=0):
         """Callback from IndexStore to take two sets of terms and merge them together."""
         raise(NotImplementedError)
-    def construct_item(self, session, term, rsitype=""):
+
+    def construct_resultSetItem(self, session, term, rsiType=""):
         """Take a single item, as stored in this Index, and produce a ResultSetItem representation."""
         raise(NotImplementedError)
+
     def construct_resultSet(self, session, terms, queryHash={}):
         """Take a list of terms and produce an appropriate ResultSet object."""
         raise(NotImplementedError)
 
+    def calc_sectionOffsets(self, session, start, nRecs, dataLen=0):
+        raise(NotImplementedError)
 
 
-class XPathObject(C3Object):
-    """An XPathObject is a simple wrapper around an XPath.  It is used
+
+class XPathProcessor(C3Object):
+    """An XPathProcessor is a simple wrapper around an XPath.  It is used
     to evaluate the XPath expression according to a given record in
     workflows"""
     def process_record(self, session, record):
@@ -180,11 +212,11 @@ class XPathObject(C3Object):
 
 
 # Takes some data, returns a list of extracted values
-class Extracter(C3Object):
-    """An Extracter is a processing object called by an Index with the
+class Extractor(C3Object):
+    """An Extractor is a processing object called by an Index with the
     value of an evaluated XPath expression or with a string. Example
-    normalisers might extract keywords from an element or the entire
-    contents thereof as a single string. Extracters must also be used
+    normalizers might extract keywords from an element or the entire
+    contents thereof as a single string. Extractors must also be used
     on the query terms to apply the same keyword processing rules, for
     example."""
     def process_string(self, session, data):
@@ -204,14 +236,14 @@ class Extracter(C3Object):
 
 class Tokenizer(C3Object):
     # take a string of language, return ordered list of tokens
-    # string is actually in hash, as per output from Extracter
+    # string is actually in hash, as per output from Extractor
 
     def process_string(self, session, data):
         raise NotImplementedError
     def process_hash(self, session, data):
         raise NotImplementedError
 
-class TokenMerge(C3Object):
+class TokenMerger(C3Object):
     # take an ordered list of tokens, merge into a hash
     # Maybe combining multiple tokens per key
 
@@ -222,14 +254,14 @@ class TokenMerge(C3Object):
 
 
 # Takes a string, returns a list of normalised values
-class Normaliser(C3Object):
-    """Normaliser objects are chained after Extracters in order to
-    transform the data from the record or query. A Normaliser might
+class Normalizer(C3Object):
+    """Normalizer objects are chained after Extractors in order to
+    transform the data from the record or query. A Normalizer might
     standardise case, perform stemming or transform a date into
-    ISO8601 format. Normalisers are also needed to transform the terms
+    ISO8601 format. Normalizers are also needed to transform the terms
     in a request into the same format as the term in the Index. For
     example a date index might be searched using a free text date and
-    that would need to be parsed into the normalised form in order to
+    that would need to be parsed into the normalized form in order to
     compare it with the stored data."""
     
     def process_string(self, session, data):
@@ -244,9 +276,15 @@ class Normaliser(C3Object):
 
 class DocumentFactory(C3Object):
     """ Object Docs """
-    def load(self, session, data, cache=None, format=None, schema=None, codec=""):
+    def load(self, session, data, cache=None, format=None, tagName=None, codec=""):
+        """Load documents into the document factory from data.  (XXX More to come)"""
         raise(NotImplementedError)
-    def get_document(self, session, idx=-1):
+
+    def get_document(self, session, n=-1):
+        raise(NotImplementedError)
+
+    def register_stream(self, session, format, cls):
+        """ Register an implementation of a DocumentStream (cls) against a name for the format parameter (format)"""
         raise(NotImplementedError)
 
 class QueryFactory(C3Object):
@@ -332,6 +370,10 @@ class IndexStore(C3Object):
     def commit_indexing(self, session, index):
         """Commit the data to disk from the indexing process."""
         raise(NotImplementedError)
+    def commit_centralIndexing(self, session, index, filePath):
+        """Commit the data to disk from the indexing process, called automatically unless in distributed mode."""
+        raise(NotImplementedError)
+
 
     def contains_index(self, session, index):
         """Does the IndexStore currently store the given Index."""
@@ -346,23 +388,25 @@ class IndexStore(C3Object):
         """Completely delete an index from the store."""
         raise(NotImplementedError)
 
-    def fetch_indexList(self, session):
-        """Fetch a list of all indexes stored in this IndexStore."""
-        raise(NotImplementedError)
-    def fetch_indexStats(self, session, index):
-        """Fetch statistics (such as size) about the given Index."""
-        raise(NotImplementedError)
 
-    def delete_terms(self, session, index, terms, record=None):
+    def delete_terms(self, session, index, terms, rec=None):
         """Delete the given terms from an index, optionally only for a particular record."""
         raise(NotImplementedError)
-    def store_terms(self, session, index, terms, record):
+    def store_terms(self, session, index, terms, rec):
         """Store terms in the index for a given record."""
         raise(NotImplementedError)
+
+    def create_term(self, session, index, termId, resultSet):
+        raise(NotImplementedError)
+
     def fetch_term(self, session, index, term, summary=0, prox=0):
         """Fetch a single term."""
         raise(NotImplementedError)
-    def fetch_termList(self, session, index, term, numReq=0, relation="", end="", summary=0, reverse=0):
+
+    def fetch_termById(self, session, index, termId):
+        raise(NotImplementedError)
+
+    def fetch_termList(self, session, index, term, nTerms=0, relation="", end="", summary=0, reverse=0):
         """Fetch a list of terms for an index.
         numReq:  How many terms are wanted.
         relation: Which order to scan through the index.
@@ -376,10 +420,27 @@ class IndexStore(C3Object):
         raise(NotImplementedError)
 
 
+    def fetch_vector(self, session, index, rec, summary=0):
+        raise(NotImplementedError)
+
+    def fetch_proxVector(self, session, index, rec, elemId=-1):
+        raise(NotImplementedError)
+
+    def fetch_summary(self, session, index):
+        raise(NotImplementedError)
+
+    def fetch_termFrequencies(self, session, index, mType, start, nTerms, direction):
+        raise(NotImplementedError)
+
+
+    def construct_resultSetItem(self, session, recId, recStoreId, nOccs, rsiType):
+        raise(NotImplementedError)
+
+
 # Store configured objects
 class ObjectStore(C3Object):
     """An interface to a persistent storage mechanism for configured Cheshire3 objects."""
-    def create_object(self, session, object=None):
+    def create_object(self, session, obj=None):
         """Given a Cheshire3 object, create a serialised form of it in the database.
         Note:  You should use create_record() as per RecordStore to create an object from a configuration.
         """
@@ -390,7 +451,7 @@ class ObjectStore(C3Object):
     def fetch_object(self, session, id):
         """Fetch an object."""
         raise(NotImplementedError)
-    def store_object(self, session, object):
+    def store_object(self, session, obj):
         """Store an object, potentially overwriting an existing copy."""
         raise(NotImplementedError)
 
@@ -406,10 +467,7 @@ class QueryStore(ObjectStore):
     def fetch_query(self, session, id):
         """Fetch a query from the store."""
         raise(NotImplementedError)
-    def fetch_queryList(self, session, req):
-        """Fetch a list of identifiers associated with queries in the store."""
-        raise(NotImplementedError)
-    def store_query(self, session, object):
+    def store_query(self, session, query):
         """Store a query, potentially overwriting an existing copy."""
         raise(NotImplementedError)
 
@@ -421,13 +479,13 @@ class RecordStore(ObjectStore):
     fast retrieval of important record metadata, for use with
     computing relevance ranking for example."""
 
-    def create_record(self, session, record=None):
+    def create_record(self, session, rec=None):
         """Create a record and assign it a new identifier."""
         raise(NotImplementedError)
-    def replace_record(self, session, record):
+    def replace_record(self, session, rec):
         """Permissions checking hook for store_record if the record does not already exist."""
         raise(NotImplementedError)
-    def store_record(self, session, record, transformer=None):
+    def store_record(self, session, rec, transformer=None):
         """Store an existing record. It must already have an identifier assigned to it."""
         raise(NotImplementedError)
     def fetch_record(self, session, id, parser=None):
@@ -436,11 +494,8 @@ class RecordStore(ObjectStore):
     def delete_record(self, session, id):
         """Delete the record with the given identifier from storage."""
         raise(NotImplementedError)
-    def fetch_recordSize(self, session, id):
+    def fetch_recordMetadata(self, session, id, mType):
         """Return the size of the record, according to its metadata."""
-        raise(NotImplementedError)
-    def fetch_recordChecksum(self, session, id):
-        """Return a checksum for the record, if one is available."""
         raise(NotImplementedError)
 
 # Store documents
@@ -452,8 +507,6 @@ class DocumentStore(ObjectStore):
         raise(NotImplementedError)
     def fetch_document(self, session, id):
         raise(NotImplementedError)
-    def fetch_documentList(self, session, req):
-        raise(NotImplementedError)
     def store_document(self, session, doc):
         raise(NotImplementedError)
 
@@ -462,11 +515,9 @@ class ResultSetStore(ObjectStore):
     """A persistent storage mechanism for result sets."""
     def create_resultSet(self, session, rset=None):
         raise(NotImplementedError)
-    def delete_resultSet(self, session, rsid):
+    def delete_resultSet(self, session, id):
         raise(NotImplementedError)
-    def fetch_resultSet(self, session, rsid):
-        raise(NotImplementedError)
-    def fetch_resultSetList(self, session, numReq, start):
+    def fetch_resultSet(self, session, id):
         raise(NotImplementedError)
     def store_resultSet(self, session, rset):
         raise(NotImplementedError)
@@ -490,7 +541,7 @@ class Document:
     processHistory = []
     parent = ('','',-1)
 
-    def __init__(self, data, creator="", history=[], mimeType="", parent=None):
+    def __init__(self, data, creator="", history=[], mimeType="", parent=None, filename="", tagName="", byteCount=0, byteOffset=0, wordCount=0):
         """The constructer takes the data which should be used to
         construct the document. This is implementation dependant. It
         also optionally may take a creator object, process history
@@ -498,7 +549,7 @@ class Document:
         documents which have been extracted from another document, for
         example pages from a book."""
         raise(NotImplementedError)
-    def get_raw(self):
+    def get_raw(self, session):
         """Return the raw data associated with this document."""
         raise(NotImplementedError)
 
@@ -540,8 +591,7 @@ class Record:
     stored in a RecordStore database and retrieved via a persistent
     and unique document identifier. The record data may be retrieved
     as a list of SAX events, as regularised XML or as a DOM tree."""
-    schema = ''
-    schemaType = ''
+    tagName = ''
     status = ''
     baseUri = ''
     history = []
@@ -560,7 +610,7 @@ class Record:
     xml = ""
     sax = []
 
-    def __init__(self, data, xml, docid=None):
+    def __init__(self, data, xml="", docId=None, wordCount=0, byteCount=0):
         raise(NotImplementedError)
     
     def __repr__(self):
@@ -569,18 +619,21 @@ class Record:
             else:
                 return "%s-%s" % (str(self.__class__).split('.')[-1], self.id)
 
-    def get_dom(self):
+    def get_dom(self, session):
         """Return the DOM document node for the record."""
         raise(NotImplementedError)
-    def get_sax(self):
+    def get_sax(self, session):
         """Return the list of SAX events for the record, serialised according to the internal C3 format."""
         raise(NotImplementedError)
-    def get_xml(self):
+    def get_xml(self, session):
         """Return the XML for the record as a serialised string."""
         raise(NotImplementedError)
 
-    def process_xpath(self, xpath, maps={}):
+    def process_xpath(self, session, xpath, maps={}):
         """Process the given xpath (either string or compiled), perhaps with some supplied namespace mappings."""
+        raise(NotImplementedError)
+
+    def fetch_vector(self, session, index, summary=False):
         raise(NotImplementedError)
 
 class Session:

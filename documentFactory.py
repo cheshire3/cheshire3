@@ -19,7 +19,7 @@ import zipfile
 
 from Ft.Xml.Domlette import Print
 from lxml import etree
-from xpathObject import XPathObject
+from xpathProcessor import SimpleXPathProcessor
 
 
 mimetypes.add_type('application/marc', '.marc')
@@ -33,7 +33,7 @@ mimetypes.add_type('application/marc', '.marc')
 class BaseDocumentStream:
     streamLocation = ""
     format = ""
-    schema = ""
+    tagName = ""
     codec = ""
     factory = None
     filterRe = None
@@ -42,13 +42,13 @@ class BaseDocumentStream:
     documents = []
     length = 0
 
-    def __init__(self, session, stream, format, schema=None, codec=None, factory=None ):
+    def __init__(self, session, stream, format, tagName=None, codec=None, factory=None ):
         self.factory = factory
         self.format = format
-        if type(schema) == unicode:
-            self.schema = schema.encode('utf-8')
+        if type(tagName) == unicode:
+            self.tagName = tagName.encode('utf-8')
         else:
-            self.schema = schema
+            self.tagName = tagName
         self.codec = codec
         self.stream = self.open_stream(stream)
 
@@ -85,6 +85,8 @@ class BaseDocumentStream:
         else:
             raise StopIteration
 
+    def find_documents(self, session, cache=0):
+        raise(NotImplementedError)
 
 class TermHashDocumentStream(BaseDocumentStream):
 
@@ -110,14 +112,14 @@ class XmlDocumentStream(BaseDocumentStream):
     start = None
     endtag = ""
 
-    def __init__(self, session, stream, format, schema="", codec="", factory=None):
-        BaseDocumentStream.__init__(self, session, stream, format, schema, codec, factory)
-        if (not schema):
+    def __init__(self, session, stream, format, tagName="", codec="", factory=None):
+        BaseDocumentStream.__init__(self, session, stream, format, tagName, codec, factory)
+        if (not tagName):
             self.start = re.compile("<([-a-zA-Z0-9_.]+:)?([-a-zA-Z0-9_.]+)[\s>]")
             self.endtag = ""
         else:
-            self.start = re.compile("<%s[\s>]" % schema)
-            self.endtag = "</" + schema + ">"
+            self.start = re.compile("<%s[\s>]" % tagName)
+            self.endtag = "</" + tagName + ">"
         
     def find_documents(self, session, cache=0):
         docs = []
@@ -167,11 +169,11 @@ class XmlDocumentStream(BaseDocumentStream):
                             byteCount = tlen
                             
                         if cache == 0:
-                            yield StringDocument(xpi + txt, mimeType="text/xml", schema=self.schema, byteCount=byteCount, byteOffset=start+offOffset, filename=self.streamLocation)
+                            yield StringDocument(xpi + txt, mimeType="text/xml", tagName=self.tagName, byteCount=byteCount, byteOffset=start+offOffset, filename=self.streamLocation)
                         elif cache == 1:
                             locs.append((start, tlen))
                         elif cache == 2:
-                            docs.append(StringDocument(xpi + txt, mimeType="text/xml", schema=self.schema))
+                            docs.append(StringDocument(xpi + txt, mimeType="text/xml", tagName=self.tagName))
                         offOffset += (byteCount - tlen)
                     else:
                         strStart = len(line)
@@ -226,8 +228,8 @@ class MarcDocumentStream(BaseDocumentStream):
 
 class MultipleDocumentStream(BaseDocumentStream):
 
-    def __init__(self, session, stream, format, schema=None, codec=None, factory=None ):
-        BaseDocumentStream.__init__(self, session, stream, format, schema, codec, factory)
+    def __init__(self, session, stream, format, tagName=None, codec=None, factory=None ):
+        BaseDocumentStream.__init__(self, session, stream, format, tagName, codec, factory)
         filterStr = factory.get_setting(session, 'filterRegexp', "\.([a-zA-Z0-9]+|tar.gz|tar.bz2)$")
         if filterStr:
             self.filterRe = re.compile(filterStr)
@@ -262,7 +264,7 @@ class MultipleDocumentStream(BaseDocumentStream):
         s = self._fetchStream(item)
         if trip[0] == 'stream':
             cls = trip[1]
-            nstream = cls(session, s, format=trip[2], schema=self.schema, codec=self.codec, factory=self.factory)
+            nstream = cls(session, s, format=trip[2], tagName=self.tagName, codec=self.codec, factory=self.factory)
             # copy streamLocation in to copy to document
             nstream.streamLocation = item
             return ('stream', nstream)
@@ -350,8 +352,8 @@ class TarDocumentStream(MultipleDocumentStream):
         else:
             return MultipleDocumentStream._processFile(self, session, item)
 
-    def _fetchStream(self, item):
-        return self.stream.extractfile(item)
+    def _fetchStream(self, path):
+        return self.stream.extractfile(path)
     def _fetchName(self, item):
         return item.name
 
@@ -371,8 +373,8 @@ class ZipDocumentStream(DirectoryDocumentStream):
             s = cStringIO.StringIO(stream)
             return zipfile.ZipFile(s, mode="r")
             
-    def _fetchStream(self, item):
-        return cStringIO.StringIO(self.stream.read(item))
+    def _fetchStream(self, path):
+        return cStringIO.StringIO(self.stream.read(path))
     def _fetchName(self, item):
         return item
 
@@ -480,8 +482,8 @@ class ComponentDocumentStream(BaseDocumentStream):
     # Accept a record, and componentize
     sources = []
 
-    def __init__(self, session, stream, format, schema=None, codec=None, factory=None ):
-        BaseDocumentStream.__init__(self, session, stream, format, schema, codec, factory)
+    def __init__(self, session, stream, format, tagName=None, codec=None, factory=None ):
+        BaseDocumentStream.__init__(self, session, stream, format, tagName, codec, factory)
         self.sources = factory.sources
 
     def open_stream(self, stream):
@@ -499,7 +501,7 @@ class ComponentDocumentStream(BaseDocumentStream):
                 for r in xp:
                     if (type(r) == types.ListType):
                         tempRec = SaxRecord(r)
-                        docstr = tempRec.get_xml()
+                        docstr = tempRec.get_xml(session)
                         saxid = r[-1][r[-1].rfind(' ')+1:]
                         if r[0][0] == "4":
                             docstr = "<c3:component xmlns:c3=\"http://www.cheshire3.org/\" parent=\"%r\" event=\"%s\">%s</c3:component>" % (rec, saxid, docstr)
@@ -539,7 +541,7 @@ class ComponentDocumentStream(BaseDocumentStream):
 class RemoteDocumentStream(BaseDocumentStream):
     # Heirarchical Class
 
-    def parse_url(self, url):
+    def _parse_url(self, url):
         bits = urlparse.urlsplit(url)
         transport = bits[0]
         uphp = bits[1].split('@')
@@ -565,9 +567,9 @@ class RemoteDocumentStream(BaseDocumentStream):
 
 class FtpDocumentStream(RemoteDocumentStream, MultipleDocumentStream):
     # FTP://user:pass@host:port/path/to/object
-    def open_stream(self, path):
+    def open_stream(self, stream):
         # streamLocation is a ftp URL
-        (transport, user, passwd, host, port, dirname, filename, params, anchor) = self.parse_url(self.streamLocation)
+        (transport, user, passwd, host, port, dirname, filename, params, anchor) = self._parse_url(self.streamLocation)
         self.stream = FTP(host, port)
         if user:
             self.stream.login(user, passwd)
@@ -576,9 +578,9 @@ class FtpDocumentStream(RemoteDocumentStream, MultipleDocumentStream):
         self.dirname = dirname
         self.file = filename
 
-    def _fetchStream(self, item):
+    def _fetchStream(self, path):
         currItem = []
-        self.stream.retrbinary(item, lambda x: currItem.append(x))
+        self.stream.retrbinary(path, lambda x: currItem.append(x))
         return cStringIO.StringIO(''.join(self.currItem))
 
     def _fetchName(self, item):
@@ -618,7 +620,7 @@ class Z3950DocumentStream(RemoteDocumentStream):
 
     def open_stream(self, stream):
         server = stream.replace('z3950', 'https')
-        (transport, user, passwd, host, port, dirname, filename, args, anchor) = self.parse_url(server)
+        (transport, user, passwd, host, port, dirname, filename, args, anchor) = self._parse_url(server)
 
         conn = zoom.Connection(host, port)        
         conn.databaseName = dirname
@@ -677,8 +679,8 @@ class UrllibUnicodeFileThing:
 
 class HttpDocumentStream(RemoteDocumentStream, MultipleDocumentStream):
 
-    def __init__(self, session, stream, format, schema=None, codec=None, factory=None ):
-        MultipleDocumentStream.__init__(self, session, stream, format, schema, codec, factory)
+    def __init__(self, session, stream, format, tagName=None, codec=None, factory=None ):
+        MultipleDocumentStream.__init__(self, session, stream, format, tagName, codec, factory)
 
 
     def _processFile(self, session, item):
@@ -710,7 +712,7 @@ class HttpDocumentStream(RemoteDocumentStream, MultipleDocumentStream):
             s = self._fetchStream(item)
         if trip[0] == 'stream':
             cls = trip[1]
-            nstream = cls(session, s, format=trip[2], schema=self.schema, codec=self.codec, factory=self.factory)
+            nstream = cls(session, s, format=trip[2], tagName=self.tagName, codec=self.codec, factory=self.factory)
             return ('stream', nstream)
         elif trip[0] == 'document':
             data = s.read()
@@ -731,8 +733,8 @@ class HttpDocumentStream(RemoteDocumentStream, MultipleDocumentStream):
         ext = mimetypes.guess_extension(mt)
         return "remote%s" % ext
             
-    def _fetchStream(self, url):
-        u = urllib2.urlopen(url)
+    def _fetchStream(self, path):
+        u = urllib2.urlopen(path)
         return UrllibUnicodeFileThing(u)
 
 
@@ -740,7 +742,7 @@ class SruDocumentStream(HttpDocumentStream):
 
     def open_stream(self, stream):
         # streamLocation is an SRU search
-        (transport, user, passwd, host, port, dirname, filename, args, anchor) = self.parse_url(stream)
+        (transport, user, passwd, host, port, dirname, filename, args, anchor) = self._parse_url(stream)
         if not port:
             port = 80
         if user:
@@ -801,13 +803,13 @@ class SrwDocumentStream(HttpDocumentStream):
     # same as Sru, but use request object and ZSI to fetch
     namespaces = {}
 
-    def __init__(self, session, stream, format, schema=None, codec=None, factory=None ):
+    def __init__(self, session, stream, format, tagName=None, codec=None, factory=None ):
         self.namespaces = SRW.protocolNamespaces
-        HttpDocumentStream.__init__(self, session, stream, format, schema,codec, factory)
+        HttpDocumentStream.__init__(self, session, stream, format, tagName,codec, factory)
 
     def open_stream(self, stream):
         # stream is SRU style URL to be opened as SRW
-        (transport, user, passwd, host, port, dirname, filename, args, anchor) = self.parse_url(stream)
+        (transport, user, passwd, host, port, dirname, filename, args, anchor) = self._parse_url(stream)
         if not port:
             port = 80
         database = os.path.join(dirname, filename)
@@ -851,8 +853,8 @@ class OaiDocumentStream(HttpDocumentStream):
         # nothing to do yet
         return None
 
-    def __init__(self, session, stream, format, schema=None, codec=None, factory=None ):
-        BaseDocumentStream.__init__(self, stream, format, schema, codec, factory)
+    def __init__(self, session, stream, format, tagName=None, codec=None, factory=None ):
+        BaseDocumentStream.__init__(self, stream, format, tagName, codec, factory)
 
         # stream is URL to ListIdentifiers
         # possible params: metadataPrefix, set, from, until
@@ -884,7 +886,7 @@ class OaiDocumentStream(HttpDocumentStream):
         # Now use existing infrastructure to parse
         doc = StringDocument(data, self.id, mimeType='text/xml')
         rec = BSParser.process_document(None, doc)
-        dom = rec.get_dom()
+        dom = rec.get_dom(session)
         for top in dom.childNodes:
             if (top.nodeType == elementType):
                 break
@@ -911,7 +913,7 @@ class OaiDocumentStream(HttpDocumentStream):
             data = resp.read()
             doc = StringDocument(data, self.id, mimeType='text/xml')
             rec = BSParser.process_document(None, doc)
-            dom = rec.get_dom()
+            dom = rec.get_dom(session)
             for top in dom.childNodes:
                 if top.nodeType == elementType:
                     break
@@ -942,7 +944,7 @@ try:
         # stream should be (osd location, query)
         # or just query if osd is set on factory config
 
-        def toXml(self, i):
+        def _toXml(self, i):
             xml = ['<sdc:dc xmlns:sdc="info:srw/schema/1/dc-schema" xmlns:dc="http://purl.org/dc/elements/1.1/">']
             # title, description, date, link
             keys = i.keys()
@@ -977,7 +979,7 @@ try:
             results = self.stream.search(self.query)
             docs = []
             for r in results:
-                doc = self.toXml(r)
+                doc = self._toXml(r)
                 if cache == 0:
                     yield StringDocument(doc)
                 elif cache == 2:
@@ -994,7 +996,7 @@ try:
     class SyndicationDocumentStream(HttpDocumentStream):
         # Use universal feed parser to import rss, atom, etc
 
-        def toXml(self, i):
+        def _toXml(self, i):
             xml = ['<sdc:dc xmlns:sdc="info:srw/schema/1/dc-schema" xmlns:dc="http://purl.org/dc/elements/1.1/">']
             # title, description, date, link
             keys = i.keys()
@@ -1023,7 +1025,7 @@ try:
             linked = self.factory.get_setting(session, 'linkedItem', 0)
             for e in self.stream.entries:
                 if linked == 0:
-                    doc = self.toXml(e)
+                    doc = self._toXml(e)
                 else:
                     s = self._fetchStream(e.link)
                     doc = s.read()
@@ -1041,10 +1043,22 @@ except:
     
 
 
-class BaseDocumentFactory(DocumentFactory):
+class DocumentFactoryIter(object):
+    factory = None
+    session = None
+
+    def __init__(self, factory):
+        self.factory = factory
+        self.session = factory.loadSession
+
+    def next(self):
+        return self.factory.get_document(self.session)
+
+
+class SimpleDocumentFactory(DocumentFactory):
     cache = 0
     format = ""
-    schema = ""
+    tagName = ""
     codec = ""
     dataPath = ""
     previousIdx = -1
@@ -1054,7 +1068,7 @@ class BaseDocumentFactory(DocumentFactory):
     
     _possibleDefaults = {'cache' : {'docs' : "Default value for cache parameter for load()", 'type' : int, 'options' : "0|1|2"}
                          , 'format' : {'docs' : "Default value for format parameter"}
-                         , 'schema' : {'docs' : "Default value for schema parameter"}
+                         , 'tagName' : {'docs' : "Default value for tagName parameter"}
                          , 'codec' : {'docs' : "Default value for codec parameter"}
                          , 'data' : {'docs' : "Default value for data parameter"}}
 
@@ -1090,17 +1104,21 @@ class BaseDocumentFactory(DocumentFactory):
                            }
         self.cache = int(self.get_default(session, 'cache', 0))
         self.format = self.get_default(session, 'format', '').encode('utf-8')
-        self.schema = self.get_default(session, 'schema', '')
+        self.tagName = self.get_default(session, 'tagName', '')
         self.codec = self.get_default(session, 'codec', "")
         self.dataPath = self.get_default(session, 'data', '')
 	self.previousIdx = -1
 
 
 	
-    def register_stream(self, format, cls):
+    def register_stream(self, session, format, cls):
         self.streamHash[format] = cls
 
-    def load(self, session, data=None, cache=None, format=None, schema=None, codec=None):
+    def load(self, session, data=None, cache=None, format=None, tagName=None, codec=None):
+
+
+        self.loadSession = session
+
         if data == None:
             data = self.dataPath
 
@@ -1108,8 +1126,8 @@ class BaseDocumentFactory(DocumentFactory):
             format = self.format
         if cache == None:
             cache = self.cache
-        if schema == None:
-            schema = self.schema
+        if tagName == None:
+            tagName = self.tagName
         if codec == None:
             codec = self.codec
 
@@ -1144,7 +1162,7 @@ class BaseDocumentFactory(DocumentFactory):
                             format = 'sru'
 
         cls = self.streamHash[format]
-        ds = cls(session, data, format, schema, codec, self)
+        ds = cls(session, data, format, tagName, codec, self)
 
         # Store and call generator on first ping
         self.docStream = ds
@@ -1155,13 +1173,10 @@ class BaseDocumentFactory(DocumentFactory):
         return self
 
     def __iter__(self):
-        return self
+        return DocumentFactoryIter(self)
 
-    def next(self):
-        return self.get_document()
-
-    def get_document(self, session=None, idx=-1):
-        if idx == -1:
+    def get_document(self, session, n=-1):
+        if n == -1:
             self.previousIdx += 1
             idx = self.previousIdx
         if self.cache == 0:
@@ -1175,10 +1190,10 @@ class BaseDocumentFactory(DocumentFactory):
                     self.generator.next()
                 except StopIteration:
                     pass
-            return self.docStream.documents[idx]
+            return self.docStream.documents[n]
 
 
-class ComponentDocumentFactory(BaseDocumentFactory):
+class ComponentDocumentFactory(SimpleDocumentFactory):
 
     def _handleConfigNode(self, session, node):
         # Source
@@ -1192,7 +1207,7 @@ class ComponentDocumentFactory(BaseDocumentFactory):
                         if ref:
                             xp = self.get_object(session, ref)
                         else:
-                            xp = XPathObject(session, node, self)
+                            xp = SimpleXPathProcessor(session, node, self)
                             xp._handleConfigNode(session, node)
                         self.sources.append(xp)
 
@@ -1202,16 +1217,17 @@ class ComponentDocumentFactory(BaseDocumentFactory):
 
 
 class AccumulatingStream(BaseDocumentStream):
-    def __init__(self, session, stream, format, schema=None, codec=None, factory=None ):
+    def __init__(self, session, stream, format, tagName=None, codec=None, factory=None ):
         self.factory = factory
         self.format = format
-        self.schema = schema
+        self.tagName = tagName
         self.codec = codec
         # And call accumulate to record stream
-        self.accumulate(session, stream, format, schema, codec, factory)
+        self.accumulate(session, stream, format, tagName, codec, factory)
 
-    def accumulate(self, session, stream, format, schema=None, codec=None, factory=None ):
+    def accumulate(self, session, stream, format, tagName=None, codec=None, factory=None ):
         raise NotImplementedError
+
 
 
 class AccTransformerStream(AccumulatingStream):
@@ -1219,7 +1235,7 @@ class AccTransformerStream(AccumulatingStream):
     Transformer should return a string
     """
 
-    def __init__(self, session, stream, format, schema=None, codec=None, factory=None ):
+    def __init__(self, session, stream, format, tagName=None, codec=None, factory=None ):
         if not factory:
             raise ValueError("Cannot build transformer stream without associated documentFactory")
         self.transformer = factory.get_path(session, 'accumulatingTransformer', None)
@@ -1228,12 +1244,12 @@ class AccTransformerStream(AccumulatingStream):
         self.data = []
 
         # now init the AccStream after discovering txr
-        AccumulatingStream.__init__(self, session, stream, format, schema, codec, factory)
+        AccumulatingStream.__init__(self, session, stream, format, tagName, codec, factory)
 
-    def accumulate(self, session, stream, format, schema=None, codec=None, factory=None ):
+    def accumulate(self, session, stream, format, tagName=None, codec=None, factory=None ):
         # session should be record instance
         doc = self.transformer.process_record(session, stream)
-        self.data.append(doc.get_raw())
+        self.data.append(doc.get_raw(session))
 
     def find_documents(self, session, cache=0):
         yield StringDocument(''.join(self.data))
@@ -1244,7 +1260,7 @@ class AccVectorTransformerStream(AccumulatingStream):
     Accumulate data to be fed to DM, via a vector transformer
     """
 
-    def __init__(self, session, stream, format, schema=None, codec=None, factory=None ):
+    def __init__(self, session, stream, format, tagName=None, codec=None, factory=None ):
         if not factory:
             raise ValueError("Cannot build transformer stream without associated documentFactory")
         self.transformer = factory.get_path(session, 'accumulatingTransformer', None)
@@ -1254,12 +1270,12 @@ class AccVectorTransformerStream(AccumulatingStream):
         self.vectors = []
         self.totalAttributes = 0
         # now init the AccStream after discovering txr
-        AccumulatingStream.__init__(self, session, stream, format, schema, codec, factory)
+        AccumulatingStream.__init__(self, session, stream, format, tagName, codec, factory)
 
-    def accumulate(self, session, stream, format, schema=None, codec=None, factory=None ):
+    def accumulate(self, session, stream, format, tagName=None, codec=None, factory=None ):
         # session should be record instance
         doc = self.transformer.process_record(session, stream)
-        (l,v) = doc.get_raw()
+        (l,v) = doc.get_raw(session)
         self.classes.append(l)
         self.vectors.append(v)
         self.totalAttributes += len(v.keys())
@@ -1270,112 +1286,115 @@ class AccVectorTransformerStream(AccumulatingStream):
         yield doc
 
 
-class ClassClusterDocumentStream(AccumulatingStream):
-    """ Give it lots of documents, it will cluster and then read back in the cluster documents. Niiiiiiiice. [in theory] """
 
-    def _handleConfigNode(self, session, node):
-        if (node.localName == "cluster"):
-            maps = []
-            for child in node.childNodes:
-                if (child.nodeType == elementType and child.localName == "map"):
-                    t = child.getAttributeNS(None, 'type')
-                    map = []
-                    for xpchild in child.childNodes:
-                        if (xpchild.nodeType == elementType and xpchild.localName == "xpath"):
-                            map.append(flattenTexts(xpchild))
-                        elif (xpchild.nodeType == elementType and xpchild.localName == "process"):
-                            # turn xpath chain to workflow
-                            ref = xpchild.getAttributeNS(None, 'ref')
-                            if ref:
-                                process = self.get_object(session, ref)
-                            else:
-                                try:
-                                    xpchild.localName = 'workflow'
-                                except:
-                                    # 4suite dom sets read only
-                                    newTop = xpchild.ownerDocument.createElementNS(None, 'workflow')
-                                    for kid in xpchild.childNodes:
-                                        newTop.appendChild(kid)
-                                    xpchild = newTop
-                                process = CachingWorkflow(session, xpchild, self)
-                                process._handleConfigNode(session, xpchild)
-                            map.append(process)
-                    vxp = verifyXPaths([map[0]])
-                    if (len(map) < 3):
-                        # default ExactExtracter
-                        map.append([['extracter', 'ExactExtracter']])
-                    if (t == u'key'):
-                        self.keyMap = [vxp[0], map[1], map[2]]
-                    else:
-                        maps.append([vxp[0], map[1], map[2]])
-            self.maps = maps
+if 0:
+    # XXX Fix Me!
 
-    def __init__(self, session, config, parent):
-        self.keyMap = []
-        self.maps = []
-        Index.__init__(self, session, config, parent)
+    class ClassClusterDocumentStream(AccumulatingStream):
+        """ Give it lots of documents, it will cluster and then read back in the cluster documents. Niiiiiiiice. [in theory] """
 
-        for m in range(len(self.maps)):
-            if isinstance(self.maps[m][2], list):
-                for t in range(len(self.maps[m][2])):
-                    o = self.get_object(session, self.maps[m][2][t][1])
+        def _handleConfigNode(self, session, node):
+            if (node.localName == "cluster"):
+                maps = []
+                for child in node.childNodes:
+                    if (child.nodeType == elementType and child.localName == "map"):
+                        t = child.getAttributeNS(None, 'type')
+                        map = []
+                        for xpchild in child.childNodes:
+                            if (xpchild.nodeType == elementType and xpchild.localName == "xpath"):
+                                map.append(flattenTexts(xpchild))
+                            elif (xpchild.nodeType == elementType and xpchild.localName == "process"):
+                                # turn xpath chain to workflow
+                                ref = xpchild.getAttributeNS(None, 'ref')
+                                if ref:
+                                    process = self.get_object(session, ref)
+                                else:
+                                    try:
+                                        xpchild.localName = 'workflow'
+                                    except:
+                                        # 4suite dom sets read only
+                                        newTop = xpchild.ownerDocument.createElementNS(None, 'workflow')
+                                        for kid in xpchild.childNodes:
+                                            newTop.appendChild(kid)
+                                        xpchild = newTop
+                                    process = CachingWorkflow(session, xpchild, self)
+                                    process._handleConfigNode(session, xpchild)
+                                map.append(process)
+                        vxp = verifyXPaths([map[0]])
+                        if (len(map) < 3):
+                            # default ExactExtractor
+                            map.append([['extractor', 'SimpleExtractor']])
+                        if (t == u'key'):
+                            self.keyMap = [vxp[0], map[1], map[2]]
+                        else:
+                            maps.append([vxp[0], map[1], map[2]])
+                self.maps = maps
+
+        def __init__(self, session, stream, format, tagName, codec, factory):
+            # XXX FIX ME:  Used to be an index!
+            self.keyMap = []
+            self.maps = []
+            Index.__init__(self, session, config, parent)
+
+            for m in range(len(self.maps)):
+                if isinstance(self.maps[m][2], list):
+                    for t in range(len(self.maps[m][2])):
+                        o = self.get_object(session, self.maps[m][2][t][1])
+                        if (o <> None):
+                            self.maps[m][2][t][1] = o
+                        else:
+                            raise(ConfigFileException("Unknown object %s" % (self.maps[m][2][t][1])))
+            if isinstance(self.keyMap[2], list):
+                for t in range(len(self.keyMap[2])):
+                    o = self.get_object(session, self.keyMap[2][t][1])
                     if (o <> None):
-                        self.maps[m][2][t][1] = o
+                        self.keyMap[2][t][1] = o
                     else:
-                        raise(ConfigFileException("Unknown object %s" % (self.maps[m][2][t][1])))
-        if isinstance(self.keyMap[2], list):
-            for t in range(len(self.keyMap[2])):
-                o = self.get_object(session, self.keyMap[2][t][1])
-                if (o <> None):
-                    self.keyMap[2][t][1] = o
-                else:
-                    raise(ConfigFileException("Unknown object %s" % (self.keyMap[2][t][1])))
+                        raise(ConfigFileException("Unknown object %s" % (self.keyMap[2][t][1])))
+
+
+        def begin_indexing(self, session):
+            path = self.get_path(session, "tempPath")
+            if (not os.path.isabs(path)):
+                dfp = self.get_path(session, "defaultPath")
+                path = os.path.join(dfp, path)       
+            self.fileHandle = codecs.open(path, "w", 'utf-8')
+
+        def commit_indexing(self, session):
+            self.fileHandle.close()
+
+
+        def index_record(self, session, rec):
+            # Extract cluster information, append to temp file
+            # Step through .maps keys
+            p = self.permissionHandlers.get('info:srw/operation/2/cluster', None)
+            if p:
+                if not session.user:
+                    raise PermissionException("Authenticated user required to cluster using %s" % self.id)
+                okay = p.hasPermission(session, session.user)
+                if not okay:
+                    raise PermissionException("Permission required to cluster using %s" % self.id)
+
+            raw = rec.process_xpath(session, self.keyMap[0])
+            keyData = self.keyMap[2].process(session, [raw])
+            fieldData = []
+            for map in self.maps:
+                raw = rec.process_xpath(session, map[0])
+                fd = map[2].process(session, [raw])
+                for f in fd.keys():
+                    fieldData.append("%s\x00%s\x00" % (map[1], f))
+            d = "".join(fieldData)
+            for k in keyData.keys():
+                try:
+                    self.fileHandle.write(u"%s\x00%s\n" % (k, d))
+                    self.fileHandle.flush()
+                except:
+                    print "%s failed to write: %r" % (self.id, k)
+                    raise
             
 
-    def begin_indexing(self, session):
-        path = self.get_path(session, "tempPath")
-        if (not os.path.isabs(path)):
-            dfp = self.get_path(session, "defaultPath")
-            path = os.path.join(dfp, path)       
-        self.fileHandle = codecs.open(path, "w", 'utf-8')
 
-    def commit_indexing(self, session):
-        self.fileHandle.close()
-                           
-
-    def index_record(self, session, rec):
-        # Extract cluster information, append to temp file
-        # Step through .maps keys
-        p = self.permissionHandlers.get('info:srw/operation/2/cluster', None)
-        if p:
-            if not session.user:
-                raise PermissionException("Authenticated user required to cluster using %s" % self.id)
-            okay = p.hasPermission(session, session.user)
-            if not okay:
-                raise PermissionException("Permission required to cluster using %s" % self.id)
-
-        raw = rec.process_xpath(self.keyMap[0])
-        keyData = self.keyMap[2].process(session, [raw])
-        fieldData = []
-        for map in self.maps:
-            raw = rec.process_xpath(map[0])
-            fd = map[2].process(session, [raw])
-            for f in fd.keys():
-                fieldData.append("%s\x00%s\x00" % (map[1], f))
-        d = "".join(fieldData)
-        for k in keyData.keys():
-            try:
-                self.fileHandle.write(u"%s\x00%s\n" % (k, d))
-                self.fileHandle.flush()
-            except:
-                print "%s failed to write: %r" % (self.id, k)
-                raise
-            
-
-    
-
-
-class AccumulatingDocumentFactory(BaseDocumentFactory):
+class AccumulatingDocumentFactory(SimpleDocumentFactory):
     """ Will accumulate data across multiple .load() calls to produce 1 or more documents
     Just call load() repeatedly before fetching document(s)
     """
@@ -1384,11 +1403,11 @@ class AccumulatingDocumentFactory(BaseDocumentFactory):
 
 
     def __init__(self, session, config, parent):
-        BaseDocumentFactory.__init__(self, session, config, parent)
-        self.register_stream('transformer', AccTransformerStream)
-        self.register_stream('vectorTransformer', AccVectorTransformerStream)
+        SimpleDocumentFactory.__init__(self, session, config, parent)
+        self.register_stream(session, 'transformer', AccTransformerStream)
+        self.register_stream(session, 'vectorTransformer', AccVectorTransformerStream)
 
-    def load(self, session, data=None, cache=None, format=None, schema=None, codec=None):
+    def load(self, session, data=None, cache=None, format=None, tagName=None, codec=None):
         if data == None:
             data = self.dataPath
 
@@ -1396,8 +1415,8 @@ class AccumulatingDocumentFactory(BaseDocumentFactory):
             format = self.format
         if cache == None:
             cache = self.cache
-        if schema == None:
-            schema = self.schema
+        if tagName == None:
+            tagName = self.tagName
         if codec == None:
             codec = self.codec
 
@@ -1433,18 +1452,18 @@ class AccumulatingDocumentFactory(BaseDocumentFactory):
 
         if not self.docStream:
             cls = self.streamHash[format]
-            self.docStream = cls(session, data, format, schema, codec, self)
+            self.docStream = cls(session, data, format, tagName, codec, self)
         else:
-            self.docStream.accumulate(session, data, format, schema, codec, self)
+            self.docStream.accumulate(session, data, format, tagName, codec, self)
         self.previousIdx = -1
         self.cache = cache
         # Return self for workflows, mostly can ignore
         return self
 
 
-    def get_document(self, session=None, idx=-1):
+    def get_document(self, session, n=-1):
         if self.previousIdx == -1:
             # call find docs for real
             self.generator = self.docStream.find_documents(session, cache=self.cache)
-        return BaseDocumentFactory.get_document(self, session, idx)
+        return SimpleDocumentFactory.get_document(self, session, n)
 

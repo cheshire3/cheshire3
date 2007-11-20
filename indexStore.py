@@ -349,9 +349,9 @@ class BdbIndexStore(IndexStore):
             return sorted
 
         # Original terms from data
-        return self.commit_indexing2(session, index, sorted)
+        return self.commit_centralIndexing(session, index, sorted)
 
-    def commit_indexing2(self, session, index, sorted):
+    def commit_centralIndexing(self, session, index, filePath):
         p = self.permissionHandlers.get('info:srw/operation/2/index', None)
         if p:
             if not session.user:
@@ -365,8 +365,8 @@ class BdbIndexStore(IndexStore):
         nonEmpty = cursor.first()
 
         # Should this be:
-        # f = codecs.open(sorted, 'r', 'utf-8')    ?
-        f = file(sorted)
+        # f = codecs.open(filePath, 'r', 'utf-8')    ?
+        f = file(filePath)
 
         tidIdx = index.get_path(session, 'termIdIndex', None)
         vectors = index.get_setting(session, 'vectors', 0)
@@ -386,7 +386,7 @@ class BdbIndexStore(IndexStore):
                 # okay, no termid hash. hope for best with final set
                 # of terms from regular index
                 (term, value) = cursor.last(doff=0, dlen=12)
-                (last, x,y) = index.deserialise_terms(value)                    
+                (last, x,y) = index.deserialize_term(session, value)                    
             else:
                 tidcursor = tidcxn.cursor()
                 (finaltid, term) = tidcursor.last()
@@ -397,9 +397,9 @@ class BdbIndexStore(IndexStore):
         currData = []
         l = 1
 
-        s2t = index.deserialise_terms
-        mt = index.merge_terms
-        t2s = index.serialise_terms
+        s2t = index.deserialize_term
+        mt = index.merge_term
+        t2s = index.serialize_term
         minTerms = index.get_setting(session, 'minimumSupport')
         if not minTerms:
             minTerms = 0
@@ -431,17 +431,17 @@ class BdbIndexStore(IndexStore):
                     if (nonEmpty):
                         val = cxn.get(currTerm)
                         if (val != None):
-                            unpacked = s2t(val)
-                            unpacked = mt(unpacked, currData, 'add', recs=totalRecs, occs=totalOccs)
+                            unpacked = s2t(session, val)
+                            unpacked = mt(session, unpacked, currData, 'add', nRecs=totalRecs, nOccs=totalOccs)
                             totalRecs = unpacked[1]
                             totalOccs = unpacked[2]
                             unpacked = unpacked[3:]
                         else:
                             unpacked = currData
-                        packed = t2s(termid, unpacked, recs=totalRecs, occs=totalOccs)
+                        packed = t2s(session, termid, unpacked, nRecs=totalRecs, nOccs=totalOccs)
                     else:
                         try:
-                            packed = t2s(termid, currData, recs=totalRecs, occs=totalOccs)
+                            packed = t2s(session, termid, currData, nRecs=totalRecs, nOccs=totalOccs)
                         except:
                             print "%s failed to t2s %s" % (self.id, currTerm)
                             print termid
@@ -466,7 +466,7 @@ class BdbIndexStore(IndexStore):
                     pass
 
         self._closeIndex(session, index)
-        os.remove(sorted)
+        os.remove(filePath)
 
         if vectors:
             # build vectors here
@@ -488,7 +488,7 @@ class BdbIndexStore(IndexStore):
             minLocalFreq = int(index.get_setting(session, 'vectorMinLocalFreq', '-1'))
             maxLocalFreq = int(index.get_setting(session, 'vectorMaxLocalFreq', '-1'))
 
-            base = sorted[:-4] + "TEMP"
+            base = filePath[:-4] + "TEMP"
             fh = codecs.open(base, 'r', 'utf-8', 'xmlcharrefreplace')
             # read in each line, look up 
             currDoc = "000000000000"
@@ -649,8 +649,6 @@ class BdbIndexStore(IndexStore):
                     termidstr = struct.pack('ll', terms[t]['i'], terms[t]['o'])
                     cxn.put("%012d" % t, termidstr)                                        
                 cxn.close()                
-
-
         # print "commited %s:  %s" % (index.id, time.time() - start)
         return None
 
@@ -708,7 +706,7 @@ class BdbIndexStore(IndexStore):
             return []
 
 
-    def fetch_proxVector(self, session, index, rec, elemid=-1):
+    def fetch_proxVector(self, session, index, rec, elemId=-1):
         # rec can be resultSetItem or record
 
         cxn = self.proxVectorCxn.get(index, None)
@@ -732,7 +730,7 @@ class BdbIndexStore(IndexStore):
             unflat = [flat[x:x+nProxInts] for x in range(0,lf,nProxInts)]
             return unflat
 
-        if elemid == -1:
+        if elemId == -1:
             # fetch all for this record
             key = struct.pack('LL', docid, 0)
             keyid = key[:4]
@@ -748,7 +746,7 @@ class BdbIndexStore(IndexStore):
             return vals
             
         else:
-            key = struct.pack('LL', docid, elemid)
+            key = struct.pack('LL', docid, elemId)
             # now add in store
             key = str(self.storeHashReverse[rec.recordStore]) + "|" +  key
             data = cxn.get(key)
@@ -758,13 +756,15 @@ class BdbIndexStore(IndexStore):
             else:
                 return []
 
-    def fetch_termById(self, session, index, termid):
+    def fetch_termById(self, session, index, termId):
         tidcxn = self.termIdCxn.get(index, None)
         if not tidcxn:
             self._openVectors(session, index)
             tidcxn = self.termIdCxn.get(index, None)
-        termid = "%012d" % termid
-        data = tidcxn.get(termid)
+        termid = "%012d" % termId
+        data = tidcxn.get(termId)
+        if type(data) == tuple and data[0] == termid:
+            data = data[1]
         if not data:
             return ""
         else:
@@ -801,29 +801,29 @@ class BdbIndexStore(IndexStore):
         return tfcxn
 
 
-    def fetch_termFrequencies(self, session, index, which='rec', position=-1, number=100, direction="<="):
-        cxn = self._openTermFreq(session, index, which)
+    def fetch_termFrequencies(self, session, index, mType='rec', start=-1, nTerms=100, direction="<="):
+        cxn = self._openTermFreq(session, index, mType)
         if not cxn:
             return []
         else:
             c = cxn.cursor()
             freqs = []
             
-            if position < 0:
+            if start < 0:
                 # go to end and reverse
                 (t,v) = c.last()
-                if position != -1:
-                    slot = int(t) + position + 1
+                if start != -1:
+                    slot = int(t) + start + 1
                     (t,v) = c.set_range("%012d" % slot)
-            elif position == 0:
+            elif start == 0:
                 (t,v) = c.first()
             else:
-                (t,v) = c.set_range("%012d" % position)
+                (t,v) = c.set_range("%012d" % start)
             if direction[0] == "<":
                 next = c.prev
             else:
                 next = c.next
-            while len(freqs) < number:
+            while len(freqs) < nTerms:
                 (tid, fr) = struct.unpack('ll', v)
                 freqs.append((int(t), tid, fr))
                 try:
@@ -834,7 +834,7 @@ class BdbIndexStore(IndexStore):
         
 
 
-    def create_term(self, session, index, termid, resultSet):
+    def create_term(self, session, index, termId, resultSet):
         # Take resultset and munge to index format, serialise, store
 
         term = resultSet.queryTerm
@@ -844,24 +844,10 @@ class BdbIndexStore(IndexStore):
         totalOccs = resultSet.totalOccs
         for item in resultSet:
             unpacked.extend([item.id, self.storeHashReverse[item.recordStore], item.occurences])
-        packed = index.serialise_terms(termid, unpacked, recs=totalRecs, occs=totalOccs)
+        packed = index.serialize_term(session, termId, unpacked, nRecs=totalRecs, nOccs=totalOccs)
         cxn = self._openIndex(session, index)
         cxn.put(term, packed)
         # NB: need to remember to close index manually
-
-    def fetch_indexList(self, session):
-        # Return IDs not object pointers
-        dfp = self.get_path(session, "defaultPath")
-        files = os.listdir(dfp)
-        files = filter(self._fileFilter, files)
-        ids = []
-        start = len(self.id) + 1
-        for f in files:
-            ids.append(f[start:-6])
-        return ids
-
-    def fetch_indexStats(self, session, index):
-        raise(NotImplementedError)
 
     def contains_index(self, session, index):
         # Send Index object, check exists, return boolean
@@ -981,7 +967,7 @@ class BdbIndexStore(IndexStore):
             self.sortStoreCxn[index] = cxn
         return cxn.get(repr(item))
 
-    def store_terms(self, session, index, terms, record):
+    def store_terms(self, session, index, terms, rec):
         # Store terms from hash
         # Need to store:  term, totalOccs, totalRecs, (record id, recordStore id, number of occs in record)
         # hash is now {tokenA:tokenA, ...}
@@ -998,7 +984,7 @@ class BdbIndexStore(IndexStore):
             # No terms to index
             return
 
-        storeid = record.recordStore
+        storeid = rec.recordStore
         if (type(storeid) != types.IntType):
             # Map
             if (self.storeHashReverse.has_key(storeid)):
@@ -1009,13 +995,13 @@ class BdbIndexStore(IndexStore):
                 self.storeHash[self.storeHashReverse[storeid]] = storeid
                 raise ConfigFileException("indexStore %s does not recognise recordStore: %s" % (self.id, storeid))
         
-        docid = record.id
+        docid = rec.id
         if (not type(docid) in [types.IntType, types.LongType]):
             if (type(docid) == types.StringType and docid.isdigit()):
                 docid = long(docid)
             else:
                 # Look up identifier in local bdb
-                docid = self._get_internalId(session, record)         
+                docid = self._get_internalId(session, rec)         
         elif (docid == -1):
             # Unstored record
             raise ValueError(str(record))
@@ -1028,7 +1014,7 @@ class BdbIndexStore(IndexStore):
                     sortVal = value.encode('utf-8')
                 else:
                     sortVal = value
-                self.outSortFiles[index].put("%s/%s" % (str(record.recordStore), docid), sortVal)
+                self.outSortFiles[index].put("%s/%s" % (str(rec.recordStore), docid), sortVal)
 
             prox = terms[value].has_key('positions')
             for k in terms.values():
@@ -1062,8 +1048,8 @@ class BdbIndexStore(IndexStore):
                     pass
                 val = cxn.get(key.encode('utf-8'))
                 if (val != None):
-                    current = index.deserialise_terms(val)               
-                    unpacked = index.merge_terms(current, stuff, op="replace", recs=1, occs=k['occurences'])
+                    current = index.deserialize_term(session, val)               
+                    unpacked = index.merge_term(session, current, stuff, op="replace", nRecs=1, nOccs=k['occurences'])
                     (termid, totalRecs, totalOccs) = unpacked[:3]
                     unpacked = unpacked[3:]
                 else:
@@ -1073,11 +1059,11 @@ class BdbIndexStore(IndexStore):
                     totalRecs = 1
                     totalOccs = k['occurences']
                    
-                packed = index.serialise_terms(termid, unpacked, recs=totalRecs, occs=totalOccs)
+                packed = index.serialize_term(session, termid, unpacked, nRecs=totalRecs, nOccs=totalOccs)
                 cxn.put(key.encode('utf-8'), packed)
             self._closeIndex(session, index)
 
-    def delete_terms(self, session, index, terms, record):
+    def delete_terms(self, session, index, terms, rec):
         p = self.permissionHandlers.get('info:srw/operation/2/unindex', None)
         if p:
             if not session.user:
@@ -1088,7 +1074,7 @@ class BdbIndexStore(IndexStore):
         if not terms:
             return
 
-        docid = record.id
+        docid = rec.id
         # Hash
         if (type(docid) == types.StringType and docid.isdigit()):
             docid = long(docid)
@@ -1096,9 +1082,9 @@ class BdbIndexStore(IndexStore):
             pass        
         else:
             # Look up identifier in local bdb
-            docid = self._get_internalId(session, record)               
+            docid = self._get_internalId(session, rec)               
         
-        storeid = record.recordStore
+        storeid = rec.recordStore
         if (type(storeid) <> types.IntType):
             # Map
             if (self.storeHashReverse.has_key(storeid)):
@@ -1116,14 +1102,14 @@ class BdbIndexStore(IndexStore):
             for k in terms.keys():
                 val = cxn.get(k.encode('utf-8'))
                 if (val <> None):
-                    current = index.deserialise_terms(val)               
+                    current = index.deserialize_term(session, val)               
                     gone = [docid, storeid, terms[k]['occurences']]
-                    unpacked = index.merge_terms(current, gone, 'delete')
+                    unpacked = index.merge_term(session, current, gone, 'delete')
                     if not unpacked[1]:
                         # all terms deleted
                         cxn.delete(k.encode('utf-8'))
                     else:
-                        packed = index.serialise_terms(current[0], unpacked[3:])
+                        packed = index.serialize_term(session, current[0], unpacked[3:])
                         cxn.put(k.encode('utf-8'), packed)
             self._closeIndex(session, index)
 
@@ -1132,7 +1118,7 @@ class BdbIndexStore(IndexStore):
     # --> (key, 12bytestring)    
     # --> unpack for termid, docs, occs
 
-    def fetch_termList(self, session, index, term, numReq=0, relation="", end="", summary=0, reverse=0):
+    def fetch_termList(self, session, index, term, nTerms=0, relation="", end="", summary=0, reverse=0):
         p = self.permissionHandlers.get('info:srw/operation/2/scan', None)
         if p:
             if not session.user:
@@ -1141,8 +1127,8 @@ class BdbIndexStore(IndexStore):
             if not okay:
                 raise PermissionException("Permission required to scan indexStore %s" % self.id)
 
-        if (not (numReq or relation or end)):
-            numReq = 20
+        if (not (nTerms or relation or end)):
+            nTerms = 20
         if (not relation and not end):
             relation = ">="
         if type(end) == unicode:
@@ -1202,11 +1188,11 @@ class BdbIndexStore(IndexStore):
         elif (key > term and relation in ['<', '<=']):
             pass
         else:
-            unpacked = index.deserialise_terms(data)
+            unpacked = index.deserialize_term(session, data)
             if reverse:
                 key = key[::-1]
             tlist.append([key, unpacked])
-            if numReq == 1:
+            if nTerms == 1:
                 fetching = 0
         
 
@@ -1229,11 +1215,11 @@ class BdbIndexStore(IndexStore):
                 elif (end and dir  == "<" and key <= end):
                     fetching = 0
                 else:
-                    unpacked = index.deserialise_terms(rec)
+                    unpacked = index.deserialize_term(session, rec)
                     if reverse:
                         key = key[::-1]
                     tlist.append([key.decode('utf-8'), unpacked])
-                    if (numReq and len(tlist) == numReq):
+                    if (nTerms and len(tlist) == nTerms):
                         fetching = 0
             else:
                 if tlist:
@@ -1247,17 +1233,17 @@ class BdbIndexStore(IndexStore):
         return tlist
 
 
-    def create_item(self, session, tid, rst, occs, rsitype="SimpleResultSetItem"):
-        recStore = self.storeHash[rst]
+    def construct_resultSetItem(self, session, recId, recStoreId, nOccs, rsiType="SimpleResultSetItem"):
+        recStore = self.storeHash[recStoreId]
         if self.identifierMapCxn and self.identifierMapCxn.has_key(recStore):
-            numericTid = tid
-            tid = self._get_externalId(session, recStore, tid)
+            numericTid = termId
+            tid = self._get_externalId(session, recStore, termId)
         else:
             numericTid = None
-        if rsitype == "SimpleResultSetItem":
-            return SimpleResultSetItem(session, tid, recStore, occs, session.database, numeric=numericTid)
-        elif rsitype == "Hash":
-            return ("%s/%s" % (recStore, tid), {"recordStore" : recStore, "recordId" : tid, "occurences" : occs, "database" : session.database})
+        if rsiType == "SimpleResultSetItem":
+            return SimpleResultSetItem(session, recId, recStore, nOccs, session.database, numeric=numericTid)
+        elif rsiType == "Hash":
+            return ("%s/%s" % (recStore, termId), {"recordStore" : recStore, "recordId" : termId, "occurences" : nOccs, "database" : session.database})
         else:
             raise NotImplementedError(rsitype)
 
@@ -1271,16 +1257,16 @@ class BdbIndexStore(IndexStore):
             if not okay:
                 raise PermissionException("Permission required to search indexStore %s" % self.id)
         unpacked = []
-        val = self.fetch_packed(session, index, term, summary)
+        val = self._fetch_packed(session, index, term, summary)
         if (val != None):
             try:
-                unpacked = index.deserialise_terms(val, prox)
+                unpacked = index.deserialize_term(session, val, prox=prox)
             except:
                 raise
                 print "%s failed to deserialise %s %s %s" % (self.id, index.id, term, val)
         return unpacked
 
-    def fetch_packed(self, session, index, term, summary=False, numReq=0, start=0):
+    def _fetch_packed(self, session, index, term, summary=False, numReq=0, start=0):
         try:
             term = term.encode('utf-8')
         except:
@@ -1297,6 +1283,9 @@ class BdbIndexStore(IndexStore):
 
             if not numReq:
                 numReq = 100
+
+
+            # XXX this should be on index somewhere!!
 
             # first get summary
             vals = []

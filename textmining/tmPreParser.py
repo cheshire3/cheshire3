@@ -35,7 +35,7 @@ class TsujiiChunkerPreParser(PreParser):
         
     def process_document(self, session, doc):
         # Must be raw text after passed through tagger
-        txt = doc.get_raw()
+        txt = doc.get_raw(session)
         lines = txt.split('\n')
         all = []
         for l in lines:
@@ -54,7 +54,7 @@ class TsujiiXMLPosPreParser(PosPreParser, TsujiiObject):
         TsujiiObject.__init__(self, session, node, parent)
 
     def process_document(self, session, doc):
-        text = doc.get_raw()
+        text = doc.get_raw(session)
         tt = self.tag(session, text, xml=1)
         ttj = '\n'.join(tt)
         ttj = "<text>" + ttj + "</text>"
@@ -67,7 +67,7 @@ class TsujiiTextPosPreParser(PosPreParser, TsujiiObject):
         TsujiiObject.__init__(self, session, node, parent)
 
     def process_document(self, session, doc):
-        text = doc.get_raw()
+        text = doc.get_raw(session)
         tt = self.tag(session, text, xml=0)
         tt = '\n'.join(tt)
         return StringDocument(tt, self.id, doc.processHistory, 'text/plain', doc.parent)
@@ -78,7 +78,7 @@ class EnjuTextPreParser(PosPreParser, EnjuObject):
         EnjuObject.__init__(self, session, node, parent)
 
     def process_document(self, session, doc):
-        text = doc.get_raw()
+        text = doc.get_raw(session)
         tt = self.tag(session, text)
         tt= '\n'.join(tt)
         return StringDocument("<text>%s</text>" % tt)
@@ -98,7 +98,7 @@ class GeniaTextPreParser(PreParser):
         self.puncre = re.compile('[ ]([.,;:?!][ \n])')
 
     def process_document(self, session, doc):
-        data = doc.get_raw()
+        data = doc.get_raw(session)
         lines = data.split('\n')
         words = []
         for l in lines:
@@ -118,6 +118,7 @@ class GeniaTextPreParser(PreParser):
         return StringDocument(txt)
 
     
+
 class GeniaVerbSpanPreParser(GeniaTextPreParser):
     # Take in unparsed genia and return spans between verb forms
 
@@ -130,7 +131,7 @@ class GeniaVerbSpanPreParser(GeniaTextPreParser):
 
     def process_document(self, session, doc):
         minWds = self.minimumWords
-        data = doc.get_raw()
+        data = doc.get_raw(session)
         data = data.decode('utf-8')
         lines = data.split('\n')
 

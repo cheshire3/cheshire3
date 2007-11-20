@@ -73,7 +73,7 @@ class RegexpFindTokenizer(SimpleTokenizer):
         self.gaps = self.get_setting(session, 'gaps', 0)
 
     def process_string(self, session, data):
-        if gaps:
+        if self.gaps:
             return [tok for tok in self._regexp.split(text) if tok]
         else:
             return self.regexp.findall(data)

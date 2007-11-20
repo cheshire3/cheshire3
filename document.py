@@ -6,11 +6,11 @@ from baseObjects import Document
 
 class StringDocument(Document):
 
-    def __init__(self, text, creator="", history=[], mimeType="", parent=None, filename=None, schema="", byteCount=0, byteOffset=0, wordCount=0):
+    def __init__(self, data, creator="", history=[], mimeType="", parent=None, filename=None, tagName="", byteCount=0, byteOffset=0, wordCount=0):
 	self.id = None
-	self.schema = schema
+	self.tagName = tagName
         self.size = 0
-        self.text = text
+        self.text = data
         self.mimeType = mimeType
 	self.filename = filename
         self.wordCount = wordCount
@@ -26,7 +26,7 @@ class StringDocument(Document):
         if parent:
             self.parent = parent
 
-    def get_raw(self):
+    def get_raw(self, session):
         return self.text
 
     def find_exception(self, e):

@@ -22,7 +22,7 @@ class VectorRenumberPreParser(PreParser):
         self.offset = self.get_setting(session, 'termOffset', 0)
         
     def process_document(self, session, doc):
-        (labels, vectors) = doc.get_raw()
+        (labels, vectors) = doc.get_raw(session)
 
         # find max attr
         all = {}
@@ -98,7 +98,7 @@ class VectorUnRenumberPreParser(PreParser):
 
     def process_document(self, session, doc):
         self.load_model(session)
-        data = doc.get_raw()
+        data = doc.get_raw(session)
         # data should be list of list of ints to map
         g = self.model.get
         ndata = []
@@ -114,7 +114,7 @@ class ARMVectorPreParser(PreParser):
     # no classes
 
     def process_document(self, session, doc):
-        (labels, vectors) = doc.get_raw()[:2]
+        (labels, vectors) = doc.get_raw(session)[:2]
         txt = []
         for v in vectors:
             k = v.keys()
@@ -160,7 +160,7 @@ class TFPPreParser(ARMPreParser):
         # write out our temp file
         (qq, infn) = tempfile.mkstemp(".tfp")
         fh = file(infn, 'w')
-        fh.write(doc.get_raw())
+        fh.write(doc.get_raw(session))
         fh.close()
 
         # go to TFP directory and run
@@ -206,7 +206,7 @@ class Fimi1PreParser(ARMPreParser):
         # write out our temp file
         (qq, infn) = tempfile.mkstemp(".arm")
         fh = file(infn, 'w')
-        fh.write(doc.get_raw())
+        fh.write(doc.get_raw(session))
         fh.close()
 
         (qq, outfn) = tempfile.mkstemp(".txt")
@@ -286,7 +286,7 @@ class FrequentSet(object):
         if unrenumber:
             doc = StringDocument([termids])
             doc2 = unrenumber.process_document(session, doc)
-            termids = doc2.get_raw()[0]
+            termids = doc2.get_raw(session)[0]
         termids.sort()
         self.termids = termids
         self.termidFreqs = dict(zip(termids, [self.freq]*len(termids)))
@@ -338,7 +338,7 @@ class MatchToRulePreParser(PreParser):
 
     def process_document(self, session, doc):
         # take in Doc with match list, return doc with rule object list
-        matches = doc.get_raw()
+        matches = doc.get_raw(session)
 
         out = StringDocument([])
 
@@ -350,13 +350,13 @@ class MatchToRulePreParser(PreParser):
         ruleLengths = {}
 
         if self.recordStore:
-            totalDocs = self.recordStore.get_dbsize(session)
+            totalDocs = self.recordStore.get_dbSize(session)
         else:
             # get default from session's database
             db = session.server.get_object(session, session.database)
             recStore = db.get_path(session, 'recordStore', None)
             if recStore:
-                totalDocs = recStore.get_dbsize(session)
+                totalDocs = recStore.get_dbSize(session)
         if totalDocs == 0:
             # avoid e_divzero
             totalDocs = 1
@@ -567,7 +567,7 @@ class LibSVMPreParser(ClassificationPreParser):
 
     def train(self, session, doc):
         # doc here is [[class,...], [{vector},...]]
-        (labels, vectors) = doc.get_raw()
+        (labels, vectors) = doc.get_raw(session)
         problem = svm.svm_problem(labels, vectors)
         self.model = svm.svm_model(problem, self.param)
         modelPath = self.get_path(session, 'modelPath')
@@ -576,7 +576,7 @@ class LibSVMPreParser(ClassificationPreParser):
 
     def predict(self, session, doc):
         # doc here is {vector}
-        vector = doc.get_raw()
+        vector = doc.get_raw(session)
         doc.predicted_class = int(self.model.predict(vector))
         return doc
 
@@ -597,7 +597,7 @@ class ReverendPreParser(ClassificationPreParser):
             raise ConfigFileException(path)
 
     def train(self, session, doc):
-        (labels, vectors) = doc.get_raw()
+        (labels, vectors) = doc.get_raw(session)
         for (l, v) in zip(labels, vectors):
             vstr = ' '.join(map(str, v.keys()))
             self.model.train(l, vstr)
@@ -605,7 +605,7 @@ class ReverendPreParser(ClassificationPreParser):
         self.predicting = 1
 
     def predict(self, session, doc):
-        v = ' '.join(map(str, doc.get_raw().keys()))
+        v = ' '.join(map(str, doc.get_raw(session).keys()))
         probs = bayes.guess(v)
         doc.predicted_class = probs[0][0]
         doc.probabilities = probs
@@ -633,7 +633,7 @@ class BpnnPreParser(ClassificationPreParser):
 
     def train(self, session, doc):
         # modified bpnn to accept dict as sparse input
-        (labels, vectors) = doc.get_raw()
+        (labels, vectors) = doc.get_raw(session)
         (nattrs, vectors) = self.renumber_train(session, vectors)
 
         labelSet = set(labels)
@@ -679,7 +679,7 @@ class BpnnPreParser(ClassificationPreParser):
         self.predicting = 1
 
     def predict(self, session, doc):
-        invec = doc.get_raw()
+        invec = doc.get_raw(session)
         vec = self.renumber_test(invec)
         resp = self.model.update(vec)
         # this is the outputs from each output node
@@ -694,7 +694,7 @@ class PerceptronPreParser(ClassificationPreParser):
 
     def train(self, session, doc):
         # modified bpnn to accept dict as sparse input
-        (labels, vectors) = doc.get_raw()
+        (labels, vectors) = doc.get_raw(session)
         (nattrs, vectors) = self.renumber_train(session, vectors)
 
         labelSet = set(labels)
@@ -738,7 +738,7 @@ class PerceptronPreParser(ClassificationPreParser):
         self.predicting = 1
 
     def predict(self, session, doc):
-        invec = doc.get_raw()
+        invec = doc.get_raw(session)
         vec = self.renumber_test(invec)
         va = na.zeros(len(self.model))
         for (a,b) in vec.items():

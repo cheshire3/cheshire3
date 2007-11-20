@@ -91,7 +91,7 @@ class reqHandler:
 
         # now retrieve from confStore
         cfg = confStore.fetch_record(session, targetid)            
-        dom = rec.get_dom()
+        dom = rec.get_dom(session)
         node = dom.childNodes[0]
         node.setAttributeNS(None, 'configStore', confStore.id)
         context.subConfigs[targetid] = node
@@ -165,7 +165,7 @@ class reqHandler:
         xml = ['<select xmlns="http://www.w3.org/1999/xhtml" id="functionNameSelect" onchange="set_function()">']
         xml.append('<option value="">(No Function)</option>');
 
-        boringFns = ['log_function', 'auth_function', 'get_setting', 'get_path', 'get_default', 'get_object', 'get_config', 'unlog_function', 'unauth_function']
+        boringFns = ['add_logging', 'add_auth', 'get_setting', 'get_path', 'get_default', 'get_object', 'get_config', 'remove_logging', 'remove_auth']
         for f in funcs:
             if f in boringFns:
                 # emphasize fns not everywhere
@@ -210,7 +210,7 @@ class reqHandler:
 
             # now re-retrieve from confStore
             rec = confStore.fetch_record(session, target)            
-            dom = rec.get_dom()
+            dom = rec.get_dom(session)
             config = dom.childNodes[0]
             config.setAttributeNS(None, 'configStore', cfgStr)
             context.subConfigs[target] = config
@@ -255,7 +255,7 @@ class reqHandler:
                     for rec in confStore:
                         # do something with config
                         if (not (rec.id in obj.subConfigs.keys())):
-                            node = rec.get_dom()
+                            node = rec.get_dom(session)
                             node= node.childNodes[0]
                             nid = node.getAttributeNS(None, 'id')
                             node.setAttributeNS(None, 'configStore', confStore.id)

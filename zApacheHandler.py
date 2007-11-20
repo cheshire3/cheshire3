@@ -356,10 +356,10 @@ class ZHandler:
                         doc = txr.process(session, rec)
                     else:
                         raise ValueError
-                    docdata = doc.get_raw()
+                    docdata = doc.get_raw(session)
                     self.log("finished transform")
                 else:
-                    docdata = rec.get_xml()
+                    docdata = rec.get_xml(session)
                 r = NamePlusRecord()
                 r.name = dbname
                 xr = asn1.EXTERNAL()

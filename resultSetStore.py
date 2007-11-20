@@ -63,26 +63,23 @@ class BdbResultSetStore(SimpleResultSetStore, BdbStore):
             self.store_resultSet(session, rset)
         return id
 
-    def delete_resultSet(self, session, rsid):
-        self.delete_data(session, rsid)
+    def delete_resultSet(self, session, id):
+        self.delete_data(session, id)
         self.commit_storing(session)
 
-    def fetch_resultSet(self, session, rsid):
-        data = self.fetch_data(session, rsid)
+    def fetch_resultSet(self, session, id):
+        data = self.fetch_data(session, id)
         if (data):
             unpacked = struct.unpack("L" * (len(data) / 4), data)
             items = []
             for o in range(len(unpacked))[::4]:
                 db = self.databaseHash[unpacked[o+3]]
                 items.append(SimpleResultSetItem(session, unpacked[o], self.storeHash[unpacked[o+1]], unpacked[o+2], db)) 
-            return SimpleResultSet(session, items, rsid)
+            return SimpleResultSet(session, items, id)
         elif (isinstance(data, DeletedObject)):
             raise ObjectDeletedException(data)
         else:
-            return SimpleResultSet(session, [], rsid)
-
-    def fetch_resultSetList(self, session, numReq=-1, start=""):
-        return self.fetch_idList(*args)
+            return SimpleResultSet(session, [], id)
 
     def store_resultSet(self, session, rset):
         idlist = []
@@ -128,15 +125,15 @@ class BdbResultSetStore2(BdbResultSetStore):
     cxn = None
     txn = None
 
-    def fetch_resultSet(self, session, rsid):
-        data = self.fetch_data(session, rsid)
+    def fetch_resultSet(self, session, id):
+        data = self.fetch_data(session, id)
         if (data):
             (cl, srlz) = data.split('||', 1)
             rset = dynamic.buildObject(session, cl, [])            
             rset.deserialise(session, srlz)
             return rset
         else:
-            return SimpleResultSet(session, [], rsid)
+            return SimpleResultSet(session, [], id)
 
 
     def store_resultSet(self, session, rset):
