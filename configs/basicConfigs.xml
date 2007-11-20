@@ -2,7 +2,7 @@
 <subConfigs>
 
 <subConfig type="documentFactory" id="defaultDocumentFactory">
-  <objectType>documentFactory.BaseDocumentFactory</objectType>
+  <objectType>documentFactory.SimpleDocumentFactory</objectType>
 </subConfig>
 <subConfig type="documentFactory" id="ComponentDocumentFactory">
   <objectType>documentFactory.ComponentDocumentFactory</objectType>
@@ -200,22 +200,22 @@
   <objectType>preParser.TxtToXmlPreParser</objectType>
 </subConfig>
 
-<!-- Extracter objects -->
+<!-- Extractor objects -->
 
-<subConfig type="extracter" id="SimpleExtracter">
-  <objectType>extracter.SimpleExtracter</objectType>
+<subConfig type="extractor" id="SimpleExtractor">
+  <objectType>extractor.SimpleExtractor</objectType>
 </subConfig>
 
-<subConfig type="extracter" id="ProxExtracter">
-  <objectType>extracter.SimpleExtracter</objectType>
+<subConfig type="extractor" id="ProxExtractor">
+  <objectType>extractor.SimpleExtractor</objectType>
   <options>
     <setting type="prox">1</setting>
     <setting type="reversable">1</setting>
   </options>
 </subConfig>
 
-<subConfig type="extracter" id="TeiExtracter">
-  <objectType>extracter.TeiExtracter</objectType>
+<subConfig type="extractor" id="TeiExtractor">
+  <objectType>extractor.TeiExtractor</objectType>
 </subConfig>
 
 
@@ -268,121 +268,121 @@
 
 <!-- TokenMerge -->
 
-<subConfig type="tokenMerge" id="SimpleTokenMerge">
-  <objectType>tokenMerge.SimpleTokenMerge</objectType>
+<subConfig type="tokenMerger" id="SimpleTokenMerger">
+  <objectType>tokenMerger.SimpleTokenMerger</objectType>
 </subConfig>
 
-<subConfig type="tokenMerge" id="ProxTokenMerge">
-  <objectType>tokenMerge.ProximityTokenMerge</objectType>
+<subConfig type="tokenMerger" id="ProxTokenMerger">
+  <objectType>tokenMerger.ProximityTokenMerger</objectType>
 </subConfig>
 
-<subConfig type="tokenMerge" id="OffsetProxTokenMerge">
-  <objectType>tokenMerge.OffsetProximityTokenMerge</objectType>
+<subConfig type="tokenMerger" id="OffsetProxTokenMerger">
+  <objectType>tokenMerger.OffsetProximityTokenMerger</objectType>
 </subConfig>
 
-<subConfig type="tokenMerge" id="NGramTokenMerge">
-  <objectType>tokenMerge.NGramTokenMerge</objectType>
+<subConfig type="tokenMerger" id="NGramTokenMerger">
+  <objectType>tokenMerger.NGramTokenMerger</objectType>
 </subConfig>
 
-<subConfig type="tokenMerge" id="SequenceRangeTokenMerge">
-  <objectType>tokenMerge.SequenceRangeTokenMerge</objectType>
+<subConfig type="tokenMerger" id="SequenceRangeTokenMerger">
+  <objectType>tokenMerger.SequenceRangeTokenMerger</objectType>
 </subConfig>
 
-<subConfig type="tokenMerge" id="MinMaxRangeTokenMerge">
-  <objectType>tokenMerge.MinMaxRangeTokenMerge</objectType>
+<subConfig type="tokenMerger" id="MinMaxRangeTokenMerger">
+  <objectType>tokenMerger.MinMaxRangeTokenMerger</objectType>
 </subConfig>
 
 
-<!-- Some 'Extracter' workflows -->
+<!-- Some 'Extractor' workflows -->
 
-<subConfig type="workflow" id="KeywordExtracterWorkflow">
+<subConfig type="workflow" id="KeywordExtractorWorkflow">
   <objectType>workflow.SimpleWorkflow</objectType>
   <workflow>
-    <object type="extracter" ref="SimpleExtracter"/>
+    <object type="extractor" ref="SimpleExtractor"/>
     <object type="tokenizer" ref="RegexpSubTokenizer"/>
-    <object type="tokenMerge" ref="SimpleTokenMerge"/>
+    <object type="tokenMerger" ref="SimpleTokenMerger"/>
   </workflow>
 </subConfig>
 
-<subConfig type="workflow" id="ProxExtracterWorkflow">
+<subConfig type="workflow" id="ProxExtractorWorkflow">
   <objectType>workflow.SimpleWorkflow</objectType>
   <workflow>
-    <object type="extracter" ref="ProxExtracter"/>
+    <object type="extractor" ref="ProxExtractor"/>
     <object type="tokenizer" ref="RegexpSubTokenizer"/>
-    <object type="tokenMerge" ref="ProxTokenMerge"/>
+    <object type="tokenMerger" ref="ProxTokenMerger"/>
   </workflow>
 </subConfig>
 
 
-<!-- Normaliser Objects -->
+<!-- Normalizer Objects -->
 
-<subConfig type="normaliser" id="UndocumentNormaliser">
-  <objectType>normaliser.UndocumentNormaliser</objectType>
+<subConfig type="normalizer" id="UndocumentNormalizer">
+  <objectType>normalizer.UndocumentNormalizer</objectType>
 </subConfig>
 
-<subConfig type="normaliser" id="DataExistsNormaliser">
-  <objectType>normaliser.DataExistsNormaliser</objectType>
+<subConfig type="normalizer" id="DataExistsNormalizer">
+  <objectType>normalizer.DataExistsNormalizer</objectType>
 </subConfig>
-<subConfig type="normaliser" id="CaseNormaliser">
-  <objectType>normaliser.CaseNormaliser</objectType>
+<subConfig type="normalizer" id="CaseNormalizer">
+  <objectType>normalizer.CaseNormalizer</objectType>
 </subConfig>
-<subConfig type="normaliser" id="SpaceNormaliser">
-  <objectType>normaliser.SpaceNormaliser</objectType>
+<subConfig type="normalizer" id="SpaceNormalizer">
+  <objectType>normalizer.SpaceNormalizer</objectType>
 </subConfig>
-<subConfig type="normaliser" id="ArticleNormaliser">
-  <objectType>normaliser.ArticleNormaliser</objectType>
+<subConfig type="normalizer" id="ArticleNormalizer">
+  <objectType>normalizer.ArticleNormalizer</objectType>
 </subConfig>
-<subConfig type="normaliser" id="StripperNormaliser">
-  <objectType>normaliser.RegexpNormaliser</objectType>
+<subConfig type="normalizer" id="StripperNormalizer">
+  <objectType>normalizer.RegexpNormalizer</objectType>
   <options>
     <setting type="regexp">["%#@~!*{}]</setting>
   </options>
 </subConfig>
-<subConfig type="normaliser" id="PrintableNormaliser">
-  <objectType>normaliser.RegexpNormaliser</objectType>
+<subConfig type="normalizer" id="PrintableNormalizer">
+  <objectType>normalizer.RegexpNormalizer</objectType>
   <options>
     <setting type="regexp">([\x0e-\x1f]|[\x7b-\xff])</setting>
   </options>
 </subConfig>
 
-<subConfig type="normaliser" id="PossessiveNormaliser">
-  <objectType>normaliser.PossessiveNormaliser</objectType>
+<subConfig type="normalizer" id="PossessiveNormalizer">
+  <objectType>normalizer.PossessiveNormalizer</objectType>
 </subConfig>
-<subConfig type="normaliser" id="DiacriticNormaliser">
-  <objectType>normaliser.DiacriticNormaliser</objectType>
+<subConfig type="normalizer" id="DiacriticNormalizer">
+  <objectType>normalizer.DiacriticNormalizer</objectType>
 </subConfig>
-<subConfig type="normaliser" id="IntNormaliser">
-  <objectType>normaliser.IntNormaliser</objectType>
+<subConfig type="normalizer" id="IntNormalizer">
+  <objectType>normalizer.IntNormalizer</objectType>
 </subConfig>
-<subConfig type="normaliser" id="StringIntNormaliser">
-  <objectType>normaliser.StringIntNormaliser</objectType>
+<subConfig type="normalizer" id="StringIntNormalizer">
+  <objectType>normalizer.StringIntNormalizer</objectType>
 </subConfig>
-<subConfig type="normaliser" id="EnglishStemNormaliser">
-  <objectType>normaliser.StemNormaliser</objectType>
+<subConfig type="normalizer" id="EnglishStemNormalizer">
+  <objectType>normalizer.StemNormalizer</objectType>
   <options>
     <setting type="language">english</setting>
   </options>
 </subConfig>
 
 <!-- Deprecate ? -->
-<subConfig type="normaliser" id="KeywordNormaliser">
-  <objectType>normaliser.KeywordNormaliser</objectType>
+<subConfig type="normalizer" id="KeywordNormalizer">
+  <objectType>normalizer.KeywordNormalizer</objectType>
 </subConfig>
-<subConfig type="normaliser" id="ProximityNormaliser">
-  <objectType>normaliser.KeywordNormaliser</objectType>
+<subConfig type="normalizer" id="ProximityNormalizer">
+  <objectType>normalizer.KeywordNormalizer</objectType>
   <options>
     <setting type="prox">1</setting>
   </options>
 </subConfig>
 
-<subConfig type="normaliser" id="ExactExpansionNormaliser">
-  <objectType>normaliser.ExactExpansionNormaliser</objectType>
+<subConfig type="normalizer" id="ExactExpansionNormalizer">
+  <objectType>normalizer.ExactExpansionNormalizer</objectType>
 </subConfig>
-<subConfig type="normaliser" id="WordExpansionNormaliser">
-  <objectType>normaliser.WordExpansionNormaliser</objectType>
+<subConfig type="normalizer" id="WordExpansionNormalizer">
+  <objectType>normalizer.WordExpansionNormalizer</objectType>
 </subConfig>
-<subConfig type="normaliser" id="DateStringNormaliser">
-  <objectType>normaliser.DateStringNormaliser</objectType>
+<subConfig type="normalizer" id="DateStringNormalizer">
+  <objectType>normalizer.DateStringNormalizer</objectType>
 </subConfig>
 
 

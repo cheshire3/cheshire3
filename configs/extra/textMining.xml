@@ -1,7 +1,7 @@
 <config>
   <subConfigs>
 
-    <subConfig type="documentFactory" id="normaliserDocumentFactory">
+    <subConfig type="documentFactory" id="normalizerDocumentFactory">
       <objectType>documentFactory.BaseDocumentFactory</objectType>
       <options>
         <default type="format">termHash</default>
@@ -9,8 +9,8 @@
       </options>
     </subConfig>
 
-    <subConfig type="normaliser" id="WordNetNormaliser">
-      <objectType>textmining.tmNormaliser.WordNetNormaliser</objectType>
+    <subConfig type="normalizer" id="WordNetNormalizer">
+      <objectType>textmining.tmNormalizer.WordNetNormalizer</objectType>
       <imports>
        <module>
          <name>textmining</name>
@@ -18,8 +18,8 @@
      </imports>
     </subConfig>  
 
-    <subConfig type="normaliser" id="HypernymNormaliser">
-      <objectType>textmining.tmNormaliser.HypernymNormaliser</objectType>
+    <subConfig type="normalizer" id="HypernymNormalizer">
+      <objectType>textmining.tmNormalizer.HypernymNormalizer</objectType>
       <imports>
        <module>
          <name>textmining</name>
@@ -28,8 +28,8 @@
     </subConfig>  
 
     <!-- string with /POS tags -->
-    <subConfig type="normaliser" id="TsuPosNormaliser">
-      <objectType>textmining.tmNormaliser.TsujiiPosNormaliser</objectType>
+    <subConfig type="normalizer" id="TsuPosNormalizer">
+      <objectType>textmining.tmNormalizer.TsujiiPosNormalizer</objectType>
       <imports>
        <module>
          <name>textmining</name>
@@ -40,23 +40,23 @@
      </paths>
     </subConfig>  
 
-    <subConfig type="normaliser" id="PosTagStripNormaliser">
-      <objectType>normaliser.RegexpNormaliser</objectType>
+    <subConfig type="normalizer" id="PosTagStripNormalizer">
+      <objectType>normalizer.RegexpNormalizer</objectType>
       <options>
         <setting type="regexp">/[^/]+$</setting>
       </options>
     </subConfig>
 
-    <subConfig type="normaliser" id="PosTagKeepNormaliser">
-      <objectType>normaliser.RegexpNormaliser</objectType>
+    <subConfig type="normalizer" id="PosTagKeepNormalizer">
+      <objectType>normalizer.RegexpNormalizer</objectType>
       <options>
-        <setting type="regexp">^(.*)/</setting>
+        <setting type="regexp">([^ ]*)/</setting>
       </options>
     </subConfig>
 
     <!-- string with XML for clauses -->
-    <subConfig type="preParser" id="EnjuNormaliser">
-      <objectType>textmining.tmNormaliser.EnjuNormaliser</objectType>
+    <subConfig type="normalizer" id="EnjuNormalizer">
+      <objectType>textmining.tmNormalizer.EnjuNormalizer</objectType>
       <imports>
        <module>
          <name>textmining</name>
@@ -81,8 +81,8 @@
     </subConfig>  
 
     <!-- raw genia output -->
-    <subConfig type="normaliser" id="UnparsedGeniaNormaliser">
-       <objectType>textmining.tmNormaliser.UnparsedGeniaNormaliser</objectType>
+    <subConfig type="normalizer" id="UnparsedGeniaNormalizer">
+       <objectType>textmining.tmNormalizer.GeniaNormalizer</objectType>
        <imports>
          <module>
            <name>textmining</name>
@@ -93,9 +93,49 @@
        </paths>
     </subConfig>  
 
+    <subConfig type="tokenizer" id="WordPosGeniaTokenizer">
+       <objectType>textmining.tmTokenizer.UnparsedGeniaTokenizer</objectType>
+       <imports>
+         <module>
+           <name>textmining</name>
+         </module>
+       </imports>
+       <options>
+         <setting type="pos">1</setting>
+       </options>
+    </subConfig>  
+
+
+    <subConfig type="tokenizer" id="PosOnlyGeniaTokenizer">
+       <objectType>textmining.tmTokenizer.UnparsedGeniaTokenizer</objectType>
+       <imports>
+         <module>
+           <name>textmining</name>
+         </module>
+       </imports>
+       <options>
+         <setting type="justPos">1</setting>
+       </options>
+    </subConfig>  
+
+
+
+    <subConfig type="tokenizer" id="PhraseGeniaTokenizer">
+       <objectType>textmining.tmTokenizer.PhraseUnparsedGeniaTokenizer</objectType>
+       <imports>
+         <module>
+           <name>textmining</name>
+         </module>
+       </imports>
+       <paths>
+         <path type="filePath">/home/cheshire/cheshire3/code/textmining</path>
+       </paths>
+    </subConfig>  
+
+
     <!-- recombine into string -->
-    <subConfig type="normaliser" id="PosStringGeniaNormaliser">
-       <objectType>textmining.tmNormaliser.ReconstructGeniaNormaliser</objectType>
+    <subConfig type="normalizer" id="PosStringGeniaNormalizer">
+       <objectType>textmining.tmNormalizer.ReconstructGeniaNormalizer</objectType>
        <imports>
          <module>
            <name>textmining</name>
@@ -110,8 +150,8 @@
     </subConfig> 
 
     <!-- stems recombined -->
-    <subConfig type="normaliser" id="StemStringGeniaNormaliser">
-       <objectType>textmining.tmNormaliser.ReconstructGeniaNormaliser</objectType>
+    <subConfig type="normalizer" id="StemStringGeniaNormalizer">
+       <objectType>textmining.tmNormalizer.ReconstructGeniaNormalizer</objectType>
        <imports>
          <module>
            <name>textmining</name>
@@ -125,8 +165,8 @@
        </options>
     </subConfig> 
 
-    <subConfig type="normaliser" id="StemPosStringGeniaNormaliser">
-       <objectType>textmining.tmNormaliser.ReconstructGeniaNormaliser</objectType>
+    <subConfig type="normalizer" id="StemPosStringGeniaNormalizer">
+       <objectType>textmining.tmNormalizer.ReconstructGeniaNormalizer</objectType>
        <imports>
          <module>
            <name>textmining</name>
@@ -141,7 +181,22 @@
        </options>
     </subConfig> 
 
-    <subConfig type="normaliser" id="StemPosGeniaVerbSpanPreParser">
+    <subConfig type="normalizer" id="XmlStringGeniaNormalizer">
+       <objectType>textmining.tmNormalizer.ReconstructGeniaNormalizer</objectType>
+       <imports>
+         <module>
+           <name>textmining</name>
+         </module>
+       </imports>
+       <paths>
+         <path type="filePath">/home/cheshire/cheshire3/code/textmining</path>
+       </paths>
+       <options>
+         <setting type="xml">1</setting>
+       </options>
+    </subConfig> 
+
+    <subConfig type="preParser" id="StemPosGeniaVerbSpanPreParser">
        <objectType>textmining.tmPreParser.GeniaVerbSpanPreParser</objectType>
        <imports>
          <module>
@@ -159,11 +214,80 @@
     </subConfig> 
 
 
+    <subConfig type="extractor" id="WordPosTaggedExtractor">
+       <objectType>textmining.tmExtractor.TaggedExtractor</objectType>
+       <imports>
+         <module>
+           <name>textmining</name>
+         </module>
+       </imports>
+       <options>
+         <setting type="format">%(word)s/%(pos)s</setting>
+         <setting type="prox">1</setting>
+         <setting type="reversable">1</setting>
+       </options>
+    </subConfig> 
+
+    <subConfig type="extractor" id="StemPosTaggedExtractor">
+       <objectType>textmining.tmExtractor.TaggedExtractor</objectType>
+       <imports>
+         <module>
+           <name>textmining</name>
+         </module>
+       </imports>
+       <options>
+         <setting type="format">%(stem)s/%(pos)s</setting>
+         <setting type="prox">1</setting>
+         <setting type="reversable">1</setting>
+       </options>
+    </subConfig> 
+
+    <subConfig type="extractor" id="WordTaggedExtractor">
+       <objectType>textmining.tmExtractor.TaggedExtractor</objectType>
+       <imports>
+         <module>
+           <name>textmining</name>
+         </module>
+       </imports>
+       <options>
+         <setting type="format">%(word)s</setting>
+         <setting type="prox">1</setting>
+         <setting type="reversable">1</setting>
+       </options>
+    </subConfig> 
+
+    <subConfig type="extractor" id="StemTaggedExtractor">
+       <objectType>textmining.tmExtractor.TaggedExtractor</objectType>
+       <imports>
+         <module>
+           <name>textmining</name>
+         </module>
+       </imports>
+       <options>
+         <setting type="format">%(stem)s</setting>
+         <setting type="prox">1</setting>
+         <setting type="reversable">1</setting>
+       </options>
+    </subConfig> 
+
+    <subConfig type="extractor" id="PosTaggedExtractor">
+       <objectType>textmining.tmExtractor.TaggedExtractor</objectType>
+       <imports>
+         <module>
+           <name>textmining</name>
+         </module>
+       </imports>
+       <options>
+         <setting type="format">%(pos)s</setting>
+         <setting type="prox">1</setting>
+         <setting type="reversable">1</setting>
+       </options>
+    </subConfig> 
 
 
     <!-- keyword, with 'stem' key in hash, /POS in term -->
-    <subConfig type="normaliser" id="KeywordGeniaNormaliser">
-       <objectType>textmining.tmNormaliser.KeywordGeniaNormaliser</objectType>
+    <subConfig type="normalizer" id="KeywordGeniaNormalizer">
+       <objectType>textmining.tmNormalizer.HashGeniaNormalizer</objectType>
        <imports>
          <module>
            <name>textmining</name>
@@ -175,8 +299,8 @@
     </subConfig> 
 
 
-    <subConfig type="normaliser" id="GeniaStemNormaliser">
-       <objectType>textmining.tmNormaliser.GeniaStemNormaliser</objectType>
+    <subConfig type="normalizer" id="GeniaStemNormalizer">
+       <objectType>textmining.tmNormalizer.StemGeniaNormalizer</objectType>
        <imports>
          <module>
            <name>textmining</name>
@@ -184,20 +308,10 @@
        </imports>
     </subConfig>  
 
-
-    <!-- take POS tagged string, and keyword -->
-    <subConfig type="normaliser" id="PosKwdNormaliser">
-       <objectType>textmining.tmNormaliser.PosKeywordNormaliser</objectType>
-       <imports>
-         <module>
-           <name>textmining</name>
-         </module>
-       </imports>
-    </subConfig>  
 
     <!-- take POS tagged string and discover phrases -->
-    <subConfig type="normaliser" id="PosPhraseNormaliser">
-       <objectType>textmining.tmNormaliser.PosPhraseNormaliser</objectType>
+    <subConfig type="normalizer" id="PosPhraseNormalizer">
+       <objectType>textmining.tmNormalizer.PosPhraseNormalizer</objectType>
        <imports>
          <module>
            <name>textmining</name>
@@ -210,12 +324,12 @@
        </options>
     </subConfig>  
 
-    <subConfig type="normaliser" id="PhraseStemNormaliser">
-       <objectType>normaliser.PhraseStemNormaliser</objectType>
+    <subConfig type="normalizer" id="PhraseStemNormalizer">
+       <objectType>normalizer.PhraseStemNormalizer</objectType>
     </subConfig>  
 
-    <subConfig type="normaliser" id="NounVerbFilterNormaliser">
-       <objectType>textmining.tmNormaliser.PosTypeNormaliser</objectType>
+    <subConfig type="normalizer" id="NounVerbFilterNormalizer">
+       <objectType>textmining.tmNormalizer.PosTypeNormalizer</objectType>
        <options>
          <setting type="posTypes">NN NNP NNS VB VBD VBZ VBG VBN VBP</setting>
          <!-- Can keep the pos tags: -->
@@ -228,8 +342,8 @@
        </imports>
     </subConfig>  
 
-    <subConfig type="normaliser" id="NounVerbAdjFilterNormaliser">
-       <objectType>textmining.tmNormaliser.PosTypeNormaliser</objectType>
+    <subConfig type="normalizer" id="NounVerbAdjFilterNormalizer">
+       <objectType>textmining.tmNormalizer.PosTypeNormalizer</objectType>
        <options>
          <setting type="posTypes">NN NNP NNS VB VBD VBZ VBG VBN VBP JJ JJR JJS</setting>
          <!-- Can keep the pos tags: -->
@@ -242,8 +356,8 @@
        </imports>
     </subConfig>  
 
-    <subConfig type="normaliser" id="NounFilterNormaliser">
-       <objectType>textmining.tmNormaliser.PosTypeNormaliser</objectType>
+    <subConfig type="normalizer" id="NounFilterNormalizer">
+       <objectType>textmining.tmNormalizer.PosTypeNormalizer</objectType>
        <options>
          <setting type="posTypes">NN NNP NNS</setting>
          <!-- Can keep the pos tags: -->
@@ -256,8 +370,8 @@
        </imports>
     </subConfig>  
 
-    <subConfig type="normaliser" id="VerbFilterNormaliser">
-       <objectType>textmining.tmNormaliser.PosTypeNormaliser</objectType>
+    <subConfig type="normalizer" id="VerbFilterNormalizer">
+       <objectType>textmining.tmNormalizer.PosTypeNormalizer</objectType>
        <options>
          <setting type="posTypes">VB VBD VBZ VBG VBN VBP</setting>
          <!-- Can keep the pos tags: -->
@@ -270,7 +384,7 @@
        </imports>
     </subConfig>  
 
-  <subConfig type="normaliser" id="TsuTransformer">
+  <subConfig type="transformer" id="TsuTransformer">
       <objectType>textmining.tmTransformer.TsujiiXPathTransformer</objectType>
       <imports>
        <module>

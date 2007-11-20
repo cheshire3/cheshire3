@@ -8,8 +8,8 @@
     <object type="defaultLogger" ref="stdoutLogger"/>
     <object type="z3950Logger" ref="z3950Logger"/>
     <object type="resultSetStore" ref="defaultResultSetStore"/>
-
-</paths>
+    <object type="extractor" ref="SimpleExtractor"/>
+  </paths>
 
   <subConfigs>
     <subConfig type="logger" id="functionLogger">
