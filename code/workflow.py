@@ -287,7 +287,10 @@ class CachingWorkflow(SimpleWorkflow):
             raise ConfigFileException("Could not determine object")
         if not function:
             # Assume most common for object type
-            function = self.fnHash[type]
+            try:
+                function = self.fnHash[type]
+            except KeyError:
+                raise ConfigFileException("No default function for objectType: %s" % type)
 
         if (function in self.singleFunctions):
             code.append('%s.%s(session)' % (o, function))
