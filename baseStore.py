@@ -487,7 +487,7 @@ class BdbStore(SimpleStore):
         elif type(id) == unicode:
             id = id.encode('utf-8')
         else:
-            id = str(key)
+            id = str(id)
 
         if self.inWorkflow:
             data = self.inWorkflow.process(session, data)
