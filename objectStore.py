@@ -6,10 +6,25 @@ from utils import getFirstData, elementType
 import dynamic
 from c3errors import ConfigFileException
 
+
+from baseStore import BdbIter
+class BdbObjectIter(BdbIter):
+    # Get data from bdbIter and turn into record, then process reocrd into object
+
+    def next(self):
+        d = BdbIter.next(self)
+        rec = self.store._process_data(None, d[0], d[1])
+        obj = self.store._processRecord(None, d[0], rec)
+        return obj
+    
+
 class BdbObjectStore(BdbRecordStore, ObjectStore):
     # Store XML records in RecordStore
-    # Retrieve and instantiate    
-
+    # Retrieve and instantiate
+    
+    def __iter__(self):
+        return BdbObjectIter(self)
+    
     def get_storageTypes(self, session):
         # assume that we want to store wordCount, byteCount
         types = ['database']
@@ -18,7 +33,6 @@ class BdbObjectStore(BdbRecordStore, ObjectStore):
         if self.get_setting(session, 'expires'):
             types.append('expires')
         return types
-
 
     # NB Use create_record() to store configurations
     def create_object(self, session, obj=None):
@@ -31,9 +45,17 @@ class BdbObjectStore(BdbRecordStore, ObjectStore):
 
     def fetch_object(self, session, id):
         rec = self.fetch_record(session, id)
-        if (not rec):
+        if rec:
+            object = self._processRecord(session, id, rec)
+            return object
+        else:
             return None
+        
+    def store_object(self, session, obj):
+        raise(NotImplementedError)
 
+    def _processRecord(self, session, id, rec):
+        # Split from fetch_object for Iterators
         dom = rec.get_dom(session)
         for d in dom.childNodes:
             if d.nodeType == elementType:
@@ -62,8 +84,4 @@ class BdbObjectStore(BdbRecordStore, ObjectStore):
 
         object = dynamic.makeObjectFromDom(session, topNode, self)
         return object
-
-    def store_object(self, session, obj):
-        raise(NotImplementedError)
-
 
