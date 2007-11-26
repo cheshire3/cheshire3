@@ -1,8 +1,8 @@
 
 import re, types, string
-from baseObjects import Extracter
+from baseObjects import Extractor
 
-class SimpleExtracter(Extracter):
+class SimpleExtractor(Extractor):
     """ Base extracter. Extracts exact text """
 
     _possibleSettings = {'extraSpaceElements' : {'docs' : "Space separated list of elements after which to append a space so as to not run words together."},
@@ -13,7 +13,7 @@ class SimpleExtracter(Extracter):
                          }
 
     def __init__(self, session, config, parent):
-        Extracter.__init__(self, session, config, parent)
+        Extractor.__init__(self, session, config, parent)
         self.spaceRe = re.compile('\s+')
         extraSpaceElems = self.get_setting(session, 'extraSpaceElements', '')
         self.extraSpaceElems = extraSpaceElems.split()
@@ -23,7 +23,7 @@ class SimpleExtracter(Extracter):
         
 
 
-    def mergeHash(self, a, b):
+    def _mergeHash(self, a, b):
         if not a:
             return b
         if not b:
@@ -40,7 +40,7 @@ class SimpleExtracter(Extracter):
                 a[k] = b[k]
         return a
 
-    def flattenTexts(self, elem):
+    def _flattenTexts(self, elem):
         texts = []
         if (hasattr(elem, 'childNodes')):
             # minidom/4suite
@@ -49,7 +49,7 @@ class SimpleExtracter(Extracter):
                     texts.append(e.data)
                 elif e.nodeType == elementType:
                     # Recurse
-                    texts.append(self.flattenTexts(e))
+                    texts.append(self._flattenTexts(e))
                     if e.localName in self.extraSpaceElems:
                         texts.append(' ')
         else:
@@ -71,7 +71,7 @@ class SimpleExtracter(Extracter):
         return {data: {'text' : data, 'occurences' : 1, 'proxLoc' : -1}}
 
 
-    def get_proxLoc_node(self, session, node):
+    def _getProxLocNode(self, session, node):
         if self.get_setting(session, 'reversable', 0):
             tree = node.getroottree()
             root = tree.getroot()
@@ -94,19 +94,19 @@ class SimpleExtracter(Extracter):
 
     def process_node(self, session, data):
         # Walk a DOM structure and extract
-        txt = self.flattenTexts(data)
+        txt = self._flattenTexts(data)
         if self.strip:
             txt = txt.replace('\n', ' ')
             txt = txt.strip()
         if self.get_setting(session, 'prox', 0):
-            lno = self.get_proxLoc_node(session, data)
+            lno = self._getProxLocNode(session, data)
         else:
             lno = -1
 
         return {txt : {'text' : txt, 'occurences' : 1, 'proxLoc' : lno}}
 
 
-    def get_proxLoc_eventList(self, session, events):
+    def _getProxLocEventList(self, session, events):
         if (self.get_setting(session, 'parent')):
             lno = int(events[0].split()[-3])
         else:
@@ -126,7 +126,7 @@ class SimpleExtracter(Extracter):
             txt = self.spaceRe.sub(' ', txt)
 
         if self.get_setting(session, 'prox', 0):
-            lno = self.get_proxLoc_eventList(session, data)
+            lno = self._getProxLocEventList(session, data)
         else:
             lno = -1
         return {txt:{'text' : txt, 'occurences' : 1, 'proxLoc' : lno}}
@@ -138,17 +138,17 @@ class SimpleExtracter(Extracter):
             for d in xp:
                 if (type(d) == types.ListType):
                     # SAX event
-                    new = self.mergeHash(new, self.process_eventList(session, d))
+                    new = self._mergeHash(new, self.process_eventList(session, d))
                 elif (type(d) in types.StringTypes):
                     # Attribute content
-                    new = self.mergeHash(new, self.process_string(session, d))
+                    new = self._mergeHash(new, self.process_string(session, d))
                 else:
                     # DOM nodes
-                    new = self.mergeHash(new, self.process_node(session, d))
+                    new = self._mergeHash(new, self.process_node(session, d))
         return new
 
 
-class TeiExtracter(SimpleExtracter):
+class TeiExtractor(SimpleExtractor):
 
 
     def process_node(self, session, data):
@@ -209,7 +209,7 @@ class TeiExtracter(SimpleExtracter):
         txt = txt.replace('- ', '')
         
         if self.get_setting(session, 'prox', 0):
-            lno = self.get_proxLoc_eventList(session, data)
+            lno = self._getProxLocEventList(session, data)
         else:
             lno = -1
         return {txt:{'text' : txt, 'occurences' : 1, 'proxLoc' : lno}}

@@ -1,16 +1,16 @@
 
 from configParser import C3Object
-from baseObjects import Normaliser
+from baseObjects import Normalizer
 from c3errors import ConfigFileException
 import types, re, os
 
 # The following defaults should be overridden
-# SimpleNormaliser should never be used (waste of CPU)
-class SimpleNormaliser(Normaliser):
-    """ Base normaliser.  Simply returns the data (shouldn't be used directly) """
+# SimpleNormalizer should never be used (waste of CPU)
+class SimpleNormalizer(Normalizer):
+    """ Base normalizer.  Simply returns the data (shouldn't be used directly) """
 
     def __init__(self, session, config, parent):
-        Normaliser.__init__(self, session, config, parent)
+        Normalizer.__init__(self, session, config, parent)
 
     def process_string(self, session, data):
         # normalise string into single appropriate form (eg '1' -> 1)
@@ -56,7 +56,7 @@ class SimpleNormaliser(Normaliser):
                         kw[new] = d
         return kw
 
-class DataExistsNormaliser(SimpleNormaliser):
+class DataExistsNormalizer(SimpleNormalizer):
     """ Return '1' if any data exists, otherwise '0' """
 
     def process_string(self, session, data):
@@ -65,17 +65,17 @@ class DataExistsNormaliser(SimpleNormaliser):
         else:
             return "0"
 
-class TermExistsNormaliser(SimpleNormaliser):
-    """ Un-stoplist anonymizing normaliser. Eg for use with data mining """
+class TermExistsNormalizer(SimpleNormalizer):
+    """ Un-stoplist anonymizing normalizer. Eg for use with data mining """
 
     _possibleSettings = {
-        'termlist' : {'docs' : "'splitChar' (defaulting to space) separated list of terms.  For each term, if it exists in this list, the normaliser returns '1', otherwise '0'", 'required' : True},
+        'termlist' : {'docs' : "'splitChar' (defaulting to space) separated list of terms.  For each term, if it exists in this list, the normalizer returns '1', otherwise '0'", 'required' : True},
         'splitChar' : {'docs' : "Override for the character to split on"},
         'frequency' : {'docs' : 'if 1, accumulate total occurences, otherwise add one per term', 'type' : int, 'options' : "0|1"}
         }
 
     def __init__(self, session, config, parent):
-        SimpleNormaliser.__init__(self, session, config, parent)
+        SimpleNormalizer.__init__(self, session, config, parent)
         tlstr = self.get_setting(session, 'termlist', '')
         splitter = self.get_setting(session, 'splitChar', ' ')
         self.termlist = tlstr.split(splitter)
@@ -103,28 +103,28 @@ class TermExistsNormaliser(SimpleNormaliser):
         return str(total)
 
 
-class UndocumentNormaliser(SimpleNormaliser):
+class UndocumentNormalizer(SimpleNormalizer):
     """ Take a document as if it were a string and turn into a string """
     def process_string(self, session, data):
-        return data.get_raw()
+        return data.get_raw(session)
     
     
-class CaseNormaliser(SimpleNormaliser):
+class CaseNormalizer(SimpleNormalizer):
     """ Reduce text to lower case """
 
     def process_string(self, session, data):
         return data.lower()
 
-class ReverseNormaliser(SimpleNormaliser):
+class ReverseNormalizer(SimpleNormalizer):
     """ Reverse string (eg for left truncation) """
     def process_string(self, session, data):
         return data[::-1]
 
     
-class SpaceNormaliser(SimpleNormaliser):
+class SpaceNormalizer(SimpleNormalizer):
     """ Reduce multiple whitespace to single space character """
     def __init__(self, session, config, parent):
-        SimpleNormaliser.__init__(self, session, config, parent)
+        SimpleNormalizer.__init__(self, session, config, parent)
         self.whitespace = re.compile("\s+")
 
     def process_string(self, session, data):
@@ -132,7 +132,7 @@ class SpaceNormaliser(SimpleNormaliser):
         data = self.whitespace.sub(' ', data)
         return data
 
-class ArticleNormaliser(SimpleNormaliser):
+class ArticleNormalizer(SimpleNormalizer):
     """ Remove leading english articles (the, a, an) """
     def process_string(self, session, data):
         d = data.lower()
@@ -146,14 +146,14 @@ class ArticleNormaliser(SimpleNormaliser):
             return data
 
 
-class NumericEntityNormaliser(SimpleNormaliser):
+class NumericEntityNormalizer(SimpleNormalizer):
     """ Replace characters matching regular expression with the equivalent numeric character entity """
 
     _possibleSettings = {'regexp':
                          {'docs' : "Regular expression of that matches characters to turn into XML numeric character entities"}
                          }
     def __init__(self, session, config, parent):
-        SimpleNormaliser.__init__(self, session, config, parent)
+        SimpleNormalizer.__init__(self, session, config, parent)
         regex = self.get_setting(session, 'regexp', '([\x0e-\x1f]|[\x7b-\xff])')
         self.regexp = re.compile(regex)
         self.function = lambda x: "&#%s;" % ord(x.group(1))
@@ -168,7 +168,7 @@ class NumericEntityNormaliser(SimpleNormaliser):
 # Non useful characters (Stripper)
 # self.asciiRe = re.compile('["%#@~!*{}]')
 
-class RegexpNormaliser(SimpleNormaliser):
+class RegexpNormalizer(SimpleNormalizer):
     """ Either strip, replace or keep data which matches a given regular expression """
 
     _possibleSettings = {'char':
@@ -180,7 +180,7 @@ class RegexpNormaliser(SimpleNormaliser):
                          }
 
     def __init__(self, session, config, parent):
-        SimpleNormaliser.__init__(self, session, config, parent)
+        SimpleNormalizer.__init__(self, session, config, parent)
         self.char = self.get_setting(session, 'char', '')
         self.keep = self.get_setting(session, 'keep', 0)
         regex = self.get_setting(session, 'regexp')
@@ -209,7 +209,7 @@ class RegexpNormaliser(SimpleNormaliser):
                     raise
     
 
-class PossessiveNormaliser(SimpleNormaliser):
+class PossessiveNormalizer(SimpleNormalizer):
     """ Remove trailing 's or s' from words """
     def process_string(self, session, data):
         # Not totally correct... eg:  it's == 'it is', not 'of it'
@@ -220,7 +220,7 @@ class PossessiveNormaliser(SimpleNormaliser):
         else:
             return data
 
-class IntNormaliser(SimpleNormaliser):
+class IntNormalizer(SimpleNormalizer):
     """ Turn a string into an integer """
     def process_string(self, session, data):
         try:
@@ -228,7 +228,7 @@ class IntNormaliser(SimpleNormaliser):
         except:
             return None
         
-class StringIntNormaliser(SimpleNormaliser):
+class StringIntNormalizer(SimpleNormalizer):
     """ Turn an integer into a 0 padded string, 12 chrs long """
     def process_string(self, session, data):
         try:
@@ -237,14 +237,14 @@ class StringIntNormaliser(SimpleNormaliser):
         except:
             return None
 
-class StoplistNormaliser(SimpleNormaliser):
+class StoplistNormalizer(SimpleNormalizer):
     """ Remove words that match a stopword list """
     stoplist = {}
 
     _possiblePaths = {'stoplist' : {'docs' : "Path file containing set of stop terms, one term per line.", 'required' : True}}
 
     def __init__(self, session, config, parent):
-        SimpleNormaliser.__init__(self, session, config, parent)
+        SimpleNormalizer.__init__(self, session, config, parent)
         p = self.get_path(session, "stoplist")
         if (not os.path.isabs(p)):
             dfp = self.get_path(session, "defaultPath")
@@ -265,14 +265,14 @@ class StoplistNormaliser(SimpleNormaliser):
 try:
     import txngstemmer as Stemmer
 
-    class StemNormaliser(SimpleNormaliser):
+    class StemNormalizer(SimpleNormalizer):
         """ Use a Snowball stemmer to stem the terms """
         stemmer = None
 
         _possibleSettings = {'language' : {'docs' : "Language to create a stemmer for, defaults to english.", 'options' : 'danish|dutch|english|finnish|french|german|italian|norwegian|porter|portuguese|russian|spanish|swedish'}}
 
         def __init__(self, session, config, parent):
-            SimpleNormaliser.__init__(self, session, config, parent)
+            SimpleNormalizer.__init__(self, session, config, parent)
             lang = self.get_setting(session, 'language', 'english')
             try:
                 self.stemmer = Stemmer.Stemmer(lang)
@@ -284,16 +284,16 @@ try:
                 data = unicode(data, 'utf-8')            
             return self.stemmer.stem([data])[0]
 
-    class PhraseStemNormaliser(SimpleNormaliser):
-        """ Use a Snowball stemmer to stem multiple words in a phrase (eg from PosPhraseNormaliser).
-        Deprecated: Should instead use normaliser after tokenizer and before tokenMerger.
+    class PhraseStemNormalizer(SimpleNormalizer):
+        """ Use a Snowball stemmer to stem multiple words in a phrase (eg from PosPhraseNormalizer).
+        Deprecated: Should instead use normalizer after tokenizer and before tokenMerger.
         """
         
 
         stemmer = None
 
         def __init__(self, session, config, parent):
-            SimpleNormaliser.__init__(self, session, config, parent)
+            SimpleNormalizer.__init__(self, session, config, parent)
             lang = self.get_setting(session, 'language', 'english')
             self.punctuationRe = re.compile("((?<!s)'|[-.,]((?=\s)|$)|(^|(?<=\s))[-.,']|[~`!@+=\#\&\^*()\[\]{}\\\|\":;<>?/])")
             try:
@@ -311,13 +311,13 @@ try:
 
 except:
 
-    class StemNormaliser(SimpleNormaliser):
+    class StemNormalizer(SimpleNormalizer):
         def __init__(self, session, config, parent):
             raise(ConfigFileException('Stemmer library not available'))
 
 
 
-class DateStringNormaliser(SimpleNormaliser):
+class DateStringNormalizer(SimpleNormalizer):
     """ Turns a Date object into ISO8601 format """
     
     def process_string(self, session, data):
@@ -326,7 +326,7 @@ class DateStringNormaliser(SimpleNormaliser):
 
 
 
-class RangeNormaliser(SimpleNormaliser):
+class RangeNormalizer(SimpleNormalizer):
     """ TODO XXX: Should normalise ranges?... unfinished??? delete??? """ 
 
     def process_hash(self, session, data):
@@ -364,7 +364,7 @@ class RangeNormaliser(SimpleNormaliser):
         
 
 
-class ExactExpansionNormaliser(SimpleNormaliser):
+class ExactExpansionNormalizer(SimpleNormalizer):
     # Expand stuff within a string
     # Then maybe pass to keyworder
     map = {
@@ -402,7 +402,7 @@ class ExactExpansionNormaliser(SimpleNormaliser):
        
 
 
-class DiacriticNormaliser(SimpleNormaliser):
+class DiacriticNormalizer(SimpleNormalizer):
     """ Slow implementation of Unicode 4.0 character decomposition. Eg that &amp;eacute; -> e """
 
     # Decomposition as per Unicode 4.0 Data file

@@ -1,7 +1,7 @@
 
-from baseObjects import TokenMerge
+from baseObjects import TokenMerger
 
-class SimpleTokenMerge(TokenMerge):
+class SimpleTokenMerger(TokenMerger):
 
     def process_string(self, session, data):
         return data
@@ -17,7 +17,7 @@ class SimpleTokenMerge(TokenMerge):
                     else:
                         # this will discard any second or further locations
                         # -very- minor edge case when this will break things
-                        # if important, use ProximityTokenMerge.
+                        # if important, use ProximityTokenMerger.
                         try:
                             new[t] = {'text' : t, 'occurences' : 1,
                                       'proxLoc' : val['proxLoc']}
@@ -28,7 +28,7 @@ class SimpleTokenMerge(TokenMerge):
                         
         return new
 
-class ProximityTokenMerge(SimpleTokenMerge):
+class ProximityTokenMerger(SimpleTokenMerger):
     def process_hash(self, session, data):
         new = {}
         has = new.has_key
@@ -51,7 +51,7 @@ class ProximityTokenMerge(SimpleTokenMerge):
                     x += 1
         return new
 
-class OffsetProximityTokenMerge(ProximityTokenMerge):
+class OffsetProximityTokenMerger(ProximityTokenMerger):
     def process_hash(self, session, data):
         new = {}
         has = new.has_key
@@ -70,7 +70,7 @@ class OffsetProximityTokenMerge(ProximityTokenMerge):
     
     
 
-class SequenceRangeTokenMerge(SimpleTokenMerge):
+class SequenceRangeTokenMerger(SimpleTokenMerger):
     # assume that we've tokenized a single value into pairs,
     #   which need to be concatenated into ranges.
 
@@ -93,7 +93,7 @@ class SequenceRangeTokenMerge(SimpleTokenMerge):
         return new
 
 
-class MinMaxRangeTokenMerge(SimpleTokenMerge):
+class MinMaxRangeTokenMerger(SimpleTokenMerger):
     """ Extracts a range for use in RangeIndexes """
     
     def process_hash(self, session, data):
@@ -113,12 +113,12 @@ class MinMaxRangeTokenMerge(SimpleTokenMerge):
                 newK: val
                 }
                
-class NGramTokenMerge(SimpleTokenMerge):
+class NGramTokenMerger(SimpleTokenMerger):
 
     _possibleSettings = {'nValue' : {'docs' : '', 'type' : int}}
 
     def __init__(self, session, config, parent):
-        SimpleTokenMerge.__init__(self, session, config, parent)
+        SimpleTokenMerger.__init__(self, session, config, parent)
         self.n = self.get_setting(session, 'nValue', 2)
                
     def process_hash(self, session, data):

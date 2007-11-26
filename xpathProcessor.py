@@ -1,9 +1,9 @@
 
-from configParser import C3Object
+from baseObjects import XPathProcessor
 from utils import elementType, getFirstData, verifyXPaths
 import time
 
-class XPathObject(C3Object):
+class SimpleXPathProcessor(XPathProcessor):
     sources = []
 
     def _handleConfigNode(self, session, node):    
@@ -13,7 +13,7 @@ class XPathObject(C3Object):
                 if child.nodeType == elementType:
                     if child.localName == "xpath":
                         # add XPath
-                        data = {'schema' : '', 'xpath': None, 'maps': {}}
+                        data = {'tagName' : '', 'xpath': None, 'maps': {}}
 
                         xp = getFirstData(child)
                         data['xpath'] = verifyXPaths([xp])[0]
@@ -36,8 +36,8 @@ class XPathObject(C3Object):
 
     def __init__(self, session, config, parent):
         self.sources = []
-        self.schema = ""
-        C3Object.__init__(self, session, config, parent)
+        self.tagName = ""
+        XPathProcessor.__init__(self, session, config, parent)
 
     def process_record(self, session, record):
         # Extract XPath and return values
@@ -45,14 +45,14 @@ class XPathObject(C3Object):
         for src in self.sources:
             # list of {}s
             for xp in src:
-                if xp['schema'] and record.schema != xp['schema']:
+                if xp['tagName'] and record.tagName != xp['tagName']:
                     continue                
-                vals.append(record.process_xpath(xp['xpath'], xp['maps']))
+                vals.append(record.process_xpath(session, xp['xpath'], xp['maps']))
         return vals
 
 
 # two xpaths, span between them
-class SpanXPath(XPathObject):
+class SpanXPath(SimpleXPathProcessor):
     # extra attributes on xpath:
     #   slide="N"    -- slide this many between components.
     #                   Defaults to window  (eg non overlapping)
@@ -62,7 +62,7 @@ class SpanXPath(XPathObject):
     #                   Defaults to 1  (eg adjacent)
 
     def process_record(self, session, record):
-        raw = record.process_xpath(self.sources[0][0]['xpath'])
+        raw = record.process_xpath(session, self.sources[0][0]['xpath'])
         initialSlide = int(self.sources[0][0].get('slide', 0))
         endTag = self.sources[0][1]['xpath'][-1][0][1]
         endNum = int(self.sources[0][1].get('window', '1'))
@@ -124,7 +124,7 @@ class SpanXPath(XPathObject):
         return [comps]
 
 
-class MetadataXPath(XPathObject):
+class MetadataXPath(SimpleXPathProcessor):
 
     def process_record(self, session, record):
         # Check xpath name against record metadata
