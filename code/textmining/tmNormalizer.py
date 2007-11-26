@@ -3,19 +3,19 @@ from configParser import C3Object
 from c3errors import ConfigFileException
 import types, re, os
 
-from normaliser import SimpleNormaliser, KeywordNormaliser
+from normalizer import SimpleNormalizer
 from textmining.TsujiiC3 import TsujiiObject, GeniaObject, EnjuObject
 
 
-# Wordnet Normalisers
+# Wordnet Normalizers
 # Use our own hacked pyWordNet
 try:
     from wn import wordnet, wntools
 
-    class WordNetNormaliser(SimpleNormaliser):
+    class WordNetNormalizer(SimpleNormalizer):
         """ Use Wordnet to expand terms """
 
-        _possibleSettings = {'prox' : {'docs' : "Should the normaliser maintain proximity information", 'type' : int, 'options' : "0|1"}}
+        _possibleSettings = {'prox' : {'docs' : "Should the normalizer maintain proximity information", 'type' : int, 'options' : "0|1"}}
 
         def process_string(self, session, data):
             # Assume that string is of the form word/POS if / in data
@@ -98,7 +98,7 @@ try:
                             kw[new] = d
             return kw
 
-    class HypernymNormaliser(WordNetNormaliser):
+    class HypernymNormalizer(WordNetNormalizer):
         def process_string(self, session, data):
             try:
                 (word, pos) = data.rsplit('/', 1)
@@ -151,15 +151,15 @@ except:
     pass
 
 
-class PosNormaliser(SimpleNormaliser):
-    """ Base class for deriving Part of Speech Normalisers """
+class PosNormalizer(SimpleNormalizer):
+    """ Base class for deriving Part of Speech Normalizers """
     pass
 
 
-class TsujiiPosNormaliser(PosNormaliser, TsujiiObject):
+class TsujiiPosNormalizer(PosNormalizer, TsujiiObject):
 
     def __init__(self, session, node, parent):
-        PosNormaliser.__init__(self, session, node, parent)
+        PosNormalizer.__init__(self, session, node, parent)
         TsujiiObject.__init__(self, session, node, parent)
 
     def process_string(self, session, data):
@@ -168,9 +168,9 @@ class TsujiiPosNormaliser(PosNormaliser, TsujiiObject):
 
 
 # XML output
-class EnjuNormaliser(PosNormaliser, EnjuObject):
+class EnjuNormalizer(PosNormalizer, EnjuObject):
     def __init__(self, session, node, parent):
-        PosNormaliser.__init__(self, session, node, parent)
+        PosNormalizer.__init__(self, session, node, parent)
         EnjuObject.__init__(self, session, node, parent)
 
     def process_string(self, session, data):
@@ -179,9 +179,9 @@ class EnjuNormaliser(PosNormaliser, EnjuObject):
 
 
 # unparsed \t delimited, \n per word
-class GeniaNormaliser(PosNormaliser, GeniaObject):
+class GeniaNormalizer(PosNormalizer, GeniaObject):
     def __init__(self, session, node, parent):
-        PosNormaliser.__init__(self, session, node, parent)
+        PosNormalizer.__init__(self, session, node, parent)
         GeniaObject.__init__(self, session, node, parent)
         self.unparsedOutput = 1
 
@@ -190,20 +190,22 @@ class GeniaNormaliser(PosNormaliser, GeniaObject):
         return ''.join(tl)
 
 
-class ReconstructGeniaNormaliser(SimpleNormaliser):
+class ReconstructGeniaNormalizer(SimpleNormalizer):
     """ Take the unparsed output from Genia and reconstruct the document, maybe with stems ('useStem') and/or PoS tags ('pos') """
 
     _possibleSettings = {'useStem' : {"docs" : "Should the text be reconstructed with the stem (1) or not (0, default)", 'type': int, 'options' : "0|1"},
                          'pos' : {"docs" : 'Should the text include the PoS tag', 'type': int, 'options' : "0|1"},
-                         'justPos' : {"docs" : 'Should the text be JUST the PoS tag', 'type' : int, 'options' : "0|1"}
+                         'justPos' : {"docs" : 'Should the text be JUST the PoS tag', 'type' : int, 'options' : "0|1"},
+                         'xml' : {'docs' : '', 'type' : int, 'options' : '0|1'}
                          }
 
     def __init__(self, session, config, parent):
-        SimpleNormaliser.__init__(self, session, config, parent)
+        SimpleNormalizer.__init__(self, session, config, parent)
         self.stem = self.get_setting(session, 'useStem', 0)
         self.pos = self.get_setting(session, 'pos', 0)
         self.onlyPos = self.get_setting(session, 'justPos', 0)
         self.puncRe = re.compile('[ ]([.,;:?!][ \n])')
+        self.xml = self.get_setting(session, 'xml', 0)
 
     def process_string(self, session, data):
         # not worth a tokenizer just to split lines!
@@ -211,13 +213,15 @@ class ReconstructGeniaNormaliser(SimpleNormaliser):
         words = []
         for l in lines:
                 try:
-                    (word, stem, pos, rest) = l.split('\t', 3)
+                    (word, stem, pos, phr, rest) = l.split('\t', 4)
                 except ValueError:
                     # empty line
                     words.append(l)
                     continue
                 if self.onlyPos:
                     w = pos
+                elif self.xml:
+                    w = """<w p="%s" l="%s" t="%s">%s</w>""" % (pos, stem, phr, word)
                 else:
                     if self.stem:
                         w = stem
@@ -231,8 +235,8 @@ class ReconstructGeniaNormaliser(SimpleNormaliser):
         return txt
 
 
-class StemGeniaNormaliser(SimpleNormaliser):
-    """ Take output from HashGeniaNormaliser and return stems as terms """
+class StemGeniaNormalizer(SimpleNormalizer):
+    """ Take output from HashGeniaNormalizer and return stems as terms """
     def process_hash(self, session, data):
 	results = {}
 	for d in data.values():
@@ -246,7 +250,7 @@ class StemGeniaNormaliser(SimpleNormaliser):
 
 
 
-class PosPhraseNormaliser(SimpleNormaliser):
+class PosPhraseNormalizer(SimpleNormalizer):
     """ Extract statistical multi-word noun phrases from full pos tagged text. Default phrase is one or more nouns preceded by zero or more adjectives. Don't tokenize first. """
 
     _possibleSettings = {'regexp' : {'docs' : 'Regular expression to match phrases'},
@@ -256,7 +260,7 @@ class PosPhraseNormaliser(SimpleNormaliser):
                          }
 
     def __init__(self, session, config, parent):
-        SimpleNormaliser.__init__(self, session, config, parent)
+        SimpleNormalizer.__init__(self, session, config, parent)
         match = self.get_setting(session, 'regexp', '')
         if not match:
             match = self.get_setting(session, 'pattern')
@@ -267,9 +271,9 @@ class PosPhraseNormaliser(SimpleNormaliser):
                 match = match.replace('+', '+)')
                 match = match.replace('?', '?)')        
                 match = match.replace('JJ', '((?:[ ][^\\s]+/JJ[SR]?)')
-                match = match.replace('NN', '((?:[ ][^\\s]+/NN[SP]?)')
+                match = match.replace('NN', '((?:[ ][^\\s]+/NN[SP]*)')
         self.pattern = re.compile(match)
-        self.strip = re.compile('/(JJ[SR]?|NN[SP]?)')
+        self.strip = re.compile('/(JJ[SR]?|NN[SP]*)')
         self.minimum = self.get_setting(session, 'minimumWords', 0)
         self.subPhrases = self.get_setting(session, 'subPhrases', 0)
 
@@ -318,7 +322,7 @@ class PosPhraseNormaliser(SimpleNormaliser):
         return kw
         
 
-class PosTypeNormaliser(SimpleNormaliser):
+class PosTypeNormalizer(SimpleNormalizer):
     """ Filter by part of speech tags.  Default to keeping only nouns """
 
     types = []
@@ -328,7 +332,7 @@ class PosTypeNormaliser(SimpleNormaliser):
                          'pos' : {'docs' : "Should the PoS tag be kept (1) or thrown away (0, default)", 'type' : int, 'options' : "0|1"}}
 
     def __init__(self, session, config, parent):
-        SimpleNormaliser.__init__(self, session, config, parent)
+        SimpleNormalizer.__init__(self, session, config, parent)
         # Load types from config
         types = self.get_setting(session, 'posTypes')
         if types:
