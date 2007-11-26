@@ -1213,7 +1213,7 @@ class ComponentDocumentFactory(SimpleDocumentFactory):
 
     def __init__(self, session, config, parent):
         self.sources = []
-        BaseDocumentFactory.__init__(self, session, config, parent)
+        SimpleDocumentFactory.__init__(self, session, config, parent)
 
 
 class AccumulatingStream(BaseDocumentStream):
