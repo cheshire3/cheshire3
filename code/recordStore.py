@@ -77,7 +77,7 @@ class SimpleRecordStore(RecordStore):
             okay = p.hasPermission(session, session.user)
             if not okay:
                 raise PermissionException("Permission required to replace an object in %s" % self.id)
-        self.store_record(session, record)
+        self.store_record(session, rec)
 
     def store_record(self, session, rec, transformer=None):
         rec.recordStore = self.id        
@@ -95,7 +95,7 @@ class SimpleRecordStore(RecordStore):
             data = doc.get_raw(session)
         else:
             sax = [x.encode('utf8') for x in rec.get_sax(session)]
-            sax.append("9 " + cPickle.dumps(record.elementHash))
+            sax.append("9 " + cPickle.dumps(rec.elementHash))
             data = nonTextToken.join(sax)       
 
         dig = self.generate_checkSum(session, data)
@@ -154,13 +154,13 @@ class SimpleRecordStore(RecordStore):
         # Split from fetch record for Iterators
         if (parser != None):
             doc = StringDocument(data)
-            record = parser.process_document(session, doc)
+            rec = parser.process_document(session, doc)
         elif (self.outParser != None):
             doc = StringDocument(data)
-            record = self.outParser.process_document(session, doc)
+            rec = self.outParser.process_document(session, doc)
         elif (self.outWorkflow != None):
             doc = StringDocument(data)
-            record = self.outWorkflow.process(session, doc)
+            rec = self.outWorkflow.process(session, doc)
         else:
             # Assume raw sax events
             data = unicode(data, 'utf-8')
@@ -170,12 +170,12 @@ class SimpleRecordStore(RecordStore):
                 elemHash = cPickle.loads(str(line[2:]))
             else:
                 elemHash = {}
-            record = SaxRecord(sax)
-            record.elementHash = elemHash
+            rec = SaxRecord(sax)
+            rec.elementHash = elemHash
         # Ensure basic required info
-        record.id = id
-        record.recordStore = self.id
-        return record
+        rec.id = id
+        rec.recordStore = self.id
+        return rec
 
 
 from baseStore import BdbIter
@@ -231,12 +231,12 @@ class RedirectRecordStore(SimpleRecordStore, SimpleStore):
 
     def create_record(self, session, rec):
         # maybe just copy some stuff around...
-        record.recordStore = self.id
+        rec.recordStore = self.id
         if rec.parent and rec.parent[2]:            
-            record.id = record.parent[2]
-            if record.id == -1:
+            rec.id = rec.parent[2]
+            if rec.id == -1:
                 raise ValueError
-            return record
+            return rec
         else:
             return SimpleRecordStore.create_record(self, session, rec)
 
@@ -326,8 +326,8 @@ class RemoteSlaveRecordStore(SimpleRecordStore):
                 sax.append("9 " + cPickle.dumps(rec.elementHash))
                 data = nonTextToken.join(sax)       
 
-            md = {'wordCount' : record.wordCount,
-                  'byteCount' : record.byteCount}
+            md = {'wordCount' : rec.wordCount,
+                  'byteCount' : rec.byteCount}
 
             if (self.writeTask != None):            
                 self.writeTask.send([self.recordStore, 'store_data_remote', [session, data, md], {}], 1)
