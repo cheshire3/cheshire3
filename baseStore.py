@@ -82,12 +82,10 @@ class SummaryObject(object):
                 
                 self.totalItems = long(cxn.get("totalItems"))
                 self.totalWordCount = long(cxn.get("totalWordCount"))
-                self.meanWordCount = long(cxn.get("meanWordCount"))
                 self.minWordCount = long(cxn.get("minWordCount"))
                 self.maxWordCount = long(cxn.get("maxWordCount"))
 
                 self.totalByteCount = long(cxn.get("totalByteCount"))
-                self.meanByteCount = long(cxn.get("meanByteCount"))
                 self.minByteCount = long(cxn.get("minByteCount"))
                 self.maxByteCount = long(cxn.get("maxByteCount"))
                 
@@ -143,11 +141,10 @@ class SummaryObject(object):
                 cxn.open(mp)
                 cxn.put("totalItems", str(self.totalItems))
                 cxn.put("totalWordCount", str(self.totalWordCount))
-                cxn.put("meanWordCount", str(self.meanWordCount))
                 cxn.put("minWordCount", str(self.minWordCount))
                 cxn.put("maxWordCount", str(self.maxWordCount))
+                
                 cxn.put("totalByteCount", str(self.totalByteCount))
-                cxn.put("meanByteCount", str(self.meanByteCount))
                 cxn.put("minByteCount", str(self.minByteCount))
                 cxn.put("maxByteCount", str(self.maxByteCount))
                 cxn.put("lastModified", self.lastModified)
