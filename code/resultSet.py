@@ -182,8 +182,8 @@ class SimpleResultSet(RankedResultSet):
         # Turn into XML
         xml = ['<resultSet>']
         xml.append('<queryTerm>%s</queryTerm><queryFreq>%s</queryFreq><queryPositions>%s</queryPositions><termWeight>%s</termWeight>' % (self.queryTerm, self.queryFreq, escape(cPickle.dumps(self.queryPositions)), self.termWeight))
-	xml.append('<totalRecs>%s</totalRecs><totalOccs>%s</totalOccs>' % (self.totalRecs, self.totalOccs))
-	xml.append('<items>')
+        xml.append('<totalRecs>%s</totalRecs><totalOccs>%s</totalOccs>' % (self.totalRecs, self.totalOccs))
+        xml.append('<items>')
         for item in self:
             if type(item.id) in types.StringTypes:
                 docid = escape(item.id)
@@ -418,6 +418,7 @@ class SimpleResultSet(RankedResultSet):
         cqlSet = "info:srw/cql-context-set/1/cql-v1.1"
 
         relevancy = 0
+        pi = 0
         algorithm = "cori"
         combine = "mean"
         modType = ""
@@ -434,25 +435,20 @@ class SimpleResultSet(RankedResultSet):
             elif (m.type.prefixURI == cqlSet and m.type.value == "relevant"):
                 # Generic 'relevancy please' request
                 relevancy = 1
-
+            elif m.type.value == 'proxinfo':
+                pi = 1
+            
         # Check if any others are relevance ranked already and preserve
         if (not relevancy):
             for x in others:
                 if (x.relevancy):
                     relevancy = 1
                     break
-        pi = 0
-        for m in cql.modifiers:
-            if m.type.value == 'proxinfo':
-                pi = 1
-                break
 
         # sort result sets by length
         all = cql.value in ['all', 'and', '=', 'prox', 'adj']                
         if not cql.value in ['not', 'prox']:
-            keys = [(len(x), x) for x in others]
-            keys.sort(reverse=not all)
-            others = [x for (key,x) in keys]    
+            others.sort(key=lambda x: len(x), reverse=not all)
 
         if (relevancy):
             self.relevancy = 1
@@ -471,183 +467,195 @@ class SimpleResultSet(RankedResultSet):
                 # Just adding relevance to items?
                 others[0].relevancy = 1
             return others[0]
-        else:
-            # Merge                    
-            if relevancy:
-                maxWeight = -1
-                minWeight = 9999999999
-                fname = "_%sWeights" % combine
-                if (hasattr(self, fname)):
-                    fn = getattr(self, fname)
-                else:
-                    raise NotImplementedError
 
-            tmplist = []
-            cont = 1
-            oidxs = range(1,len(others))
-            lens = [len(x) for x in others]
-            if all and 0 in lens:
-                # no point, just return empty result set
-                return self
-            nors = len(others)
-            positions = [0] * nors
-            cmpHash = {'<' : [-1],
-                       '<=' : [-1, 0],
-                       '=' : [0],
-                       '>=' : [0, 1],
-                       '>' : [1]}
-            distance = 1
-            unit = "word"
-            comparison = "="
-            ordered = 0
-            if (cql.value == 'prox' and cql.modifiers):
-                if (cql['unit']):
-                    unit = cql['unit'].value
-                if (cql['distance']):
-                    distance = int(cql['distance'].value)
-                    comparison = cql['distance'].comparison
-                if cql['ordered']:
-                    ordered = 1
+        if relevancy:
+            maxWeight = -1
+            minWeight = 9999999999
+            fname = "_%sWeights" % combine
+            if (hasattr(self, fname)):
+                fn = getattr(self, fname)
             else:
-                # for adj/=
+                raise NotImplementedError
+
+        tmplist = []
+        oidxs = range(1,len(others))
+        #lens = [len(x) for x in others]
+        lens = map(len, others)
+        if all and 0 in lens:
+            # no point, just return empty result set
+            # FIXME: return something that is definitely an empty resultSet
+            return self
+        nors = len(others)
+        positions = [0] * nors
+        cmpHash = {'<' : [-1],
+                   '<=' : [-1, 0],
+                   '=' : [0],
+                   '>=' : [0, 1],
+                   '>' : [1]}
+        distance = 1
+        unit = "word"
+        comparison = "="
+        ordered = 0
+        if (cql.value == 'prox' and cql.modifiers):
+            if (cql['unit']):
+                unit = cql['unit'].value
+            if (cql['distance']):
+                distance = int(cql['distance'].value)
+                comparison = cql['distance'].comparison
+            if cql['ordered']:
                 ordered = 1
+        else:
+            # for adj/=
+            ordered = 1
 
-            chitem = cmpHash[comparison]
-            if unit == "word":
-                proxtype = 1
-            elif unit == "element" and distance == 0 and comparison == "=":
-                proxtype = 2
-            else:
-                raise NotImplementedError()
-            hasGetItemList = [hasattr(o, 'get_item') for o in others]
-            while cont:                
-                items = [others[0][positions[0]]]
-                rspos = [0]
-                for o in oidxs:
-                    if o != -1:
-                        if hasGetItemList[o]:
-                            nitem = others[o].get_item(items[0])
-                            if not nitem:
+        chitem = cmpHash[comparison]
+        if unit == "word":
+            proxtype = 1
+        elif unit == "element" and distance == 0 and comparison == "=":
+            proxtype = 2
+        else:
+            raise NotImplementedError()
+        hasGetItemList = [hasattr(o, 'get_item') for o in others]
+        cont = 1
+        while cont:                
+            items = [others[0][positions[0]]]
+            rspos = [0]
+            for o in oidxs:
+                if o != -1:
+                    if hasGetItemList[o]:
+                        nitem = others[o].get_item(items[0])
+                        if not nitem:
+                            continue
+                    else:    
+                        try:
+                            nitem = others[o][positions[o]]
+                        except IndexError:
+                            oidxs[o-1] = -1
+                            continue
+                        if nitem < items[0]:
+                            if all or cql.value == 'not':
+                                # skip until equal or greater
+                                while True:
+                                    positions[o] += 1
+                                    if positions[o] >= lens[o] or others[o][positions[o]] >= items[0]:
+                                        break
+                                if positions[o] != lens[o]:
+                                    nitem = others[o][positions[o]]
+                            else:
+                                items = [nitem]
+                                rspos = [o]
                                 continue
-                        else:    
-                            try:
-                                nitem = others[o][positions[o]]
-                            except IndexError:
-                                oidxs[o-1] = -1
-                                continue
-                            if nitem < items[0]:
-                                if all or cql.value == 'not':
-                                    # skip until equal or greater
-                                    while True:
-                                        positions[o] += 1
-                                        if positions[o] >= lens[o] or others[o][positions[o]] >= items[0]:
-                                            break
-                                    if positions[o] != lens[o]:
-                                        nitem = others[o][positions[o]]
-                                else:
-                                    items = [nitem]
-                                    rspos = [o]
-                                    continue
-                        if nitem == items[0]:
-                            items.append(nitem)
-                            rspos.append(o)
+                    if nitem == items[0]:
+                        items.append(nitem)
+                        rspos.append(o)
 
-                for r in rspos:
-                    positions[r] += 1
+            for r in rspos:
+                positions[r] += 1
 
-                while others and positions[0] > len(others[0])-1:
-                    others.pop(0)
-                    positions.pop(0)
-                    lens.pop(0)
-                if not others or ((cql.value == 'not' or all) and len(others) != nors):
-                    cont = 0
-                if (all and len(items) < nors):
-                    continue
-                elif cql.value == 'not' and len(items) != 1:
-                    continue
-                elif cql.value in ["prox", 'adj', '=']:
-                    # proxInfo is hash of (docid, recStore) to list of locations in record
-                    # sort items by query position. Repeat set at each posn
+            while others and positions[0] > len(others[0])-1:
+                others.pop(0)
+                positions.pop(0)
+                lens.pop(0)
+            if not others or ((cql.value == 'not' or all) and len(others) != nors):
+                cont = 0
+            if (all and len(items) < nors):
+                continue
+            elif cql.value == 'not' and len(items) != 1:
+                continue
+            elif cql.value in ["prox", 'adj', '=']:
+                # proxInfo is hash of (docid, recStore) to list of locations in record
+                # sort items by query position. Repeat set at each posn
 
-                    if cql.value != "prox":
-                        newitems = []
-                        mqp = -1
+                if cql.value != "prox":
+                    newitems = []
+                    mqp = -1
+                    for i in items:
+                        i.queryTerm = i.resultSet.queryTerm
+                        i.queryPositions = i.resultSet.queryPositions
+                        mqp = max(mqp, max(i.queryPositions))
+                    for idx in range(mqp+1):
                         for i in items:
-                            i.queryTerm = i.resultSet.queryTerm
-                            i.queryPositions = i.resultSet.queryPositions
-                            for qp in i.queryPositions:
-                                mqp = max(mqp, qp)
-                        for idx in range(mqp+1):
-                            for i in items:
-                                if idx in i.queryPositions:
-                                    newitems.append(i)
-                                    break
-                        items = newitems[:]
-                    else:
-                        #ffs
-                        newitems = items[:]
+                            if idx in i.queryPositions:
+                                newitems.append(i)
+                                break
+                    items = newitems[:]
+                else:
+                    #ffs
+                    newitems = items[:]
 
-                    litem = items.pop(0)
-                    nomatch = 0                    
+                litem = items.pop(0)
+                nomatch = 0                    
 
-                    fullMatchLocs = []
-
-                    while len(items):                        
-                        ritem = items.pop(0)
-                        matchlocs = []
-                        for r in range(0,len(ritem.proxInfo),2):
-                            relem = ritem.proxInfo[r]
-                            rwpos = ritem.proxInfo[r+1]
-                            for l in range(0, len(litem.proxInfo), 2):
-                                if (proxtype == 1 and litem.proxInfo[l] == relem):
-                                    wordDistance = rwpos - litem.proxInfo[l+1]
+                fullMatchLocs = []
+                while len(items):
+                    ritem = items.pop(0)
+                    matchlocs = []
+                    for rpi in ritem.proxInfo:
+                        (relem, rwpos) = rpi[:2]
+                        for lpi in litem.proxInfo:
+                            (lelem, lwpos) = lpi[:2]
+                            if lelem == relem:
+                                if proxtype == 2:
+                                    matchlocs.append(rpi)
+                                else:
+                                    wordDistance = rwpos - lwpos
                                     if ordered and wordDistance < 0:
                                         # B is before A
                                         pass
                                     else:
+                                        # XXX: Stopwords in indexes/queries busts here
                                         wordDistance = abs(wordDistance)
                                         c = cmp(wordDistance, distance)
                                         if (c in chitem):
-                                            matchlocs.extend([relem, rwpos])
-                                            fullMatchLocs.extend([litem.proxInfo[l], litem.proxInfo[l+1]])
-                                            
-                                elif proxtype == 2 and litem.proxInfo[l][0] == relem:
-                                    matchlocs.extend([relem, rwpos])
-                        if matchlocs:                                    
-                            #Can't do this, as might have more later. a b c a would fail
-                            ritem.proxInfo = matchlocs
-                            litem = ritem                                
-                        else:
-                            # no match, break to next set of items
-                            nomatch = 1
-                            break
-                    if nomatch:
-                        continue
-                    litem.proxInfo = fullMatchLocs
-                    litem.proxInfo.extend(matchlocs)
-                    items = [litem]
-                    # items = newitems
-                # do stuff on items to reduce to single representative
-                if relevancy:
-                    item = fn(items, nors)
-                    if item.weight > maxWeight:
-                        maxWeight = item.weight
-                    if item.weight < minWeight:
-                        minWeight = item.weight
-                else:
-                    item = items[0]
-                if pi:
-                    # copy proxInfo around
-                    for o in items[1:]:
-                        item.proxInfo.extend(o.proxInfo)                        
-                tmplist.append(item)
+                                            matchlocs.append(rpi)
+                                            fullMatchLocs.append(lpi)
+                                        
+                    if matchlocs:                                    
+                        # FIXME: Can't do this, as might have more later. a b c b would fail
+                        ritem.proxInfo = matchlocs
+                        litem = ritem                                
+                    else:
+                        # no match, break to next set of items
+                        nomatch = 1
+                        break
+                if nomatch:
+                    continue
+                
+                fullMatchLocs.extend(matchlocs)
+                fullMatchLocs.sort()
+                newMatchLocs = []
+                n = len(newitems)
+                for f in range(len(fullMatchLocs)):
+                    fmi = fullMatchLocs[f]
+                    if fmi in matchlocs:
+                        newMatchLocs.extend(fullMatchLocs[f+1-n:f+1])
+                litem.proxInfo = newMatchLocs
+#                litem.proxInfo = fullMatchLocs
+#                litem.proxInfo.extend(matchlocs)
+                items = [litem]
+                # items = newitems
 
-            self._list = tmplist
+            # do stuff on items to reduce to single representative
             if relevancy:
-                self.relevancy = 1
-                self.minWeight = minWeight
-                self.maxWeight = maxWeight
-            return self
+                item = fn(items, nors)
+                if item.weight > maxWeight:
+                    maxWeight = item.weight
+                if item.weight < minWeight:
+                    minWeight = item.weight
+            else:
+                item = items[0]
+            if pi:
+                # copy proxInfo around
+                for o in items[1:]:
+                    item.proxInfo.extend(o.proxInfo)                        
+            tmplist.append(item)
+
+        self._list = tmplist
+        if relevancy:
+            self.relevancy = 1
+            self.minWeight = minWeight
+            self.maxWeight = maxWeight
+        return self
 
     def order(self, session, spec):
         # sort according to some spec
