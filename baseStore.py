@@ -82,10 +82,12 @@ class SummaryObject(object):
                 
                 self.totalItems = long(cxn.get("totalItems"))
                 self.totalWordCount = long(cxn.get("totalWordCount"))
+                self.meanWordCount = long(cxn.get("meanWordCount"))
                 self.minWordCount = long(cxn.get("minWordCount"))
                 self.maxWordCount = long(cxn.get("maxWordCount"))
 
                 self.totalByteCount = long(cxn.get("totalByteCount"))
+                self.meanByteCount = long(cxn.get("meanByteCount"))
                 self.minByteCount = long(cxn.get("minByteCount"))
                 self.maxByteCount = long(cxn.get("maxByteCount"))
                 
