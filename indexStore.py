@@ -1236,14 +1236,14 @@ class BdbIndexStore(IndexStore):
     def construct_resultSetItem(self, session, recId, recStoreId, nOccs, rsiType="SimpleResultSetItem"):
         recStore = self.storeHash[recStoreId]
         if self.identifierMapCxn and self.identifierMapCxn.has_key(recStore):
-            numericTid = termId
-            tid = self._get_externalId(session, recStore, termId)
+            numericId = recId
+            recId = self._get_externalId(session, recStore, numericId)
         else:
-            numericTid = None
+            numericId = None
         if rsiType == "SimpleResultSetItem":
-            return SimpleResultSetItem(session, recId, recStore, nOccs, session.database, numeric=numericTid)
+            return SimpleResultSetItem(session, recId, recStore, nOccs, session.database, numeric=numericId)
         elif rsiType == "Hash":
-            return ("%s/%s" % (recStore, termId), {"recordStore" : recStore, "recordId" : termId, "occurences" : nOccs, "database" : session.database})
+            return ("%s/%s" % (recStore, recId), {"recordStore" : recStore, "recordId" : recId, "occurences" : nOccs, "database" : session.database})
         else:
             raise NotImplementedError(rsitype)
 
