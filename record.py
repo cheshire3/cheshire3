@@ -389,7 +389,7 @@ class DomRecord(Record):
         else:
             try:
                 # Sometimes this blows up
-                self.wordCount = len(flattenTexts(domNode).split())
+                self.wordCount = len(flattenTexts(data).split())
             except:
                 self.wordCount = 0
         self.byteCount = byteCount
@@ -977,10 +977,10 @@ class SaxRecord(Record):
             s2xhandler.initState()
             self.saxify(session, s2xhandler, process)
             if not events:
-                self.xml = s2xhandler.get_raw()
+                self.xml = s2xhandler.get_raw(session)
                 return self.xml
             else:
-                return s2xhandler.get_raw()
+                return s2xhandler.get_raw(session)
             
     def get_sax(self, session):
         return self.sax
