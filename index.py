@@ -693,7 +693,8 @@ class ProximityIndex(SimpleIndex):
         s = self.resultSetClass(session, [])
         for t in terms[3:]:
             item = ci(session, t[0], t[1], t[2])
-            item.proxInfo = t[3:]
+            pi = t[3:]
+            item.proxInfo = [pi[x:x+self.nProxInts] for x in range(0, len(pi), self.nProxInts)]
             item.resultSet = s
             rsilist.append(item)
         s.fromList(rsilist)
