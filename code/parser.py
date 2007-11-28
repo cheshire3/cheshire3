@@ -1,4 +1,6 @@
 
+# some test
+
 from configParser import C3Object
 from baseObjects import Parser
 from xml.dom.minidom import parseString as domParseString
