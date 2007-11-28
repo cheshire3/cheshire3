@@ -567,17 +567,25 @@ class SimpleResultSet(RankedResultSet):
                 # sort items by query position. Repeat set at each posn
 
                 if cql.value != "prox":
-                    newitems = []
-                    mqp = -1
+                    newItemHash = {}
                     for i in items:
                         i.queryTerm = i.resultSet.queryTerm
                         i.queryPositions = i.resultSet.queryPositions
-                        mqp = max(mqp, max(i.queryPositions))
-                    for idx in range(mqp+1):
-                        for i in items:
-                            if idx in i.queryPositions:
-                                newitems.append(i)
-                                break
+                        newItemHash[i.queryPositions[0]] = i
+                        if len(i.queryPositions) > 1:
+                            for qpi in i.queryPositions[1:]:
+                                # construct new rsi
+                                newi = SimpleResultSetItem(session, id=i.id, recStore=i.recordStore,
+                                                           occs=i.occurences, database=i.database,
+                                                           weight=i.weight, resultSet=i.resultSet)
+                                newi.queryPositions =[qpi]
+                                newi.queryTerm = i.queryTerm
+                                newi.proxInfo = i.proxInfo
+                                newItemHash[qpi] = newi
+
+                    ni = newItemHash.items()
+                    ni.sort()
+                    newitems = [x[1] for x in ni]
                     items = newitems[:]
                 else:
                     #ffs
@@ -603,7 +611,6 @@ class SimpleResultSet(RankedResultSet):
                                         # B is before A
                                         pass
                                     else:
-                                        # XXX: Stopwords in indexes/queries busts here
                                         wordDistance = abs(wordDistance)
                                         c = cmp(wordDistance, distance)
                                         if (c in chitem):
@@ -611,7 +618,6 @@ class SimpleResultSet(RankedResultSet):
                                             fullMatchLocs.append(lpi)
                                         
                     if matchlocs:                                    
-                        # FIXME: Can't do this, as might have more later. a b c b would fail
                         ritem.proxInfo = matchlocs
                         litem = ritem                                
                     else:

@@ -517,7 +517,7 @@ class ComponentDocumentStream(BaseDocumentStream):
                             path = tree.getpath(r)
                             if (r.nsmap):
                                 namespaceList = []
-                                for (pref, ns) in r.nsmap.items():
+                                for (pref, ns) in r.nsmap.iteritems():
                                     namespaceList.append("xmlns:%s=\"%s\"" % (pref, ns))
                                 namespaces = " ".join(namespaceList)
                                 docstr = """<c3:component xmlns:c3="http://www.cheshire3.org/" %s parent="%r" xpath="%s">%s</c3component>""" % (namespaces, rec, path, docstr)

@@ -55,7 +55,7 @@ class SimpleDatabase(SummaryObject, Database):
             storeList = [indexStore.id]
         else:
             storeList = storeList.split(' ')
-        for (id, dom) in self.indexConfigs.items():
+        for (id, dom) in self.indexConfigs.iteritems():
             # see if index should be built
             for c in dom.childNodes:
                 if c.nodeType == 1 and c.localName == 'paths':

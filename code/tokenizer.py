@@ -18,7 +18,7 @@ class SimpleTokenizer(Tokenizer):
 
     def process_hash(self, session, data):
         kw = {}
-        for (key, val) in data.items():
+        for (key, val) in data.iteritems():
             nval = val.copy()
             nval['text'] = self.process_string(session, val['text'])
             kw[key] = nval
@@ -91,7 +91,7 @@ class RegexpFindOffsetTokenizer(RegexpFindTokenizer):
                          
     def process_hash(self, session, data):
         kw = {}
-        for (key, val) in data.items():
+        for (key, val) in data.iteritems():
             nval = val.copy()
             (tokens, positions) = self.process_string(session, val['text']) 
             nval['text'] = tokens

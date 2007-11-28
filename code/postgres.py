@@ -171,7 +171,7 @@ class PostgresStore(SimpleStore):
 
 
         # And check additional relations
-        for (name, fields) in self.relations.items():
+        for (name, fields) in self.relations.iteritems():
             try:
                 query = "SELECT identifier FROM %s_%s LIMIT 1" % (self.id,name)
                 res = self.query(query)
@@ -243,7 +243,7 @@ class PostgresStore(SimpleStore):
 
         if metadata:
             extra = []
-            for (n,v) in metadata.items():
+            for (n,v) in metadata.iteritems():
                 if type(v) in (int, long):
                     extra.append('%s = %s' % (n,v))
                 else:
@@ -342,7 +342,7 @@ class PostgresStore(SimpleStore):
             if (self.idNormalizer):
                 oid = self.idNormalizer.process_string(session, oid)                
             values.append(oid)
-        for (name, value) in kw.items():
+        for (name, value) in kw.iteritems():
             fields.append(name)
             values.append(value)
 
@@ -364,7 +364,7 @@ class PostgresStore(SimpleStore):
             if (self.idNormalizer):
                 oid = self.idNormalizer.process_string(session, oid)                
             cond += ("%s = %r, " % (obj.recordStore, oid))
-        for (name, value) in kw.items():
+        for (name, value) in kw.iteritems():
             cond += ("%s = %r, " % (name, value))
         query = "DELETE FROM %s_%s WHERE %s;" % (self.table, relation, cond[:-2])
         self._query(query)
@@ -378,7 +378,7 @@ class PostgresStore(SimpleStore):
             if (self.idNormalizer):
                 oid = self.idNormalizer.process_string(session, oid)                
             cond += ("%s = %r, " % (obj.recordStore, oid))
-        for (name, value) in kw.items():
+        for (name, value) in kw.iteritems():
             cond += ("%s = %r, " % (name, value))           
         query = "SELECT * FROM %s_%s WHERE %s;" % (self.table, relation, cond[:-2])
         res = self._query(query)
@@ -441,7 +441,7 @@ class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
             # NB: rs can't be modified
 
         # And check additional relations
-        for (name, fields) in self.relations.items():
+        for (name, fields) in self.relations.iteritems():
             try:
                 query = "SELECT identifier FROM %s_%s LIMIT 1" % (self.table,name)
                 res = self._query(query)
