@@ -9,7 +9,7 @@ class SimpleTokenMerger(TokenMerger):
     def process_hash(self, session, data):
         new = {}
         has = new.has_key
-        for (d, val) in data.items():
+        for d, val in data.iteritems():
             if d:
                 for t in val['text']:
                     if has(t):
@@ -32,7 +32,7 @@ class ProximityTokenMerger(SimpleTokenMerger):
     def process_hash(self, session, data):
         new = {}
         has = new.has_key
-        for (d, val) in data.items():
+        for d, val in data.iteritems():
             if d:
                 x = 0
                 for t in val['text']:
@@ -55,7 +55,7 @@ class OffsetProximityTokenMerger(ProximityTokenMerger):
     def process_hash(self, session, data):
         new = {}
         has = new.has_key
-        for (d, val) in data.items():
+        for d, val in data.iteritems():
             if d:
                 x = 0
                 posns = val.get('charOffsets', [])
@@ -77,7 +77,7 @@ class SequenceRangeTokenMerger(SimpleTokenMerger):
     def process_hash(self, session, data):
         new = {}
         has = new.has_key
-        for (d, val) in data.items():
+        for d, val in data.iteritems():
             l = val['text']
             for x in range(0, len(l), 2):
                 try:
@@ -125,7 +125,7 @@ class NGramTokenMerger(SimpleTokenMerger):
         kw = {}
         has = kw.has_key
         n = self.n
-        for (k, val) in data.items():
+        for k, val in data.iteritems():
             split = val['text']
             for i in range(len(split)-(n-1)):
                 nGram = split[i:(i+n)]
@@ -135,5 +135,3 @@ class NGramTokenMerger(SimpleTokenMerger):
                 else:
                     kw[nGramStr] = {'text' : nGramStr, 'occurences' : 1}
         return kw
-
-
