@@ -636,10 +636,7 @@ class SimpleResultSet(RankedResultSet):
                     if fmi in matchlocs:
                         newMatchLocs.extend(fullMatchLocs[f+1-n:f+1])
                 litem.proxInfo = newMatchLocs
-#                litem.proxInfo = fullMatchLocs
-#                litem.proxInfo.extend(matchlocs)
                 items = [litem]
-                # items = newitems
 
             # do stuff on items to reduce to single representative
             if relevancy:
@@ -1277,12 +1274,12 @@ try:
                         elif cql.value in ["prox", 'adj', '=']:
 
                             if cql.value != 'prox':
-                                # only need to check queryPositions for phrase search
                                 newitems = []
                                 newrspos = []
                                 mqp = -1
                                 qts = []
                                 qps = []
+                                # XXX Convert to slightly more efficient hash method
                                 for i in range(len(items)):
                                     rs = others[rspos[i]]
                                     qts.append(rs.queryTerm)
@@ -1304,6 +1301,7 @@ try:
                             nomatch = 0                    
                             oidx = 1
 
+                            fullMatchLocs = []
                             while len(items):                        
                                 ritem = items.pop(0)
                                 rProxInfo = others[rspos[oidx]].proxInfo[ritem[0]]
@@ -1313,6 +1311,7 @@ try:
                                     for (lelem, lwpos) in lProxInfo:
                                         if (proxtype == 1 and lelem == relem and (cmp(lwpos+distance,rwpos) in chitem)):
                                             matchlocs.append([relem, rwpos])
+                                            fullMatchLocs.append([lelem, lwpos])
                                         elif proxtype == 2 and lelem == relem:
                                             matchlocs.append([relem, rwpos])
                                 if matchlocs:                                    
@@ -1325,8 +1324,16 @@ try:
                             if nomatch:
                                 continue
                             items = itemsCopy
-                            self.proxInfo[litem[0]] = matchlocs
 
+                            fullMatchLocs.extend(matchlocs)
+                            fullMatchLocs.sort()
+                            newMatchLocs = []
+                            n = len(itemsCopy)
+                            for f in range(len(fullMatchLocs)):
+                                fmi = fullMatchLocs[f]
+                                if fmi in matchlocs:
+                                    newMatchLocs.extend(fullMatchLocs[f+1-n:f+1])
+                            self.proxInfo[litem[0]] = newMatchLocs
 
                         if relevancy:
                             item = fn(items, nors)
@@ -1336,11 +1343,13 @@ try:
                                 minWeight = item[2]
                         else:
                             item = items[0]
+
                         if pi:
                             # copy proxInfo around
-                            raise NotImplementedError
-                            for o in items[1:]:
-                                item.proxInfo.extend(o.proxInfo)                        
+                            l = []
+                            for o in others:
+                                l.extend(list(o.proxInfo[item[0]]))
+                            self.proxInfo[item[0]] = l
                         tmplist.append(item)
 
                 else:
