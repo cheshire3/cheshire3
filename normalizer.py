@@ -412,7 +412,7 @@ class ExactExpansionNormalizer(SimpleNormalizer):
         }       
 
     def process_string(self, session, data):
-        for m in self.map.items():
+        for m in self.map.iteritems():
             data = data.replace(m[0], m[1])
         return data
        

@@ -630,7 +630,7 @@ class CQLProtocolMap(ZeerexProtocolMap):
 
     def parseExtraData(self, extra):
         nodes = []
-        for item in extra.items():
+        for item in extra.iteritems():
             name = item[0]
             map = self.sruExtensionMap.get(name, None)
             if map:

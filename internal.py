@@ -99,13 +99,13 @@ class Architecture(object):
         while bases:
             cls = bases.pop(0)
             try:
-                for (k,v) in cls._possiblePaths.items():
+                for (k,v) in cls._possiblePaths.iteritems():
                     if not paths.has_key(k):
                         paths[k] = v                        
-                for (k,v) in cls._possibleSettings.items():
+                for (k,v) in cls._possibleSettings.iteritems():
                     if not settings.has_key(k):
                         settings[k] = v
-                for (k,v) in cls._possibleDefaults.items():
+                for (k,v) in cls._possibleDefaults.iteritems():
                     if not defaults.has_key(k):
                         defaults[k] = v
             except:

@@ -339,7 +339,7 @@ class SaxToXmlHandler:
             else:
                 nsaname = aname
             attrlist.append('%s="%s"' % (nsaname, attrs[(ns,aname)]))
-        for x in self.newNamespaces.items():
+        for x in self.newNamespaces.iteritems():
             if (x[0]):
                 attrlist.append('xmlns:%s="%s"' % (x[0], x[1]))
             else:
@@ -576,7 +576,7 @@ class SaxRecord(Record):
                 return self._handleAttribute(xp, maps)
             elif (xp[-1][0] == "/"):
                 # Return top level element
-                for x in range(len(self.sax)):
+                for x in xrange(len(self.sax)):
                     if self.sax[x][0] in ['1', '4']:
                         return self.sax[x:]                                    
             elif(xp[-1][0] in ['child', 'descendant']):

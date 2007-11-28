@@ -143,7 +143,6 @@ class SummaryObject(object):
                 cxn.put("totalWordCount", str(self.totalWordCount))
                 cxn.put("minWordCount", str(self.minWordCount))
                 cxn.put("maxWordCount", str(self.maxWordCount))
-                
                 cxn.put("totalByteCount", str(self.totalByteCount))
                 cxn.put("minByteCount", str(self.minByteCount))
                 cxn.put("maxByteCount", str(self.maxByteCount))
@@ -233,9 +232,8 @@ class SimpleStore(C3Object, SummaryObject):
             key = commands.getoutput('uuidgen')
             if (len(key) != 36 or key[8] != '-'):
                 # failed, generate random string instead
-                c = []
-                for x in range(16):
-                    c.append(asciiChars[randomGen.randrange(len(asciiChars))])
+                lac = len(asciiChars)                
+                c = [asciiChars[randomGen.randrange(lac)] for x in xrange(16)]
                 key = ''.join(c)
         return key
 
@@ -496,7 +494,7 @@ class BdbStore(SimpleStore):
             data = data.encode('utf-8')
         cxn.put(id, data)
         
-        for (m, val) in metadata.items():
+        for (m, val) in metadata.iteritems():
             self.store_metadata(session, id, m, val)
         return None
 
@@ -703,7 +701,7 @@ class FileSystemStore(BdbStore):
         if not (metadata.has_key('filename') and metadata.has_key('byteCount') and metadata.has_key('byteOffset')):
             raise SomeException("Need file, byteOffset and byteCount to use FileSystemStore")
 
-        for (m, val) in metadata.items():
+        for (m, val) in metadata.iteritems():
             self.store_metadata(session, id, m, val)
         return None
 

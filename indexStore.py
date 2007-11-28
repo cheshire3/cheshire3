@@ -53,9 +53,9 @@ class BdbIndexStore(IndexStore):
         rsh = self.get_path(session, 'recordStoreHash')
         if rsh:
             wds = rsh.split()
-            for w in range(len(wds)):
-                self.storeHash[long(w)] = wds[w]
-                self.storeHashReverse[wds[w]] = long(w)
+            for (w, wd) in enumerate(wds):
+                self.storeHash[w] = wd
+                self.storeHashReverse[wd] = w
 
         # Record Hash (in bdb) 
         fnbase = "recordIdentifiers_" + self.id + "_"
@@ -523,7 +523,7 @@ class BdbIndexStore(IndexStore):
                     docArray = []
                     if proxVectors:
                         pdocid = long(currDoc)
-                        for (elem, parr) in proxHash.items():
+                        for (elem, parr) in proxHash.iteritems():
                             proxKey = struct.pack('LL', pdocid, elem)
                             if elem < 0 or elem > 4294967295:
                                 raise ValueError(elem)
@@ -597,7 +597,7 @@ class BdbIndexStore(IndexStore):
                 cxn.put(str("%s|%s" % (storeid, docid.encode('utf8'))), packed)
                 if proxVectors:
                     pdocid = long(currDoc)
-                    for (elem, parr) in proxHash.items():
+                    for (elem, parr) in proxHash.iteritems():
                         proxKey = struct.pack('LL', pdocid, elem)
                         proxKey = "%s|%s" % (storeid.encode('utf8'), proxKey)
                         parr.sort()
@@ -636,8 +636,8 @@ class BdbIndexStore(IndexStore):
                 terms.sort(key=lambda x: x['r'])
                 cxn = bdb.db.DB()
                 cxn.open(dbname + "_FREQ_REC")
-                for t in range(len(terms)):
-                    termidstr = struct.pack('ll', terms[t]['i'], terms[t]['r'])
+                for (t, term) in enumerate(terms):
+                    termidstr = struct.pack('ll', term['i'], term['r'])
                     cxn.put("%012d" % t, termidstr)                                        
                 cxn.close()
 
@@ -645,8 +645,8 @@ class BdbIndexStore(IndexStore):
                 terms.sort(key=lambda x: x['o'])                
                 cxn = bdb.db.DB()
                 cxn.open(dbname + "_FREQ_OCC")
-                for t in range(len(terms)):
-                    termidstr = struct.pack('ll', terms[t]['i'], terms[t]['o'])
+                for (t, term) in enumerate(terms):
+                    termidstr = struct.pack('ll', term['i'], term['o'])
                     cxn.put("%012d" % t, termidstr)                                        
                 cxn.close()                
         # print "commited %s:  %s" % (index.id, time.time() - start)

@@ -656,13 +656,13 @@ class CharacterEntityPreParser(PreParser):
     def process_document(self, session, doc):
         txt = doc.get_raw(session)
         # Fix some common mistakes
-        for (fromEnt, toEnt) in self.inane.items():
+        for (fromEnt, toEnt) in self.inane.iteritems():
             txt = txt.replace("&%s;" % fromEnt, toEnt)
-        for (fromEnt, toEnt) in self.preEntities.items():
+        for (fromEnt, toEnt) in self.preEntities.iteritems():
             txt = txt.replace("&%s;" % fromEnt, "&%s;" % toEnt)
-        for s in range(len(self.entities)):
-            txt = txt.replace("&%s;" % self.entities[s] , "&#%s;" % (160 +s))
-        for (fent, totxt) in self.otherEntities.items():
+        for (s, enty) in enumerate(self.entities):
+            txt = txt.replace("&%s;" % enty, "&#%s;" % (160 +s))
+        for (fent, totxt) in self.otherEntities.iteritems():
             txt = txt.replace("&%s;" % fent, "&%s;" % totxt)
 
         # Add missing # in &123;

@@ -62,7 +62,7 @@ SRW.types.SearchRetrieveRequest.parseSortKeys = parseSortKeys
 
 
 def process_extraData(hash, req, resp, other=None):
-    for ((uri, name), fn) in hash.items():
+    for ((uri, name), fn) in hash.iteritems():
         # Check name in request, call fn
         for node in req.extraRequestData:
             elem = node.childNodes[0]

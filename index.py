@@ -11,11 +11,6 @@ from PyZ3950 import CQLParser, SRWDiagnostics
 import codecs
 from baseObjects import Session
 
-try:
-    import termine
-except:
-    pass
-
 from xpathProcessor import SimpleXPathProcessor
 
 
