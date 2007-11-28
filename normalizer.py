@@ -11,6 +11,7 @@ class SimpleNormalizer(Normalizer):
 
     def __init__(self, session, config, parent):
         Normalizer.__init__(self, session, config, parent)
+        
 
     def process_string(self, session, data):
         # normalise string into single appropriate form (eg '1' -> 1)
@@ -18,30 +19,44 @@ class SimpleNormalizer(Normalizer):
 
     def process_hash(self, session, data):
         kw = {}
-        has = kw.has_key
-        vals = data.values()
-        if not vals:
+        if not data:
             return kw
-        prox = vals[0].has_key('positions')
+        has = kw.has_key
+        items = data.items()
+        prox = items[0][1].has_key('positions')
         process = self.process_string        
-        for d in vals:
+        for (k,d) in items:
             dv = d['text']
             if type(dv) == list:
                 new = []
-                for dvi in dv:
-                    new.append(process(session, dv))
+                for x in range(len(dv)-1, -1, -1):
+                    dvi = dv[x]
+                    ndvi = process(session, dvi)
+                    if ndvi:
+                        new.append(ndvi)
+                    else:
+                        try:
+                            d['charOffsets'].pop(x)
+                        except KeyError:
+                            pass
+                new.reverse()        
+                d['text'] = new
+                kw[k] = d
+                continue
             else:
                 new = process(session, d['text'])
+            if not new:
+                continue
             if type(new) == types.DictType:
                 # from string to hash
-                for k in new.values():
-                    txt = k['text']
+                for nv in new.values():
+                    txt = nv['text']
                     if has(txt):
-                        kw[txt]['occurences'] += k['occurences']
+                        kw[txt]['occurences'] += nv['occurences']
                         if prox:
-                            kw[txt]['positions'].extend(k['positions'])
+                            kw[txt]['positions'].extend(nv['positions'])
                     else:
-                        kw[txt] = k
+                        kw[txt] = nv
             else:
                 if new != None:
                     try:
@@ -54,6 +69,7 @@ class SimpleNormalizer(Normalizer):
                             d['positions'] = d['positions'][:]
                         d['text'] = new
                         kw[new] = d
+                        
         return kw
 
 class DataExistsNormalizer(SimpleNormalizer):
@@ -928,6 +944,8 @@ class DiacriticNormalizer(SimpleNormalizer):
     def process_string(self, session, data):
         d = []
         # TODO: Horrifically slow implementation. Improve.
+        if not data:
+            return None
         for c in data:
             if (self.map.has_key(c)):
                 d.append(self.map[c])

@@ -362,7 +362,7 @@ class SaxToXmlHandler:
         text = escape(text)
         self.xml.append(text)
 
-    def get_raw(self):
+    def get_xmlString(self):
         return ''.join(self.xml)
 
 
@@ -977,10 +977,10 @@ class SaxRecord(Record):
             s2xhandler.initState()
             self.saxify(session, s2xhandler, process)
             if not events:
-                self.xml = s2xhandler.get_raw(session)
+                self.xml = s2xhandler.get_xmlString()
                 return self.xml
             else:
-                return s2xhandler.get_raw(session)
+                return s2xhandler.get_xmlString()
             
     def get_sax(self, session):
         return self.sax
