@@ -221,7 +221,10 @@ class ReconstructGeniaNormalizer(SimpleNormalizer):
                 if self.onlyPos:
                     w = pos
                 elif self.xml:
-                    w = """<w p="%s" l="%s" t="%s">%s</w>""" % (pos, stem, phr, word)
+                    if stem == word:
+                        w = """<w p="%s" t="%s">%s</w>""" % (pos, phr, word)
+                    else:
+                        w = """<w p="%s" l="%s" t="%s">%s</w>""" % (pos, stem, phr, word)
                 else:
                     if self.stem:
                         w = stem
