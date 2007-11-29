@@ -313,6 +313,17 @@
   </workflow>
 </subConfig>
 
+<subConfig type="workflow" id="ProxStoplistExtractorWorkflow">
+  <objectType>workflow.CachingWorkflow</objectType>
+  <workflow>
+    <object type="extractor"  ref="ProxExtractor"/>
+    <object type="normalizer" ref="CaseNormalizer"/>
+    <object type="tokenizer"  ref="RegexpFindOffsetTokenizer"/>
+    <object type="normalizer" ref="StoplistNormalizer"/>
+    <object type="tokenMerger" ref="OffsetProxTokenMerger"/>
+  </workflow>
+</subConfig>
+
 
 <!-- Normalizer Objects -->
 
