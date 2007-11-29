@@ -228,6 +228,8 @@ class CachingWorkflow(SimpleWorkflow):
 
 
     def load_cache(self, session, db):
+        if not db:
+            raise ValueError("ERROR: db parameter empty when loading cache for workflow %s" % self.id)
         self.objcache = {}
         self.database = db        
         self.defaultLogger = db.get_path(session, 'defaultLogger')

@@ -22,14 +22,18 @@ def buildObject(session, objectType, args):
     objs = objectType.split('.')
     if len(objs) < 2:
         raise ConfigFileException("Need module.class instead of %s" % objectType) 
-    globalImport(objs[0], [objs[1]])
+    try:
+        globalImport(objs[0], [objs[1]])
+    except ImportError:
+        print "ERROR: Failed to import '%s'" % objs[0]
+        raise
     parentClass = globals()[objs[0]]
     for o in objs[1:]:
         parentClass = getattr(parentClass, o)
     try:
         return parentClass(session, *args)    
     except:
-        print "Failed to create %s type of object with %r arguments" % (objs[0], args)
+        print "ERROR: Failed to create '%s' type of object" % (objs[0])
         raise
 
 	
@@ -42,7 +46,7 @@ def globalImport(module, objects=[], name=None):
     for mod in (module.split(".")[1:]):
         nname = mod
         loaded = getattr(loaded, mod)
-    if name <> None:
+    if name != None:
         globals()[name] = loaded
     else:
         globals()[nname] = loaded
@@ -51,7 +55,11 @@ def globalImport(module, objects=[], name=None):
         objects = dir(loaded)
 
     for o in objects:
-        if (o[0] <> "_"):
-            globals()[o] = getattr(loaded, o)
+        if (o[0] != "_"):
+            try:
+                globals()[o] = getattr(loaded, o)
+            except AttributeError:
+                print "ERROR: Failed to load class '%s' from module '%s'" % (o, loaded.__name__)
+                raise
 
     return loaded
