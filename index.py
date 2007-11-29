@@ -67,7 +67,6 @@ class SimpleIndex(Index):
 
     _possiblePaths = {'indexStore' : {"docs" : "IndexStore identifier for where this index is stored"}
                       , 'termIdIndex' : {"docs" : "Alternative index object to use for termId for terms in this index."}
-                      , 'termineDb' : {"docs" : "Path to the 'termine' database of term scores for this index. No, Termine does not come with C3 by default."}
                       , 'tempPath' : {"docs" : "Path to a directory where temporary files will be stored during batch mode indexing"}
                       }
 
@@ -393,13 +392,6 @@ class SimpleIndex(Index):
             return base
         else:
             rs = base.combine(session, matches, clause, db)
-            # maybe insert termine stuff
-            tdb = self.get_path(session, 'termineDb')
-            if tdb:
-                rs.termWeight = 0
-                for k in res:
-                    w = termine.fetch_weight(session, k, tdb)
-                    rs.termWeight += w                    
             return rs
 
     def scan(self, session, clause, nTerms, direction=">="):
@@ -771,13 +763,6 @@ class RangeIndex(SimpleIndex):
                 return base
             else:
                 rs = base.combine(session, matches, clause, db)
-                # maybe insert termine stuff
-                tdb = self.get_path(session, 'termineDb')
-                if tdb:
-                    rs.termWeight = 0
-                    for k in res:
-                        w = termine.fetch_weight(session, k, tdb)
-                        rs.termWeight += w                    
                 return rs
 
 
