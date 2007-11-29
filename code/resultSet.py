@@ -1347,7 +1347,11 @@ try:
                             # copy proxInfo around
                             l = []
                             for o in others:
-                                l.extend(list(o.proxInfo[item[0]]))
+                                try:
+                                    l.extend(list(o.proxInfo[item[0]]))
+                                except KeyError:
+                                    # or search not in this rs
+                                    pass
                             self.proxInfo[item[0]] = l
                         tmplist.append(item)
 
