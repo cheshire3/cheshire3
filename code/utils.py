@@ -238,7 +238,6 @@ def traversePath(node):
         return [traversePath(node._left), 'or', traversePath(node._right)]
     else:
         # We'll need to do full XPath vs DOM
-        print node.__class__
         raise(NotImplementedError)
 
 

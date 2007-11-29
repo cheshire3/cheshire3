@@ -2,6 +2,7 @@
 from extractor import SimpleExtractor
 
 class TaggedExtractor(SimpleExtractor):
+    # if not stem, then use word
 
     _possibleSettings = {"format" : {'doc' : "%(word), %(stem), %(pos), %(type) from  <w l=STEM p=POS t=TYPE>WORD</w>"}}
 
@@ -29,10 +30,16 @@ class TaggedExtractor(SimpleExtractor):
             for c in walker:
                 if c.tag == 'w':
                     attr = c.attrib
-                    h = {'word' : c.text,
-                         'stem' : attr['l'],
-                         'pos' : attr['p'],
-                         'type' : attr['t']}
+                    try:
+                        h = {'word' : c.text,
+                             'stem' : attr['l'],
+                             'pos' : attr['p'],
+                             'type' : attr['t']}
+                    except:
+                        h = {'word' : c.text,
+                             'stem' : c.text,
+                             'pos' : attr['p'],
+                             'type' : attr['t']}
                     texts.append(fmt % h)
                 else:
                     if c.text:
