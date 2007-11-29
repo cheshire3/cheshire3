@@ -8,6 +8,8 @@ from xml.sax.saxutils import escape, unescape
 import utils
 import cPickle
 
+import time
+
 class DeserializationHandler(ContentHandler):
     items = []
     item = None
@@ -479,10 +481,8 @@ class SimpleResultSet(RankedResultSet):
 
         tmplist = []
         oidxs = range(1,len(others))
-        #lens = [len(x) for x in others]
         lens = map(len, others)
         if all and 0 in lens:
-            # no point, just return empty result set
             # FIXME: return something that is definitely an empty resultSet
             return self
         nors = len(others)
@@ -548,7 +548,6 @@ class SimpleResultSet(RankedResultSet):
                     if nitem == items[0]:
                         items.append(nitem)
                         rspos.append(o)
-
             for r in rspos:
                 positions[r] += 1
 
@@ -1159,10 +1158,8 @@ try:
 
             # sort result sets by length
             all = cql.value in ['all', 'and', '=', 'prox', 'adj']                
-            if cql.value != "not":
-                keys = [(len(x), x) for x in others]
-                keys.sort(reverse=not all)
-                others = [x for (key,x) in keys]    
+            if not cql.value in ["not", 'prox']:
+                others.sort(key=lambda x: len(x), reverse=not all)
 
             if (relevancy):
                 if (isinstance(cql, CQLParser.Relation)):
@@ -1187,9 +1184,10 @@ try:
                     minWeight = 9999999999
 
                 tmplist = []
-                cont = 1
                 oidxs = range(1,len(others))
-                lens = [len(x) for x in others]
+                lens = map(len, others)
+                if all and 0 in lens:
+                    return self
                 nors = len(others)
                 positions = [0] * nors
                 cmpHash = {'<' : [-1],
@@ -1206,6 +1204,12 @@ try:
                     if (cql['distance']):
                         distance = int(cql['distance'].value)
                         comparison = cql['distance'].comparison
+                    if cql['ordered']:
+                        ordered = 1
+                else:
+                    # for adj/=
+                    ordered = 1
+
                 chitem = cmpHash[comparison]
                 if unit == "word":
                     proxtype = 1
@@ -1216,29 +1220,16 @@ try:
                 hasGetItemList = [hasattr(o, 'get_item') for o in others]
                 isArrayRs = [isinstance(o, ArrayResultSet) for o in others]
                 if sum(isArrayRs) == len(isArrayRs):
+                    # All arrays, don't create RSI unnecessarily
                     if relevancy:
                         fname = "_%sWeightsArray" % combine
                         if (hasattr(self, fname)):
                             fn = getattr(self, fname)
                         else:
                             raise NotImplementedError
-
-                    # All arrays, don't create RSI unnecessarily
+                    cont = 1
                     while cont:                
-                        # item is: array(recid, occs, weight)
-                        while others and positions[0] > len(others[0])-1:
-                            others.pop(0)
-                            positions.pop(0)
-                            lens.pop(0)
-                        if not others or ((cql.value == 'not' or all) and len(others) != nors):
-                            cont = 0
-                            break
-
-                        try:
-                            items = [others[0]._array[positions[0]]]
-                        except IndexError:
-                            # Don't know when this would happen?
-                            break
+                        items = [others[0]._array[positions[0]]]
                         rspos = [0]
                         for o in oidxs:
                             if o != -1:
@@ -1250,10 +1241,9 @@ try:
                                 if nitem[0] < items[0][0]:
                                     if all or cql.value == 'not':
                                         # skip until equal or greater
-                                        positions[o] += 1
-                                        while others[o]._array[positions[o]][0] < items[0][0]:
+                                        while True:
                                             positions[o] += 1
-                                            if positions[o] == lens[o]:
+                                            if positions[o] >= lens[o] or others[o]._array[positions[o]][0] >= items[0][0]:
                                                 break
                                         if positions[o] != lens[o]:
                                             nitem = others[o]._array[positions[o]]
@@ -1267,6 +1257,12 @@ try:
                         for r in rspos:
                             positions[r] += 1
 
+                        while others and positions[0] > len(others[0])-1:
+                            others.pop(0)
+                            positions.pop(0)
+                            lens.pop(0)
+                        if not others or ((cql.value == 'not' or all) and len(others) != nors):
+                            cont = 0
                         if (all and len(items) < nors):
                             continue
                         elif cql.value == 'not' and len(items) != 1:
@@ -1307,13 +1303,15 @@ try:
                                 rProxInfo = others[rspos[oidx]].proxInfo[ritem[0]]
                                 oidx += 1
                                 matchlocs = []
-                                for (relem, rwpos) in rProxInfo:
-                                    for (lelem, lwpos) in lProxInfo:
+                                for rpi in rProxInfo:
+                                    (relem, rwpos) = rpi[0:2]
+                                    for lpi in lProxInfo:
+                                        (lelem, lwpos) = lpi[0:2]
                                         if (proxtype == 1 and lelem == relem and (cmp(lwpos+distance,rwpos) in chitem)):
-                                            matchlocs.append([relem, rwpos])
-                                            fullMatchLocs.append([lelem, lwpos])
+                                            matchlocs.append(rpi)
+                                            fullMatchLocs.append(list(lpi))
                                         elif proxtype == 2 and lelem == relem:
-                                            matchlocs.append([relem, rwpos])
+                                            matchlocs.append(rpi)
                                 if matchlocs:                                    
                                     lProxInfo = matchlocs
                                     litem = ritem                                
@@ -1325,6 +1323,7 @@ try:
                                 continue
                             items = itemsCopy
 
+                            matchlocs = [list(x) for x in matchlocs]
                             fullMatchLocs.extend(matchlocs)
                             fullMatchLocs.sort()
                             newMatchLocs = []
