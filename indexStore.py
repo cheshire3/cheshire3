@@ -15,6 +15,40 @@ import random
 
 nonTextToken = "\x00\t"    
 
+class IndexStoreIter(object):
+    # step through our indexes!
+
+    def __init__(self, indexStore):
+        self.indexStore = indexStore
+        dfp = indexStore.get_path(None, "defaultPath")
+        files = os.listdir(dfp)
+        self.files = filter(self._fileFilter, files)
+        self.position = 0
+
+    
+    def _fileFilter(self, x):
+        if x[-6:] != ".index":
+            return 0
+        elif x[:len(self.indexStore.id)] != self.indexStore.id:
+            return 0
+        else:
+            return 1
+
+    def next(self):
+        try:
+            start = len(self.indexStore.id)+2
+            idxid = self.files[self.position][start:-6]
+            self.position += 1
+            # now fetch the index
+            return self.indexStore.get_object(None, idxid)
+        except IndexError:
+            raise StopIteration()
+
+    def jump(self, position):
+        self.position = position
+        return self.next()
+
+
 class BdbIndexStore(IndexStore):
 
     indexing = 0
@@ -81,6 +115,9 @@ class BdbIndexStore(IndexStore):
                     cxn.open(dbp)
                 self.identifierMapCxn[recstore] = cxn
 
+    def __iter__(self):
+        return IndexStoreIter(self)
+
     def _closeIndex(self, session, index):
         if self.indexCxn.has_key(index):
             self.indexCxn[index].close()
@@ -102,13 +139,6 @@ class BdbIndexStore(IndexStore):
             self.indexCxn[index] = cxn
             return cxn
         
-    def _fileFilter(self, x):
-        if x[-6:] <> ".index":
-            return 0
-        elif x[:len(self.id)] <> self.id:
-            return 0
-        else:
-            return 1
 
     def _generateFilename(self, index):
         stuff = [self.id, "--", index.id, ".index"]
