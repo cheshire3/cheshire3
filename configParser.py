@@ -323,8 +323,10 @@ class C3Object(object):
             if config:
                 try:
                     obj = dynamic.makeObjectFromDom(session, config, self)
-                except ConfigFileException:
+                except (ConfigFileException, AttributeError, ImportError):
                     # Push back up as is 
+                    print "... while trying to build object with id '%s'" % id
+                    print "... while getting it from object '%s'" % (self.id)
                     raise
                 return obj
             elif (self.parent != None):
@@ -336,9 +338,6 @@ class C3Object(object):
         """Return a configuration for the given object."""
         if (self.subConfigs.has_key(id)):
             return self.subConfigs[id]
-        # TODO: Why is this commented out? (but doesn't seem to hurt...)
-        #elif (self.parent != None):
-        #    return self.parent.get_config(session, id)
         else:
             return None
 
