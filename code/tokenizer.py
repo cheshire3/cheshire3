@@ -3,6 +3,9 @@ from baseObjects import Tokenizer
 from dateutil import parser as dateparser
 import re
 
+# Python source code tokenizer from base libs
+import tokenize, StringIO, keyword
+
 # swap a string over to a list of tokens
 # lists aren't hashable so we maintain string key
 # also we're very unlikely to duplicate at this point,
@@ -21,6 +24,18 @@ class SimpleTokenizer(Tokenizer):
         for (key, val) in data.iteritems():
             nval = val.copy()
             nval['text'] = self.process_string(session, val['text'])
+            kw[key] = nval
+        return kw
+
+class OffsetTokenizer(Tokenizer):
+
+    def process_hash(self, session, data):
+        kw = {}
+        for (key, val) in data.iteritems():
+            nval = val.copy()
+            (tokens, positions) = self.process_string(session, val['text']) 
+            nval['text'] = tokens
+            nval['charOffsets'] = positions
             kw[key] = nval
         return kw
 
@@ -79,7 +94,11 @@ class RegexpFindTokenizer(SimpleTokenizer):
             return self.regexp.findall(data)
 
 
-class RegexpFindOffsetTokenizer(RegexpFindTokenizer):
+class RegexpFindOffsetTokenizer(OffsetTokenizer, RegexpFindTokenizer):
+
+    def __init__(self, session, config, parent):
+        # Only init once!
+        RegexpFindTokenizer.__init__(self, session, config, parent)
 
     def process_string(self, session, data):
         tokens = []
@@ -89,17 +108,6 @@ class RegexpFindOffsetTokenizer(RegexpFindTokenizer):
             positions.append(m.start())
         return (tokens, positions)
                          
-    def process_hash(self, session, data):
-        kw = {}
-        for (key, val) in data.iteritems():
-            nval = val.copy()
-            (tokens, positions) = self.process_string(session, val['text']) 
-            nval['text'] = tokens
-            nval['charOffsets'] = positions
-            kw[key] = nval
-        return kw
-
-
 
 # XXX This should be in TextMining, and NLTK should auto install
 try:
@@ -149,11 +157,12 @@ class SentenceTokenizer(SimpleTokenizer):
         return ns
 
 
+
+
 # trivial, but potentially useful
 class LineTokenizer(SimpleTokenizer):
     def process_string(self, session, data):
         return data.split('\n')
-
 
 
 class DateTokenizer(SimpleTokenizer):
@@ -208,7 +217,8 @@ class DateTokenizer(SimpleTokenizer):
         # Must be a better way to do this
         # not sure, but I'll do that for now :p - JH
 
-        data = self.isoDateRe.sub(self._convertIsoDates, data)        # separate ISO date elements with - for better recognition by date parser
+        # separate ISO date elements with - for better recognition by date parser
+        data = self.isoDateRe.sub(self._convertIsoDates, data)
         if len(data) and len(data) < 18 and data.find('-'):
             midpoint = len(data)/2
             if data[midpoint] == '-':
@@ -216,4 +226,36 @@ class DateTokenizer(SimpleTokenizer):
                 data = '%s %s' % (data[:midpoint], data[midpoint+1:])
                 del midpoint                
         return self._tokenize(data)
+
+
+class PythonTokenizer(OffsetTokenizer):
+    """ Tokenize python source code into token/TYPE with offsets """
+
+    def __init__(self, session, config, parent):
+        OffsetTokenizer.__init__(self, session, config, parent)
+        self.ignoreTypes = [tokenize.INDENT, tokenize.DEDENT, tokenize.NEWLINE, tokenize.NL, tokenize.ENDMARKER]
+
+    def process_string(self, session, data):
+        io = StringIO.StringIO(data)
+        toks = []        
+        posns = []
+        totalChrs = 0
+        currLine = 0
+        prevLineLen = 0
+        for tok in tokenize.generate_tokens(io.readline):
+            (ttype, txt, start, end, lineTxt) = tok
+            if start[0] != currLine:
+                totalChrs += prevLineLen
+                prevLineLen = len(lineTxt)
+                currLine = start[0]
+            # maybe store token
+            if not ttype in self.ignoreTypes:
+                tname = tokenize.tok_name[ttype]
+                if tname == "NAME" and keyword.iskeyword(txt):
+                    toks.append("%s/KEYWORD" % (txt))                    
+                else:
+                    toks.append("%s/%s" % (txt, tokenize.tok_name[ttype]))
+                posns.append(totalChrs + start[1])
+        return (toks, posns)
+                
 
