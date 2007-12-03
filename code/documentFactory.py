@@ -1065,6 +1065,7 @@ class SimpleDocumentFactory(DocumentFactory):
     streamHash = {}
     docStream = None
     generator = None
+    loadSession = None
     
     _possibleDefaults = {'cache' : {'docs' : "Default value for cache parameter for load()", 'type' : int, 'options' : "0|1|2"}
                          , 'format' : {'docs' : "Default value for format parameter"}
@@ -1408,9 +1409,11 @@ class AccumulatingDocumentFactory(SimpleDocumentFactory):
         self.register_stream(session, 'vectorTransformer', AccVectorTransformerStream)
 
     def load(self, session, data=None, cache=None, format=None, tagName=None, codec=None):
+
+        self.loadSession = session
+
         if data == None:
             data = self.dataPath
-
         if format == None:
             format = self.format
         if cache == None:
