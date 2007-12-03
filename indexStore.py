@@ -752,7 +752,6 @@ class BdbIndexStore(IndexStore):
                 # Look up identifier in local bdb
                 docid = self._get_internalId(session, rec)         
 
-
         nProxInts = index.get_setting(session, 'nProxInts', 2)
         def unpack(data):
             flat = struct.unpack('L' * (len(data)/4), data)
@@ -767,11 +766,11 @@ class BdbIndexStore(IndexStore):
             key = str(self.storeHashReverse[rec.recordStore]) + "|" +  key
             c = cxn.cursor()
             (k, v) = c.set_range(key)
-            vals = []
+            vals = {}
             # XXX won't work for > 9 recordStores...
-
             while k[2:6] == keyid:
-                vals.append(unpack(v))
+                elemId = struct.unpack('L', k[6:])[0]
+                vals[elemId] = unpack(v)
                 (k,v) = c.next()
             return vals
             
@@ -781,7 +780,6 @@ class BdbIndexStore(IndexStore):
             key = str(self.storeHashReverse[rec.recordStore]) + "|" +  key
             data = cxn.get(key)
             if data:
-                # [(wordId, termId, charOffset?, ...)...]
                 return unpack(data)
             else:
                 return []

@@ -70,31 +70,31 @@ class SimpleIndex(Index):
                       , 'tempPath' : {"docs" : "Path to a directory where temporary files will be stored during batch mode indexing"}
                       }
 
-    _possibleSettings = {'cori_constant0' : {"docs" : ""},
-                         'cori_constant1' : {"docs" : ""},
-                         'cori_constant2' : {"docs" : ""},
-                         'lr_constant0' : {"docs" : ""},
-                         'lr_constant1' : {"docs" : ""},
-                         'lr_constant2' : {"docs" : ""},
-                         'lr_constant3' : {"docs" : ""},
-                         'lr_constant4' : {"docs" : ""},
-                         'lr_constant5' : {"docs" : ""},
-                         'lr_constant6' : {"docs" : ""},
+    _possibleSettings = {'cori_constant0' : {"docs" : "", 'type' : float},
+                         'cori_constant1' : {"docs" : "", 'type' : float},
+                         'cori_constant2' : {"docs" : "", 'type' : float},
+                         'lr_constant0' : {"docs" : "", 'type' : float},
+                         'lr_constant1' : {"docs" : "", 'type' : float},
+                         'lr_constant2' : {"docs" : "", 'type' : float},
+                         'lr_constant3' : {"docs" : "", 'type' : float},
+                         'lr_constant4' : {"docs" : "", 'type' : float},
+                         'lr_constant5' : {"docs" : "", 'type' : float},
+                         'lr_constant6' : {"docs" : "", 'type' : float},
                          'noIndexDefault' : {"docs" : "If true, the index should not be called from db.index_record()", "type" : int, "options" : "0|1"},
                          'noUnindexDefault' : {"docs" : "If true, the index should not be called from db.unindex_record()", "type" : int, "options" : "0|1"},
                          'sortStore' : {"docs" : "Should the index build a sort store", 'type' : int, 'options' : '0|1'},
                          'vectors' : {"docs" : "Should the index store vectors (doc -> list of termIds", 'type' : int, 'options' : '0|1'},
                          'proxVectors' : {"docs" : "Should the index store vectors that also maintain proximity for their terms", 'type' : int, 'options' : '0|1'},
-                         'minimumSupport' : {"docs" : "", 'type' : int},
-                         'vectorMinGlobalFreq' : {"docs" : "", 'type' : int},
-                         'vectorMaxGlobalFreq' : {"docs" : "", 'type' : int},
-                         'vectorMinGlobalOccs' : {"docs" : "", 'type' : int},
-                         'vectorMaxGlobalOccs' : {"docs" : "", 'type' : int},
-                         'vectorMinLocalFreq' : {"docs" : "", 'type' : int},
-                         'vectorMaxLocalFreq' : {"docs" : "", 'type' : int},
-                         'freqList' : {'docs' : '', 'options' : 'rec|occ|rec occ|occ rec'},
+                         'minimumSupport' : {"docs" : "Minimum number of records in which the term must appear for it to be indexed at all", 'type' : int},
+                         'vectorMinGlobalFreq' : {"docs" : "Minimum global records for term to appear in a vector", 'type' : int},
+                         'vectorMaxGlobalFreq' : {"docs" : "Maximum global records for term to appear in a vector", 'type' : int},
+                         'vectorMinGlobalOccs' : {"docs" : "Minimum global occurences", 'type' : int},
+                         'vectorMaxGlobalOccs' : {"docs" : "Maximum global occurences", 'type' : int},
+                         'vectorMinLocalFreq' : {"docs" : "Minimum records in selected", 'type' : int},
+                         'vectorMaxLocalFreq' : {"docs" : "Maximum records in selected", 'type' : int},
+                         'freqList' : {'docs' : 'Store a frequency sorted list to step through of records, occurences or both', 'options' : 'rec|occ|rec occ|occ rec'},
                          'longSize' : {"docs" : "Size of a long integer in this index's underlying data structure (eg to migrate between 32 and 64 bit platforms)", 'type' : int},
-                         'recordStoreSizes' : {"docs" : ""},
+                         'recordStoreSizes' : {"docs" : "Should we use recordStore sizes instead of database sizes", 'type' : int},
                          'maxVectorCacheSize' : {'docs' : "Number of terms to cache when building vectors", 'type' :int}
                          }
 
@@ -388,6 +388,7 @@ class SimpleIndex(Index):
 
         base = self.resultSetClass(session, [], recordStore=self.recordStore)
         base.recordStoreSizes = self.recordStoreSizes
+        base.index = self
         if not matches:
             return base
         else:
@@ -555,7 +556,7 @@ class ProximityIndex(SimpleIndex):
     """ Need to use prox extractor """
 
     canExtractSection = 0
-    _possibleSettings = {'nProxInts' : {'docs' : "", 'type' : int}}
+    _possibleSettings = {'nProxInts' : {'docs' : "Number of integers per occurence in this index for proximity information, typically 2 (elementId, wordPosition) or 3 (elementId, wordPosition, byteOffset)", 'type' : int}}
 
     def __init__(self, session, config, parent):
         SimpleIndex.__init__(self, session, config, parent)
@@ -759,6 +760,7 @@ class RangeIndex(SimpleIndex):
     
             base = self.resultSetClass(session, [], recordStore=self.recordStore)
             base.recordStoreSizes = self.recordStoreSizes
+            base.index = self
             if not matches:
                 return base
             else:
@@ -904,6 +906,7 @@ class RecordIdentifierIndex(Index):
                     item.recordStore = recordStore.id
                     items.append(item)
         base.fromList(items)
+        base.index = self
         return base
 
 
@@ -954,6 +957,7 @@ class ReverseMetadataIndex(Index):
                     item.recordStore = recordStore.id
                     items.append(item)
         base.fromList(items)
+        base.index = self
         return base
 
 try:
@@ -1082,7 +1086,7 @@ try:
 
     class ProximityArrayIndex(ArrayIndex):
 
-        _possibleSettings = {'nProxInts' : {'docs' : "", 'type' : int}}
+        _possibleSettings = {'nProxInts' : {'docs' : "The number of integers stored per occurence in this index for proximity information, typically 2 (elementId, wordPosition) or 3 (elementId, wordPosition, byteOffset)", 'type' : int}}
         
         def __init__(self, session, config, parent):
             ArrayIndex.__init__(self, session, config, parent)

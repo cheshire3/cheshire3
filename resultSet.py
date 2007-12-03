@@ -513,6 +513,9 @@ class SimpleResultSet(RankedResultSet):
             proxtype = 1
         elif unit == "element" and distance == 0 and comparison == "=":
             proxtype = 2
+        elif unit == "character":
+            # can do this with offsets :)
+            proxtype = 3
         else:
             raise NotImplementedError()
         hasGetItemList = [hasattr(o, 'get_item') for o in others]
@@ -598,20 +601,33 @@ class SimpleResultSet(RankedResultSet):
                     ritem = items.pop(0)
                     matchlocs = []
                     for rpi in ritem.proxInfo:
+                        rpi = list(rpi)
                         (relem, rwpos) = rpi[:2]
                         for lpi in litem.proxInfo:
+                            lpi = list(lpi)
                             (lelem, lwpos) = lpi[:2]
                             if lelem == relem:
                                 if proxtype == 2:
                                     matchlocs.append(rpi)
                                 else:
-                                    wordDistance = rwpos - lwpos
-                                    if ordered and wordDistance < 0:
+                                    if proxtype == 3:
+                                        # character distance
+                                        try:
+                                            loff = lpi[2]
+                                            roff = rpi[2]
+                                        except IndexError:
+                                            # no offset in index
+                                            raise ConfigFileException("Cannot do character proximity without offset information")
+                                        piDistance = roff - loff
+                                    else:
+                                        # word proximity
+                                        piDistance = rwpos - lwpos
+                                    if ordered and piDistance < 0:
                                         # B is before A
                                         pass
                                     else:
-                                        wordDistance = abs(wordDistance)
-                                        c = cmp(wordDistance, distance)
+                                        piDistance = abs(piDistance)
+                                        c = cmp(piDistance, distance)
                                         if (c in chitem):
                                             matchlocs.append(rpi)
                                             fullMatchLocs.append(lpi)
@@ -912,6 +928,7 @@ try:
             item = SimpleResultSetItem(None, int(self._array[k][0]), self.recordStore.id, int(self._array[k][1]))
             item.weight = self._array[k][2]
             item.proxInfo = self.proxInfo.get(item.id, [])
+            item.resultSet = self
             return item
 
         def __len__(self):
