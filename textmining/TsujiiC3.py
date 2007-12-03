@@ -99,7 +99,9 @@ class GeniaObject:
     tokenizer = None
 
     _possiblePaths = {'filePath' : {'docs' : "Path to geniatagger executable."}}
-    _possibleSettings = {'parseOutput' : {'docs' : "If 0 (default), then the output from the object will be the lines from genia, otherwise it will interpret back to word/POS", 'type' : int, 'options' : "0|1"}}
+    _possibleSettings = {'parseOutput' : {'docs' : "If 0 (default), then the output from the object will be the lines from genia, otherwise it will interpret back to word/POS", 'type' : int, 'options' : "0|1"},
+                         'tokenize' : {'docs' : '', 'type' : int, 'options' : '0|1'}
+                         }
 
     def __init__(self, session, node, parent):
         self.unparsedOutput = self.get_setting(session, 'parseOutput', 0)
@@ -112,7 +114,11 @@ class GeniaObject:
         # must be run in right directory :(
         o = os.getcwd()
 	os.chdir(tp)
-        (a,b,c) = os.popen3("./geniatagger")
+        if self.get_setting(session, 'tokenize', 0):
+            (a,b,c) = os.popen3("./geniatagger")
+        else:
+            # default to not tokenizing, and using Cheshire tokens
+            (a,b,c) = os.popen3("./geniatagger -nt")
         self.inh = a
         self.outh = b
         self.errh = c
@@ -139,9 +145,9 @@ class GeniaObject:
             tagline = self.outh.readline()
             tagline = tagline.decode('utf-8')
             if tagline == "\n":
-                if self.unparsedOutput:
-                    words.append(tagline)
                 break
+            elif tagline.isspace():
+                continue
             else:
                 if self.unparsedOutput:
                     words.append(tagline)
