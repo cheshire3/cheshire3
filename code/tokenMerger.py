@@ -67,8 +67,7 @@ class OffsetProximityTokenMerger(ProximityTokenMerger):
                         new[t] = {'text' : t, 'occurences' : 1, 'positions' : [val['proxLoc'],x, posns[x]]}
                     x += 1
         return new
-    
-    
+        
 
 class SequenceRangeTokenMerger(SimpleTokenMerger):
     # assume that we've tokenized a single value into pairs,
@@ -134,4 +133,24 @@ class NGramTokenMerger(SimpleTokenMerger):
                     kw[nGramStr]['occurences'] += 1
                 else:
                     kw[nGramStr] = {'text' : nGramStr, 'occurences' : 1}
+        return kw
+
+class ReconstructTokenMerger(SimpleTokenMerger):
+
+    def process_hash(self, session, data):
+        kw = {}
+        for (k, val) in data.iteritems():
+            pl = val.has_key('charOffsets')
+            currLen = 0
+            new = []
+            for (w, word) in enumerate(val['text']):
+                if pl:
+                    new.append('%s%s' % (' ' * (val['charOffsets'][w] - currLen), word))
+                    currLen = val['charOffsets'][w] + len(word)
+                else:
+                    new.append('%s%s' % (word, ' '))
+            txt = ''.join(new)
+            kval = val.copy()
+            kval['text'] = txt
+            kw[k] = kval
         return kw
