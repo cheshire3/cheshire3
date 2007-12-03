@@ -60,7 +60,17 @@ class RegexpSubTokenizer(SimpleTokenizer):
 
 
 class RegexpFindTokenizer(SimpleTokenizer):
-    # Simple re-implementation of NLTK's RegexpTokenizer
+    # Some ideas thanks to NLTK's RegexpTokenizer
+
+    # Some more ' words:
+    # cat-o'-nine-tails, ne'er-do-well, will-o'-the-wisp
+    #  --- ignoring
+    # 'tis, 'twas, 'til, 'phone
+    #  --- IMO should be indexed with leading '
+    #  --- eg 'phone == phone
+    # 
+    # l'il ? y'all ?  XXX Should come up with better solution
+    # 
 
     _possibleSettings = {'regexp' : {'docs' : ''},
                          'gaps' : {'docs' : '', 'type' : int, 'options' : "0|1"}
@@ -73,14 +83,15 @@ class RegexpFindTokenizer(SimpleTokenizer):
           (?:
             [a-zA-Z0-9!#$%*/?|^{}`~&'+-=_]+@[0-9a-zA-Z.-]+ #email
            |(?:[\w+-]+)?[+-]/[+-]                          #alleles
-           |\w+(?:-\w+)+                                   #hypenated word
+           |\w+(?:-\w+)+(?:'(?:t|ll|ve|s|d've|d|re))?      #hypenated word (maybe 'xx on the end)
            |[$\xa3\xa5\u20AC]?[0-9]+(?:[.,:-][0-9]+)+[%]?  #date/num/money/time
            |[$\xa3\xa5\u20AC][0-9]+                        #single money
            |[0-9]+%                                        #single percentage 
            |(?:[A-Z]\.)+[A-Z]?                             #acronym
-           |[oO]'[a-zA-Z]+                                 #o'clock, o'brien   
-           |[a-z]+://[^\s]+                                #URI
-           |\w+'(?:t|ll|ve|s|m)                            #don't, we've
+           |[oOd]'[a-zA-Z]+                                #o'clock, O'brien, d'Artagnan   
+           |[a-zA-Z]+://[^\s]+                             #URI
+           |\w+'(?:d've|d|t|ll|ve|s|re)                    #don't, we've
+           |(?:[hH]allowe'en|[mM]a'am|[Ii]'m|[fF]o'c's'le|[eE]'en|[sS]'pose)
            |[\w+]+                                         #basic words, including +
           )""")
 
