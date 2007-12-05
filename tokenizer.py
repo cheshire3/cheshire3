@@ -11,7 +11,7 @@ import tokenize, StringIO, keyword
 # also we're very unlikely to duplicate at this point,
 #   and even if we do it's not important.
 # This MUST be followed by a merge, however.
-# as normalisers won't know what to do with a list as data
+# as normalizers won't know what to do with a list as data
 
 
 class SimpleTokenizer(Tokenizer):
@@ -178,7 +178,7 @@ class LineTokenizer(SimpleTokenizer):
 
 class DateTokenizer(SimpleTokenizer):
     """ Extracts a single date. Multiple dates, ranges not yet implemented """
-    """ Now extracts multiple dates, but slowly and less reliably. Ranges dealt with by DateRangeExtracter. JPH Jan '07"""
+    """ Now extracts multiple dates, but slowly and less reliably. Ranges dealt with by DateRangeExtractor. JPH Jan '07"""
 
     _possibleDefaults = {'datetime' : {"docs" : "Default datetime to use for values not supplied in the data"}}
     _possibleSettings = {'fuzzy' : {"docs" : "Should the parser use fuzzy matching."}
