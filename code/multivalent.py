@@ -40,7 +40,7 @@ class MvdPdfPreParser(PreParser):
     def process_document(self, session, doc):
         (qqq, fn) = tempfile.mkstemp('.pdf')
         fh = file(fn, 'w')
-        fh.write(doc.get_raw())
+        fh.write(doc.get_raw(session))
         fh.close()	  
         cmd = "java -Djava.awt.headless=true -cp /users/azaroth/cheshire3/code/mvd/Multivalent20050929.jar tool.doc.ExtractText -output xml %s" % fn
         (i, o, err) = os.popen3(cmd)
@@ -143,8 +143,8 @@ class MultivalentPreParser(PreParser):
 
         # returns Document
         history = doc.processHistory
-        # Az:  get_raw() maybe expensive, --> local var
-        data = doc.get_raw()
+        # Az:  get_raw(session) maybe expensive, --> local var
+        data = doc.get_raw(session)
         attrs = {'mimetype': self.get_mimetype(doc),
                  'size': str(len(data)),
                  'packaging': self.returnPacking
