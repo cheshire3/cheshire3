@@ -151,7 +151,7 @@ class PostgresStore(SimpleStore):
 
         try:
             query = "SELECT identifier FROM %s LIMIT 1" % self.table
-            res = self.query(query)
+            res = self._query(query)
         except pg.ProgrammingError, e:
             # no table for self, initialise
             query = """
@@ -167,14 +167,14 @@ class PostgresStore(SimpleStore):
             timeCreated TIMESTAMP,
             timeModified TIMESTAMP);
             """ % self.table
-            self.query(query)
+            self._query(query)
 
 
         # And check additional relations
         for (name, fields) in self.relations.iteritems():
             try:
                 query = "SELECT identifier FROM %s_%s LIMIT 1" % (self.id,name)
-                res = self.query(query)
+                res = self._query(query)
             except pg.ProgrammingError, e:
                 # No table for relation, initialise
                 query = "CREATE TABLE %s_%s (identifier SERIAL PRIMARY KEY, " % (self.id, name)
@@ -185,7 +185,7 @@ class PostgresStore(SimpleStore):
                         query += (" REFERENCES %s (identifier)" % f[2])
                     query += ", "
                 query = query[:-2] + ");"                        
-                res = self.query(query)
+                res = self._query(query)
 
     def _openContainer(self, session):
         if self.cxn == None:
