@@ -6,6 +6,8 @@
 #
 # Version History:
 # 08/10/2007 - JH - Automatic insertion of database metadata into explain response
+# 06/12/2007 - JH - Some extension handling fixes
+
 
 import os, sys, re
 import SRW
@@ -65,9 +67,12 @@ def process_extraData(hash, req, resp, other=None):
     for ((uri, name), fn) in hash.iteritems():
         # Check name in request, call fn
         for node in req.extraRequestData:
-            elem = node.childNodes[0]
-            if elem.localName == name and elem.namespaceURI == uri:
+            if node.localName == name and node.namespaceURI == uri:
                 fn(req, resp, other)
+            # XXX: too much descending here - John
+#            elem = node.childNodes[0]
+#            if elem.localName == name and elem.namespaceURI == uri:
+#                fn(req, resp, other)
     
 
 # ---- Main query handler ----
@@ -175,8 +180,10 @@ def process_searchRetrieve(self, session, req):
             self.resultSetIdleTime = ttl
     else:
         self.numberOfRecords = 0
-        process_extraData(config.searchExtensionHash, req, self)
-        process_extraData(config.responseExtensionHash, req, self)
+    
+    # XXX: following lines were indented, so only happened with 0 results - John    
+    process_extraData(config.searchExtensionHash, req, self, rs)
+    process_extraData(config.responseExtensionHash, req, self)
 
 
 SRW.types.SearchRetrieveResponse.processQuery = process_searchRetrieve
