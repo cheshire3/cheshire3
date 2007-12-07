@@ -61,7 +61,7 @@ def docidRecordHandler(req, ro, other):
 
 def recordMetadataHandler(req, ro, rec):
     # Put resultSetItem info into extraRecordData
-    mdBits = ['<rec:metaData xmlns:rec="info:srw/extension/2/rec-1.1">']
+    mdBits = ['<rec:metaData xmlns:rec="http://www.archiveshub.ac.uk/srw/extension/2/record-1.1">']
     mdBits.append('<rec:identifier>%s</rec:identifier>' % rec.id)
     if rec.recordStore:
         mdBits.append('<rec:locationIdentifier>%s</rec:locationIdentifier>' % rec.recordStore)
@@ -94,7 +94,7 @@ def resultSetSummaryHandler(req, ro, rs):
     if not len(rs):
         return
     
-    mdBits = ['<rs:resultSetData xmlns:rs="info:srw/extension/2/resultSet-1.1">']
+    mdBits = ['<rs:resultSetData xmlns:rs="http://www.archiveshub.ac.uk/srw/extension/2/resultSet-1.1">']
     if hasattr(rs[0], 'weight'):
         allweights = [r.weight for r in rs]
         mdBits.append('<rs:weights>%r</rs:weights>' % allweights)
