@@ -187,12 +187,9 @@ class NumericEntityNormalizer(SimpleNormalizer):
 class RegexpNormalizer(SimpleNormalizer):
     """ Either strip, replace or keep data which matches a given regular expression """
 
-    _possibleSettings = {'char':
-                         {'docs' :"Character(s) to replace matches in the regular expression with. Defaults to empty string (eg strip matches)"},
-                         'regexp':
-                         {'docs' : "Regular expression to match in the data.", 'required' : True},
-                         'keep':
-                         {'docs' : "Should instead keep only the matches. Boolean, defaults to False", 'type': int, 'options' : "0|1"}
+    _possibleSettings = {'char': {'docs' :"Character(s) to replace matches in the regular expression with. Defaults to empty string (eg strip matches)"},
+                         'regexp': {'docs' : "Regular expression to match in the data.", 'required' : True},
+                         'keep': {'docs' : "Should instead keep only the matches. Boolean, defaults to False", 'type': int, 'options' : "0|1"}
                          }
 
     def __init__(self, session, config, parent):
@@ -224,6 +221,26 @@ class RegexpNormalizer(SimpleNormalizer):
                     print repr(data)
                     raise
     
+
+class NamedRegexpNormalizer(RegexpNormalizer):
+    """ As RegexpNormalizer, but allow named groups and reconstruction of token using a template and those groups. """
+
+    _possibleSettings = {'template' : {'docs' : "Template using group names for replacement, as per % substitution. Eg regexp = (?P<word>.+)/(?P<pos>.+) and template = --%(pos)s--, cat/NN would generate --NN--"}}
+
+    def __init__(self, session, config, parent):
+        RegexpNormalizer.__init__(self, session, config, parent)
+        self.template = self.get_setting(session, 'template', '')
+        
+    def process_string(self, session, data):
+        m = self.regexp.match(data)        
+        if m:
+            try:
+                return self.template % m.groupdict()
+            except:
+                return ""
+        else:
+            return ""
+
 
 class PossessiveNormalizer(SimpleNormalizer):
     """ Remove trailing 's or s' from words """
