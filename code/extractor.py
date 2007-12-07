@@ -214,3 +214,30 @@ class TeiExtractor(SimpleExtractor):
             lno = -1
         return {txt:{'text' : txt, 'occurences' : 1, 'proxLoc' : lno}}
 
+
+class WordTaggedExtractor(SimpleExtractor):
+
+    def _flattenTexts(self, elem):
+        texts = []
+        ws = elem.xpath('toks/w')
+        for w in ws:
+            bits = []
+            bits.append(w.text)
+            pos = w.get('p')
+            if pos:                    
+                bits.append(pos)
+            else:
+                bits.append('')
+            stem = w.get('s')
+            if stem:
+                bits.append(stem)
+            else:
+                bits.append(w.text)
+            off = w.get('o')
+            if off:
+                bits.append(off)
+            else:
+                bits.append(-1)
+            texts.append('/'.join(bits))
+        return ' '.join(texts)
+        

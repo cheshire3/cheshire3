@@ -139,7 +139,7 @@ class RegexpFindPunctuationOffsetTokenizer(RegexpFindOffsetTokenizer):
         return (tokens, positions)
 
 
-class SuppliedOffsetTokenizer(SimpleTokenizer):
+class SuppliedOffsetTokenizer(OffsetTokenizer):
 
     def process_string(self, session, data):
         tokens = []
