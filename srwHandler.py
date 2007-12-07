@@ -63,9 +63,11 @@ def parseSortKeys(self):
 SRW.types.SearchRetrieveRequest.parseSortKeys = parseSortKeys
 
 
+
 def process_extraData(hash, req, resp, other=None):
     for ((uri, name), fn) in hash.iteritems():
         # Check name in request, call fn
+        # XXX: probably need to do this recursively...
         for node in req.extraRequestData:
             if node.localName == name and node.namespaceURI == uri:
                 fn(req, resp, other)
