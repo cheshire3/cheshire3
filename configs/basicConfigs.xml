@@ -237,6 +237,13 @@
   <objectType>tokenizer.RegexpFindOffsetTokenizer</objectType>
 </subConfig>
 
+<subConfig type="tokenizer" id="RegexpFindPunctuationOffsetTokenizer">
+  <objectType>tokenizer.RegexpFindPunctuationOffsetTokenizer</objectType>
+</subConfig>
+
+<subConfig type="tokenizer" id="SuppliedOffsetTokenizer">
+  <objectType>tokenizer.SuppliedOffsetTokenizer</objectType>
+</subConfig>
 
 <subConfig type="tokenizer" id="PunktTokenizer">
   <objectType>tokenizer.PunktWordTokenizer</objectType>
