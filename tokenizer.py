@@ -11,7 +11,7 @@ import tokenize, StringIO, keyword
 # also we're very unlikely to duplicate at this point,
 #   and even if we do it's not important.
 # This MUST be followed by a merge, however.
-# as normalizers won't know what to do with a list as data
+# as normalisers won't know what to do with a list as data
 
 
 class SimpleTokenizer(Tokenizer):
@@ -72,6 +72,10 @@ class RegexpFindTokenizer(SimpleTokenizer):
     # l'il ? y'all ?  XXX Should come up with better solution
     # 
 
+    # XXX Decide what to do with 8am 8:00am 1.2M $1.2 $1.2M
+    # As related to 8 am, 8:00 am, 1.2 Million, $ 1.2, $1.2 Million
+    # vs $1200000 vs $ 1200000 vs four million dollars
+
     _possibleSettings = {'regexp' : {'docs' : ''},
                          'gaps' : {'docs' : '', 'type' : int, 'options' : "0|1"}
                          }
@@ -83,14 +87,15 @@ class RegexpFindTokenizer(SimpleTokenizer):
           (?:
             [a-zA-Z0-9!#$%*/?|^{}`~&'+-=_]+@[0-9a-zA-Z.-]+ #email
            |(?:[\w+-]+)?[+-]/[+-]                          #alleles
-           |\w+(?:-\w+)+(?:'(?:t|ll|ve|s|d've|d|re))?      #hypenated word (maybe 'xx on the end)
+           |\w+(?:-\w+)+(?:'(?:t|ll've|ll|ve|s|d've|d|re))?  #hypenated word (maybe 'xx on the end)
            |[$\xa3\xa5\u20AC]?[0-9]+(?:[.,:-][0-9]+)+[%]?  #date/num/money/time
            |[$\xa3\xa5\u20AC][0-9]+                        #single money
+           |[0-9]+(?=[a-zA-Z]+)                            #split: 8am 1Million
            |[0-9]+%                                        #single percentage 
            |(?:[A-Z]\.)+[A-Z]?                             #acronym
            |[oOd]'[a-zA-Z]+                                #o'clock, O'brien, d'Artagnan   
            |[a-zA-Z]+://[^\s]+                             #URI
-           |\w+'(?:d've|d|t|ll|ve|s|re)                    #don't, we've
+           |\w+'(?:d've|d|t|ll've|ll|ve|s|re)                #don't, we've
            |(?:[hH]allowe'en|[mM]a'am|[Ii]'m|[fF]o'c's'le|[eE]'en|[sS]'pose)
            |[\w+]+                                         #basic words, including +
           )""")
@@ -118,10 +123,11 @@ class RegexpFindOffsetTokenizer(OffsetTokenizer, RegexpFindTokenizer):
             tokens.append(m.group())
             positions.append(m.start())
         return (tokens, positions)
-
-
+                         
 
 class RegexpFindPunctuationOffsetTokenizer(RegexpFindOffsetTokenizer):
+
+    def process_string(self, session, data):
         tokens = []
         positions = []
         for m in self.regexp.finditer(data):
@@ -129,13 +135,12 @@ class RegexpFindPunctuationOffsetTokenizer(RegexpFindOffsetTokenizer):
             i = m.start();
             while i > 0 and data[i-1] in string.punctuation:
                 i = i-1
-            positions.append(i)                   
+            positions.append(i)
         return (tokens, positions)
- 
- 
-        
+
+
 class SuppliedOffsetTokenizer(SimpleTokenizer):
-    
+
     def process_string(self, session, data):
         tokens = []
         positions = []
@@ -143,7 +148,7 @@ class SuppliedOffsetTokenizer(SimpleTokenizer):
             tokens.append(t[:t.rfind('/')])
             positions.append(int(t[t.rfind('/')+1:]))
         return (tokens, positions)
-                         
+
 
 # XXX This should be in TextMining, and NLTK should auto install
 try:
@@ -203,7 +208,7 @@ class LineTokenizer(SimpleTokenizer):
 
 class DateTokenizer(SimpleTokenizer):
     """ Extracts a single date. Multiple dates, ranges not yet implemented """
-    """ Now extracts multiple dates, but slowly and less reliably. Ranges dealt with by DateRangeExtractor. JPH Jan '07"""
+    """ Now extracts multiple dates, but slowly and less reliably. Ranges dealt with by DateRangeExtracter. JPH Jan '07"""
 
     _possibleDefaults = {'datetime' : {"docs" : "Default datetime to use for values not supplied in the data"}}
     _possibleSettings = {'fuzzy' : {"docs" : "Should the parser use fuzzy matching."}
