@@ -215,29 +215,45 @@ class TeiExtractor(SimpleExtractor):
         return {txt:{'text' : txt, 'occurences' : 1, 'proxLoc' : lno}}
 
 
-class WordTaggedExtractor(SimpleExtractor):
+class TaggedTermExtractor(SimpleExtractor):
+    """Each term has been tagged in XML already, extract information."""
+
+    _possibleSettings = {"template" : {'docs' : ""},
+                         "xpath" : {'docs' : ""},
+                         "subXpaths" : {'docs' : ""}
+                         }
+
+    def __init__(self, session, config, parent):
+        SimpleExtractor.__init__(self, session, config, parent)
+        # default:  <w p="POS" s="STEM" o="OFFSET">TEXT</w>
+        #     -->   TEXT/POS/STEM/OFFSET
+
+        # XXX Can we xpathProcessor-ify these xpaths?
+        # too computationally expensive to bother?
+        xpaths = self.get_setting(session, 'subXpaths', 'word|./text()| pos|./@p|XX stem|./@s|./text() offset|./@o|-1')
+        xps = xpaths.split(' ')
+        self.xpaths = [x.split('|') for x in xps]
+        self.xpath = self.get_setting(session, 'xpath', 'toks/w')
+        self.template = self.get_setting(session, 'template', '%(word)s/%(pos)s/%(stem)s/%(offset)s')
 
     def _flattenTexts(self, elem):
+        # XXX This only implements LXML version
         texts = []
-        ws = elem.xpath('toks/w')
+        tmpl = self.template
+        xps = self.xpaths
+        ws = elem.xpath(self.xpath)
         for w in ws:
-            bits = []
-            bits.append(w.text)
-            pos = w.get('p')
-            if pos:                    
-                bits.append(pos)
-            else:
-                bits.append('')
-            stem = w.get('s')
-            if stem:
-                bits.append(stem)
-            else:
-                bits.append(w.text)
-            off = w.get('o')
-            if off:
-                bits.append(off)
-            else:
-                bits.append(-1)
-            texts.append('/'.join(bits))
+            bits = {}
+            for xpi in xps:
+                val = w.xpath(xpi[1])
+                if not val:
+                    if xpi[2][0] == '.':                        
+                        val = w.xpath(xpi[2])
+                    else:
+                        val = xpi[2]
+                if type(val) == list:
+                    val = val[0]
+                bits[xpi[0]] = val
+            texts.append(tmpl % bits)
         return ' '.join(texts)
         
