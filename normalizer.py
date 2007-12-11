@@ -25,7 +25,7 @@ class SimpleNormalizer(Normalizer):
         items = data.items()
         prox = items[0][1].has_key('positions')
         process = self.process_string        
-        for (k,d) in items:
+        for (k,d) in data.iteritems():
             dv = d['text']
             if type(dv) == list:
                 new = []
@@ -49,7 +49,7 @@ class SimpleNormalizer(Normalizer):
                 continue
             if type(new) == types.DictType:
                 # from string to hash
-                for nv in new.values():
+                for nv in new.itervalues():
                     txt = nv['text']
                     if has(txt):
                         kw[txt]['occurences'] += nv['occurences']
