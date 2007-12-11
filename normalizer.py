@@ -22,8 +22,8 @@ class SimpleNormalizer(Normalizer):
         if not data:
             return kw
         has = kw.has_key
-        items = data.items()
-        prox = items[0][1].has_key('positions')
+        #items = data.items()
+        #prox = items[0][1].has_key('positions')
         process = self.process_string        
         for (k,d) in data.iteritems():
             dv = d['text']
@@ -53,20 +53,29 @@ class SimpleNormalizer(Normalizer):
                     txt = nv['text']
                     if has(txt):
                         kw[txt]['occurences'] += nv['occurences']
-                        if prox:
+                        #if prox:
+                        try:
                             kw[txt]['positions'].extend(nv['positions'])
+                        except:
+                            pass
                     else:
                         kw[txt] = nv
             else:
                 if new != None:
                     try:
                         kw[new]['occurences'] += d['occurences']
-                        if prox:
+                        #if prox:
+                        try:
                             kw[new]['positions'].extend(d['positions'])
+                        except:
+                            pass
                     except KeyError:
                         d = d.copy()
-                        if prox:
+                        #if prox:
+                        try:
                             d['positions'] = d['positions'][:]
+                        except:
+                            pass
                         d['text'] = new
                         kw[new] = d
                         
