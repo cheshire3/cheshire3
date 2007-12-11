@@ -400,7 +400,7 @@ class BdbStore(SimpleStore):
         try:
             cxn.open(dbPath, dbtype=bdb.db.DB_BTREE, flags = bdb.db.DB_CREATE, mode=0660)
         except:
-            raise ValueError("Could not create: %s" % dbp)
+            raise ValueError("Could not create: %s" % dbPath)
         cxn.close()
 
     def _open(self, session, dbType):
