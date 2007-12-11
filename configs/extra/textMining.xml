@@ -93,6 +93,21 @@
        </paths>
     </subConfig>  
 
+    <subConfig type="normalizer" id="TokenizingUnparsedGeniaNormalizer">
+       <objectType>textmining.tmNormalizer.GeniaNormalizer</objectType>
+       <imports>
+         <module>
+           <name>textmining</name>
+         </module>
+       </imports>
+       <paths>
+         <path type="filePath">/home/cheshire/cheshire3/code/textmining</path>
+       </paths>
+       <options>
+          <setting type="tokenize">1</setting>
+       </options>
+    </subConfig>  
+
     <subConfig type="tokenizer" id="WordPosGeniaTokenizer">
        <objectType>textmining.tmTokenizer.UnparsedGeniaTokenizer</objectType>
        <imports>
