@@ -79,31 +79,20 @@ localParser.setContentHandler(localHandler)
 
 class RankedResultSet(ResultSet):
 
-    #    def _sumWeights(self, items, n):
-    #        item = items[0]
-    #        item.weight = sum([x.weight for x in items])
-    #        return item
-        
-    #    def _meanWeights(self, items, n):
-    #        item = items[0]
-    #        item.weight = sum([x.weight for x in items])
-    #        item.weight = item.weight / n
-    #        return item
-    
     def _sumWeights(self, items, n):
         item = items[0]
-        #item.weight = sum([x.weight for x in items])
-        item.weight = sum([x.weight for x in items if (x.weight <> 0.5)])
+        item.weight = sum([x.weight for x in items])
         return item
+        #item.weight = sum([x.weight for x in items if (x.weight <> 0.5)])
         
     def _meanWeights(self, items, n):
         item = items[0]
         item.weight = sum([x.weight for x in items])
         item.weight = item.weight / n
-#        trueWeightedItems = [x.weight for x in items if (x.weight <> 0.5)]
-#        item.weight = sum(trueWeightedItems)
-#        item.weight = item.weight / len(trueWeightedItems)
         return item
+        #trueWeightedItems = [x.weight for x in items if (x.weight <> 0.5)]
+        #item.weight = sum(trueWeightedItems)
+        #item.weight = item.weight / len(trueWeightedItems)
 
 
     def _normWeights(self, items, n):
@@ -596,15 +585,14 @@ class SimpleResultSet(RankedResultSet):
                 litem = items.pop(0)
                 nomatch = 0                    
 
-                fullMatchLocs = []
                 while len(items):
                     ritem = items.pop(0)
                     matchlocs = []
-                    for rpi in ritem.proxInfo:
-                        rpi = list(rpi)
+                    for rpiFull in ritem.proxInfo:                        
+                        rpi = list(rpiFull[-1])
                         (relem, rwpos) = rpi[:2]
-                        for lpi in litem.proxInfo:
-                            lpi = list(lpi)
+                        for lpiFull in litem.proxInfo:
+                            lpi = list(lpiFull[-1])
                             (lelem, lwpos) = lpi[:2]
                             if lelem == relem:
                                 if proxtype == 2:
@@ -629,8 +617,10 @@ class SimpleResultSet(RankedResultSet):
                                         piDistance = abs(piDistance)
                                         c = cmp(piDistance, distance)
                                         if (c in chitem):
-                                            matchlocs.append(rpi)
-                                            fullMatchLocs.append(lpi)
+                                            # copy as we're in two deep
+                                            d = lpiFull[:]
+                                            d.extend(rpiFull)
+                                            matchlocs.append(d)
                                         
                     if matchlocs:                                    
                         ritem.proxInfo = matchlocs
@@ -641,16 +631,8 @@ class SimpleResultSet(RankedResultSet):
                         break
                 if nomatch:
                     continue
-                
-                fullMatchLocs.extend(matchlocs)
-                fullMatchLocs.sort()
-                newMatchLocs = []
-                n = len(newitems)
-                for f in range(len(fullMatchLocs)):
-                    fmi = fullMatchLocs[f]
-                    if fmi in matchlocs:
-                        newMatchLocs.extend(fullMatchLocs[f+1-n:f+1])
-                litem.proxInfo = newMatchLocs
+
+                litem.proxInfo = matchlocs
                 items = [litem]
 
             # do stuff on items to reduce to single representative
@@ -666,6 +648,7 @@ class SimpleResultSet(RankedResultSet):
                 # copy proxInfo around
                 for o in items[1:]:
                     item.proxInfo.extend(o.proxInfo)                        
+                    item.fullProxInfo.extend(o.fullProxInfo)
             tmplist.append(item)
 
         self._list = tmplist
@@ -751,6 +734,7 @@ class SimpleResultSetItem(ResultSetItem):
         self.database = database
         self.resultSet = resultSet
         self.proxInfo = []
+        self.fullProxInfo = []
         self.numericId = numeric
 
     def fetch_record(self, session):

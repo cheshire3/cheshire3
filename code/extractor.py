@@ -3,13 +3,13 @@ import re, types, string
 from baseObjects import Extractor
 
 class SimpleExtractor(Extractor):
-    """ Base extractor. Extracts exact text """
+    """ Base extracter. Extracts exact text """
 
     _possibleSettings = {'extraSpaceElements' : {'docs' : "Space separated list of elements after which to append a space so as to not run words together."},
                          'prox' : {'docs' : ''},
                          'parent' : {"docs" : "Should the parent element's identifier be used instead of the current element."},
                          'reversable' : {"docs" : "Use a hopefully reversable identifier even when the record is a DOM tree. 1 = Yes (expensive), 0 = No (default)", 'type': int, 'options' : '0|1'},
-                         'stripWhitespace' : {'docs' : 'Should the extractor strip leading/trailing whitespace from extracted text. 1 = Yes, 0 = No (default)', 'type' : int, 'options' : '0|1'}
+                         'stripWhitespace' : {'docs' : 'Should the extracter strip leading/trailing whitespace from extracted text. 1 = Yes, 0 = No (default)', 'type' : int, 'options' : '0|1'}
                          }
 
     def __init__(self, session, config, parent):
@@ -139,7 +139,7 @@ class SimpleExtractor(Extractor):
                 if (type(d) == types.ListType):
                     # SAX event
                     new = self._mergeHash(new, self.process_eventList(session, d))
-                elif (type(d) in types.StringTypes):
+                elif (type(d) in types.StringTypes or type(d) in [int, long, float, bool]):
                     # Attribute content
                     new = self._mergeHash(new, self.process_string(session, d))
                 else:
@@ -215,12 +215,36 @@ class TeiExtractor(SimpleExtractor):
         return {txt:{'text' : txt, 'occurences' : 1, 'proxLoc' : lno}}
 
 
+
 class TaggedTermExtractor(SimpleExtractor):
     """Each term has been tagged in XML already, extract information."""
 
-    _possibleSettings = {"template" : {'docs' : ""},
-                         "xpath" : {'docs' : ""},
-                         "subXpaths" : {'docs' : ""}
+
+    def _getProxLocNode(self, session, node):
+        return int(node.attrib.get('eid'))
+
+    def _flattenTexts(self, elem):
+        # XXX This only implements LXML version
+        texts = []
+        ws = elem.xpath('.//toks/w')
+        for w in ws:
+            bits = {}
+            attr = w.attrib
+            bits['text'] = w.text
+            bits['pos'] = attr.get('p', '??')
+            bits['offset'] = attr.get('o', '-1')
+            bits['stem'] = attr.get('s', w.text)
+            texts.append("%(text)s/%(pos)s/%(stem)s/%(offset)s" % bits)
+        return ' '.join(texts)
+
+
+
+class TemplateTermExtractor(SimpleExtractor):
+    """Each term has been tagged in XML already, extract information."""
+
+    _possibleSettings = {"template" : {'docs' : "template to return term as, after % substitution for names (eg via %(name)s)"},
+                         "xpath" : {'docs' : "xpath to extract individual term"},
+                         "subXpaths" : {'docs' : "space separated named fields:  name|xpath|default-if-not-present"}
                          }
 
     def __init__(self, session, config, parent):

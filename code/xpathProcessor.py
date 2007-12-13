@@ -1,5 +1,6 @@
 
 from baseObjects import XPathProcessor
+from record import LxmlRecord
 from utils import elementType, getFirstData, verifyXPaths
 import time
 
@@ -13,10 +14,11 @@ class SimpleXPathProcessor(XPathProcessor):
                 if child.nodeType == elementType:
                     if child.localName == "xpath":
                         # add XPath
-                        data = {'tagName' : '', 'xpath': None, 'maps': {}}
+                        data = {'tagName' : '', 'xpath': None, 'maps': {}, 'string' : ''}
 
                         xp = getFirstData(child)
                         data['xpath'] = verifyXPaths([xp])[0]
+                        data['string'] = xp
 
                         for a in child.attributes.keys():
                             # ConfigStore using 4Suite
@@ -47,7 +49,10 @@ class SimpleXPathProcessor(XPathProcessor):
             for xp in src:
                 if xp['tagName'] and record.tagName != xp['tagName']:
                     continue                
-                vals.append(record.process_xpath(session, xp['xpath'], xp['maps']))
+                if isinstance(record, LxmlRecord):
+                    vals.append(record.process_xpath(session, xp['string'], xp['maps']))
+                else:
+                    vals.append(record.process_xpath(session, xp['xpath'], xp['maps']))
         return vals
 
 
@@ -136,7 +141,7 @@ class MetadataXPath(SimpleXPathProcessor):
                 full = xp['xpath']
                 name = full[1][-1][1]
                 if hasattr(record, name):
-                    vals.append([str(getattr(record, name))])
+                    vals.append([getattr(record, name)])
                 elif name == 'now':
                     # eg for lastModified/created etc
                     now = time.strftime("%Y-%m-%d %H:%M:%S")

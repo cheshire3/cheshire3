@@ -15,9 +15,17 @@ import tokenize, StringIO, keyword
 
 
 class SimpleTokenizer(Tokenizer):
+    _possibleSettings = {'char' : {'docs' : 'character to split with, or empty for default of whitespace'}}
+
+    def __init__(self, session, config, parent):
+        Tokenizer.__init__(self, session, config, parent)
+        self.char = self.get_setting(session, 'char', None)
 
     def process_string(self, session, data):
-        return data.split()
+        if self.char:
+            return data.split(self.char)
+        else:
+            return data.split()
 
     def process_hash(self, session, data):
         kw = {}
