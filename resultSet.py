@@ -98,11 +98,11 @@ class RankedResultSet(ResultSet):
         
     def _meanWeights(self, items, n):
         item = items[0]
-        #item.weight = sum([x.weight for x in items])
-        #item.weight = item.weight / n
-        trueWeightedItems = [x.weight for x in items if (x.weight <> 0.5)]
-        item.weight = sum(trueWeightedItems)
-        item.weight = item.weight / len(trueWeightedItems)
+        item.weight = sum([x.weight for x in items])
+        item.weight = item.weight / n
+#        trueWeightedItems = [x.weight for x in items if (x.weight <> 0.5)]
+#        item.weight = sum(trueWeightedItems)
+#        item.weight = item.weight / len(trueWeightedItems)
         return item
 
 
