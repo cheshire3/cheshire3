@@ -189,6 +189,15 @@ class GeniaNormalizer(PosNormalizer, GeniaObject):
         tl = self.tag(session, data)
         return ''.join(tl)
 
+    def process_hash(self, session, data):
+        # If text is list of single words, concat with ' '
+        # otherwise pass up
+        for (k, v) in data.iteritems():
+            if type(v['text']) == list and v['text'][0].find(' ') == -1:
+                data[k]['text'] = ' '.join(v['text'])
+        return PosNormalizer.process_hash(self, session, data)
+        
+
 
 class ReconstructGeniaNormalizer(SimpleNormalizer):
     """ Take the unparsed output from Genia and reconstruct the document, maybe with stems ('useStem') and/or PoS tags ('pos') """

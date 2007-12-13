@@ -76,6 +76,7 @@ class BdbIndexStore(IndexStore):
         self.outFiles = {}
         self.storeHash = {}
         self.outSortFiles = {}
+        self.metadataCxn = None
         self.sortStoreCxn = {}
         self.identifierMapCxn = {}
         self.indexCxn = {}
@@ -117,6 +118,34 @@ class BdbIndexStore(IndexStore):
 
     def __iter__(self):
         return IndexStoreIter(self)
+
+    def _openMetadata(self, session):
+        if self.metadataCxn != None:
+            return self.metadataCxn
+        else:
+            mp = self.get_path(session, 'metadataPath')
+            if not mp:
+                dfp = self.get_path(session, 'defaultPath')
+                mp = os.path.join(dfp, 'metadata.bdb')
+
+            if not os.path.exists(mp):
+                print "MAKING: %s" % mp
+                oxn = bdb.db.DB()
+                oxn.open(mp, dbtype=bdb.db.DB_BTREE, flags=bdb.db.DB_CREATE, mode=0660)
+                oxn.close()
+
+            cxn = bdb.db.DB()
+            if session.environment == "apache":
+                cxn.open(mp, flags=bdb.db.DB_NOMMAP)
+            else:
+                cxn.open(mp)
+            self.metadataCxn = cxn
+            return cxn
+
+    def _closeMetadata(self, session):
+        if self.metadataCxn != None:
+            self.metadataCxn.close()
+            self.metadataCxn = None
 
     def _closeIndex(self, session, index):
         if self.indexCxn.has_key(index):
@@ -394,6 +423,8 @@ class BdbIndexStore(IndexStore):
         cursor = cxn.cursor()
         nonEmpty = cursor.first()
 
+        metadataCxn = self._openMetadata(session)        
+
         # Should this be:
         # f = codecs.open(filePath, 'r', 'utf-8')    ?
         f = file(filePath)
@@ -441,7 +472,11 @@ class BdbIndexStore(IndexStore):
             tidcxn.open( dbname + "_TERMIDS")
         
 
-
+        nTerms = 0
+        nRecs = 0
+        nOccs = 0
+        totalChars = 0
+        
         start = time.time()
         while(l):
             l = f.readline()[:-1]
@@ -468,7 +503,7 @@ class BdbIndexStore(IndexStore):
                             unpacked = unpacked[3:]
                         else:
                             unpacked = currData
-                        packed = t2s(session, termid, unpacked, nRecs=totalRecs, nOccs=totalOccs)
+                        packed = t2s(session, termid, unpacked, nRecs=totalRecs, nOccs=totalOccs)                        
                     else:
                         try:
                             packed = t2s(session, termid, currData, nRecs=totalRecs, nOccs=totalOccs)
@@ -477,6 +512,10 @@ class BdbIndexStore(IndexStore):
                             print termid
                             print currData
                             raise
+                    nTerms += 1
+                    nRecs += totalRecs
+                    nOccs += totalOccs
+                    totalChars += len(currTerm)
                     cxn.put(currTerm, packed)
                     if vectors:
                         tidcxn.put("%012d" % termid, currTerm)
@@ -497,6 +536,12 @@ class BdbIndexStore(IndexStore):
 
         self._closeIndex(session, index)
         os.remove(filePath)
+
+        if metadataCxn:
+            # LLLL:  nTerms, nRecs, nOccs, totalChars
+            val = struct.pack("LLLL", nTerms, nRecs, nOccs, totalChars)
+            metadataCxn.put(index.id.encode('utf8'), val)
+            self._closeMetadata(session)
 
         if vectors:
             # build vectors here
@@ -859,7 +904,16 @@ class BdbIndexStore(IndexStore):
                 except TypeError:
                     break
             return freqs
-        
+
+
+    def fetch_indexMetadata(self, session, index):
+        cxn = self._openMetadata(session)
+        data = cxn.get(index.id.encode('utf-8'))
+        if data:
+            vals = struct.unpack('LLLL', data)
+            return vals
+        else:
+            return []
 
 
     def create_term(self, session, index, termId, resultSet):

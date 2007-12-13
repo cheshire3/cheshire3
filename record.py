@@ -519,7 +519,7 @@ try:
         def get_sax(self, session):
             if (not self.sax):
                 handler = SaxContentHandler()
-                sax.saxify(session, self.dom, handler)
+                sax.saxify(self.dom, handler)
                 self.sax = handler.currentText
                 self.sax.append("9 %r" % handler.elementHash)
             return self.sax
