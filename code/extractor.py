@@ -3,13 +3,13 @@ import re, types, string
 from baseObjects import Extractor
 
 class SimpleExtractor(Extractor):
-    """ Base extracter. Extracts exact text """
+    """ Base extractor. Extracts exact text """
 
     _possibleSettings = {'extraSpaceElements' : {'docs' : "Space separated list of elements after which to append a space so as to not run words together."},
                          'prox' : {'docs' : ''},
                          'parent' : {"docs" : "Should the parent element's identifier be used instead of the current element."},
                          'reversable' : {"docs" : "Use a hopefully reversable identifier even when the record is a DOM tree. 1 = Yes (expensive), 0 = No (default)", 'type': int, 'options' : '0|1'},
-                         'stripWhitespace' : {'docs' : 'Should the extracter strip leading/trailing whitespace from extracted text. 1 = Yes, 0 = No (default)', 'type' : int, 'options' : '0|1'}
+                         'stripWhitespace' : {'docs' : 'Should the extractor strip leading/trailing whitespace from extracted text. 1 = Yes, 0 = No (default)', 'type' : int, 'options' : '0|1'}
                          }
 
     def __init__(self, session, config, parent):
@@ -28,7 +28,7 @@ class SimpleExtractor(Extractor):
             return b
         if not b:
             return a
-        for k in b.keys():
+        for k in b.iterkeys():
             try:
                 a[k]['occurences'] += b[k]['occurences']
                 try:
