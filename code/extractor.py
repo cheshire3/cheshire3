@@ -221,19 +221,31 @@ class TaggedTermExtractor(SimpleExtractor):
 
 
     def _getProxLocNode(self, session, node):
-        return int(node.attrib.get('eid'))
+        try:
+            return int(node.attrib.get('eid'))
+        except:
+            return 0
 
     def _flattenTexts(self, elem):
         # XXX This only implements LXML version
         texts = []
         ws = elem.xpath('.//toks/w')
+        lastOffset = 10000000000
+        totalOffset = 0
+        thisOffset = 0
         for w in ws:
             bits = {}
             attr = w.attrib
             bits['text'] = w.text
             bits['pos'] = attr.get('p', '??')
-            bits['offset'] = attr.get('o', '-1')
             bits['stem'] = attr.get('s', w.text)
+            o = int(attr.get('o', '-1'))
+            if o < lastOffset:
+                totalOffset += thisOffset
+                thisOffset = len(w.xpath('../../txt/text()')[0]) + 1
+            lastOffset = o
+            o += totalOffset
+            bits['offset'] = o
             texts.append("%(text)s/%(pos)s/%(stem)s/%(offset)s" % bits)
         return ' '.join(texts)
 
