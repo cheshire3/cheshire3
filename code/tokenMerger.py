@@ -37,7 +37,7 @@ class ProximityTokenMerger(SimpleTokenMerger):
                 x = 0
                 for t in val['text']:
                     if has(t):
-                        new[t]['occurences'] += 1
+                        new[t]['occurences'] += val['occurences']
                         try:
                             new[t]['positions'].extend((val['proxLoc'], x))
                         except KeyError:
@@ -46,8 +46,8 @@ class ProximityTokenMerger(SimpleTokenMerger):
                         try:
                             new[t] = {'text' : t, 'occurences' : 1, 'positions' : [val['proxLoc'],x]}
                         except KeyError:
-                            new[t] = {'text' : t, 'occurences' : 1,
-                                      'positions' : val['positions']}
+                            new[t] = {'text' : t, 'occurences' : val['occurences'],
+                                      'positions' : val['positions'][:]}
                     x += 1
         return new
 
@@ -68,6 +68,30 @@ class OffsetProximityTokenMerger(ProximityTokenMerger):
                     x += 1
         return new
         
+class PositionTokenMerger(ProximityTokenMerger):
+    def process_hash(self, session, data):
+        new = {}
+        has = new.has_key
+        for d, val in data.iteritems():
+            if d:
+                x = 0
+                for t in val['text']:
+                    if has(t):
+                        new[t]['occurences'] += 1
+                        try:
+                            new[t]['positions'].extend((val['proxLoc'], x))
+                        except KeyError:
+                            new[t]['positions'].extend(val['positions'])
+                    else:
+                        try:
+                            new[t] = {'text' : t, 'occurences' : 1, 'positions' : [val['proxLoc'],x]}
+                        except KeyError:
+                            new[t] = {'text' : t, 'occurences' : 1,
+                                      'positions' : val['positions']}
+                    x += 1
+        return new
+    
+
 
 class SequenceRangeTokenMerger(SimpleTokenMerger):
     # assume that we've tokenized a single value into pairs,
