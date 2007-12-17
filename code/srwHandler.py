@@ -183,7 +183,9 @@ def process_searchRetrieve(self, session, req):
     else:
         self.numberOfRecords = 0
     
-    # XXX: following lines were indented, so only happened with 0 results - John    
+    # XXX: this needs emptying otherwise it remains from previous requests
+    self.extraResponseData = []
+    # XXX: following lines were indented, so only happened with 0 results - John
     process_extraData(config.searchExtensionHash, req, self, rs)
     process_extraData(config.responseExtensionHash, req, self)
 
@@ -234,7 +236,8 @@ def process_scan(self, session, req):
         raise f
 
     if (not clause.term.value):
-	clause.term.value = chr(0)
+        clause.term.value = chr(0)
+    
     clause.config = config
 
     if (rp == 1):
