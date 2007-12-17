@@ -438,6 +438,7 @@ class SimpleResultSet(RankedResultSet):
 
         # sort result sets by length
         all = cql.value in ['all', 'and', '=', 'prox', 'adj']                
+
         if not cql.value in ['not', 'prox']:
             others.sort(key=lambda x: len(x), reverse=not all)
 
@@ -452,7 +453,6 @@ class SimpleResultSet(RankedResultSet):
                 finish = fn(session, others, clause, cql, db)
                 if finish:
                     return self
-
         if len(others) == 1 and len(others[0].queryPositions) < 2:
             if relevancy:
                 # Just adding relevance to items?
@@ -471,10 +471,16 @@ class SimpleResultSet(RankedResultSet):
         tmplist = []
         oidxs = range(1,len(others))
         lens = map(len, others)
-        if all and 0 in lens:
-            # FIXME: return something that is definitely an empty resultSet
-            return self
         nors = len(others)
+        # Fast escapes
+        if all and 0 in lens:
+            return self
+        elif sum(lens) == 0:
+            return self
+        elif nors == 2 and cql.value in ['or', 'any'] and 0 in lens:
+            # A or (empty) == A
+            return others(int(lens[0] != 0))
+
         positions = [0] * nors
         cmpHash = {'<' : [-1],
                    '<=' : [-1, 0],
@@ -596,7 +602,11 @@ class SimpleResultSet(RankedResultSet):
                             (lelem, lwpos) = lpi[:2]
                             if lelem == relem:
                                 if proxtype == 2:
-                                    matchlocs.append(rpi)
+                                    d = lpiFull[:]
+                                    for r in rpiFull:
+                                        if d[-1] != r:
+                                            d.append(r)
+                                    matchlocs.append(d)
                                 else:
                                     if proxtype == 3:
                                         # character distance
@@ -619,7 +629,10 @@ class SimpleResultSet(RankedResultSet):
                                         if (c in chitem):
                                             # copy as we're in two deep
                                             d = lpiFull[:]
-                                            d.extend(rpiFull)
+                                            # Check we're not the same word
+                                            for r in rpiFull:
+                                                if d[-1] != r:
+                                                    d.append(r)
                                             matchlocs.append(d)
                                         
                     if matchlocs:                                    
@@ -1187,9 +1200,14 @@ try:
                 tmplist = []
                 oidxs = range(1,len(others))
                 lens = map(len, others)
+                nors = len(others)
                 if all and 0 in lens:
                     return self
-                nors = len(others)
+                elif sum(lens) == 0:
+                    return self
+                elif nors == 2 and cql.value in ['or', 'any'] and 0 in lens:
+                    return others[int(lens[0] != 0)]
+
                 positions = [0] * nors
                 cmpHash = {'<' : [-1],
                            '<=' : [-1, 0],
