@@ -129,7 +129,6 @@ class BdbIndexStore(IndexStore):
                 mp = os.path.join(dfp, 'metadata.bdb')
 
             if not os.path.exists(mp):
-                print "MAKING: %s" % mp
                 oxn = bdb.db.DB()
                 oxn.open(mp, dbtype=bdb.db.DB_BTREE, flags=bdb.db.DB_CREATE, mode=0660)
                 oxn.close()
@@ -464,11 +463,12 @@ class BdbIndexStore(IndexStore):
         minTerms = index.get_setting(session, 'minimumSupport')
         if not minTerms:
             minTerms = 0
+
+        dfp = self.get_path(session, 'defaultPath')
+        basename = self._generateFilename(index)
+        dbname = os.path.join(dfp, basename)
         if vectors:
             tidcxn = bdb.db.DB()
-            dfp = self.get_path(session, 'defaultPath')
-            basename = self._generateFilename(index)
-            dbname = os.path.join(dfp, basename)
             tidcxn.open( dbname + "_TERMIDS")
         
 
@@ -692,39 +692,38 @@ class BdbIndexStore(IndexStore):
             dataLen = index.longStructSize * self.reservedLongs
             terms = []
 
-            (term, val) = cursor.first(doff=0, dlen=dataLen)
-            while (val):
-                (termid, recs, occs) = struct.unpack('lll', val)
-                terms.append({'i' : termid, 'r' : recs, 'o' : occs})
-                try:
-                    (term, val) = cursor.next(doff=0, dlen=dataLen)
-                except:
-                    val = 0
+            try:
+                (term, val) = cursor.first(doff=0, dlen=dataLen)
+                while (val):
+                    (termid, recs, occs) = struct.unpack('lll', val)
+                    terms.append({'i' : termid, 'r' : recs, 'o' : occs})
+                    try:
+                        (term, val) = cursor.next(doff=0, dlen=dataLen)
+                    except:
+                        val = 0
+                lt = len(terms)
+                if fl.find('rec') > -1:
+                    terms.sort(key=lambda x: x['r'])
+                    cxn = bdb.db.DB()
+                    cxn.open(dbname + "_FREQ_REC")
+                    for (t, term) in enumerate(terms):
+                        termidstr = struct.pack('ll', term['i'], term['r'])
+                        cxn.put("%012d" % t, termidstr)                                        
+                    cxn.close()
 
+                if fl.find('occ') > -1:
+                    terms.sort(key=lambda x: x['o'])                
+                    cxn = bdb.db.DB()
+                    cxn.open(dbname + "_FREQ_OCC")
+                    for (t, term) in enumerate(terms):
+                        termidstr = struct.pack('ll', term['i'], term['o'])
+                        cxn.put("%012d" % t, termidstr)                                        
+                    cxn.close()                
+            except TypeError:
+                # no data in index
+                pass
             self._closeIndex(session, index)
 
-            # now create bdbs for recs and/or occs
-            # have to merge termids, so have to do separately at end
-
-            lt = len(terms)
-            if fl.find('rec') > -1:
-                terms.sort(key=lambda x: x['r'])
-                cxn = bdb.db.DB()
-                cxn.open(dbname + "_FREQ_REC")
-                for (t, term) in enumerate(terms):
-                    termidstr = struct.pack('ll', term['i'], term['r'])
-                    cxn.put("%012d" % t, termidstr)                                        
-                cxn.close()
-
-            if fl.find('occ') > -1:
-                terms.sort(key=lambda x: x['o'])                
-                cxn = bdb.db.DB()
-                cxn.open(dbname + "_FREQ_OCC")
-                for (t, term) in enumerate(terms):
-                    termidstr = struct.pack('ll', term['i'], term['o'])
-                    cxn.put("%012d" % t, termidstr)                                        
-                cxn.close()                
-        # print "commited %s:  %s" % (index.id, time.time() - start)
         return None
 
 
@@ -816,7 +815,10 @@ class BdbIndexStore(IndexStore):
             while k[2:6] == keyid:
                 elemId = struct.unpack('L', k[6:])[0]
                 vals[elemId] = unpack(v)
-                (k,v) = c.next()
+                try:
+                    (k,v) = c.next()
+                except TypeError:
+                    break
             return vals
             
         else:
