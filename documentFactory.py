@@ -1276,10 +1276,19 @@ class AccVectorTransformerStream(AccumulatingStream):
     def accumulate(self, session, stream, format, tagName=None, codec=None, factory=None ):
         # session should be record instance
         doc = self.transformer.process_record(session, stream)
-        (l,v) = doc.get_raw(session)
-        self.classes.append(l)
-        self.vectors.append(v)
-        self.totalAttributes += len(v.keys())
+        raw  = doc.get_raw(session)
+        if type(raw) == list:
+                # multiple from proxVector (etc)
+                for (l,v) in raw:
+                    self.classes.append(l)
+                    self.vectors.append(v)
+                    self.totalAttributes += len(v.keys())                
+        else:
+            # we're a tuple
+            self.classes.append(raw[0])
+            self.vectors.append(raw[1])
+            self.totalAttributes += len(raw[1].keys())
+
 
     def find_documents(self, session, cache=0):
         doc = StringDocument([self.classes, self.vectors])

@@ -124,6 +124,7 @@ class ARMVectorPreParser(PreParser):
         return StringDocument('\n'.join(txt))
 
 
+
 class ARMPreParser(PreParser):
 
     _possibleSettings = {'support' : {'docs' : "Support value", 'type' : float},
@@ -133,8 +134,8 @@ class ARMPreParser(PreParser):
 
     def __init__(self, session, config, parent):
         PreParser.__init__(self, session, config, parent)
-        self.support = self.get_setting(session, 'support', 10)
-        self.confidence = self.get_setting(session, 'confidence', 75)
+        self.support = self.get_setting(session, 'support', 10.0)
+        self.confidence = self.get_setting(session, 'confidence', 0.0)
 
 
 class TFPPreParser(ARMPreParser):
@@ -199,10 +200,10 @@ class Fimi1PreParser(ARMPreParser):
         if not self.filePath:
             raise ConfigFileException("%s requires the path: filePath" % self.id)
         self.fisre = re.compile("([0-9 ]+) \(([0-9]+)\)")
+        self.rulere = re.compile("([0-9 ]+) ==> ([0-9 ]+) \(([0-9.]+), ([0-9]+)\)")
 
 
     def process_document(self, session, doc):
-
         # write out our temp file
         (qq, infn) = tempfile.mkstemp(".arm")
         fh = file(infn, 'w')
@@ -213,12 +214,19 @@ class Fimi1PreParser(ARMPreParser):
         # go to directory and run
         o = os.getcwd()
         os.chdir(self.filePath)
-        results = commands.getoutput("./apriori %s %s %s" % (infn, outfn, self.support/100))
+        if self.confidence > 0:
+            cmd = "./apriori %s %s %s %s" % (infn, outfn, self.support/100, self.confidence/100)
+            results = commands.getoutput(cmd)
+        else:
+            cmd = "./apriori %s %s %s" % (infn, outfn, self.support/100)
+            results = commands.getoutput(cmd)
         os.chdir(o)
 
         inh = file(outfn)
         fis = self.fisre
+        rule = self.rulere
         matches = []
+        rules = []
         for line in inh:
             # matching line looks like N N N (N)
             # rules look like N N ==> N (f, N)
@@ -227,15 +235,24 @@ class Fimi1PreParser(ARMPreParser):
                 (set, freq) = m.groups()
                 if set.find(' ') > -1:
                     matches.append((int(freq), set))
+            elif self.confidence > 0:
+                m = rule.match(line)
+                if m:
+                    (ante, conc, conf, supp) = m.groups()
+                    al = map(int, ante.split(' '))
+                    cl = map(int, conc.split(' '))
+                    rules.append((float(conf), int(supp), al, cl))
         inh.close()
 
         if not matches:
             # no FIS for some reason, return results??
-            return StringDocument(results)
+            return StringDocument([results, []])
 
         matches.sort(reverse=True)
+        rules.sort(reverse=True)
         os.chdir(o)
-        return StringDocument(matches)
+        doc = StringDocument([matches, rules])
+        return doc
 
 
 
@@ -306,7 +323,7 @@ class FrequentSet(object):
 # XXX This whole setup is kinda kludgey, ya know? :(
 # This should be a workflow somehow?
 
-class MatchToRulePreParser(PreParser):
+class MatchToObjectPreParser(PreParser):
     
     _possiblePaths = {'renumberPreParser' : {'docs' : ''},
                       'recordStore' : {'docs' : ''},
@@ -338,7 +355,7 @@ class MatchToRulePreParser(PreParser):
 
     def process_document(self, session, doc):
         # take in Doc with match list, return doc with rule object list
-        matches = doc.get_raw(session)
+        (matches, armrules) = doc.get_raw(session)
 
         out = StringDocument([])
 
@@ -418,7 +435,23 @@ class MatchToRulePreParser(PreParser):
         if self.sortBy:
             rules.sort(key=self.sortFuncs[self.sortBy], reverse=True)
 
-        out.text = rules
+        nrules = []
+        if armrules:
+            # unrenumber arm found rules
+            # conf, supp, [antes], [concs]
+            for r in armrules:
+                d = StringDocument([r[2], r[3]])
+                nd = self.unrenumber.process_document(session, d)
+                antes = []
+                concs = []
+                renmbrd = nd.get_raw(session)
+                for a in renmbrd[0]:
+                    antes.append(termHash[a])
+                for c in renmbrd[1]:
+                    concs.append(termHash[c])
+                nrules.append([r[0], r[1], antes, concs])
+
+        out.text = [rules, nrules]
         out.termHash = termHash
         out.termRuleFreq = termRuleFreq
         out.ruleLengths = ruleLengths
