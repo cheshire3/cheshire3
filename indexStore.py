@@ -431,6 +431,7 @@ class BdbIndexStore(IndexStore):
         tidIdx = index.get_path(session, 'termIdIndex', None)
         vectors = index.get_setting(session, 'vectors', 0)
         proxVectors = index.get_setting(session, 'proxVectors', 0)
+        termIds = index.get_setting(session, 'termIds', 0)
 
         if not nonEmpty:
             termid = long(0)
@@ -467,7 +468,7 @@ class BdbIndexStore(IndexStore):
         dfp = self.get_path(session, 'defaultPath')
         basename = self._generateFilename(index)
         dbname = os.path.join(dfp, basename)
-        if vectors:
+        if vectors or termIds:
             tidcxn = bdb.db.DB()
             tidcxn.open( dbname + "_TERMIDS")
         
@@ -517,7 +518,7 @@ class BdbIndexStore(IndexStore):
                     nOccs += totalOccs
                     totalChars += len(currTerm)
                     cxn.put(currTerm, packed)
-                    if vectors:
+                    if vectors or termIds:
                         tidcxn.put("%012d" % termid, currTerm)
                 # assign new line
                 try:
@@ -543,9 +544,11 @@ class BdbIndexStore(IndexStore):
             metadataCxn.put(index.id.encode('utf8'), val)
             self._closeMetadata(session)
 
+        if vectors or termIds:
+            tidcxn.close()
+
         if vectors:
             # build vectors here
-            tidcxn.close()
             termCache = {}
             freqCache = {}
             maxCacheSize = index.get_setting(session, 'maxVectorCacheSize', -1)
@@ -968,17 +971,22 @@ class BdbIndexStore(IndexStore):
                 oxn.close()
             except:
                 raise(ValueError)
-        if (index.get_setting(session, "vectors")):
+
+        vecs = index.get_setting(session, "vectors")
+        tids = index.get_setting(session, "termIds")
+        if vecs or tids:
+                oxn = bdb.db.DB()
+                oxn.set_flags(bdb.db.DB_RECNUM)
+                oxn.open(fullname + "_TERMIDS", dbtype=bdb.db.DB_BTREE, flags=bdb.db.DB_CREATE, mode=0660)
+                oxn.close()
+
+        if vecs:
             try:
                 oxn = bdb.db.DB()
                 oxn.set_flags(bdb.db.DB_RECNUM)
                 oxn.open(fullname + "_VECTORS", dbtype=bdb.db.DB_BTREE, flags=bdb.db.DB_CREATE, mode=0660)
                 oxn.close()
 
-                oxn = bdb.db.DB()
-                oxn.set_flags(bdb.db.DB_RECNUM)
-                oxn.open(fullname + "_TERMIDS", dbtype=bdb.db.DB_BTREE, flags=bdb.db.DB_CREATE, mode=0660)
-                oxn.close()
                 if index.get_setting(session, 'proxVectors'):
                     oxn = bdb.db.DB()
                     oxn.set_flags(bdb.db.DB_RECNUM)
