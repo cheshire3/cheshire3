@@ -255,6 +255,86 @@ class Fimi1PreParser(ARMPreParser):
         return doc
 
 
+class MagicFimi1PreParser(Fimi1PreParser):
+    _possibleSettings = {'minRules' : {'docs' : "", 'type' : int},
+                         'minItemsets' : {'docs' : "", 'type' : int}
+                         }
+
+    def __init__(self, session, config, parent):
+        Fimi1PreParser.__init__(self, session, config, parent)
+        self.minRules = self.get_setting(session, 'minRules', -1)
+        self.minFIS = self.get_setting(session, 'minItemsets', -1)
+
+        if self.minRules > 0 and self.confidence <= 0:
+            raise ConfigFileException("minRules setting not allowed without confidence setting on %s" % (self.id))
+
+    def process_document(self, session, doc):
+        # try to find our best support threshold
+        s = self.get_setting(session, 'support', 12.0)
+        lr = -1
+        lf = -1
+        maxiters = 12
+        iters = 0
+        minRules = self.minRules
+        minFIS = self.minFIS
+
+        while True:
+            iters+=1
+            if iters > maxiters:
+                break
+            lasts = self.support
+            lastlr = lr
+            lastlf = lf
+            self.support = s
+            d2 = Fimi1PreParser.process_document(self, session, doc)
+            (fis, rules) = d2.get_raw(session)
+
+            lr = len(rules)
+            lf = len(fis)
+
+            if minRules != -1:
+                if lr == lastlr:
+                    # keep going back, change didn't make any difference
+                    s = s * 1.5
+                elif lr >= minRules * 2:
+                    # go back
+                    s = (lasts + s) / 2.0
+                elif lr >= minRules:
+                    # stop
+                    break
+                elif lr * 3 < minRules:
+                    # go forward a bit
+                    s = s / 2.0
+                elif lr * 7 < minRules:
+                    # go forward a lot
+                    s = s / 3.0
+                else:
+                    s = s / 1.5
+                if minFIS != -1 and lf > minFIS:
+                    break
+            elif minFIS != -1:
+                if lf == lastlf:
+                    # keep going back, change didn't make any difference
+                    s = s * 1.5
+                elif lf >= minFIS * 2:
+                    # go back
+                    s = (lasts + s) / 2.0
+                elif lf >= minFIS:
+                    # stop
+                    break
+                elif lf * 3 < minFIS:
+                    # go forward a bit
+                    s = s / 2.0
+                elif lf * 7 < minFIS:
+                    # go forward a lot
+                    s = s / 3.0
+                else:
+                    s = s / 1.5
+                if minRules != -1 and lf > minRules:
+                    break
+        
+        return d2
+
 
 class FrequentSet(object):
 
