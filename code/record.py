@@ -413,6 +413,9 @@ class DomRecord(Record):
     def fetch_vector(self, session, index, summary=False):
         return index.indexStore.fetch_vector(session, index, self, summary)
 
+    def fetch_proxVector(self, session, index, elem=-1):
+        return index.indexStore.fetch_proxVector(session, index, self, elem)
+
 
 class MinidomRecord(DomRecord):
     useNamespace = 1
