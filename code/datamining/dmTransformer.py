@@ -147,6 +147,8 @@ class VectorTransformer(Transformer):
                 self.currLabel += 1
                 self.labelMap[l] = self.currLabel
                 l = self.currLabel
+        if l.isdigit():
+            l = long(l)
         data = (l, vhash)
         return StringDocument(data)
 

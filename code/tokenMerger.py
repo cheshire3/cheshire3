@@ -68,28 +68,28 @@ class OffsetProximityTokenMerger(ProximityTokenMerger):
                     x += 1
         return new
         
-class PositionTokenMerger(ProximityTokenMerger):
-    def process_hash(self, session, data):
-        new = {}
-        has = new.has_key
-        for d, val in data.iteritems():
-            if d:
-                x = 0
-                for t in val['text']:
-                    if has(t):
-                        new[t]['occurences'] += 1
-                        try:
-                            new[t]['positions'].extend((val['proxLoc'], x))
-                        except KeyError:
-                            new[t]['positions'].extend(val['positions'])
-                    else:
-                        try:
-                            new[t] = {'text' : t, 'occurences' : 1, 'positions' : [val['proxLoc'],x]}
-                        except KeyError:
-                            new[t] = {'text' : t, 'occurences' : 1,
-                                      'positions' : val['positions']}
-                    x += 1
-        return new
+##class PositionTokenMerger(ProximityTokenMerger):
+##    def process_hash(self, session, data):
+##        new = {}
+##        has = new.has_key
+##        for d, val in data.iteritems():
+##            if d:
+##                x = 0
+##                for t in val['text']:
+##                    if has(t):
+##                        new[t]['occurences'] += 1
+##                        try:
+##                            new[t]['positions'].extend((val['proxLoc'], x))
+##                        except KeyError:
+##                            new[t]['positions'].extend(val['positions'])
+##                    else:
+##                        try:
+##                            new[t] = {'text' : t, 'occurences' : 1, 'positions' : [val['proxLoc'],x]}
+##                        except KeyError:
+##                            new[t] = {'text' : t, 'occurences' : 1,
+##                                      'positions' : val['positions']}
+##                    x += 1
+##        return new
     
 
 
@@ -165,6 +165,8 @@ class ReconstructTokenMerger(SimpleTokenMerger):
         kw = {}
         for (k, val) in data.iteritems():
             pl = val.has_key('charOffsets')
+            # XXX FIX ME for faked offsets
+            pl = 0
             currLen = 0
             new = []
             for (w, word) in enumerate(val['text']):
@@ -172,7 +174,7 @@ class ReconstructTokenMerger(SimpleTokenMerger):
                     new.append('%s%s' % (' ' * (val['charOffsets'][w] - currLen), word))
                     currLen = val['charOffsets'][w] + len(word)
                 else:
-                    new.append('%s%s' % (word, ' '))
+                    new.append('%s ' % (word))
             txt = ''.join(new)
             kval = val.copy()
             kval['text'] = txt
