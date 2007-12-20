@@ -734,12 +734,14 @@ class BdbIndexStore(IndexStore):
         tidcxn = bdb.db.DB()
         dfp = self.get_path(session, 'defaultPath')
         basename = self._generateFilename(index)
+
         dbname = os.path.join(dfp, basename)
         tidcxn.open( dbname + "_TERMIDS")
         self.termIdCxn[index] = tidcxn
-        cxn = bdb.db.DB()
-        cxn.open(dbname + "_VECTORS")
-        self.vectorCxn[index] = cxn
+        if index.get_setting(session, 'vectors'):
+            cxn = bdb.db.DB()
+            cxn.open(dbname + "_VECTORS")
+            self.vectorCxn[index] = cxn
         if index.get_setting(session, 'proxVectors'):
             cxn = bdb.db.DB()
             cxn.open(dbname + "_PROXVECTORS")
