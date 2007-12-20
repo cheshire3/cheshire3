@@ -479,7 +479,7 @@ class SimpleResultSet(RankedResultSet):
             return self
         elif nors == 2 and cql.value in ['or', 'any'] and 0 in lens:
             # A or (empty) == A
-            return others(int(lens[0] != 0))
+            return others[int(lens[0] == 0)]
 
         positions = [0] * nors
         cmpHash = {'<' : [-1],
@@ -1206,7 +1206,7 @@ try:
                 elif sum(lens) == 0:
                     return self
                 elif nors == 2 and cql.value in ['or', 'any'] and 0 in lens:
-                    return others[int(lens[0] != 0)]
+                    return others[int(lens[0] == 0)]
 
                 positions = [0] * nors
                 cmpHash = {'<' : [-1],
