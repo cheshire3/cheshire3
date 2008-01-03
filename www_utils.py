@@ -167,7 +167,7 @@ def html_encode(txt):
 
 def multiReplace(txt, params):
     for k,v in params.iteritems():
-        txt = txt.replace(k,v)
+        txt = txt.replace(k,str(v))
     return txt
 
 #- end multiReplace
