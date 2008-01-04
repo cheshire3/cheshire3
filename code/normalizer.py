@@ -475,6 +475,7 @@ class DiacriticNormalizer(SimpleNormalizer):
         u"\u00E3" : u"\u0061",
         u"\u00E4" : u"\u0061",
         u"\u00E5" : u"\u0061",
+        u"\u00E6" : u"\u0061\u0065",
         u"\u00E7" : u"\u0063",
         u"\u00E8" : u"\u0065",
         u"\u00E9" : u"\u0065",
