@@ -490,6 +490,7 @@ class DiacriticNormalizer(SimpleNormalizer):
         u"\u00F4" : u"\u006F",
         u"\u00F5" : u"\u006F",
         u"\u00F6" : u"\u006F",
+        u"\u00F8" : u"\u006F",
         u"\u00F9" : u"\u0075",
         u"\u00FA" : u"\u0075",
         u"\u00FB" : u"\u0075",
