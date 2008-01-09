@@ -40,8 +40,9 @@ class SimpleNormalizer(Normalizer):
                         except KeyError:
                             pass
                 new.reverse()        
-                d['text'] = new
-                kw[k] = d
+		nd = d.copy()
+		nd['text'] = new
+                kw[k] = nd
                 continue
             else:
                 new = process(session, d['text'])
