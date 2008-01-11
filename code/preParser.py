@@ -75,11 +75,12 @@ class CmdLinePreParser(TypedPreParser):
                 # guess our extn~n
                 suff = mimetypes.guess_extension(doc.mimeType[0])
                 if suff:
-                    (qq, infn) = tempfile.mkstemp("." + suff)
+                    (qq, infn) = tempfile.mkstemp(suff)
                 else:
                     (qq, infn) = tempfile.mkstemp()                    
             else:
                 (qq, infn) = tempfile.mkstemp()
+            os.close(qq)
             fh = file(infn, 'w')
             fh.write(doc.get_raw(session))
             fh.close()
@@ -88,10 +89,11 @@ class CmdLinePreParser(TypedPreParser):
             if self.outMimeType:
                 # guess our extn~n
                 suff = mimetypes.guess_extension(self.outMimeType)
-                (qq, outfn) = tempfile.mkstemp("." + suff)
+                (qq, outfn) = tempfile.mkstemp(suff)
             else:
                 (qq, outfn) = tempfile.mkstemp()
             cmd = cmd.replace("%OUTDOC%", outfn)               
+            os.close(qq)
 
         if stdIn:
             (i,o,e) = os.popen3(cmd)
@@ -105,7 +107,16 @@ class CmdLinePreParser(TypedPreParser):
             result = commands.getoutput(cmd)
             os.remove(infn)
             if not stdOut:
-                fh = file(outfn)
+                if os.path.exists(outfn) and os.path.getsize(outfn) > 0:
+                    fh = file(outfn)
+                else:
+                    # command probably added something to the end
+                    # annoying
+                    matches = glob.glob(outfn + "*")
+                    for m in matches:
+                        if os.path.getsize(m) > 0:
+                            fh = file(m)
+                            break
                 result = fh.read()
                 fh.close()
                 os.remove(outfn)
