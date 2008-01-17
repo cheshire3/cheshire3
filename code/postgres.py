@@ -73,7 +73,7 @@ class PostgresRecordIter(PostgresIter):
         data = d[1]
         data = data.replace('\\000\\001', nonTextToken)
         data = data.replace('\\012', '\n')
-        rec = self.store.process_data(None, d[0], data)
+        rec = self.store._process_data(None, d[0], data)
         return rec
 
 
