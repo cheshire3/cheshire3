@@ -47,7 +47,7 @@ class ProximityTokenMerger(SimpleTokenMerger):
                     else:
                         try:
                             pls = [(pl,x) for pl in val['proxLoc']]
-                            new[t] = {'text' : t, 'occurences' : 1, 'positions' : []}
+                            new[t] = {'text' : t, 'occurences' : len(pls), 'positions' : []}
                             for p in pls:
                                 new[t]['positions'].extend(p)
                         except KeyError:
