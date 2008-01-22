@@ -20,12 +20,31 @@ class VectorTransformer(Transformer):
     _possibleSettings = {'label' : {'docs' : "Label to assign to all records"},
                          'labelXPath'  : {'docs' : "XPath expression to retrieve label from record"},
                          'labelXPathObject'  : {'docs' : "XPath Object to use to retrieve label from record"},
+
                          'minGlobalFreq' : {'docs' : "", 'type' : int},
                          'maxGlobalFreq' : {'docs' : "", 'type' : int},
                          'minGlobalOccs' : {'docs' : "", 'type' : int},
                          'maxGlobalOccs' : {'docs' : "", 'type' : int},
                          'minLocalFreq' : {'docs' : "", 'type' : int},
                          'maxLocalFreq' : {'docs' : "", 'type' : int},
+                         'minGlobalFreqPct' : {'docs' : "", 'type' : float},
+                         'maxGlobalFreqPct' : {'docs' : "", 'type' : float},
+                         'minGlobalOccsPct' : {'docs' : "", 'type' : float},
+                         'maxGlobalOccsPct' : {'docs' : "", 'type' : float},
+                         'minPropGlobalFreqPct' : {'docs' : "", 'type' : float},
+                         'maxPropGlobalFreqPct' : {'docs' : "", 'type' : float},
+                         'minPropGlobalOccsPct' : {'docs' : "", 'type' : float},
+                         'maxPropGlobalOccsPct' : {'docs' : "", 'type' : float},
+                         'minLocalFreqPct' : {'docs' : "", 'type' : float},
+                         'maxLocalFreqPct' : {'docs' : "", 'type' : float},
+                         'maxNGlobalFreq' : {'docs' : "", 'type' : int},
+                         'maxNGlobalOccs' : {'docs' : "", 'type' : int},
+                         'maxNGlobalFreqPct' : {'docs' : "", 'type' : float},
+                         'maxNGlobalOccsPct' : {'docs' : "", 'type' : float},
+                         'minNLocalFreq' : {'docs' : "", 'type' : int},
+                         'maxNLocalFreq' : {'docs' : "", 'type' : int},
+                         
+
                          }
 
     _possiblePaths = {'vectorIndex' : {'docs' : "Index from which to get the vectors"}}
@@ -51,6 +70,31 @@ class VectorTransformer(Transformer):
         self.minLocalFreq = self.get_setting(session, 'minLocalFreq', -1)
         self.maxLocalFreq = self.get_setting(session, 'maxLocalFreq', -1)
 
+        self.minGlobalFreqPct = self.get_setting(session, 'minGlobalFreqPct', -1.0)
+        self.maxGlobalFreqPct = self.get_setting(session, 'maxGlobalFreqPct', -1.0)
+        self.minGlobalOccsPct = self.get_setting(session, 'minGlobalOccsPct', -1.0)
+        self.maxGlobalOccsPct = self.get_setting(session, 'maxGlobalOccsPct', -1.0)
+
+        self.minPropGlobalFreqPct = self.get_setting(session, 'minPropGlobalFreqPct', -1.0)
+        self.maxPropGlobalFreqPct = self.get_setting(session, 'maxPropGlobalFreqPct', -1.0)
+        self.minPropGlobalOccsPct = self.get_setting(session, 'minPropGlobalOccsPct', -1.0)
+        self.maxPropGlobalOccsPct = self.get_setting(session, 'maxPropGlobalOccsPct', -1.0)
+
+        self.minLocalFreqPct = self.get_setting(session, 'minLocalFreqPct', -1.0)
+        self.maxLocalFreqPct = self.get_setting(session, 'maxLocalFreqPct', -1.0)
+
+        self.maxNGlobalFreq = self.get_setting(session, 'maxNGlobalFreq', -1)
+        self.maxNGlobalOccs = self.get_setting(session, 'maxNGlobalOccs', -1)
+        self.maxNGlobalFreq = self.get_setting(session, 'maxNGlobalFreqPct', -1.0)
+        self.maxNGlobalOccs = self.get_setting(session, 'maxNGlobalOccsPct', -1.0)
+        self.minNLocalFreq = self.get_setting(session, 'minNLocalFreq', -1)
+        self.maxNLocalFreq = self.get_setting(session, 'maxNLocalFreq', -1)
+
+        self.idxMetadata = self.vectorIndex.fetch_metadata(session)
+
+        db = session.server.get_object(session, session.database)
+        self.totalRecords = db.totalRecords
+        
         self.clear(session)
 
 
@@ -75,7 +119,7 @@ class VectorTransformer(Transformer):
             # record is empty
             return StringDocument([None, {}])
             
-        # load thresholds from self
+        # load absolute thresholds
         # note that thresholds may also be set on index
         minLf = self.minLocalFreq
         maxLf = self.maxLocalFreq
@@ -84,7 +128,34 @@ class VectorTransformer(Transformer):
         minGo = self.maxGlobalOccs
         maxGo = self.maxGlobalOccs
 
-        # first pass on locals (v fast)
+        # term occs as percentage of tokens in record
+        minLfP = self.minLocalFreqPct
+        maxLfP = self.maxLocalFreqPct
+        # term total recs as percentage of total recs in db
+        minGfP = self.minGlobalFreqPct
+        maxGfP = self.maxGlobalFreqPct
+        # term total occs as percentage of total occs in db
+        minGoP = self.maxGlobalOccsPct
+        maxGoP = self.maxGlobalOccsPct
+        # term total recs as percentage of max total recs
+        minPGfP = self.minPropGlobalFreqPct
+        maxPGfP = self.maxPropGlobalFreqPct
+        # term total occs as percentage of max total occs
+        minPGoP = self.minPropGlobalOccsPct
+        maxPGoP = self.maxPropGlobalOccsPct
+
+        # maxN == discard above N, minN == discard below N
+        # for below, will discard all at same freq
+        minNLf = self.minNLocalFreq
+        maxNLf = self.maxNLocalFreq
+        maxNGf = self.maxNGlobalFreq
+        maxNGo = self.maxNGlobalOccs
+        # and as a percentage of nTerms in index
+        maxNGfP = self.maxNGlobalFreqPct
+        maxNGoP = self.maxNGlobalOccsPct
+
+
+        # first pass on locals (fast)
         if minLf != -1 or maxLf != -1:
             if minLf != -1 and maxLf != -1:
                 v = [x for x in v if (x[1] >= minLf and x[1] <= maxLf)]
@@ -93,8 +164,65 @@ class VectorTransformer(Transformer):
             else:
                 v = [x for x in v if x[1] >= minLf]
 
+        if minLfP != -1.0 or maxLfP != -1.0:
+            # local record percentage
+            total = sum([x[1] for x in v])
+            minThresh = total * (minLfP/100)
+            maxThresh = total * (maxLfP/100)
+            if minThresh > 0 and maxThresh > 0:
+                v = [x for x in v if (x[1] >= minThresh and x[1] <= maxThresh)]
+            elif maxThresh > 0:
+                v = [x for x in v if (x[1] <= maxThresh)]
+            else:
+                v = [x for x in v if (x[1] >= minThresh)]
+
+        if minNLf != -1 or maxNLf != -1:
+            # discard top/bottom N values
+            v.sort(key=lambda x: x[1])
+            if maxNLf != -1:
+                v = v[maxNLf:]
+            if minNLf != -1:
+                minThresh = v[2][minNLf][1]                
+                v = v[:0-minNLf]
+                while v and v[-1][1] == minThresh:
+                    v.pop(-1)
+            v.sort(key=lambda x: x[0])
+
         # now check globals (v slow)
-        if minGf != -1 or maxGf != -1 or minGo != -1 or maxGo != -1:
+
+        if maxNGf != -1 or maxNGo != -1 or maxNGfP != -1 or maxNGoP != -1:
+            discard = []
+            # minNG* is meaningless. just discard count=1 or count=2
+            if maxNGf != -1:
+                # fetch maxNGf from top of rec freq list 
+                tfs = self.vectorIndex.fetch_termFrequencies(session, mType='rec',
+                                                             nTerms=maxNGf)
+                discard.extend([x[2] for x in tfs])
+            if maxNGo != -1:
+                tfs = self.vectorIndex.fetch_termFrequencies(session, mType='occ',
+                                                             nTerms=maxNGo)
+                discard.extend([x[2] for x in tfs])
+            if maxNGfP != -1:
+                # percentage of total nTerms in index
+                n = self.idxMetadata['nterms'] * (maxNGfP/100.0)
+                tfs = self.vectorIndex.fetch_termFrequencies(session, mType='rec',
+                                                             nTerms =n)
+                discard.extend([x[2] for x in tfs])
+            if maxNGoP != -1:
+                # percentage of total nTerms in index
+                n = self.idxMetadata['nterms'] * (maxNGoP/100.0)
+                tfs = self.vectorIndex.fetch_termFrequencies(session, mType='rec',
+                                                             nTerms =n)
+                discard.extend([x[2] for x in tfs])
+                
+
+            v = [x for x in v if not x[0] in discard]
+
+
+
+        allthresh = [minGf, maxGf, minGo, maxGo, minGfP, maxGfP, minGoP, maxGoP]
+
+        if sum(allthresh) != -8:
             # fetch term from termid, fetch stats from index
             nv = []
             for x in v:
@@ -109,16 +237,40 @@ class VectorTransformer(Transformer):
                     if tdocs > 2:
                         # only cache if going to look up more than twice anyway
                         self.termInfoCache[x[0]] = (tdocs, toccs)
-                if ( (minGf == -1 or tdocs >= minGf) and
-                     (maxGf == -1 or tdocs <= maxGf) and
-                     (minGo == -1 or toccs >= minGo) and
-                     (maxGo == -1 or toccs <= maxGo)):
+
+                okay = 1
+                if minGf != -1 and tdocs < minGf:
+                    okay = 0
+                elif maxGf != -1 and tdocs > maxGf:
+                    okay = 0
+                elif minGo != -1 and toccs < minGo:
+                    okay = 0
+                elif maxGo != -1 and toccs > maxGo:
+                    okay = 0
+                elif minGfP != -1 and tdocs < self.totalRecords * (minGfP/100):
+                    okay = 0
+                elif maxGfP != -1 and tdocs > self.totalRecords * (maxGfP/100):
+                    okay = 0
+                elif minPGfP != -1 and tdocs < self.idxMetadata['maxRecs'] * (minPGfP/100):
+                    okay = 0
+                elif maxPGfP != -1 and tdocs > self.totalRecords['maxRecs'] * (maxPGfP/100):
+                    okay = 0
+                elif minGoP != -1 and toccs < self.idxMetadata['nOccs'] * (minGoP/100):
+                    okay = 0
+                elif maxGoP != -1 and toccs > self.idxMetadata['nOccs'] * (maxGoP/100):
+                    okay = 0
+                elif minPGoP != -1 and toccs < self.idxMetadata['maxOccs'] * (minPGoP/100):
+                    okay = 0
+                elif maxPGoP != -1 and toccs > self.idxMetadata['maxOccs'] * (maxPGoP/100):
+                    okay = 0
+
+                if okay:
                     nv.append(x)
             v = nv
 
-        # now convert to {}
-        # Slow: [vhash.__setitem__(x[0], x[1]) for x in v]
+        # Phew!
 
+        # now convert to {}
         vhash = {}
         vhash.update(v)
 
