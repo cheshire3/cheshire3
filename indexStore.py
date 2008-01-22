@@ -409,6 +409,7 @@ class BdbIndexStore(IndexStore):
         # Original terms from data
         return self.commit_centralIndexing(session, index, sorted)
 
+
     def commit_centralIndexing(self, session, index, filePath):
         p = self.permissionHandlers.get('info:srw/operation/2/index', None)
         if p:
@@ -477,6 +478,8 @@ class BdbIndexStore(IndexStore):
         nRecs = 0
         nOccs = 0
         totalChars = 0
+        maxNRecs = 0
+        maxNOccs = 0
         
         start = time.time()
         while(l):
@@ -517,6 +520,8 @@ class BdbIndexStore(IndexStore):
                     nRecs += totalRecs
                     nOccs += totalOccs
                     totalChars += len(currTerm)
+                    maxNRecs = max(maxNRecs, totalRecs)
+                    maxNOccs = max(maxNOccs, totalOccs)
                     cxn.put(currTerm, packed)
                     if vectors or termIds:
                         tidcxn.put("%012d" % termid, currTerm)
@@ -539,8 +544,8 @@ class BdbIndexStore(IndexStore):
         os.remove(filePath)
 
         if metadataCxn:
-            # LLLL:  nTerms, nRecs, nOccs, totalChars
-            val = struct.pack("LLLL", nTerms, nRecs, nOccs, totalChars)
+            # LLLLLL:  nTerms, nRecs, nOccs, maxRecs, maxOccs, totalChars
+            val = struct.pack("LLLLLL", nTerms, nRecs, nOccs, maxNRecs, maxNOccs, totalChars)
             metadataCxn.put(index.id.encode('utf8'), val)
             self._closeMetadata(session)
 
@@ -917,7 +922,9 @@ class BdbIndexStore(IndexStore):
         cxn = self._openMetadata(session)
         data = cxn.get(index.id.encode('utf-8'))
         if data:
-            vals = struct.unpack('LLLL', data)
+            # LLLLLL:  nTerms, nRecs, nOccs, maxRecs, maxOccs, totalChars
+            vals = struct.unpack('LLLLLL', data)
+            return dict(zip(('nTerms', 'nRecs', 'nOccs', 'maxRecs', 'maxOccs', 'totalChars'), vals))
             return vals
         else:
             return []
@@ -1369,18 +1376,15 @@ class BdbIndexStore(IndexStore):
         if summary:
             dataLen = index.longStructSize * self.reservedLongs
             val = cxn.get(term, doff=0, dlen=dataLen)
+
         elif (start != 0 or numReq != 0) and index.canExtractSection:
             # try to extract only section...
-
             fulllen = cxn.get_size(term)
             offsets = index.calc_sectionOffsets(session, start, numReq, fulllen)
-
             if not numReq:
                 numReq = 100
 
-
             # XXX this should be on index somewhere!!
-
             # first get summary
             vals = []
             dataLen = index.longStructSize * self.reservedLongs
