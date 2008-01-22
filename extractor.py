@@ -31,11 +31,15 @@ class SimpleExtractor(Extractor):
         for k in b.iterkeys():
             try:
                 a[k]['occurences'] += b[k]['occurences']
-                try:
+                try: 
+                    # XXX Is this meaningful? Yes if extractor in chain
                     a[k]['positions'].extend(b[k]['positions'])
                 except:
-                    # Non prox
-                    pass
+                    try:
+                        a[k]['proxLoc'].extend(b[k]['proxLoc'])
+                    except:
+                        # Non prox
+                        pass
             except:
                 a[k] = b[k]
         return a
@@ -68,7 +72,7 @@ class SimpleExtractor(Extractor):
 
     def process_string(self, session, data):
         # Accept just text and extract bits from it.
-        return {data: {'text' : data, 'occurences' : 1, 'proxLoc' : -1}}
+        return {data: {'text' : data, 'occurences' : 1, 'proxLoc' : [-1]}}
 
 
     def _getProxLocNode(self, session, node):
@@ -102,8 +106,7 @@ class SimpleExtractor(Extractor):
             lno = self._getProxLocNode(session, data)
         else:
             lno = -1
-
-        return {txt : {'text' : txt, 'occurences' : 1, 'proxLoc' : lno}}
+        return {txt : {'text' : txt, 'occurences' : 1, 'proxLoc' : [lno]}}
 
 
     def _getProxLocEventList(self, session, events):
@@ -129,7 +132,7 @@ class SimpleExtractor(Extractor):
             lno = self._getProxLocEventList(session, data)
         else:
             lno = -1
-        return {txt:{'text' : txt, 'occurences' : 1, 'proxLoc' : lno}}
+        return {txt:{'text' : txt, 'occurences' : 1, 'proxLoc' : [lno]}}
 
 
     def process_xpathResult(self, session, data):
