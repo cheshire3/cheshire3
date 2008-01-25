@@ -1066,7 +1066,7 @@ class BdbIndexStore(IndexStore):
             else:
                 cxn.open(fullname)
             self.sortStoreCxn[index] = cxn
-        return cxn.get(repr(item))
+        return cxn.get("%s/%s" % (str(rec.recordStore), rec.id))
 
     def store_terms(self, session, index, terms, rec):
         # Store terms from hash
