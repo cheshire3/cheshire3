@@ -66,10 +66,15 @@ class OffsetProximityTokenMerger(ProximityTokenMerger):
                 posns = val.get('charOffsets', [])
                 for t in val['text']:
                     if has(t):
-                        new[t]['occurences'] += 1
-                        new[t]['positions'].extend((val['proxLoc'], x, posns[x]))
+                        new[t]['occurences'] += val['occurences']
                     else:
-                        new[t] = {'text' : t, 'occurences' : 1, 'positions' : [val['proxLoc'],x, posns[x]]}
+                        new[t] = {'text' : t, 'occurences' : val['occurences'], 'positions' : []}
+                    try:
+                        pls =[(pl,x) for pl in val['proxLoc']]
+                        for p in pls:
+                            new[t]['positions'].extend(p)
+                    except KeyError:
+                        new[t]['positions'].extend(val['positions'])
                     x += 1
         return new
         
