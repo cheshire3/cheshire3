@@ -70,7 +70,7 @@ class OffsetProximityTokenMerger(ProximityTokenMerger):
                     else:
                         new[t] = {'text' : t, 'occurences' : val['occurences'], 'positions' : []}
                     try:
-                        pls =[(pl,x) for pl in val['proxLoc']]
+                        pls =[(pl,x, posns[x]) for pl in val['proxLoc']]
                         for p in pls:
                             new[t]['positions'].extend(p)
                     except KeyError:
