@@ -57,6 +57,9 @@ class SimpleNormalizer(Normalizer):
                         try:
                             kw[txt]['positions'].extend(nv['positions'])
                         except: pass
+                        try:
+                            kw[txt]['proxLoc'].extend(nv['proxLoc'])
+                        except: pass
                     else:
                         kw[txt] = nv
             else:
@@ -66,10 +69,16 @@ class SimpleNormalizer(Normalizer):
                         try:
                             kw[new]['positions'].extend(d['positions'])
                         except: pass
+                        try:
+                            kw[new]['proxLoc'].extend(d['proxLoc'])
+                        except: pass
                     except KeyError:
                         d = d.copy()
                         try:
                             d['positions'] = d['positions'][:]
+                        except: pass
+                        try:
+                            d['proxLoc'] = d['proxLoc'][:]
                         except: pass
                         d['text'] = new
                         kw[new] = d
@@ -187,6 +196,19 @@ class NumericEntityNormalizer(SimpleNormalizer):
 
 # Non useful characters (Stripper)
 # self.asciiRe = re.compile('["%#@~!*{}]')
+
+class PointlessCharacterNormalizer(SimpleNormalizer):
+    def process_string(self, session, data):
+        t = data.replace(u'\ufb00', 'ff')
+        t = t.replace(u'\ufb01', 'fi')
+        t = t.replace(u'\xe6', 'fi')
+        t = t.replace(u'\ufb02', 'fl')
+        t = t.replace(u'\u201c', '"')
+        t = t.replace(u'\u201d', '"')
+        t = t.replace(u'\u2019', "'")
+        t = t.replace(u'\u2026', " ")
+        return t
+    
 
 class RegexpNormalizer(SimpleNormalizer):
     """ Either strip, replace or keep data which matches a given regular expression """
