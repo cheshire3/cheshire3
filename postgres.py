@@ -3,6 +3,7 @@ from c3errors import *
 from configParser import C3Object
 from baseStore import SimpleStore
 from recordStore import SimpleRecordStore
+from documentStore import SimpleDocumentStore
 from resultSet import SimpleResultSetItem
 from documentFactory import BaseDocumentStream, SimpleDocumentFactory
 from resultSetStore import SimpleResultSetStore
@@ -75,6 +76,15 @@ class PostgresRecordIter(PostgresIter):
         data = data.replace('\\012', '\n')
         rec = self.store._process_data(None, d[0], data)
         return rec
+    
+class PostgresDocumentIter(PostgresIter):
+    # Get data from bdbIter and turn into document
+
+    def next(self):
+        d = PostgresIter.next(self)
+        data = d[1]
+        doc = self.store._process_data(None, d[0], data)
+        return doc
 
 
 # Idea is to take the results of an SQL search and XMLify them into documents.
@@ -407,6 +417,16 @@ class PostgresRecordStore(PostgresStore, SimpleRecordStore):
     def __iter__(self):
         # Return an iterator object to iter through
         return PostgresRecordIter(self)
+
+
+class PostgresDocumentStore(PostgresStore, SimpleDocumentStore):
+    def __init__(self, session, node, parent):
+        SimpleDocumentStore.__init__(self, session, node, parent)
+        PostgresStore.__init__(self, session, node, parent)
+        
+    def __iter__(self):
+        # Return an iterator object to iter through
+        return PostgresDocumentIter(self)
 
 
 
