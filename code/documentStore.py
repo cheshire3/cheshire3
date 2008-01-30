@@ -116,8 +116,26 @@ class SimpleDocumentStore(DocumentStore):
         if isinstance(id, StringDocument):
             id = id.id
         self.delete_data(session, id)
+        
+              
+    def _process_data(self, session, id, data, preParser=None):
+        # Split from fetch record for Iterators
+        if (preParser != None):
+            doc = StringDocument(data)
+            doc = preParser.process_document(session, doc)
+        elif (self.outPreParser != None):
+            doc = StringDocument(data)
+            doc = self.outPreParser.process_document(session, doc)
+        elif (self.outWorkflow != None):
+            doc = StringDocument(data)
+            doc = self.outWorkflow.process(session, doc)
+        else:
+            doc = StringDocument(data)
+        # Ensure basic required info
+        doc.id = id
+        doc.documentStore = self.id
+        return doc
     
-
 
 class BdbDocIter(BdbIter):
     def next(self):
