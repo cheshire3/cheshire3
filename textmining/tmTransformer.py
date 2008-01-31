@@ -2,9 +2,12 @@
 import os, re
 from utils import getFirstData, elementType, verifyXPaths
 
+from lxml import etree
+
 from TsujiiC3 import TsujiiObject
 from baseObjects import Transformer
 from document import StringDocument
+from  xml.sax.saxutils import escape
 
 class PosTransformer(Transformer):
     pass
