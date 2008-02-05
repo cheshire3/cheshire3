@@ -85,12 +85,17 @@ class SimpleWorkflow(Workflow):
                     sub = self._handleFlow(c)
                     for s in sub:
                         code.append("    " + s)
+                elif n == "else":
+                    code.append("else:")
+                    sub = self._handleFlow(c)
+                    for s in sub:
+                        code.append("    " + s)
                 elif n == "break":
                     code.append("break")
                 elif n == "continue":
                     code.append("continue")
                 elif n == "return":
-                    code.append("return")
+                    code.append("return input")
                 elif n == "raise":
                     code.append("raise")
                 elif n == "assign":
