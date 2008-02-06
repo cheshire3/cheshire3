@@ -306,6 +306,9 @@ class SimpleIndex(Index):
 
 
     def clear(self, session):
+        if not self.indexStore:
+            self.indexStore = self.get_path(session, 'indexStore')
+
         self.indexStore.clear_index(session, self)
         
 

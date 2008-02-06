@@ -1028,9 +1028,13 @@ class BdbIndexStore(IndexStore):
 
 
     def clear_index(self, session, index):
-        cxn = self._openIndex(session, index)
-        cxn.truncate()
-        self._closeIndex(session, index)
+        try:
+            cxn = self._openIndex(session, index)
+        except bdb.db.DBNoSuchFileError:
+            pass # no file...maybe ClusterExtractionIndex?
+        else:
+            cxn.truncate()
+            self._closeIndex(session, index)
         
 
     def delete_index(self, session, index):
