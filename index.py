@@ -304,6 +304,11 @@ class SimpleIndex(Index):
         for s in stores:
             s.commit_indexing(session, self)
 
+
+    def clear(self, session):
+        self.indexStore.clear_index(session, self)
+        
+
     def search(self, session, clause, db):
         # Final destination. Process Term.
         p = self.permissionHandlers.get('info:srw/operation/2/search', None)

@@ -67,7 +67,7 @@ class SimpleDatabase(SummaryObject, Database):
                                 self.indexes[id] = o
 
     def _cacheProtocolMaps(self, session):
-        for id in self.protocolMapConfigs.keys():
+        for id in self.protocolMapConfigs.iterkeys():
             pm = self.get_object(session, id)
             self.protocolMaps[pm.protocol] = pm
 
@@ -89,11 +89,10 @@ class SimpleDatabase(SummaryObject, Database):
         self.accumulate_metadata(session, rec)
         return rec
 
-
     def index_record(self, session, rec):        
         if not self.indexes:
             self._cacheIndexes(session)
-        for idx in self.indexes.values():
+        for idx in self.indexes.itervalues():
             if not idx.get_setting(session, 'noIndexDefault', 0):
                 idx.index_record(session, rec)
         return rec
@@ -112,7 +111,7 @@ class SimpleDatabase(SummaryObject, Database):
     def unindex_record(self, session, rec):
         if not self.indexes:
             self._cacheIndexes(session)
-        for idx in self.indexes.values():
+        for idx in self.indexes.itervalues():
             if not idx.get_setting(session, 'noUnindexDefault', 0):
                 idx.delete_record(session, rec)
         return None       
@@ -120,13 +119,22 @@ class SimpleDatabase(SummaryObject, Database):
     def begin_indexing(self, session):
         if not self.indexes:
             self._cacheIndexes(session)
-        for idx in self.indexes.values():
+        for idx in self.indexes.itervalues():
             idx.begin_indexing(session)
         return None
 
     def commit_indexing(self, session):
-        for idx in self.indexes.values():
+        for idx in self.indexes.itervalues():
             idx.commit_indexing(session)
+        return None
+
+
+    def clear_indexes(self, session):
+        if not self.indexes:
+            self._cacheIndexes(session)
+        for idx in self.indexes.itervalues():
+            idx.clear(session)
+        
         return None
 
     def _search(self, session, query):
@@ -198,9 +206,9 @@ class SimpleDatabase(SummaryObject, Database):
             rs = self._search(session, query)
         # now do top level stuff, like sort
         if rs.relevancy:
-	    rs.scale_weights()
+            rs.scale_weights()
             rs.order(session, "weight")
-	else:
+        else:
             # check query for sort
             pass
         query.resultSet = rs
@@ -227,7 +235,6 @@ class SimpleDatabase(SummaryObject, Database):
     def sort(self, session, resultSets, sortKeys):
         # XXX Needed for Z sorts by index
         raise NotImplementedError("Please Implement Me!")
-
 
     def reindex(self, session):
         # XXX Implement!
@@ -377,6 +384,4 @@ class OptimisingDatabase(SimpleDatabase):
             pass
         query.resultSet = rs
         return rs
-            
-    
-
+        

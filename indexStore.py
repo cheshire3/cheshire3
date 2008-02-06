@@ -448,7 +448,7 @@ class BdbIndexStore(IndexStore):
                 # okay, no termid hash. hope for best with final set
                 # of terms from regular index
                 (term, value) = cursor.last(doff=0, dlen=12)
-                (last, x,y) = index.deserialize_term(session, value)                    
+                (last, x,y) = index.deserialize_term(session, value)
             else:
                 tidcursor = tidcxn.cursor()
                 (finaltid, term) = tidcursor.last()
@@ -1027,10 +1027,11 @@ class BdbIndexStore(IndexStore):
         return 1
 
 
-    def clean_index(self, session, index):
+    def clear_index(self, session, index):
         cxn = self._openIndex(session, index)
         cxn.truncate()
         self._closeIndex(session, index)
+        
 
     def delete_index(self, session, index):
         # Send Index object to delete, null return
@@ -1050,7 +1051,7 @@ class BdbIndexStore(IndexStore):
         return 1
 
         
-    def fetch_sortValue(self, session, index, item):
+    def fetch_sortValue(self, session, index, rec):
         if (self.sortStoreCxn.has_key(index)):
             cxn = self.sortStoreCxn[index]
         else:
