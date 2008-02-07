@@ -531,7 +531,6 @@ class BdbIndexStore(IndexStore):
                     maxNOccs = max(maxNOccs, totalOccs)
                     cxn.put(currTerm, packed)
                     if (vectors or termIds) and tempTermId == termid:
-                        print "Storing %s --> %s" % (termid, currTerm)
                         tidcxn.put("%012d" % termid, currTerm)
                 # assign new line
                 try:
