@@ -1070,6 +1070,7 @@ class BdbIndexStore(IndexStore):
             
             cxn.truncate()
             cxn.close()
+        return Nonee
 
 
     def delete_index(self, session, index):
@@ -1081,12 +1082,10 @@ class BdbIndexStore(IndexStore):
             okay = p.hasPermission(session, session.user)
             if not okay:
                 raise PermissionException("Permission required to delete index from %s" % self.id)
-        dfp = self.get_path(session, "defaultPath")
-        name = self._generateFilename(index)
-        try:
-            os.remove(os.path.join(dfp, name))
-        except:
-            raise FileDoesNotExistException(dfp)
+        
+        for dbname in self._listExistingFiles(session, index):
+            os.remove(dbname)
+
         return 1
 
         
