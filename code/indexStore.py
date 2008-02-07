@@ -4,7 +4,7 @@ from configParser import C3Object
 from c3errors import ConfigFileException, FileDoesNotExistException
 from resultSet import SimpleResultSetItem
 from index import *
-import os, types, struct, sys, commands, time
+import os, types, struct, sys, commands, time, glob
 try:
     # Python 2.3 vs 2.2
     import bsddb as bdb
@@ -166,11 +166,17 @@ class BdbIndexStore(IndexStore):
                 cxn.open(dbname)
             self.indexCxn[index] = cxn
             return cxn
-        
+
 
     def _generateFilename(self, index):
         stuff = [self.id, "--", index.id, ".index"]
         return ''.join(stuff)
+    
+    
+    def _listExistingFiles(self, session, index):
+        dfp = self.get_path(session, "defaultPath")
+        name = self._generateFilename(index)
+        return glob.glob(os.path.join(dfp, name + '*'))
 
 
     def _get_internalId(self, session, rec):
@@ -737,6 +743,16 @@ class BdbIndexStore(IndexStore):
             self._closeIndex(session, index)
 
         return None
+    
+    
+    def _closeVectors(self, session, index):
+        for cxnx in [self.termIdCxn, self.vectorCxn, self.proxVectorCxn]:
+            try: 
+                cxnx[index].close()
+            except KeyError:
+                continue
+
+            del cxnx[index]
 
 
     def _openVectors(self, session, index):
@@ -858,6 +874,14 @@ class BdbIndexStore(IndexStore):
             return ""
         else:
             return data
+
+
+    def _closeTermFreq(self, session, index, which):
+        try: cxns = self.termFreqCxn[index]
+        except KeyError: return
+        try: cxns[which].close()
+        except KeyError: return
+        del self.termFreqCxn[index][which]
 
 
     def _openTermFreq(self, session, index, which):
@@ -988,10 +1012,10 @@ class BdbIndexStore(IndexStore):
         vecs = index.get_setting(session, "vectors")
         tids = index.get_setting(session, "termIds")
         if vecs or tids:
-                oxn = bdb.db.DB()
-                oxn.set_flags(bdb.db.DB_RECNUM)
-                oxn.open(fullname + "_TERMIDS", dbtype=bdb.db.DB_BTREE, flags=bdb.db.DB_CREATE, mode=0660)
-                oxn.close()
+            oxn = bdb.db.DB()
+            oxn.set_flags(bdb.db.DB_RECNUM)
+            oxn.open(fullname + "_TERMIDS", dbtype=bdb.db.DB_BTREE, flags=bdb.db.DB_CREATE, mode=0660)
+            oxn.close()
 
         if vecs:
             try:
@@ -1032,13 +1056,21 @@ class BdbIndexStore(IndexStore):
 
 
     def clear_index(self, session, index):
-        try:
-            cxn = self._openIndex(session, index)
-        except bdb.db.DBNoSuchFileError:
-            pass # no file...maybe ClusterExtractionIndex?
-        else:
+        self._closeIndex(session, index)
+        self._closeVectors(session, index)
+        self._closeTermFreq(session, index, 'rec')
+        self._closeTermFreq(session, index, 'occ')
+        for dbname in self._listExistingFiles(session, index):
+            cxn = bdb.db.DB()
+            #cxn.set_flags(bdb.db.DB_RECNUM)
+            if session.environment == "apache":
+                cxn.open(dbname, flags=bdb.db.DB_NOMMAP)
+            else:
+                cxn.open(dbname)
+            
             cxn.truncate()
-            self._closeIndex(session, index)
+            cxn.close()
+
 
     def delete_index(self, session, index):
         # Send Index object to delete, null return
