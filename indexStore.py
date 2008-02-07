@@ -448,13 +448,16 @@ class BdbIndexStore(IndexStore):
                 # okay, no termid hash. hope for best with final set
                 # of terms from regular index
                 (term, value) = cursor.last(doff=0, dlen=12)
-                (last, x,y) = index.deserialize_term(session, value)
+                (last, x,y) = index.deserialize_term(session, value)                    
             else:
                 tidcursor = tidcxn.cursor()
                 (finaltid, term) = tidcursor.last()
                 last = long(finaltid)
-            termid = last +1
-            
+                tidcxn.close()
+                del tidcxn
+                self.termIdCxn[index] = None
+            termid = last
+
         currTerm = None
         currData = []
         l = 1
@@ -471,7 +474,7 @@ class BdbIndexStore(IndexStore):
         dbname = os.path.join(dfp, basename)
         if vectors or termIds:
             tidcxn = bdb.db.DB()
-            tidcxn.open( dbname + "_TERMIDS")
+            tidcxn.open(dbname + "_TERMIDS")
         
 
         nTerms = 0
@@ -501,14 +504,18 @@ class BdbIndexStore(IndexStore):
                         val = cxn.get(currTerm)
                         if (val != None):
                             unpacked = s2t(session, val)
+                            tempTermId = unpacked[0]
                             unpacked = mt(session, unpacked, currData, 'add', nRecs=totalRecs, nOccs=totalOccs)
                             totalRecs = unpacked[1]
                             totalOccs = unpacked[2]
                             unpacked = unpacked[3:]
+                            termid -= 1
                         else:
+                            tempTermId = termid
                             unpacked = currData
-                        packed = t2s(session, termid, unpacked, nRecs=totalRecs, nOccs=totalOccs)                        
+                        packed = t2s(session, tempTermId, unpacked, nRecs=totalRecs, nOccs=totalOccs)
                     else:
+                        tempTermId = termid
                         try:
                             packed = t2s(session, termid, currData, nRecs=totalRecs, nOccs=totalOccs)
                         except:
@@ -523,16 +530,14 @@ class BdbIndexStore(IndexStore):
                     maxNRecs = max(maxNRecs, totalRecs)
                     maxNOccs = max(maxNOccs, totalOccs)
                     cxn.put(currTerm, packed)
-                    if vectors or termIds:
+                    if (vectors or termIds) and tempTermId == termid:
+                        print "Storing %s --> %s" % (termid, currTerm)
                         tidcxn.put("%012d" % termid, currTerm)
                 # assign new line
                 try:
                     totalOccs = fullinfo[2]
-                    if tidIdx:
-                        otid = self.fetch_term(session, tidIdx, currTerm, summary=True)
-                        termid = otid[0]
-                    else:
-                        termid += 1
+                    # we'll decrement if we already exist
+                    termid += 1
                     currTerm = term
                     currData = fullinfo
                     totalRecs = 1
@@ -1035,7 +1040,6 @@ class BdbIndexStore(IndexStore):
         else:
             cxn.truncate()
             self._closeIndex(session, index)
-        
 
     def delete_index(self, session, index):
         # Send Index object to delete, null return
