@@ -1,4 +1,4 @@
- 
+  
 from baseObjects import IndexStore, Database
 from configParser import C3Object
 from c3errors import ConfigFileException, FileDoesNotExistException
@@ -1070,7 +1070,7 @@ class BdbIndexStore(IndexStore):
             
             cxn.truncate()
             cxn.close()
-        return Nonee
+        return None
 
 
     def delete_index(self, session, index):
@@ -1106,6 +1106,7 @@ class BdbIndexStore(IndexStore):
                 cxn.open(fullname)
             self.sortStoreCxn[index] = cxn
         return cxn.get("%s/%s" % (str(rec.recordStore), rec.id))
+
 
     def store_terms(self, session, index, terms, rec):
         # Store terms from hash
