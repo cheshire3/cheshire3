@@ -1,10 +1,12 @@
 
-__all__ = ['TsujiiC3', 'tmNormalizer', 'tmPreParser', 'tmTransformer', 'tmTokenizer', 'tmExtractor']
+__all__ = ['TsujiiC3', 'tmDocumentFactory', 'tmExtractor', 'tmNormalizer', 'tmPreParser', 'tmTokenizer', 'tmTokenMerger', 'tmTransformer']
 
 from TsujiiC3 import *
 
+import textmining.tmDocumentFactory
+import textmining.tmExtractor
 import textmining.tmNormalizer
 import textmining.tmPreParser
-import textmining.tmTransformer
 import textmining.tmTokenizer
-import textmining.tmExtractor
+import textmining.tmTokenMerger
+import textmining.tmTransformer
