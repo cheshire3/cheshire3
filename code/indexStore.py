@@ -1,7 +1,7 @@
   
 from baseObjects import IndexStore, Database
 from configParser import C3Object
-from c3errors import ConfigFileException, FileDoesNotExistException
+from c3errors import ConfigFileException, FileDoesNotExistException, FileAlreadyExistsException
 from resultSet import SimpleResultSetItem
 from index import *
 import os, types, struct, sys, commands, time, glob
@@ -978,6 +978,22 @@ class BdbIndexStore(IndexStore):
         dfp = self.get_path(session, "defaultPath")
         name = self._generateFilename(index)
         return os.path.exists(os.path.join(dfp, name))
+    
+    
+    def _create_indexFile(self, dbname, flags=[]):
+        # for use by self.create_index
+        if os.path.exists(dbname):
+            raise FileAlreadyExistsException(dbname)
+        cxn = bdb.db.DB()
+        for f in flags:
+            cxn.set_flags(f)
+        try:
+            cxn.open(dbname, dbtype=bdb.db.DB_BTREE, flags=bdb.db.DB_CREATE, mode=0660)
+        except:
+            raise ConfigFileException(dbname)
+        else:
+            cxn.close()
+        
 
     def create_index(self, session, index):
         # Send Index object to create, null return
@@ -992,65 +1008,39 @@ class BdbIndexStore(IndexStore):
         dfp = self.get_path(session, "defaultPath")
         name = self._generateFilename(index)
         fullname = os.path.join(dfp, name)
-        if os.path.exists(fullname):
-            raise FileDoesNotExistException(fullname)
-        cxn = bdb.db.DB()
-        try:
-            cxn.open(fullname, dbtype=bdb.db.DB_BTREE, flags=bdb.db.DB_CREATE, mode=0660)
-            cxn.close()
-        except:
-            raise ConfigFileException(fullname)
-
+        try: self._create_indexFile(fullname)
+        except FileAlreadyExistsException: pass
+        
         if (index.get_setting(session, "sortStore")):
-            try:
-                oxn = bdb.db.DB()
-                oxn.open(fullname + "_VALUES", dbtype=bdb.db.DB_BTREE, flags=bdb.db.DB_CREATE, mode=0660)
-                oxn.close()
-            except:
-                raise(ValueError)
-
+            try: self._create_indexFile(fullname + "_VALUES")
+            except FileAlreadyExistsException: pass
+            
         vecs = index.get_setting(session, "vectors")
         tids = index.get_setting(session, "termIds")
         if vecs or tids:
-            oxn = bdb.db.DB()
-            oxn.set_flags(bdb.db.DB_RECNUM)
-            oxn.open(fullname + "_TERMIDS", dbtype=bdb.db.DB_BTREE, flags=bdb.db.DB_CREATE, mode=0660)
-            oxn.close()
+            try: self._create_indexFile(fullname + "_TERMIDS", flags=[bdb.db.DB_RECNUM])
+            except FileAlreadyExistsException: pass
 
         if vecs:
             try:
-                oxn = bdb.db.DB()
-                oxn.set_flags(bdb.db.DB_RECNUM)
-                oxn.open(fullname + "_VECTORS", dbtype=bdb.db.DB_BTREE, flags=bdb.db.DB_CREATE, mode=0660)
-                oxn.close()
+                try: self._create_indexFile(fullname + "_VECTORS", flags=[bdb.db.DB_RECNUM])
+                except FileAlreadyExistsException: pass
 
                 if index.get_setting(session, 'proxVectors'):
-                    oxn = bdb.db.DB()
-                    oxn.set_flags(bdb.db.DB_RECNUM)
-                    oxn.open(fullname + "_PROXVECTORS", dbtype=bdb.db.DB_BTREE, flags=bdb.db.DB_CREATE, mode=0660)
-                    oxn.close()
-                    
+                    try: self._create_indexFile(fullname + "_PROXVECTORS", flags=[bdb.db.DB_RECNUM])
+                    except FileAlreadyExistsException: pass
 
             except:
                 raise(ValueError)
         fl = index.get_setting(session, "freqList", "") 
         if fl:
             if fl.find('rec') > -1: 
-                try:
-                    oxn = bdb.db.DB()
-                    oxn.set_flags(bdb.db.DB_RECNUM)
-                    oxn.open(fullname + "_FREQ_REC", dbtype=bdb.db.DB_BTREE, flags=bdb.db.DB_CREATE, mode=0660)
-                    oxn.close()
-                except:
-                    raise
+                try: self._create_indexFile(fullname + "_FREQ_REC", flags=[bdb.db.DB_RECNUM])
+                except FileAlreadyExistsException: pass
+
             if fl.find('occ') > -1:
-                try:
-                    oxn = bdb.db.DB()
-                    oxn.set_flags(bdb.db.DB_RECNUM)
-                    oxn.open(fullname + "_FREQ_OCC", dbtype=bdb.db.DB_BTREE, flags=bdb.db.DB_CREATE, mode=0660)
-                    oxn.close()
-                except:
-                    raise
+                try: self._create_indexFile(fullname + "_FREQ_OCC", flags=[bdb.db.DB_RECNUM])
+                except FileAlreadyExistsException: pass
 
         return 1
 

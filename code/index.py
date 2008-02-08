@@ -177,7 +177,11 @@ class SimpleIndex(Index):
 
         if (iStore == None):
             raise(ConfigFileException("Index (%s) does not have an indexStore." % (self.id)))
-        elif not iStore.contains_index(session, self):
+#        elif not iStore.contains_index(session, self):
+#            iStore.create_index(session, self)
+        # XXX: contains_index unreliable - doesn't check for all necessary files, vectors etc.
+        # iStore.create_index made more thorough, and forgiving - John
+        else:
             iStore.create_index(session, self)
 
         self.resultSetClass = SimpleResultSet
