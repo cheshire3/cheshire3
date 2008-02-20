@@ -367,7 +367,8 @@ class SimpleIndex(Index):
                         maskBase = maskBase.combine(session, maskResultSets, maskClause, db)
                     except:
                         pass
-                    matches.append(maskBase)
+                    else:
+                        matches.append(maskBase)
                     
                 elif (firstMask == 0):
                     # TODO: come up with some way of returning results, even though they're trying to mask the first character
