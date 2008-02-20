@@ -352,9 +352,9 @@ class SimpleIndex(Index):
                         termList =  store.fetch_termList(session, self, startK, 0, '>=')
                     else:
                         termList =  store.fetch_termList(session, self, startK, 0, '>=', end=nextK)
-                    maskBase = SimpleResultSet(session)
-                    maskClause = clause
-                    maskClause.relation.value = 'any'
+                    maskBase = self.resultSetClass(session, [], recordStore=self.recordStore)
+                    maskClause = CQLParser.parse(clause.toCQL())
+                    maskClause.relation.value = u'any'
                     if (firstMask < len(k)-1) or (k[firstMask] in ['?', '^']):
                         # not simply right hand truncation
                         k = self._regexify_wildcards(k)
@@ -363,7 +363,8 @@ class SimpleIndex(Index):
                         termList = filter(lambda t: mymatch(t[0]), termList)
 
                     try:
-                        maskBase = maskBase.combine(session, [self.construct_resultSet(session, t[1], qHash) for t in termList], maskClause, db)
+                        maskResultSets = [self.construct_resultSet(session, t[1], qHash) for t in termList]
+                        maskBase = maskBase.combine(session, maskResultSets, maskClause, db)
                     except:
                         pass
                     matches.append(maskBase)
@@ -720,7 +721,7 @@ class ProximityIndex(SimpleIndex):
 
 
 class RangeIndex(SimpleIndex):
-    """ Need to use a RangeExtractor """
+    """ Need to use a RangeTokenMerger """
     # 1 3 should make 1, 2, 3
     # a c should match a* b* c
     # unsure about this - RangeIndex only necessary for 'encloses' queries - John
