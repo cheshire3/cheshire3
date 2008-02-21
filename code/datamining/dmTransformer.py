@@ -316,8 +316,8 @@ class ArmVectorTransformer(Transformer):
                          'minLocalFreq' : {'docs' : "", 'type' : int},
                          'maxLocalFreq' : {'docs' : "", 'type' : int},
                          'proxElement' : {'docs' : "", 'type' :int, 'options' : '0|1'},
-                         'matchesOnly' : {'docs' : "", 'type' :int, 'options' : '0|1'}
-
+                         'matchesOnly' : {'docs' : "", 'type' :int, 'options' : '0|1'},
+                         'stripMatch' : {'docs' : "", 'type' :int, 'options' : '0|1'}
                          }
     _possiblePaths = {'vectorIndex' : {'docs' : "Index from which to get the vectors"}}
 
@@ -341,6 +341,7 @@ class ArmVectorTransformer(Transformer):
         self.maxLocalFreq = self.get_setting(session, 'maxLocalFreq', -1)
         self.prox = self.get_setting(session, 'proxElement', 0)
         self.matches = self.get_setting(session, 'matchesOnly', 0)
+        self.stripMatch = self.get_setting(session, 'stripMatch', 0)
         self._clear(session)
 
     def _clear(self, session):
@@ -354,7 +355,7 @@ class ArmVectorTransformer(Transformer):
         maxLf = self.maxLocalFreq
         minGf = self.minGlobalFreq
         maxGf = self.maxGlobalFreq
-        minGo = self.maxGlobalOccs
+        minGo = self.minGlobalOccs
         maxGo = self.maxGlobalOccs
 
         # first pass on locals (v fast)
@@ -399,11 +400,27 @@ class ArmVectorTransformer(Transformer):
                 pv = rec.fetch_proxVector(session, self.vectorIndex)
             else:
                 if self.matches:
-                    elems = [x[0][0] for x in rec.proxInfo]
-                    elms = set(elems)
-                    pv = {}
-                    for e in elms:
-                        pv[e] = self.vectorIndex.fetch_proxVector(session, rec, e)
+                    if self.stripMatch:
+                        # this only works if search on same index as vectors
+                        pv = {}
+                        for pi in rec.proxInfo:
+                            elm = pi[0][0]
+                            if not pv.has_key(elm):
+                                pv[elm] = self.vectorIndex.fetch_proxVector(session, rec, elm)
+                            # delete match out of vector
+                            for m in pi:
+                                for pvi in pv[elm]:
+                                    if pvi[0] == m[1]:
+                                        # delete, break
+                                        pv[elm].remove(pvi)
+                                        break
+                                    
+                    else:
+                        elems = [x[0][0] for x in rec.proxInfo]
+                        elms = set(elems)
+                        pv = {}
+                        for e in elms:
+                            pv[e] = self.vectorIndex.fetch_proxVector(session, rec, e)
                 else:
                     pv = self.vectorIndex.fetch_proxVector(session, rec)
             # now map each element to vector format and process
@@ -439,9 +456,207 @@ class ArmVectorTransformer(Transformer):
             if vh:
                 return StringDocument((-1, vh))
             else:
+                return StringDocument((-1, {}))
+
+
+
+
+
+# ----------
+
+class SplitArmVectorTransformer(ArmVectorTransformer):
+    # no classes
+    _possibleSettings = {'splitIds' : {'docs' : 'space separated termids to split on'}}
+    
+    _possiblePaths = {'vectorIndex2' : {'docs' : "Index on which to split"}}
+
+    vectorIndex = None
+    minGlobalFreq = -1
+    maxGlobalFreq = -1
+    minGlobalOccs = -1
+    maxGlobalOccs = -1
+    minLocalFreq = -1
+    miaxLocalFreq = -1
+    termInfoCache = {}
+
+    def __init__(self, session, config, parent):
+        ArmVectorTransformer.__init__(self, session, config, parent)
+        self.vectorIndex2 = self.get_path(session, 'vectorIndex2')
+        tids = self.get_setting(session, 'splitIds', "")
+        self.splitIds = map(int, tids.split(' '))
+        self._clear(session)
+
+    def _clear(self, session):
+        self.termInfoCache = {}
+
+
+    def _processVector(self, session, v):
+        # load thresholds from self
+        # note that thresholds may also be set on index
+        minLf = self.minLocalFreq
+        maxLf = self.maxLocalFreq
+        minGf = self.minGlobalFreq
+        maxGf = self.maxGlobalFreq
+        minGo = self.minGlobalOccs
+        maxGo = self.maxGlobalOccs
+
+        # first pass on locals (v fast)
+        if minLf != -1 or maxLf != -1:
+            if minLf != -1 and maxLf != -1:
+                v = [x for x in v if (x[1] >= minLf and x[1] <= maxLf)]
+            elif minLf == -1:
+                v = [x for x in v if x[1] <= maxLf]
+            else:
+                v = [x for x in v if x[1] >= minLf]
+
+        # now check globals (v slow)
+        if minGf != -1 or maxGf != -1 or minGo != -1 or maxGo != -1:
+            # fetch term from termid, fetch stats from index
+            nv = []
+            for x in v:
+                try:
+                    (tdocs, toccs) = self.termInfoCache[x[0]]
+                except:
+                    term = self.vectorIndex.fetch_termById(session, x[0])
+                    try:
+                        (termId, tdocs, toccs) = self.vectorIndex.fetch_term(session, term, summary=True)
+                    except:
+                        continue
+                    if tdocs > 2:
+                        # only cache if going to look up more than twice anyway
+                        self.termInfoCache[x[0]] = (tdocs, toccs)
+                if ( (minGf == -1 or tdocs >= minGf) and
+                     (maxGf == -1 or tdocs <= maxGf) and
+                     (minGo == -1 or toccs >= minGo) and
+                     (maxGo == -1 or toccs <= maxGo)):
+                    nv.append(x)
+            v = nv
+
+        vhash = {}
+        vhash.update(v)
+        return vhash
+
+    def process_record(self, session, rec):
+        if self.prox:
+            if isinstance(rec, Record):
+                pv = rec.fetch_proxVector(session, self.vectorIndex)
+                pv2 = rec.fetch_proxVector(session, self.vectorIndex2)
+            else:
+                if self.matches:
+                    elems = [x[0][0] for x in rec.proxInfo]
+                    elms = set(elems)
+                    pv = {}
+                    pv2 = {}
+                    for e in elms:
+                        pv[e] = self.vectorIndex.fetch_proxVector(session, rec, e)
+                        pv2[e] = self.vectorIndex2.fetch_proxVector(session, rec, e)
+                else:
+                    pv = self.vectorIndex.fetch_proxVector(session, rec)
+                    pv2 = self.vectorIndex2.fetch_proxVector(session, rec)
+            # now map each element to vector format and process
+
+            splits = self.splitIds
+            hashs = []
+            for (e, pvi2) in pv2.iteritems():
+                try:
+                    pvi = pv[e]
+		    try:
+			pvihash = dict(pvi)
+		    except:
+			# might be triples w/ offset
+			pvi = [(x[0], x[1]) for x in pvi]
+			pvihash = dict(pvi)
+		except KeyError:
+                    # vector in pv is empty
+                    continue
+                v = {}
+                
+                # step through pvi2, find splitId
+                # write from pvi to v
+                for k in pvi2:
+                    if k[1] in splits:
+                        # finish
+                        vec = v.items()
+                        v = {}
+                        vh = self._processVector(session, vec)
+                        if vh:
+                            hashs.append((-1, vh))
+                    elif pvihash.has_key(k[0]):
+                        pvik = pvihash[k[0]]
+                        try:
+                            v[pvik] += 1
+                        except:
+                            v[pvik] = 1
+                
+                # this will catch end of vector
+                vec = v.items()                
+                vh = self._processVector(session, vec)
+                if vh:
+                    hashs.append((-1, vh))            
+            # This won't chain with vector PreParsers yet
+            return StringDocument(hashs)
+        else:
+            raise NotImplementedError()
+            if isinstance(rec, Record):
+                v = rec.fetch_vector(session, self.vectorIndex)
+            else:
+                # performance hack -- given resultSetItem, not record
+                v = self.vectorIndex.fetch_vector(session, rec)
+            try:
+                v = v[2]
+            except:
+                # record is empty
+                return StringDocument((-1, {}))
+            vh  = self._processVector(session, v)
+            if vh:
+                return StringDocument((-1, vh))
+            else:
                 return StrindDocument((-1, {}))
 
-        
+
+# ------------
+
+class WindowArmVectorTransformer(SplitArmVectorTransformer):
+    # no classes
+
+    def __init__(self, session, config, parent):
+        ArmVectorTransformer.__init__(self, session, config, parent)
+        self.window = self.get_setting(session, 'windowSize', 10)
+        self.step = self.get_setting(session, 'stepSize', 10)
+
+    def process_record(self, session, rec):
+
+        n = self.window
+        step = self.step
+        if self.prox:
+            if isinstance(rec, Record):
+                pv = rec.fetch_proxVector(session, self.vectorIndex)
+            else:
+                if self.matches:
+                    elems = [x[0][0] for x in rec.proxInfo]
+                    elms = set(elems)
+                    pv = {}
+                    for e in elms:
+                        pv[e] = self.vectorIndex.fetch_proxVector(session, rec, e)
+                else:
+                    pv = self.vectorIndex.fetch_proxVector(session, rec)
+
+            for pve in pv.itervalues():
+                # split into chunks of size N, overlapping at step
+                for s in range(0, len(pve), step):
+                    chunk = pve[s:s+n]
+                    vec = {}
+                    for c in chunk:
+                        try:
+                            v[c] += 1
+                        except:
+                            v[c] = 1
+                    vh = self._processVector(session, vec)
+                    if vh:
+                        hashs.append((-1, vh))            
+            return StringDocument(hashs)
+        else:
+            raise NotImplementedError()
     
 
 
