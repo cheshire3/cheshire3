@@ -259,9 +259,6 @@ class StemGeniaNormalizer(SimpleNormalizer):
 	return results
 
 
-
-
-
 class PosPhraseNormalizer(SimpleNormalizer):
     """ Extract statistical multi-word noun phrases from full pos tagged text. Default phrase is one or more nouns preceded by zero or more adjectives. Don't tokenize first. """
 
@@ -285,10 +282,9 @@ class PosPhraseNormalizer(SimpleNormalizer):
                 match = match.replace('JJ', '((?:[ ][^\\s]+/JJ[SR]?)')
                 match = match.replace('NN', '((?:[ ][^\\s]+/NN[SP]*)')
         self.pattern = re.compile(match)
-        self.strip = re.compile('/(JJ[SR]?|NN[SP]*)')
+        self.strip = re.compile('/(JJ[SR]?|NN[SP]*)|/(jj[sr]?|nn[sp]*)')
         self.minimum = self.get_setting(session, 'minimumWords', 0)
         self.subPhrases = self.get_setting(session, 'subPhrases', 0)
-
 
     def process_string(self, session, data):
         # input is tagged string, pre keywording
@@ -297,6 +293,7 @@ class PosPhraseNormalizer(SimpleNormalizer):
         has = kw.has_key
         strp = self.strip.sub
         minm = self.minimum
+
         matches = self.pattern.findall(data)
         for phrase in matches:
             phrases = []
@@ -304,6 +301,7 @@ class PosPhraseNormalizer(SimpleNormalizer):
                 phrase = ' '.join(phrase)
             phrase = phrase.strip()
             # Strip tags
+            # XXX Can't tell it what to use for NN required in subphrase
             if self.subPhrases:
                 # find all minimum+ length sub phrases that include a noun
                 words = phrase.split()
@@ -323,14 +321,13 @@ class PosPhraseNormalizer(SimpleNormalizer):
 
             for phrase in phrases:
                 phrase = strp('', phrase)
+                phrase = phrase.replace("  ", ' ')
                 phrase = phrase.strip()
-                if not minm or phrase.count(' ') >= minm -1:
+                if not minm or phrase.count(' ') >= (minm -1):
                     if has(phrase):
                         kw[phrase]['occurences'] += 1
                     else:
                         kw[phrase] = {'text' : phrase, 'occurences' : 1, 'positions' : []}
-                    
-
         return kw
         
 

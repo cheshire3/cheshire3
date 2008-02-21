@@ -1,73 +1,75 @@
+
 from tokenMerger import SimpleTokenMerger
 
 class PosPhraseTokenMerger(SimpleTokenMerger):
 
-    _possibleSettings = {'regexp' : {'docs' : 'Regular expression to match phrases'},
-                         'pattern' : {'docs' : 'Pattern to match phrases. Possible components: JJ NN * + ?'},
-                         'minimumWords' : {'docs' : "Minimum number of words that constitute a phrase.", 'type' : int, 'options' : "0|1|2|3|4|5"},
-                         'subPhrases' : {'docs' : "Extract all sub-phrases (1) or not (0, default)", 'type' : int, 'options' : "0|1"}
-                         }
+    _possibleSettings = {'nonPhrases' : {'docs' : '', 'type' : int, 'options' : '0|1'}}
 
     def __init__(self, session, config, parent):
-        SimpleNormalizer.__init__(self, session, config, parent)
-        match = self.get_setting(session, 'regexp', '')
-        if not match:
-            match = self.get_setting(session, 'pattern')
-            if not match:
-                match = "((?:[ ][^\\s]+/JJ[SR]?)*)((?:[ ][^\\s]+/NN[SP]?)+)"
-            else:
-                match = match.replace('*', '*)')
-                match = match.replace('+', '+)')
-                match = match.replace('?', '?)')        
-                match = match.replace('JJ', '((?:[ ][^\\s]+/JJ[SR]?)')
-                match = match.replace('NN', '((?:[ ][^\\s]+/NN[SP]*)')
-        self.pattern = re.compile(match)
-        self.strip = re.compile('/(JJ[SR]?|NN[SP]*)')
-        self.minimum = self.get_setting(session, 'minimumWords', 0)
-        self.subPhrases = self.get_setting(session, 'subPhrases', 0)
+        SimpleTokenMerger.__init__(self, session, config, parent)
+        self.nonPhrases = self.get_setting(session, 'nonPhrases', 0)
+        self.nounRequired = self.get_setting(session, 'nounRequired', 0)
+        # self.keepPos = self.get_setting(session, 'keepPos', 0)
 
-
-    def process_string(self, session, data):
-        # input is tagged string, pre keywording
-        # output: hash of phrases
-        kw = {}
-        has = kw.has_key
-        strp = self.strip.sub
-        minm = self.minimum
-        matches = self.pattern.findall(data)
-        for phrase in matches:
-            phrases = []
-            if type(phrase) == tuple:
-                phrase = ' '.join(phrase)
-            phrase = phrase.strip()
-            # Strip tags
-            if self.subPhrases:
-                # find all minimum+ length sub phrases that include a noun
-                words = phrase.split()
-                idx = 0
-                while idx < len(words)+1:
-                    idx2 = idx+1
-                    while idx2 < len(words)+1:
-                        curr = words[idx:idx2]                        
-                        phrase = ' '.join(curr)
-                        noun = (phrase.find('/NN') > -1)
-                        if len(curr) >= minm and noun:
-                            phrases.append(phrase)
-                        idx2 += 1
-                    idx += 1
-            else:
-                phrases = [phrase]
-
-            for phrase in phrases:
-                phrase = strp('', phrase)
-                phrase = phrase.strip()
-                if not minm or phrase.count(' ') >= minm -1:
-                    if has(phrase):
-                        kw[phrase]['occurences'] += 1
+    def process_hash(self, session, data):
+        new = {}
+        has = new.has_key
+        all = self.nonPhrases
+        noun = self.nounRequired
+        for d, val in data.iteritems():
+            if d:
+                x = 0
+                posns = val.get('charOffsets', [])
+                acc = []
+                hasNoun = 0
+                lvt = len(val['text']) -1
+                for (vt, t) in enumerate(val['text']):
+                    try:
+                        (wd, pos) = t.split('/')
+                    except:
+                        print t
+                        (wd, pos) = t.rsplit('/', 1)
+                    pos = pos.lower()
+                    if vt != lvt and ( pos.startswith('jj') or pos.startswith('nn')):   
+                        # XXX should split jj nn jj nn into two
+                        if pos.startswith('nn'):
+                            hasNoun = 1
+                        acc.append(wd)
+                        continue
+                    elif acc:
+                        # merge wds
+                        if (pos.startswith('jj') or pos.startswith('nn')):
+                            if pos.startswith('nn'):
+                                hasNoun = 1
+                            acc.append(wd)
+                            skipall = 1
+                        else:
+                            skipall = 0
+                        if noun and not hasNoun:
+                            wds = acc[:]
+                        else:
+                            wds = [' '.join(acc)]
+                        if all and not skipall:
+                            wds.append(wd)
+                        acc = []
+                        hasNoun = 0
+                    elif all:
+                        wds = [wd]
                     else:
-                        kw[phrase] = {'text' : phrase, 'occurences' : 1, 'positions' : []}
-                    
+                        continue
+                    for w in wds:
+                        if has(w):
+                            new[w]['occurences'] += val['occurences']
+                        else:
+                            new[w] = {'text' : w, 'occurences' : val['occurences'], 'positions' : []}
+                        try:
+                            pls =[(pl,x, posns[x]) for pl in val['proxLoc']]
+                            for p in pls:
+                                new[w]['positions'].extend(p)
+                        except KeyError:
+                            new[w]['positions'].extend(val['positions'])
+                        x += 1
+        return new
 
-        return kw
         
     
