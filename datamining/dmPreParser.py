@@ -189,6 +189,7 @@ class TFPPreParser(ARMPreParser):
 
 class Fimi1PreParser(ARMPreParser):
 
+    _possibleSettings = {'singleItems' : {'docs' : '', 'type' : int, 'options' : '0|1'}}
     _possiblePaths = {'filePath' : {'docs' : 'Directory where fimi01 executable (apriori) lives'}
                       }
 
@@ -201,6 +202,7 @@ class Fimi1PreParser(ARMPreParser):
             raise ConfigFileException("%s requires the path: filePath" % self.id)
         self.fisre = re.compile("([0-9 ]+) \(([0-9]+)\)")
         self.rulere = re.compile("([0-9 ]+) ==> ([0-9 ]+) \(([0-9.]+), ([0-9]+)\)")
+        self.singleItems = self.get_setting(session, 'singleItems', 0)
 
 
     def process_document(self, session, doc):
@@ -225,6 +227,7 @@ class Fimi1PreParser(ARMPreParser):
         inh = file(outfn)
         fis = self.fisre
         rule = self.rulere
+        singleItems = self.singleItems
         matches = []
         rules = []
         for line in inh:
@@ -233,7 +236,7 @@ class Fimi1PreParser(ARMPreParser):
             m = fis.match(line)
             if m:
                 (set, freq) = m.groups()
-                if set.find(' ') > -1:
+                if singleItems or set.find(' ') > -1:
                     matches.append((int(freq), set))
             elif self.confidence > 0:
                 m = rule.match(line)
@@ -291,6 +294,7 @@ class MagicFimi1PreParser(Fimi1PreParser):
 
             lr = len(rules)
             lf = len(fis)
+            print "%s --> %s,%s" % (s, lr, lf)
 
             if minRules != -1:
                 if lr == lastlr:
@@ -332,7 +336,7 @@ class MagicFimi1PreParser(Fimi1PreParser):
                     s = s / 1.5
                 if minRules != -1 and lf > minRules:
                     break
-        
+        self.support = s
         return d2
 
 
@@ -368,7 +372,7 @@ class FrequentSet(object):
         ts.sort(key=lambda x: x[1], reverse=True)
 
         for t in ts:
-            termList.append(self.document.termHash[t[0]])
+            termList.append(repr(self.document.termHash[t[0]]))
         return " ".join(termList)
 
 
