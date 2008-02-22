@@ -336,7 +336,7 @@ class SimpleIndex(Index):
         matches = []
         rel = clause.relation
 
-        if (rel.value in ['any', 'all', '=', 'exact'] and (rel.prefix == 'cql' or rel.prefixURI == 'info:srw/cql-context-set/1/cql-v1.1')):
+        if (rel.value in ['any', 'all', '=', 'exact', 'window'] and (rel.prefix == 'cql' or rel.prefixURI == 'info:srw/cql-context-set/1/cql-v1.1')):
             for k, qHash in res.iteritems():
                 if k[0] == '^': k = k[1:]      
                 firstMask = self._locate_firstMask(k)
@@ -708,9 +708,13 @@ class ProximityIndex(SimpleIndex):
             s.queryFreq = queryHash['occurences']
             s.queryPositions = []
             # not sure about this nProxInts??
-            for x in queryHash['positions'][1::self.nProxInts]:
-                s.queryPositions.append(x)
-        if (terms):
+	    try:
+		for x in queryHash['positions'][1::self.nProxInts]:
+		    s.queryPositions.append(x)
+	    except:
+		# no queryPos?
+		pass
+	if (terms):
             s.termid = terms[0]
             s.totalRecs = terms[1]
             s.totalOccs = terms[2]

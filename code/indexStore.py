@@ -721,7 +721,8 @@ class BdbIndexStore(IndexStore):
                         val = 0
                 lt = len(terms)
                 if fl.find('rec') > -1:
-                    terms.sort(key=lambda x: x['r'])
+                    # 1 = most frequent
+                    terms.sort(key=lambda x: x['r'], reverse=True)
                     cxn = bdb.db.DB()
                     cxn.open(dbname + "_FREQ_REC")
                     for (t, term) in enumerate(terms):
@@ -730,7 +731,7 @@ class BdbIndexStore(IndexStore):
                     cxn.close()
 
                 if fl.find('occ') > -1:
-                    terms.sort(key=lambda x: x['o'])                
+                    terms.sort(key=lambda x: x['o'], reverse=True)                
                     cxn = bdb.db.DB()
                     cxn.open(dbname + "_FREQ_OCC")
                     for (t, term) in enumerate(terms):
@@ -914,7 +915,7 @@ class BdbIndexStore(IndexStore):
         return tfcxn
 
 
-    def fetch_termFrequencies(self, session, index, mType='rec', start=-1, nTerms=100, direction="<="):
+    def fetch_termFrequencies(self, session, index, mType='occ', start=1, nTerms=100, direction=">"):
         cxn = self._openTermFreq(session, index, mType)
         if not cxn:
             return []

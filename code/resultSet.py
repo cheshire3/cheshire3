@@ -437,7 +437,7 @@ class SimpleResultSet(RankedResultSet):
                     break
 
         # sort result sets by length
-        all = cql.value in ['all', 'and', '=', 'prox', 'adj']                
+        all = cql.value in ['all', 'and', '=', 'prox', 'adj', 'window']                
 
         if not cql.value in ['not', 'prox']:
             others.sort(key=lambda x: len(x), reverse=not all)
@@ -491,7 +491,7 @@ class SimpleResultSet(RankedResultSet):
         unit = "word"
         comparison = "="
         ordered = 0
-        if (cql.value == 'prox' and cql.modifiers):
+        if (cql.value in ['prox', 'window'] and cql.modifiers):
             if (cql['unit']):
                 unit = cql['unit'].value
             if (cql['distance']):
@@ -559,7 +559,7 @@ class SimpleResultSet(RankedResultSet):
                 continue
             elif cql.value == 'not' and len(items) != 1:
                 continue
-            elif cql.value in ["prox", 'adj', '=']:
+            elif cql.value in ["prox", 'adj', '=', 'window']:
                 # proxInfo is hash of (docid, recStore) to list of locations in record
                 # sort items by query position. Repeat set at each posn
 
@@ -628,12 +628,36 @@ class SimpleResultSet(RankedResultSet):
                                         c = cmp(piDistance, distance)
                                         if (c in chitem):
                                             # copy as we're in two deep
+                                            anyOkay = 0
                                             d = lpiFull[:]
                                             # Check we're not the same word
                                             for r in rpiFull:
-                                                if d[-1] != r:
-                                                    d.append(r)
-                                            matchlocs.append(d)
+                                                if cql.value == 'window' and len(d) > 1:
+                                                    wokay = 1
+                                                    # check that ALL in distance
+                                                    for wd in d:
+                                                        if proxtype == 3:
+                                                            wpiDistance = roff - wd[2]
+                                                        else:
+                                                            wpiDistance = rwpos - wd[1]
+                                                        if ordered and wpiDistance < 0:
+                                                            wokay = 0
+                                                            break
+                                                        else:
+                                                            wpiDistance = abs(wpiDistance)
+                                                            c = cmp(wpiDistance, distance)
+                                                            if not c in chitem:
+                                                                wokay = 0
+                                                                break
+                                                        anyOkay = 1
+                                                    if wokay and d[-1] != r:
+                                                        d.append(r)
+                                                else:
+                                                    anyOkay = 1
+                                                    if d[-1] != r:
+                                                        d.append(r)
+                                            if anyOkay:
+                                                matchlocs.append(d)
                                         
                     if matchlocs:                                    
                         ritem.proxInfo = matchlocs
