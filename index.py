@@ -560,7 +560,7 @@ class SimpleIndex(Index):
     def fetch_summary(self, session):
 	return self.indexStore.fetch_summary(session, self)
 
-    def fetch_termFrequencies(self, session, mType='rec', start=-1, nTerms=100, direction="<="):
+    def fetch_termFrequencies(self, session, mType='occ', start=1, nTerms=100, direction=">"):
         return self.indexStore.fetch_termFrequencies(session, self, mType, start, nTerms, direction)
 
     def fetch_metadata(self, session):
