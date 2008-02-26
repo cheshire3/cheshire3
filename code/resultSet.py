@@ -589,10 +589,12 @@ class SimpleResultSet(RankedResultSet):
                     newitems = items[:]
 
                 litem = items.pop(0)
+                ltermid = litem.resultSet.termid
                 nomatch = 0                    
 
                 while len(items):
                     ritem = items.pop(0)
+                    rtermid = ritem.resultSet.termid
                     matchlocs = []
                     for rpiFull in ritem.proxInfo:                        
                         rpi = list(rpiFull[-1])
@@ -605,6 +607,7 @@ class SimpleResultSet(RankedResultSet):
                                     d = lpiFull[:]
                                     for r in rpiFull:
                                         if d[-1] != r:
+                                            r.append(rtermid)
                                             d.append(r)
                                     matchlocs.append(d)
                                 else:
@@ -651,9 +654,11 @@ class SimpleResultSet(RankedResultSet):
                                                                 break
                                                         anyOkay = 1
                                                     if wokay and d[-1] != r:
+                                                        r.append(rtermid)
                                                         d.append(r)
                                                 else:
                                                     anyOkay = 1
+                                                    r.append(rtermid)
                                                     if d[-1] != r:
                                                         d.append(r)
                                             if anyOkay:
@@ -669,9 +674,11 @@ class SimpleResultSet(RankedResultSet):
                 if nomatch:
                     continue
 
+                for m in matchlocs:
+                    m[0].append(ltermid)
                 litem.proxInfo = matchlocs
                 items = [litem]
-
+            
             # do stuff on items to reduce to single representative
             if relevancy:
                 item = fn(items, nors)
