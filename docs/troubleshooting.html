@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>www.cheshire3.org :: Documentation :: Troubleshooting</title>
+        <link rel="stylesheet" type="text/css" href="http://www.cheshire3.org/cheshire3.css"/>
+    </head>
+    <body>
+        <a name="top"></a>
+        <table cellpadding=0 cellspacing=0 class="maintitle">
+            <tr>
+    		<td class="cheshirelogo">
+                    <img src="http://www.cheshire3.org/gfx/c3_white.gif" alt="c h e s h i r e  |  3"/>
+    		</td>
+    		<td width="10">
+                    <img src="http://www.cheshire3.org/gfx/slant_grey.gif" alt=""/>
+    		</td>
+    		<td align="center">
+                    <h2>Cheshire3 Troubleshooting</h2>
+    		</td>
+            </tr>
+    	</table>
+    
+    	<!--#config errmsg="<div id="navbar"/>" -->
+    	<!--#include virtual="/navbar.ssi" -->
+        
+        <div class="fieldset">
+            <span class="legend">Introduction</span>
+            <p>This page contains a list of common Python and Cheshire 3 specific errors and exceptions.</p>
+            <p>It is hoped that it also offers some enlightenment as to what these errors and exception mean in terms of your configuration/code/data, and suggests how you might go about correcting them.</p>
+        </div>
+    
+        <div class="fieldset">
+            <span class="legend">Common Errors and Exceptions</span>
+            <ul style="list-style-type:none">
+                <li><a href="#AttributeError">AttributeError: 'NoneType' object has no attribute...</a></li>
+                <li><a href="#AttributeError2">AttributeError: x instance has no attribute 'y'</a></li>
+                <li><a href="#RefNoConfig">Cheshire3 Exception: 'x' referenced from 'y' has no configuration</a></li>
+                <li><a href="#NotWellFormedZeerex">Cheshire3 Exception: Failed to build myProtocolMap: not well-formed (invalid token): line x, column y</a></li>
+                <li><a href="#StringIntNormalizer">TypeError: cannot concatenate 'str' and 'int' objects</a></li>
+                <li><a href="#NoSpace">No space left on device</a> (in Apache log file, when there's plenty of hard drive space)</li>
+                <li><a href="#WrongArgs">TypeError: some_method() takes exactly x arguments (y given)</a></li>
+                <li><a href="#UnicodeEncodeError">UnicodeEncodeError: 'ascii' codec can't encode character u'\u2014' in position 38: ordinal not in range(128)</a></li>
+                <li><a href="#NotWellFormedDoc">xml.sax._exceptions.SAXParseException: &lt;unknown&gt;:x:y: not well-formed (invalid token)</a></li>
+            </ul>
+        </div>
+    
+        <a name="AttributeError"></a>
+        <div class="fieldset">
+            <span class="legend">AttributeError: 'NoneType' object has no attribute ...</span>
+            <p>
+    		The object the system is trying to use is null i.e. of NoneType. There are several things that can cause this:<br/>
+                <em>HINT: The reported attribute might give you a clue to what type the object should be.</em>
+            </p>
+            <ul>
+                <li>The object does not exist in the architecture. This is often due to errors/omissions in the configuration file.<br/>
+                    <strong>ACTION</strong>: Make sure that the object is configured (either at the database or server level).
+                    <!--, and built (in the 'objects' section of the configuration file)--> <br/>
+                    <em>HINT: Remember that everything is configured hierarchically from the server, down to the individual subConfigs of each database.</em>
+                </li>
+                <li>There is a discrepancy between the identifier used to configure the object, and that used to get the object for use in the script.<br/>
+                    <strong>ACTION</strong>: Ensure that the identifier used to get the object in the script is the same as that used in the configuration.<br/>
+                    <em>HINT: Check the spelling and case used.</em>
+                </li>
+                <li>If the object is the result of a get or fetch operation (e.g., from a documentGroup or objectStore), it looks like it wasn't retrieved properly from the group/store.<br/>
+                    <strong>ACTION</strong>: Afraid there's no easy answer to this one. Check that the requested object actually exists in the group/store.
+                </li>
+                <li>If the object is the result of a process request (e.g., to a parser, preParser or tranformer), it looks like it wasn't returned properly by the processor.
+                    <strong>ACTION</strong>: Afraid there's no easy answer here either. Check for any errors/exceptions raised during the processing operation.
+                </li>
+            </ul>
+        </div>
+    
+        <a name="AttributeError"></a>
+        <div class="fieldset">
+            <span class="legend">AttributeError: x instance has no attribute 'y'</span>
+            <p>
+                An instance of object type x, has neither an attribute or method called y.<br/>
+                <strong>ACTION</strong>: Check the API documentation for the object-type, and correct your script.
+            </p>
+        </div>
+    
+        <a name="RefNoConfig"></a>
+        <div class="fieldset">
+            <span class="legend">Cheshire3 Exception: 'x' referenced from 'y' has no configuration</span>
+            <p>
+                An object referred to as 'x' in the configuration for object 'y' has no configuration.<br/>
+                <strong>ACTION</strong>: Make sure that object 'x' is configured in subConfigs, and that all references to object x use the correct identifier string.
+            </p>
+        </div>
+    
+        <a name="NotWellFormedZeerex"></a>
+        <div class="fieldset">
+            <span class="legend">Cheshire3 Exception: Failed to build myProtocolMap: not well-formed ...</span>
+            <p>
+                The zeerex_srx.xml file contains XML which is not well formed. <br/>
+                <strong>ACTION</strong>: Check this file at the suggested line and column and make the necessary corrections
+            </p>
+        </div>
+        
+        <a name="StringIntNormalizer"></a>
+        <div class="fieldset">
+            <span class="legend">TypeError: cannot concatenate 'str' and 'int' objects</span>
+            <p>
+                If the error message looks like the following:
+            </p>
+            <pre>
+File "../../code/baseStore.py", line 189, in generate_id
+id = self.currentId +1
+TypeError: cannot concatenate 'str' and 'int' objects
+            </pre>
+            <p>... then it's likely that your recordStore is trying to create a new integer by incrementing the previous one, when the previous one is a string!<br/>
+            <strong>ACTION</strong>: This can easily be remedied by addind the following line to the &lt;paths&gt; section of the &lt;subConfig&gt; that defines the recordStore:
+            </p>
+            <pre>
+&lt;object type="idNormalizer" ref="StringIntNormalizer"/&gt;
+            </pre>
+        </div>
+    
+        <a name="NoSpace"></a>
+        <div class="fieldset">
+            <span class="legend">"No space left on device" Apache error</span>
+            <p>
+    		If there is space left on your hard drives, then it is almost certainly that the linux kernel has run out of semaphores for mod_python or Berkeley DB.<br/>
+    		<strong>ACTION</strong>: You need to tweak the kernel performance a little.  As root, you'll need to:  echo "512 32000 32 512" &gt; /proc/sys/kernel/sem.  For more information, see: <a href="http://clarens.sourceforge.net/index.php?docs+faq">Clarens FAQ</a>
+            </p>
+        </div>
+    
+        <a name="WrongArgs"></a>
+        <div class="fieldset">
+            <span class="legend">TypeError: some_method() takes exactly x arguments (y given)</span>
+            <p>
+                The method you're trying to use requires x arguments, you only supplied y arguments.<br/>
+                <strong>ACTION</strong>: Check the API for the required arguments for this method.<br/>
+                <em>HINT: All Cheshire3 objects require an instance of type Session as the first argument to their methods.</em>
+            </p>
+        </div>
+    
+        <a name="UnicodeEncodeError"></a>
+        <div class="fieldset">
+            <span class="legend">UnicodeEncodeError: 'ascii' codec can't encode character u'\uXXXX' ...</span>
+            <p>
+                Oh Dear! Somewhere within one of your documents/records there is a character which cannot be encoded into ascii unicode.<br/>
+                <strong>ACTION</strong>: Use a UnicodeDecodePreParser or PrintableOnlyPreParser to turn the unprintable unicode character into an XML character entity.
+            </p>
+        </div>
+    
+        <a name="NotWellFormedDoc"></a>
+        <div class="fieldset">
+            <span class="legend">xml.sax._exceptions.SAXParseException: &lt;unknown&gt;:x:y: not well-formed ...</span>
+            <p>
+                Despite the best efforts of the preParsers there is badly formed XML within the document; possibly a malformed tag, or character entity.<br/>
+                <strong>ACTION</strong>: Check the document source at line x, column y.
+            </p>
+        </div>
+
+    </body>
+</html>
