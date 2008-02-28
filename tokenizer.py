@@ -220,7 +220,7 @@ class DateTokenizer(SimpleTokenizer):
 
     _possibleDefaults = {'datetime' : {"docs" : "Default datetime to use for values not supplied in the data"}}
     _possibleSettings = {'fuzzy' : {"docs" : "Should the parser use fuzzy matching."}
-                         , 'dayfirst' : {"docs" : "Is the day or month first, if not otherwise clear."}}
+                        , 'dayfirst' : {"docs" : "Is the day before the month, if unclear. 1 = Yes, 0 = No (default)", 'type' : int, 'options' : '0|1'}}
 
     def __init__(self, session, config, parent):
         SimpleTokenizer.__init__(self, session, config, parent)
