@@ -315,6 +315,7 @@ class ArmVectorTransformer(Transformer):
                          'maxGlobalOccs' : {'docs' : "", 'type' : int},
                          'minLocalFreq' : {'docs' : "", 'type' : int},
                          'maxLocalFreq' : {'docs' : "", 'type' : int},
+                         'stopwords' : {'docs' : '', 'type' : str},
                          'proxElement' : {'docs' : "", 'type' :int, 'options' : '0|1'},
                          'matchesOnly' : {'docs' : "", 'type' :int, 'options' : '0|1'},
                          'stripMatch' : {'docs' : "", 'type' :int, 'options' : '0|1'}
@@ -342,6 +343,12 @@ class ArmVectorTransformer(Transformer):
         self.prox = self.get_setting(session, 'proxElement', 0)
         self.matches = self.get_setting(session, 'matchesOnly', 0)
         self.stripMatch = self.get_setting(session, 'stripMatch', 0)
+        sw = self.get_setting(session, 'stopwords', '')
+        ignoreTermids = []
+        for w in sw.split(' '):
+            (tid, bla, bla2) = self.vectorIndex.fetch_term(session, w, summary=True)
+            ignoreTermids.append(tid)
+        self.ignoreTermids = ignoreTermids
         self._clear(session)
 
     def _clear(self, session):
@@ -389,6 +396,10 @@ class ArmVectorTransformer(Transformer):
                      (maxGo == -1 or toccs <= maxGo)):
                     nv.append(x)
             v = nv
+            
+        if self.ignoreTermids:
+            its = self.ignoreTermids
+            v = [x for x in v if not x[0] in its]
 
         vhash = {}
         vhash.update(v)
