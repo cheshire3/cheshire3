@@ -23,7 +23,7 @@ class SimpleTokenMerger(TokenMerger):
                                       'proxLoc' : val['proxLoc']}
                         except KeyError:
                             # may already have been tokenized and merged
-                            new[t] = {'text' : t, 'occureces' : 1,
+                            new[t] = {'text' : t, 'occurences' : 1,
                                       'positions' : val['positions']}
                         
         return new
