@@ -129,12 +129,13 @@ class ARMPreParser(PreParser):
 
     _possibleSettings = {'support' : {'docs' : "Support value", 'type' : float},
                          'confidence' : {'docs' : "Confidence value", 'type' : float},
+                         'absoluteSupport' : {'docs' : 'Number of records for supp, not %', 'type' : int}
                          } 
-
 
     def __init__(self, session, config, parent):
         PreParser.__init__(self, session, config, parent)
         self.support = self.get_setting(session, 'support', 10.0)
+        self.absSupport = self.get_setting(session, 'absoluteSupport', 0)
         self.confidence = self.get_setting(session, 'confidence', 0.0)
 
 
@@ -211,6 +212,10 @@ class Fimi1PreParser(ARMPreParser):
         fh = file(infn, 'w')
         fh.write(doc.get_raw(session))
         fh.close()
+
+        if self.absSupport:
+            t = len(doc.get_raw(session).split('\n'))
+            self.support = (float(self.absSupport) / float(t)) * 100
 
         (qq, outfn) = tempfile.mkstemp(".txt")
         # go to directory and run
@@ -375,6 +380,15 @@ class FrequentSet(object):
             termList.append(repr(self.document.termHash[t[0]]))
         return " ".join(termList)
 
+    def toXml(self):
+        termList = []
+        ts = self.termids[:]
+        ts.sort()
+        items = ["""<item tid="%s">%s</item>""" % (x, self.document.termHash[x]) for x in ts]
+        itemstr = ''.join(items)
+        return """<set support="%s" ll="%s" entropy="%s" surprise="%s" gini="%s">%s</set>""" % (self.freq, self.ll, self.entropy, self.surprise, self.gini, itemstr)
+    
+
 
     def __init__(self, session, m, doc, unrenumber):
 
@@ -525,10 +539,11 @@ class MatchToObjectPreParser(PreParser):
             # conf, supp, [antes], [concs]
             for r in armrules:
                 d = StringDocument([r[2], r[3]])
-                nd = self.unrenumber.process_document(session, d)
+                if self.unrenumber:
+                    d = self.unrenumber.process_document(session, d)
                 antes = []
                 concs = []
-                renmbrd = nd.get_raw(session)
+                renmbrd = d.get_raw(session)
                 for a in renmbrd[0]:
                     antes.append(termHash[a])
                 for c in renmbrd[1]:
