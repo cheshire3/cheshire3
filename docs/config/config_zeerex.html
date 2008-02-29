@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>Cheshire3 Configuration: ZeeRex</title>
+        <link rel="stylesheet" type="text/css" href="http://www.cheshire3.org/cheshire3.css"></link>
+    </head>
+    <body>
+        <a name="top"></a>
+        <table cellpadding="0" cellspacing="0" class="maintitle">
+            <tr>
+                <td class="cheshirelogo">
+                    <img src="http://www.cheshire3.org/gfx/c3_white.gif" alt=" c h e s h i r e  |  3 "/>
+                </td>
+                <td>
+                    <img src="http://www.cheshire3.org/gfx/slant_grey.gif" alt=""/>
+                </td>
+                <td align="center">
+                    <h2>Cheshire3 Configuration: ZeeRex</h2>
+                </td>
+            </tr>
+        </table>
+
+        <!--#config errmsg="<div id="navbar"/>" -->
+        <!--#include virtual="/navbar.ssi" -->
+
+        <div class="fieldset">
+            <span class="legend">Introduction</span>
+            <p>
+                ZeeRex is a schema for service description and is required for SRW but it can also be used to describe Z39.50, OAI and other information retrieval protocols. 
+                As such, a ZeeRex description is required for each database. 
+                The full ZeeRex documentation is available at <a href="http://explain.z3950.org/">http://explain.z3950.org/</a> along with samples, schemas and so forth. 
+                It is also being considered as the standard service description schema in the NISO Metasearch Initiative, so knowing about it won't hurt you any.
+            </p>
+            <p>
+                In order to map from a CQL query, we need to know the correlation between CQL index name and Cheshire3's index object. 
+                Defaults for the SRW handler for the database are also drawn from this file, such as the default number of records to return and the default record schema. 
+                Mappings between requested schema and a transformer object are also possible. 
+                This is handled by a ProtocolMap.
+            </p>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">Examples</span>
+            <pre>
+&lt;subConfig type="protocolMap" id="l5rProtocolMap"&gt;
+  &lt;objectType&gt;protocolMap.CQLProtocolMap&lt;/objectType&gt;
+  &lt;paths&gt;
+    &lt;object type="zeerexPath"&gt;srw_zeerex.xml&lt;/path&gt;
+  &lt;/paths&gt;
+&lt;/subConfig&gt;
+            </pre>
+            <pre>
+&lt;explain id="org.o-r-g.srw-card" authoritative="true"
+  xmlns="http://explain.z3950.org/dtd/2.0/"
+  xmlns:c3="http://www.cheshire3.org/schemas/explain/"&gt;
+  &lt;serverInfo protocol="srw/u" version="1.1" transport="http"&gt;
+     &lt;host&gt;srw.cheshire3.org&lt;/host&gt;
+     &lt;port&gt;8080&lt;/port&gt;
+     &lt;database numRecs="3492" lastUpdate="2002-11-26 23:30:00"&gt;<span style="color:red;">srw/l5r</span>&lt;/database&gt;
+  &lt;/serverInfo&gt;
+  <i>[...]</i>
+  &lt;indexInfo&gt;
+     &lt;set identifier="http://srw.cheshire3.org/contextSets/ccg/1.0/" name="ccg"/&gt;
+     &lt;set identifier="http://srw.cheshire3.org/contextSets/ccg/l5r/1.0/" name="ccg_l5r"/&gt;
+     &lt;set identifier="info:srw/cql-context-set/1/dc-v1.1" name="dc"/&gt;
+
+     &lt;index <span style="color:red;">c3:index="l5r-idx-1"</span>&gt;
+        &lt;title&gt;Card Name&lt;/title&gt;
+        &lt;map&gt;&lt;name set="dc"&gt;title&lt;/name&gt;&lt;/map&gt;
+        &lt;configInfo&gt;
+          &lt;supports type="relation" <span style="color:red;">c3:index="l5r-idx-1"</span>&gt;exact&lt;/supports&gt;
+          &lt;supports type="relation" c3:index="l5r-idx-15"&gt;any&lt;/supports&gt;
+          &lt;supports type="relationModifier" c3:index="l5r-idx-15"&gt;word&lt;/supports&gt;
+          &lt;supports type="relationModifier" c3:index="l5r-idx-1"&gt;string&lt;/supports&gt;
+          &lt;supports type="relationModifier" c3:index="l5r-idx-16"&gt;stem&lt;/supports&gt;
+        &lt;/configInfo&gt;
+     &lt;/index&gt;
+  &lt;/indexInfo&gt;
+  &lt;schemaInfo&gt;
+     &lt;schema identifier="info:srw/schema/1/dc-v1.1"
+             location="http://www.loc.gov/zing/srw/dc.xsd"
+             sort="false" retrieve="true" name="dc"
+             <span style="color:red;">c3:transformer="l5rDublinCoreTxr"</span>&gt;
+        &lt;title&gt;Dublin Core&lt;/title&gt;
+     &lt;/schema&gt;
+  &lt;/schemaInfo&gt;
+&lt;/explain&gt;  
+
+            </pre>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">&lt;database&gt;</span>
+            <p>
+                The contents of the field MUST match up with the what has been configured for Apache.
+                If you configured with mapping /srw/ to the srwApacheHandler code, then the first part of the database MUST be srw/.
+                Obviously the rest of the information in serverInfo should be correct as well, but without the database field being correct, it won't load.
+            </p>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">c3:index</span>
+            <p>
+                This attribute may be present on an index element, or a supports element within configInfo within an index.
+                It maps that particular index, or the use of the index with a relation or relationModifier, to the Index object with the given id.
+                RelationModifiers and relations will override the index as appropriate.
+            </p>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">c3:transformer</span>
+            <p>
+                Similar to c3:index, this can be present on a schema element and maps that schema to the transformer used to process the internal schema into the requested one.  If the schema is the one used internally, then the attribute should not be present.
+            </p>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">Paths</span>
+            <ul>
+                <li>
+                    <b>zeerexPath</b><br/>
+                    In the configuration for the ProtocolMap object, this contains the path to the ZeeRex file to read.
+                </li>
+            </ul>
+        </div>
+
+    </body>
+</html>

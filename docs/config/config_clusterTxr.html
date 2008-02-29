@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>Cheshire3 Configuration: Cluster Extraction Transformer</title>
+        <link rel="stylesheet" type="text/css" href="http://www.cheshire3.org/cheshire3.css"></link>
+    </head>
+    <body>
+        <table cellpadding="0" cellspacing="0" class="maintitle">
+            <tr>
+                <td class="cheshirelogo">
+                    <img src="http://www.cheshire3.org/gfx/c3_white.gif" alt=" c h e s h i r e  |  3 "/>
+                </td>
+                <td>
+                    <img src="http://www.cheshire3.org/gfx/slant_grey.gif" alt=""/>
+                </td>
+                <td align="center">
+                    <h2>Cheshire3 Configuration: Cluster Extraction</h2>
+                </td>
+            </tr>
+        </table>
+
+        <!--#config errmsg="<div id="navbar"/>" -->
+        <!--#include virtual="/navbar.ssi" -->
+
+        <div class="fieldset">
+            <span class="legend">Introduction</span>
+            <p>
+                A cluster record consists of one controlled vocabulary field along with the data from other fields across all records which have that controlled field.  This is generally used to allow relevance ranked keyword searches on description or scope/content fields, but rather than retrieving the records which match, to find the most appropriate subject to do a subsequent search for.
+            </p>
+            <p>For example, given the two dublin core records:</p>
+            <pre>
+&lt;record&gt;
+  &lt;dc:description&gt;this is a document about headache pain&lt;/dc:description&gt;
+  &lt;dc:subject&gt;Orofacial Pain&lt;/dc:subject&gt;
+&lt;/record&gt;
+
+&lt;record&gt;
+  &lt;dc:description&gt;Drugs and their uses in modern headache treatment&lt;/dc:description&gt;
+  &lt;dc:subject&gt;Orofacial Pain&lt;/dc:subject&gt;
+&lt;/record&gt;
+            </pre>
+            <p>Might create through the use of a ClusterDocumentGroup:</p>
+            <pre>
+&lt;cluster&gt;
+  &lt;key&gt;orofacial pain&lt;/key&gt;
+  &lt;description&gt; this is a document about headache pain 
+                 Drugs and their uses in modern headache treatment
+  &lt;/description&gt;
+&lt;/cluster&gt;
+
+            </pre>
+            <p>And a search for 'headache drugs pain' would thus return the subject 'Orofacial Pain'.</p>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">Example</span>
+            <pre>
+&lt;subConfig type="transformer" id="clusterExtractionTxr"&gt;
+    &lt;objectType&gt;transformer.ClusterExtractionTransformer&lt;/objectType&gt;
+    &lt;paths&gt;
+      &lt;path type="tempPath"&gt;tempCluster.data&lt;/path&gt;
+      &lt;object type="database" ref="db_cluster"/&gt;
+    &lt;/paths&gt;
+    &lt;cluster&gt;
+      &lt;map type="key"&gt;
+        &lt;xpath&gt;datafield[@tag='640']&lt;/xpath&gt;
+        &lt;xpath&gt;key&lt;/xpath&gt;
+        &lt;process&gt;
+            &lt;object type="extractor" ref="ExactExtractor"/&gt;
+            &lt;object type="normalizer" ref="CaseNormalizer"/&gt;
+          &lt;/process&gt;
+        &lt;/map&gt;
+        &lt;map&gt;
+        &lt;xpath&gt;datafield[@tag='245']&lt;/xpath&gt;
+        &lt;xpath&gt;title&lt;/xpath&gt;
+        &lt;process&gt;
+          &lt;object type="extractor" ref="ExactExtractor"/&gt;
+          &lt;object type="normalizer" ref="CaseNormalizer"/&gt;
+        &lt;/process&gt;
+      &lt;/map&gt;
+      &lt;map&gt;
+        &lt;xpath&gt;datafield[@tag='500']&lt;/xpath&gt;
+        &lt;xpath&gt;description&lt;/xpath&gt;
+        &lt;process&gt;
+          &lt;object type="extractor" ref="ExactExtractor"/&gt;
+          &lt;object type="normalizer" ref="CaseNormalizer"/&gt;
+        &lt;/process&gt;
+      &lt;/map&gt;
+    &lt;/cluster&gt;
+  &lt;/subConfig&gt;
+
+            </pre>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">&lt;cluster&gt;</span>
+            <p>A wrapper element around the mappings to be done.</p>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">&lt;map&gt;</span>
+            <p>
+                Each cluster extractor must have at least two maps.
+                A map contains two XPaths and a process chain (as per indexing) and configures one particular extraction operation.
+            </p>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">&lt;xpath&gt;</span>
+            <p>
+                The first xpath is where to find the data in the record to extract, the second is where to put it in the cluster file.
+                The first map should be the key to use (subject field in the example) and must have 'key' as the name of the element to create.
+            </p>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">&lt;process&gt;</span>
+            <p>
+                This is the same as the process chain for indexing, except that only extractors and normalizers are regularly used.
+                For more information, see <a href="config_index.html">index configuration</a>.
+            </p>
+        </div>
+
+    </body>
+</html>

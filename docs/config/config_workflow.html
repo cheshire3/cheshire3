@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>Cheshire3 Configuration: Workflow</title>
+        <link rel="stylesheet" type="text/css" href="http://www.cheshire3.org/cheshire3.css"></link>
+    </head>
+    <body>
+        <a name="top"></a>
+        <table cellpadding="0" cellspacing="0" class="maintitle">
+            <tr>
+                <td class="cheshirelogo">
+                    <img src="http://www.cheshire3.org/gfx/c3_white.gif" alt=" c h e s h i r e  |  3 "/>
+                </td>
+                <td>
+                    <img src="http://www.cheshire3.org/gfx/slant_grey.gif" alt=""/>
+                </td>
+                <td align="center">
+                    <h2>Cheshire3 Configuration: Workflow</h2>
+                </td>
+            </tr>
+        </table>
+    
+        <!--#config errmsg="<div id="navbar"/>" -->
+        <!--#include virtual="/navbar.ssi" -->
+    
+        <div class="fieldset">
+            <span class="legend">Introduction</span>
+            <p>
+                Workflows can be configured to define a series of processing steps that are common to several Cheshire3 databases/systems, as an alternative to writing customised code for each.
+            </p>
+            <p><a href="../build/build_workflow.html">Workflow Configuration Tutorial</a> including examples and explanation.</p>
+        </div>
+        
+        <div class="fieldset" id="source">
+            <span class="legend">&lt;workflow&gt;</span>
+            <p>
+                Base wrapping tags for workflows; analagous to &lt;process&gt; and &lt;preprocess&gt; in <a href="config_index.html">Index configurations</a>.<br/>
+                Contains an ordered list of <a href="#object">object</a>s.
+                The results of the first object is given to the second and so on down the chain.
+                It should be apparent that subsequent objects must be able to accept as input, the result of the previous.
+            </p>
+        </div>
+
+        <a name="object"></a>
+        <div class="fieldset" id="object">
+            <span class="legend">&lt;object&gt;</span>
+            <p>
+                A call to an object within the system.
+                &lt;object&gt;s define the following attributes:
+            </p>
+            <ul>
+                <li>
+                    <p>
+                        <b>type</b> [ mandatory ]<br/>
+                        Specifies the type of the object within the Cheshire3 framework.
+                        Broadly speaking this may be a preParser, parser, database, recordStore, index, logger, transformer, workflow.
+                    </p>
+                </li>
+                <li>
+                    <p>
+                        <b>ref</b><br/>
+                        A reference to a configured object within the system.
+                        If unspecified, the current session is used to determine which server, database, recordStore and so forth should be used.
+                    </p>
+                </li>
+                <li>
+                    <p>
+                        <b>function</b><br/>
+                        The name of the function to call.
+                        If unspecified, the default function for the particular type of object is called.
+                    </p>
+                </li>
+            </ul>
+            <p>
+                For existing processing objects that can be used in these fields, see the <a href="../objects">object documentation</a>.
+            </p>
+        </div>
+        
+        <a name="log"></a>
+        <div class="fieldset" id="log">
+            <span class="legend">&lt;log&gt;</span>
+            <p>
+                Log text to a Logger object.<br/>
+                A reference to a configured Logger may be provided using the 'ref' attribute.
+                If no 'ref' attribute is present, the database's default logger is used.
+            </p>
+        </div>
+        
+        <a name="assign"></a>
+        <div class="fieldset" id="assign">
+            <span class="legend">&lt;assign&gt;</span>
+            <p>Assign a specified value to a variable with a given name. Requires both of the following attributes:</p>
+            <ul>
+                <li>
+                    <p>
+                        <b>from</b> [ mandatory ]<br/>
+                        the value to assign
+                    </p>
+                </li>
+                <li>
+                    <p>
+                        <b>to</b> [ mandatory ]<br/>
+                        a name to refer to the variable
+                    </p>
+                </li>
+            </ul>
+        </div>
+        
+        <a name="fork"></a>
+        <div class="fieldset" id="fork">
+            <span class="legend">&lt;fork&gt;</span>
+            <p>
+                Feed the current input into each processing fork.<br/>
+                [ more details to follow ]
+            </p>
+        </div>
+        
+        <a name="for-each"></a>
+        <div class="fieldset" id="for-each">
+            <span class="legend">&lt;for-each&gt;</span>
+            <p>Iterate/loop through the items in the input object.<br/>
+                Like &lt;workflow&gt; contains an ordered list of <a href="#object">object</a>s.
+                Each of the items in the input is run through the chain of processing objects.
+            </p>
+        </div>
+        
+        <a name="try"></a>
+        <div class="fieldset" id="try">
+            <span class="legend">&lt;try&gt;</span>
+            <p>
+                Allows for error catching.<br/>
+                Any errors that occur within this element will not cause the workflow to exit with a failure.
+                <b>Must</b> be followed by an <a href="#except">&lt;except&gt;</a> element, which may also be followed by an <a href="#else">&lt;else&gt;</a> element.
+            </p>
+        </div>
+        
+        <a name="except"></a>
+        <div class="fieldset" id="except">
+            <span class="legend">&lt;except&gt;</span>
+            <p>
+                Error handling.<br/>
+                This element <b>must</b> follow a <a href="#try">&lt;try&gt;</a> element.
+                Specifies action to take in the event of an error occuring within the preceeding &lt;try&gt;.
+            </p>
+        </div>
+        
+        <a name="else"></a>
+        <div class="fieldset" id="else">
+            <span class="legend">&lt;else&gt;</span>
+            <p>
+                Success handling.<br/>
+                This element may follow a &lt;try&gt; &lt;except&gt; pair.
+                Specifies action to take in the event that no errors occur within the preceeding &lt;try&gt;.
+            </p>
+        </div>
+        
+        <a name="continue"></a>
+        <div class="fieldset" id="continue">
+            <span class="legend">&lt;continue/&gt;</span>
+            <p>
+                Skip remaining processing steps, and move on to next iteration while inside a <a href="#for-each">&lt;for-each&gt;</a> loop element.
+                May not contain any further elements or attributes.                
+                This can be useful in the error handling <a href="#except">&lt;except&gt;</a> element.<br/>
+                e.g. if a document cannot be parsed, it cannot be indexed, so skip to next document in the documentFactory.
+            </p>
+        </div>
+        
+        <a name="break"></a>
+        <div class="fieldset" id="break">
+            <span class="legend">&lt;break/&gt;</span>
+            <p>
+                Break out of a <a href="#for-each">&lt;for-each&gt;</a> loop element, skipping all subsequent processing steps, and all remaining iterations.
+                May not contain any further elements or attributes.
+            </p>
+        </div>
+        
+        <a name="raise"></a>
+        <div class="fieldset" id="raise">
+            <span class="legend">&lt;raise/&gt;</span>
+            <p>
+                Raise an error occuring within the preceeding <a href="#try">&lt;try&gt;</a> to the calling script or workflow.
+                May only be used within an <a href="#except">&lt;except&gt;</a> element.
+                May not contain any further elements or attributes.
+            </p>
+        </div>
+        
+        <a name="return"></a>
+        <div class="fieldset" id="return">
+            <span class="legend">&lt;return/&gt;</span>
+            <p>
+                Return the result of the previous step to the calling script or workflow.
+                May not contain any further elements or attributes.
+            </p>
+        </div>
+
+    </body>
+</html>
