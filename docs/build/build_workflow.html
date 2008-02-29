@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>Workflow Configuration</title>
+        <link rel="stylesheet" type="text/css" href="http://www.cheshire3.org/cheshire3.css"></link>
+    </head>
+    <body>
+        <a name="top"></a>
+        <table cellpadding="0" cellspacing="0" class="maintitle">
+            <tr>
+                <td class="cheshirelogo">
+                    <img src="http://www.cheshire3.org/gfx/c3_white.gif" alt=" c h e s h i r e  |  3"/>
+                </td>
+                <td>
+                    <img src="http://www.cheshire3.org/gfx/slant_grey.gif" alt=""/>
+                </td>
+                <td align="center">
+                    <h2>Workflow Configuration</h2>
+                </td>
+            </tr>
+        </table>
+
+        <!--#config errmsg="<div id="navbar"/>" -->
+        <!--#include virtual="/navbar.ssi" -->
+
+        <div class="fieldset">
+            <span class="legend">Introduction</span>
+            <p>
+                Workflows are first class objects in the Cheshire3 system -- they're configured at the same time and in the same way as other objects.
+                Their function is to provide an easy way to define a series of common steps that can be reused by different Cheshire3 databases/systems, as opposed to writing customised code to achieve the same end result for each.
+            </p>
+            <p>
+                Build workflows are the most common type as the data must generally pass through a lot of different functions on different objects, however as explained previously the differences between databases are often only in one section.
+                By using workflows, we can simply define the changed section rather than writing code to do the same task over and over again.
+            </p>
+            <p>
+                The disadvantage, currently, of workflows is that it is very complicated to find out what is going wrong if something fails.
+                If your data is very clean, then a workflow is probably the right solution, however if the data is likely to have XML parse errors or has to go through many different preParsers and you want to verify each step, then hand written code may be a better solution for you.
+            </p>
+            <p>
+                The distribution comes with a generic build workflow object called 'buildIndexWorkflow'.
+                It then calls 'buildIndexSingleWorkflow' to handle each individual document, also supplied.
+                This second workflow then calls 'PreParserWorkflow', of which a trivial one is supplied, but this is very unlikely to suit your particular needs, and should be customised as required.
+                An example would be if you were trying to build a database of legacy <abbr title="Standard General Markup Language">SGML</abbr> documents, your PreParserWorkflow would probably need to call an <a href="../objects/object_preParser.html">SGML PreParser</a>, configured to deal with the non-XML conformant parts of that particular SGML <abbr title="Document Type Definition">DTD</abbr>
+            </p>
+            <p>
+                For a full explanation of the different tags used in workflow configuration, and what they do, see the <a href="../config/">Configuration section</a> dealing with <a href="../config/config_workflow.html">workflows</a>.
+            </p>
+        </div>
+
+<p></p>
+        <div class="fieldset">
+            <span class="legend">Example 1</span>
+            <p>Simple workflow configuration:</p>
+            <pre>
+01  &lt;subConfig type="workflow" id="PreParserWorkflow"&gt;
+02    &lt;objectType&gt;workflow.SimpleWorkflow&lt;/objectType&gt;
+03    &lt;workflow&gt;
+04      &lt;!-- input type:  document --&gt;
+05      &lt;object type="preParser" ref="SgmlPreParser"/&gt;
+06      &lt;object type="preParser" ref="CharacterEntityPreParser"/&gt;
+07    &lt;/workflow&gt;
+08  &lt;/subConfig&gt;
+            
+            </pre>
+        </div>
+        
+        <div class="fieldset">
+            <span class="legend">Example 2</span>
+            <p>Slightly more complex workflow configurations:</p>
+            <pre>
+01  &lt;subConfig type="workflow" id="buildIndexWorkflow"&gt;
+02    &lt;objectType&gt;workflow.SimpleWorkflow&lt;/objectType&gt;
+03    &lt;workflow&gt;
+04      &lt;!-- input type:  documentFactory --&gt;
+05      &lt;log&gt;Loading records&lt;/log&gt;
+06      &lt;object type="recordStore" function="begin_storing"/&gt;
+07      &lt;object type="database" function="begin_indexing"/&gt;
+08      &lt;for-each&gt;
+09        &lt;object type="workflow" ref="buildIndexSingleWorkflow"/&gt;
+10      &lt;/for-each&gt;
+11      &lt;object type="recordStore" function="commit_storing"/&gt;
+12      &lt;object type="database" function="commit_metadata"/&gt;
+13      &lt;object type="database" function="commit_indexing"/&gt;
+14    &lt;/workflow&gt;
+15  &lt;/subConfig&gt;
+16
+17  &lt;subConfig type="workflow" id="buildIndexSingleWorkflow"&gt;
+18    &lt;objectType&gt;workflow.SimpleWorkflow&lt;/objectType&gt;
+19    &lt;workflow&gt;
+20      &lt;!-- input type:  document --&gt;
+21      &lt;object type="workflow" ref="PreParserWorkflow"/&gt;
+22      &lt;try&gt;
+23        &lt;object type="parser" ref="SaxParser"/&gt;
+24      &lt;/try&gt;
+25      &lt;except&gt;
+26        &lt;log&gt;Unparsable Record&lt;/log&gt;
+27      &lt;/except&gt;
+28      &lt;object type="recordStore" function="create_record"/&gt;
+29      &lt;object type="database" function="addRecord"/&gt;
+30      &lt;object type="database" function="indexRecord"/&gt;
+31      &lt;log&gt;Loaded Record&lt;/log&gt;
+32    &lt;/workflow&gt;
+33  &lt;/subConfig&gt;
+
+                </pre>
+
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">Explanation</span>
+            <p>
+                The first two lines of each configuration example are exactly the same as all previous objects.
+                Then there is one new section -- <i>workflow</i>.
+                This contains a series of instructions for what to do, primarily by listing objects to handle the data.
+            </p>
+            <p>
+                The workflow in example 1 is an example of how to override the PreParserWorkflow for a specific database.
+                In this case we start by giving the document input object to the SgmlPreParser in line 5, and the result of that is given to the CharacterEntityPreParser in line 6.
+                Note that lines 4 and 20 are just comments and are not required.
+            </p>
+            <p>
+                The workflows in Example 2 are slightly more complex with some additional constructions.
+                Lines 5, 26, 31 use the <i>log</i> instruction to get the workflow to log the fact that it is starting to load records.
+            </p>  
+            <p>
+                In lines 6 and 7 the object tags have a second attribute called 'function'.
+                This contains the name of the function to call when it's not derivable from the input object.
+                For example, a preParser will always call 'process_document', however you need to specify the function to call on a database as there are many available.
+                Note also that there isn't a 'ref' attribute to reference a specific object identifier.
+                In this case it uses the current session to determine which server, database, recordStore and so forth should be used.
+                This allows the workflow to be used in multiple contexts (i.e. if configured at the server level it can be used by several databases).
+            </p>
+            <p>
+                The <i>for-each</i> block (lines 8-10) then iterates through the documents in the supplied documentFactory, calling another workflow, buildIndexSingleWorkflow (configured in lines 17-33), on each of them.
+                Like the preParser objects mentioned earlier, workflow objects called don't need to be told which function to call - the system will always call their 'process' function.
+                Finally the database and recordStore have their commit functions called to ensure that everything is written out to disk.
+            </p>
+            <p>
+                The second workflow in Example 2 is called by the first, and in turn calls the PreParserWorkflow configured in Example 1.
+                It then calls a parser, carrying out some error handling as it does so (lines 22-27), and then makes further calls to the <a href="../objects/object_recordStore.html">recordStore</a> (line 28) and <a href="../objects/object_database.html">database</a> (lines 29-30) objects to store and index the record produced.
+            </p>
+        </div>
+
+    </body>
+</html>

@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>Configuring Databases</title>
+        <link rel="stylesheet" type="text/css" href="http://www.cheshire3.org/cheshire3.css"></link>
+    </head>
+    <body>
+        <a name="top"></a>
+        <table cellpadding="0" cellspacing="0" class="maintitle">
+            <tr>
+                <td class="cheshirelogo">
+                    <img src="http://www.cheshire3.org/gfx/c3_white.gif"  alt=" c h e s h i r e  |  3 "/>
+                </td>
+                <td>
+                    <img src="http://www.cheshire3.org/gfx/slant_grey.gif" alt=""/>
+                </td>
+                <td align="center">
+                    <h2>Configuring Cheshire3 Systems</h2>
+                </td>
+            </tr>
+        </table>
+
+        <!--#config errmsg="<div id="navbar"/>" -->
+        <!--#include virtual="/navbar.ssi" -->
+
+        <div class="fieldset">
+            <span class="legend">Introduction</span>
+            <p>
+                There are two main processes that Cheshire3 takes care of:
+            </p>
+            <ol>
+                <li>
+                    The preprocessing 'ingestion' phase in which data is taken into the system and processed. 
+                    This phase takes into account such things as cleaning the data, extracting the terms from the records and storage of the data and terms.
+                </li>
+                <li>The real time 'discovery' phase in which a user interacts with the system to find items that match their information need.</li>
+            </ol>
+            <p>The Ingestion Phase is the one with which we are currently concerned -- how to build a database with your data.</p>
+            <p>
+                First we will look at the types of object that will be involved with this phase, then how to configure them. 
+                Once the objects in the system are ready there are two possible ways to tell them how to work together and we'll cover each in turn.
+            </p>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">Objects</span>
+            <p>
+                Before we can populate a database with data, we need to configure how everything is going to work.
+                So first of all we need to know what sorts of <a href="../objects/index.html">Objects</a> we're going to have to interact with, and hence need to be configured.
+                So we'll run through a fairly typical ingestion phase process in Cheshire3.
+            </p>
+            <p>
+                A single item of data from outside of the system is represented in Cheshire3 as a <a href="../objects/object_document.html">Document</a>. 
+                This could be raw text, XML, a PDF, a row in a relational table or any other single coherent item. 
+                Normally, you will want to be importing a whole lot of items at once. 
+                The first object that we'll need to use is a <a href="../objects/object_documentFactory.html">DocumentFactory</a>. 
+                The document factory is responsible for discovering and importing the documents into the Cheshire3 framework as document objects. 
+                We'll need to tell the factory where to look for documents, for example the name of a directory in which the files are kept.
+            </p>
+            <p>
+                Once we have the told the document factory where to look, we can then extract each document from it in turn for processing. 
+                If the document is not in well formed XML, then we need to transform it so the XML parser will accept it. 
+                To do this, we use a series of <a href="../objects/object_preParser.html">PreParsers</a>. 
+                A preParser accepts a document, does a transformation, and returns the result as another document. 
+                Examples might be a PDF to Text preParser, or one that turns latin-1 entities like &amp;eacute; into their unicode character entity equivalent. 
+                A chain of preparsers can then transform a document through any number of intermediate steps before getting to the raw XML form.
+            </p>
+            <p>
+                When the document is in its final XML, we run it through a <a href="../objects/object_parser.html">Parser</a> in order to create a <a href="../objects/object_record.html">Record</a> representation of it. 
+                This record is the parsed XML, and allows interaction via both the Document Object Model and SAX interfaces, as well as serialising back to the canonical string form.
+            </p>  
+            <p>
+                Before we can talk about the record, we need to assign it a persistent identifier. 
+                This is typically done by storing it somewhere in a <a href="../objects/object_recordStore.html">RecordStore</a>, however they can be manually assigned identifiers as well. 
+                Documents may also be stored in a <a href="../objects/object_documentStore.html">DocumentStore</a> -- especially useful when the preParser chain is 'destructive', eg when information is lost such as in a PDF to raw text conversion.
+            </p>
+            <p>
+                The record is then given to a <a href="../objects/object_database.html">Database</a>. 
+                The database notes that the record is part of its collection and then hands it off to one or more <a href="../objects/object_index.html">Indexes</a> to extract the terms to allow for efficient searching.
+            </p>
+            <p>
+                The index then extracts the relevant data from the record via one or more XPath expressions configured ahead of time.
+                Once it has the result, it gives the information to an <a href="../objects/object_extractor.html">Extractor</a> which will extract the data from it in the required format.
+                Examples of this are: SimpleExtractor, which simply extracts all text content from the XML element; TeiExtractor, which extracts all text content, carrying out expansion of encoded abbreviations, modifying character cases etc. as specified by the <abbr title="Text Encoding Initiative">TEI</abbr> schema.
+            </p>
+            <p>
+                The data extracted may then be passed to a Tokenizer followed by a TokenMerger.
+                The tokenizer splits the data into tokens of the required type.
+                Examples of this are: <!-- layout here purely for clarity - NOT intended to be reflected in browser display -->
+                    SimpleTokenizer to split the data at whitespaces,
+                    LineTokenizer to split the data at newline characters,
+                    SentenceTokenizer to split the data into sentences,
+                    DateTokenizer to locate date tokens within the data.
+            </p>
+            <p>
+                If a Tokenizer is used it <b>must</b> be followed by a TokenMerger.
+                This is necessary to combine identical tokens into terms, and keep track of things like the number of times the term occurs.
+                We call the results of this process 'terms' but they do not have their own object class for performance reasons.
+                As well as being essential for assimilating tokens into terms, TokenMergers may be used to combine tokens in other useful ways for specialized types of index.
+                Examples of this are ProximityTokenMerger to take care of term positions for ProximityIndexes, and RangeTokenMergers to combine tokens into terms representing ranges for RangeIndexes.
+            </p>
+            <p>
+                Once the terms have been assimilated, the index may run them through zero or more <a href="../objects/object_normalizer.html">Normalizers</a>.
+                Each normalizer will take each term and transform it in some fashion.
+                For example a CaseNormalizer would return each term in lowercase, a StemNormalizer would perform some kind of linguistic stemming on each term.
+            </p>
+            <p>
+                After the normalisation process, the terms are stored in an <a href="../objects/object_indexStore.html">IndexStore</a> along with a pointer to the record from which it was derived and the number of occurences of the term in the record.
+            </p>
+            <p>
+                That's the ingestion phase from beginning to end.
+                We do not need to configure the Documents, the Records or the terms, but we will need configurations for the other objects that we've seen so far.
+                Many example or default configurations are provided.
+            </p>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">Database Configuration</span>
+            <p>
+                Configuration for objects in Cheshire3 is specified in XML.
+                There is one schema that all objects use, but it is extended for ones with additional requirements beyond typical aspects such as settings, defaults, paths and identifiers.
+            </p>
+            <p>
+                Every object has an identifier which is unique within the context of where it is defined.
+                This is important to understand, as it means that you can have two objects in different databases with the same identifier, but different configurations.
+                It also means you can have one object at the <a href="../objects/object_server.html">Server</a> level and one at a database level with the same identifier -- in this case the database will use its own object first.
+            </p>
+            <p>
+                Configurations are nested for this scoping reason.
+                The configuration for a server will contain several database configurations, which in turn will contain the indexes and storage objects required.
+                However it is normal to have each database's configuration in a separate file in the directory tree along with any other associated files, rather than directly in the server configuration itself.
+                The file is then imported via an instruction that we'll get to at the end.
+            </p>
+            <p>
+                The easiest way to configure a database is to copy and modify an existing configuration file (at least one is supplied with Cheshire3).
+                For detailed information on the configuration file format, see the <a href="../config/index.html">Configuration</a> section.
+            </p>
+            <p>Objects to be configured:</p>
+            <ul>
+                <li><a href="build_database.html">Database</a></li>
+                <li><a href="build_store.html">Stores</a> (RecordStore, IndexStore)</li>
+                <li><a href="build_index.html">Indexes</a></li>
+                <li><a href="build_preParser.html">PreParsers</a></li>
+                <li><a href="build_extractors.html">Extractors, Normalizers</a></li>
+            </ul>
+            <p>
+                There is one other 'mapping' object that we have to configure at this point -- a ProtocolMap which knows how to turn the parts of a query into references to the objects.
+            </p>
+            <ul>
+                <li><a href="build_protocolMap.html">CQL Protocol Map</a></li>
+            </ul>
+            <p>
+                Now we need get the database to instantiate the objects and tell the server to include the database:
+            </p>
+            <ul>
+                <li><a href="build_server.html">Instantiation</a></li>
+            </ul>
+        
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">Execution</span>
+            <p>
+                Once everything is configured, we need to be able to tell the system to build it.
+                There are two ways of doing this.  Either we can configure another object to tell the system which PreParsers to use for this particular database, or we can write some Python code to call the objects directly.  Examples of both are supplied in the distribution and explained in the pages below.
+            </p>
+            <ul>
+                <li><a href="build_workflow.html">Workflow Objects</a>  (Involves configuring another object)</li>
+                <li><a href="build_scripts.html">Python Scripts</a> (Involves writing straightforward Python code)</li>
+            </ul>
+        </div>
+
+    </body>
+</html>

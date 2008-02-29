@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>Configuring Databases</title>
+        <link rel="stylesheet" type="text/css" href="http://www.cheshire3.org/cheshire3.css"></link>
+    </head>
+    <body>
+        <a name="top"></a>
+        <table cellpadding="0" cellspacing="0" class="maintitle">
+            <tr>
+                <td class="cheshirelogo">
+                    <img src="http://www.cheshire3.org/gfx/c3_white.gif" alt=" c h e s h i r e  |  3 "/>
+                </td>
+                <td>
+                    <img src="http://www.cheshire3.org/gfx/slant_grey.gif" alt=""/>
+                </td>
+                <td align="center">
+                    <h2>Configuring Databases</h2>
+                </td>
+            </tr>
+        </table>
+
+        <!--#config errmsg="<div id="navbar"/>" -->
+        <!--#include virtual="/navbar.ssi" -->
+
+        <div class="fieldset">
+            <span class="legend">Introduction</span>
+            <p>
+                Databases are primarily collections of Records and Indexes along with the associated metadata and objects required for processing the data.
+            </p>
+            <p>
+                Configuration is typically done in a single file, with all of the dependent components included within it and stored in a directory devoted to just that database. 
+                The file is normally called, simply, 'config.xml'.
+            </p>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">Example</span>
+            <p>An example database configuration:</p>
+            <pre>
+01 &lt;config type="database" id="db_ead"&gt;
+02   &lt;objectType&gt;database.SimpleDatabase&lt;/objectType&gt;
+03
+04   &lt;paths&gt;
+05     &lt;path type="defaultPath"&gt;dbs/ead&lt;/path&gt;
+06     &lt;path type="metadataPath"&gt;metadata.bdb&lt;/path&gt;
+07     &lt;path type="indexStoreList"&gt;eadIndexStore&lt;/path&gt;
+08     &lt;object type="recordStore" ref="eadRecordStore"/&gt;
+09   &lt;/paths&gt;
+10   &lt;subConfigs&gt;
+11     ...
+12   &lt;/subConfigs&gt;
+13   &lt;objects&gt;
+14     ...
+15   &lt;/objects&gt;
+16 &lt;/config&gt;
+            </pre>
+
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">Explanation</span>
+            <p>In line 1 we open a new object, of type 'database' with an identifier of 'db_ead'.  You should replace 'db_ead' with the identifier you want for your database.</p>
+            <p>The second line defines the type of database. There is currently only one type, so this line should be copied in verbatim.</p>
+            <p>Between lines 4 and 9 we define 3 paths and one reference to an object. To explain each in turn:</p>
+            <ul>
+                <li>defaultPath is the path to the directory where the database is being stored.  It will be prepended to any further paths in the database or in any subsidiary object.</li>
+                <li>metadataPath is the path to a datastore in which the database will keep its metadata.  This includes things like the number of records, the average size or the records and so forth.  As it's a file path, it would end up being dbs/ead/metdata.bdb -- in other words, in the same directory as the rest of the database files.</li>
+                <li>indexStoreList is a space separated list of references to all indexStores the database will use. This is needed if we intend to index any records later, as it tells the database which indexStores to register the record in.</li>
+                <li>The object reference is to an object called 'eadRecordStore' which is an instance of a 'recordStore'.  This is important for future workflows, so that the database knows which recordStore it should put records into by default.</li>
+            </ul>
+            <p>Lines 10-12 will contain a series of subConfig elements, each of which is the configuration for a subsidiary object such as the recordStore and the indexes.</p>
+            <p>Lines 13-15 will contain a series of path elements, each of which has a reference to an object that has been previously configured.  This lines instruct the server to actually instantiate the object.  This means that the objects can be configured globally but only built when required.</p>
+        </div>
+
+    </body>
+</html>

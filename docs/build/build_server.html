@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+    <head>
+        <title>Object Instantiation Configuration</title>
+        <link rel="stylesheet" type="text/css" href="http://www.cheshire3.org/cheshire3.css"></link>
+    </head>
+    <body>
+        <a name="top"></a>
+        <table cellpadding="0" cellspacing="0" class="maintitle">
+            <tr>
+                <td class="cheshirelogo">
+                    <img src="http://www.cheshire3.org/gfx/c3_white.gif" alt=" c h e s h i r e  |  3 "/>
+                </td>
+                <td>
+                    <img src="http://www.cheshire3.org/gfx/slant_grey.gif" alt=""/>
+                </td>
+                <td align="center">
+                    <h2>Object Instantiation Configuration</h2>
+                </td>
+            </tr>
+        </table>
+
+        <!--#config errmsg="<div id="navbar"/>" -->
+        <!--#include virtual="/navbar.ssi" -->
+
+        <div class="fieldset">
+            <span class="legend">Introduction</span>
+            <p>
+                Cheshire3 employs Just-in-time building of objects.
+                This means that when a configured object is requested from its parent (usually a server or database), the parent checks whether the object has already been instantiated.
+                If it has, then the object is simply returned, if not it is instantiated and then returned.
+            </p>
+            <p>
+                <del>
+                Once all of the objects have been configured, we need to first tell the database to build them, and then include the database into the server. 
+                The split between configuration and instantiation is an important one -- we don't want to use up memory on useless objects that will never be used.
+                </del>
+            </p>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">Example</span>
+            <p>Example database configuration, continued:</p>
+            <pre>
+01 &lt;config type="database" id="db_ead"&gt;
+02   &lt;objectType&gt;database.SimpleDatabase&lt;/objectType&gt;
+...
+12   &lt;objects&gt;
+13     &lt;path ref="CharacterEntityPreParser"/&gt;
+14     &lt;path ref="eadIndexStore"/&gt;
+15     &lt;path ref="eadRecordStore"/&gt;
+16     &lt;path ref="title-idx"/&gt;
+17     ...
+18   &lt;/objects&gt;
+19 &lt;/config&gt;
+
+            </pre>						
+            <p>Example "configs.xml" configuration:</p>
+            <pre>
+01 &lt;config&gt;
+02   &lt;paths&gt;
+03     &lt;path type="defaultPath"&gt;dbs&lt;/path&gt;
+04   &lt;/paths&gt;
+05   &lt;subConfigs&gt;
+06     &lt;path type="database" id="db_dc"&gt;dbs/dc/config.xml&lt;/path&gt;
+07     <font color="red">&lt;path type="database" id="db_ead"&gt;dbs/ead/config.xml&lt;/path&gt;</font>
+08   &lt;/subConfigs&gt;
+09   &lt;objects&gt;
+10     &lt;path type="database" ref="db_dc"/&gt;
+11     <font color="red">&lt;path type="database" ref="db_ead"/&gt;</font>
+12   &lt;/objects&gt;
+13 &lt;/config&gt;
+            </pre>
+
+</div>
+
+        <div class="fieldset">
+            <span class="legend">Explanation</span>
+            <p>
+                At the bottom of the database configuration file is a section called <i>objects</i>. 
+                Here we need to give references back to the objects that we want the server to actually build at instantiation, rather than those for which it simple has a configuration and will instantiate later. 
+                This is done with a simple <i>path</i> element, equivalent to the way that objects that had already been instantiated are refered to in the <i>paths</i> section.
+            </p>
+            <p>
+                You may need to tell the server to build objects that you haven't defined, but have configurations included in the distribution. 
+                This isn't a problem -- you can instantiate objects at any level, so long as the server can work it's way back up the object tree to find the configuration to build it from. 
+                If the server complains (currently):
+            </p>
+            <pre>
+Traceback (most recent call last):
+    ...
+    doc = cepp.process_document(session, doc)
+AttributeError: 'NoneType' object has no attribute 'process_document'
+</pre>
+            <p>
+                or similar, then it probably means that the object (in this case 'cepp') hasn't been instantiated correctly - probably because the identifer used to retrieve it was incorrect.
+            </p>
+
+            <p>
+                Once the database config.xml has been finished, you then need to include it in to the server. 
+                To do this, edit the 'configs.xml' file in the 'dbs/' directory. 
+                It should look something similar to the second example above. 
+                In this case we want to add our new 'db_ead' database, so we need to add lines 7 and 11 in red. 
+                The first is the request to include the referenced file into the configuration, and the second is to build the database object in the same way as we've just done for the objects below the database.
+            </p>
+            <p>
+                Now you're done with the main configuration for your database :)
+            </p>
+        </div>
+
+    </body>
+</html>

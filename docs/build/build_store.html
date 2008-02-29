@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>Configuring Stores</title>
+        <link rel="stylesheet" type="text/css" href="http://www.cheshire3.org/cheshire3.css"></link>
+    </head>
+    <body>
+        <a name="top"></a>
+        <table cellpadding="0" cellspacing="0" class="maintitle">
+            <tr>
+                <td class="cheshirelogo">
+                    <img src="http://www.cheshire3.org/gfx/c3_white.gif" alt=" c h e s h i r e  |  3 "/>
+                </td>
+                <td>
+                    <img src="http://www.cheshire3.org/gfx/slant_grey.gif" alt=""/>
+                </td>
+                <td align="center">
+                    <h2>Configuring Stores</h2>
+                </td>
+            </tr>
+        </table>
+
+        <!--#config errmsg="<div id="navbar"/>" -->
+        <!--#include virtual="/navbar.ssi" -->
+
+        <div class="fieldset">
+            <span class="legend">Introduction</span>
+            <p>
+                There are several Store objects, but we're currently primarily concerned with RecordStores and IndexStores. 
+                DocumentStores are practically identical to RecordStores in terms of configuration, so we'll talk about the two together.
+            </p>
+            <p>
+                Database specific stores will be included in the subConfigs section of a database configuration file.
+            </p>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">Example</span>
+            <p>Example store configurations:</p>
+            <pre>
+01  &lt;subConfig type="recordStore" id="eadRecordStore"&gt;
+02    &lt;objectType&gt;recordStore.BdbRecordStore&lt;/objectType&gt;
+03    &lt;paths&gt;
+04      &lt;path type="databasePath"&gt;recordStore.bdb&lt;/path&gt;
+05      &lt;object type="idNormalizer" ref="StringIntNormalizer"/&gt;
+06    &lt;/paths&gt;
+07    &lt;options&gt;
+08      &lt;setting type="digest"&gt;sha&lt;/setting&gt;
+09    &lt;/options&gt;
+10  &lt;/subConfig&gt;
+11
+12  &lt;subConfig type="indexStore" id="eadIndexStore"&gt;
+13   &lt;objectType&gt;indexStore.BdbIndexStore&lt;/objectType&gt;
+14    &lt;paths&gt;
+15      &lt;path type="defaultPath"&gt;indexes&lt;/path&gt;
+16      &lt;path type="tempPath"&gt;temp&lt;/path&gt;
+17      &lt;path type="recordStoreHash"&gt;eadRecordStore&lt;/path&gt;
+18    &lt;/paths&gt;
+19  &lt;/subConfig&gt;
+
+            </pre>
+
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">Explanation</span>
+            <p>
+                Line 1 starts a new recordStore configuration for an object called 'eadRecordStore', and the following line declares that it should be instantiated using the recordStore.BdbRecordStore class. 
+                There are several possible classes distributed with Cheshire3, the other main one is PostgresRecordStore which will maintain the data and associated metadata in a PostgreSQL relational database. 
+                The default is the much faster BerkeleyDB store.
+            </p>
+            <p>
+                Then we have two fields wrapped in the <i>paths</i> section. 
+                Line 4 gives the filename of the database to use, in this case 'recordStore.bdb'.
+                Remember that this will be relative to the current defaultPath.
+                Line 5 has a reference to a Normalizer object -- this is used to turn the record identifiers into something appropriate for the underlying storage system. 
+                In this case, it turns integers into strings as Berkeley DB only has string keys. 
+                It's safest to leave this alone.
+            </p>
+            <p>
+                Then in line 8, we have a setting called 'digest'. 
+                This will configure the recordStore to maintain a checksum for each record to ensure that it remains unique within the store. 
+                There are two checksum algorithms available at the moment, 'sha' and 'md5'. 
+                If left out, the store will be slightly faster, but allow (potentially inadvertant) duplicate records.
+            </p>
+            <p>
+                For documentStores, instead all we would change would be the identifier and the class. 
+                Everything else can remain the same.  DocumentStores have some additional objects that can be referenced in the <i>paths</i> section however -- 'inWorkflow', 'inPreParser', 'outWorkflow' and 'outPreParser'.
+                These are objects to call to transform the document as it comes into the store or as it is fetched out of it respectively.
+            </p>
+            <p>
+                At line 12 we start configuring an indexStore called eadIndexStore, and as always the following line gives the class to instantiate it as.
+            </p>
+            <p>
+                In the paths section for this object we have three <i>path</i> elements.
+                The first at line 15 we've seen before -- it adds another link in the defaultPath. 
+                Line 16 gives a path in which to store temporary files.
+                During indexing, the store will create a couple of temporary files per index and then load them into the database only at the end after some pre-processing for efficiency. 
+                Line 17 then has a path of type 'recordStoreHash'. 
+                This is a space separated list of recordStores that contain records that will appear in the indexes. 
+                Normally there will just be the one store, but for larger or composite databases it may be appropriate to split the data into multiple stores.
+            </p>
+        </div>
+
+    </body>
+</html>
