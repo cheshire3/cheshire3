@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>Cheshire3 Development: Search Interfaces</title>
+        <link rel="stylesheet" type="text/css" href="http://www.cheshire3.org/cheshire3.css"></link>
+    </head>
+    <body>
+        <a name="top"></a>
+	<table cellpadding="0" cellspacing="0" class="maintitle">
+            <tr>
+	       <td class="cheshirelogo">
+                    <img src="http://www.cheshire3.org/gfx/c3_white.gif" alt=" c h e s h i r e  |  3 " />
+                </td>
+		<td>
+                    <img src="http://www.cheshire3.org/gfx/slant_grey.gif" alt="" />
+		</td>
+		<td align="center">
+                    <h2>Search Interfaces</h2>
+		</td>
+            </tr>
+	</table>
+
+	<!--#config errmsg="<div id="navbar"/>" -->
+	<!--#include virtual="/navbar.ssi" -->
+
+	<div class="fieldset">
+            <span class="legend">Introduction</span>
+            <p>
+                A sample and fairly straightforwards script to search a database given a CQL query. 
+                We go through it section by section and explain how things work. 
+                It can be used as a template for other scripts, or as a base point for more complicated versions.
+            </p>
+	</div>
+
+	<div class="fieldset">
+            <span class="legend">Python Environment (01-10)</span>
+            <pre>
+01 #!/home/cheshire/install/bin/python
+02
+03 import sys
+04 osp = sys.path
+05 sys.path = ["/home/cheshire/cheshire3/code"]
+06 sys.path.extend(osp)
+07
+08 from server import SimpleServer
+09 from PyZ3950 import CQLParser
+10 from baseObjects import Session
+            </pre>
+            <p>
+                The first thing to do in any script is to setup python such that you can use the various Cheshire3 objects. 
+                This allows us to find the Cheshire3 code first, before any other similarly named modules that might be installed. 
+                Line 8 imports the base server code needed in the next section, and line 9 imports the parser for CQL (Common Query Language). 
+                Line 10 imports the base Session object used to maintain contextual information.
+            </p>
+	</div>
+
+	<div class="fieldset">
+            <span class="legend">Cheshire3 Environment (11-20)</span>
+            <pre>
+11 # Build environment...
+12 session = Session()
+13 serv = SimpleServer(session, "../../configs/serverConfig.xml")
+14 db = serv.get_object(session, 'db_tei')
+15 recStore = db.get_object(session, 'TeiRecordStore')
+16 resultStore = db.get_object(session, 'TempResultStore')
+17 txr = db.get_object(session, 'TeiToDCTransformer')
+18 idx = db.get_object(session, 'l5r-idx-1')
+19 session.database = 'db_tei'
+20
+            </pre>
+            <p>
+                This example uses a lot of different objects within the Cheshire3 framework.
+                First of all (12) we instantiate a Session object.  
+                Then (13) we build a server from the configuration file.  
+                From that server we then retrieve the database (14), the recordStore (15), a result set store (16), a transformer (17) and an index (18).  
+                Finally (19) we set the database attribute of the session object to the id of the database we're currently using.
+                These objects will all be used in the next section.
+            </p>
+	</div>
+
+	<div class="fieldset">
+            <span class="legend">Search, Sort, Transform and Display (21-31)</span>
+            <pre>
+21 query = 'dc.title any "sword fist steel"'
+22 clause = CQLParser.parse(query)
+23 result = db.search(session, clause)
+24 hits = len(result)
+25 if hits:
+26     result.order(session, idx)
+27     rsid = resultStore.create_resultSet(session, result)
+28     for i in range(min(hits, 10)):
+29       rec = recStore.fetch_record(session, result[i].docid)
+30       doc = txr.process_record(session, rec)
+31       print doc.get_raw(session)
+            </pre>
+            <p>
+            	Now that we're set up, we can actually do some work.    
+            	First (21) we define a query in CQL. This would typically come from a command line or another interface rather than being static as per the example.  
+            	We need to turn the query into a parsed tree to process it, which is done by the CQLParser (22). 
+            	The search is then carried out (23), returning a resultSet object.
+            </p>
+            <p>
+            	ResultSets are a combination of set and list in that they have a fixed order but can be combined with booleans such as AND or OR. 
+            	First we check if there were any matches for our search (24-25). 
+            	If there were, then we order the resultSet according to an index. 
+            	This is one of the indexes built in the build process and hence knows how to extract data from a record. 
+            	If configured, it may have a pre-generated database of these extracted values per record. 
+                We then store the sorted result set in a ResultSetStore for later reference (27).
+            </p>
+            <p>
+            	Finally, we step through the first 10 records (or however many are in the set, if less). 
+            	We need to retrieve the actual document from the recordStore first (29), as the set consists of pointers. 
+            	Then we transform the record into a document (30) containing, in this example, the simple dublin core form of the data. 
+            	The last line then prints the transformed XML.
+            </p>
+	</div>
+
+	<div class="fieldset">
+            <span class="legend">Complete Example</span>
+            <pre>
+#!/home/cheshire/install/bin/python
+
+import sys
+osp = sys.path
+sys.path = ["/home/cheshire/cheshire3/code"]
+sys.path.extend(osp)
+
+from server import SimpleServer
+from PyZ3950 import CQLParser
+from baseObjects import Session
+
+# Build environment...
+session = Session()
+serv = SimpleServer(session, "../../configs/serverConfig.xml")
+db = serv.get_object(session, 'db_tei')
+recStore = db.get_object(session, 'TeiRecordStore')
+resultStore = db.get_object(session, 'TempResultStore')
+txr = db.get_object(session, 'TeiToDCTransformer')
+idx = db.get_object(session, 'l5r-idx-1')
+
+query = 'dc.title any "sword fist steel"'
+clause = CQLParser.parse(query)
+result = db.search(session, clause)
+hits = len(result)
+if hits:
+    result.order(session, idx)
+    rsid = resultStore.create_resultSet(session, result)
+    for i in range(min(hits, 10)):
+        rec = recStore.fetch_record(session, result[i].docid)
+        doc = txr.process_record(session, rec)
+        print doc.get_raw(session)
+            </pre>
+        </div>
+
+    </body>
+</html>
