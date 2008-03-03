@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>Cheshire3 Objects: IndexStore</title>
+        <link rel="stylesheet" type="text/css" href="http://www.cheshire3.org/cheshire3.css"></link>
+    </head>
+    <body>
+
+        <table cellpadding="0" cellspacing="0" class="maintitle">
+            <tr>
+                <td class="cheshirelogo">
+                    <img src="http://www.cheshire3.org/gfx/c3_white.gif" alt=" c h e s h i r e  |  3 "/>
+		</td>
+		<td>
+                    <img src="http://www.cheshire3.org/gfx/slant_grey.gif" alt=""/>
+		</td>
+		<td align="center">
+                    <h2>Cheshire3 Objects:  Index Store</h2>
+		</td>
+            </tr>
+	</table>
+
+	<!--#config errmsg="<div id="navbar"/>" -->
+	<!--#include virtual="/navbar.ssi" -->
+
+        <div class="fieldset">
+            <span class="legend">Description</span>
+            <p>
+            A persistent storage mechanism for indexed terms.  
+            </p>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">Implementations</span>
+            <ul>
+                <li><b>recordStore.BdbIndexStore</b><br/>
+                The recommended implementation, it stores the terms in BerkeleyDB stores.</li>
+            </ul>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">API</span>
+            <table border="1" cellpadding="3" cellspacing="0" width="100%">
+                <tr><th>Function</th><th>Parameters</th><th>Returns</th><th>Description</th></tr>
+                <tr><td>__init__</td><td>config, parent</td><td>&nbsp;</td><td> </td></tr>
+                <tr><td>begin_indexing</td><td>session, index</td><td>&nbsp;</td><td>Setup an environment to allow for batch mode indexing -- eg don't store anything until commit_indexing is called</td></tr>
+                <tr><td>commit_indexing</td><td>session, index</td><td>&nbsp;</td><td>Store the terms given since begin_indexing was called</td></tr>
+                
+                <tr><td>create_index</td><td>session, index</td><td>&nbsp;</td><td>Register a new index, including maybe creating files on disk and so forth</td></tr>
+                <tr><td>delete_index</td><td>session, index</td><td>&nbsp;</td><td>Delete an existing index</td></tr>
+                <tr><td>contains_index</td><td>session, index</td><td>Boolean</td><td>Does this store maintain the given index</td></tr>
+                
+                <tr><td>store_terms</td><td>session, index, hash, record, ?original</td><td>&nbsp;</td><td>Store the given terms and related information, as extracted from the record.  If present, store the given original term, as it existed in the record before processing</td></tr>
+                <tr><td>delete_term</td><td>session, index</td><td>&nbsp;</td><td>Delete a term from the index</td></tr>
+                <tr><td>fetch_termList</td><td>session, index, term, numberOfTerms, relation, end</td><td>list of terms</td><td>Return a list of terms and their data according to the parameters.  The relation determines which way to scan through the index, and end gives a position to stop at such that 'within' queries can be processed</td></tr>
+                <tr><td>fetch_term</td><td>session, index, term</td><td>&nbsp;</td><td>Return the data for a given term</td></tr>
+                
+                <tr><td>fetch_sortValue</td><td>session, index</td><td>&nbsp;</td><td>Given a record, return a value appropriate for sorting according to an index. (May not be available)</td></tr>
+
+            </table>
+        </div>
+
+    </body>
+</html>

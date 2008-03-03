@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>normalizer.SimpleNormalizer</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <link rel="stylesheet" href="/cheshire3.css" type="text/css"/>
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body>
+<table width="100%" border=0 cellpadding=0 cellspacing=0 class="maintitle">
+<tr height="75">
+<td class="cheshirelogo" width="25%">
+<img src="/gfx/c3_white.gif">
+</td>
+<td width="10">
+<img src="/gfx/slant_grey.gif">
+</td>
+<td width="75%" align="center">
+<h2>Cheshire3 Object Model: Class SimpleNormalizer
+</h2>
+</td></tr>
+</table>
+
+<div class="fieldset">
+<span class="legend"><a href="configParser-module.html">
+        <a href="normalizer-module.html">Module&nbsp;normalizer</a> ::
+        Class&nbsp;SimpleNormalizer
+      </span>
+<p>
+
+
+<h2 class="class">Class SimpleNormalizer
+<br/><span class="codelink"><a href="normalizer-pysrc.html#SimpleNormalizer">source&nbsp;code</a></span></h2>
+<b>Object Tree:</b><pre class="base-tree">
+           object --+        
+                    |        
+<a href="configParser.C3Object-class.html">configParser.C3Object</a> --+    
+                        |    
+   <a href="baseObjects.Normalizer-class.html">baseObjects.Normalizer</a> --+
+                            |
+                           <strong class="uidshort">SimpleNormalizer</strong>
+</pre>
+
+<dl><dt>Known Subclasses:</dt>
+<dd>
+    <a href="normalizer.ArticleNormalizer-class.html">ArticleNormalizer</a>,
+    <a href="normalizer.CaseNormalizer-class.html">CaseNormalizer</a>,
+    <a href="normalizer.DataExistsNormalizer-class.html">DataExistsNormalizer</a>,
+    <a href="normalizer.DateStringNormalizer-class.html">DateStringNormalizer</a>,
+    <a href="normalizer.DiacriticNormalizer-class.html">DiacriticNormalizer</a>,
+    <a href="normalizer.ExactExpansionNormalizer-class.html">ExactExpansionNormalizer</a>,
+    <a href="normalizer.IntNormalizer-class.html">IntNormalizer</a>,
+    <a href="normalizer.KeywordNormalizer-class.html">KeywordNormalizer</a>,
+    <a href="normalizer.NumericEntityNormalizer-class.html">NumericEntityNormalizer</a>,
+    <a href="normalizer.PhraseStemNormalizer-class.html">PhraseStemNormalizer</a>,
+    <a href="normalizer.PossessiveNormalizer-class.html">PossessiveNormalizer</a>,
+    <a href="normalizer.RangeNormalizer-class.html">RangeNormalizer</a>,
+    <a href="normalizer.RegexpNormalizer-class.html">RegexpNormalizer</a>,
+    <a href="normalizer.ReverseNormalizer-class.html">ReverseNormalizer</a>,
+    <a href="normalizer.SpaceNormalizer-class.html">SpaceNormalizer</a>,
+    <a href="normalizer.StemNormalizer-class.html">StemNormalizer</a>,
+    <a href="normalizer.StoplistNormalizer-class.html">StoplistNormalizer</a>,
+    <a href="normalizer.StringIntNormalizer-class.html">StringIntNormalizer</a>,
+    <a href="normalizer.TermExistsNormalizer-class.html">TermExistsNormalizer</a>,
+    <a href="normalizer.WordExpansionNormalizer-class.html">WordExpansionNormalizer</a>,
+    <a href="textmining.tmNormalizer.PosNormalizer-class.html">textmining.tmNormalizer.PosNormalizer</a>,
+    <a href="textmining.tmNormalizer.GeniaStemNormalizer-class.html">textmining.tmNormalizer.GeniaStemNormalizer</a>,
+    <a href="textmining.tmNormalizer.GeniaTextNormalizer-class.html">textmining.tmNormalizer.GeniaTextNormalizer</a>,
+    <a href="textmining.tmNormalizer.PosPhraseNormalizer-class.html">textmining.tmNormalizer.PosPhraseNormalizer</a>,
+    <a href="textmining.tmNormalizer.PosTypeNormalizer-class.html">textmining.tmNormalizer.PosTypeNormalizer</a>
+</dd></dl>
+
+<hr />
+Base normalizer.  Simply returns the data (shouldn't be used 
+  directly)<br /><br />
+
+<!-- ==================== INSTANCE METHODS ==================== -->
+</div><div class="fieldset"><span class="legend">Instance Methods</span><p>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white"><tr>
+
+  <td>
+    <span class="sig"><a href="normalizer.SimpleNormalizer-class.html#__init__" class="sig-name">__init__</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">config</span>,
+        <span class="sig-arg">parent</span>)</span>
+    <br />The constructor for all Cheshire3 objects take the same arguments:
+      session:  A Session object topNode:  The &lt;config&gt; or 
+      &lt;subConfig&gt; domNode for the configuration parent:   The object 
+      that provides the scope for this object.
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="normalizer.SimpleNormalizer-class.html#process_hash" class="sig-name">process_hash</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">data</span>)</span>
+    <br />Process a hash of values into alternative forms.
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="normalizer.SimpleNormalizer-class.html#process_string" class="sig-name">process_string</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">data</span>)</span>
+    <br />Process a string into an alternative form.
+  </td>
+</tr>
+  <tr>
+    <td colspan="2">
+    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="configParser.C3Object-class.html">configParser.C3Object</a></code></span>:
+      <code><a href="configParser.C3Object-class.html#auth_function">auth_function</a></code>,
+      <code><a href="configParser.C3Object-class.html#get_config">get_config</a></code>,
+      <code><a href="configParser.C3Object-class.html#get_default">get_default</a></code>,
+      <code><a href="configParser.C3Object-class.html#get_object">get_object</a></code>,
+      <code><a href="configParser.C3Object-class.html#get_path">get_path</a></code>,
+      <code><a href="configParser.C3Object-class.html#get_setting">get_setting</a></code>,
+      <code><a href="configParser.C3Object-class.html#log_function">log_function</a></code>,
+      <code><a href="configParser.C3Object-class.html#unauth_function">unauth_function</a></code>,
+      <code><a href="configParser.C3Object-class.html#unlog_function">unlog_function</a></code>
+      </p>
+    <div class="private">    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="configParser.C3Object-class.html">configParser.C3Object</a></code></span> (private):
+      <code><a href="configParser.C3Object-class.html#_getDomFromFile">_getDomFromFile</a></code>,
+      <code><a href="configParser.C3Object-class.html#_handleConfigNode">_handleConfigNode</a></code>,
+      <code><a href="configParser.C3Object-class.html#_parseIncludes">_parseIncludes</a></code>,
+      <code><a href="configParser.C3Object-class.html#_recurseSubConfigs">_recurseSubConfigs</a></code>,
+      <code><a href="configParser.C3Object-class.html#_verifyDefault">_verifyDefault</a></code>,
+      <code><a href="configParser.C3Object-class.html#_verifyOption">_verifyOption</a></code>,
+      <code><a href="configParser.C3Object-class.html#_verifySetting">_verifySetting</a></code>
+      </p></div>
+    <p class="varlist"><span class="varlist-header">Inherited from <code>object</code></span>:
+      <code>__delattr__</code>,
+      <code>__getattribute__</code>,
+      <code>__hash__</code>,
+      <code>__new__</code>,
+      <code>__reduce__</code>,
+      <code>__reduce_ex__</code>,
+      <code>__repr__</code>,
+      <code>__setattr__</code>,
+      <code>__str__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+
+<br />
+<!-- ==================== CLASS VARIABLES ==================== -->
+</div><div class="fieldset"><span class="legend">Class Variables</span><p>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">  <tr>
+    <td colspan="2">
+    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="configParser.C3Object-class.html">configParser.C3Object</a></code></span>:
+      <code><a href="configParser.C3Object-class.html#configStore">configStore</a></code>,
+      <code><a href="configParser.C3Object-class.html#defaults">defaults</a></code>,
+      <code><a href="configParser.C3Object-class.html#functionLogger">functionLogger</a></code>,
+      <code><a href="configParser.C3Object-class.html#id">id</a></code>,
+      <code><a href="configParser.C3Object-class.html#name">name</a></code>,
+      <code><a href="configParser.C3Object-class.html#objectType">objectType</a></code>,
+      <code><a href="configParser.C3Object-class.html#objects">objects</a></code>,
+      <code><a href="configParser.C3Object-class.html#parent">parent</a></code>,
+      <code><a href="configParser.C3Object-class.html#paths">paths</a></code>,
+      <code><a href="configParser.C3Object-class.html#permissionHandlers">permissionHandlers</a></code>,
+      <code><a href="configParser.C3Object-class.html#settings">settings</a></code>,
+      <code><a href="configParser.C3Object-class.html#subConfigs">subConfigs</a></code>,
+      <code><a href="configParser.C3Object-class.html#unresolvedObjects">unresolvedObjects</a></code>
+      </p>
+    <div class="private">    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="configParser.C3Object-class.html">configParser.C3Object</a></code></span> (private):
+      <code><a href="configParser.C3Object-class.html#_includeConfigStores">_includeConfigStores</a></code>,
+      <code><a href="configParser.C3Object-class.html#_objectRefs">_objectRefs</a></code>
+      </p></div>
+    <p class="varlist"><span class="varlist-header">Inherited from <code>object</code></span>:
+      <code>__class__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+
+<br />
+<!-- ==================== METHOD DETAILS ==================== --></div><div class="fieldset"><span class="legend">Method Details</span><p><a name="__init__"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">config</span>,
+        <span class="sig-arg">parent</span>)</span>
+    <br /><em class="fname">(Constructor)</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="normalizer-pysrc.html#SimpleNormalizer.__init__">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  The constructor for all Cheshire3 objects take the same arguments: 
+  session:  A Session object topNode:  The &lt;config&gt; or 
+  &lt;subConfig&gt; domNode for the configuration parent:   The object that
+  provides the scope for this object.
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="configParser.C3Object-class.html#__init__">configParser.C3Object.__init__</a>
+        <dd><em class="note">(inherited documentation)</em></dd>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="process_hash"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">process_hash</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">data</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="normalizer-pysrc.html#SimpleNormalizer.process_hash">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Process a hash of values into alternative forms.
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="baseObjects.Normalizer-class.html#process_hash">baseObjects.Normalizer.process_hash</a>
+        <dd><em class="note">(inherited documentation)</em></dd>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="process_string"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">process_string</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">data</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="normalizer-pysrc.html#SimpleNormalizer.process_string">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Process a string into an alternative form.
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="baseObjects.Normalizer-class.html#process_string">baseObjects.Normalizer.process_string</a>
+        <dd><em class="note">(inherited documentation)</em></dd>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<br />
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">Generated by Epydoc
+        3.0alpha2 on Wed Aug  9 18:09:58 2006</td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>

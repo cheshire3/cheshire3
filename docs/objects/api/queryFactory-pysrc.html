@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>queryFactory</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        Module&nbsp;queryFactory
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript: void(0);" class="privatelink"
+    onclick="toggle_private();">hide private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="queryFactory-pysrc.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<h2 class="py-src">Source Code for <a href="queryFactory-module.html">Module queryFactory</a></h2>
+<div class="py-src">
+<pre class="py-src">
+<span class="lineno"> 1</span>  <span class="py-line"> </span>
+<span class="lineno"> 2</span>  <span class="py-line"> </span>
+<span class="lineno"> 3</span>  <span class="py-line"><span class="py-comment"># Give qf a string, get back a query object</span> </span>
+<span class="lineno"> 4</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># Why?  ...  Removes dependency on PyZ3950.CQLParser in all scripts</span> </span>
+<span class="lineno"> 5</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># Allows for non CQL queries, with sufficient translation</span> </span>
+<span class="lineno"> 6</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># Allows for query generation during workflows from string</span> </span>
+<span class="lineno"> 7</span>  <span class="py-line"><span class="py-comment"></span> </span>
+<span class="lineno"> 8</span>  <span class="py-line"> </span>
+<span class="lineno"> 9</span>  <span class="py-line"><span class="py-keyword">from</span> <span class="py-name">PyZ3950</span><span class="py-op">.</span><span class="py-name">CQLParser</span> <span class="py-keyword">import</span> <span class="py-name">parse</span> </span>
+<span class="lineno">10</span>  <span class="py-line"><span class="py-keyword">from</span> <a title="baseObjects" class="py-name" href="baseObjects-module.html">baseObjects</a> <span class="py-keyword">import</span> <a class="py-name" href="baseObjects.QueryFactory-class.html">QueryFactory</a> </span>
+<span class="lineno">11</span>  <span class="py-line"> </span>
+<a name="SimpleQueryFactory"></a><div id="SimpleQueryFactory-def"><span class="lineno">12</span> <a class="pysrc-toggle" href="#" id="SimpleQueryFactory-toggle" onclick="toggle('SimpleQueryFactory'); return false;">-</a><span class="py-line"><span class="py-keyword">class</span> <a class="py-def-name" href="queryFactory.SimpleQueryFactory-class.html">SimpleQueryFactory</a><span class="py-op">(</span><span class="py-base-class">QueryFactory</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="SimpleQueryFactory-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="SimpleQueryFactory-expanded"><span class="lineno">13</span>  <span class="py-line"> </span>
+<a name="SimpleQueryFactory.process_string"></a><div id="SimpleQueryFactory.process_string-def"><span class="lineno">14</span> <a class="pysrc-toggle" href="#" id="SimpleQueryFactory.process_string-toggle" onclick="toggle('SimpleQueryFactory.process_string'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="queryFactory.SimpleQueryFactory-class.html#process_string">process_string</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">session</span><span class="py-op">,</span> <span class="py-param">data</span><span class="py-op">,</span> <span class="py-param">type</span><span class="py-op">=</span><span class="py-string">"cql"</span><span class="py-op">,</span> <span class="py-param">db</span><span class="py-op">=</span><span class="py-name">None</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="SimpleQueryFactory.process_string-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="SimpleQueryFactory.process_string-expanded"><span class="lineno">15</span>  <span class="py-line">        <span class="py-keyword">if</span> <span id="link-0" class="py-name"><a title="GoogleSearch_services_types.urn_GoogleSearch.DirectoryCategory_Def.type
+GoogleSearch_services_types.urn_GoogleSearch.GoogleSearchResult_Def.type
+GoogleSearch_services_types.urn_GoogleSearch.ResultElement_Def.type" class="py-name" href="#" onclick="doclink('link-0', 'type', 'Variable GoogleSearch_services_types.urn_GoogleSearch.DirectoryCategory_Def.type=GoogleSearch_services_types.urn_GoogleSearch.DirectoryCategory_Def-class.html#type,Variable GoogleSearch_services_types.urn_GoogleSearch.GoogleSearchResult_Def.type=GoogleSearch_services_types.urn_GoogleSearch.GoogleSearchResult_Def-class.html#type,Variable GoogleSearch_services_types.urn_GoogleSearch.ResultElement_Def.type=GoogleSearch_services_types.urn_GoogleSearch.ResultElement_Def-class.html#type'); return false;">type</a></span></span> <span class="py-op">==</span> <span class="py-string">"cql"</span><span class="py-op">:</span> </span>
+<span class="lineno">16</span>  <span class="py-line">            <span class="py-keyword">return</span> <span class="py-name">parse</span><span class="py-op">(</span><span class="py-name">data</span><span class="py-op">)</span> </span>
+<span class="lineno">17</span>  <span class="py-line">        <span class="py-keyword">else</span><span class="py-op">:</span> </span>
+<span class="lineno">18</span>  <span class="py-line">            <span class="py-keyword">raise</span> <span class="py-name">NotImplementedError</span><span class="py-op">(</span><span class="py-op">)</span> </span>
+</div></div><span class="lineno">19</span>  <span class="py-line"> </span><script type="text/javascript">
+<!--
+expandto(location.href);
+// -->
+</script>
+</pre>
+</div>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">Generated by Epydoc
+        3.0alpha2 on Wed Aug  9 18:11:03 2006</td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>

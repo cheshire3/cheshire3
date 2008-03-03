@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>documentFactory.XmlDocumentStream</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <link rel="stylesheet" href="/cheshire3.css" type="text/css"/>
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body>
+<table width="100%" border=0 cellpadding=0 cellspacing=0 class="maintitle">
+<tr height="75">
+<td class="cheshirelogo" width="25%">
+<img src="/gfx/c3_white.gif">
+</td>
+<td width="10">
+<img src="/gfx/slant_grey.gif">
+</td>
+<td width="75%" align="center">
+<h2>Cheshire3 Object Model: Class XmlDocumentStream
+</h2>
+</td></tr>
+</table>
+
+<div class="fieldset">
+<span class="legend"><a href="configParser-module.html">
+        <a href="documentFactory-module.html">Module&nbsp;documentFactory</a> ::
+        Class&nbsp;XmlDocumentStream
+      </span>
+<p>
+
+
+<h2 class="class">Class XmlDocumentStream
+<br/><span class="codelink"><a href="documentFactory-pysrc.html#XmlDocumentStream">source&nbsp;code</a></span></h2>
+<b>Object Tree:</b><pre class="base-tree">
+<a href="documentFactory.BaseDocumentStream-class.html">BaseDocumentStream</a> --+
+                     |
+                    <strong class="uidshort">XmlDocumentStream</strong>
+</pre>
+
+<hr />
+<!-- ==================== INSTANCE METHODS ==================== -->
+</div><div class="fieldset"><span class="legend">Instance Methods</span><p>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white"><tr>
+
+  <td>
+    <span class="sig"><a href="documentFactory.XmlDocumentStream-class.html#__init__" class="sig-name">__init__</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">stream</span>,
+        <span class="sig-arg">format</span>,
+        <span class="sig-arg">schema</span>=<span class="sig-default">&quot;&quot;</span>,
+        <span class="sig-arg">codec</span>=<span class="sig-default">&quot;&quot;</span>,
+        <span class="sig-arg">factory</span>=<span class="sig-default">None</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="documentFactory.XmlDocumentStream-class.html#find_documents" class="sig-name">find_documents</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">cache</span>=<span class="sig-default">0</span>)</span>
+    
+  </td>
+</tr>
+  <tr>
+    <td colspan="2">
+    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="documentFactory.BaseDocumentStream-class.html">BaseDocumentStream</a></code></span>:
+      <code><a href="documentFactory.BaseDocumentStream-class.html#fetch_document">fetch_document</a></code>,
+      <code><a href="documentFactory.BaseDocumentStream-class.html#open_stream">open_stream</a></code>
+      </p>
+    </td>
+  </tr>
+</table>
+
+<br />
+<!-- ==================== CLASS VARIABLES ==================== -->
+</div><div class="fieldset"><span class="legend">Class Variables</span><p>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white"><tr>
+  <td width="15%">
+    <strong><a href="documentFactory.XmlDocumentStream-class.html#start">start</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="documentFactory.XmlDocumentStream-class.html#endtag">endtag</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+  <tr>
+    <td colspan="2">
+    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="documentFactory.BaseDocumentStream-class.html">BaseDocumentStream</a></code></span>:
+      <code><a href="documentFactory.BaseDocumentStream-class.html#codec">codec</a></code>,
+      <code><a href="documentFactory.BaseDocumentStream-class.html#documents">documents</a></code>,
+      <code><a href="documentFactory.BaseDocumentStream-class.html#factory">factory</a></code>,
+      <code><a href="documentFactory.BaseDocumentStream-class.html#filterRe">filterRe</a></code>,
+      <code><a href="documentFactory.BaseDocumentStream-class.html#format">format</a></code>,
+      <code><a href="documentFactory.BaseDocumentStream-class.html#length">length</a></code>,
+      <code><a href="documentFactory.BaseDocumentStream-class.html#locations">locations</a></code>,
+      <code><a href="documentFactory.BaseDocumentStream-class.html#schema">schema</a></code>,
+      <code><a href="documentFactory.BaseDocumentStream-class.html#stream">stream</a></code>,
+      <code><a href="documentFactory.BaseDocumentStream-class.html#streamLocation">streamLocation</a></code>
+      </p>
+    </td>
+  </tr>
+</table>
+
+<br />
+<!-- ==================== METHOD DETAILS ==================== --></div><div class="fieldset"><span class="legend">Method Details</span><p><a name="__init__"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">stream</span>,
+        <span class="sig-arg">format</span>,
+        <span class="sig-arg">schema</span>=<span class="sig-default">&quot;&quot;</span>,
+        <span class="sig-arg">codec</span>=<span class="sig-default">&quot;&quot;</span>,
+        <span class="sig-arg">factory</span>=<span class="sig-default">None</span>)</span>
+    <br /><em class="fname">(Constructor)</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="documentFactory-pysrc.html#XmlDocumentStream.__init__">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="documentFactory.BaseDocumentStream-class.html#__init__">BaseDocumentStream.__init__</a>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="find_documents"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">find_documents</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">cache</span>=<span class="sig-default">0</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="documentFactory-pysrc.html#XmlDocumentStream.find_documents">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<br />
+<!-- ==================== CLASS VARIABLE DETAILS ==================== --></div><div class="fieldset"><span class="legend">Class Variable Details</span><p><a name="start"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>start</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="None"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="endtag"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>endtag</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="''"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+<span class="variable-quote">'</span><span class="variable-quote">'</span>                                                                     
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<br />
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">Generated by Epydoc
+        3.0alpha2 on Wed Aug  9 18:09:58 2006</td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>

@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>normalizer</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <link rel="stylesheet" href="/cheshire3.css" type="text/css"/>
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body>
+<table width="100%" border=0 cellpadding=0 cellspacing=0 class="maintitle">
+<tr height="75">
+<td class="cheshirelogo" width="25%">
+<img src="/gfx/c3_white.gif">
+</td>
+<td width="10">
+<img src="/gfx/slant_grey.gif">
+</td>
+<td width="75%" align="center">
+<h2>Cheshire3: normalizer
+ Module</h2>
+</td></tr>
+</table>
+
+<div class="fieldset">
+<span class="legend"><a href="configParser-module.html">
+        Module&nbsp;normalizer
+      </span>
+<p>
+
+
+
+<!-- ==================== CLASSES ==================== -->
+<a name="section-Classes"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <td colspan="2">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <th align="left" class="summary">Classes</th>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-Classes"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="normalizer.SimpleNormalizer-class.html">SimpleNormalizer</a></strong></td>
+  <td>Base normalizer.</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="normalizer.DataExistsNormalizer-class.html">DataExistsNormalizer</a></strong></td>
+  <td>Return '1' if any data exists, otherwise '0'</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="normalizer.TermExistsNormalizer-class.html">TermExistsNormalizer</a></strong></td>
+  <td>Un-stoplist anonymizing normalizer.</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="normalizer.CaseNormalizer-class.html">CaseNormalizer</a></strong></td>
+  <td>Reduce text to lower case</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="normalizer.ReverseNormalizer-class.html">ReverseNormalizer</a></strong></td>
+  <td>Reverse string (eg for left truncation)</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="normalizer.SpaceNormalizer-class.html">SpaceNormalizer</a></strong></td>
+  <td>Reduce multiple whitespace to single space character</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="normalizer.ArticleNormalizer-class.html">ArticleNormalizer</a></strong></td>
+  <td>Remove leading english articles (the, a, an)</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="normalizer.NumericEntityNormalizer-class.html">NumericEntityNormalizer</a></strong></td>
+  <td>Replace characters matching regular expression with the 
+        equivalent numeric character entity</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="normalizer.RegexpNormalizer-class.html">RegexpNormalizer</a></strong></td>
+  <td>Either strip, replace or keep data which matches a given regular
+        expression</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="normalizer.PossessiveNormalizer-class.html">PossessiveNormalizer</a></strong></td>
+  <td>Remove trailing 's or s' from words</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="normalizer.IntNormalizer-class.html">IntNormalizer</a></strong></td>
+  <td>Turn a string into an integer</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="normalizer.StringIntNormalizer-class.html">StringIntNormalizer</a></strong></td>
+  <td>Turn an integer into a 0 padded string, 12 chrs long</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="normalizer.StoplistNormalizer-class.html">StoplistNormalizer</a></strong></td>
+  <td>Remove words that match a stopword list</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="normalizer.PhraseStemNormalizer-class.html">PhraseStemNormalizer</a></strong></td>
+  <td>Use a Snowball stemmer to stem multiple words in a phrase (eg 
+        from PosPhraseNormalizer)</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="normalizer.StemNormalizer-class.html">StemNormalizer</a></strong></td>
+  <td>Use a Snowball stemmer to stem the terms</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="normalizer.DateStringNormalizer-class.html">DateStringNormalizer</a></strong></td>
+  <td>Turns a Date object into ISO8601 format</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="normalizer.RangeNormalizer-class.html">RangeNormalizer</a></strong></td>
+  <td>Should normalise ranges...</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="normalizer.KeywordNormalizer-class.html">KeywordNormalizer</a></strong></td>
+  <td>Given a string, keyword it with proximity.</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="normalizer.ExactExpansionNormalizer-class.html">ExactExpansionNormalizer</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="normalizer.WordExpansionNormalizer-class.html">WordExpansionNormalizer</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="normalizer.DiacriticNormalizer-class.html">DiacriticNormalizer</a></strong></td>
+  <td>Slow implementation of Unicode 4.0 character decomposition.</td>
+</tr>
+</table>
+
+<br />
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">Generated by Epydoc
+        3.0alpha2 on Wed Aug  9 18:09:56 2006</td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>

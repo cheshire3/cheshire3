@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>Cheshire3 Objects: Index</title>
+        <link rel="stylesheet" type="text/css" href="http://www.cheshire3.org/cheshire3.css"></link>
+    </head>
+    <body>
+        <a name="top"></a>
+	<table cellpadding="0" cellspacing="0" class="maintitle">
+            <tr>
+		<td class="cheshirelogo">
+                    <img src="http://www.cheshire3.org/gfx/c3_white.gif" alt=" c h e s h i r e  |  3 "/>
+		</td>
+		<td>
+                    <img src="http://www.cheshire3.org/gfx/slant_grey.gif" alt=""/>
+		</td>
+		<td align="center">
+                    <h2>Cheshire3 Objects:  Index</h2>
+		</td>
+            </tr>
+	</table>
+
+	<!--#config errmsg="<div id="navbar"/>" -->
+	<!--#include virtual="/navbar.ssi" -->
+
+	<div class="fieldset">
+            <span class="legend">Description</span>
+            <p>
+		An Index is an object which defines an access point into records and is responsable for extracting that information from them. 
+                It can then store the information extracted in an IndexStore. 
+                The entry point can be defined using one or more XPath expressions, and the extraction process can be defined using a workflow chain of standard objects. 
+                These chains must start with an Extractor, but from there might then include PreParsers, Parsers, Transformers, Normalizers and even other Indexes.
+            </p>
+            <p>A simple chain for a stemmed keyword index might be:</p>
+            <ul>
+                <li>KeywordExtractor</li>
+                <li>CaseNormalizer</li>
+                <li>StemNormalizer</li>
+            </ul>
+            <p>Whereas a chain which takes a URL from an attribute, fetches it and then extracts title keywords from it might look like:</p>
+            <ul>
+                <li>ExactExtractor</li>
+                <li>URLNormalizer</li>
+                <li>URLFetchPreParser</li>
+                <li>HtmlPreParser</li>
+                <li>DefaultParser</li>
+                <li>TitleIndex</li>
+                <li>KeywordExtractor</li>
+                <li>CaseNormalizer</li>
+            </ul>
+	</div>
+    
+        <div class="fieldset">
+            <span class="legend">Configuration</span>
+            <p>Further documentation is available on configuring Cheshire3 Indexes:</p>
+            <ul>
+                <li><a href="../build/build_index.html">Index Configuration</a> -- A tutorial on configuring indexes, with illustrative examples.</li>
+                <li><a href="../config/config_index.html" >Cheshire3 Configuration: Index</a> -- Cheshire3 Configuration reference material on the tags used for index configuration.</li>
+            </ul>
+
+        </div>
+
+	<div class="fieldset">
+		<span class="legend">Implementations</span>
+		<ul>
+			<li><b>index.SimpleIndex</b><br/>
+			An index implementation that handles process chains for indexing and searchClauses for querying.  Stores total matching records, total occurences, and record id plus occurences per record.</li>
+			<li><b>index.ProximityIndex</b><br/>
+			An index which also stores proximity information.  Currently this is word based or element based, but further types could be added with appropriate Extractors.</li>
+		</ul>
+	</div>
+
+	<div class="fieldset">
+		<span class="legend">API</span>
+		<table border="1" cellpadding="3" cellspacing="0" width="100%">
+			<tr><th>Function</th><th>Parameters</th><th>Returns</th><th>Description</th></tr>
+			<tr><td>__init__</td><td>domNode, parentObject</td><td>&nbsp;</td><td>The constructer takes a DOM tree containing the configuration of the index and the object which the database should consider as its parent, normally a database.</td></tr>
+			<tr><td>index_record</td><td>session, record</td><td>&nbsp;</td><td>Index a record according to this index's rules</td></tr>
+			<tr><td>remove_record</td><td>session, record</td><td>&nbsp;</td><td>Remove the terms of a record from our index</td></tr>
+			<tr><td>update_record</td><td>session, newRecord, oldRecord</td><td>&nbsp;</td><td>Remove the terms from the old record and add the new</td></tr>
+			<tr><td>search</td><td>session, searchClause, database</td><td>resultSet</td><td>Process search query against self and return resultSet</td></tr>
+			<tr><td>scan</td><td>session, searchClause, numberOfTerms, direction</td><td>list of term information</td><td>Handle a scan/browse request</td></tr>
+			<tr><td>sort</td><td>session, resultSets</td><td>resultSet</td><td>Sort resultsets according to the extraction rules of this index.</td></tr>
+			<tr><td>begin_indexing</td><td>session</td><td>&nbsp;</td><td>Set up for batch mode indexing (many records will be indexed, optimize and save data on commit)</td></tr>
+			<tr><td>commit_indexing</td><td>session</td><td>&nbsp;</td><td>Save batch mode indexing</td></tr>
+
+		</table>
+
+	</div>
+
+  </body>
+</html>

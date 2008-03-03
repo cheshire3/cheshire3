@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>baseObjects.Document</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <link rel="stylesheet" href="/cheshire3.css" type="text/css"/>
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body>
+<table width="100%" border=0 cellpadding=0 cellspacing=0 class="maintitle">
+<tr height="75">
+<td class="cheshirelogo" width="25%">
+<img src="/gfx/c3_white.gif">
+</td>
+<td width="10">
+<img src="/gfx/slant_grey.gif">
+</td>
+<td width="75%" align="center">
+<h2>Cheshire3 Object Model: Class Document
+</h2>
+</td></tr>
+</table>
+
+<div class="fieldset">
+<span class="legend"><a href="configParser-module.html">
+        <a href="baseObjects-module.html">Module&nbsp;baseObjects</a> ::
+        Class&nbsp;Document
+      </span>
+<p>
+
+
+<h2 class="class">Class Document
+<br/><span class="codelink"><a href="baseObjects-pysrc.html#Document">source&nbsp;code</a></span></h2>
+<dl><dt>Known Subclasses:</dt>
+<dd>
+    <a href="document.StringDocument-class.html">document.StringDocument</a>
+</dd></dl>
+
+<hr />
+A Document is the raw data which will become a record. It may be 
+  processed into a Record by a Parser, or into another Document type by a 
+  PreParser. Documents might be stored in a DocumentStore, if necessary, 
+  but can generally be discarded. Documents may be anything from a JPG 
+  file, to an unparsed XML file, to a string containing a URL. This allows 
+  for future compatability with new formats, as they may be incorporated 
+  into the system by implementing a Document type and a PreParser.<br /><br />
+
+<!-- ==================== INSTANCE METHODS ==================== -->
+</div><div class="fieldset"><span class="legend">Instance Methods</span><p>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white"><tr>
+
+  <td>
+    <span class="sig"><a href="baseObjects.Document-class.html#__init__" class="sig-name">__init__</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">data</span>,
+        <span class="sig-arg">creator</span>=<span class="sig-default">&quot;&quot;</span>,
+        <span class="sig-arg">history</span>=<span class="sig-default">[]</span>,
+        <span class="sig-arg">mimeType</span>=<span class="sig-default">&quot;&quot;</span>,
+        <span class="sig-arg">parent</span>=<span class="sig-default">None</span>)</span>
+    <br />The constructer takes the data which should be used to construct 
+      the document.
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="baseObjects.Document-class.html#get_raw" class="sig-name">get_raw</a>(<span class="sig-arg">self</span>)</span>
+    <br />Return the raw data associated with this document.
+  </td>
+</tr>
+</table>
+
+<br />
+<!-- ==================== CLASS VARIABLES ==================== -->
+</div><div class="fieldset"><span class="legend">Class Variables</span><p>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white"><tr>
+  <td width="15%">
+    <strong><a href="baseObjects.Document-class.html#documentStore">documentStore</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="baseObjects.Document-class.html#id">id</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="baseObjects.Document-class.html#mimeType">mimeType</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="baseObjects.Document-class.html#parent">parent</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="baseObjects.Document-class.html#processHistory">processHistory</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="baseObjects.Document-class.html#text">text</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+</table>
+
+<br />
+<!-- ==================== METHOD DETAILS ==================== --></div><div class="fieldset"><span class="legend">Method Details</span><p><a name="__init__"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">data</span>,
+        <span class="sig-arg">creator</span>=<span class="sig-default">&quot;&quot;</span>,
+        <span class="sig-arg">history</span>=<span class="sig-default">[]</span>,
+        <span class="sig-arg">mimeType</span>=<span class="sig-default">&quot;&quot;</span>,
+        <span class="sig-arg">parent</span>=<span class="sig-default">None</span>)</span>
+    <br /><em class="fname">(Constructor)</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="baseObjects-pysrc.html#Document.__init__">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  The constructer takes the data which should be used to construct the 
+  document. This is implementation dependant. It also optionally may take a
+  creator object, process history information and a mimetype.  The parent 
+  option is for documents which have been extracted from another document, 
+  for example pages from a book.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="get_raw"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">get_raw</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="baseObjects-pysrc.html#Document.get_raw">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Return the raw data associated with this document.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<br />
+<!-- ==================== CLASS VARIABLE DETAILS ==================== --></div><div class="fieldset"><span class="legend">Class Variable Details</span><p><a name="documentStore"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>documentStore</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="''"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+<span class="variable-quote">'</span><span class="variable-quote">'</span>                                                                     
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="id"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>id</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="-1"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+-1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="mimeType"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>mimeType</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="''"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+<span class="variable-quote">'</span><span class="variable-quote">'</span>                                                                     
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="parent"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>parent</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="'','',-1"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+('', '', -1)                                                           
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="processHistory"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>processHistory</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="[]"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+[]                                                                     
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="text"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>text</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="''"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+<span class="variable-quote">'</span><span class="variable-quote">'</span>                                                                     
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<br />
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">Generated by Epydoc
+        3.0alpha2 on Wed Aug  9 18:09:57 2006</td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>

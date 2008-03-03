@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>GoogleSearch_services.GoogleSearchBindingSOAP</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <link rel="stylesheet" href="/cheshire3.css" type="text/css"/>
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body>
+<table width="100%" border=0 cellpadding=0 cellspacing=0 class="maintitle">
+<tr height="75">
+<td class="cheshirelogo" width="25%">
+<img src="/gfx/c3_white.gif">
+</td>
+<td width="10">
+<img src="/gfx/slant_grey.gif">
+</td>
+<td width="75%" align="center">
+<h2>Cheshire3 Object Model: Class GoogleSearchBindingSOAP
+</h2>
+</td></tr>
+</table>
+
+<div class="fieldset">
+<span class="legend"><a href="configParser-module.html">
+        <a href="GoogleSearch_services-module.html">Module&nbsp;GoogleSearch_services</a> ::
+        Class&nbsp;GoogleSearchBindingSOAP
+      </span>
+<p>
+
+
+<h2 class="class">Class GoogleSearchBindingSOAP
+<br/><span class="codelink"><a href="GoogleSearch_services-pysrc.html#GoogleSearchBindingSOAP">source&nbsp;code</a></span></h2>
+<!-- ==================== INSTANCE METHODS ==================== -->
+</div><div class="fieldset"><span class="legend">Instance Methods</span><p>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white"><tr>
+
+  <td>
+    <span class="sig"><a href="GoogleSearch_services.GoogleSearchBindingSOAP-class.html#__init__" class="sig-name">__init__</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">addr</span>,
+        <span class="sig-arg">**kw</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="GoogleSearch_services.GoogleSearchBindingSOAP-class.html#doGetCachedPage" class="sig-name">doGetCachedPage</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">request</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="GoogleSearch_services.GoogleSearchBindingSOAP-class.html#doGoogleSearch" class="sig-name">doGoogleSearch</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">request</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="GoogleSearch_services.GoogleSearchBindingSOAP-class.html#doSpellingSuggestion" class="sig-name">doSpellingSuggestion</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">request</span>)</span>
+    
+  </td>
+</tr>
+</table>
+
+<br />
+<!-- ==================== METHOD DETAILS ==================== --></div><div class="fieldset"><span class="legend">Method Details</span><p><a name="__init__"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">addr</span>,
+        <span class="sig-arg">**kw</span>)</span>
+    <br /><em class="fname">(Constructor)</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="GoogleSearch_services-pysrc.html#GoogleSearchBindingSOAP.__init__">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="doGetCachedPage"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">doGetCachedPage</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">request</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="GoogleSearch_services-pysrc.html#GoogleSearchBindingSOAP.doGetCachedPage">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+    <dl><dt>Returns:</dt>
+        <dd>response from doGetCachedPageResponse:
+<pre class="literalblock">
+ _return: str
+</pre></dd></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="doGoogleSearch"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">doGoogleSearch</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">request</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="GoogleSearch_services-pysrc.html#GoogleSearchBindingSOAP.doGoogleSearch">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+    <dl><dt>Returns:</dt>
+        <dd>response from doGoogleSearchResponse:
+<pre class="literalblock">
+ _return: ns1.GoogleSearchResult_Def
+   _directoryCategories: ns1.DirectoryCategoryArray_Def
+     _element: ns1.DirectoryCategory_Def
+       _fullViewableName: str
+       _specialEncoding: str
+   _documentFiltering: boolean
+   _endIndex: int
+   _estimateIsExact: boolean
+   _estimatedTotalResultsCount: int
+   _resultElements: ns1.ResultElementArray_Def
+     _element: ns1.ResultElement_Def
+       _URL: str
+       _cachedSize: str
+       _directoryCategory: ns1.DirectoryCategory_Def
+       _directoryTitle: str
+       _hostName: str
+       _relatedInformationPresent: boolean
+       _snippet: str
+       _summary: str
+       _title: str
+   _searchComments: str
+   _searchQuery: str
+   _searchTime: float
+   _searchTips: str
+   _startIndex: int
+</pre></dd></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="doSpellingSuggestion"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">doSpellingSuggestion</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">request</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="GoogleSearch_services-pysrc.html#GoogleSearchBindingSOAP.doSpellingSuggestion">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+    <dl><dt>Returns:</dt>
+        <dd>response from doSpellingSuggestionResponse:
+<pre class="literalblock">
+ _return: str
+</pre></dd></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<br />
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">Generated by Epydoc
+        3.0alpha2 on Wed Aug  9 18:09:57 2006</td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>

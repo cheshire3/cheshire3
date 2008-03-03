@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>resultSet.RankedResultSet</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <link rel="stylesheet" href="/cheshire3.css" type="text/css"/>
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body>
+<table width="100%" border=0 cellpadding=0 cellspacing=0 class="maintitle">
+<tr height="75">
+<td class="cheshirelogo" width="25%">
+<img src="/gfx/c3_white.gif">
+</td>
+<td width="10">
+<img src="/gfx/slant_grey.gif">
+</td>
+<td width="75%" align="center">
+<h2>Cheshire3 Object Model: Class RankedResultSet
+</h2>
+</td></tr>
+</table>
+
+<div class="fieldset">
+<span class="legend"><a href="configParser-module.html">
+        <a href="resultSet-module.html">Module&nbsp;resultSet</a> ::
+        Class&nbsp;RankedResultSet
+      </span>
+<p>
+
+
+<h2 class="class">Class RankedResultSet
+<br/><span class="codelink"><a href="resultSet-pysrc.html#RankedResultSet">source&nbsp;code</a></span></h2>
+<b>Object Tree:</b><pre class="base-tree">
+<a href="baseObjects.ResultSet-class.html">baseObjects.ResultSet</a> --+
+                        |
+                       <strong class="uidshort">RankedResultSet</strong>
+</pre>
+
+<dl><dt>Known Subclasses:</dt>
+<dd>
+    <a href="resultSet.SimpleResultSet-class.html">SimpleResultSet</a>
+</dd></dl>
+
+<hr />
+<!-- ==================== INSTANCE METHODS ==================== -->
+</div><div class="fieldset"><span class="legend">Instance Methods</span><p>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white"><tr class="private">
+
+  <td>
+    <span class="sig"><a href="resultSet.RankedResultSet-class.html#_sumWeights" class="sig-name">_sumWeights</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">items</span>,
+        <span class="sig-arg">n</span>)</span>
+    
+  </td>
+</tr>
+<tr class="private">
+
+  <td>
+    <span class="sig"><a href="resultSet.RankedResultSet-class.html#_meanWeights" class="sig-name">_meanWeights</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">items</span>,
+        <span class="sig-arg">n</span>)</span>
+    
+  </td>
+</tr>
+<tr class="private">
+
+  <td>
+    <span class="sig"><a href="resultSet.RankedResultSet-class.html#_normWeights" class="sig-name">_normWeights</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">items</span>,
+        <span class="sig-arg">n</span>)</span>
+    
+  </td>
+</tr>
+<tr class="private">
+
+  <td>
+    <span class="sig"><a href="resultSet.RankedResultSet-class.html#_cmbzWeights" class="sig-name">_cmbzWeights</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">a</span>,
+        <span class="sig-arg">b</span>)</span>
+    
+  </td>
+</tr>
+<tr class="private">
+
+  <td>
+    <span class="sig"><a href="resultSet.RankedResultSet-class.html#_nprvWeights" class="sig-name">_nprvWeights</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">a</span>,
+        <span class="sig-arg">b</span>)</span>
+    
+  </td>
+</tr>
+<tr class="private">
+
+  <td>
+    <span class="sig"><a href="resultSet.RankedResultSet-class.html#_pivotWeights" class="sig-name">_pivotWeights</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">a</span>,
+        <span class="sig-arg">b</span>)</span>
+    
+  </td>
+</tr>
+  <tr>
+    <td colspan="2">
+    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="baseObjects.ResultSet-class.html">baseObjects.ResultSet</a></code></span>:
+      <code><a href="baseObjects.ResultSet-class.html#combine">combine</a></code>,
+      <code><a href="baseObjects.ResultSet-class.html#retrieve">retrieve</a></code>,
+      <code><a href="baseObjects.ResultSet-class.html#sort">sort</a></code>
+      </p>
+    </td>
+  </tr>
+</table>
+
+<br />
+<!-- ==================== CLASS VARIABLES ==================== -->
+</div><div class="fieldset"><span class="legend">Class Variables</span><p>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">  <tr>
+    <td colspan="2">
+    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="baseObjects.ResultSet-class.html">baseObjects.ResultSet</a></code></span>:
+      <code><a href="baseObjects.ResultSet-class.html#expires">expires</a></code>,
+      <code><a href="baseObjects.ResultSet-class.html#id">id</a></code>,
+      <code><a href="baseObjects.ResultSet-class.html#index">index</a></code>,
+      <code><a href="baseObjects.ResultSet-class.html#maxWeight">maxWeight</a></code>,
+      <code><a href="baseObjects.ResultSet-class.html#minWeight">minWeight</a></code>,
+      <code><a href="baseObjects.ResultSet-class.html#queryFragment">queryFragment</a></code>,
+      <code><a href="baseObjects.ResultSet-class.html#queryFreq">queryFreq</a></code>,
+      <code><a href="baseObjects.ResultSet-class.html#queryPositions">queryPositions</a></code>,
+      <code><a href="baseObjects.ResultSet-class.html#queryTerm">queryTerm</a></code>,
+      <code><a href="baseObjects.ResultSet-class.html#relevancy">relevancy</a></code>,
+      <code><a href="baseObjects.ResultSet-class.html#termid">termid</a></code>,
+      <code><a href="baseObjects.ResultSet-class.html#totalOccs">totalOccs</a></code>,
+      <code><a href="baseObjects.ResultSet-class.html#totalRecs">totalRecs</a></code>
+      </p>
+    </td>
+  </tr>
+</table>
+
+<br />
+<!-- ==================== METHOD DETAILS ==================== --></div><div class="fieldset"><span class="legend">Method Details</span><p><a name="_sumWeights"></a>
+<div class="private">
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">_sumWeights</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">items</span>,
+        <span class="sig-arg">n</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="resultSet-pysrc.html#RankedResultSet._sumWeights">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="_meanWeights"></a>
+<div class="private">
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">_meanWeights</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">items</span>,
+        <span class="sig-arg">n</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="resultSet-pysrc.html#RankedResultSet._meanWeights">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="_normWeights"></a>
+<div class="private">
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">_normWeights</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">items</span>,
+        <span class="sig-arg">n</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="resultSet-pysrc.html#RankedResultSet._normWeights">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="_cmbzWeights"></a>
+<div class="private">
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">_cmbzWeights</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">a</span>,
+        <span class="sig-arg">b</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="resultSet-pysrc.html#RankedResultSet._cmbzWeights">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="_nprvWeights"></a>
+<div class="private">
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">_nprvWeights</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">a</span>,
+        <span class="sig-arg">b</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="resultSet-pysrc.html#RankedResultSet._nprvWeights">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="_pivotWeights"></a>
+<div class="private">
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">_pivotWeights</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">a</span>,
+        <span class="sig-arg">b</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="resultSet-pysrc.html#RankedResultSet._pivotWeights">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<br />
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">Generated by Epydoc
+        3.0alpha2 on Wed Aug  9 18:10:00 2006</td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>

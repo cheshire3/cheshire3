@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>baseObjects</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <link rel="stylesheet" href="/cheshire3.css" type="text/css"/>
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body>
+<table width="100%" border=0 cellpadding=0 cellspacing=0 class="maintitle">
+<tr height="75">
+<td class="cheshirelogo" width="25%">
+<img src="/gfx/c3_white.gif">
+</td>
+<td width="10">
+<img src="/gfx/slant_grey.gif">
+</td>
+<td width="75%" align="center">
+<h2>Cheshire3: baseObjects
+ Module</h2>
+</td></tr>
+</table>
+
+<div class="fieldset">
+<span class="legend"><a href="configParser-module.html">
+        Module&nbsp;baseObjects
+      </span>
+<p>
+
+
+
+<!-- ==================== CLASSES ==================== -->
+<a name="section-Classes"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="summary">
+  <td colspan="2">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <th align="left" class="summary">Classes</th>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-Classes"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="baseObjects.Server-class.html">Server</a></strong></td>
+  <td>A Server object is a collection point for other objects, and an 
+        initial entry into the system for requests from a 
+        ProtocolHandler.</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="baseObjects.Database-class.html">Database</a></strong></td>
+  <td>A Database is a collection of Records and Indexes.</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="baseObjects.Index-class.html">Index</a></strong></td>
+  <td>An Index is an object which defines an access point into records
+        and is responsable for extracting that information from them.</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="baseObjects.XPathProcessor-class.html">XPathProcessor</a></strong></td>
+  <td>An XPathProcessor is a simple wrapper around an XPath.</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="baseObjects.Extractor-class.html">Extractor</a></strong></td>
+  <td>An Extractor is a processing object called by an Index with the 
+        value of an evaluated XPath expression or with a string.</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="baseObjects.Normalizer-class.html">Normalizer</a></strong></td>
+  <td>Normalizer objects are chained after Extractors in order to 
+        transform the data from the record or query.</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="baseObjects.DocumentFactory-class.html">DocumentFactory</a></strong></td>
+  <td>Object Docs</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="baseObjects.QueryFactory-class.html">QueryFactory</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="baseObjects.Parser-class.html">Parser</a></strong></td>
+  <td>Normally a simple wrapper around an XML parser, these objects 
+        can be viewed as Record Factories.</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="baseObjects.PreParser-class.html">PreParser</a></strong></td>
+  <td>A PreParser takes a Document and creates a second one.</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="baseObjects.Transformer-class.html">Transformer</a></strong></td>
+  <td>A Transformer is the opposite of a Parser.</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="baseObjects.User-class.html">User</a></strong></td>
+  <td>An object representing a user of the system to allow for 
+        convenient access to properties such as username, password and 
+        rights metadata.</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="baseObjects.ProtocolMap-class.html">ProtocolMap</a></strong></td>
+  <td>Protocol maps map from an incoming query type to internal 
+        indexes based on some specification.</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="baseObjects.IndexStore-class.html">IndexStore</a></strong></td>
+  <td>A persistent storage mechanism for extracted terms.</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="baseObjects.ObjectStore-class.html">ObjectStore</a></strong></td>
+  <td>An interface to a persistent storage mechanism for configured 
+        Cheshire3 objects.</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="baseObjects.QueryStore-class.html">QueryStore</a></strong></td>
+  <td>An interface to persistent storage for Queries.</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="baseObjects.RecordStore-class.html">RecordStore</a></strong></td>
+  <td>A persistent storage mechanism for Records.</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="baseObjects.DocumentStore-class.html">DocumentStore</a></strong></td>
+  <td>An interface to a persistent storage mechanism for Documents and
+        their associated metadata.</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="baseObjects.ResultSetStore-class.html">ResultSetStore</a></strong></td>
+  <td>A persistent storage mechanism for result sets.</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="baseObjects.Document-class.html">Document</a></strong></td>
+  <td>A Document is the raw data which will become a record.</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="baseObjects.ResultSet-class.html">ResultSet</a></strong></td>
+  <td>A collection of records, typically created as the result of a 
+        search on a database.</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="baseObjects.ResultSetItem-class.html">ResultSetItem</a></strong></td>
+  <td>An object representing a pointer to a Record, with result set 
+        specific metadata.</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="baseObjects.Record-class.html">Record</a></strong></td>
+  <td>Records in the system are stored in an XML form.</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="baseObjects.Session-class.html">Session</a></strong></td>
+  <td>An object to be passed around amongst the processing objects to 
+        maintain a session.</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="baseObjects.Workflow-class.html">Workflow</a></strong></td>
+  <td>A workflow is similar to the process chain concept of an index, 
+        but behaves at a more global level.</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="baseObjects.Logger-class.html">Logger</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+</table>
+
+<br />
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">Generated by Epydoc
+        3.0alpha2 on Wed Aug  9 18:09:56 2006</td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>

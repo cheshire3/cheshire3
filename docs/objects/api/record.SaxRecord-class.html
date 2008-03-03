@@ -1,0 +1,489 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>record.SaxRecord</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <link rel="stylesheet" href="/cheshire3.css" type="text/css"/>
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body>
+<table width="100%" border=0 cellpadding=0 cellspacing=0 class="maintitle">
+<tr height="75">
+<td class="cheshirelogo" width="25%">
+<img src="/gfx/c3_white.gif">
+</td>
+<td width="10">
+<img src="/gfx/slant_grey.gif">
+</td>
+<td width="75%" align="center">
+<h2>Cheshire3 Object Model: Class SaxRecord
+</h2>
+</td></tr>
+</table>
+
+<div class="fieldset">
+<span class="legend"><a href="configParser-module.html">
+        <a href="record-module.html">Module&nbsp;record</a> ::
+        Class&nbsp;SaxRecord
+      </span>
+<p>
+
+
+<h2 class="class">Class SaxRecord
+<br/><span class="codelink"><a href="record-pysrc.html#SaxRecord">source&nbsp;code</a></span></h2>
+<b>Object Tree:</b><pre class="base-tree">
+<a href="baseObjects.Record-class.html">baseObjects.Record</a> --+
+                     |
+                    <strong class="uidshort">SaxRecord</strong>
+</pre>
+
+<hr />
+<!-- ==================== INSTANCE METHODS ==================== -->
+</div><div class="fieldset"><span class="legend">Instance Methods</span><p>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white"><tr>
+
+  <td>
+    <span class="sig"><a href="record.SaxRecord-class.html#__repr__" class="sig-name">__repr__</a>(<span class="sig-arg">self</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="record.SaxRecord-class.html#__init__" class="sig-name">__init__</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">saxList</span>,
+        <span class="sig-arg">xml</span>=<span class="sig-default">&quot;&quot;</span>,
+        <span class="sig-arg">docid</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">recordSize</span>=<span class="sig-default">0</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="record.SaxRecord-class.html#process_xpath" class="sig-name">process_xpath</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">xpTuple</span>,
+        <span class="sig-arg">maps</span>=<span class="sig-default">{}</span>)</span>
+    <br />Process the given xpath (either string or compiled), perhaps with 
+      some supplied namespace mappings.
+  </td>
+</tr>
+<tr class="private">
+
+  <td>
+    <span class="sig"><a href="record.SaxRecord-class.html#_handleAttribute" class="sig-name">_handleAttribute</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">xp</span>,
+        <span class="sig-arg">maps</span>=<span class="sig-default">{}</span>)</span>
+    
+  </td>
+</tr>
+<tr class="private">
+
+  <td>
+    <span class="sig"><a href="record.SaxRecord-class.html#_checkSaxXPathLine" class="sig-name">_checkSaxXPathLine</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">xp</span>,
+        <span class="sig-arg">line</span>)</span>
+    
+  </td>
+</tr>
+<tr class="private">
+
+  <td>
+    <span class="sig"><a href="record.SaxRecord-class.html#_checkSaxXPathNode" class="sig-name">_checkSaxXPathNode</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">step</span>,
+        <span class="sig-arg">name</span>,
+        <span class="sig-arg">attrs</span>,
+        <span class="sig-arg">line</span>,
+        <span class="sig-arg">posn</span>)</span>
+    
+  </td>
+</tr>
+<tr class="private">
+
+  <td>
+    <span class="sig"><a href="record.SaxRecord-class.html#_checkSaxXPathPredicate" class="sig-name">_checkSaxXPathPredicate</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">pred</span>,
+        <span class="sig-arg">name</span>,
+        <span class="sig-arg">attrs</span>,
+        <span class="sig-arg">line</span>,
+        <span class="sig-arg">posn</span>,
+        <span class="sig-arg">predPosn</span>)</span>
+    
+  </td>
+</tr>
+<tr class="private">
+
+  <td>
+    <span class="sig"><a href="record.SaxRecord-class.html#_checkSaxXPathAttr" class="sig-name">_checkSaxXPathAttr</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">pred</span>,
+        <span class="sig-arg">attrs</span>)</span>
+    
+  </td>
+</tr>
+<tr class="private">
+
+  <td>
+    <span class="sig"><a href="record.SaxRecord-class.html#_convert_elem" class="sig-name">_convert_elem</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">line</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="record.SaxRecord-class.html#saxify" class="sig-name">saxify</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">handler</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">sax</span>=<span class="sig-default">[]</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="record.SaxRecord-class.html#get_dom" class="sig-name">get_dom</a>(<span class="sig-arg">self</span>)</span>
+    <br />Return the DOM document node for the record.
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="record.SaxRecord-class.html#get_xml" class="sig-name">get_xml</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">events</span>=<span class="sig-default">[]</span>)</span>
+    <br />Return the XML for the record as a serialised string.
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="record.SaxRecord-class.html#get_sax" class="sig-name">get_sax</a>(<span class="sig-arg">self</span>)</span>
+    <br />Return the list of SAX events for the record, serialised according
+      to the internal C3 format.
+  </td>
+</tr>
+</table>
+
+<br />
+<!-- ==================== CLASS VARIABLES ==================== -->
+</div><div class="fieldset"><span class="legend">Class Variables</span><p>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">  <tr>
+    <td colspan="2">
+    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="baseObjects.Record-class.html">baseObjects.Record</a></code></span>:
+      <code><a href="baseObjects.Record-class.html#baseUri">baseUri</a></code>,
+      <code><a href="baseObjects.Record-class.html#dom">dom</a></code>,
+      <code><a href="baseObjects.Record-class.html#elementHash">elementHash</a></code>,
+      <code><a href="baseObjects.Record-class.html#history">history</a></code>,
+      <code><a href="baseObjects.Record-class.html#parent">parent</a></code>,
+      <code><a href="baseObjects.Record-class.html#processHistory">processHistory</a></code>,
+      <code><a href="baseObjects.Record-class.html#recordStore">recordStore</a></code>,
+      <code><a href="baseObjects.Record-class.html#resultSetItem">resultSetItem</a></code>,
+      <code><a href="baseObjects.Record-class.html#rights">rights</a></code>,
+      <code><a href="baseObjects.Record-class.html#sax">sax</a></code>,
+      <code><a href="baseObjects.Record-class.html#schema">schema</a></code>,
+      <code><a href="baseObjects.Record-class.html#schemaType">schemaType</a></code>,
+      <code><a href="baseObjects.Record-class.html#status">status</a></code>,
+      <code><a href="baseObjects.Record-class.html#xml">xml</a></code>
+      </p>
+    </td>
+  </tr>
+</table>
+
+<br />
+<!-- ==================== METHOD DETAILS ==================== --></div><div class="fieldset"><span class="legend">Method Details</span><p><a name="__repr__"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">__repr__</span>(<span class="sig-arg">self</span>)</span>
+    <br /><em class="fname">(Representation operator)</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="record-pysrc.html#SaxRecord.__repr__">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="__init__"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">saxList</span>,
+        <span class="sig-arg">xml</span>=<span class="sig-default">&quot;&quot;</span>,
+        <span class="sig-arg">docid</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">recordSize</span>=<span class="sig-default">0</span>)</span>
+    <br /><em class="fname">(Constructor)</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="record-pysrc.html#SaxRecord.__init__">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="baseObjects.Record-class.html#__init__">baseObjects.Record.__init__</a>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="process_xpath"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">process_xpath</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">xpTuple</span>,
+        <span class="sig-arg">maps</span>=<span class="sig-default">{}</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="record-pysrc.html#SaxRecord.process_xpath">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Process the given xpath (either string or compiled), perhaps with some
+  supplied namespace mappings.
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="baseObjects.Record-class.html#process_xpath">baseObjects.Record.process_xpath</a>
+        <dd><em class="note">(inherited documentation)</em></dd>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="_handleAttribute"></a>
+<div class="private">
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">_handleAttribute</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">xp</span>,
+        <span class="sig-arg">maps</span>=<span class="sig-default">{}</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="record-pysrc.html#SaxRecord._handleAttribute">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="_checkSaxXPathLine"></a>
+<div class="private">
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">_checkSaxXPathLine</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">xp</span>,
+        <span class="sig-arg">line</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="record-pysrc.html#SaxRecord._checkSaxXPathLine">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="_checkSaxXPathNode"></a>
+<div class="private">
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">_checkSaxXPathNode</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">step</span>,
+        <span class="sig-arg">name</span>,
+        <span class="sig-arg">attrs</span>,
+        <span class="sig-arg">line</span>,
+        <span class="sig-arg">posn</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="record-pysrc.html#SaxRecord._checkSaxXPathNode">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="_checkSaxXPathPredicate"></a>
+<div class="private">
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">_checkSaxXPathPredicate</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">pred</span>,
+        <span class="sig-arg">name</span>,
+        <span class="sig-arg">attrs</span>,
+        <span class="sig-arg">line</span>,
+        <span class="sig-arg">posn</span>,
+        <span class="sig-arg">predPosn</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="record-pysrc.html#SaxRecord._checkSaxXPathPredicate">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="_checkSaxXPathAttr"></a>
+<div class="private">
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">_checkSaxXPathAttr</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">pred</span>,
+        <span class="sig-arg">attrs</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="record-pysrc.html#SaxRecord._checkSaxXPathAttr">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="_convert_elem"></a>
+<div class="private">
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">_convert_elem</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">line</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="record-pysrc.html#SaxRecord._convert_elem">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="saxify"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">saxify</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">handler</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">sax</span>=<span class="sig-default">[]</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="record-pysrc.html#SaxRecord.saxify">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="get_dom"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">get_dom</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="record-pysrc.html#SaxRecord.get_dom">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Return the DOM document node for the record.
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="baseObjects.Record-class.html#get_dom">baseObjects.Record.get_dom</a>
+        <dd><em class="note">(inherited documentation)</em></dd>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="get_xml"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">get_xml</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">events</span>=<span class="sig-default">[]</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="record-pysrc.html#SaxRecord.get_xml">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Return the XML for the record as a serialised string.
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="baseObjects.Record-class.html#get_xml">baseObjects.Record.get_xml</a>
+        <dd><em class="note">(inherited documentation)</em></dd>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="get_sax"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">get_sax</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="record-pysrc.html#SaxRecord.get_sax">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Return the list of SAX events for the record, serialised according to 
+  the internal C3 format.
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="baseObjects.Record-class.html#get_sax">baseObjects.Record.get_sax</a>
+        <dd><em class="note">(inherited documentation)</em></dd>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<br />
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">Generated by Epydoc
+        3.0alpha2 on Wed Aug  9 18:09:59 2006</td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>

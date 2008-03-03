@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>Cheshire3 Objects: PreParser</title>
+        <link rel="stylesheet" type="text/css" href="http://www.cheshire3.org/cheshire3.css"></link>
+    </head>
+    <body>
+        <a name="top"></a>
+        <table cellpadding="0" cellspacing="0" class="maintitle">
+            <tr>
+                <td class="cheshirelogo">
+                    <img src="http://www.cheshire3.org/gfx/c3_white.gif" alt=" c h e s h i r e  |  3 "/>
+                </td>
+                <td>
+                    <img src="http://www.cheshire3.org/gfx/slant_grey.gif" alt=""/>
+                </td>
+                <td align="center">
+                    <h2>Cheshire3 Objects:  PreParser</h2>
+                </td>
+            </tr>
+        </table>
+
+	<!--#config errmsg="<div id="navbar"/>" -->
+	<!--#include virtual="/navbar.ssi" -->
+
+        <div class="fieldset">
+            <span class="legend">Description</span>
+            <p>
+                A PreParser takes a Document and creates a second one. 
+                For example, the input document might consist solely of a URL. 
+                The output would be a Document with the data that the PreParser has fetched from that address. 
+                This functionality allows for work flow chains to be strung together in many ways, and perhaps in ways which the original implemention had not foreseen.
+            </p>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">Implementations</span>
+            <ul>
+                <li><b>preParser.SgmlPreParser</b><br/>
+                Converts SGML into XML. eg empty tags, quoted attributes, normalised case</li>
+                <li><b>preParser.GzipPreParser</b><br/>
+                Given a gzipped document, return the decompressed version.</li>
+                <li><b>preParser.MarcToXmlPreParser</b><br/>
+                Convert MARC format to MARCXML.</li>
+                <li><b>preParser.MarcToSgmlPreParser</b><br/>
+                Convert MARC format to Cheshire's MarcSGML</li>
+                <li><b>preParser.B64EncodePreParser</b><br/>
+                Encode data into base64</li>
+                <li><b>preParser.B64DecodePreParser</b><br/>
+                Decode data from base64</li>
+                <li><b>preParser.PrintableOnlyPreParser</b><br/>
+                Strip non printable (ascii) characters</li> 
+                <li><b>preParser.PdfToTxtPreParser</b><br/>
+                Convert PDF format to simple text</li>
+                <li><b>preParser.TxtToXmlPreParser</b><br/>
+                Add an XML wrapper around plain text.</li>
+                <li><b>preParser.BzipPreParser</b><br/>
+                Unbzip a document.</li>
+                <li><b>preParser.WordPreParser</b><br/>
+                If the appropriate OpenOffice server is running, use it to turn any format known to OO into OO's internal XML format.
+            </ul>
+        </div>
+
+	<div class="fieldset">
+            <span class="legend">API</span>
+            <table border="1" cellpadding="3" cellspacing="0" width="100%">
+                <tr><th>Function</th><th>Parameters</th><th>Returns</th><th>Description</th></tr>
+                <tr><td>__init__</td><td>config, parent</td><td>&nbsp;</td><td> </td></tr>
+                <tr><td>process_document</td><td>session, document</td><td>Document</td><td>Return a new document after some transformation</td></tr>
+            </table>
+	</div>
+
+    </body>
+</html>

@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>baseObjects.Normalizer</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <link rel="stylesheet" href="/cheshire3.css" type="text/css"/>
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body>
+<table width="100%" border=0 cellpadding=0 cellspacing=0 class="maintitle">
+<tr height="75">
+<td class="cheshirelogo" width="25%">
+<img src="/gfx/c3_white.gif">
+</td>
+<td width="10">
+<img src="/gfx/slant_grey.gif">
+</td>
+<td width="75%" align="center">
+<h2>Cheshire3 Object Model: Class Normalizer
+</h2>
+</td></tr>
+</table>
+
+<div class="fieldset">
+<span class="legend"><a href="configParser-module.html">
+        <a href="baseObjects-module.html">Module&nbsp;baseObjects</a> ::
+        Class&nbsp;Normalizer
+      </span>
+<p>
+
+
+<h2 class="class">Class Normalizer
+<br/><span class="codelink"><a href="baseObjects-pysrc.html#Normalizer">source&nbsp;code</a></span></h2>
+<b>Object Tree:</b><pre class="base-tree">
+           object --+    
+                    |    
+<a href="configParser.C3Object-class.html">configParser.C3Object</a> --+
+                        |
+                       <strong class="uidshort">Normalizer</strong>
+</pre>
+
+<dl><dt>Known Subclasses:</dt>
+<dd>
+    <a href="normalizer.SimpleNormalizer-class.html">normalizer.SimpleNormalizer</a>
+</dd></dl>
+
+<hr />
+Normalizer objects are chained after Extractors in order to transform 
+  the data from the record or query. A Normalizer might standardise case, 
+  perform stemming or transform a date into ISO8601 format. Normalizers are
+  also needed to transform the terms in a request into the same format as 
+  the term in the Index. For example a date index might be searched using a
+  free text date and that would need to be parsed into the normalised form 
+  in order to compare it with the stored data.<br /><br />
+
+<!-- ==================== INSTANCE METHODS ==================== -->
+</div><div class="fieldset"><span class="legend">Instance Methods</span><p>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white"><tr>
+
+  <td>
+    <span class="sig"><a href="baseObjects.Normalizer-class.html#process_hash" class="sig-name">process_hash</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">data</span>)</span>
+    <br />Process a hash of values into alternative forms.
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="baseObjects.Normalizer-class.html#process_string" class="sig-name">process_string</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">data</span>)</span>
+    <br />Process a string into an alternative form.
+  </td>
+</tr>
+  <tr>
+    <td colspan="2">
+    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="configParser.C3Object-class.html">configParser.C3Object</a></code></span>:
+      <code><a href="configParser.C3Object-class.html#__init__">__init__</a></code>,
+      <code><a href="configParser.C3Object-class.html#auth_function">auth_function</a></code>,
+      <code><a href="configParser.C3Object-class.html#get_config">get_config</a></code>,
+      <code><a href="configParser.C3Object-class.html#get_default">get_default</a></code>,
+      <code><a href="configParser.C3Object-class.html#get_object">get_object</a></code>,
+      <code><a href="configParser.C3Object-class.html#get_path">get_path</a></code>,
+      <code><a href="configParser.C3Object-class.html#get_setting">get_setting</a></code>,
+      <code><a href="configParser.C3Object-class.html#log_function">log_function</a></code>,
+      <code><a href="configParser.C3Object-class.html#unauth_function">unauth_function</a></code>,
+      <code><a href="configParser.C3Object-class.html#unlog_function">unlog_function</a></code>
+      </p>
+    <div class="private">    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="configParser.C3Object-class.html">configParser.C3Object</a></code></span> (private):
+      <code><a href="configParser.C3Object-class.html#_getDomFromFile">_getDomFromFile</a></code>,
+      <code><a href="configParser.C3Object-class.html#_handleConfigNode">_handleConfigNode</a></code>,
+      <code><a href="configParser.C3Object-class.html#_parseIncludes">_parseIncludes</a></code>,
+      <code><a href="configParser.C3Object-class.html#_recurseSubConfigs">_recurseSubConfigs</a></code>,
+      <code><a href="configParser.C3Object-class.html#_verifyDefault">_verifyDefault</a></code>,
+      <code><a href="configParser.C3Object-class.html#_verifyOption">_verifyOption</a></code>,
+      <code><a href="configParser.C3Object-class.html#_verifySetting">_verifySetting</a></code>
+      </p></div>
+    <p class="varlist"><span class="varlist-header">Inherited from <code>object</code></span>:
+      <code>__delattr__</code>,
+      <code>__getattribute__</code>,
+      <code>__hash__</code>,
+      <code>__new__</code>,
+      <code>__reduce__</code>,
+      <code>__reduce_ex__</code>,
+      <code>__repr__</code>,
+      <code>__setattr__</code>,
+      <code>__str__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+
+<br />
+<!-- ==================== CLASS VARIABLES ==================== -->
+</div><div class="fieldset"><span class="legend">Class Variables</span><p>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">  <tr>
+    <td colspan="2">
+    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="configParser.C3Object-class.html">configParser.C3Object</a></code></span>:
+      <code><a href="configParser.C3Object-class.html#configStore">configStore</a></code>,
+      <code><a href="configParser.C3Object-class.html#defaults">defaults</a></code>,
+      <code><a href="configParser.C3Object-class.html#functionLogger">functionLogger</a></code>,
+      <code><a href="configParser.C3Object-class.html#id">id</a></code>,
+      <code><a href="configParser.C3Object-class.html#name">name</a></code>,
+      <code><a href="configParser.C3Object-class.html#objectType">objectType</a></code>,
+      <code><a href="configParser.C3Object-class.html#objects">objects</a></code>,
+      <code><a href="configParser.C3Object-class.html#parent">parent</a></code>,
+      <code><a href="configParser.C3Object-class.html#paths">paths</a></code>,
+      <code><a href="configParser.C3Object-class.html#permissionHandlers">permissionHandlers</a></code>,
+      <code><a href="configParser.C3Object-class.html#settings">settings</a></code>,
+      <code><a href="configParser.C3Object-class.html#subConfigs">subConfigs</a></code>,
+      <code><a href="configParser.C3Object-class.html#unresolvedObjects">unresolvedObjects</a></code>
+      </p>
+    <div class="private">    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="configParser.C3Object-class.html">configParser.C3Object</a></code></span> (private):
+      <code><a href="configParser.C3Object-class.html#_includeConfigStores">_includeConfigStores</a></code>,
+      <code><a href="configParser.C3Object-class.html#_objectRefs">_objectRefs</a></code>
+      </p></div>
+    <p class="varlist"><span class="varlist-header">Inherited from <code>object</code></span>:
+      <code>__class__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+
+<br />
+<!-- ==================== METHOD DETAILS ==================== --></div><div class="fieldset"><span class="legend">Method Details</span><p><a name="process_hash"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">process_hash</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">data</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="baseObjects-pysrc.html#Normalizer.process_hash">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Process a hash of values into alternative forms.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="process_string"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">process_string</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">data</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="baseObjects-pysrc.html#Normalizer.process_string">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Process a string into an alternative form.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<br />
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">Generated by Epydoc
+        3.0alpha2 on Wed Aug  9 18:09:57 2006</td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>

@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>c3errors</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        Module&nbsp;c3errors
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript: void(0);" class="privatelink"
+    onclick="toggle_private();">hide private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="c3errors-pysrc.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<h2 class="py-src">Source Code for <a href="c3errors-module.html">Module c3errors</a></h2>
+<div class="py-src">
+<pre class="py-src">
+<span class="lineno"> 1</span>  <span class="py-line"> </span>
+<span class="lineno"> 2</span>  <span class="py-line"><span class="py-keyword">import</span> <span class="py-name">exceptions</span> </span>
+<span class="lineno"> 3</span>  <span class="py-line"> </span>
+<a name="C3Exception"></a><div id="C3Exception-def"><span class="lineno"> 4</span> <a class="pysrc-toggle" href="#" id="C3Exception-toggle" onclick="toggle('C3Exception'); return false;">-</a><span class="py-line"><span class="py-keyword">class</span> <a class="py-def-name" href="c3errors.C3Exception-class.html">C3Exception</a><span class="py-op">(</span><span class="py-base-class">Exception</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="C3Exception-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="C3Exception-expanded"><span class="lineno"> 5</span>  <span class="py-line">    <a class="py-name" href="c3errors.C3Exception-class.html#text">text</a> <span class="py-op">=</span> <span class="py-string">""</span> </span>
+<span class="lineno"> 6</span>  <span class="py-line"> </span>
+<a name="C3Exception.__init__"></a><div id="C3Exception.__init__-def"><span class="lineno"> 7</span> <a class="pysrc-toggle" href="#" id="C3Exception.__init__-toggle" onclick="toggle('C3Exception.__init__'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="c3errors.C3Exception-class.html#__init__">__init__</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">text</span><span class="py-op">=</span><span class="py-string">"None"</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="C3Exception.__init__-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="C3Exception.__init__-expanded"><span class="lineno"> 8</span>  <span class="py-line">        <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">reason</span> <span class="py-op">=</span> <span id="link-0" class="py-name"><a title="baseObjects.Document.text
+c3errors.C3Exception.text" class="py-name" href="#" onclick="doclink('link-0', 'text', 'Variable baseObjects.Document.text=baseObjects.Document-class.html#text,Variable text=c3errors.C3Exception-class.html#text'); return false;">text</a></span></span> </span>
+</div><span class="lineno"> 9</span>  <span class="py-line"> </span>
+<a name="C3Exception.__str__"></a><div id="C3Exception.__str__-def"><span class="lineno">10</span> <a class="pysrc-toggle" href="#" id="C3Exception.__str__-toggle" onclick="toggle('C3Exception.__str__'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="c3errors.C3Exception-class.html#__str__">__str__</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="C3Exception.__str__-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="C3Exception.__str__-expanded"><span class="lineno">11</span>  <span class="py-line">        <span class="py-keyword">return</span> <span class="py-string">"Cheshire3 Exception: "</span> <span class="py-op">+</span> <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">reason</span> </span>
+</div></div><span class="lineno">12</span>  <span class="py-line"> </span>
+<a name="ConfigFileException"></a><div id="ConfigFileException-def"><span class="lineno">13</span> <a class="pysrc-toggle" href="#" id="ConfigFileException-toggle" onclick="toggle('ConfigFileException'); return false;">-</a><span class="py-line"><span class="py-keyword">class</span> <a class="py-def-name" href="c3errors.ConfigFileException-class.html">ConfigFileException</a><span class="py-op">(</span><span class="py-base-class">C3Exception</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="ConfigFileException-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="ConfigFileException-expanded"><span class="lineno">14</span>  <span class="py-line">    <span class="py-keyword">pass</span> </span>
+</div><span class="lineno">15</span>  <span class="py-line"> </span>
+<a name="FileDoesNotExistException"></a><div id="FileDoesNotExistException-def"><span class="lineno">16</span> <a class="pysrc-toggle" href="#" id="FileDoesNotExistException-toggle" onclick="toggle('FileDoesNotExistException'); return false;">-</a><span class="py-line"><span class="py-keyword">class</span> <a class="py-def-name" href="c3errors.FileDoesNotExistException-class.html">FileDoesNotExistException</a><span class="py-op">(</span><span class="py-base-class">C3Exception</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="FileDoesNotExistException-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="FileDoesNotExistException-expanded"><span class="lineno">17</span>  <span class="py-line">    <span class="py-keyword">pass</span> </span>
+</div><span class="lineno">18</span>  <span class="py-line"> </span>
+<a name="ObjectDoesNotExistException"></a><div id="ObjectDoesNotExistException-def"><span class="lineno">19</span> <a class="pysrc-toggle" href="#" id="ObjectDoesNotExistException-toggle" onclick="toggle('ObjectDoesNotExistException'); return false;">-</a><span class="py-line"><span class="py-keyword">class</span> <a class="py-def-name" href="c3errors.ObjectDoesNotExistException-class.html">ObjectDoesNotExistException</a><span class="py-op">(</span><span class="py-base-class">C3Exception</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="ObjectDoesNotExistException-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="ObjectDoesNotExistException-expanded"><span class="lineno">20</span>  <span class="py-line">    <span class="py-keyword">pass</span> </span>
+</div><span class="lineno">21</span>  <span class="py-line"> </span>
+<a name="ObjectAlreadyExistsException"></a><div id="ObjectAlreadyExistsException-def"><span class="lineno">22</span> <a class="pysrc-toggle" href="#" id="ObjectAlreadyExistsException-toggle" onclick="toggle('ObjectAlreadyExistsException'); return false;">-</a><span class="py-line"><span class="py-keyword">class</span> <a class="py-def-name" href="c3errors.ObjectAlreadyExistsException-class.html">ObjectAlreadyExistsException</a><span class="py-op">(</span><span class="py-base-class">C3Exception</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="ObjectAlreadyExistsException-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="ObjectAlreadyExistsException-expanded"><span class="lineno">23</span>  <span class="py-line">    <span class="py-keyword">pass</span> </span>
+</div><span class="lineno">24</span>  <span class="py-line"> </span>
+<a name="PermissionException"></a><div id="PermissionException-def"><span class="lineno">25</span> <a class="pysrc-toggle" href="#" id="PermissionException-toggle" onclick="toggle('PermissionException'); return false;">-</a><span class="py-line"><span class="py-keyword">class</span> <a class="py-def-name" href="c3errors.PermissionException-class.html">PermissionException</a><span class="py-op">(</span><span class="py-base-class">C3Exception</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="PermissionException-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="PermissionException-expanded"><span class="lineno">26</span>  <span class="py-line">    <span class="py-keyword">pass</span> </span>
+</div><span class="lineno">27</span>  <span class="py-line"> </span>
+<a name="ExternalSystemException"></a><div id="ExternalSystemException-def"><span class="lineno">28</span> <a class="pysrc-toggle" href="#" id="ExternalSystemException-toggle" onclick="toggle('ExternalSystemException'); return false;">-</a><span class="py-line"><span class="py-keyword">class</span> <a class="py-def-name" href="c3errors.ExternalSystemException-class.html">ExternalSystemException</a><span class="py-op">(</span><span class="py-base-class">C3Exception</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="ExternalSystemException-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="ExternalSystemException-expanded"><span class="lineno">29</span>  <span class="py-line">    <span class="py-keyword">pass</span> </span>
+</div><span class="lineno">30</span>  <span class="py-line"> </span><script type="text/javascript">
+<!--
+expandto(location.href);
+// -->
+</script>
+</pre>
+</div>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">Generated by Epydoc
+        3.0alpha2 on Wed Aug  9 18:11:04 2006</td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>

@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>document.StringDocument</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <link rel="stylesheet" href="/cheshire3.css" type="text/css"/>
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body>
+<table width="100%" border=0 cellpadding=0 cellspacing=0 class="maintitle">
+<tr height="75">
+<td class="cheshirelogo" width="25%">
+<img src="/gfx/c3_white.gif">
+</td>
+<td width="10">
+<img src="/gfx/slant_grey.gif">
+</td>
+<td width="75%" align="center">
+<h2>Cheshire3 Object Model: Class StringDocument
+</h2>
+</td></tr>
+</table>
+
+<div class="fieldset">
+<span class="legend"><a href="configParser-module.html">
+        <a href="document-module.html">Module&nbsp;document</a> ::
+        Class&nbsp;StringDocument
+      </span>
+<p>
+
+
+<h2 class="class">Class StringDocument
+<br/><span class="codelink"><a href="document-pysrc.html#StringDocument">source&nbsp;code</a></span></h2>
+<b>Object Tree:</b><pre class="base-tree">
+<a href="baseObjects.Document-class.html">baseObjects.Document</a> --+
+                       |
+                      <strong class="uidshort">StringDocument</strong>
+</pre>
+
+<hr />
+<!-- ==================== INSTANCE METHODS ==================== -->
+</div><div class="fieldset"><span class="legend">Instance Methods</span><p>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white"><tr>
+
+  <td>
+    <span class="sig"><a href="document.StringDocument-class.html#__init__" class="sig-name">__init__</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">text</span>,
+        <span class="sig-arg">creator</span>=<span class="sig-default">&quot;&quot;</span>,
+        <span class="sig-arg">history</span>=<span class="sig-default">[]</span>,
+        <span class="sig-arg">mimeType</span>=<span class="sig-default">&quot;&quot;</span>,
+        <span class="sig-arg">parent</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">filename</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">schema</span>=<span class="sig-default">&quot;&quot;</span>)</span>
+    <br />The constructer takes the data which should be used to construct 
+      the document.
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="document.StringDocument-class.html#get_raw" class="sig-name">get_raw</a>(<span class="sig-arg">self</span>)</span>
+    <br />Return the raw data associated with this document.
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="document.StringDocument-class.html#find_exception" class="sig-name">find_exception</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">e</span>)</span>
+    
+  </td>
+</tr>
+</table>
+
+<br />
+<!-- ==================== CLASS VARIABLES ==================== -->
+</div><div class="fieldset"><span class="legend">Class Variables</span><p>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">  <tr>
+    <td colspan="2">
+    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="baseObjects.Document-class.html">baseObjects.Document</a></code></span>:
+      <code><a href="baseObjects.Document-class.html#documentStore">documentStore</a></code>,
+      <code><a href="baseObjects.Document-class.html#id">id</a></code>,
+      <code><a href="baseObjects.Document-class.html#mimeType">mimeType</a></code>,
+      <code><a href="baseObjects.Document-class.html#parent">parent</a></code>,
+      <code><a href="baseObjects.Document-class.html#processHistory">processHistory</a></code>,
+      <code><a href="baseObjects.Document-class.html#text">text</a></code>
+      </p>
+    </td>
+  </tr>
+</table>
+
+<br />
+<!-- ==================== METHOD DETAILS ==================== --></div><div class="fieldset"><span class="legend">Method Details</span><p><a name="__init__"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">text</span>,
+        <span class="sig-arg">creator</span>=<span class="sig-default">&quot;&quot;</span>,
+        <span class="sig-arg">history</span>=<span class="sig-default">[]</span>,
+        <span class="sig-arg">mimeType</span>=<span class="sig-default">&quot;&quot;</span>,
+        <span class="sig-arg">parent</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">filename</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">schema</span>=<span class="sig-default">&quot;&quot;</span>)</span>
+    <br /><em class="fname">(Constructor)</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="document-pysrc.html#StringDocument.__init__">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  The constructer takes the data which should be used to construct the 
+  document. This is implementation dependant. It also optionally may take a
+  creator object, process history information and a mimetype.  The parent 
+  option is for documents which have been extracted from another document, 
+  for example pages from a book.
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="baseObjects.Document-class.html#__init__">baseObjects.Document.__init__</a>
+        <dd><em class="note">(inherited documentation)</em></dd>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="get_raw"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">get_raw</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="document-pysrc.html#StringDocument.get_raw">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Return the raw data associated with this document.
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="baseObjects.Document-class.html#get_raw">baseObjects.Document.get_raw</a>
+        <dd><em class="note">(inherited documentation)</em></dd>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="find_exception"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">find_exception</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">e</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="document-pysrc.html#StringDocument.find_exception">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<br />
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">Generated by Epydoc
+        3.0alpha2 on Wed Aug  9 18:09:57 2006</td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>Cheshire3 Objects: ResultSetStore</title>
+        <link rel="stylesheet" type="text/css" href="http://www.cheshire3.org/cheshire3.css"></link>
+    </head>
+    <body>
+
+	<table cellpadding="0" cellspacing="0" class="maintitle">
+            <tr>
+                <td class="cheshirelogo">
+                    <img src="http://www.cheshire3.org/gfx/c3_white.gif" alt=" c h e s h i r e  |  3 "/>
+                </td>
+        	<td>
+                    <img src="http://www.cheshire3.org/gfx/slant_grey.gif" alt=""/>
+        	</td>
+                <td align="center">
+                    <h2>Cheshire3 Objects:  Result Set Store</h2>
+                </td>
+            </tr>
+	</table>
+
+	<!--#config errmsg="<div id="navbar"/>" -->
+	<!--#include virtual="/navbar.ssi" -->
+
+        <div class="fieldset">
+            <span class="legend">Description</span>
+            <p>
+                A persistent storage mechanism for result sets.  
+            </p>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">Implementations</span>
+            <ul>
+                <li><b>recordStore.BdbResultSetStore</b><br/>
+                The recommended implementation, it stores the terms in BerkeleyDB stores against UUIDs.</li>
+            </ul>
+        </div>
+
+	<div class="fieldset">
+            <span class="legend">API</span>
+	    <table border="1" cellpadding="3" cellspacing="0" width="100%">
+                <tr><th>Function</th><th>Parameters</th><th>Returns</th><th>Description</th></tr>
+                <tr><td>__init__</td><td>config, parent</td><td>&nbsp;</td><td> </td></tr>
+                <tr><td>create_resultSet</td><td>session, ?resultSet</td><td>&nbsp;</td><td>Generate a UUID for a result set, and if given, store it.</td></tr>
+                <tr><td>store_resultSet</td><td>session, resultSet</td><td>&nbsp;</td><td>Store the result set</td></tr>
+                <tr><td>delete_resultSet</td><td>session, uuid</td><td>&nbsp;</td><td>Delete the given result set</td></tr>
+                <tr><td>fetch_resultSet</td><td>session, uuid</td><td>&nbsp;</td><td>Return the given result set</td></tr>
+                <tr><td>fetch_resultSetList</td><td>session</td><td>&nbsp;</td><td>Return list of result set uuids present in the store</td></tr>
+                <tr><td>clean</td><td>session</td><td>&nbsp;</td><td>Delete any result sets that have expired (according to the configuration)</td></tr>
+            </table>
+	</div>
+
+    </body>
+</html>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>Cheshire3 Objects: ProtocolHandler</title>
+        <link rel="stylesheet" type="text/css" href="http://www.cheshire3.org/cheshire3.css"></link>
+    </head>
+    <body>
+        <a name="top"></a>
+	<table cellpadding="0" cellspacing="0" class="maintitle">
+            <tr>
+                <td class="cheshirelogo">
+                    <img src="http://www.cheshire3.org/gfx/c3_white.gif" alt=" c h e s h i r e  |  3 "/>
+                </td>
+                <td>
+                    <img src="http://www.cheshire3.org/gfx/slant_grey.gif" alt=""/>
+                </td>
+                <td align="center">
+                    <h2>Cheshire3 Objects: Protocol Handler</h2>
+                </td>
+            </tr>
+	</table>
+
+	<!--#config errmsg="<div id="navbar"/>" -->
+	<!--#include virtual="/navbar.ssi" -->
+
+        <div class="fieldset">
+            <span class="legend">Description</span>
+            <p>
+                A protocol handler is the first object which is encountered in any given operation. 
+                The handler acts as a black box which parses the request, does a lot of magic and gives back the response. 
+                Of course that magic is simply knowing about the top level of objects within the system and turning the request into a workflow which will collect the information necessary to respond.
+            </p>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">Implementations</span>
+            <ul>
+                <li><b>srwApacheHandler</b><br/>
+                Handles SRW/U protocol via an Apache RequestHandler</li>
+                <li><b>zApacheHandler</b><br/>
+                Handles Z39.50 protocol via an Apache ConnectionHandler</li>
+                <li><b>oaiApacheHandler</b><br/>
+                Handles the OAI-PMH protocol  via an Apache RequestHandler</li>
+                <li><b>cnwHandler</b><br/>
+                Example store front application</li>
+            </ul>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">API</span>
+            <p>
+                Protocol Handlers do not have a standardised API as they are dependant on the framework in which they're included. 
+                Apache based handlers will generally be RequestHandlers, but for binary protocols such as Z39.50 they need to be ConnectionHandlers. 
+                An IRC protocol handler, on the other hand, would be entirely different.
+            </p>
+        </div>
+
+    </body>
+</html>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <title>Cheshire3 Objects: Parser</title>
+    <link rel="stylesheet" type="text/css" href="http://www.cheshire3.org/cheshire3.css"></link>
+  </head>
+
+    <body>
+        <a name="top"></a>
+	<table cellpadding="0" cellspacing="0" class="maintitle">
+            <tr>
+		<td class="cheshirelogo">
+                    <img src="http://www.cheshire3.org/gfx/c3_white.gif" alt=" c h e s h i r e  |  3 "/>
+		</td>
+		<td>
+                    <img src="http://www.cheshire3.org/gfx/slant_grey.gif" alt=""/>
+		</td>
+		<td align="center">
+                    <h2>Cheshire3 Objects:  Parser</h2>
+		</td>
+            </tr>
+	</table>
+
+	<!--#config errmsg="<div id="navbar"/>" -->
+	<!--#include virtual="/navbar.ssi" -->
+
+	<div class="fieldset">
+            <span class="legend">Description</span>
+            <p>
+                Normally a simple wrapper around an XML parser, these objects can be viewed as Record Factories.  
+                They take a Document containing some XML and produce the equivalent Record.
+            </p>
+	</div>
+
+        <div class="fieldset">
+            <span class="legend">Implementations</span>
+            <ul>
+                <li><b>parser.SaxParser</b><br/>
+                Default SAX2 expat based parser</li>
+                <li><b>parser.MinidomParser</b><br/>
+                Python standard library's Minidom parser</li>
+                <li><b>parser.FtParser</b><br/>
+                Fourthought's nonvalidating DOM parser</li>
+                <li><b>parser.LibxmlSaxParser</b><br/>
+                Libxml2 Sax parser</li>
+                <li><b>parser.DTDParser</b><br/>
+                Libxml2 DTD validating parser</li>
+                <li><b>parser.RelaxNGParser</b><br/>
+                Libxml2 RelaxNG validating parser</li>
+                <li><b>parser.LibxmlParser</b><br/>
+                Libxml2 DOM parser</li>
+                <li><b>parser.XmlRecordStoreParser</b><br/>
+                Parser to create SAX records from the default record store implementation</li>
+            </ul>
+        </div>
+
+	<div class="fieldset">
+            <span class="legend">API</span>
+            <table border="1" cellpadding="3" cellspacing="0" width="100%">
+                <tr><th>Function</th><th>Parameters</th><th>Returns</th><th>Description</th></tr>
+                <tr><td>__init__</td><td>config, parent</td><td>&nbsp;</td><td> </td></tr>
+                <tr><td>process_document</td><td>session, document</td><td>Record</td><td>Return a record after parsing from an XML document</td></tr>
+            </table>
+	</div>
+
+    </body>
+</html>

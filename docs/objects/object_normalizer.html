@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>Cheshire3 Objects: Normalizer</title>
+        <link rel="stylesheet" type="text/css" href="http://www.cheshire3.org/cheshire3.css"></link>
+    </head>
+    <body>
+        <a name="top"></a>
+	<table cellpadding="0" cellspacing="0" class="maintitle">
+            <tr>
+		<td class="cheshirelogo">
+                    <img src="http://www.cheshire3.org/gfx/c3_white.gif" alt=" c h e s h i r e  |  3 "/>
+		</td>
+		<td>
+                    <img src="http://www.cheshire3.org/gfx/slant_grey.gif" alt=""/>
+		</td>
+		<td align="center">
+                    <h2>Cheshire3 Objects:  Normalizer</h2>
+		</td>
+            </tr>
+	</table>
+
+	<!--#config errmsg="<div id="navbar"/>" -->
+	<!--#include virtual="/navbar.ssi" -->
+
+        <div class="fieldset">
+            <span class="legend">Description</span>
+            <p>
+                Normalizer objects are chained after Extractors in order to transform the data from the record or query. 
+                A Normalizer might standardise case, perform stemming or transform a date into ISO8601 format. 
+                Normalizers are also needed to transform the terms in a request into the same format as the term in the Index. 
+                For example a date index might be searched using a free text date and that would need to be parsed into the normalised form in order to compare it with the stored data.
+            </p>
+        </div>
+
+	<div class="fieldset">
+            <span class="legend">Implementations</span>
+            <ul>
+		<li>
+                    <b>normalizer.SimpleNormalizer</b><br/>
+                    Simply returns the data with no modifications
+		</li>
+		<li>
+                    <b>normalizer.CaseNormalizer</b><br/>
+                    Returns the data in all lower case
+		</li>
+		<li>
+                    <b>normalizer.ArticleNormalizer</b><br/>
+                    Strips leading english articles (the, a, an)
+		</li>
+		<li>
+                    <b>normalizer.PossessiveNormalizer</b><br/>
+                    Strips trailing possessive 's, eg truck's -&gt; truck
+		</li>
+		<li>
+                    <b>normalizer.IntNormalizer</b><br/>
+                    Returns a long int from the numeric data, or None if there is no mapping possible
+		</li>
+		<li>
+                    <b>normalizer.StringIntNormalizer</b><br/>
+                    Returns a 0 padded length 12 string for an integer
+		</li>
+		<li>
+                    <b>normalizer.StoplistNormalizer</b><br/>
+                    Strip stoplisted words from the data
+		</li>
+		<li>
+                    <b>normalizer.StemNormalizer</b><br/>
+                    Apply a stemming algorithm to the data.  Implementation can be configured for 11+ different languages.
+		</li>
+		<li>
+                    <b>normalizer.DiacriticNormalizer</b><br/>
+                    Map characters with diacritics to their simple form. eg &eacute; -&gt; e
+		</li>
+            </ul>
+	</div>
+
+	<div class="fieldset">
+            <span class="legend">API</span>
+            <table border="1" cellpadding="3" cellspacing="0" width="100%">
+                <tr><th>Function</th><th>Parameters</th><th>Returns</th><th>Description</th></tr>
+                <tr><td>__init__</td><td>config, parent</td><td>&nbsp;</td><td> </td></tr>
+                <tr><td>process_string</td><td>session, string</td><td>data</td><td>Process a string into an alternative form</td></tr>
+            </table>
+	</div>
+
+    </body>
+</html>

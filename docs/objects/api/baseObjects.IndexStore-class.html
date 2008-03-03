@@ -1,0 +1,549 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>baseObjects.IndexStore</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <link rel="stylesheet" href="/cheshire3.css" type="text/css"/>
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body>
+<table width="100%" border=0 cellpadding=0 cellspacing=0 class="maintitle">
+<tr height="75">
+<td class="cheshirelogo" width="25%">
+<img src="/gfx/c3_white.gif">
+</td>
+<td width="10">
+<img src="/gfx/slant_grey.gif">
+</td>
+<td width="75%" align="center">
+<h2>Cheshire3 Object Model: Class IndexStore
+</h2>
+</td></tr>
+</table>
+
+<div class="fieldset">
+<span class="legend"><a href="configParser-module.html">
+        <a href="baseObjects-module.html">Module&nbsp;baseObjects</a> ::
+        Class&nbsp;IndexStore
+      </span>
+<p>
+
+
+<h2 class="class">Class IndexStore
+<br/><span class="codelink"><a href="baseObjects-pysrc.html#IndexStore">source&nbsp;code</a></span></h2>
+<b>Object Tree:</b><pre class="base-tree">
+           object --+    
+                    |    
+<a href="configParser.C3Object-class.html">configParser.C3Object</a> --+
+                        |
+                       <strong class="uidshort">IndexStore</strong>
+</pre>
+
+<dl><dt>Known Subclasses:</dt>
+<dd>
+    <a href="indexStore.BdbIndexStore-class.html">indexStore.BdbIndexStore</a>,
+    <a href="postgres.PostgresIndexStore-class.html">postgres.PostgresIndexStore</a>
+</dd></dl>
+
+<hr />
+A persistent storage mechanism for extracted terms.<br /><br />
+
+<!-- ==================== INSTANCE METHODS ==================== -->
+</div><div class="fieldset"><span class="legend">Instance Methods</span><p>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white"><tr>
+
+  <td>
+    <span class="sig"><a href="baseObjects.IndexStore-class.html#begin_indexing" class="sig-name">begin_indexing</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">req</span>)</span>
+    <br />Perform tasks as required before indexing begins, for example 
+      setting batch files.
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="baseObjects.IndexStore-class.html#clean_index" class="sig-name">clean_index</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>)</span>
+    <br />Remove all the terms from an index, but keep the 
+      specification.
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="baseObjects.IndexStore-class.html#commit_indexing" class="sig-name">commit_indexing</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">req</span>)</span>
+    <br />Commit the data to disk from the indexing process.
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="baseObjects.IndexStore-class.html#contains_index" class="sig-name">contains_index</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>)</span>
+    <br />Does the IndexStore currently store the given Index.
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="baseObjects.IndexStore-class.html#create_index" class="sig-name">create_index</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>)</span>
+    <br />Create an index in the store.
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="baseObjects.IndexStore-class.html#delete_index" class="sig-name">delete_index</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>)</span>
+    <br />Completely delete an index from the store.
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="baseObjects.IndexStore-class.html#delete_terms" class="sig-name">delete_terms</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>,
+        <span class="sig-arg">terms</span>,
+        <span class="sig-arg">record</span>=<span class="sig-default">None</span>)</span>
+    <br />Delete the given terms from an index, optionally only for a 
+      particular record.
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="baseObjects.IndexStore-class.html#fetch_indexList" class="sig-name">fetch_indexList</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>)</span>
+    <br />Fetch a list of all indexes stored in this IndexStore.
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="baseObjects.IndexStore-class.html#fetch_indexStats" class="sig-name">fetch_indexStats</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>)</span>
+    <br />Fetch statistics (such as size) about the given Index.
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="baseObjects.IndexStore-class.html#fetch_sortValue" class="sig-name">fetch_sortValue</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>,
+        <span class="sig-arg">record</span>)</span>
+    <br />Fetch a stored data value for the given record.
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="baseObjects.IndexStore-class.html#fetch_term" class="sig-name">fetch_term</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>,
+        <span class="sig-arg">term</span>,
+        <span class="sig-arg">summary</span>=<span class="sig-default">0</span>,
+        <span class="sig-arg">reverse</span>=<span class="sig-default">0</span>)</span>
+    <br />Fetch a single term.
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="baseObjects.IndexStore-class.html#fetch_termList" class="sig-name">fetch_termList</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>,
+        <span class="sig-arg">term</span>,
+        <span class="sig-arg">numReq</span>=<span class="sig-default">0</span>,
+        <span class="sig-arg">relation</span>=<span class="sig-default">&quot;&quot;</span>,
+        <span class="sig-arg">end</span>=<span class="sig-default">&quot;&quot;</span>,
+        <span class="sig-arg">summary</span>=<span class="sig-default">0</span>,
+        <span class="sig-arg">reverse</span>=<span class="sig-default">0</span>)</span>
+    <br />Fetch a list of terms for an index.
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="baseObjects.IndexStore-class.html#store_terms" class="sig-name">store_terms</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>,
+        <span class="sig-arg">terms</span>,
+        <span class="sig-arg">record</span>)</span>
+    <br />Store terms in the index for a given record.
+  </td>
+</tr>
+  <tr>
+    <td colspan="2">
+    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="configParser.C3Object-class.html">configParser.C3Object</a></code></span>:
+      <code><a href="configParser.C3Object-class.html#__init__">__init__</a></code>,
+      <code><a href="configParser.C3Object-class.html#auth_function">auth_function</a></code>,
+      <code><a href="configParser.C3Object-class.html#get_config">get_config</a></code>,
+      <code><a href="configParser.C3Object-class.html#get_default">get_default</a></code>,
+      <code><a href="configParser.C3Object-class.html#get_object">get_object</a></code>,
+      <code><a href="configParser.C3Object-class.html#get_path">get_path</a></code>,
+      <code><a href="configParser.C3Object-class.html#get_setting">get_setting</a></code>,
+      <code><a href="configParser.C3Object-class.html#log_function">log_function</a></code>,
+      <code><a href="configParser.C3Object-class.html#unauth_function">unauth_function</a></code>,
+      <code><a href="configParser.C3Object-class.html#unlog_function">unlog_function</a></code>
+      </p>
+    <div class="private">    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="configParser.C3Object-class.html">configParser.C3Object</a></code></span> (private):
+      <code><a href="configParser.C3Object-class.html#_getDomFromFile">_getDomFromFile</a></code>,
+      <code><a href="configParser.C3Object-class.html#_handleConfigNode">_handleConfigNode</a></code>,
+      <code><a href="configParser.C3Object-class.html#_parseIncludes">_parseIncludes</a></code>,
+      <code><a href="configParser.C3Object-class.html#_recurseSubConfigs">_recurseSubConfigs</a></code>,
+      <code><a href="configParser.C3Object-class.html#_verifyDefault">_verifyDefault</a></code>,
+      <code><a href="configParser.C3Object-class.html#_verifyOption">_verifyOption</a></code>,
+      <code><a href="configParser.C3Object-class.html#_verifySetting">_verifySetting</a></code>
+      </p></div>
+    <p class="varlist"><span class="varlist-header">Inherited from <code>object</code></span>:
+      <code>__delattr__</code>,
+      <code>__getattribute__</code>,
+      <code>__hash__</code>,
+      <code>__new__</code>,
+      <code>__reduce__</code>,
+      <code>__reduce_ex__</code>,
+      <code>__repr__</code>,
+      <code>__setattr__</code>,
+      <code>__str__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+
+<br />
+<!-- ==================== CLASS VARIABLES ==================== -->
+</div><div class="fieldset"><span class="legend">Class Variables</span><p>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">  <tr>
+    <td colspan="2">
+    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="configParser.C3Object-class.html">configParser.C3Object</a></code></span>:
+      <code><a href="configParser.C3Object-class.html#configStore">configStore</a></code>,
+      <code><a href="configParser.C3Object-class.html#defaults">defaults</a></code>,
+      <code><a href="configParser.C3Object-class.html#functionLogger">functionLogger</a></code>,
+      <code><a href="configParser.C3Object-class.html#id">id</a></code>,
+      <code><a href="configParser.C3Object-class.html#name">name</a></code>,
+      <code><a href="configParser.C3Object-class.html#objectType">objectType</a></code>,
+      <code><a href="configParser.C3Object-class.html#objects">objects</a></code>,
+      <code><a href="configParser.C3Object-class.html#parent">parent</a></code>,
+      <code><a href="configParser.C3Object-class.html#paths">paths</a></code>,
+      <code><a href="configParser.C3Object-class.html#permissionHandlers">permissionHandlers</a></code>,
+      <code><a href="configParser.C3Object-class.html#settings">settings</a></code>,
+      <code><a href="configParser.C3Object-class.html#subConfigs">subConfigs</a></code>,
+      <code><a href="configParser.C3Object-class.html#unresolvedObjects">unresolvedObjects</a></code>
+      </p>
+    <div class="private">    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="configParser.C3Object-class.html">configParser.C3Object</a></code></span> (private):
+      <code><a href="configParser.C3Object-class.html#_includeConfigStores">_includeConfigStores</a></code>,
+      <code><a href="configParser.C3Object-class.html#_objectRefs">_objectRefs</a></code>
+      </p></div>
+    <p class="varlist"><span class="varlist-header">Inherited from <code>object</code></span>:
+      <code>__class__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+
+<br />
+<!-- ==================== METHOD DETAILS ==================== --></div><div class="fieldset"><span class="legend">Method Details</span><p><a name="begin_indexing"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">begin_indexing</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">req</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="baseObjects-pysrc.html#IndexStore.begin_indexing">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Perform tasks as required before indexing begins, for example setting 
+  batch files.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="clean_index"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">clean_index</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="baseObjects-pysrc.html#IndexStore.clean_index">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Remove all the terms from an index, but keep the specification.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="commit_indexing"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">commit_indexing</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">req</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="baseObjects-pysrc.html#IndexStore.commit_indexing">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Commit the data to disk from the indexing process.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="contains_index"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">contains_index</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="baseObjects-pysrc.html#IndexStore.contains_index">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Does the IndexStore currently store the given Index.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="create_index"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">create_index</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="baseObjects-pysrc.html#IndexStore.create_index">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Create an index in the store.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="delete_index"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">delete_index</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="baseObjects-pysrc.html#IndexStore.delete_index">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Completely delete an index from the store.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="delete_terms"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">delete_terms</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>,
+        <span class="sig-arg">terms</span>,
+        <span class="sig-arg">record</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="baseObjects-pysrc.html#IndexStore.delete_terms">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Delete the given terms from an index, optionally only for a particular
+  record.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="fetch_indexList"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">fetch_indexList</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="baseObjects-pysrc.html#IndexStore.fetch_indexList">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Fetch a list of all indexes stored in this IndexStore.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="fetch_indexStats"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">fetch_indexStats</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="baseObjects-pysrc.html#IndexStore.fetch_indexStats">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Fetch statistics (such as size) about the given Index.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="fetch_sortValue"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">fetch_sortValue</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>,
+        <span class="sig-arg">record</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="baseObjects-pysrc.html#IndexStore.fetch_sortValue">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Fetch a stored data value for the given record.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="fetch_term"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">fetch_term</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>,
+        <span class="sig-arg">term</span>,
+        <span class="sig-arg">summary</span>=<span class="sig-default">0</span>,
+        <span class="sig-arg">reverse</span>=<span class="sig-default">0</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="baseObjects-pysrc.html#IndexStore.fetch_term">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Fetch a single term.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="fetch_termList"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">fetch_termList</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>,
+        <span class="sig-arg">term</span>,
+        <span class="sig-arg">numReq</span>=<span class="sig-default">0</span>,
+        <span class="sig-arg">relation</span>=<span class="sig-default">&quot;&quot;</span>,
+        <span class="sig-arg">end</span>=<span class="sig-default">&quot;&quot;</span>,
+        <span class="sig-arg">summary</span>=<span class="sig-default">0</span>,
+        <span class="sig-arg">reverse</span>=<span class="sig-default">0</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="baseObjects-pysrc.html#IndexStore.fetch_termList">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Fetch a list of terms for an index. numReq:  How many terms are 
+  wanted. relation: Which order to scan through the index. end: A point to 
+  end at (eg between A and B) summary: Only return frequency info, not the 
+  pointers to matching records. reverse: Use the reversed index if 
+  available (eg 'xedni' not 'index').
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="store_terms"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">store_terms</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>,
+        <span class="sig-arg">terms</span>,
+        <span class="sig-arg">record</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="baseObjects-pysrc.html#IndexStore.store_terms">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Store terms in the index for a given record.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<br />
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">Generated by Epydoc
+        3.0alpha2 on Wed Aug  9 18:09:57 2006</td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>

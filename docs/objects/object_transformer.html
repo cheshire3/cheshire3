@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>Cheshire3 Objects: Transformer</title>
+        <link rel="stylesheet" type="text/css" href="http://www.cheshire3.org/cheshire3.css"></link>
+    </head>
+    <body>
+        <a name="top"></a>
+        <table cellpadding=0 cellspacing=0 class="maintitle">
+            <tr>
+                <td class="cheshirelogo">
+                    <img src="http://www.cheshire3.org/gfx/c3_white.gif" alt=" c h e s h i r e  |  3 "/>
+                </td>
+                <td>
+                    <img src="http://www.cheshire3.org/gfx/slant_grey.gif" alt=""/>
+                </td>
+                <td align="center">
+                    <h2>Cheshire3 Objects:  Transformer</h2>
+                </td>
+            </tr>
+        </table>
+
+	<!--#config errmsg="<div id="navbar"/>" -->
+	<!--#include virtual="/navbar.ssi" -->
+
+        <div class="fieldset">
+            <span class="legend">Description</span>
+            <p>
+                A Transformer is the opposite of a Parser. 
+                It takes a Record and produces a Document. 
+                In many cases this can be handled by an XSLT implementation but other instances might include one that returns a binary file based on the information in the record. 
+                Transformers might be used in an indexing chain, but are more likely to be used to render a record in a format or schema requested by the end user.
+            </p>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">Implementations</span>
+            <ul>
+                <li><b>transformer.XsltTransformer</b><br/>
+                Using a configured XSL stylesheet, transform the record into new XML using Fourthought's processor</li>
+                <li><b>transformer.LibxsltTransformer</b><br/>
+                Using a configured stylesheet, transform the record into new XML using libxml2's processor</li>
+                <li><b>transformer.GRS1Transformer</b><br/>
+                Given a record, step through it and turn it into the equivalent GRS1 tree for Z39.50</li>
+                <li><b>transformer.ChainTransformer</b><br/>
+                Given a record, pass it through any number of configured objects to end up with a document.</li>
+                <li><b>transformer.XmlRecordStoreTransformer</b><br/>
+                Transform a record into a string to store in a RecordStore</li>
+                <li><b>transformer.ClusterExtractionTransformer</b><br/>
+                Extract the configured information to cluster and store it locally for later consumption with a documentGroup. Return an empty record.</li>
+            </ul>
+        </div>
+
+	<div class="fieldset">
+            <span class="legend">API</span>
+            <table border="1" cellpadding="3" cellspacing="0" width="100%">
+		<tr><th>Function</th><th>Parameters</th><th>Returns</th><th>Description</th></tr>
+                <tr><td>__init__</td><td>config, parent</td><td>&nbsp;</td><td> </td></tr>
+                <tr><td>process_record</td><td>session, record</td><td>Document</td><td>Return a document after some transformation of the record</td></tr>
+            </table>
+	</div>
+
+    </body>
+</html>

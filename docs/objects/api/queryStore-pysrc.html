@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>queryStore</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        Module&nbsp;queryStore
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript: void(0);" class="privatelink"
+    onclick="toggle_private();">hide private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="queryStore-pysrc.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<h2 class="py-src">Source Code for <a href="queryStore-module.html">Module queryStore</a></h2>
+<div class="py-src">
+<pre class="py-src">
+<span class="lineno"> 1</span>  <span class="py-line"> </span>
+<span class="lineno"> 2</span>  <span class="py-line"><span class="py-keyword">from</span> <a title="baseObjects" class="py-name" href="baseObjects-module.html">baseObjects</a> <span class="py-keyword">import</span> <a class="py-name" href="baseObjects.QueryStore-class.html">QueryStore</a> </span>
+<span class="lineno"> 3</span>  <span class="py-line"><span class="py-keyword">from</span> <a title="baseStore" class="py-name" href="baseStore-module.html">baseStore</a> <span class="py-keyword">import</span> <a class="py-name" href="baseStore.BdbStore-class.html">BdbStore</a> </span>
+<span class="lineno"> 4</span>  <span class="py-line"><span class="py-keyword">from</span> <span class="py-name">PyZ3950</span><span class="py-op">.</span><span class="py-name">CQLParser</span> <span class="py-keyword">import</span> <span class="py-name">parse</span> </span>
+<span class="lineno"> 5</span>  <span class="py-line"> </span>
+<a name="SimpleQueryStore"></a><div id="SimpleQueryStore-def"><span class="lineno"> 6</span> <a class="pysrc-toggle" href="#" id="SimpleQueryStore-toggle" onclick="toggle('SimpleQueryStore'); return false;">-</a><span class="py-line"><span class="py-keyword">class</span> <a class="py-def-name" href="queryStore.SimpleQueryStore-class.html">SimpleQueryStore</a><span class="py-op">(</span><span class="py-base-class">BdbStore</span><span class="py-op">,</span> <span class="py-base-class">QueryStore</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="SimpleQueryStore-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="SimpleQueryStore-expanded"><span class="lineno"> 7</span>  <span class="py-line"> </span>
+<a name="SimpleQueryStore.create_query"></a><div id="SimpleQueryStore.create_query-def"><span class="lineno"> 8</span> <a class="pysrc-toggle" href="#" id="SimpleQueryStore.create_query-toggle" onclick="toggle('SimpleQueryStore.create_query'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="queryStore.SimpleQueryStore-class.html#create_query">create_query</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">session</span><span class="py-op">,</span> <span class="py-param">query</span><span class="py-op">=</span><span class="py-name">None</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="SimpleQueryStore.create_query-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="SimpleQueryStore.create_query-expanded"><span class="lineno"> 9</span>  <span class="py-line">        <span class="py-comment"># Create a record like &lt;query&gt; text &lt;/query&gt;</span> </span>
+<span class="lineno">10</span>  <span class="py-line"><span class="py-comment"></span>        <span class="py-name">data</span> <span class="py-op">=</span> <a title="postgres.PostgresStore.query" class="py-name" href="postgres.PostgresStore-class.html#query">query</a><span class="py-op">.</span><span class="py-name">toCQL</span><span class="py-op">(</span><span class="py-op">)</span> </span>
+<span class="lineno">11</span>  <span class="py-line">        <span id="link-0" class="py-name"><a title="baseObjects.Document.id
+baseObjects.ResultSet.id
+configParser.C3Object.id
+resultSet.BitmapResultSet.id
+resultSet.SimpleResultSet.id
+srboo.SrbConnection.id" class="py-name" href="#" onclick="doclink('link-0', 'id', 'Variable baseObjects.Document.id=baseObjects.Document-class.html#id,Variable baseObjects.ResultSet.id=baseObjects.ResultSet-class.html#id,Variable configParser.C3Object.id=configParser.C3Object-class.html#id,Variable resultSet.BitmapResultSet.id=resultSet.BitmapResultSet-class.html#id,Variable resultSet.SimpleResultSet.id=resultSet.SimpleResultSet-class.html#id,Variable srboo.SrbConnection.id=srboo.SrbConnection-class.html#id'); return false;">id</a></span></span> <span class="py-op">=</span> <span class="py-name">self</span><span class="py-op">.</span><span id="link-1" class="py-name"><a title="baseStore.BdbStore.generate_id
+baseStore.SrbBdbCombineStore.generate_id
+baseStore.SrbStore.generate_id
+postgres.PostgresStore.generate_id
+resultSetStore.SimpleResultSetStore.generate_id" class="py-name" href="#" onclick="doclink('link-1', 'generate_id', 'Method baseStore.BdbStore.generate_id()=baseStore.BdbStore-class.html#generate_id,Method baseStore.SrbBdbCombineStore.generate_id()=baseStore.SrbBdbCombineStore-class.html#generate_id,Method baseStore.SrbStore.generate_id()=baseStore.SrbStore-class.html#generate_id,Method postgres.PostgresStore.generate_id()=postgres.PostgresStore-class.html#generate_id,Method resultSetStore.SimpleResultSetStore.generate_id()=resultSetStore.SimpleResultSetStore-class.html#generate_id'); return false;">generate_id</a></span></span><span class="py-op">(</span><a title="resultSet.DeserializationHandler.session" class="py-name" href="resultSet.DeserializationHandler-class.html#session">session</a><span class="py-op">)</span> </span>
+<span class="lineno">12</span>  <span class="py-line">        <span class="py-name">self</span><span class="py-op">.</span><span id="link-2" class="py-name"><a title="baseStore.BdbStore.store_data
+baseStore.SrbBdbCombineStore.store_data
+baseStore.SrbStore.store_data
+postgres.PostgresResultSetStore.store_data
+postgres.PostgresStore.store_data" class="py-name" href="#" onclick="doclink('link-2', 'store_data', 'Method baseStore.BdbStore.store_data()=baseStore.BdbStore-class.html#store_data,Method baseStore.SrbBdbCombineStore.store_data()=baseStore.SrbBdbCombineStore-class.html#store_data,Method baseStore.SrbStore.store_data()=baseStore.SrbStore-class.html#store_data,Method postgres.PostgresResultSetStore.store_data()=postgres.PostgresResultSetStore-class.html#store_data,Method postgres.PostgresStore.store_data()=postgres.PostgresStore-class.html#store_data'); return false;">store_data</a></span></span><span class="py-op">(</span><a title="resultSet.DeserializationHandler.session" class="py-name" href="resultSet.DeserializationHandler-class.html#session">session</a><span class="py-op">,</span> <span id="link-3" class="py-name"><a title="baseObjects.Document.id
+baseObjects.ResultSet.id
+configParser.C3Object.id
+resultSet.BitmapResultSet.id
+resultSet.SimpleResultSet.id
+srboo.SrbConnection.id" class="py-name" href="#" onclick="doclink('link-3', 'id', 'Variable baseObjects.Document.id=baseObjects.Document-class.html#id,Variable baseObjects.ResultSet.id=baseObjects.ResultSet-class.html#id,Variable configParser.C3Object.id=configParser.C3Object-class.html#id,Variable resultSet.BitmapResultSet.id=resultSet.BitmapResultSet-class.html#id,Variable resultSet.SimpleResultSet.id=resultSet.SimpleResultSet-class.html#id,Variable srboo.SrbConnection.id=srboo.SrbConnection-class.html#id'); return false;">id</a></span></span><span class="py-op">,</span> <span class="py-name">data</span><span class="py-op">)</span> </span>
+<span class="lineno">13</span>  <span class="py-line">        <span class="py-keyword">return</span> <span id="link-4" class="py-name"><a title="baseObjects.Document.id
+baseObjects.ResultSet.id
+configParser.C3Object.id
+resultSet.BitmapResultSet.id
+resultSet.SimpleResultSet.id
+srboo.SrbConnection.id" class="py-name" href="#" onclick="doclink('link-4', 'id', 'Variable baseObjects.Document.id=baseObjects.Document-class.html#id,Variable baseObjects.ResultSet.id=baseObjects.ResultSet-class.html#id,Variable configParser.C3Object.id=configParser.C3Object-class.html#id,Variable resultSet.BitmapResultSet.id=resultSet.BitmapResultSet-class.html#id,Variable resultSet.SimpleResultSet.id=resultSet.SimpleResultSet-class.html#id,Variable srboo.SrbConnection.id=srboo.SrbConnection-class.html#id'); return false;">id</a></span></span> </span>
+</div><span class="lineno">14</span>  <span class="py-line"> </span>
+<a name="SimpleQueryStore.delete_query"></a><div id="SimpleQueryStore.delete_query-def"><span class="lineno">15</span> <a class="pysrc-toggle" href="#" id="SimpleQueryStore.delete_query-toggle" onclick="toggle('SimpleQueryStore.delete_query'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="queryStore.SimpleQueryStore-class.html#delete_query">delete_query</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">session</span><span class="py-op">,</span> <span class="py-param">id</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="SimpleQueryStore.delete_query-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="SimpleQueryStore.delete_query-expanded"><span class="lineno">16</span>  <span class="py-line">        <span class="py-name">self</span><span class="py-op">.</span><span id="link-5" class="py-name"><a title="baseStore.BdbStore.delete_item
+baseStore.SrbBdbCombineStore.delete_item
+baseStore.SrbStore.delete_item
+postgres.PostgresStore.delete_item" class="py-name" href="#" onclick="doclink('link-5', 'delete_item', 'Method baseStore.BdbStore.delete_item()=baseStore.BdbStore-class.html#delete_item,Method baseStore.SrbBdbCombineStore.delete_item()=baseStore.SrbBdbCombineStore-class.html#delete_item,Method baseStore.SrbStore.delete_item()=baseStore.SrbStore-class.html#delete_item,Method postgres.PostgresStore.delete_item()=postgres.PostgresStore-class.html#delete_item'); return false;">delete_item</a></span></span><span class="py-op">(</span><a title="resultSet.DeserializationHandler.session" class="py-name" href="resultSet.DeserializationHandler-class.html#session">session</a><span class="py-op">,</span> <span id="link-6" class="py-name"><a title="baseObjects.Document.id
+baseObjects.ResultSet.id
+configParser.C3Object.id
+resultSet.BitmapResultSet.id
+resultSet.SimpleResultSet.id
+srboo.SrbConnection.id" class="py-name" href="#" onclick="doclink('link-6', 'id', 'Variable baseObjects.Document.id=baseObjects.Document-class.html#id,Variable baseObjects.ResultSet.id=baseObjects.ResultSet-class.html#id,Variable configParser.C3Object.id=configParser.C3Object-class.html#id,Variable resultSet.BitmapResultSet.id=resultSet.BitmapResultSet-class.html#id,Variable resultSet.SimpleResultSet.id=resultSet.SimpleResultSet-class.html#id,Variable srboo.SrbConnection.id=srboo.SrbConnection-class.html#id'); return false;">id</a></span></span><span class="py-op">)</span> </span>
+</div><span class="lineno">17</span>  <span class="py-line"> </span>
+<a name="SimpleQueryStore.fetch_query"></a><div id="SimpleQueryStore.fetch_query-def"><span class="lineno">18</span> <a class="pysrc-toggle" href="#" id="SimpleQueryStore.fetch_query-toggle" onclick="toggle('SimpleQueryStore.fetch_query'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="queryStore.SimpleQueryStore-class.html#fetch_query">fetch_query</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">session</span><span class="py-op">,</span> <span class="py-param">id</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="SimpleQueryStore.fetch_query-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="SimpleQueryStore.fetch_query-expanded"><span class="lineno">19</span>  <span class="py-line">        <span class="py-name">cql</span> <span class="py-op">=</span> <span class="py-name">self</span><span class="py-op">.</span><span id="link-7" class="py-name"><a title="baseStore.BdbStore.fetch_data
+baseStore.SrbBdbCombineStore.fetch_data
+baseStore.SrbStore.fetch_data
+postgres.PostgresStore.fetch_data" class="py-name" href="#" onclick="doclink('link-7', 'fetch_data', 'Method baseStore.BdbStore.fetch_data()=baseStore.BdbStore-class.html#fetch_data,Method baseStore.SrbBdbCombineStore.fetch_data()=baseStore.SrbBdbCombineStore-class.html#fetch_data,Method baseStore.SrbStore.fetch_data()=baseStore.SrbStore-class.html#fetch_data,Method postgres.PostgresStore.fetch_data()=postgres.PostgresStore-class.html#fetch_data'); return false;">fetch_data</a></span></span><span class="py-op">(</span><a title="resultSet.DeserializationHandler.session" class="py-name" href="resultSet.DeserializationHandler-class.html#session">session</a><span class="py-op">,</span> <span id="link-8" class="py-name"><a title="baseObjects.Document.id
+baseObjects.ResultSet.id
+configParser.C3Object.id
+resultSet.BitmapResultSet.id
+resultSet.SimpleResultSet.id
+srboo.SrbConnection.id" class="py-name" href="#" onclick="doclink('link-8', 'id', 'Variable baseObjects.Document.id=baseObjects.Document-class.html#id,Variable baseObjects.ResultSet.id=baseObjects.ResultSet-class.html#id,Variable configParser.C3Object.id=configParser.C3Object-class.html#id,Variable resultSet.BitmapResultSet.id=resultSet.BitmapResultSet-class.html#id,Variable resultSet.SimpleResultSet.id=resultSet.SimpleResultSet-class.html#id,Variable srboo.SrbConnection.id=srboo.SrbConnection-class.html#id'); return false;">id</a></span></span><span class="py-op">)</span> </span>
+<span class="lineno">20</span>  <span class="py-line">        <span class="py-keyword">return</span> <span class="py-name">parse</span><span class="py-op">(</span><span class="py-name">cql</span><span class="py-op">)</span> </span>
+</div><span class="lineno">21</span>  <span class="py-line"> </span>
+<a name="SimpleQueryStore.store_query"></a><div id="SimpleQueryStore.store_query-def"><span class="lineno">22</span> <a class="pysrc-toggle" href="#" id="SimpleQueryStore.store_query-toggle" onclick="toggle('SimpleQueryStore.store_query'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="queryStore.SimpleQueryStore-class.html#store_query">store_query</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">session</span><span class="py-op">,</span> <span class="py-param">query</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="SimpleQueryStore.store_query-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="SimpleQueryStore.store_query-expanded"><span class="lineno">23</span>  <span class="py-line">        <span class="py-comment"># Where to get ID from???</span> </span>
+<span class="lineno">24</span>  <span class="py-line"><span class="py-comment"></span>        <span class="py-keyword">raise</span> <span class="py-name">NotImplementedError</span> </span>
+<span class="lineno">25</span>  <span class="py-line">        <a title="srwExtensions.r" class="py-name" href="srwExtensions-module.html#r">r</a> <span class="py-op">=</span> <span class="py-name">self</span><span class="py-op">.</span><span id="link-9" class="py-name"><a title="baseObjects.RecordStore.store_record
+recordStore.ParsingRecordStore.store_record
+recordStore.RemoteSlaveRecordStore.store_record
+recordStore.SimpleRecordStore.store_record" class="py-name" href="#" onclick="doclink('link-9', 'store_record', 'Method baseObjects.RecordStore.store_record()=baseObjects.RecordStore-class.html#store_record,Method recordStore.ParsingRecordStore.store_record()=recordStore.ParsingRecordStore-class.html#store_record,Method recordStore.RemoteSlaveRecordStore.store_record()=recordStore.RemoteSlaveRecordStore-class.html#store_record,Method recordStore.SimpleRecordStore.store_record()=recordStore.SimpleRecordStore-class.html#store_record'); return false;">store_record</a></span></span><span class="py-op">(</span><a title="resultSet.DeserializationHandler.session" class="py-name" href="resultSet.DeserializationHandler-class.html#session">session</a><span class="py-op">,</span> <span class="py-name">rec</span><span class="py-op">)</span> </span>
+<span class="lineno">26</span>  <span class="py-line">        <span class="py-keyword">return</span> <span id="link-10" class="py-name"><a title="baseObjects.Document.id
+baseObjects.ResultSet.id
+configParser.C3Object.id
+resultSet.BitmapResultSet.id
+resultSet.SimpleResultSet.id
+srboo.SrbConnection.id" class="py-name" href="#" onclick="doclink('link-10', 'id', 'Variable baseObjects.Document.id=baseObjects.Document-class.html#id,Variable baseObjects.ResultSet.id=baseObjects.ResultSet-class.html#id,Variable configParser.C3Object.id=configParser.C3Object-class.html#id,Variable resultSet.BitmapResultSet.id=resultSet.BitmapResultSet-class.html#id,Variable resultSet.SimpleResultSet.id=resultSet.SimpleResultSet-class.html#id,Variable srboo.SrbConnection.id=srboo.SrbConnection-class.html#id'); return false;">id</a></span></span> </span>
+</div></div><span class="lineno">27</span>  <span class="py-line"> </span><script type="text/javascript">
+<!--
+expandto(location.href);
+// -->
+</script>
+</pre>
+</div>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">Generated by Epydoc
+        3.0alpha2 on Wed Aug  9 18:10:22 2006</td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>

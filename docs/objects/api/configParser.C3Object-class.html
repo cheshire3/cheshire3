@@ -1,0 +1,900 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>configParser.C3Object</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <link rel="stylesheet" href="/cheshire3.css" type="text/css"/>
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body>
+<table width="100%" border=0 cellpadding=0 cellspacing=0 class="maintitle">
+<tr height="75">
+<td class="cheshirelogo" width="25%">
+<img src="/gfx/c3_white.gif">
+</td>
+<td width="10">
+<img src="/gfx/slant_grey.gif">
+</td>
+<td width="75%" align="center">
+<h2>Cheshire3 Object Model: Class C3Object
+</h2>
+</td></tr>
+</table>
+
+<div class="fieldset">
+<span class="legend"><a href="configParser-module.html">
+        <a href="configParser-module.html">Module&nbsp;configParser</a> ::
+        Class&nbsp;C3Object
+      </span>
+<p>
+
+
+<h2 class="class">Class C3Object
+<br/><span class="codelink"><a href="configParser-pysrc.html#C3Object">source&nbsp;code</a></span></h2>
+<b>Object Tree:</b><pre class="base-tree">
+object --+
+         |
+        <strong class="uidshort">C3Object</strong>
+</pre>
+
+<dl><dt>Known Subclasses:</dt>
+<dd>
+    <a href="baseObjects.Database-class.html">baseObjects.Database</a>,
+    <a href="baseObjects.DocumentFactory-class.html">baseObjects.DocumentFactory</a>,
+    <a href="baseObjects.ObjectStore-class.html">baseObjects.ObjectStore</a>,
+    <a href="baseObjects.Extractor-class.html">baseObjects.Extractor</a>,
+    <a href="baseObjects.Index-class.html">baseObjects.Index</a>,
+    <a href="baseObjects.IndexStore-class.html">baseObjects.IndexStore</a>,
+    <a href="baseObjects.Logger-class.html">baseObjects.Logger</a>,
+    <a href="baseObjects.Normalizer-class.html">baseObjects.Normalizer</a>,
+    <a href="baseObjects.Parser-class.html">baseObjects.Parser</a>,
+    <a href="baseObjects.PreParser-class.html">baseObjects.PreParser</a>,
+    <a href="baseObjects.ProtocolMap-class.html">baseObjects.ProtocolMap</a>,
+    <a href="baseObjects.QueryFactory-class.html">baseObjects.QueryFactory</a>,
+    <a href="baseObjects.Server-class.html">baseObjects.Server</a>,
+    <a href="baseObjects.Transformer-class.html">baseObjects.Transformer</a>,
+    <a href="baseObjects.User-class.html">baseObjects.User</a>,
+    <a href="baseObjects.Workflow-class.html">baseObjects.Workflow</a>,
+    <a href="baseObjects.XPathProcessor-class.html">baseObjects.XPathProcessor</a>,
+    <a href="baseStore.SimpleStore-class.html">baseStore.SimpleStore</a>,
+    <a href="xpathProcessor.SimpleXPathProcessor-class.html">xpathProcessor.SimpleXPathProcessor</a>,
+    <a href="baseStore.SrbStore-class.html">baseStore.SrbStore</a>
+</dd></dl>
+
+<hr />
+<!-- ==================== INSTANCE METHODS ==================== -->
+</div><div class="fieldset"><span class="legend">Instance Methods</span><p>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white"><tr>
+
+  <td>
+    <span class="sig"><a href="configParser.C3Object-class.html#__init__" class="sig-name">__init__</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">topNode</span>,
+        <span class="sig-arg">parentObject</span>=<span class="sig-default">None</span>)</span>
+    <br />The constructor for all Cheshire3 objects take the same arguments:
+      session:  A Session object topNode:  The &lt;config&gt; or 
+      &lt;subConfig&gt; domNode for the configuration parent:   The object 
+      that provides the scope for this object.
+  </td>
+</tr>
+<tr class="private">
+
+  <td>
+    <span class="sig"><a href="configParser.C3Object-class.html#_getDomFromFile" class="sig-name">_getDomFromFile</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">fileName</span>)</span>
+    <br />Read in an XML file from disk to get the configuration for this 
+      object.
+  </td>
+</tr>
+<tr class="private">
+
+  <td>
+    <span class="sig"><a href="configParser.C3Object-class.html#_handleConfigNode" class="sig-name">_handleConfigNode</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">node</span>)</span>
+    
+  </td>
+</tr>
+<tr class="private">
+
+  <td>
+    <span class="sig"><a href="configParser.C3Object-class.html#_parseIncludes" class="sig-name">_parseIncludes</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">path</span>)</span>
+    
+  </td>
+</tr>
+<tr class="private">
+
+  <td>
+    <span class="sig"><a href="configParser.C3Object-class.html#_recurseSubConfigs" class="sig-name">_recurseSubConfigs</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">child</span>)</span>
+    
+  </td>
+</tr>
+<tr class="private">
+
+  <td>
+    <span class="sig"><a href="configParser.C3Object-class.html#_verifyDefault" class="sig-name">_verifyDefault</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">type</span>,
+        <span class="sig-arg">value</span>)</span>
+    
+  </td>
+</tr>
+<tr class="private">
+
+  <td>
+    <span class="sig"><a href="configParser.C3Object-class.html#_verifyOption" class="sig-name">_verifyOption</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">type</span>,
+        <span class="sig-arg">value</span>)</span>
+    
+  </td>
+</tr>
+<tr class="private">
+
+  <td>
+    <span class="sig"><a href="configParser.C3Object-class.html#_verifySetting" class="sig-name">_verifySetting</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">type</span>,
+        <span class="sig-arg">value</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="configParser.C3Object-class.html#auth_function" class="sig-name">auth_function</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">name</span>)</span>
+    <br />Add an authorisation layer on top of a named function.
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="configParser.C3Object-class.html#get_config" class="sig-name">get_config</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">id</span>)</span>
+    <br />Return a configuration for the given object.
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="configParser.C3Object-class.html#get_default" class="sig-name">get_default</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">id</span>,
+        <span class="sig-arg">default</span>=<span class="sig-default">None</span>)</span>
+    <br />Return the default value for an option on this object
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="configParser.C3Object-class.html#get_object" class="sig-name">get_object</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">id</span>)</span>
+    <br />Return an object with the given id within this object's scope, or 
+      search upwards for it.
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="configParser.C3Object-class.html#get_path" class="sig-name">get_path</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">id</span>,
+        <span class="sig-arg">default</span>=<span class="sig-default">None</span>)</span>
+    <br />Return the named path
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="configParser.C3Object-class.html#get_setting" class="sig-name">get_setting</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">id</span>,
+        <span class="sig-arg">default</span>=<span class="sig-default">None</span>)</span>
+    <br />Return the value for a setting on this object.
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="configParser.C3Object-class.html#log_function" class="sig-name">log_function</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">name</span>)</span>
+    <br />Set a named function to log invocations.
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="configParser.C3Object-class.html#unauth_function" class="sig-name">unauth_function</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">name</span>)</span>
+    <br />Remove the authorisation requirement from the named function.
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="configParser.C3Object-class.html#unlog_function" class="sig-name">unlog_function</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">name</span>)</span>
+    <br />Remove the logging from a named function.
+  </td>
+</tr>
+  <tr>
+    <td colspan="2">
+    <p class="varlist"><span class="varlist-header">Inherited from <code>object</code></span>:
+      <code>__delattr__</code>,
+      <code>__getattribute__</code>,
+      <code>__hash__</code>,
+      <code>__new__</code>,
+      <code>__reduce__</code>,
+      <code>__reduce_ex__</code>,
+      <code>__repr__</code>,
+      <code>__setattr__</code>,
+      <code>__str__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+
+<br />
+<!-- ==================== CLASS VARIABLES ==================== -->
+</div><div class="fieldset"><span class="legend">Class Variables</span><p>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white"><tr class="private">
+  <td width="15%">
+    <strong><a href="configParser.C3Object-class.html#_includeConfigStores">_includeConfigStores</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr class="private">
+  <td width="15%">
+    <strong><a href="configParser.C3Object-class.html#_objectRefs">_objectRefs</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="configParser.C3Object-class.html#configStore">configStore</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="configParser.C3Object-class.html#defaults">defaults</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="configParser.C3Object-class.html#functionLogger">functionLogger</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="configParser.C3Object-class.html#id">id</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="configParser.C3Object-class.html#name">name</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="configParser.C3Object-class.html#objectType">objectType</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="configParser.C3Object-class.html#objects">objects</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="configParser.C3Object-class.html#parent">parent</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="configParser.C3Object-class.html#paths">paths</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="configParser.C3Object-class.html#permissionHandlers">permissionHandlers</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="configParser.C3Object-class.html#settings">settings</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="configParser.C3Object-class.html#subConfigs">subConfigs</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="configParser.C3Object-class.html#unresolvedObjects">unresolvedObjects</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+  <tr>
+    <td colspan="2">
+    <p class="varlist"><span class="varlist-header">Inherited from <code>object</code></span>:
+      <code>__class__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+
+<br />
+<!-- ==================== METHOD DETAILS ==================== --></div><div class="fieldset"><span class="legend">Method Details</span><p><a name="__init__"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">topNode</span>,
+        <span class="sig-arg">parentObject</span>=<span class="sig-default">None</span>)</span>
+    <br /><em class="fname">(Constructor)</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="configParser-pysrc.html#C3Object.__init__">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  The constructor for all Cheshire3 objects take the same arguments: 
+  session:  A Session object topNode:  The &lt;config&gt; or 
+  &lt;subConfig&gt; domNode for the configuration parent:   The object that
+  provides the scope for this object.
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      object.__init__
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="_getDomFromFile"></a>
+<div class="private">
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">_getDomFromFile</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">fileName</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="configParser-pysrc.html#C3Object._getDomFromFile">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Read in an XML file from disk to get the configuration for this 
+  object.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="_handleConfigNode"></a>
+<div class="private">
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">_handleConfigNode</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">node</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="configParser-pysrc.html#C3Object._handleConfigNode">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="_parseIncludes"></a>
+<div class="private">
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">_parseIncludes</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">path</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="configParser-pysrc.html#C3Object._parseIncludes">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="_recurseSubConfigs"></a>
+<div class="private">
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">_recurseSubConfigs</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">child</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="configParser-pysrc.html#C3Object._recurseSubConfigs">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="_verifyDefault"></a>
+<div class="private">
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">_verifyDefault</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">type</span>,
+        <span class="sig-arg">value</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="configParser-pysrc.html#C3Object._verifyDefault">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="_verifyOption"></a>
+<div class="private">
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">_verifyOption</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">type</span>,
+        <span class="sig-arg">value</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="configParser-pysrc.html#C3Object._verifyOption">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="_verifySetting"></a>
+<div class="private">
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">_verifySetting</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">type</span>,
+        <span class="sig-arg">value</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="configParser-pysrc.html#C3Object._verifySetting">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="auth_function"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">auth_function</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">name</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="configParser-pysrc.html#C3Object.auth_function">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Add an authorisation layer on top of a named function.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="get_config"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">get_config</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">id</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="configParser-pysrc.html#C3Object.get_config">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Return a configuration for the given object.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="get_default"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">get_default</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">id</span>,
+        <span class="sig-arg">default</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="configParser-pysrc.html#C3Object.get_default">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Return the default value for an option on this object
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="get_object"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">get_object</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">id</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="configParser-pysrc.html#C3Object.get_object">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Return an object with the given id within this object's scope, or 
+  search upwards for it.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="get_path"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">get_path</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">id</span>,
+        <span class="sig-arg">default</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="configParser-pysrc.html#C3Object.get_path">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Return the named path
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="get_setting"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">get_setting</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">id</span>,
+        <span class="sig-arg">default</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="configParser-pysrc.html#C3Object.get_setting">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Return the value for a setting on this object.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="log_function"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">log_function</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">name</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="configParser-pysrc.html#C3Object.log_function">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Set a named function to log invocations.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="unauth_function"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">unauth_function</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">name</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="configParser-pysrc.html#C3Object.unauth_function">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Remove the authorisation requirement from the named function.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="unlog_function"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">unlog_function</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">name</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="configParser-pysrc.html#C3Object.unlog_function">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Remove the logging from a named function.
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<br />
+<!-- ==================== CLASS VARIABLE DETAILS ==================== --></div><div class="fieldset"><span class="legend">Class Variable Details</span><p><a name="_includeConfigStores"></a>
+<div class="private">
+<table width="100%" class="var-details"><tr><td>
+  <h3>_includeConfigStores</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="[]"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+[]                                                                     
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="_objectRefs"></a>
+<div class="private">
+<table width="100%" class="var-details"><tr><td>
+  <h3>_objectRefs</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="[]"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+[]                                                                     
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="configStore"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>configStore</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="None"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="defaults"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>defaults</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="{}"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+{}                                                                     
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="functionLogger"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>functionLogger</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="None"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="id"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>id</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="''"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+<span class="variable-quote">'</span><span class="variable-quote">'</span>                                                                     
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="name"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>name</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="''"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+<span class="variable-quote">'</span><span class="variable-quote">'</span>                                                                     
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="objectType"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>objectType</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="''"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+<span class="variable-quote">'</span><span class="variable-quote">'</span>                                                                     
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="objects"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>objects</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="{}"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+{}                                                                     
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="parent"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>parent</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="None"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="paths"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>paths</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="{}"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+{}                                                                     
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="permissionHandlers"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>permissionHandlers</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="{}"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+{}                                                                     
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="settings"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>settings</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="{}"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+{}                                                                     
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="subConfigs"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>subConfigs</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="{}"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+{}                                                                     
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="unresolvedObjects"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>unresolvedObjects</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="{}"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+{}                                                                     
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<br />
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">Generated by Epydoc
+        3.0alpha2 on Wed Aug  9 18:09:57 2006</td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>

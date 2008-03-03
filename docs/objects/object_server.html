@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>Cheshire3 Objects: Server</title>
+        <link rel="stylesheet" type="text/css" href="http://www.cheshire3.org/cheshire3.css"></link>
+    </head>
+    <body>
+        <a name="top"></a>
+        <table cellpadding="0" cellspacing="0" class="maintitle">
+            <tr>
+                <td class="cheshirelogo">
+                    <img src="http://www.cheshire3.org/gfx/c3_white.gif" alt=" c h e s h i r e  |  3 "/>
+                </td>
+                <td>
+                    <img src="http://www.cheshire3.org/gfx/slant_grey.gif" alt=""/>
+                </td>
+                <td align="center">
+                    <h2>Cheshire3 Objects: Server</h2>
+                </td>
+            </tr>
+        </table>
+
+	<!--#config errmsg="<div id="navbar"/>" -->
+	<!--#include virtual="/navbar.ssi" -->
+
+        <div class="fieldset">
+            <span class="legend">Description</span>
+            <p>
+                A Server object is a collection point for other objects, and an initial entry point into the system for requests from a ProtocolHandler. 
+                A server might know about several Databases, RecordStores and so forth, but its main function is to check whether the request should be accepted or not and create an environment in which the request can be processed. 
+                It will likely have access to a UserStore database which maintains authentication and authorisation information. 
+                The exact nature of this information is not defined, allowing many possible backend implementations. 
+                Servers are the top level of configuration for the system and hence their constructor requires the path to a local XML configuration file, however from then on configuration information may be retrieved from other locations such as a remote datastore to enable distributed environments to maintain synchronicity.
+            </p>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">Implementations</span>
+            <ul>
+                <li><b>server.SimpleServer</b><br/>
+                A very simple server which instantiates and handles search, scan and sort but does not (currently) have any facility for authentication (etc).</li>
+            </ul>
+        </div>
+
+	<div class="fieldset">
+            <span class="legend">API</span>
+            <p><b>Note: the Server API is not well tested and is currently under review</b></p>
+            <table border="1" cellpadding="3" cellspacing="0" width="100%">
+                <tr><th>Function</th><th>Parameters</th><th>Returns</th><th>Description</th></tr>
+                <tr><td>__init__</td><td>configFile</td><td>&nbsp;</td><td>The constructer takes a file path to the configuration file to be parsed and processed.</td></tr>
+                <tr><td>connect</td><td><i>undefined</i></td><td>Session</td><td>Accept a connection to the server and perform any per session initialisation</td></tr>
+                <tr><td>disconnect</td><td><i>undefined</i></td><td><i>undefined</i></td><td>Called when a connection is dropped to perform any garbage collection or other such tidying.</td></tr>
+                <tr><td>search</td><td><i>undefined</i></td><td><i>undefined</i></td><td>Handle a search style request and return response</td></tr>
+                <tr><td>scan</td><td><i>undefined</i></td><td><i>undefined</i></td><td>Handle a browse/scan style request and return response</td></tr>
+                <tr><td>sort</td><td><i>undefined</i></td><td><i>undefined</i></td><td>Handle a sort style request and return response</td></tr>
+                <tr><td>retrieve</td><td><i>undefined</i></td><td><i>undefined</i></td><td>Handle a get/retrieve/present style request and return response</td></tr>
+                <tr><td>explain</td><td><i>undefined</i></td><td><i>undefined</i></td><td>Handle a get/retrieve/present style request for server metadata</td></tr>
+                <tr><td>deleteResultSet</td><td><i>undefined</i></td><td><i>undefined</i></td><td>Handle a request to delete an existing result set</td></tr>
+                <tr><td>addRecord</td><td><i>undefined</i></td><td><i>undefined</i></td><td>Handle a request to add a record to a database</td></tr>
+                <tr><td>replaceRecord</td><td><i>undefined</i></td><td><i>undefined</i></td><td>Handle a request to replace a record in a database</td></tr>
+                <tr><td>deleteRecord</td><td><i>undefined</i></td><td><i>undefined</i></td><td>Handle a request to delete a record from a database</td></tr>
+                <tr><td>indexRecord</td><td><i>undefined</i></td><td><i>undefined</i></td><td>Handle a request to index a specific record</td></tr>
+                <tr><td>addDatabase</td><td><i>undefined</i></td><td><i>undefined</i></td><td>Handle a request to create a new database from a configuration</td></tr>
+                <tr><td>replaceDatabase</td><td><i>undefined</i></td><td><i>undefined</i></td><td>Handle a request to replace a database configuration</td></tr>
+                <tr><td>deleteDatabase</td><td><i>undefined</i></td><td><i>undefined</i></td><td>Handle a request to delete an existing database</td></tr>
+                <tr><td>indexDatabase</td><td><i>undefined</i></td><td><i>undefined</i></td><td>Handle a request to re-index from scratch an existing database</td></tr>
+                <tr><td>authenticate</td><td><i>undefined</i></td><td><i>undefined</i></td><td>Handle authentication of session/request and establish user profile</td></tr>
+            </table>
+	</div>
+
+    </body>
+</html>

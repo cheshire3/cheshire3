@@ -1,0 +1,492 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>logger</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        Module&nbsp;logger
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript: void(0);" class="privatelink"
+    onclick="toggle_private();">hide private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="logger-pysrc.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<h2 class="py-src">Source Code for <a href="logger-module.html">Module logger</a></h2>
+<div class="py-src">
+<pre class="py-src">
+<span class="lineno"> 1</span>  <span class="py-line"> </span>
+<span class="lineno"> 2</span>  <span class="py-line"><span class="py-keyword">from</span> <a title="configParser" class="py-name" href="configParser-module.html">configParser</a> <span class="py-keyword">import</span> <a class="py-name" href="configParser.C3Object-class.html">C3Object</a> </span>
+<span class="lineno"> 3</span>  <span class="py-line"><span class="py-keyword">from</span> <span class="py-name">PyZ3950</span><span class="py-op">.</span><span class="py-name">CQLParser</span> <span class="py-keyword">import</span> <span class="py-name">PrefixableObject</span> </span>
+<span class="lineno"> 4</span>  <span class="py-line"><span class="py-keyword">import</span> <span class="py-name">os</span><span class="py-op">,</span> <span class="py-name">time</span><span class="py-op">,</span> <span class="py-name">sys</span> </span>
+<span class="lineno"> 5</span>  <span class="py-line"><span class="py-keyword">from</span> <a title="baseObjects" class="py-name" href="baseObjects-module.html">baseObjects</a> <span class="py-keyword">import</span> <a class="py-name" href="baseObjects.Session-class.html">Session</a><span class="py-op">,</span> <a class="py-name" href="baseObjects.Logger-class.html">Logger</a> </span>
+<span class="lineno"> 6</span>  <span class="py-line"> </span>
+<a name="SimpleLogger"></a><div id="SimpleLogger-def"><span class="lineno"> 7</span> <a class="pysrc-toggle" href="#" id="SimpleLogger-toggle" onclick="toggle('SimpleLogger'); return false;">-</a><span class="py-line"><span class="py-keyword">class</span> <a class="py-def-name" href="logger.SimpleLogger-class.html">SimpleLogger</a><span class="py-op">(</span><span class="py-base-class">Logger</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="SimpleLogger-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="SimpleLogger-expanded"><span class="lineno"> 8</span>  <span class="py-line"> </span>
+<span class="lineno"> 9</span>  <span class="py-line">    <a class="py-name" href="logger.SimpleLogger-class.html#fileh">fileh</a> <span class="py-op">=</span> <span class="py-name">None</span> </span>
+<span class="lineno">10</span>  <span class="py-line">    <a class="py-name" href="logger.SimpleLogger-class.html#lineCache">lineCache</a> <span class="py-op">=</span> <span class="py-op">[</span><span class="py-op">]</span> </span>
+<span class="lineno">11</span>  <span class="py-line">    <a class="py-name" href="logger.SimpleLogger-class.html#cacheLen">cacheLen</a> <span class="py-op">=</span> <span class="py-number">0</span> </span>
+<span class="lineno">12</span>  <span class="py-line"> </span>
+<a name="SimpleLogger.__init__"></a><div id="SimpleLogger.__init__-def"><span class="lineno">13</span> <a class="pysrc-toggle" href="#" id="SimpleLogger.__init__-toggle" onclick="toggle('SimpleLogger.__init__'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="logger.SimpleLogger-class.html#__init__">__init__</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">session</span><span class="py-op">,</span> <span class="py-param">config</span><span class="py-op">,</span> <span class="py-param">parent</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="SimpleLogger.__init__-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="SimpleLogger.__init__-expanded"><span class="lineno">14</span>  <span class="py-line">        <a title="baseObjects.Logger" class="py-name" href="baseObjects.Logger-class.html">Logger</a><span class="py-op">.</span><span id="link-0" class="py-name"><a title="GoogleSearch_services.GoogleSearchBindingSOAP.__init__
+GoogleSearch_services.doGetCachedPage.__init__
+GoogleSearch_services.doGetCachedPageResponse.__init__
+GoogleSearch_services.doGetCachedPageResponseWrapper.__init__
+GoogleSearch_services.doGetCachedPageWrapper.__init__
+GoogleSearch_services.doGoogleSearch.__init__
+GoogleSearch_services.doGoogleSearchResponse.__init__
+GoogleSearch_services.doGoogleSearchResponseWrapper.__init__
+GoogleSearch_services.doGoogleSearchWrapper.__init__
+GoogleSearch_services.doSpellingSuggestion.__init__
+GoogleSearch_services.doSpellingSuggestionResponse.__init__
+GoogleSearch_services.doSpellingSuggestionResponseWrapper.__init__
+GoogleSearch_services.doSpellingSuggestionWrapper.__init__
+GoogleSearch_services_types.urn_GoogleSearch.DirectoryCategoryArray_Def.__init__
+GoogleSearch_services_types.urn_GoogleSearch.DirectoryCategory_Def.__init__
+GoogleSearch_services_types.urn_GoogleSearch.GoogleSearchResult_Def.__init__
+GoogleSearch_services_types.urn_GoogleSearch.ResultElementArray_Def.__init__
+GoogleSearch_services_types.urn_GoogleSearch.ResultElement_Def.__init__
+baseObjects.Document.__init__
+baseObjects.Record.__init__
+baseObjects.Server.__init__
+baseStore.BdbIter.__init__
+baseStore.SimpleStore.__init__
+baseStore.SrbBdbCombineStore.__init__
+baseStore.SrbStore.__init__
+bootstrap.BootstrapDocument.__init__
+bootstrap.BootstrapRecord.__init__
+bootstrap.BootstrapSession.__init__
+c3errors.C3Exception.__init__
+configParser.C3Object.__init__
+database.SimpleDatabase.__init__
+document.StringDocument.__init__
+documentFactory.BaseDocumentFactory.__init__
+documentFactory.BaseDocumentStream.__init__
+documentFactory.ComponentDocumentFactory.__init__
+documentFactory.ComponentDocumentStream.__init__
+documentFactory.GoogleDocumentStream.__init__
+documentFactory.HttpDocumentStream.__init__
+documentFactory.MultipleDocumentStream.__init__
+documentFactory.OaiDocumentStream.__init__
+documentFactory.UrllibUnicodeFileThing.__init__
+documentFactory.XmlDocumentStream.__init__
+documentStore.BdbDocumentStore.__init__
+documentStore.CachingSrbDocumentStore.__init__
+documentStore.SimpleDocumentStore.__init__
+documentStore.SrbDocumentStore.__init__
+extractor.DateExtractor.__init__
+extractor.KeywordExtractor.__init__
+extractor.SimpleExtractor.__init__
+index.ArrayIndex.__init__
+index.BitmapIndex.__init__
+index.ClusterExtractionIndex.__init__
+index.SimpleIndex.__init__
+indexStore.BdbIndexStore.__init__
+indexStore.SrbBdbIndexStore.__init__
+logger.FunctionLogger.__init__
+logger.SimpleLogger.__init__
+multivalent.MultivalentClient.__init__
+multivalent.MultivalentPreParser.__init__
+normalizer.KeywordNormalizer.__init__
+normalizer.NumericEntityNormalizer.__init__
+normalizer.PhraseStemNormalizer.__init__
+normalizer.RegexpNormalizer.__init__
+normalizer.SimpleNormalizer.__init__
+normalizer.SpaceNormalizer.__init__
+normalizer.StemNormalizer.__init__
+normalizer.StoplistNormalizer.__init__
+normalizer.TermExistsNormalizer.__init__
+parser.FtParser.__init__
+parser.FtSaxParser.__init__
+parser.SaxParser.__init__
+parser.XmlRecordStoreParser.__init__
+permissionHandler.PermissionHandler.__init__
+postgres.PostgresDocumentFactory.__init__
+postgres.PostgresDocumentStream.__init__
+postgres.PostgresIndexStore.__init__
+postgres.PostgresRecordStore.__init__
+postgres.PostgresResultSetStore.__init__
+postgres.PostgresStore.__init__
+preParser.AmpPreParser.__init__
+preParser.CharacterEntityPreParser.__init__
+preParser.HtmlSmashPreParser.__init__
+preParser.HtmlTidyPreParser.__init__
+preParser.NormalizerPreParser.__init__
+preParser.PdfToTxtPreParser.__init__
+preParser.PrintableOnlyPreParser.__init__
+preParser.RegexpSmashPreParser.__init__
+preParser.SgmlPreParser.__init__
+protocolMap.C3WepProtocolMap.__init__
+protocolMap.CQLProtocolMap.__init__
+protocolMap.UpdateProtocolMap.__init__
+protocolMap.Z3950ProtocolMap.__init__
+protocolMap.ZeerexProtocolMap.__init__
+record.DomRecord.__init__
+record.MarcRecord.__init__
+record.SaxContentHandler.__init__
+record.SaxRecord.__init__
+recordStore.BdbRecordStore.__init__
+recordStore.CachingSrbRecordStore.__init__
+recordStore.CachingSrbRemoteWriteRecordStore.__init__
+recordStore.MarcIter.__init__
+recordStore.ParsingRecordStore.__init__
+recordStore.PostgresRecordStore.__init__
+recordStore.RemoteSlaveRecordStore.__init__
+recordStore.SimpleRecordStore.__init__
+recordStore.SrbRecordStore.__init__
+resultSet.ArrayResultSet.__init__
+resultSet.BitmapResultSet.__init__
+resultSet.SimpleResultSet.__init__
+resultSet.SimpleResultSetItem.__init__
+resultSetStore.BdbResultSetStore.__init__
+resultSetStore.BdbResultSetStore2.__init__
+resultSetStore.SimpleResultSetStore.__init__
+server.SimpleServer.__init__
+srboo.SrbConnection.__init__
+srboo.SrbException.__init__
+srboo.SrbFile.__init__
+textmining.TsujiiC3.EnjuObject.__init__
+textmining.TsujiiC3.GeniaObject.__init__
+textmining.TsujiiC3.SimpleTokenizer.__init__
+textmining.TsujiiC3.TsujiiObject.__init__
+textmining.tmNormalizer.EnjuNormalizer.__init__
+textmining.tmNormalizer.ExactGeniaNormalizer.__init__
+textmining.tmNormalizer.GeniaNormalizer.__init__
+textmining.tmNormalizer.GeniaTextNormalizer.__init__
+textmining.tmNormalizer.PosKeywordNormalizer.__init__
+textmining.tmNormalizer.PosPhraseNormalizer.__init__
+textmining.tmNormalizer.PosTypeNormalizer.__init__
+textmining.tmNormalizer.TsujiiPosNormalizer.__init__
+textmining.tmNormalizer.UnparsedGeniaNormalizer.__init__
+textmining.tmPreParser.EnjuTextPreParser.__init__
+textmining.tmPreParser.GeniaTextPreParser.__init__
+textmining.tmPreParser.TsujiiChunkerPreParser.__init__
+textmining.tmPreParser.TsujiiTextPosPreParser.__init__
+textmining.tmPreParser.TsujiiXMLPosPreParser.__init__
+textmining.tmTransformer.TsujiiTextPosTransformer.__init__
+textmining.tmTransformer.TsujiiXPathTransformer.__init__
+transformer.CSVTransformer.__init__
+transformer.GrsMapTransformer.__init__
+transformer.LxmlXsltTransformer.__init__
+transformer.XsltTransformer.__init__
+utils.SimpleBitfield.__init__
+workflow.CachingWorkflow.__init__
+workflow.SimpleWorkflow.__init__
+xpathProcessor.SimpleXPathProcessor.__init__" class="py-name" href="#" onclick="doclink('link-0', '__init__', 'Method GoogleSearch_services.GoogleSearchBindingSOAP.__init__()=GoogleSearch_services.GoogleSearchBindingSOAP-class.html#__init__,Method GoogleSearch_services.doGetCachedPage.__init__()=GoogleSearch_services.doGetCachedPage-class.html#__init__,Method GoogleSearch_services.doGetCachedPageResponse.__init__()=GoogleSearch_services.doGetCachedPageResponse-class.html#__init__,Method GoogleSearch_services.doGetCachedPageResponseWrapper.__init__()=GoogleSearch_services.doGetCachedPageResponseWrapper-class.html#__init__,Method GoogleSearch_services.doGetCachedPageWrapper.__init__()=GoogleSearch_services.doGetCachedPageWrapper-class.html#__init__,Method GoogleSearch_services.doGoogleSearch.__init__()=GoogleSearch_services.doGoogleSearch-class.html#__init__,Method GoogleSearch_services.doGoogleSearchResponse.__init__()=GoogleSearch_services.doGoogleSearchResponse-class.html#__init__,Method GoogleSearch_services.doGoogleSearchResponseWrapper.__init__()=GoogleSearch_services.doGoogleSearchResponseWrapper-class.html#__init__,Method GoogleSearch_services.doGoogleSearchWrapper.__init__()=GoogleSearch_services.doGoogleSearchWrapper-class.html#__init__,Method GoogleSearch_services.doSpellingSuggestion.__init__()=GoogleSearch_services.doSpellingSuggestion-class.html#__init__,Method GoogleSearch_services.doSpellingSuggestionResponse.__init__()=GoogleSearch_services.doSpellingSuggestionResponse-class.html#__init__,Method GoogleSearch_services.doSpellingSuggestionResponseWrapper.__init__()=GoogleSearch_services.doSpellingSuggestionResponseWrapper-class.html#__init__,Method GoogleSearch_services.doSpellingSuggestionWrapper.__init__()=GoogleSearch_services.doSpellingSuggestionWrapper-class.html#__init__,Method GoogleSearch_services_types.urn_GoogleSearch.DirectoryCategoryArray_Def.__init__()=GoogleSearch_services_types.urn_GoogleSearch.DirectoryCategoryArray_Def-class.html#__init__,Method GoogleSearch_services_types.urn_GoogleSearch.DirectoryCategory_Def.__init__()=GoogleSearch_services_types.urn_GoogleSearch.DirectoryCategory_Def-class.html#__init__,Method GoogleSearch_services_types.urn_GoogleSearch.GoogleSearchResult_Def.__init__()=GoogleSearch_services_types.urn_GoogleSearch.GoogleSearchResult_Def-class.html#__init__,Method GoogleSearch_services_types.urn_GoogleSearch.ResultElementArray_Def.__init__()=GoogleSearch_services_types.urn_GoogleSearch.ResultElementArray_Def-class.html#__init__,Method GoogleSearch_services_types.urn_GoogleSearch.ResultElement_Def.__init__()=GoogleSearch_services_types.urn_GoogleSearch.ResultElement_Def-class.html#__init__,Method baseObjects.Document.__init__()=baseObjects.Document-class.html#__init__,Method baseObjects.Record.__init__()=baseObjects.Record-class.html#__init__,Method baseObjects.Server.__init__()=baseObjects.Server-class.html#__init__,Method baseStore.BdbIter.__init__()=baseStore.BdbIter-class.html#__init__,Method baseStore.SimpleStore.__init__()=baseStore.SimpleStore-class.html#__init__,Method baseStore.SrbBdbCombineStore.__init__()=baseStore.SrbBdbCombineStore-class.html#__init__,Method baseStore.SrbStore.__init__()=baseStore.SrbStore-class.html#__init__,Method bootstrap.BootstrapDocument.__init__()=bootstrap.BootstrapDocument-class.html#__init__,Method bootstrap.BootstrapRecord.__init__()=bootstrap.BootstrapRecord-class.html#__init__,Method bootstrap.BootstrapSession.__init__()=bootstrap.BootstrapSession-class.html#__init__,Method c3errors.C3Exception.__init__()=c3errors.C3Exception-class.html#__init__,Method configParser.C3Object.__init__()=configParser.C3Object-class.html#__init__,Method database.SimpleDatabase.__init__()=database.SimpleDatabase-class.html#__init__,Method document.StringDocument.__init__()=document.StringDocument-class.html#__init__,Method documentFactory.BaseDocumentFactory.__init__()=documentFactory.BaseDocumentFactory-class.html#__init__,Method documentFactory.BaseDocumentStream.__init__()=documentFactory.BaseDocumentStream-class.html#__init__,Method documentFactory.ComponentDocumentFactory.__init__()=documentFactory.ComponentDocumentFactory-class.html#__init__,Method documentFactory.ComponentDocumentStream.__init__()=documentFactory.ComponentDocumentStream-class.html#__init__,Method documentFactory.GoogleDocumentStream.__init__()=documentFactory.GoogleDocumentStream-class.html#__init__,Method documentFactory.HttpDocumentStream.__init__()=documentFactory.HttpDocumentStream-class.html#__init__,Method documentFactory.MultipleDocumentStream.__init__()=documentFactory.MultipleDocumentStream-class.html#__init__,Method documentFactory.OaiDocumentStream.__init__()=documentFactory.OaiDocumentStream-class.html#__init__,Method documentFactory.UrllibUnicodeFileThing.__init__()=documentFactory.UrllibUnicodeFileThing-class.html#__init__,Method documentFactory.XmlDocumentStream.__init__()=documentFactory.XmlDocumentStream-class.html#__init__,Method documentStore.BdbDocumentStore.__init__()=documentStore.BdbDocumentStore-class.html#__init__,Method documentStore.CachingSrbDocumentStore.__init__()=documentStore.CachingSrbDocumentStore-class.html#__init__,Method documentStore.SimpleDocumentStore.__init__()=documentStore.SimpleDocumentStore-class.html#__init__,Method documentStore.SrbDocumentStore.__init__()=documentStore.SrbDocumentStore-class.html#__init__,Method extractor.DateExtractor.__init__()=extractor.DateExtractor-class.html#__init__,Method extractor.KeywordExtractor.__init__()=extractor.KeywordExtractor-class.html#__init__,Method extractor.SimpleExtractor.__init__()=extractor.SimpleExtractor-class.html#__init__,Method index.ArrayIndex.__init__()=index.ArrayIndex-class.html#__init__,Method index.BitmapIndex.__init__()=index.BitmapIndex-class.html#__init__,Method index.ClusterExtractionIndex.__init__()=index.ClusterExtractionIndex-class.html#__init__,Method index.SimpleIndex.__init__()=index.SimpleIndex-class.html#__init__,Method indexStore.BdbIndexStore.__init__()=indexStore.BdbIndexStore-class.html#__init__,Method indexStore.SrbBdbIndexStore.__init__()=indexStore.SrbBdbIndexStore-class.html#__init__,Method FunctionLogger.__init__()=logger.FunctionLogger-class.html#__init__,Method __init__()=logger.SimpleLogger-class.html#__init__,Method multivalent.MultivalentClient.__init__()=multivalent.MultivalentClient-class.html#__init__,Method multivalent.MultivalentPreParser.__init__()=multivalent.MultivalentPreParser-class.html#__init__,Method normalizer.KeywordNormalizer.__init__()=normalizer.KeywordNormalizer-class.html#__init__,Method normalizer.NumericEntityNormalizer.__init__()=normalizer.NumericEntityNormalizer-class.html#__init__,Method normalizer.PhraseStemNormalizer.__init__()=normalizer.PhraseStemNormalizer-class.html#__init__,Method normalizer.RegexpNormalizer.__init__()=normalizer.RegexpNormalizer-class.html#__init__,Method normalizer.SimpleNormalizer.__init__()=normalizer.SimpleNormalizer-class.html#__init__,Method normalizer.SpaceNormalizer.__init__()=normalizer.SpaceNormalizer-class.html#__init__,Method normalizer.StemNormalizer.__init__()=normalizer.StemNormalizer-class.html#__init__,Method normalizer.StoplistNormalizer.__init__()=normalizer.StoplistNormalizer-class.html#__init__,Method normalizer.TermExistsNormalizer.__init__()=normalizer.TermExistsNormalizer-class.html#__init__,Method parser.FtParser.__init__()=parser.FtParser-class.html#__init__,Method parser.FtSaxParser.__init__()=parser.FtSaxParser-class.html#__init__,Method parser.SaxParser.__init__()=parser.SaxParser-class.html#__init__,Method parser.XmlRecordStoreParser.__init__()=parser.XmlRecordStoreParser-class.html#__init__,Method permissionHandler.PermissionHandler.__init__()=permissionHandler.PermissionHandler-class.html#__init__,Method postgres.PostgresDocumentFactory.__init__()=postgres.PostgresDocumentFactory-class.html#__init__,Method postgres.PostgresDocumentStream.__init__()=postgres.PostgresDocumentStream-class.html#__init__,Method postgres.PostgresIndexStore.__init__()=postgres.PostgresIndexStore-class.html#__init__,Method postgres.PostgresRecordStore.__init__()=postgres.PostgresRecordStore-class.html#__init__,Method postgres.PostgresResultSetStore.__init__()=postgres.PostgresResultSetStore-class.html#__init__,Method postgres.PostgresStore.__init__()=postgres.PostgresStore-class.html#__init__,Method preParser.AmpPreParser.__init__()=preParser.AmpPreParser-class.html#__init__,Method preParser.CharacterEntityPreParser.__init__()=preParser.CharacterEntityPreParser-class.html#__init__,Method preParser.HtmlSmashPreParser.__init__()=preParser.HtmlSmashPreParser-class.html#__init__,Method preParser.HtmlTidyPreParser.__init__()=preParser.HtmlTidyPreParser-class.html#__init__,Method preParser.NormalizerPreParser.__init__()=preParser.NormalizerPreParser-class.html#__init__,Method preParser.PdfToTxtPreParser.__init__()=preParser.PdfToTxtPreParser-class.html#__init__,Method preParser.PrintableOnlyPreParser.__init__()=preParser.PrintableOnlyPreParser-class.html#__init__,Method preParser.RegexpSmashPreParser.__init__()=preParser.RegexpSmashPreParser-class.html#__init__,Method preParser.SgmlPreParser.__init__()=preParser.SgmlPreParser-class.html#__init__,Method protocolMap.C3WepProtocolMap.__init__()=protocolMap.C3WepProtocolMap-class.html#__init__,Method protocolMap.CQLProtocolMap.__init__()=protocolMap.CQLProtocolMap-class.html#__init__,Method protocolMap.UpdateProtocolMap.__init__()=protocolMap.UpdateProtocolMap-class.html#__init__,Method protocolMap.Z3950ProtocolMap.__init__()=protocolMap.Z3950ProtocolMap-class.html#__init__,Method protocolMap.ZeerexProtocolMap.__init__()=protocolMap.ZeerexProtocolMap-class.html#__init__,Method record.DomRecord.__init__()=record.DomRecord-class.html#__init__,Method record.MarcRecord.__init__()=record.MarcRecord-class.html#__init__,Method record.SaxContentHandler.__init__()=record.SaxContentHandler-class.html#__init__,Method record.SaxRecord.__init__()=record.SaxRecord-class.html#__init__,Method recordStore.BdbRecordStore.__init__()=recordStore.BdbRecordStore-class.html#__init__,Method recordStore.CachingSrbRecordStore.__init__()=recordStore.CachingSrbRecordStore-class.html#__init__,Method recordStore.CachingSrbRemoteWriteRecordStore.__init__()=recordStore.CachingSrbRemoteWriteRecordStore-class.html#__init__,Method recordStore.MarcIter.__init__()=recordStore.MarcIter-class.html#__init__,Method recordStore.ParsingRecordStore.__init__()=recordStore.ParsingRecordStore-class.html#__init__,Method recordStore.PostgresRecordStore.__init__()=recordStore.PostgresRecordStore-class.html#__init__,Method recordStore.RemoteSlaveRecordStore.__init__()=recordStore.RemoteSlaveRecordStore-class.html#__init__,Method recordStore.SimpleRecordStore.__init__()=recordStore.SimpleRecordStore-class.html#__init__,Method recordStore.SrbRecordStore.__init__()=recordStore.SrbRecordStore-class.html#__init__,Method resultSet.ArrayResultSet.__init__()=resultSet.ArrayResultSet-class.html#__init__,Method resultSet.BitmapResultSet.__init__()=resultSet.BitmapResultSet-class.html#__init__,Method resultSet.SimpleResultSet.__init__()=resultSet.SimpleResultSet-class.html#__init__,Method resultSet.SimpleResultSetItem.__init__()=resultSet.SimpleResultSetItem-class.html#__init__,Method resultSetStore.BdbResultSetStore.__init__()=resultSetStore.BdbResultSetStore-class.html#__init__,Method resultSetStore.BdbResultSetStore2.__init__()=resultSetStore.BdbResultSetStore2-class.html#__init__,Method resultSetStore.SimpleResultSetStore.__init__()=resultSetStore.SimpleResultSetStore-class.html#__init__,Method server.SimpleServer.__init__()=server.SimpleServer-class.html#__init__,Method srboo.SrbConnection.__init__()=srboo.SrbConnection-class.html#__init__,Method srboo.SrbException.__init__()=srboo.SrbException-class.html#__init__,Method srboo.SrbFile.__init__()=srboo.SrbFile-class.html#__init__,Method textmining.TsujiiC3.EnjuObject.__init__()=textmining.TsujiiC3.EnjuObject-class.html#__init__,Method textmining.TsujiiC3.GeniaObject.__init__()=textmining.TsujiiC3.GeniaObject-class.html#__init__,Method textmining.TsujiiC3.SimpleTokenizer.__init__()=textmining.TsujiiC3.SimpleTokenizer-class.html#__init__,Method textmining.TsujiiC3.TsujiiObject.__init__()=textmining.TsujiiC3.TsujiiObject-class.html#__init__,Method textmining.tmNormalizer.EnjuNormalizer.__init__()=textmining.tmNormalizer.EnjuNormalizer-class.html#__init__,Method textmining.tmNormalizer.ExactGeniaNormalizer.__init__()=textmining.tmNormalizer.ExactGeniaNormalizer-class.html#__init__,Method textmining.tmNormalizer.GeniaNormalizer.__init__()=textmining.tmNormalizer.GeniaNormalizer-class.html#__init__,Method textmining.tmNormalizer.GeniaTextNormalizer.__init__()=textmining.tmNormalizer.GeniaTextNormalizer-class.html#__init__,Method textmining.tmNormalizer.PosKeywordNormalizer.__init__()=textmining.tmNormalizer.PosKeywordNormalizer-class.html#__init__,Method textmining.tmNormalizer.PosPhraseNormalizer.__init__()=textmining.tmNormalizer.PosPhraseNormalizer-class.html#__init__,Method textmining.tmNormalizer.PosTypeNormalizer.__init__()=textmining.tmNormalizer.PosTypeNormalizer-class.html#__init__,Method textmining.tmNormalizer.TsujiiPosNormalizer.__init__()=textmining.tmNormalizer.TsujiiPosNormalizer-class.html#__init__,Method textmining.tmNormalizer.UnparsedGeniaNormalizer.__init__()=textmining.tmNormalizer.UnparsedGeniaNormalizer-class.html#__init__,Method textmining.tmPreParser.EnjuTextPreParser.__init__()=textmining.tmPreParser.EnjuTextPreParser-class.html#__init__,Method textmining.tmPreParser.GeniaTextPreParser.__init__()=textmining.tmPreParser.GeniaTextPreParser-class.html#__init__,Method textmining.tmPreParser.TsujiiChunkerPreParser.__init__()=textmining.tmPreParser.TsujiiChunkerPreParser-class.html#__init__,Method textmining.tmPreParser.TsujiiTextPosPreParser.__init__()=textmining.tmPreParser.TsujiiTextPosPreParser-class.html#__init__,Method textmining.tmPreParser.TsujiiXMLPosPreParser.__init__()=textmining.tmPreParser.TsujiiXMLPosPreParser-class.html#__init__,Method textmining.tmTransformer.TsujiiTextPosTransformer.__init__()=textmining.tmTransformer.TsujiiTextPosTransformer-class.html#__init__,Method textmining.tmTransformer.TsujiiXPathTransformer.__init__()=textmining.tmTransformer.TsujiiXPathTransformer-class.html#__init__,Method transformer.CSVTransformer.__init__()=transformer.CSVTransformer-class.html#__init__,Method transformer.GrsMapTransformer.__init__()=transformer.GrsMapTransformer-class.html#__init__,Method transformer.LxmlXsltTransformer.__init__()=transformer.LxmlXsltTransformer-class.html#__init__,Method transformer.XsltTransformer.__init__()=transformer.XsltTransformer-class.html#__init__,Method utils.SimpleBitfield.__init__()=utils.SimpleBitfield-class.html#__init__,Method workflow.CachingWorkflow.__init__()=workflow.CachingWorkflow-class.html#__init__,Method workflow.SimpleWorkflow.__init__()=workflow.SimpleWorkflow-class.html#__init__,Method xpathProcessor.SimpleXPathProcessor.__init__()=xpathProcessor.SimpleXPathProcessor-class.html#__init__'); return false;">__init__</a></span></span><span class="py-op">(</span><span class="py-name">self</span><span class="py-op">,</span> <a title="resultSet.DeserializationHandler.session" class="py-name" href="resultSet.DeserializationHandler-class.html#session">session</a><span class="py-op">,</span> <span class="py-name">config</span><span class="py-op">,</span> <span id="link-1" class="py-name"><a title="baseObjects.Document.parent
+baseObjects.Record.parent
+configParser.C3Object.parent" class="py-name" href="#" onclick="doclink('link-1', 'parent', 'Variable baseObjects.Document.parent=baseObjects.Document-class.html#parent,Variable baseObjects.Record.parent=baseObjects.Record-class.html#parent,Variable configParser.C3Object.parent=configParser.C3Object-class.html#parent'); return false;">parent</a></span></span><span class="py-op">)</span> </span>
+<span class="lineno">15</span>  <span class="py-line">        <span class="py-name">fp</span> <span class="py-op">=</span> <span class="py-name">self</span><span class="py-op">.</span><a title="configParser.C3Object.get_path" class="py-name" href="configParser.C3Object-class.html#get_path">get_path</a><span class="py-op">(</span><span class="py-name">None</span><span class="py-op">,</span> <span class="py-string">'filePath'</span><span class="py-op">)</span> </span>
+<span class="lineno">16</span>  <span class="py-line">        <span class="py-keyword">if</span> <span class="py-op">(</span><span class="py-name">fp</span> <span class="py-op">==</span> <span class="py-string">"stdout"</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno">17</span>  <span class="py-line">            <span class="py-name">self</span><span class="py-op">.</span><a title="logger.SimpleLogger.fileh" class="py-name" href="logger.SimpleLogger-class.html#fileh">fileh</a> <span class="py-op">=</span> <span class="py-name">sys</span><span class="py-op">.</span><span class="py-name">stdout</span> </span>
+<span class="lineno">18</span>  <span class="py-line">        <span class="py-keyword">elif</span> <span class="py-op">(</span><span class="py-name">fp</span> <span class="py-op">==</span> <span class="py-string">"stderr"</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno">19</span>  <span class="py-line">            <span class="py-name">self</span><span class="py-op">.</span><a title="logger.SimpleLogger.fileh" class="py-name" href="logger.SimpleLogger-class.html#fileh">fileh</a> <span class="py-op">=</span> <span class="py-name">sys</span><span class="py-op">.</span><span class="py-name">stderr</span> </span>
+<span class="lineno">20</span>  <span class="py-line">        <span class="py-keyword">else</span><span class="py-op">:</span> </span>
+<span class="lineno">21</span>  <span class="py-line">            <span class="py-keyword">if</span> <span class="py-op">(</span><span class="py-keyword">not</span> <span class="py-name">os</span><span class="py-op">.</span><span class="py-name">path</span><span class="py-op">.</span><span class="py-name">isabs</span><span class="py-op">(</span><span class="py-name">fp</span><span class="py-op">)</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno">22</span>  <span class="py-line">                <span class="py-name">dfp</span> <span class="py-op">=</span> <span class="py-name">self</span><span class="py-op">.</span><a title="configParser.C3Object.get_path" class="py-name" href="configParser.C3Object-class.html#get_path">get_path</a><span class="py-op">(</span><span class="py-name">None</span><span class="py-op">,</span> <span class="py-string">'defaultPath'</span><span class="py-op">)</span> </span>
+<span class="lineno">23</span>  <span class="py-line">                <span class="py-name">fp</span> <span class="py-op">=</span> <span class="py-name">os</span><span class="py-op">.</span><span class="py-name">path</span><span class="py-op">.</span><span class="py-name">join</span><span class="py-op">(</span><span class="py-name">dfp</span><span class="py-op">,</span> <span class="py-name">fp</span><span class="py-op">)</span> </span>
+<span class="lineno">24</span>  <span class="py-line">            <span class="py-name">self</span><span class="py-op">.</span><a title="logger.SimpleLogger.fileh" class="py-name" href="logger.SimpleLogger-class.html#fileh">fileh</a> <span class="py-op">=</span> <span class="py-name">file</span><span class="py-op">(</span><span class="py-name">fp</span><span class="py-op">,</span> <span class="py-string">'a'</span><span class="py-op">)</span> </span>
+<span class="lineno">25</span>  <span class="py-line">        <span class="py-name">clen</span> <span class="py-op">=</span> <span class="py-name">self</span><span class="py-op">.</span><a title="configParser.C3Object.get_setting" class="py-name" href="configParser.C3Object-class.html#get_setting">get_setting</a><span class="py-op">(</span><span class="py-name">None</span><span class="py-op">,</span> <span class="py-string">'cacheLength'</span><span class="py-op">)</span> </span>
+<span class="lineno">26</span>  <span class="py-line">        <span class="py-keyword">if</span> <span class="py-name">clen</span><span class="py-op">:</span> </span>
+<span class="lineno">27</span>  <span class="py-line">            <span class="py-name">self</span><span class="py-op">.</span><a title="logger.SimpleLogger.cacheLen" class="py-name" href="logger.SimpleLogger-class.html#cacheLen">cacheLen</a> <span class="py-op">=</span> <span class="py-name">int</span><span class="py-op">(</span><span class="py-name">clen</span><span class="py-op">)</span> </span>
+<span class="lineno">28</span>  <span class="py-line">        <span class="py-keyword">else</span><span class="py-op">:</span> </span>
+<span class="lineno">29</span>  <span class="py-line">            <span class="py-name">self</span><span class="py-op">.</span><a title="logger.SimpleLogger.cacheLen" class="py-name" href="logger.SimpleLogger-class.html#cacheLen">cacheLen</a> <span class="py-op">=</span> <span class="py-number">0</span> </span>
+</div><span class="lineno">30</span>  <span class="py-line">             </span>
+<a name="SimpleLogger.log"></a><div id="SimpleLogger.log-def"><span class="lineno">31</span> <a class="pysrc-toggle" href="#" id="SimpleLogger.log-toggle" onclick="toggle('SimpleLogger.log'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="logger.SimpleLogger-class.html#log">log</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">session</span><span class="py-op">,</span> <span class="py-param">txt</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="SimpleLogger.log-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="SimpleLogger.log-expanded"><span class="lineno">32</span>  <span class="py-line">        <span class="py-name">now</span> <span class="py-op">=</span> <span class="py-name">time</span><span class="py-op">.</span><span class="py-name">strftime</span><span class="py-op">(</span><span class="py-string">"%Y-%m-%d %H:%M:%S"</span><span class="py-op">)</span> </span>
+<span class="lineno">33</span>  <span class="py-line">        <span class="py-name">line</span> <span class="py-op">=</span> <span class="py-string">"[%s]: %s"</span> <span class="py-op">%</span> <span class="py-op">(</span><span class="py-name">now</span><span class="py-op">,</span> <a title="bootstrap.BootstrapDocument.txt" class="py-name" href="bootstrap.BootstrapDocument-class.html#txt">txt</a><span class="py-op">)</span> </span>
+<span class="lineno">34</span>  <span class="py-line">        <span class="py-name">self</span><span class="py-op">.</span><a title="logger.SimpleLogger._logLine" class="py-name" href="logger.SimpleLogger-class.html#_logLine">_logLine</a><span class="py-op">(</span><span class="py-name">line</span><span class="py-op">)</span> </span>
+</div><span class="lineno">35</span>  <span class="py-line"> </span>
+<a name="SimpleLogger._logLine"></a><div id="SimpleLogger._logLine-def"><span class="lineno">36</span> <a class="pysrc-toggle" href="#" id="SimpleLogger._logLine-toggle" onclick="toggle('SimpleLogger._logLine'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="logger.SimpleLogger-class.html#_logLine">_logLine</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">line</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="SimpleLogger._logLine-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="SimpleLogger._logLine-expanded"><span class="lineno">37</span>  <span class="py-line">        <span class="py-keyword">if</span> <span class="py-op">(</span><span class="py-name">self</span><span class="py-op">.</span><a title="logger.SimpleLogger.lineCache" class="py-name" href="logger.SimpleLogger-class.html#lineCache">lineCache</a> <span class="py-keyword">and</span> <span class="py-name">self</span><span class="py-op">.</span><a title="logger.SimpleLogger.lineCache" class="py-name" href="logger.SimpleLogger-class.html#lineCache">lineCache</a><span class="py-op">[</span><span class="py-op">-</span><span class="py-number">1</span><span class="py-op">]</span><span class="py-op">.</span><span class="py-name">startswith</span><span class="py-op">(</span><span class="py-name">line</span><span class="py-op">)</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno">38</span>  <span class="py-line">            <span class="py-name">self</span><span class="py-op">.</span><a title="logger.SimpleLogger.lineCache" class="py-name" href="logger.SimpleLogger-class.html#lineCache">lineCache</a><span class="py-op">[</span><span class="py-op">-</span><span class="py-number">1</span><span class="py-op">]</span> <span class="py-op">+=</span> <span class="py-string">"."</span> </span>
+<span class="lineno">39</span>  <span class="py-line">        <span class="py-keyword">else</span><span class="py-op">:</span> </span>
+<span class="lineno">40</span>  <span class="py-line">            <span class="py-name">self</span><span class="py-op">.</span><a title="logger.SimpleLogger.lineCache" class="py-name" href="logger.SimpleLogger-class.html#lineCache">lineCache</a><span class="py-op">.</span><a title="resultSet.SimpleResultSet.append" class="py-name" href="resultSet.SimpleResultSet-class.html#append">append</a><span class="py-op">(</span><span class="py-name">line</span><span class="py-op">)</span> </span>
+<span class="lineno">41</span>  <span class="py-line">        <span class="py-keyword">if</span> <span class="py-op">(</span><span class="py-name">len</span><span class="py-op">(</span><span class="py-name">self</span><span class="py-op">.</span><a title="logger.SimpleLogger.lineCache" class="py-name" href="logger.SimpleLogger-class.html#lineCache">lineCache</a><span class="py-op">)</span> <span class="py-op">&gt;</span> <span class="py-name">self</span><span class="py-op">.</span><a title="logger.SimpleLogger.cacheLen" class="py-name" href="logger.SimpleLogger-class.html#cacheLen">cacheLen</a><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno">42</span>  <span class="py-line">            <span class="py-keyword">for</span> <span class="py-name">l</span> <span class="py-keyword">in</span> <span class="py-name">self</span><span class="py-op">.</span><a title="logger.SimpleLogger.lineCache" class="py-name" href="logger.SimpleLogger-class.html#lineCache">lineCache</a><span class="py-op">:</span> </span>
+<span class="lineno">43</span>  <span class="py-line">                <span class="py-name">self</span><span class="py-op">.</span><a title="logger.SimpleLogger.fileh" class="py-name" href="logger.SimpleLogger-class.html#fileh">fileh</a><span class="py-op">.</span><a title="srboo.SrbFile.write" class="py-name" href="srboo.SrbFile-class.html#write">write</a><span class="py-op">(</span><span class="py-name">l</span> <span class="py-op">+</span> <span class="py-string">"\n"</span><span class="py-op">)</span> </span>
+<span class="lineno">44</span>  <span class="py-line">            <span class="py-name">self</span><span class="py-op">.</span><a title="logger.SimpleLogger.fileh" class="py-name" href="logger.SimpleLogger-class.html#fileh">fileh</a><span class="py-op">.</span><a title="srboo.SrbFile.flush" class="py-name" href="srboo.SrbFile-class.html#flush">flush</a><span class="py-op">(</span><span class="py-op">)</span> </span>
+<span class="lineno">45</span>  <span class="py-line">            <span class="py-name">self</span><span class="py-op">.</span><a title="logger.SimpleLogger.lineCache" class="py-name" href="logger.SimpleLogger-class.html#lineCache">lineCache</a> <span class="py-op">=</span> <span class="py-op">[</span><span class="py-op">]</span> </span>
+</div></div><span class="lineno">46</span>  <span class="py-line"> </span>
+<span class="lineno">47</span>  <span class="py-line"> </span>
+<a name="FunctionLogger"></a><div id="FunctionLogger-def"><span class="lineno">48</span> <a class="pysrc-toggle" href="#" id="FunctionLogger-toggle" onclick="toggle('FunctionLogger'); return false;">-</a><span class="py-line"><span class="py-keyword">class</span> <a class="py-def-name" href="logger.FunctionLogger-class.html">FunctionLogger</a><span class="py-op">(</span><span class="py-base-class">SimpleLogger</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="FunctionLogger-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="FunctionLogger-expanded"><span class="lineno">49</span>  <span class="py-line"> </span>
+<a name="FunctionLogger.__init__"></a><div id="FunctionLogger.__init__-def"><span class="lineno">50</span> <a class="pysrc-toggle" href="#" id="FunctionLogger.__init__-toggle" onclick="toggle('FunctionLogger.__init__'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="logger.FunctionLogger-class.html#__init__">__init__</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">session</span><span class="py-op">,</span> <span class="py-param">config</span><span class="py-op">,</span> <span class="py-param">parent</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="FunctionLogger.__init__-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="FunctionLogger.__init__-expanded"><span class="lineno">51</span>  <span class="py-line">        <span class="py-name">self</span><span class="py-op">.</span><a title="logger.SimpleLogger.cacheLen" class="py-name" href="logger.SimpleLogger-class.html#cacheLen">cacheLen</a> <span class="py-op">=</span> <span class="py-number">1000</span> </span>
+<span class="lineno">52</span>  <span class="py-line">        <a title="logger.SimpleLogger" class="py-name" href="logger.SimpleLogger-class.html">SimpleLogger</a><span class="py-op">.</span><span id="link-2" class="py-name"><a title="GoogleSearch_services.GoogleSearchBindingSOAP.__init__
+GoogleSearch_services.doGetCachedPage.__init__
+GoogleSearch_services.doGetCachedPageResponse.__init__
+GoogleSearch_services.doGetCachedPageResponseWrapper.__init__
+GoogleSearch_services.doGetCachedPageWrapper.__init__
+GoogleSearch_services.doGoogleSearch.__init__
+GoogleSearch_services.doGoogleSearchResponse.__init__
+GoogleSearch_services.doGoogleSearchResponseWrapper.__init__
+GoogleSearch_services.doGoogleSearchWrapper.__init__
+GoogleSearch_services.doSpellingSuggestion.__init__
+GoogleSearch_services.doSpellingSuggestionResponse.__init__
+GoogleSearch_services.doSpellingSuggestionResponseWrapper.__init__
+GoogleSearch_services.doSpellingSuggestionWrapper.__init__
+GoogleSearch_services_types.urn_GoogleSearch.DirectoryCategoryArray_Def.__init__
+GoogleSearch_services_types.urn_GoogleSearch.DirectoryCategory_Def.__init__
+GoogleSearch_services_types.urn_GoogleSearch.GoogleSearchResult_Def.__init__
+GoogleSearch_services_types.urn_GoogleSearch.ResultElementArray_Def.__init__
+GoogleSearch_services_types.urn_GoogleSearch.ResultElement_Def.__init__
+baseObjects.Document.__init__
+baseObjects.Record.__init__
+baseObjects.Server.__init__
+baseStore.BdbIter.__init__
+baseStore.SimpleStore.__init__
+baseStore.SrbBdbCombineStore.__init__
+baseStore.SrbStore.__init__
+bootstrap.BootstrapDocument.__init__
+bootstrap.BootstrapRecord.__init__
+bootstrap.BootstrapSession.__init__
+c3errors.C3Exception.__init__
+configParser.C3Object.__init__
+database.SimpleDatabase.__init__
+document.StringDocument.__init__
+documentFactory.BaseDocumentFactory.__init__
+documentFactory.BaseDocumentStream.__init__
+documentFactory.ComponentDocumentFactory.__init__
+documentFactory.ComponentDocumentStream.__init__
+documentFactory.GoogleDocumentStream.__init__
+documentFactory.HttpDocumentStream.__init__
+documentFactory.MultipleDocumentStream.__init__
+documentFactory.OaiDocumentStream.__init__
+documentFactory.UrllibUnicodeFileThing.__init__
+documentFactory.XmlDocumentStream.__init__
+documentStore.BdbDocumentStore.__init__
+documentStore.CachingSrbDocumentStore.__init__
+documentStore.SimpleDocumentStore.__init__
+documentStore.SrbDocumentStore.__init__
+extractor.DateExtractor.__init__
+extractor.KeywordExtractor.__init__
+extractor.SimpleExtractor.__init__
+index.ArrayIndex.__init__
+index.BitmapIndex.__init__
+index.ClusterExtractionIndex.__init__
+index.SimpleIndex.__init__
+indexStore.BdbIndexStore.__init__
+indexStore.SrbBdbIndexStore.__init__
+logger.FunctionLogger.__init__
+logger.SimpleLogger.__init__
+multivalent.MultivalentClient.__init__
+multivalent.MultivalentPreParser.__init__
+normalizer.KeywordNormalizer.__init__
+normalizer.NumericEntityNormalizer.__init__
+normalizer.PhraseStemNormalizer.__init__
+normalizer.RegexpNormalizer.__init__
+normalizer.SimpleNormalizer.__init__
+normalizer.SpaceNormalizer.__init__
+normalizer.StemNormalizer.__init__
+normalizer.StoplistNormalizer.__init__
+normalizer.TermExistsNormalizer.__init__
+parser.FtParser.__init__
+parser.FtSaxParser.__init__
+parser.SaxParser.__init__
+parser.XmlRecordStoreParser.__init__
+permissionHandler.PermissionHandler.__init__
+postgres.PostgresDocumentFactory.__init__
+postgres.PostgresDocumentStream.__init__
+postgres.PostgresIndexStore.__init__
+postgres.PostgresRecordStore.__init__
+postgres.PostgresResultSetStore.__init__
+postgres.PostgresStore.__init__
+preParser.AmpPreParser.__init__
+preParser.CharacterEntityPreParser.__init__
+preParser.HtmlSmashPreParser.__init__
+preParser.HtmlTidyPreParser.__init__
+preParser.NormalizerPreParser.__init__
+preParser.PdfToTxtPreParser.__init__
+preParser.PrintableOnlyPreParser.__init__
+preParser.RegexpSmashPreParser.__init__
+preParser.SgmlPreParser.__init__
+protocolMap.C3WepProtocolMap.__init__
+protocolMap.CQLProtocolMap.__init__
+protocolMap.UpdateProtocolMap.__init__
+protocolMap.Z3950ProtocolMap.__init__
+protocolMap.ZeerexProtocolMap.__init__
+record.DomRecord.__init__
+record.MarcRecord.__init__
+record.SaxContentHandler.__init__
+record.SaxRecord.__init__
+recordStore.BdbRecordStore.__init__
+recordStore.CachingSrbRecordStore.__init__
+recordStore.CachingSrbRemoteWriteRecordStore.__init__
+recordStore.MarcIter.__init__
+recordStore.ParsingRecordStore.__init__
+recordStore.PostgresRecordStore.__init__
+recordStore.RemoteSlaveRecordStore.__init__
+recordStore.SimpleRecordStore.__init__
+recordStore.SrbRecordStore.__init__
+resultSet.ArrayResultSet.__init__
+resultSet.BitmapResultSet.__init__
+resultSet.SimpleResultSet.__init__
+resultSet.SimpleResultSetItem.__init__
+resultSetStore.BdbResultSetStore.__init__
+resultSetStore.BdbResultSetStore2.__init__
+resultSetStore.SimpleResultSetStore.__init__
+server.SimpleServer.__init__
+srboo.SrbConnection.__init__
+srboo.SrbException.__init__
+srboo.SrbFile.__init__
+textmining.TsujiiC3.EnjuObject.__init__
+textmining.TsujiiC3.GeniaObject.__init__
+textmining.TsujiiC3.SimpleTokenizer.__init__
+textmining.TsujiiC3.TsujiiObject.__init__
+textmining.tmNormalizer.EnjuNormalizer.__init__
+textmining.tmNormalizer.ExactGeniaNormalizer.__init__
+textmining.tmNormalizer.GeniaNormalizer.__init__
+textmining.tmNormalizer.GeniaTextNormalizer.__init__
+textmining.tmNormalizer.PosKeywordNormalizer.__init__
+textmining.tmNormalizer.PosPhraseNormalizer.__init__
+textmining.tmNormalizer.PosTypeNormalizer.__init__
+textmining.tmNormalizer.TsujiiPosNormalizer.__init__
+textmining.tmNormalizer.UnparsedGeniaNormalizer.__init__
+textmining.tmPreParser.EnjuTextPreParser.__init__
+textmining.tmPreParser.GeniaTextPreParser.__init__
+textmining.tmPreParser.TsujiiChunkerPreParser.__init__
+textmining.tmPreParser.TsujiiTextPosPreParser.__init__
+textmining.tmPreParser.TsujiiXMLPosPreParser.__init__
+textmining.tmTransformer.TsujiiTextPosTransformer.__init__
+textmining.tmTransformer.TsujiiXPathTransformer.__init__
+transformer.CSVTransformer.__init__
+transformer.GrsMapTransformer.__init__
+transformer.LxmlXsltTransformer.__init__
+transformer.XsltTransformer.__init__
+utils.SimpleBitfield.__init__
+workflow.CachingWorkflow.__init__
+workflow.SimpleWorkflow.__init__
+xpathProcessor.SimpleXPathProcessor.__init__" class="py-name" href="#" onclick="doclink('link-2', '__init__', 'Method GoogleSearch_services.GoogleSearchBindingSOAP.__init__()=GoogleSearch_services.GoogleSearchBindingSOAP-class.html#__init__,Method GoogleSearch_services.doGetCachedPage.__init__()=GoogleSearch_services.doGetCachedPage-class.html#__init__,Method GoogleSearch_services.doGetCachedPageResponse.__init__()=GoogleSearch_services.doGetCachedPageResponse-class.html#__init__,Method GoogleSearch_services.doGetCachedPageResponseWrapper.__init__()=GoogleSearch_services.doGetCachedPageResponseWrapper-class.html#__init__,Method GoogleSearch_services.doGetCachedPageWrapper.__init__()=GoogleSearch_services.doGetCachedPageWrapper-class.html#__init__,Method GoogleSearch_services.doGoogleSearch.__init__()=GoogleSearch_services.doGoogleSearch-class.html#__init__,Method GoogleSearch_services.doGoogleSearchResponse.__init__()=GoogleSearch_services.doGoogleSearchResponse-class.html#__init__,Method GoogleSearch_services.doGoogleSearchResponseWrapper.__init__()=GoogleSearch_services.doGoogleSearchResponseWrapper-class.html#__init__,Method GoogleSearch_services.doGoogleSearchWrapper.__init__()=GoogleSearch_services.doGoogleSearchWrapper-class.html#__init__,Method GoogleSearch_services.doSpellingSuggestion.__init__()=GoogleSearch_services.doSpellingSuggestion-class.html#__init__,Method GoogleSearch_services.doSpellingSuggestionResponse.__init__()=GoogleSearch_services.doSpellingSuggestionResponse-class.html#__init__,Method GoogleSearch_services.doSpellingSuggestionResponseWrapper.__init__()=GoogleSearch_services.doSpellingSuggestionResponseWrapper-class.html#__init__,Method GoogleSearch_services.doSpellingSuggestionWrapper.__init__()=GoogleSearch_services.doSpellingSuggestionWrapper-class.html#__init__,Method GoogleSearch_services_types.urn_GoogleSearch.DirectoryCategoryArray_Def.__init__()=GoogleSearch_services_types.urn_GoogleSearch.DirectoryCategoryArray_Def-class.html#__init__,Method GoogleSearch_services_types.urn_GoogleSearch.DirectoryCategory_Def.__init__()=GoogleSearch_services_types.urn_GoogleSearch.DirectoryCategory_Def-class.html#__init__,Method GoogleSearch_services_types.urn_GoogleSearch.GoogleSearchResult_Def.__init__()=GoogleSearch_services_types.urn_GoogleSearch.GoogleSearchResult_Def-class.html#__init__,Method GoogleSearch_services_types.urn_GoogleSearch.ResultElementArray_Def.__init__()=GoogleSearch_services_types.urn_GoogleSearch.ResultElementArray_Def-class.html#__init__,Method GoogleSearch_services_types.urn_GoogleSearch.ResultElement_Def.__init__()=GoogleSearch_services_types.urn_GoogleSearch.ResultElement_Def-class.html#__init__,Method baseObjects.Document.__init__()=baseObjects.Document-class.html#__init__,Method baseObjects.Record.__init__()=baseObjects.Record-class.html#__init__,Method baseObjects.Server.__init__()=baseObjects.Server-class.html#__init__,Method baseStore.BdbIter.__init__()=baseStore.BdbIter-class.html#__init__,Method baseStore.SimpleStore.__init__()=baseStore.SimpleStore-class.html#__init__,Method baseStore.SrbBdbCombineStore.__init__()=baseStore.SrbBdbCombineStore-class.html#__init__,Method baseStore.SrbStore.__init__()=baseStore.SrbStore-class.html#__init__,Method bootstrap.BootstrapDocument.__init__()=bootstrap.BootstrapDocument-class.html#__init__,Method bootstrap.BootstrapRecord.__init__()=bootstrap.BootstrapRecord-class.html#__init__,Method bootstrap.BootstrapSession.__init__()=bootstrap.BootstrapSession-class.html#__init__,Method c3errors.C3Exception.__init__()=c3errors.C3Exception-class.html#__init__,Method configParser.C3Object.__init__()=configParser.C3Object-class.html#__init__,Method database.SimpleDatabase.__init__()=database.SimpleDatabase-class.html#__init__,Method document.StringDocument.__init__()=document.StringDocument-class.html#__init__,Method documentFactory.BaseDocumentFactory.__init__()=documentFactory.BaseDocumentFactory-class.html#__init__,Method documentFactory.BaseDocumentStream.__init__()=documentFactory.BaseDocumentStream-class.html#__init__,Method documentFactory.ComponentDocumentFactory.__init__()=documentFactory.ComponentDocumentFactory-class.html#__init__,Method documentFactory.ComponentDocumentStream.__init__()=documentFactory.ComponentDocumentStream-class.html#__init__,Method documentFactory.GoogleDocumentStream.__init__()=documentFactory.GoogleDocumentStream-class.html#__init__,Method documentFactory.HttpDocumentStream.__init__()=documentFactory.HttpDocumentStream-class.html#__init__,Method documentFactory.MultipleDocumentStream.__init__()=documentFactory.MultipleDocumentStream-class.html#__init__,Method documentFactory.OaiDocumentStream.__init__()=documentFactory.OaiDocumentStream-class.html#__init__,Method documentFactory.UrllibUnicodeFileThing.__init__()=documentFactory.UrllibUnicodeFileThing-class.html#__init__,Method documentFactory.XmlDocumentStream.__init__()=documentFactory.XmlDocumentStream-class.html#__init__,Method documentStore.BdbDocumentStore.__init__()=documentStore.BdbDocumentStore-class.html#__init__,Method documentStore.CachingSrbDocumentStore.__init__()=documentStore.CachingSrbDocumentStore-class.html#__init__,Method documentStore.SimpleDocumentStore.__init__()=documentStore.SimpleDocumentStore-class.html#__init__,Method documentStore.SrbDocumentStore.__init__()=documentStore.SrbDocumentStore-class.html#__init__,Method extractor.DateExtractor.__init__()=extractor.DateExtractor-class.html#__init__,Method extractor.KeywordExtractor.__init__()=extractor.KeywordExtractor-class.html#__init__,Method extractor.SimpleExtractor.__init__()=extractor.SimpleExtractor-class.html#__init__,Method index.ArrayIndex.__init__()=index.ArrayIndex-class.html#__init__,Method index.BitmapIndex.__init__()=index.BitmapIndex-class.html#__init__,Method index.ClusterExtractionIndex.__init__()=index.ClusterExtractionIndex-class.html#__init__,Method index.SimpleIndex.__init__()=index.SimpleIndex-class.html#__init__,Method indexStore.BdbIndexStore.__init__()=indexStore.BdbIndexStore-class.html#__init__,Method indexStore.SrbBdbIndexStore.__init__()=indexStore.SrbBdbIndexStore-class.html#__init__,Method __init__()=logger.FunctionLogger-class.html#__init__,Method SimpleLogger.__init__()=logger.SimpleLogger-class.html#__init__,Method multivalent.MultivalentClient.__init__()=multivalent.MultivalentClient-class.html#__init__,Method multivalent.MultivalentPreParser.__init__()=multivalent.MultivalentPreParser-class.html#__init__,Method normalizer.KeywordNormalizer.__init__()=normalizer.KeywordNormalizer-class.html#__init__,Method normalizer.NumericEntityNormalizer.__init__()=normalizer.NumericEntityNormalizer-class.html#__init__,Method normalizer.PhraseStemNormalizer.__init__()=normalizer.PhraseStemNormalizer-class.html#__init__,Method normalizer.RegexpNormalizer.__init__()=normalizer.RegexpNormalizer-class.html#__init__,Method normalizer.SimpleNormalizer.__init__()=normalizer.SimpleNormalizer-class.html#__init__,Method normalizer.SpaceNormalizer.__init__()=normalizer.SpaceNormalizer-class.html#__init__,Method normalizer.StemNormalizer.__init__()=normalizer.StemNormalizer-class.html#__init__,Method normalizer.StoplistNormalizer.__init__()=normalizer.StoplistNormalizer-class.html#__init__,Method normalizer.TermExistsNormalizer.__init__()=normalizer.TermExistsNormalizer-class.html#__init__,Method parser.FtParser.__init__()=parser.FtParser-class.html#__init__,Method parser.FtSaxParser.__init__()=parser.FtSaxParser-class.html#__init__,Method parser.SaxParser.__init__()=parser.SaxParser-class.html#__init__,Method parser.XmlRecordStoreParser.__init__()=parser.XmlRecordStoreParser-class.html#__init__,Method permissionHandler.PermissionHandler.__init__()=permissionHandler.PermissionHandler-class.html#__init__,Method postgres.PostgresDocumentFactory.__init__()=postgres.PostgresDocumentFactory-class.html#__init__,Method postgres.PostgresDocumentStream.__init__()=postgres.PostgresDocumentStream-class.html#__init__,Method postgres.PostgresIndexStore.__init__()=postgres.PostgresIndexStore-class.html#__init__,Method postgres.PostgresRecordStore.__init__()=postgres.PostgresRecordStore-class.html#__init__,Method postgres.PostgresResultSetStore.__init__()=postgres.PostgresResultSetStore-class.html#__init__,Method postgres.PostgresStore.__init__()=postgres.PostgresStore-class.html#__init__,Method preParser.AmpPreParser.__init__()=preParser.AmpPreParser-class.html#__init__,Method preParser.CharacterEntityPreParser.__init__()=preParser.CharacterEntityPreParser-class.html#__init__,Method preParser.HtmlSmashPreParser.__init__()=preParser.HtmlSmashPreParser-class.html#__init__,Method preParser.HtmlTidyPreParser.__init__()=preParser.HtmlTidyPreParser-class.html#__init__,Method preParser.NormalizerPreParser.__init__()=preParser.NormalizerPreParser-class.html#__init__,Method preParser.PdfToTxtPreParser.__init__()=preParser.PdfToTxtPreParser-class.html#__init__,Method preParser.PrintableOnlyPreParser.__init__()=preParser.PrintableOnlyPreParser-class.html#__init__,Method preParser.RegexpSmashPreParser.__init__()=preParser.RegexpSmashPreParser-class.html#__init__,Method preParser.SgmlPreParser.__init__()=preParser.SgmlPreParser-class.html#__init__,Method protocolMap.C3WepProtocolMap.__init__()=protocolMap.C3WepProtocolMap-class.html#__init__,Method protocolMap.CQLProtocolMap.__init__()=protocolMap.CQLProtocolMap-class.html#__init__,Method protocolMap.UpdateProtocolMap.__init__()=protocolMap.UpdateProtocolMap-class.html#__init__,Method protocolMap.Z3950ProtocolMap.__init__()=protocolMap.Z3950ProtocolMap-class.html#__init__,Method protocolMap.ZeerexProtocolMap.__init__()=protocolMap.ZeerexProtocolMap-class.html#__init__,Method record.DomRecord.__init__()=record.DomRecord-class.html#__init__,Method record.MarcRecord.__init__()=record.MarcRecord-class.html#__init__,Method record.SaxContentHandler.__init__()=record.SaxContentHandler-class.html#__init__,Method record.SaxRecord.__init__()=record.SaxRecord-class.html#__init__,Method recordStore.BdbRecordStore.__init__()=recordStore.BdbRecordStore-class.html#__init__,Method recordStore.CachingSrbRecordStore.__init__()=recordStore.CachingSrbRecordStore-class.html#__init__,Method recordStore.CachingSrbRemoteWriteRecordStore.__init__()=recordStore.CachingSrbRemoteWriteRecordStore-class.html#__init__,Method recordStore.MarcIter.__init__()=recordStore.MarcIter-class.html#__init__,Method recordStore.ParsingRecordStore.__init__()=recordStore.ParsingRecordStore-class.html#__init__,Method recordStore.PostgresRecordStore.__init__()=recordStore.PostgresRecordStore-class.html#__init__,Method recordStore.RemoteSlaveRecordStore.__init__()=recordStore.RemoteSlaveRecordStore-class.html#__init__,Method recordStore.SimpleRecordStore.__init__()=recordStore.SimpleRecordStore-class.html#__init__,Method recordStore.SrbRecordStore.__init__()=recordStore.SrbRecordStore-class.html#__init__,Method resultSet.ArrayResultSet.__init__()=resultSet.ArrayResultSet-class.html#__init__,Method resultSet.BitmapResultSet.__init__()=resultSet.BitmapResultSet-class.html#__init__,Method resultSet.SimpleResultSet.__init__()=resultSet.SimpleResultSet-class.html#__init__,Method resultSet.SimpleResultSetItem.__init__()=resultSet.SimpleResultSetItem-class.html#__init__,Method resultSetStore.BdbResultSetStore.__init__()=resultSetStore.BdbResultSetStore-class.html#__init__,Method resultSetStore.BdbResultSetStore2.__init__()=resultSetStore.BdbResultSetStore2-class.html#__init__,Method resultSetStore.SimpleResultSetStore.__init__()=resultSetStore.SimpleResultSetStore-class.html#__init__,Method server.SimpleServer.__init__()=server.SimpleServer-class.html#__init__,Method srboo.SrbConnection.__init__()=srboo.SrbConnection-class.html#__init__,Method srboo.SrbException.__init__()=srboo.SrbException-class.html#__init__,Method srboo.SrbFile.__init__()=srboo.SrbFile-class.html#__init__,Method textmining.TsujiiC3.EnjuObject.__init__()=textmining.TsujiiC3.EnjuObject-class.html#__init__,Method textmining.TsujiiC3.GeniaObject.__init__()=textmining.TsujiiC3.GeniaObject-class.html#__init__,Method textmining.TsujiiC3.SimpleTokenizer.__init__()=textmining.TsujiiC3.SimpleTokenizer-class.html#__init__,Method textmining.TsujiiC3.TsujiiObject.__init__()=textmining.TsujiiC3.TsujiiObject-class.html#__init__,Method textmining.tmNormalizer.EnjuNormalizer.__init__()=textmining.tmNormalizer.EnjuNormalizer-class.html#__init__,Method textmining.tmNormalizer.ExactGeniaNormalizer.__init__()=textmining.tmNormalizer.ExactGeniaNormalizer-class.html#__init__,Method textmining.tmNormalizer.GeniaNormalizer.__init__()=textmining.tmNormalizer.GeniaNormalizer-class.html#__init__,Method textmining.tmNormalizer.GeniaTextNormalizer.__init__()=textmining.tmNormalizer.GeniaTextNormalizer-class.html#__init__,Method textmining.tmNormalizer.PosKeywordNormalizer.__init__()=textmining.tmNormalizer.PosKeywordNormalizer-class.html#__init__,Method textmining.tmNormalizer.PosPhraseNormalizer.__init__()=textmining.tmNormalizer.PosPhraseNormalizer-class.html#__init__,Method textmining.tmNormalizer.PosTypeNormalizer.__init__()=textmining.tmNormalizer.PosTypeNormalizer-class.html#__init__,Method textmining.tmNormalizer.TsujiiPosNormalizer.__init__()=textmining.tmNormalizer.TsujiiPosNormalizer-class.html#__init__,Method textmining.tmNormalizer.UnparsedGeniaNormalizer.__init__()=textmining.tmNormalizer.UnparsedGeniaNormalizer-class.html#__init__,Method textmining.tmPreParser.EnjuTextPreParser.__init__()=textmining.tmPreParser.EnjuTextPreParser-class.html#__init__,Method textmining.tmPreParser.GeniaTextPreParser.__init__()=textmining.tmPreParser.GeniaTextPreParser-class.html#__init__,Method textmining.tmPreParser.TsujiiChunkerPreParser.__init__()=textmining.tmPreParser.TsujiiChunkerPreParser-class.html#__init__,Method textmining.tmPreParser.TsujiiTextPosPreParser.__init__()=textmining.tmPreParser.TsujiiTextPosPreParser-class.html#__init__,Method textmining.tmPreParser.TsujiiXMLPosPreParser.__init__()=textmining.tmPreParser.TsujiiXMLPosPreParser-class.html#__init__,Method textmining.tmTransformer.TsujiiTextPosTransformer.__init__()=textmining.tmTransformer.TsujiiTextPosTransformer-class.html#__init__,Method textmining.tmTransformer.TsujiiXPathTransformer.__init__()=textmining.tmTransformer.TsujiiXPathTransformer-class.html#__init__,Method transformer.CSVTransformer.__init__()=transformer.CSVTransformer-class.html#__init__,Method transformer.GrsMapTransformer.__init__()=transformer.GrsMapTransformer-class.html#__init__,Method transformer.LxmlXsltTransformer.__init__()=transformer.LxmlXsltTransformer-class.html#__init__,Method transformer.XsltTransformer.__init__()=transformer.XsltTransformer-class.html#__init__,Method utils.SimpleBitfield.__init__()=utils.SimpleBitfield-class.html#__init__,Method workflow.CachingWorkflow.__init__()=workflow.CachingWorkflow-class.html#__init__,Method workflow.SimpleWorkflow.__init__()=workflow.SimpleWorkflow-class.html#__init__,Method xpathProcessor.SimpleXPathProcessor.__init__()=xpathProcessor.SimpleXPathProcessor-class.html#__init__'); return false;">__init__</a></span></span><span class="py-op">(</span><span class="py-name">self</span><span class="py-op">,</span> <a title="resultSet.DeserializationHandler.session" class="py-name" href="resultSet.DeserializationHandler-class.html#session">session</a><span class="py-op">,</span> <span class="py-name">config</span><span class="py-op">,</span> <span id="link-3" class="py-name"><a title="baseObjects.Document.parent
+baseObjects.Record.parent
+configParser.C3Object.parent" class="py-name" href="#" onclick="doclink('link-3', 'parent', 'Variable baseObjects.Document.parent=baseObjects.Document-class.html#parent,Variable baseObjects.Record.parent=baseObjects.Record-class.html#parent,Variable configParser.C3Object.parent=configParser.C3Object-class.html#parent'); return false;">parent</a></span></span><span class="py-op">)</span> </span>
+</div><span class="lineno">53</span>  <span class="py-line"> </span>
+<a name="FunctionLogger._myRepr"></a><div id="FunctionLogger._myRepr-def"><span class="lineno">54</span> <a class="pysrc-toggle" href="#" id="FunctionLogger._myRepr-toggle" onclick="toggle('FunctionLogger._myRepr'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="logger.FunctionLogger-class.html#_myRepr">_myRepr</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">a</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="FunctionLogger._myRepr-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="FunctionLogger._myRepr-expanded"><span class="lineno">55</span>  <span class="py-line">        <span class="py-keyword">if</span> <span class="py-op">(</span><span class="py-name">isinstance</span><span class="py-op">(</span><span class="py-name">a</span><span class="py-op">,</span> <a title="configParser.C3Object" class="py-name" href="configParser.C3Object-class.html">C3Object</a><span class="py-op">)</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno">56</span>  <span class="py-line">            <span class="py-keyword">return</span> <span class="py-name">a</span><span class="py-op">.</span><span id="link-4" class="py-name"><a title="baseObjects.Document.id
+baseObjects.ResultSet.id
+configParser.C3Object.id
+resultSet.BitmapResultSet.id
+resultSet.SimpleResultSet.id
+srboo.SrbConnection.id" class="py-name" href="#" onclick="doclink('link-4', 'id', 'Variable baseObjects.Document.id=baseObjects.Document-class.html#id,Variable baseObjects.ResultSet.id=baseObjects.ResultSet-class.html#id,Variable configParser.C3Object.id=configParser.C3Object-class.html#id,Variable resultSet.BitmapResultSet.id=resultSet.BitmapResultSet-class.html#id,Variable resultSet.SimpleResultSet.id=resultSet.SimpleResultSet-class.html#id,Variable srboo.SrbConnection.id=srboo.SrbConnection-class.html#id'); return false;">id</a></span></span> </span>
+<span class="lineno">57</span>  <span class="py-line">        <span class="py-keyword">elif</span> <span class="py-op">(</span><span class="py-name">isinstance</span><span class="py-op">(</span><span class="py-name">a</span><span class="py-op">,</span> <a title="baseObjects.Session" class="py-name" href="baseObjects.Session-class.html">Session</a><span class="py-op">)</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno">58</span>  <span class="py-line">            <span class="py-keyword">return</span> <span class="py-string">"Session(%s)"</span> <span class="py-op">%</span> <span class="py-op">(</span><span class="py-name">a</span><span class="py-op">.</span><span id="link-5" class="py-name"><a title="baseObjects.Session.user
+baseStore.SrbStore.user
+bootstrap.BootstrapSession.user
+indexStore.SrbBdbIndexStore.user
+srboo.SrbConnection.user
+user" class="py-name" href="#" onclick="doclink('link-5', 'user', 'Variable baseObjects.Session.user=baseObjects.Session-class.html#user,Variable baseStore.SrbStore.user=baseStore.SrbStore-class.html#user,Variable bootstrap.BootstrapSession.user=bootstrap.BootstrapSession-class.html#user,Variable indexStore.SrbBdbIndexStore.user=indexStore.SrbBdbIndexStore-class.html#user,Variable srboo.SrbConnection.user=srboo.SrbConnection-class.html#user,Module user=user-module.html'); return false;">user</a></span></span><span class="py-op">)</span> </span>
+<span class="lineno">59</span>  <span class="py-line">        <span class="py-keyword">elif</span> <span class="py-op">(</span><span class="py-name">isinstance</span><span class="py-op">(</span><span class="py-name">a</span><span class="py-op">,</span> <span class="py-name">PrefixableObject</span><span class="py-op">)</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno">60</span>  <span class="py-line">            <span class="py-keyword">return</span> <span class="py-name">repr</span><span class="py-op">(</span><span class="py-name">a</span><span class="py-op">.</span><span class="py-name">toCQL</span><span class="py-op">(</span><span class="py-op">)</span><span class="py-op">)</span> </span>
+<span class="lineno">61</span>  <span class="py-line">        <span class="py-keyword">else</span><span class="py-op">:</span> </span>
+<span class="lineno">62</span>  <span class="py-line">            <span class="py-keyword">return</span> <span class="py-name">repr</span><span class="py-op">(</span><span class="py-name">a</span><span class="py-op">)</span> </span>
+</div><span class="lineno">63</span>  <span class="py-line"> </span>
+<a name="FunctionLogger.log"></a><div id="FunctionLogger.log-def"><span class="lineno">64</span> <a class="pysrc-toggle" href="#" id="FunctionLogger.log-toggle" onclick="toggle('FunctionLogger.log'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="logger.FunctionLogger-class.html#log">log</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">object</span><span class="py-op">,</span> <span class="py-param">fn</span><span class="py-op">,</span> <span class="py-op">*</span><span class="py-param">args</span><span class="py-op">,</span> <span class="py-op">**</span><span class="py-param">kw</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="FunctionLogger.log-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="FunctionLogger.log-expanded"><span class="lineno">65</span>  <span class="py-line"> </span>
+<span class="lineno">66</span>  <span class="py-line">        <span class="py-name">frame</span> <span class="py-op">=</span> <span class="py-name">sys</span><span class="py-op">.</span><span class="py-name">_getframe</span><span class="py-op">(</span><span class="py-number">2</span><span class="py-op">)</span> </span>
+<span class="lineno">67</span>  <span class="py-line">        <span class="py-name">caller</span> <span class="py-op">=</span> <span class="py-name">frame</span><span class="py-op">.</span><span class="py-name">f_code</span><span class="py-op">.</span><span class="py-name">co_name</span> </span>
+<span class="lineno">68</span>  <span class="py-line">        <span class="py-name">now</span> <span class="py-op">=</span> <span class="py-name">time</span><span class="py-op">.</span><span class="py-name">strftime</span><span class="py-op">(</span><span class="py-string">"%Y-%m-%d %H:%M:%S"</span><span class="py-op">)</span> </span>
+<span class="lineno">69</span>  <span class="py-line">        <span class="py-name">line</span> <span class="py-op">=</span> <span class="py-op">[</span><span class="py-string">"[%s]: from %s() : %s.%s("</span> <span class="py-op">%</span> <span class="py-op">(</span><span class="py-name">now</span><span class="py-op">,</span> <span class="py-name">caller</span><span class="py-op">,</span> <span class="py-name">object</span><span class="py-op">.</span><span id="link-6" class="py-name"><a title="baseObjects.Document.id
+baseObjects.ResultSet.id
+configParser.C3Object.id
+resultSet.BitmapResultSet.id
+resultSet.SimpleResultSet.id
+srboo.SrbConnection.id" class="py-name" href="#" onclick="doclink('link-6', 'id', 'Variable baseObjects.Document.id=baseObjects.Document-class.html#id,Variable baseObjects.ResultSet.id=baseObjects.ResultSet-class.html#id,Variable configParser.C3Object.id=configParser.C3Object-class.html#id,Variable resultSet.BitmapResultSet.id=resultSet.BitmapResultSet-class.html#id,Variable resultSet.SimpleResultSet.id=resultSet.SimpleResultSet-class.html#id,Variable srboo.SrbConnection.id=srboo.SrbConnection-class.html#id'); return false;">id</a></span></span><span class="py-op">,</span> <span class="py-name">fn</span><span class="py-op">)</span><span class="py-op">]</span> </span>
+<span class="lineno">70</span>  <span class="py-line">        <span class="py-name">ln</span> <span class="py-op">=</span> <span class="py-op">[</span><span class="py-op">]</span> </span>
+<span class="lineno">71</span>  <span class="py-line">        <span class="py-keyword">for</span> <span class="py-name">a</span> <span class="py-keyword">in</span> <span class="py-name">args</span><span class="py-op">:</span> </span>
+<span class="lineno">72</span>  <span class="py-line">            <span class="py-name">ln</span><span class="py-op">.</span><a title="resultSet.SimpleResultSet.append" class="py-name" href="resultSet.SimpleResultSet-class.html#append">append</a><span class="py-op">(</span><span class="py-name">self</span><span class="py-op">.</span><a title="logger.FunctionLogger._myRepr" class="py-name" href="logger.FunctionLogger-class.html#_myRepr">_myRepr</a><span class="py-op">(</span><span class="py-name">a</span><span class="py-op">)</span><span class="py-op">)</span> </span>
+<span class="lineno">73</span>  <span class="py-line">        <span class="py-keyword">for</span> <span class="py-name">k</span> <span class="py-keyword">in</span> <span class="py-name">kw</span><span class="py-op">:</span> </span>
+<span class="lineno">74</span>  <span class="py-line">            <span class="py-name">ln</span><span class="py-op">.</span><a title="resultSet.SimpleResultSet.append" class="py-name" href="resultSet.SimpleResultSet-class.html#append">append</a><span class="py-op">(</span><span class="py-string">"%s=%s"</span> <span class="py-op">%</span> <span class="py-op">(</span><span class="py-name">k</span><span class="py-op">,</span> <span class="py-name">self</span><span class="py-op">.</span><a title="logger.FunctionLogger._myRepr" class="py-name" href="logger.FunctionLogger-class.html#_myRepr">_myRepr</a><span class="py-op">(</span><span class="py-name">kw</span><span class="py-op">[</span><span class="py-name">k</span><span class="py-op">]</span><span class="py-op">)</span><span class="py-op">)</span><span class="py-op">)</span> </span>
+<span class="lineno">75</span>  <span class="py-line">        <span class="py-name">atxt</span> <span class="py-op">=</span> <span class="py-string">','</span><span class="py-op">.</span><span class="py-name">join</span><span class="py-op">(</span><span class="py-name">ln</span><span class="py-op">)</span> </span>
+<span class="lineno">76</span>  <span class="py-line">        <span class="py-name">line</span><span class="py-op">.</span><a title="resultSet.SimpleResultSet.append" class="py-name" href="resultSet.SimpleResultSet-class.html#append">append</a><span class="py-op">(</span><span class="py-name">atxt</span><span class="py-op">)</span> </span>
+<span class="lineno">77</span>  <span class="py-line">        <span class="py-name">line</span><span class="py-op">.</span><a title="resultSet.SimpleResultSet.append" class="py-name" href="resultSet.SimpleResultSet-class.html#append">append</a><span class="py-op">(</span><span class="py-string">")"</span><span class="py-op">)</span> </span>
+<span class="lineno">78</span>  <span class="py-line">        <span class="py-name">line</span> <span class="py-op">=</span> <span class="py-string">''</span><span class="py-op">.</span><span class="py-name">join</span><span class="py-op">(</span><span class="py-name">line</span><span class="py-op">)</span> </span>
+<span class="lineno">79</span>  <span class="py-line"> </span>
+<span class="lineno">80</span>  <span class="py-line">        <span class="py-name">self</span><span class="py-op">.</span><a title="logger.SimpleLogger._logLine" class="py-name" href="logger.SimpleLogger-class.html#_logLine">_logLine</a><span class="py-op">(</span><span class="py-name">line</span><span class="py-op">)</span> </span>
+</div></div><span class="lineno">81</span>  <span class="py-line"> </span><script type="text/javascript">
+<!--
+expandto(location.href);
+// -->
+</script>
+</pre>
+</div>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">Generated by Epydoc
+        3.0alpha2 on Wed Aug  9 18:10:50 2006</td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>
