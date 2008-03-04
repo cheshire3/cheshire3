@@ -14,6 +14,7 @@ except:
 import random
 
 nonTextToken = "\x00\t"    
+NumTypes = [types.IntType, types.LongType]
 
 class IndexStoreIter(object):
     # step through our indexes!
@@ -786,7 +787,7 @@ class BdbIndexStore(IndexStore):
             cxn = self.vectorCxn[index]
 
         docid = rec.id
-        if (type(docid) != types.IntType):
+        if (not type(docid) in NumTypes):
             if (type(docid) == types.StringType and docid.isdigit()):
                 docid = long(docid)
             else:
@@ -820,7 +821,7 @@ class BdbIndexStore(IndexStore):
             cxn = self.proxVectorCxn.get(index, None)
 
         docid = rec.id
-        if (type(docid) != types.IntType):
+        if (not type(docid) in NumTypes):
             if (type(docid) == types.StringType and docid.isdigit()):
                 docid = long(docid)
             else:
@@ -1117,7 +1118,7 @@ class BdbIndexStore(IndexStore):
             return
 
         storeid = rec.recordStore
-        if (type(storeid) != types.IntType):
+        if (not type(storeid) in NumTypes):
             # Map
             if (self.storeHashReverse.has_key(storeid)):
                 storeid = self.storeHashReverse[storeid]
@@ -1128,7 +1129,7 @@ class BdbIndexStore(IndexStore):
                 raise ConfigFileException("indexStore %s does not recognise recordStore: %s" % (self.id, storeid))
         
         docid = rec.id
-        if (not type(docid) in [types.IntType, types.LongType]):
+        if (not type(docid) in NumTypes):
             if (type(docid) == types.StringType and docid.isdigit()):
                 docid = long(docid)
             else:
@@ -1210,14 +1211,14 @@ class BdbIndexStore(IndexStore):
         # Hash
         if (type(docid) == types.StringType and docid.isdigit()):
             docid = long(docid)
-        elif (type(docid) in [types.IntType, types.LongType]):
+        elif (type(docid) in NumTypes):
             pass        
         else:
             # Look up identifier in local bdb
             docid = self._get_internalId(session, rec)               
         
         storeid = rec.recordStore
-        if (type(storeid) <> types.IntType):
+        if (not type(storeid) in NumTypes):
             # Map
             if (self.storeHashReverse.has_key(storeid)):
                 storeid = self.storeHashReverse[storeid]
