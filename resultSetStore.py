@@ -12,6 +12,8 @@ from c3errors import ConfigFileException
 # This map needs to happen at the user/session end
 # Hence only the RSS can name a result set.
 
+NumTypes = [types.IntType, types.LongType]
+
 class SimpleResultSetStore(ResultSetStore):
     storeHash = {}
     storeHashReverse = {}
@@ -87,7 +89,7 @@ class BdbResultSetStore(SimpleResultSetStore, BdbStore):
             storeid = rset[k].recordStore
 
             id = rset[k].id
-            if (type(storeid) <> types.IntType):
+            if (not type(storeid) in NumTypes):
                 # Map
                 if (self.storeHashReverse.has_key(storeid)):
                     storeid = self.storeHashReverse[storeid]
@@ -96,7 +98,7 @@ class BdbResultSetStore(SimpleResultSetStore, BdbStore):
                     self.storeHash[self.storeHashReverse[storeid]] = storeid
                     storeid = self.storeHashReverse[storeid]
             databaseid = rset[k].database
-            if (type(databaseid) <> types.IntType):
+            if (not type(databaseid) in NumTypes):
                 # Map
                 if (self.databaseHashReverse.has_key(databaseid)):
                     databaseid = self.databaseHashReverse[databaseid]
