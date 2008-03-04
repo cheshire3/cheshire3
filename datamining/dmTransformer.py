@@ -346,16 +346,17 @@ class ArmVectorTransformer(Transformer):
         sw = self.get_setting(session, 'stopwords', '')
         ignoreTermids = []
         for w in sw.split(' '):
-            (tid, bla, bla2) = self.vectorIndex.fetch_term(session, w, summary=True)
-            ignoreTermids.append(tid)
+            if w:
+                (tid, bla, bla2) = self.vectorIndex.fetch_term(session, w, summary=True)
+                ignoreTermids.append(tid)
         self.ignoreTermids = ignoreTermids
         self._clear(session)
 
     def _clear(self, session):
         self.termInfoCache = {}
 
-
     def _processVector(self, session, v):
+
         # load thresholds from self
         # note that thresholds may also be set on index
         minLf = self.minLocalFreq
@@ -627,13 +628,19 @@ class SplitArmVectorTransformer(ArmVectorTransformer):
 
 # ------------
 
-class WindowArmVectorTransformer(SplitArmVectorTransformer):
+class WindowArmVectorTransformer(ArmVectorTransformer):
     # no classes
+
+    _possibleSettings = {'windowSize' : {'docs': '', 'type' : int},
+                         'step' : {'docs' : '', 'type' : int},
+                         'onlyAroundMatches' : {'docs' : '', 'type' : int}
+                         }
 
     def __init__(self, session, config, parent):
         ArmVectorTransformer.__init__(self, session, config, parent)
         self.window = self.get_setting(session, 'windowSize', 10)
         self.step = self.get_setting(session, 'stepSize', 10)
+        self.onlyMatches = self.get_setting(session, 'onlyAroundMatches', 0)
 
     def process_record(self, session, rec):
 
@@ -652,19 +659,52 @@ class WindowArmVectorTransformer(SplitArmVectorTransformer):
                 else:
                     pv = self.vectorIndex.fetch_proxVector(session, rec)
 
-            for pve in pv.itervalues():
-                # split into chunks of size N, overlapping at step
-                for s in range(0, len(pve), step):
-                    chunk = pve[s:s+n]
-                    vec = {}
-                    for c in chunk:
-                        try:
-                            v[c] += 1
-                        except:
-                            v[c] = 1
-                    vh = self._processVector(session, vec)
-                    if vh:
-                        hashs.append((-1, vh))            
+            hashs = []
+            if not self.onlyMatches:
+                for pve in pv.itervalues():
+                    # split into chunks of size N, overlapping at step
+                    for s in range(0, len(pve), step):
+                        chunk = pve[s:s+n]
+                        v = {}
+                        for c in chunk:
+                            try:
+                                v[c[1]] += 1
+                            except:
+                                v[c[1]] = 1
+                        vec = v.items()
+                        vh = self._processVector(session, vec)
+                        if vh:
+                            hashs.append((-1, vh))            
+            else:
+                tids = {}
+                for pii in rec.proxInfo:
+                    for t in [x[-1] for x in pii]:
+                        tids[t] = 1
+                all = []
+                start = -1
+                hn = n/2
+                for (x, pve) in enumerate(pv.itervalues()):
+                    lpve = len(pve)
+                    for pvi in pve:
+                        if tids.has_key(pvi[1]):
+                            start = max(x-hn, 0)
+                            diff = hn - (x - start)
+                            end = min(x+hn+diff, lpve)
+                            if start != 0:
+                                diff2 = n - (end - start)
+                                if diff2:
+                                    start = min(start - diff2, 0)
+                            chunk = pve[start:end+1]
+                            v = {}
+                            for c in chunk:
+                                try:
+                                    v[c[1]] += 1
+                                except:
+                                    v[c[1]] = 1
+                            vec = v.items()
+                            vh = self._processVector(session, vec)
+                            if vh:
+                                hashs.append((-1, vh))            
             return StringDocument(hashs)
         else:
             raise NotImplementedError()
