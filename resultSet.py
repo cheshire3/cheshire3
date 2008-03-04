@@ -153,12 +153,14 @@ class SimpleResultSet(RankedResultSet):
     termWeight = 0.0
     recordStore = ""
     recordStoreSizes = 0
+    termIdHash = {}
 
     def __init__(self, session, data=[], id="", recordStore=""):
         self._list = data
         self.id = id
         self.recordStore = recordStore
         self.recordStoreSizes = 0
+        self.termIdHash = {}
 
     def __getitem__(self, k):
         return self._list[k]
@@ -453,10 +455,16 @@ class SimpleResultSet(RankedResultSet):
                 finish = fn(session, others, clause, cql, db)
                 if finish:
                     return self
+
         if len(others) == 1 and len(others[0].queryPositions) < 2:
             if relevancy:
                 # Just adding relevance to items?
                 others[0].relevancy = 1
+            if pi:
+                o = others[0]
+                for i in o:
+                    for pii in i.proxInfo:
+                        [x.append(o.termid) for x in pii]
             return others[0]
 
         if relevancy:
@@ -503,6 +511,9 @@ class SimpleResultSet(RankedResultSet):
             # for adj/=
             ordered = 1
 
+        for o in others:
+            self.termIdHash[o.termid] = o.queryTerm
+
         chitem = cmpHash[comparison]
         if unit == "word":
             proxtype = 1
@@ -515,6 +526,7 @@ class SimpleResultSet(RankedResultSet):
             raise NotImplementedError()
         hasGetItemList = [hasattr(o, 'get_item') for o in others]
         cont = 1
+
         while cont:                
             items = [others[0][positions[0]]]
             rspos = [0]
@@ -688,11 +700,15 @@ class SimpleResultSet(RankedResultSet):
                     minWeight = item.weight
             else:
                 item = items[0]
-            if pi:
+
+            if pi and cql.value != "window":
                 # copy proxInfo around
+                for pii in items[0].proxInfo:
+                    [x.append(items[0].resultSet.termid) for x in pii]
                 for o in items[1:]:
+                    for pii in o.proxInfo:
+                        [x.append(o.resultSet.termid) for x in pii]
                     item.proxInfo.extend(o.proxInfo)                        
-                    item.fullProxInfo.extend(o.fullProxInfo)
             tmplist.append(item)
 
         self._list = tmplist
@@ -778,7 +794,6 @@ class SimpleResultSetItem(ResultSetItem):
         self.database = database
         self.resultSet = resultSet
         self.proxInfo = []
-        self.fullProxInfo = []
         self.numericId = numeric
 
     def fetch_record(self, session):
