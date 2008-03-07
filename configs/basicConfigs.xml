@@ -396,8 +396,9 @@
 <subConfig type="normalizer" id="ExactExpansionNormalizer">
   <objectType>normalizer.ExactExpansionNormalizer</objectType>
 </subConfig>
+<!-- same as previous - left in for backward compatibility -->
 <subConfig type="normalizer" id="WordExpansionNormalizer">
-  <objectType>normalizer.WordExpansionNormalizer</objectType>
+  <objectType>normalizer.ExactExpansionNormalizer</objectType>
 </subConfig>
 <subConfig type="normalizer" id="DateStringNormalizer">
   <objectType>normalizer.DateStringNormalizer</objectType>
