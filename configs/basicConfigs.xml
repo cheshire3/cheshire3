@@ -244,15 +244,7 @@
 <subConfig type="tokenizer" id="SuppliedOffsetTokenizer">
   <objectType>tokenizer.SuppliedOffsetTokenizer</objectType>
 </subConfig>
-
-<subConfig type="tokenizer" id="PunktTokenizer">
-  <objectType>tokenizer.PunktWordTokenizer</objectType>
-</subConfig>
-
-<subConfig type="tokenizer" id="PunktSentenceTokenizer">
-  <objectType>tokenizer.PunktSentenceTokenizer</objectType>
-</subConfig>
-
+ 
 <subConfig type="tokenizer" id="SentenceTokenizer">
   <objectType>tokenizer.SentenceTokenizer</objectType>
 </subConfig>
