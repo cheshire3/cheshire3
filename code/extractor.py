@@ -58,7 +58,11 @@ class SimpleExtractor(Extractor):
                         texts.append(' ')
         else:
             # elementTree/lxml
-            walker = elem.getiterator()
+            try:
+                walker = elem.getiterator()
+            except AttributeError:
+                # lxml 1.3 or later
+                walker = elem.iter()
             for c in walker:
                 if c.text:
                     texts.append(c.text)
@@ -86,7 +90,12 @@ class SimpleExtractor(Extractor):
                 lno = 0
                 self.cachedRoot = root
                 self.cachedElems = {}
-                for n in tree.getiterator():
+                try:
+                    walker = elem.getiterator()
+                except AttributeError:
+                    # lxml 1.3 or later
+                    walker = elem.iter()
+                for n in walker:
                     self.cachedElems[n] = lno
                     lno += 1
                 lno = self.cachedElems[node]
