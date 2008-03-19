@@ -75,7 +75,11 @@ def flattenTexts(elem):
                 texts.append(flattenTexts(e))
     else:
         # libxml2 walker/iterator
-        walker = elem.getiterator()
+        try:
+            walker = elem.getiterator()
+        except AttributeError:
+            # lxml 1.3 or later
+            walker = elem.iter()
         for c in walker:
             if c.text:
                 texts.append(c.text)
