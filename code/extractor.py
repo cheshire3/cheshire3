@@ -91,10 +91,10 @@ class SimpleExtractor(Extractor):
                 self.cachedRoot = root
                 self.cachedElems = {}
                 try:
-                    walker = elem.getiterator()
+                    walker = tree.getiterator()
                 except AttributeError:
                     # lxml 1.3 or later
-                    walker = elem.iter()
+                    walker = tree.iter()
                 for n in walker:
                     self.cachedElems[n] = lno
                     lno += 1
