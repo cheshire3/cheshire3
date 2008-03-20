@@ -1,5 +1,5 @@
 
-import re, types, string
+import re, types, string, copy
 from baseObjects import Extractor
 
 class SimpleExtractor(Extractor):
@@ -62,7 +62,11 @@ class SimpleExtractor(Extractor):
                 walker = elem.getiterator()
             except AttributeError:
                 # lxml 1.3 or later
-                walker = elem.iter()
+                try:
+                    walker = elem.iter()
+                except:
+                    # lxml smart string object
+                    return elem
             for c in walker:
                 if c.text:
                     texts.append(c.text)
@@ -80,8 +84,14 @@ class SimpleExtractor(Extractor):
 
 
     def _getProxLocNode(self, session, node):
-        if self.get_setting(session, 'reversable', 0):
+        try:
             tree = node.getroottree()
+        except AttributeError:
+            # lxml smart string result?
+            node = node.getparent()
+            tree = node.getroottree()
+            
+        if self.get_setting(session, 'reversable', 0):
             root = tree.getroot()
 
             if root == self.cachedRoot:
@@ -100,7 +110,6 @@ class SimpleExtractor(Extractor):
                     lno += 1
                 lno = self.cachedElems[node]
         else:
-            tree = node.getroottree()
             lno = abs(hash(tree.getpath(node)))
         return lno
 
@@ -142,8 +151,8 @@ class SimpleExtractor(Extractor):
         else:
             lno = -1
         return {txt:{'text' : txt, 'occurences' : 1, 'proxLoc' : [lno]}}
-
-
+    
+    
     def process_xpathResult(self, session, data):
         new = {}
         for xp in data:
