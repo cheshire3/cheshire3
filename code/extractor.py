@@ -62,8 +62,7 @@ class SimpleExtractor(Extractor):
                 walker = elem.getiterator()
             except AttributeError:
                 # lxml 1.3 or later
-                try:
-                    walker = elem.iter()
+                try: walker = elem.iter()
                 except:
                     # lxml smart string object
                     return elem
@@ -100,8 +99,7 @@ class SimpleExtractor(Extractor):
                 lno = 0
                 self.cachedRoot = root
                 self.cachedElems = {}
-                try:
-                    walker = tree.getiterator()
+                try: walker = tree.getiterator()
                 except AttributeError:
                     # lxml 1.3 or later
                     walker = tree.iter()
