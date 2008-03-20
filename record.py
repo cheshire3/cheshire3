@@ -512,7 +512,7 @@ try:
             if xpath[0] != "/" and xpath[-1] != ')':
                 xpath = "//" + xpath
             if maps:
-        		return self.dom.xpath(xpath, maps)
+        		return self.dom.xpath(xpath, namespaces=maps)
     	    else:
                 return self.dom.xpath(xpath)
 
