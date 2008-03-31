@@ -425,8 +425,7 @@ class CQLProtocolMap(ZeerexProtocolMap):
         self.scanExtensionHash = {}
         self.explainExtensionHash = {}
         self.responseExtensionHash = {}
-	self.sruExtensionMap = {}
-	
+        self.sruExtensionMap = {}
         ZeerexProtocolMap.__init__(self, session, node, parent)
 
 
@@ -447,32 +446,31 @@ class CQLProtocolMap(ZeerexProtocolMap):
             raise(ConfigFileException("Unknown prefix: %s" % (name)))
 
     def resolveIndex(self, session, query):
-
-	if query.index.prefix == "c3":
+        if query.index.prefix == 'c3':
             # Override
-	    try:
-		idx = self.parent.get_object(session, query.index.value)
-	    except ObjectDoesNotExistException:
-		# origValue is complete token
-		val = query.index.origValue.split('.')[1]
-		idx = self.parent.get_object(session, val)
-	    return idx
+            try:
+                idx = self.parent.get_object(session, query.index.value)
+            except ObjectDoesNotExistException:
+                # origValue is complete token
+                val = query.index.origValue.split('.')[1]
+                idx = self.parent.get_object(session, val)
+            return idx
 
         target = query
         while (target.parent):
             target = target.parent
         target.config = self
-
+        
         query.index.resolvePrefix()
         uri = query.index.prefixURI
         name = query.index.value
         rel = query.relation.value
         relMods = query.relation.modifiers
-
+        
         # FIXME:  Better CQL->Index resolution
         # Check relevance, check stem, check str/word, check relation,
         # Check index
-
+        
         relv = stem = 0
         rms = []
         for r in relMods:
@@ -483,7 +481,7 @@ class CQLProtocolMap(ZeerexProtocolMap):
                 stem = 1
             else:
                 rms.append(r.type.value)
-
+        
         idx = None
         if (relv):
             idx = self.indexHash.get((uri, name, ('relationModifier', 'relevant')), None)
@@ -604,7 +602,7 @@ class CQLProtocolMap(ZeerexProtocolMap):
                     raise(ConfigFileException('Cannot find handler function %s in srwExtensions.' % fn))
                 xn = node.getAttributeNS(self.c3Namespace, 'type')
                 if (not xn in ['record', 'term', 'search', 'scan', 'explain', 'response']):
-		    raise (ConfigFileException('Incorrect extension type %s' % xn))               
+                    raise (ConfigFileException('Incorrect extension type %s' % xn))               
                 xform = node.getAttributeNS(self.c3Namespace, 'sruFunction')
                 if not xform:
                     sruFunction = srwExtensions.simpleRequestXform
