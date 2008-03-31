@@ -62,9 +62,10 @@ def docidRecordHandler(req, ro, other):
 def recordMetadataHandler(req, ro, rec):
     # Put resultSetItem info into extraRecordData
     mdBits = ['<rec:metaData xmlns:rec="http://www.archiveshub.ac.uk/srw/extension/2/record-1.1">']
-    mdBits.append('<rec:identifier>%s</rec:identifier>' % rec.id)
+    # ids may contain nasties - escape them
+    mdBits.append('<rec:identifier>%s</rec:identifier>' % escape(unicode(rec.id, 'utf-8')))
     if rec.recordStore:
-        mdBits.append('<rec:locationIdentifier>%s</rec:locationIdentifier>' % rec.recordStore)
+        mdBits.append('<rec:locationIdentifier>%s</rec:locationIdentifier>' % escape(rec.recordStore))
     if rec.wordCount:
         mdBits.append('<rec:wordCount>%d</rec:wordCount>' % rec.wordCount)
     if rec.wordCount:
@@ -78,7 +79,7 @@ def recordMetadataHandler(req, ro, rec):
     if rsi.occurences:
         mdBits.append('<rec:termOccurences>%d</rec:termOccurences>' % rsi.occurences)
     if rsi.proxInfo:
-        mdBits.append('<rec:termPositionList>%r</rec:termPositionList>' % rsi.proxInfo)
+        mdBits.append('<rec:termPositionList>%r</rec:termPositionList>' % (rsi.proxInfo))
         
     mdBits.append('</rec:metaData>')
     txt = ''.join(mdBits)
@@ -96,9 +97,12 @@ def resultSetSummaryHandler(req, ro, rs):
     
     mdBits = ['<rs:resultSetData xmlns:rs="http://www.archiveshub.ac.uk/srw/extension/2/resultSet-1.1">']
     if hasattr(rs[0], 'weight'):
+        allids = [escape(r.id) for r in rs] # ids may contain nasties - escape them
+        mdBits.append('<rs:ids>%r</rs:ids>' % allids)
+    if hasattr(rs[0], 'weight'):
         allweights = [r.weight for r in rs]
         mdBits.append('<rs:weights>%r</rs:weights>' % allweights)
-    if hasattr(rs[0], 'proxInfo'):
+    if hasattr(rs[0], 'proxInfo') and rs[0].proxInfo:
         prox = [r.proxInfo for r in rs]
         mdBits.append('<rs:proxInfo>%r</rs:proxInfo>' % prox)
         
