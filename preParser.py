@@ -36,7 +36,7 @@ class NormalizerPreParser(PreParser):
         data = doc.get_raw(session)
         new = self.normalizer.process_string(session, data)
         return StringDocument(data, self.id, doc.processHistory, mimeType=doc.mimeType, parent=doc.parent, filename=doc.filename)
-        
+
 
 class UnicodeDecodePreParser(PreParser):
 
@@ -545,8 +545,6 @@ class OpenOfficePreParser(UrlPreParser):
         return StringDocument(xml, self.id, doc.processHistory, mimeType='text/xml', parent=doc.parent, filename=doc.filename)
 
 
-
-
 class PrintableOnlyPreParser(PreParser):
     """ Replace or Strip non printable characters """
 
@@ -559,7 +557,7 @@ class PrintableOnlyPreParser(PreParser):
         PreParser.__init__(self, session, config, parent)
         self.asciiRe = re.compile('([\x7b-\xff])')
         self.nonxmlRe = re.compile('([\x00-\x08]|[\x0E-\x1F]|[\x0B\x0C\x1F])')
- 	self.strip = self.get_setting(session, 'strip', 0)
+        self.strip = self.get_setting(session, 'strip', 0)
 	
     # Strip any non printable characters
     def process_document(self, session, doc):
