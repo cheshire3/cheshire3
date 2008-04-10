@@ -1083,43 +1083,38 @@ class SimpleDocumentFactory(DocumentFactory):
     
     def __init__(self, session, config, parent):
         DocumentFactory.__init__(self, session, config, parent)
-	self.docStream = None
-	self.generator = None
-	self.streamHash = {"xml" : XmlDocumentStream,
-                           "marc" : MarcDocumentStream,
-                           "dir" : DirectoryDocumentStream,
-                           "tar" : TarDocumentStream,
-                           "zip" : ZipDocumentStream,
-                           "cluster" : ClusterDocumentStream,
-                           "locate" : LocateDocumentStream,
-                           "component" : ComponentDocumentStream,
-                           "oai" : OaiDocumentStream,
-                           "sru" : SruDocumentStream,
-                           "srw" : SrwDocumentStream,
-                           "opensearch" : OpensearchDocumentStream,
-                           "z3950" : Z3950DocumentStream,
-                           "ftp" : FtpDocumentStream,
-                           "http" : HttpDocumentStream,
-                           "termHash" : TermHashDocumentStream,
-                           "rss" : SyndicationDocumentStream
-                           }
+        self.docStream = None
+        self.generator = None
+        self.streamHash = {"xml" : XmlDocumentStream,
+                               "marc" : MarcDocumentStream,
+                               "dir" : DirectoryDocumentStream,
+                               "tar" : TarDocumentStream,
+                               "zip" : ZipDocumentStream,
+                               "cluster" : ClusterDocumentStream,
+                               "locate" : LocateDocumentStream,
+                               "component" : ComponentDocumentStream,
+                               "oai" : OaiDocumentStream,
+                               "sru" : SruDocumentStream,
+                               "srw" : SrwDocumentStream,
+                               "opensearch" : OpensearchDocumentStream,
+                               "z3950" : Z3950DocumentStream,
+                               "ftp" : FtpDocumentStream,
+                               "http" : HttpDocumentStream,
+                               "termHash" : TermHashDocumentStream,
+                               "rss" : SyndicationDocumentStream
+                               }
         self.cache = int(self.get_default(session, 'cache', 0))
         self.format = self.get_default(session, 'format', '').encode('utf-8')
         self.tagName = self.get_default(session, 'tagName', '')
         self.codec = self.get_default(session, 'codec', "")
         self.dataPath = self.get_default(session, 'data', '')
-	self.previousIdx = -1
+        self.previousIdx = -1
 
-
-	
     def register_stream(self, session, format, cls):
         self.streamHash[format] = cls
 
     def load(self, session, data=None, cache=None, format=None, tagName=None, codec=None):
-
-
         self.loadSession = session
-
         if data == None:
             data = self.dataPath
 
@@ -1133,7 +1128,6 @@ class SimpleDocumentFactory(DocumentFactory):
             codec = self.codec
 
         # Some laziness checking
-
         if not format:
             if os.path.exists(data):
                 if data[-4:] == '.zip':
@@ -1164,7 +1158,7 @@ class SimpleDocumentFactory(DocumentFactory):
 
         cls = self.streamHash[format]
         ds = cls(session, data, format, tagName, codec, self)
-
+        
         # Store and call generator on first ping
         self.docStream = ds
         self.generator = ds.find_documents(session, cache=cache)
