@@ -1,0 +1,82 @@
+<?xml version="1.0" ?>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+ <head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="Content-Language" content="en-GB">
+ 	<meta name="keywords" content="">
+	<meta name="Description" content="">
+	<meta name="DC.Creator" content="The British Library">
+	<meta name="DC.Publisher" content="The British Library">
+	<meta name="DC.Contributor" content="The British Library">
+
+	<meta name="DC.Type" content="Text">
+	<meta name="DC.Format" scheme="IMT" content="text/html">
+	<meta name="DC.Identifier" scheme="URI" content="http://www.bl.uk/">
+	<meta name="DC.Source" scheme="URI" content="http://www.bl.uk/">
+	<meta name="DC.Language" scheme="RFC1766" content="en-GB">
+	<meta name="DC.Rights" content="http://www.bl.uk/">
+	<meta name="DC.Title" content="The British Library">
+	<meta name="DC.Date.Created" scheme="W3CDTF" content="2005-10-27">
+	<meta name="DC.Date.Modified" scheme="W3CDTF" content="2005-10-27">
+
+
+        <title>British Library - Incunabular Short Title Catalogue</title>
+        <meta name="copyright" content="&copy; University of Liverpool" />
+
+        <link rel="stylesheet" href="istc2.css" type="text/css" />
+
+ </head>
+ 
+ <body rightmargin="0" class="backgroundwhite">
+   <table width="100%" height="70" border="0" cellspacing="0" cellpadding="0">
+      <tr>
+	 <td width="36"><a href="http://www.bl.uk/"><img src="images/logo.gif" width="35" height="70" border="0" alt="THE BRITISH LIBRARY" align="bottom"></a></td>
+	 <td><div align="left"><img src="images/istc_title.gif" width="560" height="45" alt="Incunabula Short Title Catalogue" align="bottom" border="0"></div><div  id="nav"> <a href="about.html">&nbsp; About</a> | <a href="index.html">Simple search</a> | <a href="browse.html">Browse</a> | <a href="advanced.html">Advanced search</a> | <a href="http://www.bl.uk/catalogues/istc/index.html">Main</a> </div></td>
+	 <td width="71"><div align="right"><img src="images/istc_image_top.jpg" width="70" height="70" border="0" alt="Manuscript image - top"></div></td>
+	 <td align="right"><a href="http://www.liv.ac.uk/" title="University of Liverpool"><img src="images/livsmall.gif" alt=" [ The University of Liverpool ] " border="0" width="" height=""/></a></td>
+     </tr>
+     <tr><td class="backgroundcolour" height="1" colspan=4>&nbsp;</td></tr>
+   </table>
+
+   <table bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0" width="100%">
+     <tr>
+       <td valign="top" width="150">
+
+   <div id="leftnav">
+    <table width="150" border="0" align="right" cellpadding="0" cellspacing="0">
+     <tr><td align="right" valign="middle"><br/><a  href="javascript:history.back()">Back<img src="images/link_back2.gif" alt=" Back " name="back" width="27" height="19" border=0 align="middle"></a></td></tr>
+     <tr><td align="right" valign="middle"><hr align="right" width="100%" size="1" noshade/></td></tr>
+     <tr><td align="right" valign="middle"><a href="help.html">Help<img src="images/int_link.gif" alt="" width="27" height="21" border="0" align="middle"></a></td></tr>
+     <tr><td align="right" valign="middle"><a href="links.html">Links<img src="images/int_link.gif" alt="" width="27" height="21" border="0" align="middle"></a></td></tr>
+     <tr><td align="right" valign="middle"><a href="/~cheshire/cgi-bin/restricted/edit.html">Create editors only<img src="images/int_link.gif" alt="" width="27" height="21" border="0" align="middle"></a></td></tr>
+     <tr><td align="right" valign="middle"><hr align="right" width="100%" size="1" noshade></td></tr>
+%EXTRATABLESTUFF%
+    </table>
+  </div>
+
+  </td>
+  <td valign="top">     
+    <div id="content">
+    <h1>&nbsp;%CONTENTTITLE%</h1>
+ 
+<!-- PAGE CONTAINER -->	
+
+   %CONTENT%
+
+<br/>
+<p> The site is under construction and therefore things may alter and the site may be unavaliable for short periods. </p>
+<p> If you have any further queries please contact John Goldfinch: John.Goldfinch@bl.uk </p> 
+
+ <hr width="100%"/>
+ </div>
+</td>
+</tr>
+</table>
+
+  <div id="footer">
+    <a href="http://www.bl.uk/copyrightstatement.html">Copyright</a> &copy; The British Library Board</div></a>
+    <p align ="right"><a href="http://www.cheshire3.org/" title="University of Liverpool"><img src="images/c3_black.gif" alt=" [ Cheshire3 logo ] " border="0" width="" height=""/></a></p>
+  </div>
+ </body>
+</html>

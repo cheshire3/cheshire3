@@ -1,0 +1,34 @@
+
+
+
+	<p>Select an index to browse alphabetically from the drop-down list, and then enter a term to browse for, and then click 'Browse' or hit the enter key. test<br/>
+	</p>
+
+  <form name="browseform" action="scan.html" method="get">
+   
+    <input type="hidden" name="numreq" value="25"/>
+    <p>	
+      <select name="fieldidx1">
+       <option value="c3.idx-all-fields">All Fields</option>-->
+       <option value="c3.idx-title">Title</option>
+       <option value="c3.idx-author">Author</option>
+       <option value="c3.idx-location">Location of Print</option>
+       <option value="c3.idx-date">Date</option>
+       <option value="c3.idx-ISTC-number">ISTC number</option>
+
+<!--       <option value="c3.idx-bib-ref">Bibliographic References</option>
+       <option value="c3.idx-isbn">ISBN</option>
+       <option value="c3.idx-subject">Subjects</option>
+       <option value="c3.idx-subject-motive">&nbsp;Subject Heading Motive</option>
+       <option value="c3.idx-subject-location">&nbsp;Subject Heading Location</option>
+       <option value="c3.idx-subject-person">&nbsp;Subject Heading Person</option>
+       <option value="c3.idx-subject-corporation">&nbsp;Subject Heading Corporation</option>
+       -->
+      </select>  
+      for
+      <input type="hidden" name="fieldrel1" value="exact"/>
+      <input name="fieldcont1" type="text" size="45"></input>
+    </p>
+    <input type="submit" value=" Browse "/>
+  </form>
+
