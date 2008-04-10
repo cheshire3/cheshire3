@@ -135,6 +135,7 @@ class FileUtilPreParser(TypedPreParser):
 
         cmd = "file -i -b %INDOC%"
         (qq, infn) = tempfile.mkstemp()
+        os.close(qq)
         fh = file(infn, 'w')
         fh.write(doc.get_raw(session))
         fh.close()
@@ -558,7 +559,7 @@ class PrintableOnlyPreParser(PreParser):
         self.asciiRe = re.compile('([\x7b-\xff])')
         self.nonxmlRe = re.compile('([\x00-\x08]|[\x0E-\x1F]|[\x0B\x0C\x1F])')
         self.strip = self.get_setting(session, 'strip', 0)
-	
+
     # Strip any non printable characters
     def process_document(self, session, doc):
         data = doc.get_raw(session)
@@ -587,14 +588,11 @@ class PrintableOnlyPreParser(PreParser):
             
 
         data = self.nonxmlRe.sub(' ', data)
-	
-	if self.strip:
-	    return StringDocument(self.asciiRe.sub('', data), self.id, doc.processHistory, mimeType=doc.mimeType, parent=doc.parent, filename=doc.filename)
-	else:
-	    fn = lambda x: "&#%s;" % ord(x.group(1))
-	    return StringDocument(self.asciiRe.sub(fn, data), self.id, doc.processHistory, mimeType=doc.mimeType, parent=doc.parent, filename=doc.filename)
-
-
+        if self.strip:
+            return StringDocument(self.asciiRe.sub('', data), self.id, doc.processHistory, mimeType=doc.mimeType, parent=doc.parent, filename=doc.filename)
+        else:
+            fn = lambda x: "&#%s;" % ord(x.group(1))
+            return StringDocument(self.asciiRe.sub(fn, data), self.id, doc.processHistory, mimeType=doc.mimeType, parent=doc.parent, filename=doc.filename)
 
 class CharacterEntityPreParser(PreParser):
     """ Transform latin-1 and broken character entities into numeric character entities. eg &amp;something; --> &amp;#123; """
