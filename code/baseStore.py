@@ -437,7 +437,7 @@ class BdbStore(SimpleStore):
 
     def get_dbSize(self, session):
         cxn = self._open(session, 'digest')
-        if not cxn:
+        if cxn == None:
             cxn = self._open(session, 'database')
         return cxn.stat(bdb.db.DB_FAST_STAT)['nkeys']
 

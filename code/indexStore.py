@@ -816,7 +816,7 @@ class BdbIndexStore(IndexStore):
         # rec can be resultSetItem or record
 
         cxn = self.proxVectorCxn.get(index, None)
-        if not cxn:
+        if cxn == None:
             self._openVectors(session, index)
             cxn = self.proxVectorCxn.get(index, None)
 
@@ -918,7 +918,7 @@ class BdbIndexStore(IndexStore):
 
     def fetch_termFrequencies(self, session, index, mType='occ', start=1, nTerms=100, direction=">"):
         cxn = self._openTermFreq(session, index, mType)
-        if not cxn:
+        if cxn == None:
             return []
         else:
             c = cxn.cursor()
