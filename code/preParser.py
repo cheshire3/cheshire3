@@ -175,7 +175,7 @@ class MagicRedirectPreParser(TypedPreParser):
                     self.mimeTypeHash[mt] = ref
                     
     def __init__(self, session, config, parent):
-        self.mimeTypeHash = {"application/x-gzip" : "GzipPreParser",
+        self.mimeTypeHash = {"application/x-gzip" : "GunzipPreParser",
                              "application/postscript" : "PsPdfPreParser",
                              "application/pdf" : "PdfXmlPreParser",
                              "text/html" : "HtmlSmashPreParser",
@@ -442,17 +442,40 @@ class UnpicklePreParser(PreParser):
         data = doc.get_raw(session)
         string = cPickle.loads(data)
         return StringDocument(string, self.id, doc.processHistory, mimeType='text/pickle', parent=doc.parent, filename=doc.filename)
-    
+
+
 class GzipPreParser(PreParser):
+    """ Gzip a not-gzipped document """
+    inMimeType = ""
+    outMimeType = ""
+
+    def __init__(self, session, config, parent):
+        PreParser.__init__(self, session, config, parent)
+        self.compressLevel = self.get_setting(session, "compressLevel", 1)
+    
+    def process_document(self, session, doc):
+        outDoc = StringIO.StringIO()
+        zfile = gzip.GzipFile(mode = 'wb', fileobj=outDoc, compresslevel=self.compressLevel)
+        zfile.write(doc.get_raw(session))
+        zfile.close()
+        l = outDoc.tell()
+        outDoc.seek(0)
+        data = outDoc.read(l)
+        outDoc.close()
+        return StringDocument(data, self.id, doc.processHistory, parent=doc.parent, filename=doc.filename)
+
+    
+class GunzipPreParser(PreParser):
     """ Gunzip a gzipped document """
     inMimeType = ""
     outMimeType = ""
-    
+
     def process_document(self, session, doc):
         buffer = StringIO.StringIO(doc.get_raw(session))
         zfile = gzip.GzipFile(mode = 'rb', fileobj=buffer)
         data = zfile.read()
         return StringDocument(data, self.id, doc.processHistory, parent=doc.parent, filename=doc.filename)
+
 
 class BzipPreParser(PreParser):
     def process_document(self, session, doc):

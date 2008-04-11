@@ -19,9 +19,10 @@ NumTypes = [types.IntType, types.LongType]
 class IndexStoreIter(object):
     # step through our indexes!
 
-    def __init__(self, indexStore):
+    def __init__(self, session, indexStore):
+        self.session = session
         self.indexStore = indexStore
-        dfp = indexStore.get_path(None, "defaultPath")
+        dfp = indexStore.get_path(session, "defaultPath")
         files = os.listdir(dfp)
         self.files = filter(self._fileFilter, files)
         self.position = 0
@@ -41,7 +42,7 @@ class IndexStoreIter(object):
             idxid = self.files[self.position][start:-6]
             self.position += 1
             # now fetch the index
-            return self.indexStore.get_object(None, idxid)
+            return self.indexStore.get_object(self.session, idxid)
         except IndexError:
             raise StopIteration()
 
@@ -86,6 +87,8 @@ class BdbIndexStore(IndexStore):
         self.termIdCxn = {}
         self.termFreqCxn = {}
         self.reservedLongs = 3
+        self.session = session
+
         rsh = self.get_path(session, 'recordStoreHash')
         if rsh:
             wds = rsh.split()
@@ -118,7 +121,7 @@ class BdbIndexStore(IndexStore):
                 self.identifierMapCxn[recstore] = cxn
 
     def __iter__(self):
-        return IndexStoreIter(self)
+        return IndexStoreIter(self.session, self)
 
     def _openMetadata(self, session):
         if self.metadataCxn != None:

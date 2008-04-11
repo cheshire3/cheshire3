@@ -23,7 +23,7 @@ class BdbObjectStore(BdbRecordStore, ObjectStore):
     # Retrieve and instantiate
     
     def __iter__(self):
-        return BdbObjectIter(self)
+        return BdbObjectIter(self.session, self)
     
     def get_storageTypes(self, session):
         # assume that we want to store wordCount, byteCount

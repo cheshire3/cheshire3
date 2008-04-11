@@ -180,6 +180,7 @@ class SimpleStore(C3Object, SummaryObject):
     reverseMetadataTypes = []
     currentId = -1
     useUUID = 0
+    session = None
 
     _possiblePaths = {'idNormalizer' : {'docs' : "Identifier for Normalizer to use to turn the data object's identifier into a suitable form for storing. Eg: StringIntNormalizer"},
                       'outIdNormalizer' : {'docs' : "Normalizer to reverse the process done by idNormalizer"},
@@ -204,6 +205,8 @@ class SimpleStore(C3Object, SummaryObject):
         self.outIdNormalizer = self.get_path(session, 'outIdNormalizer', None)
         self.inWorkflow = self.get_path(session, 'inWorkflow', None)
         self.outWorkflow = self.get_path(session, 'outWorkflow', None)
+
+        self.session = session
 
         dbts = self.get_storageTypes(session)
         self.storageTypes = dbts
@@ -342,9 +345,9 @@ class BdbIter(object):
     cxn = None
     nextData = None
 
-    def __init__(self, store):
+    def __init__(self, session, store):
         self.store = store
-        self.session = Session()
+        self.session = session
         self.cxn = store._open(self.session, 'database')
         self.cursor = self.cxn.cursor()
         self.nextData = self.cursor.first()
@@ -378,7 +381,7 @@ class BdbStore(SimpleStore):
 
     def __iter__(self):
         # Return an iterator object to iter through... keys?
-        return BdbIter(self)
+        return BdbIter(self.session, self)
 
     def _verifyDatabase(self, session, dbType):
         dbp = self.get_path(session, dbType + "Path")
@@ -488,8 +491,13 @@ class BdbStore(SimpleStore):
         else:
             id = str(id)
 
-        if self.inWorkflow:
-            data = self.inWorkflow.process(session, data)
+        # This needs to happen before generating metadata
+        # which is class specific
+        #if self.inWorkflow:
+        #    data = self.inWorkflow.process(session, data)
+        #    if isinstance(data, Document):
+        #        data = data.get_raw(session)
+
         if type(data) == unicode:
             data = data.encode('utf-8')
         cxn.put(id, data)
@@ -510,8 +518,9 @@ class BdbStore(SimpleStore):
 
         if data and data[:41] == "\0http://www.cheshire3.org/status/DELETED:":
             data = DeletedObject(self, id, data[41:])
-        elif self.outWorkflow:
-            data = self.outWorkflow.process(session, data)
+        # This needs to happen in real object
+        #elif self.outWorkflow:
+        #    data = self.outWorkflow.process(session, data)
         if data and self.expires:
             # update touched
             expires = self.generate_expires(session)
@@ -673,7 +682,7 @@ class FileSystemStore(BdbStore):
 
 
     def __iter__(self):
-        return FileSystemIter(self)
+        return FileSystemIter(self.session, self)
 
     def get_storageTypes(self, session):
         return ['filename', 'byteCount', 'byteOffset']

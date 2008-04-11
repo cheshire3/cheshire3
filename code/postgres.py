@@ -22,8 +22,6 @@ import pg
 import time
 from PyZ3950 import CQLParser as cql
 
-
-
 # Iterator for postgres stores
 
 class PostgresIter(object):
@@ -32,7 +30,8 @@ class PostgresIter(object):
     idList = None
     cursor = None
 
-    def __init__(self, store):
+    def __init__(self, session, store):
+        self.session = session
         self.store = store
         self.cxn = pg.connect(self.store.database)
         query = "SELECT identifier FROM %s ORDER BY identifier ASC" % (self.store.table)
@@ -74,7 +73,7 @@ class PostgresRecordIter(PostgresIter):
         data = d[1]
         data = data.replace('\\000\\001', nonTextToken)
         data = data.replace('\\012', '\n')
-        rec = self.store._process_data(None, d[0], data)
+        rec = self.store._process_data(self.session, d[0], data)
         return rec
     
 class PostgresDocumentIter(PostgresIter):
@@ -83,9 +82,8 @@ class PostgresDocumentIter(PostgresIter):
     def next(self):
         d = PostgresIter.next(self)
         data = d[1]
-        doc = self.store._process_data(None, d[0], data)
+        doc = self.store._process_data(self.session, d[0], data)
         return doc
-
 
 # Idea is to take the results of an SQL search and XMLify them into documents.
 # FIXME:  Implement PostgresDocumentStream
@@ -128,11 +126,11 @@ class PostgresStore(SimpleStore):
         self.table = self.get_path(session, 'tableName', parent.id + '_' + self.id)
         self.idNormalizer = self.get_path(session, 'idNormalizer', None)
         self._verifyDatabases(session)
-
+        self.session = session
         
     def __iter__(self):
         # Return an iterator object to iter through
-        return PostgresIter(self)
+        return PostgresIter(self.session, self)
 
     def _handleConfigNode(self, session, node):
         if (node.nodeType == elementType and node.localName == 'relations'):
@@ -416,7 +414,7 @@ class PostgresRecordStore(PostgresStore, SimpleRecordStore):
 
     def __iter__(self):
         # Return an iterator object to iter through
-        return PostgresRecordIter(self)
+        return PostgresRecordIter(self.session, self)
 
 
 class PostgresDocumentStore(PostgresStore, SimpleDocumentStore):
@@ -426,7 +424,7 @@ class PostgresDocumentStore(PostgresStore, SimpleDocumentStore):
         
     def __iter__(self):
         # Return an iterator object to iter through
-        return PostgresDocumentIter(self)
+        return PostgresDocumentIter(self.session, self)
 
 
 
