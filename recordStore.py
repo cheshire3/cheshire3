@@ -184,7 +184,7 @@ class BdbRecordIter(BdbIter):
 
     def next(self):
         d = BdbIter.next(self)
-        rec = self.store._process_data(None, d[0], d[1])
+        rec = self.store._process_data(self.session, d[0], d[1])
         return rec
 
 class BdbRecordStore(BdbStore, SimpleRecordStore):
@@ -202,7 +202,7 @@ class BdbRecordStore(BdbStore, SimpleRecordStore):
 
     def __iter__(self):
         # return an iter object
-        return BdbRecordIter(self)
+        return BdbRecordIter(self.session, self)
 
 try:
     from baseStore import PostgresStore

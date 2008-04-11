@@ -152,7 +152,7 @@ class BdbDocumentStore(BdbStore, SimpleDocumentStore):
         SimpleDocumentStore.__init__(self, session, config, parent)
 
     def __iter__(self):
-        return BdbDocIter(self)
+        return BdbDocIter(self.session, self)
 
 
 class FileSystemDocumentStore(FileSystemStore, SimpleDocumentStore):
