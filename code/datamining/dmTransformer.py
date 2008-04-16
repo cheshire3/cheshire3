@@ -11,7 +11,7 @@ class VectorTransformer(Transformer):
     """ Return a representation of the record's vector for libSVM's python binding """
     label = ""
     labelXPath = ""
-    labelXPathObject = None
+    labelXPathProcessor = None
     vectorIndex = None
     labelMap = {}
     currLabel = -1
@@ -19,7 +19,7 @@ class VectorTransformer(Transformer):
 
     _possibleSettings = {'label' : {'docs' : "Label to assign to all records"},
                          'labelXPath'  : {'docs' : "XPath expression to retrieve label from record"},
-                         'labelXPathObject'  : {'docs' : "XPath Object to use to retrieve label from record"},
+                         'labelXPathProcessor'  : {'docs' : "XPath Object to use to retrieve label from record"},
 
                          'minGlobalFreq' : {'docs' : "", 'type' : int},
                          'maxGlobalFreq' : {'docs' : "", 'type' : int},
@@ -55,12 +55,12 @@ class VectorTransformer(Transformer):
         if not self.label:
             self.labelXPath = self.get_setting(session, 'labelXPath', '')
             if not self.labelXPath:
-                lxpo = self.get_setting(session, 'labelXPathObject', '')
+                lxpo = self.get_setting(session, 'labelXPathProcessor', '')
                 if not lxpo:
                     raise ConfigFileException("No label (class) source set for %s" % (self.id))
                 else:
                     # Will raise if not found
-                    self.labelXPathObject = db.get_object(session, lxpo)
+                    self.labelXPathProcessor = db.get_object(session, lxpo)
         # And now get vector index
         self.vectorIndex = self.get_path(session, 'vectorIndex')
         self.minGlobalFreq = self.get_setting(session, 'minGlobalFreq', -1)
@@ -279,8 +279,8 @@ class VectorTransformer(Transformer):
         if l == "":
             if self.labelXPath:
                 l = rec.process_xpath(session, self.labelXPath)
-            elif self.labelXPathObject:
-                l = self.labelXPathObject.process_record(session, rec)
+            elif self.labelXPathProcessor:
+                l = self.labelXPathProcessor.process_record(session, rec)
             else:
                 # no label, should never get here
                 raise ConfigFileException("No label (class) source set for %s" % (self.id))
@@ -572,13 +572,13 @@ class SplitArmVectorTransformer(ArmVectorTransformer):
             for (e, pvi2) in pv2.iteritems():
                 try:
                     pvi = pv[e]
-		    try:
-			pvihash = dict(pvi)
-		    except:
-			# might be triples w/ offset
-			pvi = [(x[0], x[1]) for x in pvi]
-			pvihash = dict(pvi)
-		except KeyError:
+                    try:
+                        pvihash = dict(pvi)
+                    except:
+                        # might be triples w/ offset
+                        pvi = [(x[0], x[1]) for x in pvi]
+                        pvihash = dict(pvi)
+                except KeyError:
                     # vector in pv is empty
                     continue
                 v = {}
@@ -623,7 +623,7 @@ class SplitArmVectorTransformer(ArmVectorTransformer):
             if vh:
                 return StringDocument((-1, vh))
             else:
-                return StrindDocument((-1, {}))
+                return StringDocument((-1, {}))
 
 
 # ------------
@@ -722,5 +722,4 @@ class SVMFileTransformer(VectorTransformer):
         vstr = ' '.join(["%s:%s" % tuple(x) for x in full])
         data = "%s %s\n" % (l, vstr)
         return StringDocument(data)
-
 
