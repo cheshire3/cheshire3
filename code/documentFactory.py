@@ -212,10 +212,10 @@ class MarcDocumentStream(BaseDocumentStream):
                 myTell += tlen
                 rt = data.find("\x1D")
             dlen = len(data)
-	    data += self.stream.read(1536)
-	    if (len(data) == dlen):
-		# Junk at end of file
-		data = ""
+            data += self.stream.read(1536)
+            if (len(data) == dlen):
+                # Junk at end of file
+                data = ""
         self.stream.close()
         self.locations = locs
         self.documents = docs
@@ -1110,11 +1110,16 @@ class SimpleDocumentFactory(DocumentFactory):
         self.dataPath = self.get_default(session, 'data', '')
         self.previousIdx = -1
 
+
+    
     def register_stream(self, session, format, cls):
         self.streamHash[format] = cls
 
     def load(self, session, data=None, cache=None, format=None, tagName=None, codec=None):
+
+
         self.loadSession = session
+
         if data == None:
             data = self.dataPath
 

@@ -200,7 +200,13 @@ class GRS1Transformer(Transformer):
             if not okay:
                 raise PermissionException("Permission required to transform using %s" % self.id)
         self.initState()
-        rec.saxify(session, self)
+        try:
+            rec.saxify(session, self)
+        except AttributeError:
+            saxp = session.server.get_object(session, 'SaxParser')
+            saxRec = saxp.process_document(session, StringDocument(rec.get_xml(session)))
+            saxRec.saxify(session, self)
+
         return StringDocument(self.top, self.id, rec.processHistory, parent=rec.parent)
 
 

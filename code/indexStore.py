@@ -205,13 +205,14 @@ class BdbIndexStore(IndexStore):
                 cxn.open(dbp)
             self.identifierMapCxn[rec.recordStore] = cxn    
         # Now we have cxn, check it rec exists
-	recid = rec.id
-	if type(recid) == unicode:
-	    try:
-		recid = rec.id.encode('utf-8')
-	    except:
-		recid = rec.id.encode('utf-16')
-	try:
+        recid = rec.id
+        if type(recid) == unicode:
+            try:
+                recid = rec.id.encode('utf-8')
+            except:
+                recid = rec.id.encode('utf-16')
+            
+        try:
             data = cxn.get(recid)
             if data:
                 return long(data)

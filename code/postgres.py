@@ -276,7 +276,10 @@ class PostgresStore(SimpleStore):
             sid = self.idNormalizer.process_string(session, sid)
         query = "SELECT data FROM %s WHERE identifier = '%s';" % (self.table, sid)
         res = self._query(query)
-        data = res.dictresult()[0]['data']
+        try:
+	        data = res.dictresult()[0]['data']
+        except IndexError:
+	    	raise ObjectDoesNotExistException(id)
         data = data.replace('\\000\\001', nonTextToken)
         data = data.replace('\\012', '\n')
         return data

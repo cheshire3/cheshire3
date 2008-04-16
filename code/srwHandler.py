@@ -7,6 +7,7 @@
 # Version History:
 # 08/10/2007 - JH - Automatic insertion of database metadata into explain response
 # 06/12/2007 - JH - Some extension handling fixes
+#
 
 
 import os, sys, re
@@ -299,8 +300,8 @@ def process_explain(self, session, req):
         else:
             nsHash = {'zrx':"http://explain.z3950.org/dtd/2.0/" ,'c3':"http://www.cheshire3.org/schemas/explain/"}
             et = etree.XML(filestr)
-            dbNode = et.xpath('//zrx:explain/zrx:databaseInfo', nsHash)[0]
-            try: impNode = dbNode.xpath('//zrx:implementation', nsHash)[0]
+            dbNode = et.xpath('//zrx:explain/zrx:databaseInfo', namespaces=nsHash)[0]
+            try: impNode = dbNode.xpath('//zrx:implementation', namespaces=nsHash)[0]
             except IndexError:
                 impNode = etree.XML('''<implementation identifier="http://www.cheshire3.org" version="0.9.9">
                 <title>Cheshire3 SRW/U Server</title>
@@ -311,14 +312,14 @@ def process_explain(self, session, req):
                 dbNode.append(impNode)
                 
             if db.totalItems:
-                try: extNode = dbNode.xpath('//zrx:extent', nsHash)[0]
+                try: extNode = dbNode.xpath('//zrx:extent', namespaces=nsHash)[0]
                 except IndexError:
                     etree.SubElement(dbNode, 'extent', {'numberOfRecords': str(db.totalItems)})
                 else:
                     extNode.set('numberOfRecords', str(db.totalItems))
                 
             if db.lastModified:
-                try: histNode = dbNode.xpath('//zrx:history', nsHash)[0]
+                try: histNode = dbNode.xpath('//zrx:history', namespaces=nsHash)[0]
                 except IndexError:
                     # create history and append node
                     etree.SubElement(dbNode, 'history', {'lastUpdate': db.lastModified})
