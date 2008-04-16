@@ -24,7 +24,8 @@ class IndexStoreIter(object):
         self.indexStore = indexStore
         dfp = indexStore.get_path(session, "defaultPath")
         files = os.listdir(dfp)
-        self.files = filter(self._fileFilter, files)
+        # self.files = filter(self._fileFilter, files)
+        self.files = [f for f in files if self._fileFilter(f)]
         self.position = 0
 
     
@@ -205,14 +206,13 @@ class BdbIndexStore(IndexStore):
                 cxn.open(dbp)
             self.identifierMapCxn[rec.recordStore] = cxn    
         # Now we have cxn, check it rec exists
-        recid = rec.id
-        if type(recid) == unicode:
-            try:
-                recid = rec.id.encode('utf-8')
-            except:
-                recid = rec.id.encode('utf-16')
-            
-        try:
+	recid = rec.id
+	if type(recid) == unicode:
+	    try:
+		recid = rec.id.encode('utf-8')
+	    except:
+		recid = rec.id.encode('utf-16')
+	try:
             data = cxn.get(recid)
             if data:
                 return long(data)
@@ -420,6 +420,27 @@ class BdbIndexStore(IndexStore):
         # Original terms from data
         return self.commit_centralIndexing(session, index, sorted)
 
+    def merge_tempFiles(self, session, index):
+
+        sort = self.get_path(session, 'sortPath')
+        temp = self.get_path(session, 'tempPath')
+        dfp = self.get_path(session, 'defaultPath')
+        if not os.path.isabs(temp):
+            temp = os.path.join(dfp, temp)
+	if (not os.path.exists(sort)):
+	    raise ConfigFileException("Sort executable for %s does not exist" % self.id)
+        basename = self._generateFilename(index)
+        baseGlob = os.path.join(temp, "%sTask*SORT" % basename)
+        sortFileList = glob.glob(baseGlob)
+        sortFiles = " ".join(sortFileList)
+        sorted = os.path.join(temp, "%s_SORT" % basename)
+	cmd = "%s -m -T %s -o %s %s" % (sort, temp, sorted, sortFiles)
+	out = commands.getoutput(cmd)
+        if not os.path.exists(sorted):
+            raise ValueError("Didn't sort %s" % index.id)
+        for tsfn in sortFileList:
+            os.remove(tsfn)
+        return sorted
 
     def commit_centralIndexing(self, session, index, filePath):
         p = self.permissionHandlers.get('info:srw/operation/2/index', None)
@@ -430,10 +451,17 @@ class BdbIndexStore(IndexStore):
             if not okay:
                 raise PermissionException("Permission required to add to indexStore %s" % self.id)
 
+        if not filePath:
+            temp = self.get_path(session, 'tempPath')
+            dfp = self.get_path(session, 'defaultPath')
+            if not os.path.isabs(temp):
+                temp = os.path.join(dfp, temp)
+            basename = self._generateFilename(index)
+            filePath = os.path.join(temp, basename + "_SORT")
+            
         cxn = self._openIndex(session, index)
         cursor = cxn.cursor()
         nonEmpty = cursor.first()
-
         metadataCxn = self._openMetadata(session)        
 
         # Should this be:
@@ -458,7 +486,7 @@ class BdbIndexStore(IndexStore):
             if not tidcxn:
                 # okay, no termid hash. hope for best with final set
                 # of terms from regular index
-                (term, value) = cursor.last(doff=0, dlen=12)
+                (term, value) = cursor.last(doff=0, dlen=3*self.longStructSize)
                 (last, x,y) = index.deserialize_term(session, value)                    
             else:
                 tidcursor = tidcxn.cursor()
@@ -500,7 +528,8 @@ class BdbIndexStore(IndexStore):
             l = f.readline()[:-1]
             data = l.split(nonTextToken)
             term = data[0]
-            fullinfo = map(long, data[1:])
+            #fullinfo = map(long, data[1:])
+            fullinfo = [long(x) for x in data[1:]]
             if term == currTerm:
                 # accumulate
                 if fullinfo:
@@ -674,7 +703,8 @@ class BdbIndexStore(IndexStore):
                     totalFreq += long(freq)                    
                 if proxVectors:
                     nProxInts = index.get_setting(session, 'nProxInts', 2)
-                    proxInfo = map(long, bits[4:])
+                    # proxInfo = map(long, bits[4:])
+                    proxInfo = [long(x) for x in bits[4:]]
                     tups = [proxInfo[x:x+nProxInts] for x in range(0,len(proxInfo),nProxInts)]
                     for t in tups:
                         val = [t[1], tid]
@@ -1166,7 +1196,8 @@ class BdbIndexStore(IndexStore):
                 # ensure that docids are sorted to numeric order
                 lineList = ["", "%012d" % docid, str(storeid), str(k['occurences'])]
                 if prox:
-                    lineList.extend(map(str, k['positions']))
+                    # lineList.extend(map(str, k['positions']))
+                    lineList.extend([str(x) for x in k['positions']])
                 self.outFiles[index].write(nonTextToken.join(lineList) + "\n")
         else:
 
