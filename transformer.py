@@ -4,7 +4,6 @@ from baseObjects import Transformer
 import os.path, time, utils, types
 from document import StringDocument
 from c3errors import ConfigFileException
-from server import SimpleServer
 
 from Ft.Xml.Xslt.Processor import Processor
 from Ft.Xml import InputSource
@@ -15,10 +14,6 @@ from PyZ3950.zmarc import MARC
 from utils import verifyXPaths
 from utils import nonTextToken
 from utils import elementType, flattenTexts, verifyXPaths
-from  xml.sax.saxutils import escape
-import re
-import sys
-
 
 class FilepathTransformer(Transformer):
     """ Returns record.id as an identifier, in raw SAX events. For use as the inTransformer of a recordStore """
@@ -38,6 +33,12 @@ class XmlTransformer(Transformer):
 
 try:
     from lxml import etree
+
+    def myTimeFn(dummy):
+        # call as <xsl:value-of select="c3fn:now()"/>
+        # with c3fn defined as http://www.cheshire3.org/ns/xsl/
+        return time.strftime("%Y-%m-%dT%H:%M:%SZ")
+
     class LxmlXsltTransformer(Transformer):
         """ XSLT transformer using Lxml implementation. Requires LxmlRecord """
 
@@ -48,6 +49,10 @@ try:
             xfrPath = self.get_path(session, "xsltPath")
             dfp = self.get_path(session, "defaultPath")
             path = os.path.join(dfp, xfrPath)
+
+            ns = etree.FunctionNamespace('http://www.cheshire3.org/ns/xsl/')
+            ns['now'] = myTimeFn
+            self.functionNamespace = ns
             self.parsedXslt = etree.parse(path)
             self.txr = etree.XSLT(self.parsedXslt)
 
@@ -206,7 +211,6 @@ class GRS1Transformer(Transformer):
             saxp = session.server.get_object(session, 'SaxParser')
             saxRec = saxp.process_document(session, StringDocument(rec.get_xml(session)))
             saxRec.saxify(session, self)
-
         return StringDocument(self.top, self.id, rec.processHistory, parent=rec.parent)
 
 
