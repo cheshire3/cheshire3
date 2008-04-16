@@ -375,6 +375,8 @@
 </subConfig>
 
 <!-- Deprecate ? -->
+<!-- Obselete - code no longer exists - use tokenizers instead -->
+<!-- 
 <subConfig type="normalizer" id="KeywordNormalizer">
   <objectType>normalizer.KeywordNormalizer</objectType>
 </subConfig>
@@ -384,6 +386,7 @@
     <setting type="prox">1</setting>
   </options>
 </subConfig>
+-->
 
 <subConfig type="normalizer" id="ExactExpansionNormalizer">
   <objectType>normalizer.ExactExpansionNormalizer</objectType>

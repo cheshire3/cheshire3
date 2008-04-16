@@ -398,6 +398,14 @@
          </module>
        </imports>
     </subConfig>  
+    
+    <subConfig type="tokenizer" id="PunktTokenizer">
+      <objectType>tokenizer.PunktWordTokenizer</objectType>
+    </subConfig>
+    
+    <subConfig type="tokenizer" id="PunktSentenceTokenizer">
+      <objectType>tokenizer.PunktSentenceTokenizer</objectType>
+    </subConfig>
 
   <subConfig type="transformer" id="TsuTransformer">
       <objectType>textmining.tmTransformer.TsujiiXPathTransformer</objectType>
@@ -416,4 +424,3 @@
 
   </subConfigs>
 </config>
-
