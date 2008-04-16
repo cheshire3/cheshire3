@@ -91,7 +91,7 @@ def recordMetadataHandler(req, ro, rec):
     
     
 def resultSetSummaryHandler(req, ro, rs):
-    # puts summary of resultSet nto extraSearchData
+    # puts summary of resultSet into extraSearchData
     if not len(rs):
         return
     
