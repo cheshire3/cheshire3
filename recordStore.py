@@ -258,87 +258,86 @@ class RedirectRecordStore(SimpleRecordStore, SimpleStore):
         return self.documentStore.fetch_documentMetadata(session, id, mType)
 
 
-# MarcRecordStore becomes a RedirectRecordStore with
-#   an outParser of MarcParser
-
-
-# Task API for PVM/MPI/SOAP/etc
+# Pass back info for PVM/MPI/SOAP/etc
 class RemoteWriteRecordStore(BdbRecordStore):
     """ Listen for records and write """
 
-    def store_data_remote(self, session, data, metadata={}):
+    def store_data(self, session, id, data, metadata={}):
         # Return Id to other task
-        id = self.generate_id(session)
+        # Almost don't need this function/class
+        if id == None:
+            id = self.generate_id(session)
         try:
-            self.store_data(session, id, data, metadata={})
+            BdbRecordStore.store_data(self, session, id, data, metadata)
             return id
         except ObjectAlreadyExistsException:
             return -1
 
 
-class RemoteSlaveRecordStore(SimpleRecordStore):
-        recordStore = ""
-        writeTask = None
-        taskType = None
-        protocol = ""
+class RemoteSlaveRecordStore(BdbRecordStore):
+    recordStore = ""
+    writeTask = None
+    taskType = None
+    protocol = ""
 
-        _possiblePaths = {'remoteStore' : {'docs' : "Identifier for remote store to send data to."}}
-        _possibleSettings = {'protocol' : {'docs' : "Protocol to use for sending data. Currently MPI or PVM"}}
+    _possiblePaths = {'remoteStore' : {'docs' : "Remote store to send data to."}}
+    _possibleSettings = {'protocol' : {'docs' : "Protocol to use for sending data. Currently MPI or PVM"}}
 
-        def __init__(self, session, config, parent):
-            SimpleRecordStore.__init__(self, session, config, parent)
-            self.writeTask = None
-            self.recordStore = self.get_path(session, 'remoteStore')
-            if not self.recordStore:
-                raise ConfigFileException('Missing recordStore identifier')
-            self.protocol = self.get_setting(session, 'protocol')
-            if self.protocol == 'PVM':
-                from pvmProtocolHandler import Task
-                self.taskType = Task
-            elif self.protocol == 'MPI':
-                from mpiProtocolHandler import Task
-                self.taskType = Task
-            else:
-                raise ConfigFileException('Unknown or missing protocol: %s' % self.protocol)
+    def __init__(self, session, config, parent):
+        SimpleRecordStore.__init__(self, session, config, parent)
+        self.writeTask = None
+        self.recordStore = self.get_path(session, 'remoteStore')
+        if not self.recordStore:
+            raise ConfigFileException('Missing recordStore identifier')
+
             
-        def begin_storing(self, session, task=None):
-            # set tasks
-            if task:
-                self.writeTask = self.taskType(task)
-            return None
+    def begin_storing(self, session):
+        # set tasks
+        self.writeTask = session.processManager.namedTasks['writeTask']
+        return None
 
-        def create_record(self, session, rec=None):
-            # Is this actually useful?
-            if (rec == None):
-                rec = SaxRecord([], "", "__new")
-            else:
-                rec.id = "__new"
-            self.store_record(session, rec)
-            return rec
+    def create_record(self, session, rec=None):
+        if (rec == None):
+            rec = SaxRecord([], "", None)
+        else:
+            rec.id = None
+        self.store_record(session, rec)
+        return rec
 
-        def store_record(self, session, rec, transformer=None):
-            # str()ify
-            if (self.inTransformer != None):
-                doc = self.inTransformer.process_record(session, rec)
-                data = doc.get_raw(session)
-            else:
-                sax = rec.get_sax(session)
-                sax.append("9 " + cPickle.dumps(rec.elementHash))
-                data = nonTextToken.join(sax)       
+    def store_record(self, session, rec, transformer=None):
+        rec.recordStore = self.recordStore.id        
 
-            md = {'wordCount' : rec.wordCount,
-                  'byteCount' : rec.byteCount}
-
-            if (self.writeTask != None):            
-                self.writeTask.send([self.recordStore, 'store_data_remote', [session, data, md], {}], 1)
-                msg = self.writeTask.recv()
-            else:
-                raise ValueError('WriteTask is None... did you call begin_storing?')
-            rec.recordStore = self.recordStore
+        # Maybe add metadata, etc.
+        if transformer != None:
+            # Allow custom transformer
+            doc = transformer.process_record(session, rec)
+            data = doc.get_raw(session)            
+        elif self.inTransformer != None:
+            doc = self.inTransformer.process_record(session, rec)
+            data = doc.get_raw(session)
+        elif self.inWorkflow != None:
+            doc = self.inWorkflow.process(session, rec)
+            data = doc.get_raw(session)
+        else:
+            sax = [x.encode('utf8') for x in rec.get_sax(session)]
+            sax.append("9 " + cPickle.dumps(rec.elementHash))
+            data = nonTextToken.join(sax)       
+            
+        dig = self.generate_checkSum(session, data)
+        md = {'byteCount' : rec.byteCount,
+              'wordCount' : rec.wordCount,
+              'digest' : dig}
+            
+        if (self.writeTask != None):            
+            self.writeTask.call(self.recordStore, 'store_data', session, rec.id, data, md)
+            msg = self.writeTask.recv()
+        else:
+            raise ValueError('WriteTask is None... did you call begin_storing?')
+        if rec.id == None:
             rec.id = msg.data
-            return rec
+        return rec
 
-        def fetch_record(self, session, id, parser=None):
-            raise NotImplementedError
+    def fetch_record(self, session, id, parser=None):
+        raise NotImplementedError
 
 

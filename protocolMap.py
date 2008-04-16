@@ -192,13 +192,16 @@ class Z3950ProtocolMap(ZeerexProtocolMap):
     def attrsToCql(self, attrs):
         # Pull defaults off of self
         bib1 = z3950.Z3950_ATTRS_BIB1_ov
-        bib1str = '.'.join(map(str, bib1.lst))
+        #bib1str = '.'.join(map(str, bib1.lst))
+        bib1str = '.'.join([str(x) for x in bib1.lst])
         xd1 = z3950.Z3950_ATTRS_XD1_ov
-        xd1str = '.'.join(map(str, xd1.lst))
+        # xd1str = '.'.join(map(str, xd1.lst))
+        xd1 = '.'.join([str(x) for x in xd1.lst])
         attrHash = {}
         for c in attrs:
             if (not c[0]):
-                c[0] = asn1.OidVal(map(int, self.defaultAttributeSet.split('.')))
+                # c[0] = asn1.OidVal(map(int, self.defaultAttributeSet.split('.')))
+                c[0] = asn1.OidVal([int(x) for x in self.defaultAttributeSet.split('.')])
             attrHash[(c[0], c[1])] = c[2]
         # First check bib1
 

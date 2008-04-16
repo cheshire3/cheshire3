@@ -328,16 +328,6 @@ class SimpleStore(C3Object, SummaryObject):
         # ensure all data is flushed to disk
         raise NotImplementedError
 
-        
-        
-
-
-
-
-
-        
-
-
 
 class BdbIter(object):
     store = None
@@ -484,19 +474,15 @@ class BdbStore(SimpleStore):
                     raise ObjectAlreadyExistsException(exists)
 
         cxn = self._open(session, 'database')
+        # Should always have an id by now, but just in case
+        if id == None:
+            id = self.generate_id(session)
         if (self.idNormalizer != None):
             id = self.idNormalizer.process_string(session, id)
         elif type(id) == unicode:
             id = id.encode('utf-8')
         else:
             id = str(id)
-
-        # This needs to happen before generating metadata
-        # which is class specific
-        #if self.inWorkflow:
-        #    data = self.inWorkflow.process(session, data)
-        #    if isinstance(data, Document):
-        #        data = data.get_raw(session)
 
         if type(data) == unicode:
             data = data.encode('utf-8')
@@ -634,8 +620,6 @@ class BdbStore(SimpleStore):
                     break
         self._closeAll(session)        
         return deleted
-
-
 
 
 class FileSystemIter(object):
@@ -789,3 +773,4 @@ class FileSystemStore(BdbStore):
             else:
                 # Can't write deleted status as original doc is shorter than deletion info!
                 pass
+

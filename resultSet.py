@@ -303,7 +303,8 @@ class SimpleResultSet(RankedResultSet):
                 if all and len(items) < nors:
                     continue
 
-                sumLogDAF = sum(map(math.log, [x.occurences for x in items]))
+                # sumLogDAF = sum(map(math.log, [x.occurences for x in items]))
+                sumLogDAF = sum([math.log(x) for x in [y.occurences for y in items]])
                 sumIdx = sum([x.resultSet.idf for x in items])
 
                 x1 = sumLogQueryFreq / float(n)
@@ -478,7 +479,7 @@ class SimpleResultSet(RankedResultSet):
 
         tmplist = []
         oidxs = range(1,len(others))
-        lens = map(len, others)
+        lens = [len(x) for x in others]
         nors = len(others)
         # Fast escapes
         if all and 0 in lens:
@@ -1245,7 +1246,8 @@ try:
 
                 tmplist = []
                 oidxs = range(1,len(others))
-                lens = map(len, others)
+                # lens = map(len, others)
+                lens = [len(x) for x in others]
                 nors = len(others)
                 if all and 0 in lens:
                     return self

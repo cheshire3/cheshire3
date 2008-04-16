@@ -40,8 +40,8 @@ class SimpleNormalizer(Normalizer):
                         except KeyError:
                             pass
                 new.reverse()        
-		nd = d.copy()
-		nd['text'] = new
+                nd = d.copy()
+                nd['text'] = new
                 kw[k] = nd
                 continue
             else:
@@ -244,7 +244,6 @@ class RegexpNormalizer(SimpleNormalizer):
                 try:
                     return self.regexp.sub(self.char, data)
                 except:
-                    print repr(data)
                     raise
     
 
