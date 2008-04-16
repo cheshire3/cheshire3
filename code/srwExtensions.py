@@ -47,7 +47,7 @@ def implementationResponseHandler(req, resp, other=None):
       <ident:application>Cheshire3 SRW Server</ident:application>
       <ident:version>%s</ident:version>
     </ident:serverInfo>
-    """ % ('.'.join(map(str, internal.cheshireVersion)))
+    """ % ('.'.join([str(x) for x in internal.cheshireVersion]))
     resp.extraResponseData.append(reader.fromString(txt))
 
 def docidRecordHandler(req, ro, other):
