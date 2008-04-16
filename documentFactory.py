@@ -318,11 +318,14 @@ class DirectoryDocumentStream(MultipleDocumentStream):
                 if os.path.islink(os.path.join(root, d)):
                     for root2, dirs2, files2 in os.walk(os.path.join(root,d)):
                         files2.sort()
-                        files2 = map(lambda x: os.path.join(root2, x), files2)
+                        files2 = [os.path.join(root2, x) for x in files2]
+                        # Psyco Map Reduction
+                        # files2 = map(lambda x: os.path.join(root2, x), files2)
                         for f in self._processFiles(session, files2, cache):
                             yield f
             files.sort()
-            files = map(lambda x: os.path.join(root, x), files)
+            files = [os.path.join(root, x) for x in files]
+            # files = map(lambda x: os.path.join(root, x), files)
             for f in self._processFiles(session, files, cache):
                 yield f
 
@@ -559,7 +562,8 @@ class RemoteDocumentStream(BaseDocumentStream):
             port = 0
         # now cwd to the directory, check if last chunk is dir or file
         (dirname,filename) = os.path.split(bits[2])
-        params = map(lambda x: x.split('='), bits[3].split('&'))
+        # params = map(lambda x: x.split('='), bits[3].split('&'))
+        params = [x.split('=') for x in bits[3].split('&')]
         params = dict(params)
         anchor = bits[4]
         return (transport, user, passwd, host, port, dirname, filename, params, anchor)
@@ -859,7 +863,8 @@ class OaiDocumentStream(HttpDocumentStream):
         # stream is URL to ListIdentifiers
         # possible params: metadataPrefix, set, from, until
         bits = urlparse.urlsplit(stream)
-        self.params = dict(map(lambda x: x.split('='), bits[3].split('&')))
+        #self.params = dict(map(lambda x: x.split('='), bits[3].split('&')))
+        self.params = [x.split('=') for x in bits[3].split('&')]
         self.metadataPrefix = params.get('metadataPrefix', 'oai_dc')
         base = bits[0] + "://" + bits[1] + '/' + bits[2] + '?'
         self.server = base
@@ -1110,16 +1115,11 @@ class SimpleDocumentFactory(DocumentFactory):
         self.dataPath = self.get_default(session, 'data', '')
         self.previousIdx = -1
 
-
-    
     def register_stream(self, session, format, cls):
         self.streamHash[format] = cls
 
     def load(self, session, data=None, cache=None, format=None, tagName=None, codec=None):
-
-
         self.loadSession = session
-
         if data == None:
             data = self.dataPath
 
@@ -1155,7 +1155,8 @@ class SimpleDocumentFactory(DocumentFactory):
                     if data.find('?') > -1:
                         # parse url and extract param names
                         bits = urlparse.urlsplit(data)
-                        plist = map(lambda x: x.split('=')[0], bits[3].split('&'))
+                        # plist = map(lambda x: x.split('=')[0], bits[3].split('&'))
+                        plist = [x.split('=')[0] for x in bits[3].split('&')]
                         if 'verb' in plist and 'metadataPrefix' in plist:
                             format = 'oai'
                         elif 'operation' in plist and 'version' in plist and 'query' in plist:
@@ -1455,7 +1456,8 @@ class AccumulatingDocumentFactory(SimpleDocumentFactory):
                     if data.find('?') > -1:
                         # parse url and extract param names
                         bits = urlparse.urlsplit(data)
-                        plist = map(lambda x: x.split('=')[0], bits[3].split('&'))
+                        # plist = map(lambda x: x.split('=')[0], bits[3].split('&'))
+                        plist = [x.split('=')[0] for x in bits[3].split('&')]
                         if 'verb' in plist and 'metadataPrefix' in plist:
                             format = 'oai'
                         elif 'operation' in plist and 'version' in plist and 'query' in plist:
