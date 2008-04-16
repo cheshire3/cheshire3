@@ -565,7 +565,10 @@ class SimpleIndex(Index):
 
     def fetch_metadata(self, session):
         return self.indexStore.fetch_indexMetadata(session, self)
-
+    def merge_tempFiles(self, session):
+        return self.indexStore.merge_tempFiles(session, self)
+    def commit_centralIndexing(self, session, filename=""):
+        return self.indexStore.commit_centralIndexing(session, self, filename)
     
 
 class ProximityIndex(SimpleIndex):

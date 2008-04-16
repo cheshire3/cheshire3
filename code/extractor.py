@@ -20,8 +20,6 @@ class SimpleExtractor(Extractor):
         self.strip = self.get_setting(session, 'stripWhitespace', 0)
         self.cachedRoot = None
         self.cachedElems = {}
-        
-
 
     def _mergeHash(self, a, b):
         if not a:
@@ -115,8 +113,10 @@ class SimpleExtractor(Extractor):
     def process_node(self, session, data):
         # Walk a DOM structure and extract
         txt = self._flattenTexts(data)
+        # We MUST turn newlines into space or can't index
+        txt = txt.replace('\n', ' ')
+        txt = txt.replace('\r', ' ')
         if self.strip:
-            txt = txt.replace('\n', ' ')
             txt = txt.strip()
         if self.get_setting(session, 'prox', 0):
             lno = self._getProxLocNode(session, data)

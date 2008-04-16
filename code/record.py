@@ -499,7 +499,7 @@ class FtDomRecord(DomRecord):
 
         self.context.processorNss.update(maps)
         res = xp.evaluate(self.context)
-        return map(self._checkType, res)
+        return [self._checkType(x) for x in res]
 
 try:
     from lxml import etree, sax
@@ -512,7 +512,7 @@ try:
             if xpath[0] != "/" and xpath[-1] != ')':
                 xpath = "//" + xpath
             if maps:
-        		return self.dom.xpath(xpath, namespaces=maps)
+                return self.dom.xpath(xpath, namespaces=maps)
     	    else:
                 return self.dom.xpath(xpath)
 
