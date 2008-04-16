@@ -74,7 +74,7 @@ class ZHandler:
         ctx = self.decode_ctx
         while (c):
             try:
-                ctx.feed(map(ord, c))
+                ctx.feed([ord(x) for x in c])
                 while ctx.val_count() > 0:
                     # We have a PDU
                     (type, data) = ctx.get_first_decoded()
@@ -99,6 +99,8 @@ class ZHandler:
         try:
             r = self.encode_ctx.encode(APDU, resp)
         except:
+            # XXX Which should it be?
+            #self.set_codec('utf8')
             self.encode_ctx.set_codec(asn1.GeneralString, codecs.lookup(name))
             r = self.encode_ctx.encode(APDU, resp)
         return r
@@ -137,7 +139,7 @@ class ZHandler:
         resp.exceptionalRecordSize = 0x10000
         resp.implementationId = 'Cheshire3'
         resp.implementationName = 'Cheshire3 Z39.50 Server'
-        resp.implementationVersion = '0.9.10'   
+        resp.implementationVersion = '.'.join([str(x) for x ininternal.cheshireVersion])
         resp.result = 1
         pdu = self.encode(('initResponse', resp))
         if (name <> None):
@@ -324,7 +326,7 @@ class ZHandler:
             f = data.resultSetStartPoint
             n = data.numberOfRecordsRequested
             recSyntax = data.preferredRecordSyntax
-            recSynStr = '.'.join(map(str, recSyntax.lst))
+            recSynStr = '.'.join([str(x) for x in recSyntax.lst])
 
             records = []
             for x in range(f-1, min(f+n-1, len(resultset))):
