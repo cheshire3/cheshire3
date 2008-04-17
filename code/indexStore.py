@@ -1359,7 +1359,7 @@ class BdbIndexStore(IndexStore):
             unpacked = index.deserialize_term(session, data)
             if reverse:
                 key = key[::-1]
-            tlist.append([key, unpacked])
+            tlist.append([key.decode('utf-8'), unpacked])
             if nTerms == 1:
                 fetching = 0
         
