@@ -4,6 +4,8 @@ from baseObjects import Transformer
 import os.path, time, utils, types
 from document import StringDocument
 from c3errors import ConfigFileException
+from lxml import etree
+from copy import deepcopy
 
 from Ft.Xml.Xslt.Processor import Processor
 from Ft.Xml import InputSource
@@ -14,6 +16,8 @@ from PyZ3950.zmarc import MARC
 from utils import verifyXPaths
 from utils import nonTextToken
 from utils import elementType, flattenTexts, verifyXPaths
+
+import re
 
 class FilepathTransformer(Transformer):
     """ Returns record.id as an identifier, in raw SAX events. For use as the inTransformer of a recordStore """
@@ -381,6 +385,90 @@ class XmlRecordStoreTransformer(Transformer):
 
         return StringDocument(xml)
 
+
+class CorpusPrepTransformer(Transformer):
+    
+    def __init__(self, session, config, parent):       
+        Transformer.__init__(self, session, config, parent)
+        self.session = session
+        self.rfot = self.get_path(session, 'tokenizer')
+        self.regexp = re.compile('[\s]+')
             
-              
+    def process_record(self, session, rec):
+        tree = rec.get_dom(session)
+        #put in test for sentence and tokenize if necessary
+        elems = tree.xpath('//p|//s')
+        eid = 1
+        for e in elems :
+            e.set('eid', str(eid))
+            eid += 1
+        for s in tree.xpath('//s') :
+            text = re.sub(self.regexp, ' ', flattenTexts(s)).strip()
+            wordCount = 0
+            tBase, oBase = self.rfot.process_string(self.session, text)
+            txt = etree.Element('txt')
+            txt.text = text
+            #create toks and delete the children of s
+            toks = etree.Element('toks')
+            if s.text:
+                #toks.text = s.text
+                t, o = self.rfot.process_string(self.session, s.text)
+                for i in range(0, len(t)):
+                    w = etree.Element('w')
+                    w.text = t[i]
+                    w.set('o', str(oBase[wordCount]))
+                    toks.append(w)
+                    wordCount += 1
+                s.text = ''
+            if s.tail:
+                #toks.tail = s.tail 
+                t, o = self.rfot.process_string(self.session, s.tail)
+                for i in range(0, len(t)):
+                    w = etree.Element('w')
+                    w.text = t[i]
+                    #w.set('o', str(o[i]))
+                    w.set('o', str(oBase[wordCount]))
+                    toks.append(w)
+                    wordCount += 1
+                s.tail = '' 
+            
+            try:
+                walker = s.getiterator()
+            except AttributeError:
+                # lxml 1.3 or later
+                walker = s.iter()
+            
+            for c in walker:      
+                if c.tag != 's':
+                    #toks.append(deepcopy(c))
+                    if c.text:
+                        t, o = self.rfot.process_string(self.session, c.text)
+                        for i in range(0, len(t)):
+                            w = etree.Element('w')
+                            w.text = t[i]
+                            w.set('o', str(oBase[wordCount]))
+                            c.append(w) 
+                            wordCount += 1
+                        toks.append(c)
+                        c.text = ''
+                        
+                    else:
+                        toks.append(c)
+                    if c.tail:
+                        t, o = self.rfot.process_string(self.session, c.tail)
+                        for i in range(0, len(t)):
+                            w = etree.Element('w')
+                            w.text = t[i]
+                            w.set('o', str(oBase[wordCount]))
+                            toks.append(w) 
+                            wordCount += 1
+                        c.tail = ''
+                    #s.remove(c)
+            
+            s.append(txt)
+            s.append(toks)
+                    
+        
+        return StringDocument(etree.tostring(tree))
+          
 
