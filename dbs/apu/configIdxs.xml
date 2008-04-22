@@ -678,6 +678,241 @@
 		
 		
 
+		<!-- TASK idxs -->
+		
+		<!-- keyword -->
+		<subConfig type="index" id="task1-idx">
+			<objectType>index.ProximityIndex</objectType>
+			<paths>
+				<object type="indexStore" ref="indexStore"/>
+			</paths>
+			<source>
+				<xpath ref="task1XPath"/>
+				<process>
+					<object type="extractor" ref="TaggedTermExtractor"/>
+					<object type="tokenizer" ref="SuppliedOffsetTokenizer"/>
+					<object type="tokenMerger" ref="OffsetProxTokenMerger"/>
+					<object type="normalizer" ref="WordNamedNormalizer"/>
+					<object type="normalizer" ref="CaseNormalizer"/>
+					<object type="normalizer" ref="PossessiveNormalizer"/>
+				</process>
+			</source>
+			<source mode="any|all|=|exact|window">
+				<process>
+					<object type="extractor" ref="SimpleExtractor"/>
+					<object type="tokenizer" ref="RegexpFindOffsetTokenizer"/>
+					<object type="tokenMerger" ref="OffsetProxTokenMerger"/>
+					<object type="normalizer" ref="CaseNormalizer"/>
+					<object type="normalizer" ref="PossessiveNormalizer"/>
+				</process>
+			</source>
+			<options>
+				<setting type="nProxInts">3</setting>
+				<setting type="proxVectors">1</setting>
+				<setting type="vectors">1</setting>
+				<setting type="freqList">rec occ</setting>
+			</options>
+		</subConfig>
+
+		
+		<!-- ngrams -->
+		<subConfig type="index" id="task1-2gram-idx">
+			<objectType>index.SimpleIndex</objectType>
+			<paths>
+				<object type="indexStore" ref="indexStore"/>
+			</paths>
+			<source>
+				<xpath ref="task1XPath"/>
+				<process>
+					<object type="extractor" ref="SimpleExtractor"/>
+					<object type="tokenizer" ref="RegexpSubTokenizer"/>
+					<object type="tokenMerger" ref="2GramTokenMerger"/>
+					<object type="normalizer" ref="CaseNormalizer"/>
+				</process>
+			</source>
+			<options>
+				<setting type="termIds">1</setting>
+				<setting type="freqList">rec occ</setting>
+			</options>
+		</subConfig>
+		
+		<subConfig type="index" id="task1-3gram-idx">
+			<objectType>index.SimpleIndex</objectType>
+			<paths>
+				<object type="indexStore" ref="indexStore"/>
+			</paths>
+			<source>
+				<xpath ref="task1XPath"/>
+				<process>
+					<object type="extractor" ref="SimpleExtractor"/>
+					<object type="tokenizer" ref="RegexpSubTokenizer"/>
+					<object type="tokenMerger" ref="3GramTokenMerger"/>
+					<object type="normalizer" ref="CaseNormalizer"/>
+				</process>
+			</source>
+			<options>
+				<setting type="termIds">1</setting>
+				<setting type="freqList">rec occ</setting>
+			</options>
+		</subConfig>
+		<!-- end TASK 1 -->
+
+		<!--  TASK 2 -->
+		<!-- keyword -->
+		<subConfig type="index" id="task2-idx">
+			<objectType>index.ProximityIndex</objectType>
+			<paths>
+				<object type="indexStore" ref="indexStore"/>
+			</paths>
+			<source>
+				<xpath ref="task2XPath"/>
+				<process>
+					<object type="extractor" ref="TaggedTermExtractor"/>
+					<object type="tokenizer" ref="SuppliedOffsetTokenizer"/>
+					<object type="tokenMerger" ref="OffsetProxTokenMerger"/>
+					<object type="normalizer" ref="WordNamedNormalizer"/>
+					<object type="normalizer" ref="CaseNormalizer"/>
+					<object type="normalizer" ref="PossessiveNormalizer"/>
+				</process>
+			</source>
+			<source mode="any|all|=|exact|window">
+				<process>
+					<object type="extractor" ref="SimpleExtractor"/>
+					<object type="tokenizer" ref="RegexpFindOffsetTokenizer"/>
+					<object type="tokenMerger" ref="OffsetProxTokenMerger"/>
+					<object type="normalizer" ref="CaseNormalizer"/>
+					<object type="normalizer" ref="PossessiveNormalizer"/>
+				</process>
+			</source>
+			<options>
+				<setting type="nProxInts">3</setting>
+				<setting type="proxVectors">1</setting>
+				<setting type="vectors">1</setting>
+				<setting type="freqList">rec occ</setting>
+			</options>
+		</subConfig>
+
+		
+		<!-- ngrams -->
+		<subConfig type="index" id="task2-2gram-idx">
+			<objectType>index.SimpleIndex</objectType>
+			<paths>
+				<object type="indexStore" ref="indexStore"/>
+			</paths>
+			<source>
+				<xpath ref="task2XPath"/>
+				<process>
+					<object type="extractor" ref="SimpleExtractor"/>
+					<object type="tokenizer" ref="RegexpSubTokenizer"/>
+					<object type="tokenMerger" ref="2GramTokenMerger"/>
+					<object type="normalizer" ref="CaseNormalizer"/>
+				</process>
+			</source>
+			<options>
+				<setting type="termIds">1</setting>
+				<setting type="freqList">rec occ</setting>
+			</options>
+		</subConfig>
+		
+		<subConfig type="index" id="task2-3gram-idx">
+			<objectType>index.SimpleIndex</objectType>
+			<paths>
+				<object type="indexStore" ref="indexStore"/>
+			</paths>
+			<source>
+				<xpath ref="task2XPath"/>
+				<process>
+					<object type="extractor" ref="SimpleExtractor"/>
+					<object type="tokenizer" ref="RegexpSubTokenizer"/>
+					<object type="tokenMerger" ref="3GramTokenMerger"/>
+					<object type="normalizer" ref="CaseNormalizer"/>
+				</process>
+			</source>
+			<options>
+				<setting type="termIds">1</setting>
+				<setting type="freqList">rec occ</setting>
+			</options>
+		</subConfig>
+		<!-- end TASK 2 -->
+
+		<!--  TASK 3 -->
+		<!-- keyword -->
+		<subConfig type="index" id="task3-idx">
+			<objectType>index.ProximityIndex</objectType>
+			<paths>
+				<object type="indexStore" ref="indexStore"/>
+			</paths>
+			<source>
+				<xpath ref="task3XPath"/>
+				<process>
+					<object type="extractor" ref="TaggedTermExtractor"/>
+					<object type="tokenizer" ref="SuppliedOffsetTokenizer"/>
+					<object type="tokenMerger" ref="OffsetProxTokenMerger"/>
+					<object type="normalizer" ref="WordNamedNormalizer"/>
+					<object type="normalizer" ref="CaseNormalizer"/>
+					<object type="normalizer" ref="PossessiveNormalizer"/>
+				</process>
+			</source>
+			<source mode="any|all|=|exact|window">
+				<process>
+					<object type="extractor" ref="SimpleExtractor"/>
+					<object type="tokenizer" ref="RegexpFindOffsetTokenizer"/>
+					<object type="tokenMerger" ref="OffsetProxTokenMerger"/>
+					<object type="normalizer" ref="CaseNormalizer"/>
+					<object type="normalizer" ref="PossessiveNormalizer"/>
+				</process>
+			</source>
+			<options>
+				<setting type="nProxInts">3</setting>
+				<setting type="proxVectors">1</setting>
+				<setting type="vectors">1</setting>
+				<setting type="freqList">rec occ</setting>
+			</options>
+		</subConfig>
+
+		
+		<!-- ngrams -->
+		<subConfig type="index" id="task3-2gram-idx">
+			<objectType>index.SimpleIndex</objectType>
+			<paths>
+				<object type="indexStore" ref="indexStore"/>
+			</paths>
+			<source>
+				<xpath ref="task3XPath"/>
+				<process>
+					<object type="extractor" ref="SimpleExtractor"/>
+					<object type="tokenizer" ref="RegexpSubTokenizer"/>
+					<object type="tokenMerger" ref="2GramTokenMerger"/>
+					<object type="normalizer" ref="CaseNormalizer"/>
+				</process>
+			</source>
+			<options>
+				<setting type="termIds">1</setting>
+				<setting type="freqList">rec occ</setting>
+			</options>
+		</subConfig>
+		
+		<subConfig type="index" id="task3-3gram-idx">
+			<objectType>index.SimpleIndex</objectType>
+			<paths>
+				<object type="indexStore" ref="indexStore"/>
+			</paths>
+			<source>
+				<xpath ref="task3XPath"/>
+				<process>
+					<object type="extractor" ref="SimpleExtractor"/>
+					<object type="tokenizer" ref="RegexpSubTokenizer"/>
+					<object type="tokenMerger" ref="3GramTokenMerger"/>
+					<object type="normalizer" ref="CaseNormalizer"/>
+				</process>
+			</source>
+			<options>
+				<setting type="termIds">1</setting>
+				<setting type="freqList">rec occ</setting>
+			</options>
+		</subConfig>
+		<!-- end TASK 3 -->
+
 
 
 	</subConfigs>

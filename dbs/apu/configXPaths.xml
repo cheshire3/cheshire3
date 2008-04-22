@@ -22,16 +22,30 @@
 				<xpath>/article/body</xpath>
 			</source>
 		</subConfig>
-<!-- 		
-		<subConfig type="xpathProcessor" id="hiscXPath">
+		
+		<subConfig type="xpathProcessor" id="task1XPath">
 			<objectType>xpathProcessor.SimpleXPathProcessor</objectType>
 			<source>
-				<xpath>/article/body/headline</xpath>
-				<xpath>/article/body/lead</xpath>
+				<xpath>/article[head/task=1]/body/p/s</xpath>
 			</source>
 		</subConfig>
+
+		<subConfig type="xpathProcessor" id="task2XPath">
+			<objectType>xpathProcessor.SimpleXPathProcessor</objectType>
+			<source>
+				<xpath>/article[head/task=2]/body/p/s</xpath>
+			</source>
+		</subConfig>
+
+		<subConfig type="xpathProcessor" id="task3XPath">
+			<objectType>xpathProcessor.SimpleXPathProcessor</objectType>
+			<source>
+				<xpath>/article[head/task=3]/body/p/s</xpath>
+			</source>
+		</subConfig>
+
 		
-		<subConfig type="xpathProcessor" id="tiscXPath">
+<!-- 		<subConfig type="xpathProcessor" id="tiscXPath">
 			<objectType>xpathProcessor.SimpleXPathProcessor</objectType>
 			<source>
 				<xpath>/article/body/p[1]/s[1]</xpath>

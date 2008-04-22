@@ -16,7 +16,14 @@
 		<div class="articleDiv">
 			<div class="source"><xsl:value-of select="concat(@id, ' ', head/source, ', p. ', head/source/@page, ' - ', head/date, ' ', head/section)"/></div>
 			<xsl:apply-templates select="body"/>
+			<xsl:if test="comments">
+				<div class="comments">
+					<div style="text-decoration: underline">COMMENTS:</div>
+					<xsl:apply-templates select="comments"/>
+				</div>
+			</xsl:if>
 		</div>
+		
 	</xsl:template>
 
 
