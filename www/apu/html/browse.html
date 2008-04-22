@@ -1,0 +1,70 @@
+
+<html>
+
+	<head>
+		<title>Guardian Corpus Chesire Word List Interface</title>
+		<link rel="stylesheet" href="/apu/css/search.css" type="text/css"/>
+		<link rel="stylesheet" href="/apu/css/browse.css" type="text/css"/>
+
+		<script src="/apu/js/rico.js" type="text/javascript"></script>
+		<script type="text/javascript" src="/apu/js/prototype.js"></script>		
+		<script type="text/javascript" src="/apu/js/browse.js"></script>
+		
+		<script type="text/javascript" src="/apu/js/tabs.js"></script>
+		
+		
+		<link href="/apu/css/tabs.css" type="text/css" rel="stylesheet" />		
+		
+		<link href="/apu/css/ricoGrid.css" type="text/css" rel="stylesheet" />		
+		
+
+	</head>
+	<body>
+		<div id="header">
+			<h3>Guardian Corpus</h3>
+		</div>
+	
+	
+		<div id="browseWidget">			
+		  <form id="browseform">
+		  
+		  <span class="searchComp">Word List for</span> 
+		  <div class="left">
+		      <select name="indexSelect" id="indexSelect" >
+		      	%OPTNS%
+		      </select>  
+		   
+		   </div>
+		   <div class="arrows">
+		     <input type="button" onclick="addIndex();" class="arrow" value=">"/>
+			 <input type="button" onclick="removeIndex();" class="arrow" value="<"/>
+		   	 
+		   </div>
+		   <div id="box">
+	
+			</div>
+		  
+		   
+		  </form>
+		  <br />
+		  <div class="left">
+		  	<a href="javascript:createComparison()">SHOW</a>
+		  </div>
+		  <br/>
+		</div>
+		
+		<div id="resultTabWidget" class="tabber">
+		
+			<div id="tabWidget">
+				<div id="tabs" class="tabs">
+					<ul>
+					</ul>
+				</div>
+				<div id="canvasContainer">
+				
+				</div>
+			</div>
+		</div>
+			
+	</body>
+</html>

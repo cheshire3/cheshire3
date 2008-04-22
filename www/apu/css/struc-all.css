@@ -1,0 +1,181 @@
+/*
+	This file was produced, and released as part of Cheshire for Archives v3.x
+	Copyright &copy; 2005-2007 the University of Liverpool
+*/
+
+body {
+  margin: 0;
+  padding: 8em 1em 6em 0;
+  /* Prevent body becoming narrower than wrapper - keeps the content from disappearing off the left edge with Gecko browsers */ 
+  min-width: 770px;
+  height: 100%;
+}
+
+div#banner,
+div#leftcol,
+div#rightcol,
+div#single,
+div#footer
+{
+	position: absolute;
+	text-align: left;
+	left: 0;
+	overflow: auto;
+}
+
+div#banner {
+	position: fixed;
+	overflow: visible;
+	top: 0;
+	z-index: 2;
+	width: 100%;
+	background: none;
+	/*height: 7.5em;
+	min-height: 120px;*/
+}
+
+div#banner div { padding: 5px 15px 5px 15px; }
+div#crest{ float: left; }
+div#c3logo{ float: right; }
+div#banner div#navbar {
+	padding-top: 0;
+	padding-bottom:0;
+	clear: both;
+}
+
+div#wrapper {
+	text-align: left;
+	top: 8em;
+	padding: 0 5px 0 5px;
+}
+
+div#single,
+div#leftcol,
+div#rightcol
+{
+	top: 8em;
+	bottom: 65px;
+	padding: 5px 5px 5px 5px;
+	min-height: 1em;
+}
+div#single {
+	width: 99%;
+	padding: 15px 0 0 15px;
+}
+div#leftcol {
+	width: 39%;
+	margin: 1px 2px 1px 2px;
+	border-right: 1px solid white;
+}
+
+div#rightcol {
+	width: 59%;
+	margin-left: 40%;
+}
+
+div#footer {
+	bottom: 0;
+	z-index: 1;
+	width: 100%;
+	max-height: 50px;
+	background: white;
+	border-top: 2px solid silver;
+}
+
+@media screen {
+	body>div#banner,
+	body>div#leftcol,
+	body>div#footer
+	{
+		position: fixed;
+	}
+}
+
+div#technologies { 
+  min-width:240px;
+  padding: 5px;
+  float: left;
+}
+div#supporters {
+  float: left;
+  min-width:390px;
+  padding: 5px;
+  padding-left: 50px;
+  padding-right: 50px;
+  margin-right: auto;
+}
+div#version,
+div#copyright
+{
+  padding-right: 5px;
+  text-align: right;
+  font-size: smaller;
+}
+
+#hitreport { 
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+.hitnav {
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+.pagenav {
+	padding:3px 0 3px 0;
+}
+
+.backlinks { 
+  float: left;
+  width: 85px;
+  text-align:left;
+}
+.numnav { 
+  margin-left: 85px;
+  margin-right:85px;
+  text-align:center;
+}
+.forwardlinks { 
+  float:right;
+  width: 85px;
+  text-align: right;
+}
+
+ul { 
+  margin: 0 0 0 0;
+  padding-top: 0;
+  padding-bottom: 0.5em;
+}
+
+ul.hierarchy,
+ul.unmarked {
+  list-style-type: none;
+  list-style-position: outside;
+  padding-left: 10px;
+}
+
+ul.hierarchy {
+	margin-left: 5px;
+	padding-bottom: 0;
+}
+
+ul.hierarchy li {
+	clear: both;
+	white-space: nowrap;
+}
+
+div.did,
+div.eadheader {
+	margin-bottom: 0.5em;
+}
+
+div#eadheader,
+div#traceback {
+	display: none;
+}
+
+hr { 
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
