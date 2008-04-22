@@ -1,0 +1,41 @@
+<explain xmlns="http://explain.z3950.org/dtd/2.0/" xmlns:c3="http://www.cheshire3.org/schemas/explain/">
+   <serverInfo protocol="srw/u" version="1.1" transport="http">
+    <host>localhost</host>
+     <port>80</port>
+     <database>services/guardian</database>
+   </serverInfo>
+
+   <indexInfo>
+   	<!--  
+     <set identifier="info:srw/cql-context-set/1/dc-v1.1" name="dc"/>   
+     
+     <index c3:index="headline-idx">
+       <title>Headline</title>
+       <map><name set="dc">title</name></map>
+       <configInfo>
+      	<supports type="relation" c3:index="headline-idx">exact</supports>
+       	<supports type="relation" c3:index="headline-keyword-idx">all</supports>
+       	<supports type="relation" c3:index="headline-keyword-idx">any</supports>
+        <supports type="relation" c3:index="headline-keyword-idx">=</supports> 
+       </configInfo>
+     </index>
+     
+	<index c3:index="byline-idx">
+	 	<title>Byline</title>
+	 	<map><name set="dc">creator</name></map>
+	 	<configInfo>
+	 		<supports type="relation" c3:index="byline-idx">exact</supports>
+	 	</configInfo>
+	 </index>
+	  
+	  <index c3:index="content-idx">
+	 	<title>content</title>
+	 	<map><name set="dc">description</name></map>
+	 </index>
+	 -->
+   </indexInfo>
+   
+   <schemaInfo>
+   </schemaInfo>
+
+</explain>

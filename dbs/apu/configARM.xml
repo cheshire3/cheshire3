@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+
+<subConfigs>
+
+		
+		<subConfig type="vectorStore" id="vectorStore">
+			 <objectType>postgres.PostgresDocumentStore</objectType>
+			 <paths>
+		       <path type="databaseName">db_guardian</path>
+		       <path type="tableName">vectorStore</path>
+		     </paths>	
+		</subConfig> 
+		
+    
+    <subConfig type="transformer" id="armTable-Txr">
+    	<objectType>transformer.LxmlXsltTransformer</objectType>
+    	<paths>
+	    <path type="xsltPath">xsl/armTable.xsl</path>
+	</paths>
+    </subConfig>
+
+
+<subConfig type="transformer" id="Vector1Txr">
+      <objectType>datamining.dmTransformer.ArmVectorTransformer</objectType>
+      <paths>
+        <object type="vectorIndex" ref="sentence-idx"/>
+      </paths>
+      <imports>
+         <module>
+           <name>datamining</name>
+         </module>
+      </imports>
+      <options>
+      <!--
+        <setting type="minGlobalFreq">4</setting>
+        <setting type="maxGlobalOccs">50000</setting>
+      -->
+        <setting type="stopwords">the a an and</setting>
+        <setting type="proxElement">1</setting>
+        <setting type="matchesOnly">1</setting>
+        <setting type="stripMatch">1</setting>
+      </options>
+    </subConfig>
+
+    <subConfig type="documentFactory" id="accDocFac">
+      <objectType>documentFactory.AccumulatingDocumentFactory</objectType>
+      <paths>
+        <object type="accumulatingTransformer" ref="Vector1Txr"/>
+      </paths>
+    </subConfig>
+
+
+    <subConfig type="preParser" id="FimiPreParser">
+      <objectType>datamining.dmPreParser.Fimi1PreParser</objectType>
+      <paths>
+        <path type="filePath">/home/cheshire/cheshire3/code/datamining/apps/fimi</path>
+      </paths>
+      <options>
+        <setting type="absoluteSupport">100</setting>
+        <setting type="singleItems">1</setting>
+        <setting type="confidence">3</setting>
+      </options>
+    </subConfig>
+
+    <subConfig type="preParser" id="MagicFimiPreParser">
+      <objectType>datamining.dmPreParser.MagicFimi1PreParser</objectType>
+      <paths>
+        <path type="filePath">/home/cheshire/cheshire3/code/datamining/apps/fimi</path>
+      </paths>
+      <options>
+        <setting type="singleItems">1</setting>
+        <setting type="support">1</setting>
+        <setting type="minItemsets">2000</setting>
+        <setting type="confidence">10</setting>
+      </options>
+    </subConfig>
+
+
+    <subConfig type="preParser" id="RulePreParser">
+      <objectType>datamining.dmPreParser.MatchToObjectPreParser</objectType>
+      <paths>
+        <object type="recordStore" ref="recordStore"/>
+        <object type="index" ref="sentence-idx"/>
+      </paths>
+      <options>
+        <setting type="calcRankings">1</setting>
+        <setting type="sortBy">ll</setting>
+      </options>
+    </subConfig>
+
+    
+    </subConfigs>
+  </config>
+  

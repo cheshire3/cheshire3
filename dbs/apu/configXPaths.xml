@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+	<subConfigs>
+	
+		<subConfig type="xpathProcessor" id="sentenceXPath">
+			<objectType>xpathProcessor.SimpleXPathProcessor</objectType>
+			<source>
+				<xpath>/article/body/p/s</xpath>
+			</source>
+		</subConfig>
+		
+		<subConfig type="xpathProcessor" id="paragraphXPath">
+			<objectType>xpathProcessor.SimpleXPathProcessor</objectType>
+			<source>
+				<xpath>/article/body/p</xpath>
+			</source>
+		</subConfig>
+		
+		<subConfig type="xpathProcessor" id="articleXPath">
+			<objectType>xpathProcessor.SimpleXPathProcessor</objectType>
+			<source>
+				<xpath>/article/body</xpath>
+			</source>
+		</subConfig>
+<!-- 		
+		<subConfig type="xpathProcessor" id="hiscXPath">
+			<objectType>xpathProcessor.SimpleXPathProcessor</objectType>
+			<source>
+				<xpath>/article/body/headline</xpath>
+				<xpath>/article/body/lead</xpath>
+			</source>
+		</subConfig>
+		
+		<subConfig type="xpathProcessor" id="tiscXPath">
+			<objectType>xpathProcessor.SimpleXPathProcessor</objectType>
+			<source>
+				<xpath>/article/body/p[1]/s[1]</xpath>
+			</source>
+		</subConfig>
+		
+		<subConfig type="xpathProcessor" id="piscXPath">
+			<objectType>xpathProcessor.SimpleXPathProcessor</objectType>
+			<source>
+				<xpath>/article/body/p[preceding-sibling::p][count(s)&gt;1]/s[1]</xpath>
+			</source>
+		</subConfig>
+		
+		<subConfig type="xpathProcessor" id="siscXPath">
+			<objectType>xpathProcessor.SimpleXPathProcessor</objectType>
+			<source>
+				<xpath>/article/body/p[preceding-sibling::p][count(s)=1]/s[1]</xpath>
+			</source>
+		</subConfig>
+		
+		<subConfig type="xpathProcessor" id="niscXPath">
+			<objectType>xpathProcessor.SimpleXPathProcessor</objectType>
+			<source>
+				<xpath>/article/body/p[preceding-sibling::p][count(s)&gt;1]/s[position()&gt;1]</xpath>
+			</source>
+		</subConfig>
+	 -->	
+	</subConfigs>
+</config>
