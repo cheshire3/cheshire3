@@ -681,13 +681,13 @@
 		<!-- TASK idxs -->
 		
 		<!-- keyword -->
-		<subConfig type="index" id="task1-idx">
+		<subConfig type="index" id="taskOne-idx">
 			<objectType>index.ProximityIndex</objectType>
 			<paths>
 				<object type="indexStore" ref="indexStore"/>
 			</paths>
 			<source>
-				<xpath ref="task1XPath"/>
+				<xpath ref="taskOneXPath"/>
 				<process>
 					<object type="extractor" ref="TaggedTermExtractor"/>
 					<object type="tokenizer" ref="SuppliedOffsetTokenizer"/>
@@ -716,13 +716,13 @@
 
 		
 		<!-- ngrams -->
-		<subConfig type="index" id="task1-2gram-idx">
+		<subConfig type="index" id="taskOne-2gram-idx">
 			<objectType>index.SimpleIndex</objectType>
 			<paths>
 				<object type="indexStore" ref="indexStore"/>
 			</paths>
 			<source>
-				<xpath ref="task1XPath"/>
+				<xpath ref="taskOneXPath"/>
 				<process>
 					<object type="extractor" ref="SimpleExtractor"/>
 					<object type="tokenizer" ref="RegexpSubTokenizer"/>
@@ -736,13 +736,13 @@
 			</options>
 		</subConfig>
 		
-		<subConfig type="index" id="task1-3gram-idx">
+		<subConfig type="index" id="taskOne-3gram-idx">
 			<objectType>index.SimpleIndex</objectType>
 			<paths>
 				<object type="indexStore" ref="indexStore"/>
 			</paths>
 			<source>
-				<xpath ref="task1XPath"/>
+				<xpath ref="taskOneXPath"/>
 				<process>
 					<object type="extractor" ref="SimpleExtractor"/>
 					<object type="tokenizer" ref="RegexpSubTokenizer"/>
@@ -759,13 +759,13 @@
 
 		<!--  TASK 2 -->
 		<!-- keyword -->
-		<subConfig type="index" id="task2-idx">
+		<subConfig type="index" id="taskTwo-idx">
 			<objectType>index.ProximityIndex</objectType>
 			<paths>
 				<object type="indexStore" ref="indexStore"/>
 			</paths>
 			<source>
-				<xpath ref="task2XPath"/>
+				<xpath ref="taskTwoXPath"/>
 				<process>
 					<object type="extractor" ref="TaggedTermExtractor"/>
 					<object type="tokenizer" ref="SuppliedOffsetTokenizer"/>
@@ -794,13 +794,13 @@
 
 		
 		<!-- ngrams -->
-		<subConfig type="index" id="task2-2gram-idx">
+		<subConfig type="index" id="taskTwo-2gram-idx">
 			<objectType>index.SimpleIndex</objectType>
 			<paths>
 				<object type="indexStore" ref="indexStore"/>
 			</paths>
 			<source>
-				<xpath ref="task2XPath"/>
+				<xpath ref="taskTwoXPath"/>
 				<process>
 					<object type="extractor" ref="SimpleExtractor"/>
 					<object type="tokenizer" ref="RegexpSubTokenizer"/>
@@ -814,13 +814,13 @@
 			</options>
 		</subConfig>
 		
-		<subConfig type="index" id="task2-3gram-idx">
+		<subConfig type="index" id="taskTwo-3gram-idx">
 			<objectType>index.SimpleIndex</objectType>
 			<paths>
 				<object type="indexStore" ref="indexStore"/>
 			</paths>
 			<source>
-				<xpath ref="task2XPath"/>
+				<xpath ref="taskTwoXPath"/>
 				<process>
 					<object type="extractor" ref="SimpleExtractor"/>
 					<object type="tokenizer" ref="RegexpSubTokenizer"/>
@@ -835,15 +835,15 @@
 		</subConfig>
 		<!-- end TASK 2 -->
 
-		<!--  TASK 3 -->
+		<!--  TASK 4 -->
 		<!-- keyword -->
-		<subConfig type="index" id="task3-idx">
+		<subConfig type="index" id="taskFour-idx">
 			<objectType>index.ProximityIndex</objectType>
 			<paths>
 				<object type="indexStore" ref="indexStore"/>
 			</paths>
 			<source>
-				<xpath ref="task3XPath"/>
+				<xpath ref="taskFourXPath"/>
 				<process>
 					<object type="extractor" ref="TaggedTermExtractor"/>
 					<object type="tokenizer" ref="SuppliedOffsetTokenizer"/>
@@ -872,13 +872,13 @@
 
 		
 		<!-- ngrams -->
-		<subConfig type="index" id="task3-2gram-idx">
+		<subConfig type="index" id="taskFour-2gram-idx">
 			<objectType>index.SimpleIndex</objectType>
 			<paths>
 				<object type="indexStore" ref="indexStore"/>
 			</paths>
 			<source>
-				<xpath ref="task3XPath"/>
+				<xpath ref="taskFourXPath"/>
 				<process>
 					<object type="extractor" ref="SimpleExtractor"/>
 					<object type="tokenizer" ref="RegexpSubTokenizer"/>
@@ -892,13 +892,13 @@
 			</options>
 		</subConfig>
 		
-		<subConfig type="index" id="task3-3gram-idx">
+		<subConfig type="index" id="taskFour-3gram-idx">
 			<objectType>index.SimpleIndex</objectType>
 			<paths>
 				<object type="indexStore" ref="indexStore"/>
 			</paths>
 			<source>
-				<xpath ref="task3XPath"/>
+				<xpath ref="taskFourXPath"/>
 				<process>
 					<object type="extractor" ref="SimpleExtractor"/>
 					<object type="tokenizer" ref="RegexpSubTokenizer"/>
@@ -911,7 +911,164 @@
 				<setting type="freqList">rec occ</setting>
 			</options>
 		</subConfig>
-		<!-- end TASK 3 -->
+		<!-- end TASK 4 -->
+
+		<!--  TASK 5 -->
+		<!-- keyword -->
+		<subConfig type="index" id="taskFive-idx">
+			<objectType>index.ProximityIndex</objectType>
+			<paths>
+				<object type="indexStore" ref="indexStore"/>
+			</paths>
+			<source>
+				<xpath ref="taskFiveXPath"/>
+				<process>
+					<object type="extractor" ref="TaggedTermExtractor"/>
+					<object type="tokenizer" ref="SuppliedOffsetTokenizer"/>
+					<object type="tokenMerger" ref="OffsetProxTokenMerger"/>
+					<object type="normalizer" ref="WordNamedNormalizer"/>
+					<object type="normalizer" ref="CaseNormalizer"/>
+					<object type="normalizer" ref="PossessiveNormalizer"/>
+				</process>
+			</source>
+			<source mode="any|all|=|exact|window">
+				<process>
+					<object type="extractor" ref="SimpleExtractor"/>
+					<object type="tokenizer" ref="RegexpFindOffsetTokenizer"/>
+					<object type="tokenMerger" ref="OffsetProxTokenMerger"/>
+					<object type="normalizer" ref="CaseNormalizer"/>
+					<object type="normalizer" ref="PossessiveNormalizer"/>
+				</process>
+			</source>
+			<options>
+				<setting type="nProxInts">3</setting>
+				<setting type="proxVectors">1</setting>
+				<setting type="vectors">1</setting>
+				<setting type="freqList">rec occ</setting>
+			</options>
+		</subConfig>
+
+		
+		<!-- ngrams -->
+		<subConfig type="index" id="taskFive-2gram-idx">
+			<objectType>index.SimpleIndex</objectType>
+			<paths>
+				<object type="indexStore" ref="indexStore"/>
+			</paths>
+			<source>
+				<xpath ref="taskFiveXPath"/>
+				<process>
+					<object type="extractor" ref="SimpleExtractor"/>
+					<object type="tokenizer" ref="RegexpSubTokenizer"/>
+					<object type="tokenMerger" ref="2GramTokenMerger"/>
+					<object type="normalizer" ref="CaseNormalizer"/>
+				</process>
+			</source>
+			<options>
+				<setting type="termIds">1</setting>
+				<setting type="freqList">rec occ</setting>
+			</options>
+		</subConfig>
+		
+		<subConfig type="index" id="taskFive-3gram-idx">
+			<objectType>index.SimpleIndex</objectType>
+			<paths>
+				<object type="indexStore" ref="indexStore"/>
+			</paths>
+			<source>
+				<xpath ref="taskFiveXPath"/>
+				<process>
+					<object type="extractor" ref="SimpleExtractor"/>
+					<object type="tokenizer" ref="RegexpSubTokenizer"/>
+					<object type="tokenMerger" ref="3GramTokenMerger"/>
+					<object type="normalizer" ref="CaseNormalizer"/>
+				</process>
+			</source>
+			<options>
+				<setting type="termIds">1</setting>
+				<setting type="freqList">rec occ</setting>
+			</options>
+		</subConfig>
+		<!-- end TASK 5 -->
+
+
+		<!--  TASK 6 -->
+		<!-- keyword -->
+		<subConfig type="index" id="taskSix-idx">
+			<objectType>index.ProximityIndex</objectType>
+			<paths>
+				<object type="indexStore" ref="indexStore"/>
+			</paths>
+			<source>
+				<xpath ref="taskSixXPath"/>
+				<process>
+					<object type="extractor" ref="TaggedTermExtractor"/>
+					<object type="tokenizer" ref="SuppliedOffsetTokenizer"/>
+					<object type="tokenMerger" ref="OffsetProxTokenMerger"/>
+					<object type="normalizer" ref="WordNamedNormalizer"/>
+					<object type="normalizer" ref="CaseNormalizer"/>
+					<object type="normalizer" ref="PossessiveNormalizer"/>
+				</process>
+			</source>
+			<source mode="any|all|=|exact|window">
+				<process>
+					<object type="extractor" ref="SimpleExtractor"/>
+					<object type="tokenizer" ref="RegexpFindOffsetTokenizer"/>
+					<object type="tokenMerger" ref="OffsetProxTokenMerger"/>
+					<object type="normalizer" ref="CaseNormalizer"/>
+					<object type="normalizer" ref="PossessiveNormalizer"/>
+				</process>
+			</source>
+			<options>
+				<setting type="nProxInts">3</setting>
+				<setting type="proxVectors">1</setting>
+				<setting type="vectors">1</setting>
+				<setting type="freqList">rec occ</setting>
+			</options>
+		</subConfig>
+
+		
+		<!-- ngrams -->
+		<subConfig type="index" id="taskSix-2gram-idx">
+			<objectType>index.SimpleIndex</objectType>
+			<paths>
+				<object type="indexStore" ref="indexStore"/>
+			</paths>
+			<source>
+				<xpath ref="taskSixXPath"/>
+				<process>
+					<object type="extractor" ref="SimpleExtractor"/>
+					<object type="tokenizer" ref="RegexpSubTokenizer"/>
+					<object type="tokenMerger" ref="2GramTokenMerger"/>
+					<object type="normalizer" ref="CaseNormalizer"/>
+				</process>
+			</source>
+			<options>
+				<setting type="termIds">1</setting>
+				<setting type="freqList">rec occ</setting>
+			</options>
+		</subConfig>
+		
+		<subConfig type="index" id="taskSix-3gram-idx">
+			<objectType>index.SimpleIndex</objectType>
+			<paths>
+				<object type="indexStore" ref="indexStore"/>
+			</paths>
+			<source>
+				<xpath ref="taskSixXPath"/>
+				<process>
+					<object type="extractor" ref="SimpleExtractor"/>
+					<object type="tokenizer" ref="RegexpSubTokenizer"/>
+					<object type="tokenMerger" ref="3GramTokenMerger"/>
+					<object type="normalizer" ref="CaseNormalizer"/>
+				</process>
+			</source>
+			<options>
+				<setting type="termIds">1</setting>
+				<setting type="freqList">rec occ</setting>
+			</options>
+		</subConfig>
+		<!-- end TASK 6 -->
 
 
 

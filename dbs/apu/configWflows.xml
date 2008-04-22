@@ -6,8 +6,8 @@
 			<objectType>workflow.CachingWorkflow</objectType>
 			<workflow>
 				<fork>
-					<split id="task1">
-						<object type="xpathProcessor" ref="task1XPath"/>
+					<split id="taskOne">
+						<object type="xpathProcessor" ref="taskOneXPath"/>
 						<object type="extractor" ref="TaggedTermExtractor"/>
 						<object type="tokenizer" ref="SuppliedOffsetTokenizer"/>
 						<fork>
@@ -15,13 +15,13 @@
 								<object type="normalizer" ref="WordNamedNormalizer"/>
 								<object type="normalizer" ref="CaseNormalizer"/>
 								<object type="tokenMerger" ref="2GramTokenMerger"/>					
-								<object type="index" ref="task1-2gram-idx"/>
+								<object type="index" ref="taskOne-2gram-idx"/>
 							</split>
 							<split>
 								<object type="normalizer" ref="WordNamedNormalizer"/>
 								<object type="normalizer" ref="CaseNormalizer"/>
 								<object type="tokenMerger" ref="3GramTokenMerger"/>
-								<object type="index" ref="task1-3gram-idx"/>
+								<object type="index" ref="taskOne-3gram-idx"/>
 							</split>
 						</fork>
 						<object type="tokenMerger" ref="OffsetProxTokenMerger"/>
@@ -31,7 +31,7 @@
 								<object type="normalizer" ref="WordNamedNormalizer"/>
 								<object type="normalizer" ref="CaseNormalizer"/>
 								<object type="normalizer" ref="PossessiveNormalizer"/>
-								<object type="index" ref="task1-idx"/>
+								<object type="index" ref="taskOne-idx"/>
 							</split>
 							<!--
 							
@@ -65,8 +65,8 @@
 						-->
 						</fork>					
 					</split>	
-					<split id="task2">
-						<object type="xpathProcessor" ref="task2XPath"/>
+					<split id="taskTwo">
+						<object type="xpathProcessor" ref="taskTwoXPath"/>
 						<object type="extractor" ref="TaggedTermExtractor"/>
 						<object type="tokenizer" ref="SuppliedOffsetTokenizer"/>
 						<fork>
@@ -74,13 +74,13 @@
 								<object type="normalizer" ref="WordNamedNormalizer"/>
 								<object type="normalizer" ref="CaseNormalizer"/>
 								<object type="tokenMerger" ref="2GramTokenMerger"/>					
-								<object type="index" ref="task2-2gram-idx"/>
+								<object type="index" ref="taskTwo-2gram-idx"/>
 							</split>
 							<split>
 								<object type="normalizer" ref="WordNamedNormalizer"/>
 								<object type="normalizer" ref="CaseNormalizer"/>
 								<object type="tokenMerger" ref="3GramTokenMerger"/>
-								<object type="index" ref="task2-3gram-idx"/>
+								<object type="index" ref="taskTwo-3gram-idx"/>
 							</split>
 						</fork>
 						<object type="tokenMerger" ref="OffsetProxTokenMerger"/>
@@ -90,7 +90,7 @@
 								<object type="normalizer" ref="WordNamedNormalizer"/>
 								<object type="normalizer" ref="CaseNormalizer"/>
 								<object type="normalizer" ref="PossessiveNormalizer"/>
-								<object type="index" ref="task2-idx"/>
+								<object type="index" ref="taskTwo-idx"/>
 							</split>
 							<!--
 							
@@ -124,8 +124,8 @@
 						-->
 						</fork>					
 					</split>	
-					<split id="task3">
-						<object type="xpathProcessor" ref="task3XPath"/>
+					<split id="taskFour">
+						<object type="xpathProcessor" ref="taskFourXPath"/>
 						<object type="extractor" ref="TaggedTermExtractor"/>
 						<object type="tokenizer" ref="SuppliedOffsetTokenizer"/>
 						<fork>
@@ -133,13 +133,13 @@
 								<object type="normalizer" ref="WordNamedNormalizer"/>
 								<object type="normalizer" ref="CaseNormalizer"/>
 								<object type="tokenMerger" ref="2GramTokenMerger"/>					
-								<object type="index" ref="task3-2gram-idx"/>
+								<object type="index" ref="taskFour-2gram-idx"/>
 							</split>
 							<split>
 								<object type="normalizer" ref="WordNamedNormalizer"/>
 								<object type="normalizer" ref="CaseNormalizer"/>
 								<object type="tokenMerger" ref="3GramTokenMerger"/>
-								<object type="index" ref="task3-3gram-idx"/>
+								<object type="index" ref="taskFour-3gram-idx"/>
 							</split>
 						</fork>
 						<object type="tokenMerger" ref="OffsetProxTokenMerger"/>
@@ -149,7 +149,125 @@
 								<object type="normalizer" ref="WordNamedNormalizer"/>
 								<object type="normalizer" ref="CaseNormalizer"/>
 								<object type="normalizer" ref="PossessiveNormalizer"/>
-								<object type="index" ref="task3-idx"/>
+								<object type="index" ref="taskFour-idx"/>
+							</split>
+							<!--
+							
+							<split>
+								<object type="normalizer" ref="StemNamedNormalizer"/>
+								<object type="normalizer" ref="CaseNormalizer"/>
+								<object type="index" ref="TISC-idx-stem"/>
+							</split>
+							<split>
+								<object type="normalizer" ref="PosNamedNormalizer"/>
+								<object type="normalizer" ref="CaseNormalizer"/>
+								<object type="index" ref="TISC-idx-pos"/>
+							</split>
+							<split>
+								<object type="normalizer" ref="PosNamedNormalizer"/>
+								<object type="normalizer" ref="CaseNormalizer"/>
+								<object type="tokenizer" ref="PlusTokenizer"/>
+								<object type="tokenMerger" ref="ProxTokenMerger"/>
+								<object type="index" ref="TISC-idx-pos-single"/>
+							</split>
+							<split>
+								<object type="normalizer" ref="WordPosNamedNormalizer"/>
+								<object type="normalizer" ref="CaseNormalizer"/>
+								<object type="index" ref="TISC-idx-wordpos"/>
+							</split>
+							<split>
+								<object type="normalizer" ref="StemPosNamedNormalizer"/>
+								<object type="normalizer" ref="CaseNormalizer"/>
+								<object type="index" ref="TISC-idx-stempos"/>
+							</split>
+						-->
+						</fork>					
+					</split>	
+					<split id="taskFive">
+						<object type="xpathProcessor" ref="taskFiveXPath"/>
+						<object type="extractor" ref="TaggedTermExtractor"/>
+						<object type="tokenizer" ref="SuppliedOffsetTokenizer"/>
+						<fork>
+							<split>
+								<object type="normalizer" ref="WordNamedNormalizer"/>
+								<object type="normalizer" ref="CaseNormalizer"/>
+								<object type="tokenMerger" ref="2GramTokenMerger"/>					
+								<object type="index" ref="taskFive-2gram-idx"/>
+							</split>
+							<split>
+								<object type="normalizer" ref="WordNamedNormalizer"/>
+								<object type="normalizer" ref="CaseNormalizer"/>
+								<object type="tokenMerger" ref="3GramTokenMerger"/>
+								<object type="index" ref="taskFive-3gram-idx"/>
+							</split>
+						</fork>
+						<object type="tokenMerger" ref="OffsetProxTokenMerger"/>
+						<fork>
+							<split>
+								
+								<object type="normalizer" ref="WordNamedNormalizer"/>
+								<object type="normalizer" ref="CaseNormalizer"/>
+								<object type="normalizer" ref="PossessiveNormalizer"/>
+								<object type="index" ref="taskFive-idx"/>
+							</split>
+							<!--
+							
+							<split>
+								<object type="normalizer" ref="StemNamedNormalizer"/>
+								<object type="normalizer" ref="CaseNormalizer"/>
+								<object type="index" ref="TISC-idx-stem"/>
+							</split>
+							<split>
+								<object type="normalizer" ref="PosNamedNormalizer"/>
+								<object type="normalizer" ref="CaseNormalizer"/>
+								<object type="index" ref="TISC-idx-pos"/>
+							</split>
+							<split>
+								<object type="normalizer" ref="PosNamedNormalizer"/>
+								<object type="normalizer" ref="CaseNormalizer"/>
+								<object type="tokenizer" ref="PlusTokenizer"/>
+								<object type="tokenMerger" ref="ProxTokenMerger"/>
+								<object type="index" ref="TISC-idx-pos-single"/>
+							</split>
+							<split>
+								<object type="normalizer" ref="WordPosNamedNormalizer"/>
+								<object type="normalizer" ref="CaseNormalizer"/>
+								<object type="index" ref="TISC-idx-wordpos"/>
+							</split>
+							<split>
+								<object type="normalizer" ref="StemPosNamedNormalizer"/>
+								<object type="normalizer" ref="CaseNormalizer"/>
+								<object type="index" ref="TISC-idx-stempos"/>
+							</split>
+						-->
+						</fork>					
+					</split>	
+					<split id="taskSix">
+						<object type="xpathProcessor" ref="taskSixXPath"/>
+						<object type="extractor" ref="TaggedTermExtractor"/>
+						<object type="tokenizer" ref="SuppliedOffsetTokenizer"/>
+						<fork>
+							<split>
+								<object type="normalizer" ref="WordNamedNormalizer"/>
+								<object type="normalizer" ref="CaseNormalizer"/>
+								<object type="tokenMerger" ref="2GramTokenMerger"/>					
+								<object type="index" ref="taskSix-2gram-idx"/>
+							</split>
+							<split>
+								<object type="normalizer" ref="WordNamedNormalizer"/>
+								<object type="normalizer" ref="CaseNormalizer"/>
+								<object type="tokenMerger" ref="3GramTokenMerger"/>
+								<object type="index" ref="taskSix-3gram-idx"/>
+							</split>
+						</fork>
+						<object type="tokenMerger" ref="OffsetProxTokenMerger"/>
+						<fork>
+							<split>
+								
+								<object type="normalizer" ref="WordNamedNormalizer"/>
+								<object type="normalizer" ref="CaseNormalizer"/>
+								<object type="normalizer" ref="PossessiveNormalizer"/>
+								<object type="index" ref="taskSix-idx"/>
 							</split>
 							<!--
 							
