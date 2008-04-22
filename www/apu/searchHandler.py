@@ -16,7 +16,7 @@ sys.path = [os.path.join(cheshirePath, 'cheshire3', 'code')]
 sys.path.extend(osp)
 
 # list of subcorpora indexes
-subcorpora = []
+subcorpora = ['taskOne','taskTwo','taskFour','taskFive','taskSix']
 
 
 
