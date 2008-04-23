@@ -6,6 +6,7 @@ from document import StringDocument
 from c3errors import ConfigFileException
 from lxml import etree
 from copy import deepcopy
+from xml.sax.saxutils import escape
 
 from Ft.Xml.Xslt.Processor import Processor
 from Ft.Xml import InputSource
@@ -394,6 +395,29 @@ class CorpusPrepTransformer(Transformer):
         self.rfot = self.get_path(session, 'tokenizer')
         self.regexp = re.compile('[\s]+')
             
+    
+    def get_toks(self, nwtxt):
+        alltoks = []
+        cnw = []
+        space = 1
+        for c in nwtxt:
+            csp = c.isspace()
+            if (space and csp) or (not space and not csp):
+                cnw.append(c)
+            else:
+                if cnw:
+                    el= etree.Element('n')
+                    el.text = escape(''.join(cnw))
+                    alltoks.append(el)
+                cnw = [c]
+                space = csp
+        if cnw:
+            el= etree.Element('n')
+            el.text = escape(''.join(cnw))
+            alltoks.append(el)
+        return alltoks
+            
+            
     def process_record(self, session, rec):
         tree = rec.get_dom(session)
         #put in test for sentence and tokenize if necessary
@@ -466,8 +490,29 @@ class CorpusPrepTransformer(Transformer):
                     #s.remove(c)
             
             s.append(txt)
-            s.append(toks)
-                    
+            
+            newtoks = etree.Element('toks')
+            alltoks = []
+            #alltoks = etree.Element('toks')
+            start = 0
+            for (o, off) in enumerate(oBase):
+                if off > start:
+                    nwtxt = text[start:off]
+                    alltoks.extend(self.get_toks(nwtxt))
+                    tlen = len(tBase[o])
+                    start = off + tlen
+                else:
+                    tlen = len(tBase[o])
+                    start += tlen     
+                alltoks.append(toks[o])
+    
+            if start < len(text):
+                # get the last
+                nwtxt = text[start:]
+                alltoks.extend(self.get_toks(nwtxt))
+            for e in alltoks:
+                newtoks.append(e)
+            s.append(newtoks)      
         
         return StringDocument(etree.tostring(tree))
           
