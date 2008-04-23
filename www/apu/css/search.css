@@ -152,9 +152,9 @@ font-size: 10pt;
 						}
 					.articleDiv h2 { font-size: 14pt; }
 					.bold { font-weight: bold; }
-					.source { border: 1px solid black; font-size: 7pt; font-family: Arial;}
+					.source { border-bottom: 1px solid black; font-size: 9pt; font-family: Arial;}
 
-	.comments { margin-top: 20px; border-top: 1px solid #707070; margin-bottom: 10px; }
+	.comments { margin-top: 20px; border-top: 0px solid #707070; margin-bottom: 10px; }
 	
 
 /* end article.xsl css */

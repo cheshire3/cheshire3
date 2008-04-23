@@ -93,7 +93,7 @@ class SearchHandler:
         terms = form.get('terms', None)        
         id = form.get('id', None)    
         span = int(form.get('span', 0))
-        wordWindow = int(form.get('windowsize', 5))
+        wordWindow = int(form.get('windowsize', 10))
         gid = form.get('gid', None)
         if (id != None):
             # remove the 'kwic_grid_' that comes from LiveGrid id 
