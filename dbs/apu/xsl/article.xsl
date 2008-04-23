@@ -14,7 +14,9 @@
 
 	<xsl:template match="article">
 		<div class="articleDiv">
-			<div class="source"><xsl:value-of select="concat(@id, ' ', head/source, ', p. ', head/source/@page, ' - ', head/date, ' ', head/section)"/></div>
+			<div class="source">
+				<xsl:apply-templates select="head"/>
+			</div>
 			<xsl:apply-templates select="body"/>
 			<xsl:if test="comments">
 				<div class="comments">
@@ -27,6 +29,17 @@
 	</xsl:template>
 
 
+	<xsl:template match="head">
+		<xsl:variable name="sex">
+			<xsl:choose>
+				<xsl:when test="starts-with(sex,'M')">Male</xsl:when>
+				<xsl:when test="starts-with(sex,'F')">Female</xsl:when>
+				<xsl:when test="starts-with(sex,'U')">Unknown</xsl:when>
+				<xsl:otherwise><xsl:value-of select="sex"/></xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+		<xsl:value-of select="concat('Task ', task, ' ', $sex, ' ', studentID)"/>
+	</xsl:template>
 
 
 	<xsl:template match="p">
