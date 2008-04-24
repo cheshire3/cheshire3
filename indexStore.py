@@ -1088,14 +1088,9 @@ class BdbIndexStore(IndexStore):
         self._closeTermFreq(session, index, 'occ')
         for dbname in self._listExistingFiles(session, index):
             cxn = bdb.db.DB()
-            #cxn.set_flags(bdb.db.DB_RECNUM)
-            if session.environment == "apache":
-                cxn.open(dbname, flags=bdb.db.DB_NOMMAP)
-            else:
-                cxn.open(dbname)
-            
-            cxn.truncate()
-            cxn.close()
+            cxn.remove(dbname)
+
+        self.create_index(session, index)
         return None
 
 
