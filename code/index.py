@@ -342,7 +342,6 @@ class SimpleIndex(Index):
                 firstMask = self._locate_firstMask(k)
                 while (firstMask > 0) and (k[firstMask-1] == '\\'):
                     firstMask = self._locate_firstMask(k, firstMask+1)
-                # TODO: slow regex e.g. if first char is *
                 if (firstMask > 0):
                     startK = k[:firstMask]
                     try: nextK = startK[:-1] + chr(ord(startK[-1])+1)
