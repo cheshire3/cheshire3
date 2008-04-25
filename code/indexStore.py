@@ -486,7 +486,7 @@ class BdbIndexStore(IndexStore):
             if not tidcxn:
                 # okay, no termid hash. hope for best with final set
                 # of terms from regular index
-                (term, value) = cursor.last(doff=0, dlen=3*self.longStructSize)
+                (term, value) = cursor.last(doff=0, dlen=3*index.longStructSize)
                 (last, x,y) = index.deserialize_term(session, value)                    
             else:
                 tidcursor = tidcxn.cursor()
