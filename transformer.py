@@ -517,8 +517,7 @@ class CorpusPrepTransformer(Transformer):
                 toks.extend(self.get_toks(nwtxt))
                 s.text = ''
             s.append(txt)
-            s.append(toks)
-            print etree.tostring(toks)     
+            s.append(toks)  
         
         return StringDocument(etree.tostring(tree))
           
