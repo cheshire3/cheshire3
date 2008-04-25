@@ -426,35 +426,33 @@ class CorpusPrepTransformer(Transformer):
         for e in elems :
             e.set('eid', str(eid))
             eid += 1
-        for s in tree.xpath('//s') :
+        for s in tree.xpath('//s') :   
             text = re.sub(self.regexp, ' ', flattenTexts(s)).strip()
             wordCount = 0
+            start = 0
+            nList = []
             tBase, oBase = self.rfot.process_string(self.session, text)
             txt = etree.Element('txt')
             txt.text = text
             #create toks and delete the children of s
             toks = etree.Element('toks')
             if s.text:
-                #toks.text = s.text
                 t, o = self.rfot.process_string(self.session, s.text)
                 for i in range(0, len(t)):
                     w = etree.Element('w')
                     w.text = t[i]
                     w.set('o', str(oBase[wordCount]))
+                    if oBase[wordCount] > start:
+                        nwtxt = text[start:oBase[wordCount]]
+                        nList = self.get_toks(nwtxt)
+                        tlen = len(tBase[wordCount])
+                        start = oBase[wordCount] + tlen
+                    else:
+                        tlen = len(tBase[wordCount])
+                        start += tlen             
+                    toks.extend(nList)
                     toks.append(w)
                     wordCount += 1
-                s.text = ''
-            if s.tail:
-                #toks.tail = s.tail 
-                t, o = self.rfot.process_string(self.session, s.tail)
-                for i in range(0, len(t)):
-                    w = etree.Element('w')
-                    w.text = t[i]
-                    #w.set('o', str(o[i]))
-                    w.set('o', str(oBase[wordCount]))
-                    toks.append(w)
-                    wordCount += 1
-                s.tail = '' 
             
             try:
                 walker = s.getiterator()
@@ -470,6 +468,12 @@ class CorpusPrepTransformer(Transformer):
                             w = etree.Element('w')
                             w.text = t[i]
                             w.set('o', str(oBase[wordCount]))
+                            if oBase[wordCount] > start:
+                                nwtxt = text[start:oBase[wordCount]]
+                                nList = self.get_toks(nwtxt)
+                                tlen = len(tBase[wordCount])
+                                start = oBase[wordCount] + tlen
+                            c.extend(nList)
                             c.append(w) 
                             wordCount += 1
                         toks.append(c)
@@ -482,67 +486,39 @@ class CorpusPrepTransformer(Transformer):
                             w = etree.Element('w')
                             w.text = t[i]
                             w.set('o', str(oBase[wordCount]))
+                            if oBase[wordCount] > start:
+                                nwtxt = text[start:oBase[wordCount]]
+                                nList = self.get_toks(nwtxt)
+                                tlen = len(tBase[wordCount])
+                                start = oBase[wordCount] + tlen
+                            toks.extend(nList)
                             toks.append(w) 
                             wordCount += 1
                         c.tail = ''
                     #s.remove(c)
-            
-            s.append(txt)
-            print etree.tostring(toks)
-            
-            newtoks = etree.Element('toks')
-            alltoks = []
-            #alltoks = etree.Element('toks')
-            start = 0
-            i=0
-            j=0
-            while i < len(oBase):
-                print start
-                print oBase[i]
-                if j < len(toks) and toks[j].tag != 'w':
-                    alltoks.append(toks[j])
-                    print toks[j]
-                    j += 1
-                else:
-                    if oBase[i] > start:
-                        nwtxt = text[start:oBase[i]]
-                        print nwtxt
-                        alltoks.extend(self.get_toks(nwtxt))
-                        tlen = len(tBase[i])
-                        start = oBase[i] + tlen                       
-                    else:
-                        tlen = len(tBase[i])
-                        start += tlen
-                    if j<len(toks):                        
-                        alltoks.append(toks[j])  
-                        print toks[j]
-                    i += 1
-                    j += 1
-#            for (i, off) in enumerate(oBase):
-#                print start
-#                print off
-#                if toks[i].tag != 'w':
-#                    print toks[i].tag
-#                    alltoks.append(toks[i])
-#                    continue
-#                elif off > start:
-#                    nwtxt = text[start:off]
-#                    print nwtxt
-#                    alltoks.extend(self.get_toks(nwtxt))
-#                    tlen = len(tBase[i])
-#                    start = off + tlen
-#                else:
-#                    tlen = len(tBase[i])
-#                    start += tlen     
-#                alltoks.append(toks[i])
-    
+            if s.tail:
+                t, o = self.rfot.process_string(self.session, s.tail)
+                for i in range(0, len(t)):
+                    w = etree.Element('w')
+                    w.text = t[i]
+                    w.set('o', str(oBase[wordCount]))
+                    if oBase[wordCount] > start:
+                        nwtxt = text[start:oBase[wordCount]]
+                        nList = self.get_toks(nwtxt)
+                        tlen = len(tBase[wordCount])
+                        start = oBase[wordCount] + tlen
+                    toks.extend(nList)
+                    toks.append(w)
+                    wordCount += 1
+                s.tail = '' 
             if start < len(text):
-                # get the last
+                    # get the last
                 nwtxt = text[start:]
-                alltoks.extend(self.get_toks(nwtxt))
-            for e in alltoks:
-                newtoks.append(e)
-            s.append(newtoks)      
+                toks.extend(self.get_toks(nwtxt))
+                s.text = ''
+            s.append(txt)
+            s.append(toks)
+            print etree.tostring(toks)     
         
         return StringDocument(etree.tostring(tree))
           
