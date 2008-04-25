@@ -464,7 +464,6 @@ class CorpusPrepTransformer(Transformer):
             
             for c in walker:      
                 if c.tag != 's':
-                    #toks.append(deepcopy(c))
                     if c.text:
                         t, o = self.rfot.process_string(self.session, c.text)
                         for i in range(0, len(t)):
@@ -475,7 +474,6 @@ class CorpusPrepTransformer(Transformer):
                             wordCount += 1
                         toks.append(c)
                         c.text = ''
-                        
                     else:
                         toks.append(c)
                     if c.tail:
@@ -490,21 +488,53 @@ class CorpusPrepTransformer(Transformer):
                     #s.remove(c)
             
             s.append(txt)
+            print etree.tostring(toks)
             
             newtoks = etree.Element('toks')
             alltoks = []
             #alltoks = etree.Element('toks')
             start = 0
-            for (o, off) in enumerate(oBase):
-                if off > start:
-                    nwtxt = text[start:off]
-                    alltoks.extend(self.get_toks(nwtxt))
-                    tlen = len(tBase[o])
-                    start = off + tlen
+            i=0
+            j=0
+            while i < len(oBase):
+                print start
+                print oBase[i]
+                if j < len(toks) and toks[j].tag != 'w':
+                    alltoks.append(toks[j])
+                    print toks[j]
+                    j += 1
                 else:
-                    tlen = len(tBase[o])
-                    start += tlen     
-                alltoks.append(toks[o])
+                    if oBase[i] > start:
+                        nwtxt = text[start:oBase[i]]
+                        print nwtxt
+                        alltoks.extend(self.get_toks(nwtxt))
+                        tlen = len(tBase[i])
+                        start = oBase[i] + tlen                       
+                    else:
+                        tlen = len(tBase[i])
+                        start += tlen
+                    if j<len(toks):                        
+                        alltoks.append(toks[j])  
+                        print toks[j]
+                    i += 1
+                    j += 1
+#            for (i, off) in enumerate(oBase):
+#                print start
+#                print off
+#                if toks[i].tag != 'w':
+#                    print toks[i].tag
+#                    alltoks.append(toks[i])
+#                    continue
+#                elif off > start:
+#                    nwtxt = text[start:off]
+#                    print nwtxt
+#                    alltoks.extend(self.get_toks(nwtxt))
+#                    tlen = len(tBase[i])
+#                    start = off + tlen
+#                else:
+#                    tlen = len(tBase[i])
+#                    start += tlen     
+#                alltoks.append(toks[i])
     
             if start < len(text):
                 # get the last
