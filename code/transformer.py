@@ -484,8 +484,12 @@ class CorpusPrepTransformer(Transformer):
                             wordOffset +=1
                         toks.append(c)
                         c.text = ''
-                    else:       
-                        c.set('offset', str(oBase[wordCount] + totalOffset))
+                    else:     
+                        try:  
+                            c.set('offset', str(oBase[wordCount] + totalOffset))
+                           
+                        except:
+                            pass
                         c.set('wordOffset', str(wordOffset))
                         toks.append(c)
                     if c.tail:
