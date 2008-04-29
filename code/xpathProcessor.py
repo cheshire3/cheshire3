@@ -1,6 +1,6 @@
 
 from baseObjects import XPathProcessor
-from record import LxmlRecord
+from record import LxmlRecord, SaxRecord
 from utils import elementType, getFirstData, verifyXPaths
 import time
 
@@ -65,8 +65,14 @@ class SpanXPath(SimpleXPathProcessor):
     #                   Defaults to 0 (eg start at beginning)
     #   window="N"   -- This is the number of elements in a single comp.
     #                   Defaults to 1  (eg adjacent)
-
-    def process_record(self, session, record):
+    
+    def process_record(self, session, rec):
+        if isinstance(rec, LxmlRecord):
+            sax = rec.get_sax(session)
+            record = SaxRecord(sax)
+            record.elementHash = eval(sax[-1][2:])
+        else:
+            record = rec
         raw = record.process_xpath(session, self.sources[0][0]['xpath'])
         initialSlide = int(self.sources[0][0].get('slide', 0))
         endTag = self.sources[0][1]['xpath'][-1][0][1]
@@ -102,9 +108,11 @@ class SpanXPath(SimpleXPathProcessor):
                         stuff = eval(line[2:end+1])
                         ns, tag = stuff[0], stuff[1]
                         openTags.append((ns, tag))
+                    #*** added by Cat Rob needs to check - no openning tags showing in returned fragment
+                        comp.append(line)
                     else:
                         openTags.append(record._convert_elem(line)[0])
-                        comp.append(line)
+                        comp.append(line)                       
                 elif (line[0] in ['2', '5']):
                     # check we're open
                     if (line[0] == '2'):
