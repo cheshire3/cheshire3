@@ -485,6 +485,8 @@ class CorpusPrepTransformer(Transformer):
                         toks.append(c)
                         c.text = ''
                     else:       
+                        c.set('offset', str(oBase[wordCount] + totalOffset))
+                        c.set('wordOffset', str(wordOffset))
                         toks.append(c)
                     if c.tail:
                         t, o = self.rfot.process_string(self.session, c.tail)
