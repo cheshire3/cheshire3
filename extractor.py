@@ -274,8 +274,11 @@ class TaggedTermExtractor(SimpleExtractor):
     def process_eventList(self, session, data):
         # Step through a SAX event list and extract
         txt = []
+        wordOffs = []
         tagRe = re.compile('([\w]+)')
-        attribRe = re.compile('(\{[[\S]+\s[\S]+:\s[\S]+]*\})')
+        attribRe = re.compile('({[^}]+})')
+#        attribRe = re.compile('(\{[[\S]+\s[\S]+:\s[\S]+]*\})')
+#        attribRe = re.compile('(\{[\S]+\s[\S]+:\s[\S]+[\s]?[\S]+\s[\S]+:\s[\S]+\})')
 #        lastOffset = 10000000000
 #        totalOffset = 0
 #        thisOffset = 0
@@ -283,6 +286,7 @@ class TaggedTermExtractor(SimpleExtractor):
         previousOffset = -1
         firstOffset = -1
         spanStartOffset = 0
+        wordCount = 0
         elem = None     
         previousText = ''
         bitsText = None  
@@ -294,6 +298,7 @@ class TaggedTermExtractor(SimpleExtractor):
                 dictStr =  str(a.group())
                 d = eval(dictStr)
                 spanStartOffset = int(d[(None, 'offset')])   
+                wordCount = int(d[(None, 'wordOffset')])
 #                print 'qs offset'
 #                print spanStartOffset      
             elif e[0] == "4" :
@@ -349,6 +354,8 @@ class TaggedTermExtractor(SimpleExtractor):
 #                                print o
                             previousOffset = currentOffset     
                         bitsOffset = o
+                        bitsWord = wordCount
+                        wordCount += 1
                         punctCount = 0
                         for j in range(i+1, len(data)):
                             if data[j][0] == "4":
@@ -362,15 +369,16 @@ class TaggedTermExtractor(SimpleExtractor):
             if bitsText and bitsOffset:
                 previousText = bitsText
                 txt.append("%s/%s" % (bitsText, bitsOffset))
+                wordOffs.append(bitsWord)
 
         txt = ' '.join(txt)
+        
         if self.strip:
             txt = self.spaceRe.sub(' ', txt)
 
         if self.get_setting(session, 'prox', 0):
             lno = 0
-        #print txt
-        return {txt:{'text' : txt, 'occurences' : 1, 'proxLoc' : [lno]}}
+        return {txt:{'text' : txt, 'occurences' : 1, 'proxLoc' : [lno], 'wordOffs' : wordOffs}}
 
 
 
