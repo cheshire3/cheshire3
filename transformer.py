@@ -427,6 +427,7 @@ class CorpusPrepTransformer(Transformer):
             e.set('eid', str(eid))
             eid += 1
         totalOffset = 0
+        wordOffset = 0
         for s in tree.xpath('//s') :   
             text = re.sub(self.regexp, ' ', flattenTexts(s)).strip()            
             wordCount = 0
@@ -454,7 +455,7 @@ class CorpusPrepTransformer(Transformer):
                     toks.extend(nList)
                     toks.append(w)
                     wordCount += 1
-            
+                    wordOffset +=1
             try:
                 walker = s.getiterator()
             except AttributeError:
@@ -471,6 +472,7 @@ class CorpusPrepTransformer(Transformer):
                             w.set('o', str(oBase[wordCount]))
                             if not c.get('offset'):
                                 c.set('offset', str(oBase[wordCount] + totalOffset))
+                                c.set('wordOffset', str(wordOffset))
                             if oBase[wordCount] > start:
                                 nwtxt = text[start:oBase[wordCount]]
                                 nList = self.get_toks(nwtxt)
@@ -479,6 +481,7 @@ class CorpusPrepTransformer(Transformer):
                             c.extend(nList)
                             c.append(w) 
                             wordCount += 1
+                            wordOffset +=1
                         toks.append(c)
                         c.text = ''
                     else:       
@@ -491,6 +494,7 @@ class CorpusPrepTransformer(Transformer):
                             w.set('o', str(oBase[wordCount]))
                             if not c.get('offset'):
                                 c.set('offset', str(oBase[wordCount] + totalOffset))
+                                c.set('wordOffset', str(wordOffset))
                             if oBase[wordCount] > start:
                                 nwtxt = text[start:oBase[wordCount]]
                                 nList = self.get_toks(nwtxt)
@@ -499,6 +503,7 @@ class CorpusPrepTransformer(Transformer):
                             toks.extend(nList)
                             toks.append(w) 
                             wordCount += 1
+                            wordOffset +=1
                         c.tail = ''
                     #s.remove(c)
             if s.tail:
@@ -507,6 +512,7 @@ class CorpusPrepTransformer(Transformer):
                     w = etree.Element('w')
                     w.text = t[i]
                     w.set('o', str(oBase[wordCount]))
+                    
                     if oBase[wordCount] > start:
                         nwtxt = text[start:oBase[wordCount]]
                         nList = self.get_toks(nwtxt)
@@ -515,6 +521,7 @@ class CorpusPrepTransformer(Transformer):
                     toks.extend(nList)
                     toks.append(w)
                     wordCount += 1
+                    wordOffset +=1
                 s.tail = '' 
             if start < len(text):
                     # get the last
@@ -524,6 +531,7 @@ class CorpusPrepTransformer(Transformer):
             totalOffset += len(text) + 1
             s.append(txt)
             s.append(toks)  
+            
         
         return StringDocument(etree.tostring(tree))
           
