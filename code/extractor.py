@@ -9,7 +9,8 @@ class SimpleExtractor(Extractor):
                          'prox' : {'docs' : ''},
                          'parent' : {"docs" : "Should the parent element's identifier be used instead of the current element."},
                          'reversable' : {"docs" : "Use a hopefully reversable identifier even when the record is a DOM tree. 1 = Yes (expensive), 0 = No (default)", 'type': int, 'options' : '0|1'},
-                         'stripWhitespace' : {'docs' : 'Should the extracter strip leading/trailing whitespace from extracted text. 1 = Yes, 0 = No (default)', 'type' : int, 'options' : '0|1'}
+                         'stripWhitespace' : {'docs' : 'Should the extracter strip leading/trailing whitespace from extracted text. 1 = Yes, 0 = No (default)', 'type' : int, 'options' : '0|1'},
+                         
                          }
 
     def __init__(self, session, config, parent):
@@ -237,7 +238,7 @@ class TeiExtractor(SimpleExtractor):
 
 class TaggedTermExtractor(SimpleExtractor):
     """Each term has been tagged in XML already, extract information."""
-
+    
 
     def _getProxLocNode(self, session, node):
         try:
@@ -267,6 +268,110 @@ class TaggedTermExtractor(SimpleExtractor):
             bits['offset'] = o
             texts.append("%(text)s/%(pos)s/%(stem)s/%(offset)s" % bits)
         return ' '.join(texts)
+
+        
+
+    def process_eventList(self, session, data):
+        # Step through a SAX event list and extract
+        txt = []
+        tagRe = re.compile('([\w]+)')
+        attribRe = re.compile('(\{[[\S]+\s[\S]+:\s[\S]+]*\})')
+#        lastOffset = 10000000000
+#        totalOffset = 0
+#        thisOffset = 0
+        currentOffset = 0
+        previousOffset = -1
+        firstOffset = -1
+        spanStartOffset = 0
+        elem = None     
+        previousText = ''
+        bitsText = None  
+        for i, e in enumerate(data): 
+            bitsText = ''
+            bitsOffset = None              
+            if i == 0:
+                a = re.search(attribRe, data[0])
+                dictStr =  str(a.group())
+                d = eval(dictStr)
+                spanStartOffset = int(d[(None, 'offset')])   
+#                print 'qs offset'
+#                print spanStartOffset      
+            elif e[0] == "4" :
+                m = re.search(tagRe, e.split()[3])
+                if m.group() == 'w':
+                    #get the text node for the w element
+#                    print '++++++++++++++++++++'
+                    el = data[i+1]
+                    if el[0] == "3":
+                        bitsText = el[2:] 
+#                        print 'bitsText'
+#                        print bitsText                              
+                        if previousOffset == -1:
+ #                           print 'no previous'
+                            a = re.search(attribRe, e)
+                            dictStr =  str(a.group())
+                            d = eval(dictStr)
+                            o = spanStartOffset
+                            previousOffset = int(d[(None, 'o')])
+#                            print 'previousOffset'
+#                            print previousOffset
+                            firstOffset = int(d[(None, 'o')])
+#                            print 'firstOffset'
+#                            print firstOffset
+                        else:
+                            a = re.search(attribRe, e)
+                            dictStr =  str(a.group())
+                            d = eval(dictStr)
+                            currentOffset = int(d[(None, 'o')])
+#                            print 'currentOffset'
+#                            print currentOffset
+#                            print 'previousOffset'
+#                            print previousOffset
+                            if currentOffset < previousOffset: 
+#                                print 'adjusting offset'
+#                                print 'old span start'
+#                                print spanStartOffset
+#                                print previousText
+#                                print 'inter'
+#                                print spanStartOffset + (previousOffset + len(previousText) + punctCount)-spanStartOffset
+                                spanStartOffset = spanStartOffset + (((previousOffset + len(previousText) + punctCount)) - spanStartOffset) + (spanStartOffset - firstOffset)
+#                                print '-----'
+#                                print 'new span start'
+#                                print spanStartOffset
+                                o = spanStartOffset + currentOffset 
+#                                print 'o'
+#                                print o
+                                firstOffset = 0
+                            else:
+                                o = spanStartOffset + (currentOffset - firstOffset)
+                                #o = spanStartOffset + currentOffset
+#                                print 'o'
+#                                print o
+                            previousOffset = currentOffset     
+                        bitsOffset = o
+                        punctCount = 0
+                        for j in range(i+1, len(data)):
+                            if data[j][0] == "4":
+                                m = re.search(tagRe, data[j].split()[3])
+                                if m.group() == 'w' or m.group() == 's':
+                                    break
+                                if m.group() == 'n':                                 
+                                    punctCount += len(data[j+1][2:])
+                        
+
+            if bitsText and bitsOffset:
+                previousText = bitsText
+                txt.append("%s/%s" % (bitsText, bitsOffset))
+
+        txt = ' '.join(txt)
+        if self.strip:
+            txt = self.spaceRe.sub(' ', txt)
+
+        if self.get_setting(session, 'prox', 0):
+            lno = 0
+        #print txt
+        return {txt:{'text' : txt, 'occurences' : 1, 'proxLoc' : [lno]}}
+
 
 
 
