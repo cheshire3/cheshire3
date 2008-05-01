@@ -26,6 +26,7 @@ asn1.register_oid(Z3950_QUERY_CQL, asn1.GeneralString)
 
 from baseObjects import Session, Database, Transformer, Workflow
 from server import SimpleServer
+import internal
 
 session = Session()
 session.environment = "apache"
@@ -139,7 +140,7 @@ class ZHandler:
         resp.exceptionalRecordSize = 0x10000
         resp.implementationId = 'Cheshire3'
         resp.implementationName = 'Cheshire3 Z39.50 Server'
-        resp.implementationVersion = '.'.join([str(x) for x ininternal.cheshireVersion])
+        resp.implementationVersion = '.'.join([str(x) for x in internal.cheshireVersion])
         resp.result = 1
         pdu = self.encode(('initResponse', resp))
         if (name <> None):
@@ -265,6 +266,7 @@ class ZHandler:
             dbname = dbs[0]
             cfg = self.session.configs.get(dbname, None)
             db = cfg.parent
+            session.database = db.id
             where = data.termListAndStartPoint
             # Make it look like part of an RPN query...
             w = ('op', ('attrTerm', where))
