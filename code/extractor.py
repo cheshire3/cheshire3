@@ -277,11 +277,6 @@ class TaggedTermExtractor(SimpleExtractor):
         wordOffs = []
         tagRe = re.compile('([\w]+)')
         attribRe = re.compile('({[^}]+})')
-#        attribRe = re.compile('(\{[[\S]+\s[\S]+:\s[\S]+]*\})')
-#        attribRe = re.compile('(\{[\S]+\s[\S]+:\s[\S]+[\s]?[\S]+\s[\S]+:\s[\S]+\})')
-#        lastOffset = 10000000000
-#        totalOffset = 0
-#        thisOffset = 0
         currentOffset = 0
         previousOffset = -1
         firstOffset = -1
@@ -298,60 +293,32 @@ class TaggedTermExtractor(SimpleExtractor):
                 dictStr =  str(a.group())
                 d = eval(dictStr)
                 spanStartOffset = int(d[(None, 'offset')])   
-                wordCount = int(d[(None, 'wordOffset')])
-#                print 'qs offset'
-#                print spanStartOffset      
+                wordCount = int(d[(None, 'wordOffset')])    
             elif e[0] == "4" :
                 m = re.search(tagRe, e.split()[3])
                 if m.group() == 'w':
                     #get the text node for the w element
-#                    print '++++++++++++++++++++'
                     el = data[i+1]
                     if el[0] == "3":
-                        bitsText = el[2:] 
-#                        print 'bitsText'
-#                        print bitsText                              
+                        bitsText = el[2:]                              
                         if previousOffset == -1:
- #                           print 'no previous'
                             a = re.search(attribRe, e)
                             dictStr =  str(a.group())
                             d = eval(dictStr)
                             o = spanStartOffset
                             previousOffset = int(d[(None, 'o')])
-#                            print 'previousOffset'
-#                            print previousOffset
                             firstOffset = int(d[(None, 'o')])
-#                            print 'firstOffset'
-#                            print firstOffset
                         else:
                             a = re.search(attribRe, e)
                             dictStr =  str(a.group())
                             d = eval(dictStr)
                             currentOffset = int(d[(None, 'o')])
-#                            print 'currentOffset'
-#                            print currentOffset
-#                            print 'previousOffset'
-#                            print previousOffset
                             if currentOffset < previousOffset: 
-#                                print 'adjusting offset'
-#                                print 'old span start'
-#                                print spanStartOffset
-#                                print previousText
-#                                print 'inter'
-#                                print spanStartOffset + (previousOffset + len(previousText) + punctCount)-spanStartOffset
                                 spanStartOffset = spanStartOffset + (((previousOffset + len(previousText) + punctCount)) - spanStartOffset) + (spanStartOffset - firstOffset)
-#                                print '-----'
-#                                print 'new span start'
-#                                print spanStartOffset
                                 o = spanStartOffset + currentOffset 
-#                                print 'o'
-#                                print o
                                 firstOffset = 0
                             else:
                                 o = spanStartOffset + (currentOffset - firstOffset)
-                                #o = spanStartOffset + currentOffset
-#                                print 'o'
-#                                print o
                             previousOffset = currentOffset     
                         bitsOffset = o
                         bitsWord = wordCount
@@ -365,19 +332,19 @@ class TaggedTermExtractor(SimpleExtractor):
                                 if m.group() == 'n':                                 
                                     punctCount += len(data[j+1][2:])
                         
-
-            if bitsText and bitsOffset:
+            if bitsText and not bitsOffset == None:
                 previousText = bitsText
                 txt.append("%s/%s" % (bitsText, bitsOffset))
                 wordOffs.append(bitsWord)
 
         txt = ' '.join(txt)
-        
+
         if self.strip:
             txt = self.spaceRe.sub(' ', txt)
 
         if self.get_setting(session, 'prox', 0):
             lno = 0
+        
         return {txt:{'text' : txt, 'occurences' : 1, 'proxLoc' : [lno], 'wordOffs' : wordOffs}}
 
 
