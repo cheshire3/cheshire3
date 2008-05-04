@@ -134,6 +134,7 @@ class SpanXPath(SimpleXPathProcessor):
                     else:
                         comp.append("5 u'%s', u'%s', u'', None" % o)
             comps.append(comp)
+        
         return [comps]
 
 
