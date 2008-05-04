@@ -5,7 +5,7 @@ import os.path, time, utils, types
 from document import StringDocument
 from c3errors import ConfigFileException
 from lxml import etree
-from copy import deepcopy
+from copy import deepcopy, copy
 from xml.sax.saxutils import escape
 
 from Ft.Xml.Xslt.Processor import Processor
@@ -392,6 +392,7 @@ class CorpusPrepTransformer(Transformer):
     def __init__(self, session, config, parent):       
         Transformer.__init__(self, session, config, parent)
         self.session = session
+        self.extractor = self.get_path(session, 'extractor')
         self.rfot = self.get_path(session, 'tokenizer')
         self.regexp = re.compile('[\s]+')
             
@@ -423,13 +424,15 @@ class CorpusPrepTransformer(Transformer):
         #put in test for sentence and tokenize if necessary
         elems = tree.xpath('//p|//s')
         eid = 1
+        lookingForW = False
+        waiting = None
         for e in elems :
             e.set('eid', str(eid))
             eid += 1
         totalOffset = 0
         wordOffset = 0
         for s in tree.xpath('//s') :   
-            text = re.sub(self.regexp, ' ', flattenTexts(s)).strip()            
+            text = re.sub(self.regexp, ' ', self.extractor._flattenTexts(s)).strip()           
             wordCount = 0
             start = 0
             nList = []
@@ -438,12 +441,19 @@ class CorpusPrepTransformer(Transformer):
             txt.text = text
             #create toks and delete the children of s
             toks = etree.Element('toks')
+            #deal with any .text. content of S
             if s.text:
                 t, o = self.rfot.process_string(self.session, s.text)
                 for i in range(0, len(t)):
                     w = etree.Element('w')
                     w.text = t[i]
                     w.set('o', str(oBase[wordCount]))
+                    if lookingForW:
+                        waiting.set('offset', str(oBase[wordCount] + totalOffset))
+                        toks.append(waiting)
+                        waiting = None
+                        lookingForW = False
+                        
                     if oBase[wordCount] > start:
                         nwtxt = text[start:oBase[wordCount]]
                         nList = self.get_toks(nwtxt)
@@ -456,6 +466,8 @@ class CorpusPrepTransformer(Transformer):
                     toks.append(w)
                     wordCount += 1
                     wordOffset +=1
+                s.text = ''
+            #deal with each tag within S
             try:
                 walker = s.getiterator()
             except AttributeError:
@@ -463,13 +475,18 @@ class CorpusPrepTransformer(Transformer):
                 walker = s.iter()           
             for c in walker:      
                 if c.tag != 's':
-                    #set offset here
+                    #deal with any .text content
                     if c.text:
                         t, o = self.rfot.process_string(self.session, c.text)
                         for i in range(0, len(t)):
                             w = etree.Element('w')
                             w.text = t[i]
                             w.set('o', str(oBase[wordCount]))
+                            if lookingForW:
+                                waiting.set('offset', str(oBase[wordCount] + totalOffset))
+                                toks.append(waiting)
+                                waiting = None
+                                lookingForW = False
                             if not c.get('offset'):
                                 c.set('offset', str(oBase[wordCount] + totalOffset))
                                 c.set('wordOffset', str(wordOffset))
@@ -484,24 +501,35 @@ class CorpusPrepTransformer(Transformer):
                             wordOffset +=1
                         toks.append(c)
                         c.text = ''
+                    #deal with the tag itself
                     else:     
-                        try:  
-                            c.set('offset', str(oBase[wordCount] + totalOffset))
-                           
+                        try:
+                            c.set('offset', str(oBase[wordCount] + totalOffset))     
                         except:
-                            pass
-                        c.set('wordOffset', str(wordOffset))
-                        toks.append(c)
+                            #this is the last tag of an s so we need to wait to get another w element before setting the offset value
+                            c.set('wordOffset', str(wordOffset))
+                            lookingForW = True
+                            waiting = copy(c)
+                            s.remove(c)
+                        else:
+                            c.set('wordOffset', str(wordOffset))
+                            toks.append(c)
+                    #deal with any .tail element of the tag
                     if c.tail:
                         t, o = self.rfot.process_string(self.session, c.tail)
                         for i in range(0, len(t)):
                             w = etree.Element('w')
                             w.text = t[i]
                             w.set('o', str(oBase[wordCount]))
+                            if lookingForW:
+                                waiting.set('offset', str(oBase[wordCount] + totalOffset))
+                                toks.append(waiting)
+                                waiting = None
+                                lookingForW = False
                             if not c.get('offset'):
                                 c.set('offset', str(oBase[wordCount] + totalOffset))
                                 c.set('wordOffset', str(wordOffset))
-                            if oBase[wordCount] > start:
+                            if oBase[wordCount] >= start:
                                 nwtxt = text[start:oBase[wordCount]]
                                 nList = self.get_toks(nwtxt)
                                 tlen = len(tBase[wordCount])
@@ -518,7 +546,11 @@ class CorpusPrepTransformer(Transformer):
                     w = etree.Element('w')
                     w.text = t[i]
                     w.set('o', str(oBase[wordCount]))
-                    
+                    if lookingForW:
+                        waiting.set('offset', str(oBase[wordCount] + totalOffset))
+                        toks.append(waiting)
+                        waiting = None
+                        lookingForW = False
                     if oBase[wordCount] > start:
                         nwtxt = text[start:oBase[wordCount]]
                         nList = self.get_toks(nwtxt)
@@ -535,10 +567,8 @@ class CorpusPrepTransformer(Transformer):
                 toks.extend(self.get_toks(nwtxt))
                 s.text = ''
             totalOffset += len(text) + 1
-            s.append(txt)
-            s.append(toks)  
-            
-        
+            s.append(txt)            
+            s.append(toks)             
         return StringDocument(etree.tostring(tree))
           
 
