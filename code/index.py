@@ -342,6 +342,7 @@ class SimpleIndex(Index):
                 firstMask = self._locate_firstMask(k)
                 while (firstMask > 0) and (k[firstMask-1] == '\\'):
                     firstMask = self._locate_firstMask(k, firstMask+1)
+                # TODO: slow regex e.g. if first char is *
                 if (firstMask > 0):
                     startK = k[:firstMask]
                     try: nextK = startK[:-1] + chr(ord(startK[-1])+1)
@@ -431,9 +432,21 @@ class SimpleIndex(Index):
             d.details = "%s" % (clause.term.value)
             raise d
         store = self.get_path(session, 'indexStore')
-        tList = store.fetch_termList(session, self, res.keys()[0], nTerms=nTerms, relation=direction, summary=1)
+        if direction == "=":
+            k = res.keys()[0]
+            k2 = k[:-1] + chr(ord(k[-1])+1)
+            tList = store.fetch_termList(session, self, k, nTerms=nTerms, end=k2, summary=1)
+        else:
+            tList = store.fetch_termList(session, self, res.keys()[0], nTerms=nTerms, relation=direction, summary=1)
         # list of (term, occs)
         return tList
+
+
+    def facets(self, session, clause, resultSet, nTerms, direction=">="):
+        pass
+
+
+
 
     def serialize_term(self, session, termId, data, nRecs=0, nOccs=0):
         # in: list of longs
