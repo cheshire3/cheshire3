@@ -120,8 +120,9 @@ class XmlDocumentStream(BaseDocumentStream):
         else:
             self.start = re.compile("<%s[\s>]" % tagName)
             self.endtag = "</" + tagName + ">"
-        
+            
     def find_documents(self, session, cache=0):
+
         docs = []
         locs = []
         endtag = self.endtag
@@ -1416,6 +1417,10 @@ class AccumulatingDocumentFactory(SimpleDocumentFactory):
         SimpleDocumentFactory.__init__(self, session, config, parent)
         self.register_stream(session, 'transformer', AccTransformerStream)
         self.register_stream(session, 'vectorTransformer', AccVectorTransformerStream)
+
+    def loadMany(self, session, data=None, cache=None, format=None, tagName=None, codec=None):
+        for item in data:
+            self.load(session, item, cache, format, tagName, codec)
 
     def load(self, session, data=None, cache=None, format=None, tagName=None, codec=None):
 
