@@ -118,7 +118,12 @@ class SimpleWorkflow(Workflow):
                 elif n == "fork":
                     code.extend(self._handleFork(c))
                 else:
-                    raise ConfigFileException("Unknown workflow element: %s" % n)
+                    try:
+                        name = n.title()
+                        fn = self.getattr("_handle%s" % name)
+                        code.extend(fn(c))
+                    except:
+                        raise ConfigFileException("Unknown workflow element: %s" % n)
         return code
                                
     def _handleLog(self, node):

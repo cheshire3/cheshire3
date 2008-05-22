@@ -471,9 +471,13 @@ class GunzipPreParser(PreParser):
     outMimeType = ""
 
     def process_document(self, session, doc):
-        buffer = StringIO.StringIO(doc.get_raw(session))
-        zfile = gzip.GzipFile(mode = 'rb', fileobj=buffer)
+        buff = StringIO.StringIO(doc.get_raw(session))
+        zfile = gzip.GzipFile(mode = 'rb', fileobj=buff)
         data = zfile.read()
+        zfile.close()
+        buff.close()
+        del zfile
+        del buff
         return StringDocument(data, self.id, doc.processHistory, parent=doc.parent, filename=doc.filename)
 
 

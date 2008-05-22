@@ -10,6 +10,11 @@ modules = ['database', 'documentFactory', 'documentStore', 'extractor', 'index',
 
 cheshireVersion = (0,9,10)
 
+cheshireRoot = "/home/cheshire/cheshire3"
+cheshireCode = "/home/cheshire/cheshire3/code/extensions"
+cheshireDbs = "/home/cheshire/cheshire3/dbs"
+cheshireWww = "/home/cheshire/cheshire3/www"
+
 
 class Architecture(object):
     # Facilitate Architecture Introspection 
