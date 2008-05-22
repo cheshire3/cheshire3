@@ -214,7 +214,7 @@ class SimpleDatabase(SummaryObject, Database):
         query.resultSet = rs
         return rs
 
-    def scan(self, session, clause, nTerms, direction=">="):
+    def scan(self, session, clause, nTerms=25, direction=">="):
         if (not isinstance(clause, cql.SearchClause)):
             d = SRWDiagnostics.Diagnostic38()
             d.details = "Cannot use boolean in scan"
