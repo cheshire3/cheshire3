@@ -77,6 +77,17 @@ localHandler = DeserializationHandler()
 localParser.setContentHandler(localHandler)
 
 
+from lxml import etree
+class LxmlDeserialiser(object):
+
+    def parse(self, session, data, rset):
+        dom = etree.fromstring(data)
+        
+
+
+lxmlRsetParser = LxmlDeserialiser()
+
+
 class RankedResultSet(ResultSet):
 
     def _sumWeights(self, items, n):
@@ -173,33 +184,82 @@ class SimpleResultSet(RankedResultSet):
 
     def serialise(self, session):
         # Turn into XML
+        # this is pretty fast, and generates better XML than previous
         xml = ['<resultSet>']
-        xml.append('<queryTerm>%s</queryTerm><queryFreq>%s</queryFreq><queryPositions>%s</queryPositions><termWeight>%s</termWeight>' % (self.queryTerm, self.queryFreq, escape(cPickle.dumps(self.queryPositions)), self.termWeight))
-        xml.append('<totalRecs>%s</totalRecs><totalOccs>%s</totalOccs>' % (self.totalRecs, self.totalOccs))
+
+        rsetattrs = [('id', ''), ('termid', -1), ('totalOccs', 0),
+                     ('totalRecs', 0), ('expires', 0), ('queryTerm', ''),
+                     ('queryFreq', 0), ('queryPositions', []), ('relevancy', 0),
+                     ('maxWeight', 0), ('minWeight', 0), ('termWeight', 0.0),
+                     ('recordStore', ''), ('recordStoreSizes', 0)]
+        
+        itemattrs = [('id', 0), ('recordStore', ''), ('database', ''),
+                     ('occurences', 0), ('weight', 0.5), ('scaledWeight', 0.5),
+                     ('proxInfo', [])]
+                   
+
+        typehash = {int : 'int', long : 'long', str : 'str', unicode : 'unicode',
+                    bool : 'bool', type(None) : 'None'}
+
+        for (a, deft) in rsetattrs:
+            val = getattr(self, a)
+            if val != deft:
+                if type(val) in [dict, list, tuple]:
+                    xml.append('<d n="%s" t="pickle">%s</d>' % (a, escape(cPickle.dumps(val))))
+                else:
+                    xml.append('<d n="%s" t="%s">%s</d>' % (a, typehash.get(type(val), ''), val))
         xml.append('<items>')
         for item in self:
-            if type(item.id) in types.StringTypes:
-                docid = escape(item.id)
-            else:
-                docid = str(item.id)
-            xml.append("<item><recStore>%s</recStore><id>%s</id><occs>%s</occs><weight>%s</weight><scaledWeight>%s</scaledWeight><proxInfo>%s</proxInfo><database>%s</database></item>" % (item.recordStore,
-              docid,
-              item.occurences,
-              item.weight,
-              item.scaledWeight,
-              escape(cPickle.dumps(item.proxInfo)),
-              item.database))
+            xml.append('<item>')
+            for (a, deft) in itemattrs:
+                val = getattr(item, a)
+                if val != deft:
+                    if type(val) in [dict, list, tuple]:
+                        xml.append('<d n="%s" t="pickle">%s</d>' % (a, escape(cPickle.dumps(val))))
+                    else:
+                        xml.append('<d n="%s" t="%s">%s</d>' % (a, typehash.get(type(val), ''), val))
+            xml.append('</item>')
+
         xml.append('</items>')
         xml.append('</resultSet>')
         return ''.join(xml)
 
     def deserialise(self, session, data):
-        self._list = []
-        localHandler.reinit(session, self)
-        localInput.setByteStream(StringIO.StringIO(data))
-        localParser.parse(localInput)
-        return None
+        # This is slow-ish, but not too bad
+        root = etree.fromstring(data)
+        typehash = {'int' : int, 'long' : long, 'bool' : bool}
 
+        for e in root.iterchildren():
+            if e.tag == 'd':
+                name = e.attrib['n']
+                t = e.attrib['t']
+                if t == 'pickle':
+                    val = cPickle.loads(str(e.text))
+                elif t == 'None':
+                    val = None
+                elif typehash.has_key(t):
+                    val = typehash[t](e.text)
+                else:
+                    val = e.text
+                setattr(self, name, val)
+            elif e.tag == 'items':
+                for e2 in e.iterchildren():
+                    rsi = SimpleResultSetItem(session)
+                    for e3 in e2.iterchildren():
+                        if e3.tag == 'd':
+                            name = e3.attrib['n']
+                            t = e3.attrib['t']
+                            if t == 'pickle':
+                                val = cPickle.loads(str(e3.text))
+                            elif t == 'None':
+                                val = None
+                            elif typehash.has_key(t):
+                                val = typehash[t](e3.text)
+                            else:
+                                val = e3.text
+                            setattr(rsi, name, val)
+                    self.append(rsi)
+        return None
 
     def append(self, item):
         item.resultSet = self
@@ -954,9 +1014,11 @@ try:
         _array = None
         recordStore = None
         proxInfo = {}
+        _objHash = {}
 
         def __init__(self, session, data, recordStore = None):
             # data is (docid, freq) array
+            self._objHash = {}
             self.recordStore = recordStore     
             self.proxInfo = {}
             if len(data) > 0:
@@ -969,11 +1031,16 @@ try:
                 self._array = na.array([])
 
         def __getitem__(self, k):
-            item = SimpleResultSetItem(None, int(self._array[k][0]), self.recordStore.id, int(self._array[k][1]))
-            item.weight = self._array[k][2]
-            item.proxInfo = self.proxInfo.get(item.id, [])
-            item.resultSet = self
-            return item
+
+            try:
+                return self._objHash[k]
+            except KeyError:
+                item = SimpleResultSetItem(None, int(self._array[k][0]), self.recordStore.id, int(self._array[k][1]))
+                item.weight = self._array[k][2]
+                item.proxInfo = self.proxInfo.get(item.id, [])
+                item.resultSet = self
+                self._objHash[k] = item
+                return item
 
         def __len__(self):
             return len(self._array)
