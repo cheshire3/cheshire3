@@ -564,7 +564,6 @@ class ResultSet:
     index = None
     queryTerm = ""
     queryFreq = 0
-    queryFragment = None
     queryPositions = []
     relevancy = 0
     maxWeight = 0
@@ -645,6 +644,7 @@ class Session:
     database = ""
     environment = ""
 
+
 class Workflow(C3Object):
     """A workflow is similar to the process chain concept of an index,
     but behaves at a more global level. It will allow the
@@ -666,6 +666,7 @@ class Workflow(C3Object):
         produced by the execution.  This function is automatically
         written and compiled when the object is instantiated."""
         raise(NotImplementedError)
+
 
 class Logger(C3Object):
     def log(self, session, *args, **kw):

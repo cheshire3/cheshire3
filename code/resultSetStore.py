@@ -41,13 +41,10 @@ class SimpleResultSetStore(ResultSetStore):
 
 class BdbResultSetStore(SimpleResultSetStore, BdbStore):
 
-    _possibleSettings = {'onlyRecordId' : {'docs' : "Store only the record identifier and discard all other information.", 'type' : int, 'options' : "0|1"}}
-
     def __init__(self, session, config, parent):
         self.databaseTypes = ['database', 'expires']
         SimpleResultSetStore.__init__(self, session, config, parent)
         BdbStore.__init__(self, session, config, parent)
-        self.onlyRecordId = self.get_setting(session, 'onlyRecordId', 0)
 
     def create_resultSet(self, session, rset=None):
         id = self.generate_id(session)
@@ -120,6 +117,9 @@ class BdbResultSetStore(SimpleResultSetStore, BdbStore):
 
 
 class BdbResultSetStore2(BdbResultSetStore):
+
+    _possibleSettings = {'proxInfo' : {'docs' : "Should the result set store maintain proximity information. Defaults to Yes (1), but if this is not needed, it is a significant increase in speed to turn it off (0)", 'type': int}}
+
     storeHash = {}
     storeHashReverse = {}
     databaseHash = {}
@@ -140,7 +140,7 @@ class BdbResultSetStore2(BdbResultSetStore):
 
     def store_resultSet(self, session, rset):
         # Serialise resultSet to data + class
-        srlz = rset.serialise(session)
+        srlz = rset.serialise(session, pickle=self.get_setting(session, 'proxInfo', 1))
         cl = str(rset.__class__)
         data = cl + "||" + srlz        
 

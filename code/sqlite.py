@@ -261,6 +261,25 @@ class SQLiteStore(SimpleStore):
 
 class TrivialSqliteResultSetStore(ResultSetStore, SQLiteStore):
 
+    def _serialise(self, session, rset):
+        ids = [x.id for x in rset]
+        format = 'l' * len(ids)
+        data = struct.pack(format, *ids)
+        data = data.encode('string_escape')
+        return data
+
+    def _deserialise(self, session, data, size, id):
+        data = data.decode('string_escape')
+        fmt = 'l' * size
+        ids = struct.unpack(fmt, data)
+        # can't use bitfield, as need to preserve order
+        rset = SimpleResultSet(session)
+        items = [SimpleResultSetItem(session, x, resultSet=rset) for x in ids]
+        rset.fromList(items)
+        rset.id = id
+        return rset
+
+
     def _initialise(self, session):
         dbPath = self.get_path(session, 'databasePath')
         cxn = sqlite3.connect(dbPath)
@@ -297,10 +316,7 @@ class TrivialSqliteResultSetStore(ResultSetStore, SQLiteStore):
             id = self.idNormalizer.process_string(session, id)
 
         # Serialise and store
-        ids = [x.id for x in rset]
-        format = 'l' * len(ids)
-        data = struct.pack(format, *ids)
-        data = data.encode('string_escape')
+        data = self._serialise(session, rset)
 
         query = "INSERT INTO %s (identifier, data, size, expires, timeCreated, timeAccessed) VALUES (?, ?, ?, ?, ?, ?)" % (self.id)
         try:
@@ -330,15 +346,8 @@ class TrivialSqliteResultSetStore(ResultSetStore, SQLiteStore):
             raise ObjectDoesNotExistException('%s/%s' % (self.id, sid))
 
         data = res[0]
-        data = data.decode('string_escape')
         size = res[1]
-        fmt = 'l' * size
-        ids = struct.unpack(fmt, data)
-
-        # can't use bitfield, as need to preserve order
-        items = [SimpleResultSetItem(session, x) for x in ids]
-        rset = SimpleResultSet(session, items)
-        rset.id = id
+        self._deserialise(session, data, size, id)
         
         # Update expires 
         now = time.time()
@@ -360,5 +369,23 @@ class TrivialSqliteResultSetStore(ResultSetStore, SQLiteStore):
         self.cxn.execute(query, (sid,))
         self.flush(session)
         return None
+    
+
+class SimpleSqliteResultSetStore(TrivialSqliteResultSetStore):
+    _possibleSettings = {'proxInfo' : {'docs' : "Should the result set store maintain proximity information. Defaults to Yes (1), but if this is not needed, it is a significant increase in speed to turn it off (0)", 'type': int}}
+
+    def _serialise(self, session, rset):
+        srlz = rset.serialise(session, pickle=self.get_setting(session, 'proxInfo', 1))
+        cl = str(rset.__class__)
+        data = cl + "||" + srlz        
+        return data
+
+    def _deserialise(self, session, data, size, id):
+        (cl, srlz) = data.split('||', 1)
+        rset = dynamic.buildObject(session, cl, [])            
+        rset.deserialise(session, srlz)
+        return rset
+
+
     
     
