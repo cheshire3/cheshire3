@@ -2,91 +2,12 @@ from baseObjects import ResultSet, ResultSetItem, Index
 from PyZ3950 import CQLParser
 import math, types, sys
 
-from xml.sax import ContentHandler, make_parser, parseString as saxParseString, ErrorHandler, InputSource as SaxInput
 import cStringIO as StringIO
 from xml.sax.saxutils import escape, unescape
 import utils
 import cPickle
-
 import time
-
-class DeserializationHandler(ContentHandler):
-    items = []
-    item = None
-    set = None
-    session = None
-    currContent = ""
-    
-
-    def reinit(self, session, set):
-        self.currContent = ""
-        self.session = session
-        self.set = set
-        self.items = []
-        self.item = None
-        
-    def startElement(self, name, attrs):
-        if name == "item":
-            self.item = SimpleResultSetItem(self.session)
-            
-    def endElement(self, name):
-        c = self.currContent
-        if name == "queryFreq":
-            self.set.queryFreq = long(c)
-        elif name == "queryTerm":
-            self.set.queryTerm = c
-        elif name == "totalOccs":
-            self.set.totalOccs = long(c)
-        elif name == "totalRecs":
-            self.set.totalRecs = long(c)
-        elif name == "termWeight":
-            self.set.termWeight = float(c)
-        elif name == "queryPositions" and c:
-            if len(c) > 1:
-                self.set.queryPositions = cPickle.loads(str(c))
-        elif name == "item":
-            self.set.append(self.item)
-        elif name == "recStore":
-            self.item.recordStore = c
-        elif name == "id":
-            if c.isdigit():
-                self.item.id = long(c)
-            else:
-                self.item.id = c
-        elif name == "weight":
-            self.item.weight = float(c)
-        elif name == "scaledWeight":
-            self.item.scaledWeight = float(c)
-        elif name == "occs":
-            self.item.occurences = long(c)
-        elif name == "database":
-            self.item.database = c
-        elif name == "proxInfo" and c:
-            if len(c) > 1:
-                self.item.proxInfo = cPickle.loads(str(c))
-        self.currContent = ""
-
-    def characters(self, text):
-        self.currContent += unescape(text)
-
-
-localParser = make_parser()
-localParser.setErrorHandler(ErrorHandler())
-localInput = SaxInput()
-localHandler = DeserializationHandler()
-localParser.setContentHandler(localHandler)
-
-
 from lxml import etree
-class LxmlDeserialiser(object):
-
-    def parse(self, session, data, rset):
-        dom = etree.fromstring(data)
-        
-
-
-lxmlRsetParser = LxmlDeserialiser()
-
 
 class RankedResultSet(ResultSet):
 
@@ -156,7 +77,6 @@ class SimpleResultSet(RankedResultSet):
     index = None
     queryTerm = ""
     queryFreq = 0
-    queryFragment = None
     queryPositions = []
     relevancy = 0
     maxWeight = 0
@@ -182,7 +102,7 @@ class SimpleResultSet(RankedResultSet):
     def fromList(self, data):
         self._list = data
 
-    def serialise(self, session):
+    def serialise(self, session, pickle=1):
         # Turn into XML
         # this is pretty fast, and generates better XML than previous
         xml = ['<resultSet>']
@@ -191,12 +111,11 @@ class SimpleResultSet(RankedResultSet):
                      ('totalRecs', 0), ('expires', 0), ('queryTerm', ''),
                      ('queryFreq', 0), ('queryPositions', []), ('relevancy', 0),
                      ('maxWeight', 0), ('minWeight', 0), ('termWeight', 0.0),
-                     ('recordStore', ''), ('recordStoreSizes', 0)]
+                     ('recordStore', ''), ('recordStoreSizes', 0), ('index', None)
+                     ]
         
         itemattrs = [('id', 0), ('recordStore', ''), ('database', ''),
-                     ('occurences', 0), ('weight', 0.5), ('scaledWeight', 0.5),
-                     ('proxInfo', [])]
-                   
+                     ('occurences', 0), ('weight', 0.5), ('scaledWeight', 0.5)]
 
         typehash = {int : 'int', long : 'long', str : 'str', unicode : 'unicode',
                     bool : 'bool', type(None) : 'None'}
@@ -206,6 +125,8 @@ class SimpleResultSet(RankedResultSet):
             if val != deft:
                 if type(val) in [dict, list, tuple]:
                     xml.append('<d n="%s" t="pickle">%s</d>' % (a, escape(cPickle.dumps(val))))
+                elif isinstance(val, Index):
+                    xml.append('<d n="%s" t="object">%s</d>' % (a, val.id))
                 else:
                     xml.append('<d n="%s" t="%s">%s</d>' % (a, typehash.get(type(val), ''), val))
         xml.append('<items>')
@@ -215,9 +136,21 @@ class SimpleResultSet(RankedResultSet):
                 val = getattr(item, a)
                 if val != deft:
                     if type(val) in [dict, list, tuple]:
-                        xml.append('<d n="%s" t="pickle">%s</d>' % (a, escape(cPickle.dumps(val))))
+                        if pickle:
+                            xml.append('<d n="%s" t="pickle">%s</d>' % (a, escape(cPickle.dumps(val))))
                     else:
                         xml.append('<d n="%s" t="%s">%s</d>' % (a, typehash.get(type(val), ''), val))
+            val = getattr(item, 'proxInfo')
+            if val:
+                # serialise to XML
+                xml.append('<proxInfo>')
+                for hit in val:
+                    xml.append('<hit>')
+                    for w in hit:
+                        xml.append('<w e="%s" w="%s" o="%s" t="%s"/>' % tuple(w))
+                    xml.append('</hit>')
+                xml.append('</proxInfo>')
+
             xml.append('</item>')
 
         xml.append('</items>')
@@ -225,41 +158,56 @@ class SimpleResultSet(RankedResultSet):
         return ''.join(xml)
 
     def deserialise(self, session, data):
-        # This is slow-ish, but not too bad
-        root = etree.fromstring(data)
-        typehash = {'int' : int, 'long' : long, 'bool' : bool}
+        # This is blindingly fast compared to old version!
 
+        def value_of(elem):
+            typehash = {'int' : int, 'long' : long, 'bool' : bool}
+            t = elem.attrib['t']
+            if t == 'pickle':
+                val = cPickle.loads(str(elem.text))
+            elif t == 'None':
+                val = None
+            elif t == 'object':
+                # dereference id
+                db = session.server.get_object(session, session.database)
+                val = db.get_object(session, elem.text)
+            elif typehash.has_key(t):
+                val = typehash[t](elem.text)
+            else:
+                val = elem.text
+            return val
+
+        root = etree.fromstring(data)
         for e in root.iterchildren():
             if e.tag == 'd':
                 name = e.attrib['n']
-                t = e.attrib['t']
-                if t == 'pickle':
-                    val = cPickle.loads(str(e.text))
-                elif t == 'None':
-                    val = None
-                elif typehash.has_key(t):
-                    val = typehash[t](e.text)
-                else:
-                    val = e.text
+                val = value_of(e)
                 setattr(self, name, val)
-            elif e.tag == 'items':
-                for e2 in e.iterchildren():
-                    rsi = SimpleResultSetItem(session)
-                    for e3 in e2.iterchildren():
-                        if e3.tag == 'd':
-                            name = e3.attrib['n']
-                            t = e3.attrib['t']
-                            if t == 'pickle':
-                                val = cPickle.loads(str(e3.text))
-                            elif t == 'None':
-                                val = None
-                            elif typehash.has_key(t):
-                                val = typehash[t](e3.text)
-                            else:
-                                val = e3.text
-                            setattr(rsi, name, val)
-                    self.append(rsi)
+            elif e.tag == 'items' and not self._list:
+                rsi = None
+                pi = []
+                for e2 in e.iter():
+                    if e2.tag == 'item':
+                        if rsi:
+                            if hit:
+                                pi.append(hit)
+                            rsi.proxInfo = pi
+                            self.append(rsi)
+                        rsi = SimpleResultSetItem(session)
+                        pi = []
+                        hit = []
+                    elif e2.tag == 'd':
+                        name = e2.attrib['n']
+                        val = value_of(e2)
+                        setattr(rsi, name, val)
+                    elif e2.tag == 'hit':
+                        if hit:
+                            pi.append(hit)
+                        hit = []
+                    elif e2.tag == 'w':
+                        hit.append([int(x) for x in e2.attrib.values()])
         return None
+
 
     def append(self, item):
         item.resultSet = self
@@ -914,7 +862,6 @@ class BitmapResultSet(ResultSet):
     index = None
     queryTerm = ""
     queryFreq = 0
-    queryFragment = None
     queryPositions = []
     relevancy = 0
     maxWeight = 0
