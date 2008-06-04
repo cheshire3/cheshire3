@@ -11,6 +11,9 @@ from PyZ3950 import CQLParser, SRWDiagnostics
 import codecs
 from baseObjects import Session
 
+import gzip, StringIO
+from lxml import etree
+
 from xpathProcessor import SimpleXPathProcessor
 
 
@@ -235,7 +238,6 @@ class SimpleIndex(Index):
             return None
 
     def index_record(self, session, rec):
-        # First extract simple paths, the majority of cases
         p = self.permissionHandlers.get('info:srw/operation/2/index', None)
         if p:
             if not session.user:
@@ -243,8 +245,22 @@ class SimpleIndex(Index):
             okay = p.hasPermission(session, session.user)
             if not okay:
                 raise PermissionException("Permission required to add to index %s" % self.id)
+
+        if self.sources.has_key(u'sort'):
+            sortHash = self._processRecord(session, rec, self.sources[u'sort'][0])
+            if sortHash:
+                sortVal = sortHash.keys()[0]
+            else:
+                sortVal = ''
+        else:
+            sortVal = ''
+
         for src in self.sources[u'data']:
             processed = self._processRecord(session, rec, src)
+            if sortVal:
+                # don't blank sortVal, or will be overwritten in subsequent iters
+                k = processed.keys()[0]
+                processed[k]['sortValue'] = sortVal
             self.indexStore.store_terms(session, self, processed, rec)
         return rec
 
@@ -410,7 +426,7 @@ class SimpleIndex(Index):
             rs = base.combine(session, matches, clause, db)
             return rs
 
-    def scan(self, session, clause, nTerms, direction=">="):
+    def scan(self, session, clause, nTerms, direction=">=", summary=1):
         # Process term.
         p = self.permissionHandlers.get('info:srw/operation/2/scan', None)
         if p:
@@ -435,9 +451,9 @@ class SimpleIndex(Index):
         if direction == "=":
             k = res.keys()[0]
             k2 = k[:-1] + chr(ord(k[-1])+1)
-            tList = store.fetch_termList(session, self, k, nTerms=nTerms, end=k2, summary=1)
+            tList = store.fetch_termList(session, self, k, nTerms=nTerms, end=k2, summary=summary)
         else:
-            tList = store.fetch_termList(session, self, res.keys()[0], nTerms=nTerms, relation=direction, summary=1)
+            tList = store.fetch_termList(session, self, res.keys()[0], nTerms=nTerms, relation=direction, summary=summary)
         # list of (term, occs)
         return tList
 
@@ -577,8 +593,13 @@ class SimpleIndex(Index):
 
     def fetch_metadata(self, session):
         return self.indexStore.fetch_indexMetadata(session, self)
+
+    def fetch_sortValue(self, session, rec):
+        return self.indexStore.fetch_sortValue(session, self, rec)
+
     def merge_tempFiles(self, session):
         return self.indexStore.merge_tempFiles(session, self)
+
     def commit_centralIndexing(self, session, filename=""):
         return self.indexStore.commit_centralIndexing(session, self, filename)
     
@@ -736,8 +757,172 @@ class ProximityIndex(SimpleIndex):
         else:
             s.totalRecs = 0
             s.totalOccs = 0
+
         return s
 
+
+
+
+
+class XmlIndex(SimpleIndex):
+
+    def __init__(self, session, config, parent):
+        SimpleIndex.__init__(self, session, config, parent)
+        # ping etree to initialize
+        nothing = etree.fromstring("<xml/>")
+
+    def _maybeCompress(self, xmlstr):
+        compress = "0"
+        if len(xmlstr) > 1000000:
+            # compress
+            compress="1"
+            outDoc = StringIO.StringIO()
+            zfile = gzip.GzipFile(mode = 'wb', fileobj=outDoc, compresslevel=1)
+            zfile.write(xmlstr)
+            zfile.close()
+            l = outDoc.tell()
+            outDoc.seek(0)
+            xmlstr = outDoc.read(l)
+            outDoc.close()        
+        return compress + xmlstr
+
+    def _maybeUncompress(self, data):        
+        compress = int(data[0])
+        xmlstr = data[1:]
+        if compress:
+            # uncompress
+            buff = StringIO.StringIO(xmlstr)
+            zfile = gzip.GzipFile(mode = 'rb', fileobj=buff)
+            xmlstr = zfile.read()
+            zfile.close()
+            buff.close()        
+        return xmlstr
+
+    def serialize_term(self, session, termId, data, nRecs=0, nOccs=0):
+        # in: list of longs
+        val = struct.pack('lll', termId, nRecs,nOccs)
+        xml = ['<rs tid="%s" recs="%s" occs="%s">' % (termId, nRecs, nOccs)]
+        idx = 0
+        for i in range(0, len(data), 3):
+            xml.append('<r i="%s" s="%s" o="%s"/>' % data[i:i+3])
+        xml.append("</rs>")
+        xmlstr= ''.join(xml)
+        data = self._maybeCompress(xmlstr)
+        final = val + data
+        return final
+        
+    def deserialize_term(self, session, data, nRecs=-1, prox=1):
+        lss3 = 3*self.longStructSize
+        fmt = 'lll'
+        (termid, totalRecs, totalOccs) = struct.unpack(fmt, data[:lss3])
+        xmlstr = self._maybeUncompress(data[lss3:])
+        return [termid, totalRecs, totalOccs, xmlstr]
+
+    def construct_resultSet(self, session, terms, queryHash={}):
+        # in: [termid, recs, occs, XML]
+        # out: resultSet
+
+        rs = SimpleResultSet(session, [])
+        if len(terms) < 3:
+            # no data
+            return rs
+
+        rsilist = []
+        #ci = self.indexStore.construct_resultSetItem
+        
+        # parse xml
+        doc = etree.fromstring(terms[3])
+        rsi = None
+
+        for elem in doc.iter():
+            if elem.tag == 'rs':
+                # extract any further rs info here
+                pass
+            elif elem.tag == 'r':
+                # process a hit: i, s, o
+                if rsi:
+                    rsi.proxInfo = pi
+                    rsilist.append(rsi)
+                vals = [int(x) for x in elem.attrib.values()]
+                
+                rsi=SimpleResultSetItem(session, *vals)
+                # rsi = ci(session, *vals)
+                rsi.resultSet = rs
+                pi = []
+            elif elem.tag == 'p':
+                # process prox info
+                pi.append([[int(x) for x in elem.attrib.values()]])
+        if rsi:
+            rsi.proxInfo = pi
+            rsilist.append(rsi)
+
+        rs.fromList(rsilist)
+        rs.index = self
+        if queryHash:
+            rs.queryTerm = queryHash['text']
+            rs.queryFreq = queryHash['occurences']
+            rs.queryPositions = []
+            # not sure about this nProxInts??
+	    try:
+		for x in queryHash['positions'][1::self.nProxInts]:
+		    rs.queryPositions.append(x)
+	    except:
+		# no queryPos?
+		pass
+	if (terms):
+            rs.termid = terms[0]
+            rs.totalRecs = terms[1]
+            rs.totalOccs = terms[2]
+        else:
+            rs.totalRecs = 0
+            rs.totalOccs = 0
+
+        return rs
+
+
+
+class XmlProximityIndex(XmlIndex):
+    """Store term as XML structure:
+<rs tid="" recs="" occs="">
+  <r i="DOCID" s="STORE" o="OCCS">
+    <p e="ELEM" w="WORDNUM" c="CHAROFFSET"/>
+  </r>
+</rs>
+"""
+
+    _possibleSettings = {'nProxInts' : {'docs' : "Number of integers per occurence in this index for proximity information, typically 2 (elementId, wordPosition) or 3 (elementId, wordPosition, byteOffset)", 'type' : int}}
+
+    def __init__(self, session, config, parent):
+        XmlIndex.__init__(self, session, config, parent)
+        self.nProxInts = self.get_setting(session, 'nProxInts', 2)
+
+    def serialize_term(self, session, termId, data, nRecs=0, nOccs=0):
+        # in: list of longs
+        npi = self.get_setting(session, 'nProxInts', 2)
+        val = struct.pack('lll', termId, nRecs,nOccs)
+
+        xml = ['<rs tid="%s" recs="%s" occs="%s">' % (termId, nRecs, nOccs)]
+        idx = 0
+        while idx < len(data):
+            xml.append('<r i="%s" s="%s" o="%s">' % tuple(data[idx:idx+3]))
+            if npi == 3:
+                for x in range(data[idx+2]):
+                    xml.append('<p e="%s" w="%s" c="%s"/>' % tuple(data[idx+3+(x*3):idx+6+(x*3)]))
+                idx = idx + idx+6+(x*3)
+            else:
+                for x in range(data[idx+2]):
+                    p = tuple(data[idx+3+(x*2):idx+5+(x*2)])                    
+                    xml.append('<p e="%s" w="%s"/>' % p)
+                idx = idx +5+(x*2)
+            xml.append('</r>')
+            
+        xml.append("</rs>")
+        xmlstr= ''.join(xml)
+
+        data = self._maybeCompress(xmlstr)
+        final = val + data
+        return final
+        
 
 
 class RangeIndex(SimpleIndex):
@@ -994,6 +1179,116 @@ class ReverseMetadataIndex(Index):
         base.fromList(items)
         base.index = self
         return base
+
+
+class PassThroughIndex(SimpleIndex):
+
+    def _handleConfigNode(self, session, node):
+        # Source
+        if (node.localName == "xpath"):
+            ref = node.getAttributeNS(None, 'ref')
+            if ref:
+                xp = self.get_object(session, ref)
+            else:
+                xp = SimpleXPathProcessor(session, node, self)
+                xp.sources = [[xp._handleXPathNode(session, node)]]
+            self.xpath = xp
+
+    def __init__(self, session, config, parent):
+        self.xpath = None
+        SimpleIndex.__init__(self, session, config, parent)
+        dbStr = self.get_path(session, 'database', '')
+        if not dbStr:
+            raise ConfigFileException("No remote database given in %s" % self.id)
+        db = session.server.get_object(session, dbStr)
+        if not db:
+            raise ConfigFileException("Unknown remote database given in %s" % self.id)            
+        self.database = db
+
+        idxStr = self.get_path(session, 'remoteIndex', "")
+        if not idxStr:
+            raise ConfigFileException("No remote index given in %s" % self.id)            
+        idx = db.get_object(session, idxStr)
+        if not idx:
+            raise ConfigFileException("Unknown index %s in remote database %s for %s" % (idxStr, db.id, self.id))
+        self.remoteIndex = idx
+
+        idx = self.get_path(session, 'localIndex', None)
+        if not idx:
+            raise ConfigFileException("No local index given in %s" % self.id)            
+        self.localIndex = idx
+
+
+    def search(self, session, clause, db):
+        # first do search on remote index
+        currDb = session.database
+        session.database = self.database.id
+        rs = self.remoteIndex.search(session, clause, self.database)
+
+        # fetch all matched records
+        values = {}
+        for rsi in rs:
+            rec = rsi.fetch_record(session)
+            # process xpath
+            try:
+                value = self.xpath.process_record(session, rec)[0][0]
+            except:
+                # no data where we expect it
+                continue
+            if value:
+                values[value] = 1
+
+        # construct search from keys and return local search
+        localq = CQLParser.parse('c3.%s any "%s"' % (self.localIndex.id, ' '.join(values.keys())))
+        session.database = currDb
+        return self.localIndex.search(session, localq, db)
+
+    def scan(self, session, clause, nTerms, direction=">="):
+        # scan remote index
+        # Note Well:  If term in remote doesn't appear, it's still included
+        # with trecs and toccs of 0.  termid is always -1 as it's meaningless
+        # in the local context -- could be multiple or 0            
+        currDb = session.database
+        session.database = self.database.id
+        scans = self.remoteIndex.scan(session, clause, nTerms, direction, summary=0)        
+
+        newscans = []
+        storeHash = {}
+        for (term, termInfo) in scans:
+            trecs = 0
+            toccs = 0
+            termid = -1
+            for rsi in termInfo[3:]:
+                store = storeHash.get(rsi[1])
+                if not store:
+                    # XXX Bad Magic Juju -- only true for BdbIndexStore?
+                    storeId = self.remoteIndex.indexStore.storeHash.get(rsi[1])
+                    store = self.database.get_object(session, storeId)
+                    storeHash[rsi[1]] = store
+                rec = store.fetch_record(session, rsi[0])
+                # process xpath
+                try:
+                    value = self.xpath.process_record(session, rec)[0][0]
+                except:
+                    # no data where we expect it
+                    continue
+                info  = self.localIndex.fetch_term(session, value, summary=1, prox=0)
+                if info:
+                    trecs += info[1]
+                    toccs += info[2]
+            newscans.append([term, [termid, trecs, toccs]])
+        return newscans
+
+    # no need to do anything during indexing
+    def begin_indexing(self, session):
+        pass
+    def commit_indexing(self, session):
+        pass
+    def index_record(self, session, rec):
+        return record
+    def delete_record(self, session, rec):
+        pass
+
 
 try:
     import numarray as na
