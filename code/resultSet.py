@@ -9,6 +9,7 @@ import cPickle
 import time
 from lxml import etree
 
+
 class RankedResultSet(ResultSet):
 
     def _sumWeights(self, items, n):
@@ -78,6 +79,7 @@ class SimpleResultSet(RankedResultSet):
     queryTerm = ""
     queryFreq = 0
     queryPositions = []
+    queryTime = 0
     relevancy = 0
     maxWeight = 0
     minWeight = 0
@@ -90,8 +92,23 @@ class SimpleResultSet(RankedResultSet):
         self._list = data
         self.id = id
         self.recordStore = recordStore
+
+        self.termid = -1
+        self.totalOccs = 0
+        self.totalRecs = 0
+        self.expires = 0
+        self.index = None
+        self.queryTerm = ""
+        self.queryFreq = 0
+        self.queryPositions = []
+        self.queryTime = 0.0
+        self.relevancy = 0
+        self.maxWeight = 0
+        self.minWeight = 0
+        self.termWeight = 0.0
         self.recordStoreSizes = 0
         self.termIdHash = {}
+        
 
     def __getitem__(self, k):
         return self._list[k]
@@ -111,14 +128,15 @@ class SimpleResultSet(RankedResultSet):
                      ('totalRecs', 0), ('expires', 0), ('queryTerm', ''),
                      ('queryFreq', 0), ('queryPositions', []), ('relevancy', 0),
                      ('maxWeight', 0), ('minWeight', 0), ('termWeight', 0.0),
-                     ('recordStore', ''), ('recordStoreSizes', 0), ('index', None)
+                     ('recordStore', ''), ('recordStoreSizes', 0), ('index', None),
+                     ('queryTime', 0.0)
                      ]
         
         itemattrs = [('id', 0), ('recordStore', ''), ('database', ''),
                      ('occurences', 0), ('weight', 0.5), ('scaledWeight', 0.5)]
 
         typehash = {int : 'int', long : 'long', str : 'str', unicode : 'unicode',
-                    bool : 'bool', type(None) : 'None'}
+                    bool : 'bool', type(None) : 'None', float : 'float'}
 
         for (a, deft) in rsetattrs:
             val = getattr(self, a)
@@ -147,10 +165,14 @@ class SimpleResultSet(RankedResultSet):
                 for hit in val:
                     xml.append('<hit>')
                     for w in hit:
-                        xml.append('<w e="%s" w="%s" o="%s" t="%s"/>' % tuple(w))
+                        if len(w) == 4:
+                            xml.append('<w e="%s" w="%s" o="%s" t="%s"/>' % tuple(w))
+                        elif len(w) == 3:
+                            xml.append('<w e="%s" w="%s" o="%s"/>' % tuple(w))
+                        else:
+                            xml.append('<w e="%s" w="%s"/>' % tuple(w))
                     xml.append('</hit>')
                 xml.append('</proxInfo>')
-
             xml.append('</item>')
 
         xml.append('</items>')
@@ -161,7 +183,7 @@ class SimpleResultSet(RankedResultSet):
         # This is blindingly fast compared to old version!
 
         def value_of(elem):
-            typehash = {'int' : int, 'long' : long, 'bool' : bool}
+            typehash = {'int' : int, 'long' : long, 'bool' : bool, 'float' : float}
             t = elem.attrib['t']
             if t == 'pickle':
                 val = cPickle.loads(str(elem.text))
@@ -728,20 +750,16 @@ class SimpleResultSet(RankedResultSet):
         return self
 
     def order(self, session, spec):
-        # sort according to some spec
-        # spec can be index, "docid", xpath, other?
-        # XXX Need secondary sort specs
+        # spec can be:  index, xpath, workflow, item attribute
 
         l = self._list
-
         if not l:
             # don't try to sort empty set
             return
 
         if (isinstance(spec, Index) and spec.get_setting(session, 'sortStore')):
             # check pre-processed db
-            istore = spec.get_path(session, 'indexStore')
-            tmplist = [(istore.fetch_sortValue(session, spec, x), x) for x in l]
+            tmplist = [(spec.fetch_sortValue(session, x), x) for x in l]
             tmplist.sort()
             self._list = [x for (key,x) in tmplist]
         elif isinstance(spec, Index):
@@ -804,6 +822,8 @@ class SimpleResultSetItem(ResultSetItem):
         self.resultSet = resultSet
         self.proxInfo = []
         self.numericId = numeric
+
+    
 
     def fetch_record(self, session):
         # return record from store

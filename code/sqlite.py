@@ -4,8 +4,11 @@ import sqlite3
 from baseStore import SimpleStore
 from baseObjects import ResultSetStore
 from resultSet import SimpleResultSet, SimpleResultSetItem
+import dynamic
+
 import os, time, datetime, dateutil
 import struct
+import StringIO, gzip
 
 
 class SQLiteIter(object):
@@ -288,6 +291,7 @@ class TrivialSqliteResultSetStore(ResultSetStore, SQLiteStore):
         CREATE TABLE %s (identifier TEXT PRIMARY KEY,
         data BLOB,
         size INT,
+        queryTime REAL,
         expires TEXT,
         timeCreated TEXT,
         timeAccessed TEXT);
@@ -318,9 +322,9 @@ class TrivialSqliteResultSetStore(ResultSetStore, SQLiteStore):
         # Serialise and store
         data = self._serialise(session, rset)
 
-        query = "INSERT INTO %s (identifier, data, size, expires, timeCreated, timeAccessed) VALUES (?, ?, ?, ?, ?, ?)" % (self.id)
+        query = "INSERT INTO %s (identifier, data, size, expires, queryTime, timeCreated, timeAccessed) VALUES (?, ?, ?, ?, ?, ?, ?)" % (self.id)
         try:
-            self.cxn.execute(query, (id, data, len(ids), expiresStr, nowStr, nowStr))
+            self.cxn.execute(query, (id, data, len(rset), expiresStr, rset.queryTime, nowStr, nowStr))
         except:
             # already exists, retry for create
             if hasattr(rset, 'retryOnFail'):
@@ -328,7 +332,7 @@ class TrivialSqliteResultSetStore(ResultSetStore, SQLiteStore):
                 id = self.generate_id(session)
                 if (self.idNormalizer != None):
                     id = self.idNormalizer.process_string(session, id)
-                self.cxn.execute(query, (id, data, len(ids), expiresStr, nowStr, nowStr))
+                self.cxn.execute(query, (id, data, len(rset), expiresStr, rset.queryTime, nowStr, nowStr))
             else:
                 raise ObjectAlreadyExistsException(self.id + '/' + id)
         self.flush(session)
@@ -347,7 +351,7 @@ class TrivialSqliteResultSetStore(ResultSetStore, SQLiteStore):
 
         data = res[0]
         size = res[1]
-        self._deserialise(session, data, size, id)
+        rset = self._deserialise(session, data, size, id)
         
         # Update expires 
         now = time.time()
@@ -372,10 +376,24 @@ class TrivialSqliteResultSetStore(ResultSetStore, SQLiteStore):
     
 
 class SimpleSqliteResultSetStore(TrivialSqliteResultSetStore):
-    _possibleSettings = {'proxInfo' : {'docs' : "Should the result set store maintain proximity information. Defaults to Yes (1), but if this is not needed, it is a significant increase in speed to turn it off (0)", 'type': int}}
+    _possibleSettings = {'proxInfo' : {'docs' : "Should the result set store maintain proximity information. Defaults to Yes (1), but if this is not needed, it is a significant increase in speed to turn it off (0)", 'type': int},
+                         'compress' : {'docs' : "Should the serialised result set be compressed with gzip -1 (default, 1) or not (0).", 'type' : int}
+                         }
 
     def _serialise(self, session, rset):
         srlz = rset.serialise(session, pickle=self.get_setting(session, 'proxInfo', 1))
+        
+        if self.get_setting(session, 'compress', 1):
+            outDoc = StringIO.StringIO()
+            zfile = gzip.GzipFile(mode = 'wb', fileobj=outDoc, compresslevel=1)
+            zfile.write(srlz)
+            zfile.close()
+            l = outDoc.tell()
+            outDoc.seek(0)
+            srlz = outDoc.read(l)
+            outDoc.close()
+            srlz = srlz.encode('string_escape')
+
         cl = str(rset.__class__)
         data = cl + "||" + srlz        
         return data
@@ -383,6 +401,15 @@ class SimpleSqliteResultSetStore(TrivialSqliteResultSetStore):
     def _deserialise(self, session, data, size, id):
         (cl, srlz) = data.split('||', 1)
         rset = dynamic.buildObject(session, cl, [])            
+        if self.get_setting(session, 'compress', 1):
+            # gunzip
+            srlz = srlz.decode('string_escape')
+            buff = StringIO.StringIO(srlz)
+            zfile = gzip.GzipFile(mode = 'rb', fileobj=buff)
+            srlz = zfile.read()
+            zfile.close()
+            buff.close()
+            
         rset.deserialise(session, srlz)
         return rset
 

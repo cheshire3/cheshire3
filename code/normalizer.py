@@ -421,44 +421,22 @@ class RangeNormalizer(SimpleNormalizer):
         return kw
         
 
+class UnicodeCollationNormalizer(SimpleNormalizer):
+    """ Use pyuca to create sort key for string """
 
-class ExactExpansionNormalizer(SimpleNormalizer):
-    # Expand stuff within a string
-    # Then maybe pass to keyworder
-    map = {
-        'USA' :'United States of America',
-        'UK' : 'United Kingdom',
-        'NZ' : 'New Zealand',
-        'XML' : 'Extensible Markup Language',
-        'SOAP' : 'Simple Object Access Protocol',
-        'SRW' : 'Search Retrieve Webservice',
-        'CQL' : 'Common Query Language',
-        "isn't" : 'is not',
-        "don't" : "do not",
-        "won't" : "will not",
-        "can't" : "can not",
-        "wasn't" : "was not",
-        "hasn't" : "has not",
-        "I'm" : "I am",
-        "you're" : "you are",
-        "he's" : "he is",
-        "she's" : "she is",
-        "they're" : "they are",
-        "we're" : "we are",
-        "I'd" : "I would",
-        "she'd" : "she would",
-        "he'd" : "he would",
-        "we'd" : "we would",
-        "they'd" : "they would",
-        "you'd" : "you would"
-        }       
+    def __init__(self, session, config, parent):
+        SimpleNormalizer.__init__(self, session, config, parent)
+        keyPath = self.get_path(session, 'keyFile', 'allkeys.txt')
+        from pyuca import Collator
+        self.collator = Collator(keyPath)
 
     def process_string(self, session, data):
-        for m in self.map.iteritems():
-            data = data.replace(m[0], m[1])
-        return data
-       
-
+        # fix eszett sorting
+        data = data.replace(u'\u00DF', 'ss')
+        ints = self.collator.sort_key(data)
+        exp = ["%04d" % i for i in ints]
+        return ''.join(exp)
+    
 
 class DiacriticNormalizer(SimpleNormalizer):
     """ Slow implementation of Unicode 4.0 character decomposition. Eg that &amp;eacute; -> e """
@@ -471,6 +449,7 @@ class DiacriticNormalizer(SimpleNormalizer):
         u"\u00C3" : u"\u0041",
         u"\u00C4" : u"\u0041",
         u"\u00C5" : u"\u0041",
+        u"\u00C6" : u"AE",
         u"\u00C7" : u"\u0043",
         u"\u00C8" : u"\u0045",
         u"\u00C9" : u"\u0045",
@@ -486,11 +465,15 @@ class DiacriticNormalizer(SimpleNormalizer):
         u"\u00D4" : u"\u004F",
         u"\u00D5" : u"\u004F",
         u"\u00D6" : u"\u004F",
+        u"\u00D7" : u"x",
+        u"\u00D8" : u"O",
         u"\u00D9" : u"\u0055",
         u"\u00DA" : u"\u0055",
         u"\u00DB" : u"\u0055",
         u"\u00DC" : u"\u0055",
         u"\u00DD" : u"\u0059",
+        u"\u00DE" : u"TH",
+        u"\u00DF" : u"ss",
         u"\u00E0" : u"\u0061",
         u"\u00E1" : u"\u0061",
         u"\u00E2" : u"\u0061",
@@ -513,12 +496,14 @@ class DiacriticNormalizer(SimpleNormalizer):
         u"\u00F4" : u"\u006F",
         u"\u00F5" : u"\u006F",
         u"\u00F6" : u"\u006F",
+        u"\u00F7" : u"/",
         u"\u00F8" : u"\u006F",
         u"\u00F9" : u"\u0075",
         u"\u00FA" : u"\u0075",
         u"\u00FB" : u"\u0075",
         u"\u00FC" : u"\u0075",
         u"\u00FD" : u"\u0079",
+        u"\u00FE" : u"th",
         u"\u00FF" : u"\u0079",
         u"\u0100" : u"\u0041",
         u"\u0101" : u"\u0061",
@@ -536,6 +521,8 @@ class DiacriticNormalizer(SimpleNormalizer):
         u"\u010D" : u"\u0063",
         u"\u010E" : u"\u0044",
         u"\u010F" : u"\u0064",
+        u"\u0110" : u"D",
+        u"\u0111" : u"d",
         u"\u0112" : u"\u0045",
         u"\u0113" : u"\u0065",
         u"\u0114" : u"\u0045",
@@ -556,6 +543,8 @@ class DiacriticNormalizer(SimpleNormalizer):
         u"\u0123" : u"\u0067",
         u"\u0124" : u"\u0048",
         u"\u0125" : u"\u0068",
+        u"\u0126" : u"H",
+        u"\u0127" : u"h",
         u"\u0128" : u"\u0049",
         u"\u0129" : u"\u0069",
         u"\u012A" : u"\u0049",
@@ -565,12 +554,14 @@ class DiacriticNormalizer(SimpleNormalizer):
         u"\u012E" : u"\u0049",
         u"\u012F" : u"\u0069",
         u"\u0130" : u"\u0049",
+        u"\u0131" : u"i",
         u"\u0132" : u"\u0049",
         u"\u0133" : u"\u0069",
         u"\u0134" : u"\u004A",
         u"\u0135" : u"\u006A",
         u"\u0136" : u"\u004B",
         u"\u0137" : u"\u006B",
+        u"\u0138" : u"k",
         u"\u0139" : u"\u004C",
         u"\u013A" : u"\u006C",
         u"\u013B" : u"\u004C",
@@ -579,6 +570,8 @@ class DiacriticNormalizer(SimpleNormalizer):
         u"\u013E" : u"\u006C",
         u"\u013F" : u"\u004C",
         u"\u0140" : u"\u006C",
+        u"\u0141" : u"L",
+        u"\u0142" : u"l",
         u"\u0143" : u"\u004E",
         u"\u0144" : u"\u006E",
         u"\u0145" : u"\u004E",
@@ -586,12 +579,16 @@ class DiacriticNormalizer(SimpleNormalizer):
         u"\u0147" : u"\u004E",
         u"\u0148" : u"\u006E",
         u"\u0149" : u"\u02BC",
+        u"\u014A" : u"N",
+        u"\u014B" : u"n",
         u"\u014C" : u"\u004F",
         u"\u014D" : u"\u006F",
         u"\u014E" : u"\u004F",
         u"\u014F" : u"\u006F",
         u"\u0150" : u"\u004F",
         u"\u0151" : u"\u006F",
+        u"\u0152" : u"OE",
+        u"\u0153" : u"oe",
         u"\u0154" : u"\u0052",
         u"\u0155" : u"\u0072",
         u"\u0156" : u"\u0052",
@@ -610,6 +607,8 @@ class DiacriticNormalizer(SimpleNormalizer):
         u"\u0163" : u"\u0074",
         u"\u0164" : u"\u0054",
         u"\u0165" : u"\u0074",
+        u"\u0166" : u"T",
+        u"\u0167" : u"t",
         u"\u0168" : u"\u0055",
         u"\u0169" : u"\u0075",
         u"\u016A" : u"\u0055",
@@ -633,6 +632,8 @@ class DiacriticNormalizer(SimpleNormalizer):
         u"\u017C" : u"\u007A",
         u"\u017D" : u"\u005A",
         u"\u017E" : u"\u007A",
+        u"\u017F" : u"s",
+        # Big Gap, and scattered from here
         u"\u01A0" : u"\u004F",
         u"\u01A1" : u"\u006F",
         u"\u01AF" : u"\u0055",
@@ -987,12 +988,13 @@ class DiacriticNormalizer(SimpleNormalizer):
 
     def process_string(self, session, data):
         d = []
-        # TODO: Horrifically slow implementation. Improve.
+        m = self.map
         if not data:
             return None
+        # with scarcity of diacritics, this is faster than try/except
         for c in data:
-            if (self.map.has_key(c)):
-                d.append(self.map[c])
+            if (m.has_key(c)):
+                d.append(m[c])
             else:
                 d.append(c)
         return ''.join(d)

@@ -7,6 +7,28 @@ import time
 class SimpleXPathProcessor(XPathProcessor):
     sources = []
 
+    def _handleXPathNode(self, session, child):
+        data = {'tagName' : '', 'xpath': None, 'maps': {}, 'string' : ''}
+
+        xp = getFirstData(child)
+        data['xpath'] = verifyXPaths([xp])[0]
+        data['string'] = xp
+
+        for a in child.attributes.keys():
+            # ConfigStore using 4Suite
+            if type(a) == tuple:
+                attrNode = child.attributes[a]
+                a = attrNode.name
+            if (a[:6] == "xmlns:"):
+                pref = a[6:]
+                uri = child.getAttributeNS('http://www.w3.org/2000/xmlns/', pref)
+                if not uri:
+                    uri = child.getAttribute(a)
+                data['maps'][pref] = uri
+            else:
+                data[a] = child.getAttributeNS(None, a)
+        return data
+
     def _handleConfigNode(self, session, node):    
         if (node.localName == "source"):
             xpaths = []
@@ -14,26 +36,8 @@ class SimpleXPathProcessor(XPathProcessor):
                 if child.nodeType == elementType:
                     if child.localName == "xpath":
                         # add XPath
-                        data = {'tagName' : '', 'xpath': None, 'maps': {}, 'string' : ''}
-
-                        xp = getFirstData(child)
-                        data['xpath'] = verifyXPaths([xp])[0]
-                        data['string'] = xp
-
-                        for a in child.attributes.keys():
-                            # ConfigStore using 4Suite
-                            if type(a) == tuple:
-                                attrNode = child.attributes[a]
-                                a = attrNode.name
-                            if (a[:6] == "xmlns:"):
-                                pref = a[6:]
-                                uri = child.getAttributeNS('http://www.w3.org/2000/xmlns/', pref)
-                                if not uri:
-                                    uri = child.getAttribute(a)
-                                data['maps'][pref] = uri
-                            else:
-                                data[a] = child.getAttributeNS(None, a)
-                        xpaths.append(data)
+                        xp = self._handleXPathNode(session, child)
+                        xpaths.append(xp)
             self.sources.append(xpaths)
 
     def __init__(self, session, config, parent):
