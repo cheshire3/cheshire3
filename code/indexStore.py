@@ -16,6 +16,7 @@ import random
 nonTextToken = "\x00\t"    
 NumTypes = [types.IntType, types.LongType]
 
+
 class IndexStoreIter(object):
     # step through our indexes!
 
@@ -56,7 +57,6 @@ class BdbIndexStore(IndexStore):
 
     indexing = 0
     outFiles = {}
-    outSortFiles = {}
     storeHash = {}
     storeHashReverse = {}
     sortStoreCxn = {}
@@ -78,7 +78,6 @@ class BdbIndexStore(IndexStore):
         IndexStore.__init__(self, session, config, parent)
         self.outFiles = {}
         self.storeHash = {}
-        self.outSortFiles = {}
         self.metadataCxn = None
         self.sortStoreCxn = {}
         self.identifierMapCxn = {}
@@ -340,7 +339,7 @@ class BdbIndexStore(IndexStore):
                     cxn.open(fullname, flags=bdb.db.DB_NOMMAP)
                 else:
                     cxn.open(fullname)
-                self.outSortFiles[index] = cxn
+                self.sortStoreCxn[index] = cxn
 
 
     def get_indexingPosition(self, session):
@@ -384,8 +383,8 @@ class BdbIndexStore(IndexStore):
         if not os.path.isabs(temp):
             temp = os.path.join(dfp, temp)
 
-        for k in self.outSortFiles:
-            self.outSortFiles[k].close()
+        for k in self.sortStoreCxn:
+            self.sortStoreCxn[k].close()
         if (not self.outFiles.has_key(index)):
             raise FileDoesNotExistException(index.id)
         sort = self.get_path(session, 'sortPath')
@@ -528,7 +527,6 @@ class BdbIndexStore(IndexStore):
             l = f.readline()[:-1]
             data = l.split(nonTextToken)
             term = data[0]
-            #fullinfo = map(long, data[1:])
             fullinfo = [long(x) for x in data[1:]]
             if term == currTerm:
                 # accumulate
@@ -685,11 +683,6 @@ class BdbIndexStore(IndexStore):
                         # select random key to remove
                         (k,v) = termCache.popitem()
                         del freqCache[k]
-                        # too many random calls
-                        #r = rand.randint(0,ltc-1)
-                        #k = termCache.keys()[r]
-                        #del termCache[k]
-                        #del freqCache[k]
                 else:
                     (tdocs, tfreq) = freqCache[term]
                 if ( (minGlobalFreq == -1 or tdocs >= minGlobalFreq) and
@@ -703,7 +696,6 @@ class BdbIndexStore(IndexStore):
                     totalFreq += long(freq)                    
                 if proxVectors:
                     nProxInts = index.get_setting(session, 'nProxInts', 2)
-                    # proxInfo = map(long, bits[4:])
                     proxInfo = [long(x) for x in bits[4:]]
                     tups = [proxInfo[x:x+nProxInts] for x in range(0,len(proxInfo),nProxInts)]
                     for t in tups:
@@ -1089,7 +1081,6 @@ class BdbIndexStore(IndexStore):
         for dbname in self._listExistingFiles(session, index):
             cxn = bdb.db.DB()
             cxn.remove(dbname)
-
         self.create_index(session, index)
         return None
 
@@ -1109,24 +1100,31 @@ class BdbIndexStore(IndexStore):
 
         return 1
 
+
+    def _openSortStore(self, session, index):
+        if (not index.get_setting(session, 'sortStore')):
+            raise FileDoesNotExistException()
+        dfp = self.get_path(session, "defaultPath")
+        name = self._generateFilename(index) + "_VALUES"
+        fullname = os.path.join(dfp, name)
+        cxn = bdb.db.DB()
+        if session.environment == "apache":
+            cxn.open(fullname, flags=bdb.db.DB_NOMMAP)
+        else:
+            cxn.open(fullname)
+        self.sortStoreCxn[index] = cxn
+        return cxn
         
     def fetch_sortValue(self, session, index, rec):
-        if (self.sortStoreCxn.has_key(index)):
+        try:
             cxn = self.sortStoreCxn[index]
-        else:
-            if (not index.get_setting(session, 'sortStore')):
-                raise FileDoesNotExistException()
-            dfp = self.get_path(session, "defaultPath")
-            name = self._generateFilename(index) + "_VALUES"
-            fullname = os.path.join(dfp, name)
-            cxn = bdb.db.DB()
-            #cxn.set_flags(bdb.db.DB_RECNUM)
-            if session.environment == "apache":
-                cxn.open(fullname, flags=bdb.db.DB_NOMMAP)
-            else:
-                cxn.open(fullname)
-            self.sortStoreCxn[index] = cxn
-        return cxn.get("%s/%s" % (str(rec.recordStore), rec.id))
+        except:
+            cxn = self._openSortStore(session, index)
+        try:
+            return cxn.get("%s/%s" % (str(rec.recordStore), rec.id))
+        except:
+            cxn = self._openSortStore(session, index)
+            return cxn.get("%s/%s" % (str(rec.recordStore), rec.id))
 
 
     def store_terms(self, session, index, terms, rec):
@@ -1170,13 +1168,17 @@ class BdbIndexStore(IndexStore):
         
         if self.outFiles.has_key(index):
             # Batch loading
-            value = terms.values()[0]['text']
-            if (self.outSortFiles.has_key(index) and value):
-                if type(value) == unicode:
-                    sortVal = value.encode('utf-8')
+
+            valueHash = terms.values()[0]
+            value = valueHash['text']
+            if (self.sortStoreCxn.has_key(index)):
+                if valueHash.has_key('sortValue'):
+                    sortVal = valueHash['sortValue']
                 else:
                     sortVal = value
-                self.outSortFiles[index].put("%s/%s" % (str(rec.recordStore), docid), sortVal)
+                if type(sortVal) == unicode:
+                    sortVal = sortVal.encode('utf-8')
+                self.sortStoreCxn[index].put("%s/%s" % (str(rec.recordStore), docid), sortVal)
 
             prox = terms[value].has_key('positions')
             for k in terms.values():
@@ -1403,6 +1405,7 @@ class BdbIndexStore(IndexStore):
             recId = self._get_externalId(session, recStore, numericId)
         else:
             numericId = None
+
         if rsiType == "SimpleResultSetItem":
             return SimpleResultSetItem(session, recId, recStore, nOccs, session.database, numeric=numericId)
         elif rsiType == "Hash":
