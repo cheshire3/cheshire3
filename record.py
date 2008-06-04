@@ -512,9 +512,13 @@ try:
             if xpath[0] != "/" and xpath[-1] != ')':
                 xpath = "//" + xpath
             if maps:
-                return self.dom.xpath(xpath, namespaces=maps)
+                retval = self.dom.xpath(xpath, namespaces=maps)
     	    else:
-                return self.dom.xpath(xpath)
+                retval = self.dom.xpath(xpath)
+            if isinstance(retval, list):
+                return retval
+            else:
+                return [retval]
 
         def get_xml(self, session):
             return etree.tostring(self.dom)
