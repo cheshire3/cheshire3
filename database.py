@@ -6,7 +6,7 @@ from c3errors import ConfigFileException
 from bootstrap import BSParser, BootstrapDocument
 from resultSet import SimpleResultSet, BitmapResultSet, ArrayResultSet
 import PyZ3950.CQLParser as cql,  PyZ3950.SRWDiagnostics as SRWDiagnostics
-import os, sys, re
+import os, sys, re, time
 
 
 try:
@@ -144,7 +144,8 @@ class SimpleDatabase(SummaryObject, Database):
             if (rsid):
                 # Get existing result set
                 rss = self.get_object(session, "defaultResultSetStore")
-                return rss.fetch_resultSet(session, rsid)
+                rset =  rss.fetch_resultSet(session, rsid)
+                return rset
             else:
                 pm = self.get_path(session, 'protocolMap')
                 if not pm:
@@ -200,8 +201,9 @@ class SimpleDatabase(SummaryObject, Database):
         # FIXME: Should respect multiple index stores somehow?
         idxStore = self.get_object(session, storeList[0])
         # check if there's an indexStore specific search function
+        start = time.time()
         if hasattr(idxStore, 'search'):
-            return idxStore.search(session, query, self)
+            rs = idxStore.search(session, query, self)
         else:
             rs = self._search(session, query)
         # now do top level stuff, like sort
@@ -212,6 +214,7 @@ class SimpleDatabase(SummaryObject, Database):
             # check query for sort
             pass
         query.resultSet = rs
+        rs.queryTime = time.time() - start
         return rs
 
     def scan(self, session, clause, nTerms=25, direction=">="):
@@ -232,13 +235,6 @@ class SimpleDatabase(SummaryObject, Database):
             d.details = query.index.toCQL()
             raise d
 
-    def sort(self, session, resultSets, sortKeys):
-        # XXX Needed for Z sorts by index
-        raise NotImplementedError("Please Implement Me!")
-
-    def reindex(self, session):
-        # XXX Implement!
-        raise NotImplementedError("Please Implement Me!")
         
 
 
