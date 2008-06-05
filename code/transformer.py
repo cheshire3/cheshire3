@@ -4,7 +4,6 @@ from baseObjects import Transformer
 import os.path, time, utils, types
 from document import StringDocument
 from c3errors import ConfigFileException
-from lxml import etree
 from copy import deepcopy, copy
 from xml.sax.saxutils import escape
 
@@ -247,15 +246,15 @@ class GrsMapTransformer(Transformer):
     
     def _resolveData(self, session, rec, xpath):
         if xpath[0] != '#': 
-                data = rec.process_xpath(session, xpath)
-                try: data = ' '.join(data)
-                except TypeError:
-                    # data isn't sequence, maybe a string or integer
-                    pass
-                try:
-                    data = data.encode('utf-8')
-                except:
-                    data = str(data)
+            data = rec.process_xpath(session, xpath)
+            try: data = ' '.join(data)
+            except TypeError:
+                # data isn't sequence, maybe a string or integer
+                pass
+            try:
+                data = data.encode('utf-8')
+            except:
+                data = str(data)
         elif xpath == '#RELEVANCE#':
             data = rec.resultSetItem.scaledWeight
         elif xpath == '#RAWRELEVANCE#':
