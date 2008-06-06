@@ -60,6 +60,17 @@ class SimpleXPathProcessor(XPathProcessor):
         return vals
 
 
+class TransformerXPathProcessor(SimpleXPathProcessor):
+    def __init__(self, session, config, parent):
+        SimpleXPathProcessor.__init__(self, session, config, parent)
+        self.transformer = self.get_path(session, 'transformer')
+
+    def process_record(self, session, record):
+        # give record to txr, and then return data
+        doc = self.transformer.process_record(session, record)
+        return [[doc.text]]
+
+
 # two xpaths, span between them
 class SpanXPath(SimpleXPathProcessor):
     # extra attributes on xpath:
