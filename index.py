@@ -180,10 +180,6 @@ class SimpleIndex(Index):
 
         if (iStore == None):
             raise(ConfigFileException("Index (%s) does not have an indexStore." % (self.id)))
-#        elif not iStore.contains_index(session, self):
-#            iStore.create_index(session, self)
-        # XXX: contains_index unreliable - doesn't check for all necessary files, vectors etc.
-        # iStore.create_index made more thorough, and forgiving - John
         else:
             iStore.create_index(session, self)
 
@@ -325,13 +321,6 @@ class SimpleIndex(Index):
             s.commit_indexing(session, self)
 
 
-    def clear(self, session):
-        if not self.indexStore:
-            self.indexStore = self.get_path(session, 'indexStore')
-
-        self.indexStore.clear_index(session, self)
-        
-
     def search(self, session, clause, db):
         # Final destination. Process Term.
         p = self.permissionHandlers.get('info:srw/operation/2/search', None)
@@ -462,7 +451,7 @@ class SimpleIndex(Index):
         pass
 
 
-
+    # Internal API for stores
 
     def serialize_term(self, session, termId, data, nRecs=0, nOccs=0):
         # in: list of longs
@@ -532,12 +521,6 @@ class SimpleIndex(Index):
         merged = [termid, trecs, toccs] + currentData
         return merged
 
-    def construct_resultSetItem(self, session, term, rsiType="SimpleResultSetItem"):
-        # in: single triple
-        # out: resultSetItem
-        # Need to map recordStore and docid at indexStore
-        return self.indexStore.construct_resultSetItem(session, term[0], term[1], term[2], rsitype)
-
     def construct_resultSet(self, session, terms, queryHash={}):
         # in: unpacked
         # out: resultSet
@@ -564,8 +547,13 @@ class SimpleIndex(Index):
             s.totalOccs = 0
         return s
 
-
     # pass-throughs to indexStore
+
+    def construct_resultSetItem(self, session, term, rsiType="SimpleResultSetItem"):
+        return self.indexStore.construct_resultSetItem(session, term[0], term[1], term[2], rsitype)
+
+    def clear(self, session):
+        self.indexStore.clear_index(session, self)
 
     def store_terms(self, session, data, rec):
         self.indexStore.store_terms(session, self, data, rec)
@@ -1213,6 +1201,15 @@ class PassThroughIndex(SimpleIndex):
             raise ConfigFileException("Unknown index %s in remote database %s for %s" % (idxStr, db.id, self.id))
         self.remoteIndex = idx
 
+        idxStr = self.get_path(session, 'remoteKeyIndex', "")
+        if idxStr:
+            idx = db.get_object(session, idxStr)
+            if not idx:
+                raise ConfigFileException("Unknown index %s in remote database %s for %s" % (idxStr, db.id, self.id))
+            self.remoteKeyIndex = idx
+        else:
+            self.remoteKeyIndex = None
+
         idx = self.get_path(session, 'localIndex', None)
         if not idx:
             raise ConfigFileException("No local index given in %s" % self.id)            
@@ -1278,6 +1275,19 @@ class PassThroughIndex(SimpleIndex):
                     toccs += info[2]
             newscans.append([term, [termid, trecs, toccs]])
         return newscans
+
+    def fetch_sortValue(self, session, rec):
+        if not self.remoteKeyIndex:
+            return ''
+        key = self.localIndex.fetch_sortValue(session, rec)
+        currDb = session.database
+        session.database = self.database.id
+        q = parse('c3.%s exact "%s"' % (self.remoteKeyIndex.id, key))
+        rs = self.remoteKeyIndex.search(session, q, self.database)
+        if rs:
+            return self.remoteIndex.fetch_sortValue(session, rs[0])
+        else:
+            return ''
 
     # no need to do anything during indexing
     def begin_indexing(self, session):
