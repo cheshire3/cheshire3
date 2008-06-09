@@ -405,7 +405,6 @@ class SimpleSqliteResultSetStore(TrivialSqliteResultSetStore):
     def _deserialise(self, session, data, size, id):
         (cl, srlz) = data.split('||', 1)        
         rset = dynamic.buildObject(session, cl, [[]])            
-        print len(rset)
         # rset = SimpleResultSet(session, [])
         if self.get_setting(session, 'compress', 1):
             # gunzip
@@ -416,9 +415,7 @@ class SimpleSqliteResultSetStore(TrivialSqliteResultSetStore):
             zfile.close()
             buff.close()
             
-        print len(srlz)
         rset.deserialise(session, srlz)
-        print len(rset)
         return rset
 
 
