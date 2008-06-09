@@ -247,6 +247,10 @@ class SQLiteStore(SimpleStore):
 
     def flush(self, session):
         self.cxn.commit()
+        dbPath = self.get_path(session, 'databasePath')
+        cxn = sqlite3.connect(dbPath)
+        self.cxn = cxn
+
 
     def clean(self, session, force=False):
         # check for expires unless force is true
@@ -399,8 +403,10 @@ class SimpleSqliteResultSetStore(TrivialSqliteResultSetStore):
         return data
 
     def _deserialise(self, session, data, size, id):
-        (cl, srlz) = data.split('||', 1)
-        rset = dynamic.buildObject(session, cl, [])            
+        (cl, srlz) = data.split('||', 1)        
+        rset = dynamic.buildObject(session, cl, [[]])            
+        print len(rset)
+        # rset = SimpleResultSet(session, [])
         if self.get_setting(session, 'compress', 1):
             # gunzip
             srlz = srlz.decode('string_escape')
@@ -410,7 +416,9 @@ class SimpleSqliteResultSetStore(TrivialSqliteResultSetStore):
             zfile.close()
             buff.close()
             
+        print len(srlz)
         rset.deserialise(session, srlz)
+        print len(rset)
         return rset
 
 

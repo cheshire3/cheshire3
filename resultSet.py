@@ -175,6 +175,7 @@ class SimpleResultSet(RankedResultSet):
                 xml.append('</proxInfo>')
             xml.append('</item>')
 
+        xml.append('<stop/>')
         xml.append('</items>')
         xml.append('</resultSet>')
         return ''.join(xml)
@@ -228,7 +229,13 @@ class SimpleResultSet(RankedResultSet):
                         hit = []
                     elif e2.tag == 'w':
                         hit.append([int(x) for x in e2.attrib.values()])
-        return None
+                    elif e2.tag == 'stop':
+                        if rsi:
+                            if hit:
+                                pi.append(hit)
+                            rsi.proxInfo = pi
+                            self.append(rsi)
+                            return self
 
 
     def append(self, item):
