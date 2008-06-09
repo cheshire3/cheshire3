@@ -1280,14 +1280,18 @@ class PassThroughIndex(SimpleIndex):
         if not self.remoteKeyIndex:
             return ''
         key = self.localIndex.fetch_sortValue(session, rec)
+        if not key:
+            return ''
         currDb = session.database
         session.database = self.database.id
-        q = parse('c3.%s exact "%s"' % (self.remoteKeyIndex.id, key))
+        q = CQLParser.parse('c3.%s exact "%s"' % (self.remoteKeyIndex.id, key))
         rs = self.remoteKeyIndex.search(session, q, self.database)
         if rs:
-            return self.remoteIndex.fetch_sortValue(session, rs[0])
+            sv = self.remoteIndex.fetch_sortValue(session, rs[0])
         else:
-            return ''
+            sv =  ''
+        session.database = currDb
+        return sv
 
     # no need to do anything during indexing
     def begin_indexing(self, session):
