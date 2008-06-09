@@ -209,7 +209,12 @@ class SimpleResultSet(RankedResultSet):
             elif e.tag == 'items' and not self._list:
                 rsi = None
                 pi = []
-                for e2 in e.iter():
+                try:
+                    walker = e.getiterator()
+                except AttributeError:
+                    # lxml 1.3 or later
+                    walker = e.iter()
+                for e2 in walker:
                     if e2.tag == 'item':
                         if rsi:
                             if hit:
