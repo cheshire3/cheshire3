@@ -574,7 +574,7 @@ class SimpleIndex(Index):
         return self.indexStore.fetch_proxVector(session, self, rec, elemId)
 
     def fetch_summary(self, session):
-	return self.indexStore.fetch_summary(session, self)
+        return self.indexStore.fetch_summary(session, self)
 
     def fetch_termFrequencies(self, session, mType='occ', start=1, nTerms=100, direction=">"):
         return self.indexStore.fetch_termFrequencies(session, self, mType, start, nTerms, direction)
@@ -591,7 +591,39 @@ class SimpleIndex(Index):
     def commit_centralIndexing(self, session, filename=""):
         return self.indexStore.commit_centralIndexing(session, self, filename)
     
-
+    def facets(self, session, resultSet, nTerms=0):
+        """ Return a list of terms from this index which co-occur within the records in resultSet.
+            Terms are returned in ascending frequency order.
+        """
+        termFreqs = {}
+        recordFreqs = {}
+        has = termFreqs.has_key
+        for r in resultSet:
+            # use vectors to identify terms
+            vec = self.fetch_vector(session, r)
+            if vec:
+                # store / increment freq
+                for t in vec[2]:
+                    try:
+                        termFreqs[t[0]] += t[1]
+                        recordFreqs[t[0]] += 1
+                    except:
+                        termFreqs[t[0]] = t[1]
+                        recordFreqs[t[0]] = 1
+                        
+        # sort list by descending frequency (decorate-sort-undecorate)        
+        sortList = [(v,k) for k,v in termFreqs.iteritems()]
+        sortList.sort(reverse=True)
+        tids = [x[1] for x in sortList]
+        if nTerms:
+            tids = tids[:min(len(tids), nTerms)]
+        terms = []
+        for termId in tids:
+            term = self.fetch_termById(session, termId)
+            terms.append((term.decode('utf-8'), (termId, recordFreqs[termId], termFreqs[termId])))        
+        return terms
+    
+        
 class ProximityIndex(SimpleIndex):
     """ Need to use prox extractor """
 
