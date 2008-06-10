@@ -1,4 +1,4 @@
-from baseObjects import ResultSet, ResultSetItem, Index
+from baseObjects import ResultSet, ResultSetItem, Index, Workflow
 from PyZ3950 import CQLParser
 import math, types, sys
 
