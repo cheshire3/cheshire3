@@ -761,8 +761,16 @@ class SimpleResultSet(RankedResultSet):
             self.maxWeight = maxWeight
         return self
 
-    def order(self, session, spec):
+    def order(self, session, spec, ascending=None, missing=None, case=None):
         # spec can be:  index, xpath, workflow, item attribute
+        # clause is a CQL clause with sort attributes on the relation
+
+        # sort args:
+        #   missingHigh (1), missingLow (-1), missingOmit (0)
+        #   missingValue=(str) ascending=1/0
+        # Not handling yet:
+        #   case=1/0, accents=1/0
+        #   locale=VALUE, unicodeCollate[=VALUE]
 
         l = self._list
         if not l:
@@ -772,33 +780,57 @@ class SimpleResultSet(RankedResultSet):
         if (isinstance(spec, Index) and spec.get_setting(session, 'sortStore')):
             # check pre-processed db
             tmplist = [(spec.fetch_sortValue(session, x), x) for x in l]
-            tmplist.sort()
-            self._list = [x for (key,x) in tmplist]
         elif isinstance(spec, Index):
             # Extract data as per indexing, MUCH slower
             recs = []
             storeHash = {}
-            for r in l:
+            for r in l:                
                 store = r.recordStore
                 o = storeHash.get(store, spec.get_object(session, store))
                 storeHash[store] = o
                 recs.append(o.fetch_record(session, r.id))
             tmplist = [(spec.extract_data(session, recs[x]), l[x]) for x in range(len(l))]
-            tmplist.sort()
-            self._list = [x for (key,x) in tmplist]
+        elif isinstance(spec, Workflow):
+            # process a workflow on records
+            tmplist = []
+            for r in l:
+                rec = r.fetch_record(session)
+                tmplist.append((spec.process(session, rec), r))
         elif (type(spec) == str and hasattr(self[0], spec)):
               # Sort by attribute of item
               tmplist = [(getattr(x, spec), x) for x in l]
-              if spec  == 'docid':
-                  tmplist.sort()
-              else:
-                  tmplist.sort(reverse=True)
-              self._list = [x for (key, x) in tmplist]
+              if ascending == None:
+                  if spec == 'id':
+                      ascending = 1
+                  else:
+                      ascending = 0
         elif isinstance(spec, str):
-            # XPath?
-            raise NotImplementedError
+            tmplist = []
+            for r in l:
+                rec = r.fetch_record(session)
+                tmplist.append((rec.process_xpath(session, spec), l))
         else:
+            # Don't know what?
             raise NotImplementedError
+        if missing:            
+            if missing == -1:
+                val = '\x00'
+            elif missing == 1:
+                val ='\xff'
+            else:
+                val = missing
+            fill = lambda x: x if x else val
+            tmplist = [(fill(x[0]), x[1]) for x in tmplist]
+        elif missing == 0:
+            # omit
+            tmplist = [x for x in tmplist if x[0]]
+
+        if ascending == 0:
+            tmplist.sort(reverse=True)
+        else:
+            tmplist.sort()
+        self._list = [x for (key,x) in tmplist]
+
 
     def reverse(self, session):
         self._list.reverse()
