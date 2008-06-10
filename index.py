@@ -447,10 +447,6 @@ class SimpleIndex(Index):
         return tList
 
 
-    def facets(self, session, clause, resultSet, nTerms, direction=">="):
-        pass
-
-
     # Internal API for stores
 
     def serialize_term(self, session, termId, data, nRecs=0, nOccs=0):
@@ -1283,18 +1279,15 @@ class PassThroughIndex(SimpleIndex):
 
         newscans = []
         storeHash = {}
+
         for (term, termInfo) in scans:
             trecs = 0
             toccs = 0
             termid = -1
-            for rsi in termInfo[3:]:
-                store = storeHash.get(rsi[1])
-                if not store:
-                    # XXX Bad Magic Juju -- only true for BdbIndexStore?
-                    storeId = self.remoteIndex.indexStore.storeHash.get(rsi[1])
-                    store = self.database.get_object(session, storeId)
-                    storeHash[rsi[1]] = store
-                rec = store.fetch_record(session, rsi[0])
+            # construct result set is more portable but slower
+            rs = self.remoteIndex.construct_resultSet(session, termInfo)
+            for rsi in rs:
+                rec = rsi.fetch_record(session)
                 # process xpath
                 try:
                     value = self.xpath.process_record(session, rec)[0][0]
