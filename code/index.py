@@ -1280,26 +1280,35 @@ class PassThroughIndex(SimpleIndex):
         newscans = []
         storeHash = {}
 
-        for (term, termInfo) in scans:
-            trecs = 0
-            toccs = 0
-            termid = -1
-            # construct result set is more portable but slower
-            rs = self.remoteIndex.construct_resultSet(session, termInfo)
-            for rsi in rs:
-                rec = rsi.fetch_record(session)
-                # process xpath
-                try:
-                    value = self.xpath.process_record(session, rec)[0][0]
-                except:
-                    # no data where we expect it
-                    continue
-                info  = self.localIndex.fetch_term(session, value, summary=1, prox=0)
-                if info:
-                    trecs += info[1]
-                    toccs += info[2]
-            newscans.append([term, [termid, trecs, toccs]])
-        return newscans
+        while True:
+            for (term, termInfo) in scans:
+                trecs = 0
+                toccs = 0
+                termid = -1
+                # construct result set is more portable but slower
+                rs = self.remoteIndex.construct_resultSet(session, termInfo)
+                for rsi in rs:
+                    rec = rsi.fetch_record(session)
+                    # process xpath
+                    try:
+                        value = self.xpath.process_record(session, rec)[0][0]
+                    except:
+                        # no data where we expect it
+                        continue
+                    info  = self.localIndex.fetch_term(session, value, summary=1, prox=0)
+                    if info:
+                        trecs += info[1]
+                        toccs += info[2]
+                if trecs:
+                    newscans.append([term, [termid, trecs, toccs]])
+            if len(newscans) < nTerms:
+                # fetch new scans
+                clause.term.value = scans[-1][0]
+                scans = self.remoteIndex.scan(session, clause, 10, direction, summary=0)
+            else:
+                break
+
+        return newscans[:nTerms]
 
     def fetch_sortValue(self, session, rec):
         if not self.remoteKeyIndex:
