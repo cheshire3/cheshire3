@@ -746,12 +746,17 @@ class SimpleResultSet(RankedResultSet):
 
             if pi and cql.value != "window":
                 # copy proxInfo around
-                for pii in items[0].proxInfo:
-                    [x.append(items[0].resultSet.termid) for x in pii]
+                if items[0].resultSet.termid != -1:
+                    for pii in items[0].proxInfo:
+                        for x in pii:
+                            x.append(items[0].resultSet.termid)
                 for o in items[1:]:
-                    for pii in o.proxInfo:
-                        [x.append(o.resultSet.termid) for x in pii]
+                    if o.resultSet.termid != -1:
+                        for pii in o.proxInfo:
+                            for x in pii:
+                                x.append(o.resultSet.termid)
                     item.proxInfo.extend(o.proxInfo)                        
+            item.resultSet = self
             tmplist.append(item)
 
         self._list = tmplist
