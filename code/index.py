@@ -608,7 +608,7 @@ class SimpleIndex(Index):
                         recordFreqs[t[0]] = 1
                         
         # sort list by descending frequency (decorate-sort-undecorate)        
-        sortList = [(v,k) for k,v in termFreqs.iteritems()]
+        sortList = [(v,k) for k,v in recordFreqs.iteritems()]
         sortList.sort(reverse=True)
         tids = [x[1] for x in sortList]
         if nTerms:
