@@ -68,7 +68,10 @@ class TransformerXPathProcessor(SimpleXPathProcessor):
     def process_record(self, session, record):
         # give record to txr, and then return data
         doc = self.transformer.process_record(session, record)
-        return [[doc.text]]
+        try:
+            return [[doc.text.decode('utf-8')]]
+        except:
+            return [[doc.text]]
 
 
 # two xpaths, span between them

@@ -67,7 +67,7 @@ try:
                 self.txr = etree.XSLT(self.parsedXslt)
 
             result = self.txr(dom)
-            return StringDocument(unicode(result))
+            return StringDocument(str(result))
 
 except:
     pass
