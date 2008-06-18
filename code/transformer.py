@@ -386,6 +386,62 @@ class XmlRecordStoreTransformer(Transformer):
         return StringDocument(xml)
 
 
+#converts records in marc21xml to marc records 
+class MarcTransformer(Transformer):
+    
+    def __init__(self, session, config, parent):       
+        Transformer.__init__(self, session, config, parent)
+        self.session = session
+    
+    def _process_tagName(self, tagname):
+        for i, c in enumerate(tagname):
+            if c != '0':
+                return int(tagname[i:])
+
+    def process_record(self, session, rec):
+        fields = {}
+        tree = rec.get_dom(session)
+        try:
+            walker = tree.getiterator("controlfield")
+        except AttributeError:
+            # lxml 1.3 or later
+            walker = tree.iter("controlfield")  
+        for element in walker:
+            tag = self._process_tagName(element.get('tag'))
+            contents = element.text
+            if fields.has_key(tag):
+                fields[tag].append(contents)
+            else:
+                fields[tag] = [contents]
+                
+        try:
+            walker = tree.getiterator("datafield")
+        except AttributeError:
+            # lxml 1.3 or later
+            walker = tree.iter("datafield")  
+        for element in walker:
+            tag = self._process_tagName(element.get('tag'))
+            try:
+                children = element.getiterator('subfield')
+            except AttributeError:
+                # lxml 1.3 or later
+                walker = element.iter('subfield') 
+            subelements = [(c.get('code'), c.text) for c in children]
+            contents = (element.get('ind1'), element.get('ind2'), subelements)         
+            if fields.has_key(tag):
+                fields[tag].append(contents)
+            else:
+                fields[tag] = [contents] 
+
+        leader = tree.xpath('//leader')[0]
+        l = leader.text
+        fields[0] = [''.join([l[5:9], l[17:20]])]
+        marcObject = MARC()
+        marcObject.fields = fields
+        return StringDocument(marcObject.get_MARC())
+
+
+
 class CorpusPrepTransformer(Transformer):
     
     def __init__(self, session, config, parent):       
