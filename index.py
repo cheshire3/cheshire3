@@ -1275,13 +1275,22 @@ class PassThroughIndex(SimpleIndex):
         # in the local context -- could be multiple or 0            
         currDb = session.database
         session.database = self.database.id
-        scans = self.remoteIndex.scan(session, clause, nTerms, direction, summary=0)        
+        scans = self.remoteIndex.scan(session, clause, nTerms, direction, summary=0)
+        sys.stderr.write('New Fetch: %r\n' % scans)
+        sys.stderr.flush()
+        if not scans:
+            return []
 
         newscans = []
         storeHash = {}
+        end = 0
 
         while True:
-            for (term, termInfo) in scans:
+            for info in scans:
+                if len(info) == 3:
+                    end = 1
+                term = info[0]
+                termInfo = info[1]
                 trecs = 0
                 toccs = 0
                 termid = -1
@@ -1301,10 +1310,14 @@ class PassThroughIndex(SimpleIndex):
                         toccs += info[2]
                 if trecs:
                     newscans.append([term, [termid, trecs, toccs]])
-            if len(newscans) < nTerms:
+                    if len(info) == 3:
+                        newscans[-1].append(info[2])
+            if (not end) and len(newscans) < nTerms:
                 # fetch new scans
                 clause.term.value = scans[-1][0]
                 scans = self.remoteIndex.scan(session, clause, 10, direction, summary=0)
+                sys.stderr.write('More Fetch: %r\n' % scans)
+                sys.stderr.flush()
             else:
                 break
 

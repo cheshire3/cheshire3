@@ -1320,8 +1320,7 @@ class BdbIndexStore(IndexStore):
         else:
             cxn = self._openIndex(session, index)
 
-        if summary:
-            dataLen = index.longStructSize * self.reservedLongs
+        dataLen = index.longStructSize * self.reservedLongs
 
         c = cxn.cursor()
         term = term.encode('utf-8')
@@ -1386,6 +1385,15 @@ class BdbIndexStore(IndexStore):
                     tlist.append([key.decode('utf-8'), unpacked])
                     if (nTerms and len(tlist) == nTerms):
                         fetching = 0
+                        if dir == '<':
+                            fltup = c.prev(dlen=dataLen, doff=0)
+                            if not fltup:
+                                tlist[-1].append('first')
+                        else:
+                            fltup = c.next(dlen=dataLen, doff=0)
+                            if not fltup:
+                                tlist[-1].append('last')
+                            
             else:
                 if tlist:
                     if (dir == ">"):
