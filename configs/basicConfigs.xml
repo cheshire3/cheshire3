@@ -398,6 +398,9 @@
 <subConfig type="normalizer" id="DateStringNormalizer">
   <objectType>normalizer.DateStringNormalizer</objectType>
 </subConfig>
+<subConfig type="normalizer" id="DateYearNormalizer">
+  <objectType>normalizer.DateYearNormalizer</objectType>
+</subConfig>
 
 
 
