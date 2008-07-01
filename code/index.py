@@ -1709,7 +1709,9 @@ class ClusterExtractionIndex(SimpleIndex):
 
     def commit_indexing(self, session):
         self.fileHandle.close()
-                           
+             
+    def clear(self, session):
+        pass
 
     def index_record(self, session, rec):
         # Extract cluster information, append to temp file
