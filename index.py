@@ -607,9 +607,10 @@ class SimpleIndex(Index):
                         termFreqs[t[0]] = t[1]
                         recordFreqs[t[0]] = 1
                         
-        # sort list by descending frequency (decorate-sort-undecorate)        
-        sortList = [(v,k) for k,v in recordFreqs.iteritems()]
-        sortList.sort(reverse=True)
+        # sort list by descending frequency (decorate-sort-undecorate)
+        # use 1 / freq - keeps terms with same freq in alpha order
+        sortList = [(1/v,k) for k,v in recordFreqs.iteritems()]
+        sortList.sort()
         tids = [x[1] for x in sortList]
         if nTerms:
             tids = tids[:min(len(tids), nTerms)]
