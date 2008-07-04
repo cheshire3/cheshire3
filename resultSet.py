@@ -9,6 +9,8 @@ import cPickle
 import time
 from lxml import etree
 
+typehash = {int : 'int', long : 'long', str : 'str', unicode : 'unicode',
+                    bool : 'bool', type(None) : 'None', float : 'float'}
 
 class RankedResultSet(ResultSet):
 
@@ -85,14 +87,24 @@ class SimpleResultSet(RankedResultSet):
     minWeight = 0
     termWeight = 0.0
     recordStore = ""
+    rsiConstructor = None
+    attributesToSerialize = []
     recordStoreSizes = 0
     termIdHash = {}
 
     def __init__(self, session, data=[], id="", recordStore=""):
+        self.rsiConstructor = SimpleResultSetItem
+        self.attributesToSerialize = [('id', ''), ('termid', -1), ('totalOccs', 0),
+                     ('totalRecs', 0), ('expires', 0), ('queryTerm', ''),
+                     ('queryFreq', 0), ('queryPositions', []), ('relevancy', 0),
+                     ('maxWeight', 0), ('minWeight', 0), ('termWeight', 0.0),
+                     ('recordStore', ''), ('recordStoreSizes', 0), ('index', None),
+                     ('queryTime', 0.0)
+                     ]
         self._list = data
         self.id = id
         self.recordStore = recordStore
-
+        
         self.termid = -1
         self.totalOccs = 0
         self.totalRecs = 0
@@ -119,25 +131,16 @@ class SimpleResultSet(RankedResultSet):
     def fromList(self, data):
         self._list = data
 
+    # TODO: fix nasty rename hack
+    def serialize(self, session, pickle=1):
+        return self.serialise(session, pickle)
+
     def serialise(self, session, pickle=1):
         # Turn into XML
         # this is pretty fast, and generates better XML than previous
         xml = ['<resultSet>']
 
-        rsetattrs = [('id', ''), ('termid', -1), ('totalOccs', 0),
-                     ('totalRecs', 0), ('expires', 0), ('queryTerm', ''),
-                     ('queryFreq', 0), ('queryPositions', []), ('relevancy', 0),
-                     ('maxWeight', 0), ('minWeight', 0), ('termWeight', 0.0),
-                     ('recordStore', ''), ('recordStoreSizes', 0), ('index', None),
-                     ('queryTime', 0.0)
-                     ]
-        
-        itemattrs = [('id', 0), ('recordStore', ''), ('database', ''),
-                     ('occurences', 0), ('weight', 0.5), ('scaledWeight', 0.5)]
-
-        typehash = {int : 'int', long : 'long', str : 'str', unicode : 'unicode',
-                    bool : 'bool', type(None) : 'None', float : 'float'}
-
+        rsetattrs = self.attributesToSerialize
         for (a, deft) in rsetattrs:
             val = getattr(self, a)
             if val != deft:
@@ -149,36 +152,16 @@ class SimpleResultSet(RankedResultSet):
                     xml.append('<d n="%s" t="%s">%s</d>' % (a, typehash.get(type(val), ''), val))
         xml.append('<items>')
         for item in self:
-            xml.append('<item>')
-            for (a, deft) in itemattrs:
-                val = getattr(item, a)
-                if val != deft:
-                    if type(val) in [dict, list, tuple]:
-                        if pickle:
-                            xml.append('<d n="%s" t="pickle">%s</d>' % (a, escape(cPickle.dumps(val))))
-                    else:
-                        xml.append('<d n="%s" t="%s">%s</d>' % (a, typehash.get(type(val), ''), val))
-            val = getattr(item, 'proxInfo')
-            if val:
-                # serialise to XML
-                xml.append('<proxInfo>')
-                for hit in val:
-                    xml.append('<hit>')
-                    for w in hit:
-                        if len(w) == 4:
-                            xml.append('<w e="%s" w="%s" o="%s" t="%s"/>' % tuple(w))
-                        elif len(w) == 3:
-                            xml.append('<w e="%s" w="%s" o="%s"/>' % tuple(w))
-                        else:
-                            xml.append('<w e="%s" w="%s"/>' % tuple(w))
-                    xml.append('</hit>')
-                xml.append('</proxInfo>')
-            xml.append('</item>')
+            xml.append(item.serialize(session, pickle))
 
         xml.append('<stop/>')
         xml.append('</items>')
         xml.append('</resultSet>')
         return ''.join(xml)
+    
+    # TODO: fix nasty rename hack
+    def deserialize(self, session, data):
+        return self.deserialise(session, data)
 
     def deserialise(self, session, data):
         # This is blindingly fast compared to old version!
@@ -201,6 +184,7 @@ class SimpleResultSet(RankedResultSet):
             return val
 
         root = etree.fromstring(data)
+        rsiConstructor = self.rsiConstructor
         for e in root.iterchildren():
             if e.tag == 'd':
                 name = e.attrib['n']
@@ -221,7 +205,7 @@ class SimpleResultSet(RankedResultSet):
                                 pi.append(hit)
                             rsi.proxInfo = pi
                             self.append(rsi)
-                        rsi = SimpleResultSetItem(session)
+                        rsi = rsiConstructor(session)
                         pi = []
                         hit = []
                     elif e2.tag == 'd':
@@ -620,6 +604,7 @@ class SimpleResultSet(RankedResultSet):
 
                 if cql.value != "prox":
                     newItemHash = {}
+                    rsiConstructor = self.rsiConstructor
                     for i in items:
                         i.queryTerm = i.resultSet.queryTerm
                         i.queryPositions = i.resultSet.queryPositions
@@ -627,7 +612,7 @@ class SimpleResultSet(RankedResultSet):
                         if len(i.queryPositions) > 1:
                             for qpi in i.queryPositions[1:]:
                                 # construct new rsi
-                                newi = SimpleResultSetItem(session, id=i.id, recStore=i.recordStore,
+                                newi = rsiConstructor(session, id=i.id, recStore=i.recordStore,
                                                            occs=i.occurences, database=i.database,
                                                            weight=i.weight, resultSet=i.resultSet)
                                 newi.queryPositions =[qpi]
@@ -860,8 +845,11 @@ class SimpleResultSetItem(ResultSetItem):
     scaledWeight = 0.5
     diagnostic = None
     proxInfo = []
+    attributesToSerialize = []
 
     def __init__(self, session, id=0, recStore="", occs=0, database="", diagnostic=None, weight=0.5, resultSet = None, numeric=None):
+        self.attributesToSerialize = [('id', 0), ('recordStore', ''), ('database', ''),
+                     ('occurences', 0), ('weight', 0.5), ('scaledWeight', 0.5)]
         self.id = id
         self.recordStore = recStore
         self.occurences = occs
@@ -872,7 +860,40 @@ class SimpleResultSetItem(ResultSetItem):
         self.proxInfo = []
         self.numericId = numeric
 
-    
+
+    def serialize(self, session, pickle=1):
+        xml = ['<item>']
+        itemattrs = self.attributesToSerialize
+        for (a, deft) in itemattrs:
+            val = getattr(self, a)
+            if val != deft:
+                if type(val) in [dict, list, tuple]:
+                    if pickle:
+                        xml.append('<d n="%s" t="pickle">%s</d>' % (a, escape(cPickle.dumps(val))))
+                else:
+                    xml.append('<d n="%s" t="%s">%s</d>' % (a, typehash.get(type(val), ''), val))
+        val = getattr(self, 'proxInfo')
+        if val:
+            # serialise to XML
+            xml.append('<proxInfo>')
+            for hit in val:
+                xml.append('<hit>')
+                for w in hit:
+                    if len(w) == 4:
+                        xml.append('<w e="%s" w="%s" o="%s" t="%s"/>' % tuple(w))
+                    elif len(w) == 3:
+                        xml.append('<w e="%s" w="%s" o="%s"/>' % tuple(w))
+                    else:
+                        try:
+                            xml.append('<w e="%s" w="%s"/>' % tuple(w))
+                        except:
+                            # should really error!
+                            xml.append('<w e="%s" w="%s" o="%s" t="%s"/>' % tuple(w[:4]))
+                            
+                xml.append('</hit>')
+            xml.append('</proxInfo>')
+        xml.append('</item>')
+        return ''.join(xml)
 
     def fetch_record(self, session):
         # return record from store
