@@ -444,6 +444,8 @@ class CQLProtocolMap(ZeerexProtocolMap):
                 return self.prefixes[default]
             else:
                 return default
+        elif (name == 'c3'):
+            return 'http://www.cheshire3.org/cql-context-set/internal'
         else:
             # YYY: Should step up to other config objects?
             raise(ConfigFileException("Unknown prefix: %s" % (name)))
