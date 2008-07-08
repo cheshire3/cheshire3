@@ -82,6 +82,7 @@ class SimpleResultSet(RankedResultSet):
     queryFreq = 0
     queryPositions = []
     queryTime = 0
+    query = None
     relevancy = 0
     maxWeight = 0
     minWeight = 0
@@ -91,6 +92,7 @@ class SimpleResultSet(RankedResultSet):
     attributesToSerialize = []
     recordStoreSizes = 0
     termIdHash = {}
+    fromStore = 0
 
     def __init__(self, session, data=[], id="", recordStore=""):
         self.rsiConstructor = SimpleResultSetItem
@@ -99,7 +101,7 @@ class SimpleResultSet(RankedResultSet):
                      ('queryFreq', 0), ('queryPositions', []), ('relevancy', 0),
                      ('maxWeight', 0), ('minWeight', 0), ('termWeight', 0.0),
                      ('recordStore', ''), ('recordStoreSizes', 0), ('index', None),
-                     ('queryTime', 0.0)
+                     ('queryTime', 0.0), ('query', '')
                      ]
         self._list = data
         self.id = id
@@ -114,13 +116,14 @@ class SimpleResultSet(RankedResultSet):
         self.queryFreq = 0
         self.queryPositions = []
         self.queryTime = 0.0
+        self.query = None
         self.relevancy = 0
         self.maxWeight = 0
         self.minWeight = 0
         self.termWeight = 0.0
         self.recordStoreSizes = 0
         self.termIdHash = {}
-        
+        self.fromStore = 0
 
     def __getitem__(self, k):
         return self._list[k]
@@ -148,6 +151,9 @@ class SimpleResultSet(RankedResultSet):
                     xml.append('<d n="%s" t="pickle">%s</d>' % (a, escape(cPickle.dumps(val))))
                 elif isinstance(val, Index):
                     xml.append('<d n="%s" t="object">%s</d>' % (a, val.id))
+                elif a == 'query':
+                    # XXX FIXME:  This breaks in postgres store with unicode
+                    xml.append('<d n="%s" t="cql">%s</d>' % (a, val.toCQL()))
                 else:
                     xml.append('<d n="%s" t="%s">%s</d>' % (a, typehash.get(type(val), ''), val))
         xml.append('<items>')
@@ -157,7 +163,7 @@ class SimpleResultSet(RankedResultSet):
         xml.append('<stop/>')
         xml.append('</items>')
         xml.append('</resultSet>')
-        return ''.join(xml)
+        return u''.join(xml)
     
     # TODO: fix nasty rename hack
     def deserialize(self, session, data):
@@ -177,6 +183,11 @@ class SimpleResultSet(RankedResultSet):
                 # dereference id
                 db = session.server.get_object(session, session.database)
                 val = db.get_object(session, elem.text)
+            elif t == 'cql':
+                try:
+                    val = CQLParser.parse(elem.text)
+                except:
+                    val = None
             elif typehash.has_key(t):
                 val = typehash[t](elem.text)
             else:
@@ -540,6 +551,9 @@ class SimpleResultSet(RankedResultSet):
 
         for o in others:
             self.termIdHash[o.termid] = o.queryTerm
+            if o.fromStore:
+                #re-sort before combining as likely out of order
+                o.order(session, 'id')
 
         chitem = cmpHash[comparison]
         if unit == "word":

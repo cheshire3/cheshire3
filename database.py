@@ -143,8 +143,13 @@ class SimpleDatabase(SummaryObject, Database):
             rsid = query.getResultSetId()
             if (rsid):
                 # Get existing result set
-                rss = self.get_object(session, "defaultResultSetStore")
+                if rsid.find('/') > -1:
+                    (rssid, rsid) = rsid.split('/', 1)
+                    rss = self.get_object(session, rssid)
+                else:
+                    rss = self.get_object(session, "defaultResultSetStore")
                 rset =  rss.fetch_resultSet(session, rsid)
+                rset.fromStore = 1
                 return rset
             else:
                 pm = self.get_path(session, 'protocolMap')
@@ -157,6 +162,7 @@ class SimpleDatabase(SummaryObject, Database):
                     query.config = pm
                     rs = idx.search(session, query, self)
                     query.config = None
+                    rs.query = query
                     return rs
                 else:
                     d = SRWDiagnostics.Diagnostic16()
@@ -185,7 +191,13 @@ class SimpleDatabase(SummaryObject, Database):
                 new = left.__class__(session, [], recordStore=left.recordStore)
             else:
                 new = SimpleResultSet(session, [])
-            return new.combine(session, [left, right], query, self)
+            rs = new.combine(session, [left, right], query, self)
+            trip = cql.Triple()
+            trip.leftOperand = left.query
+            trip.rightOperand = right.query
+            trip.boolean = query.boolean
+            rs.query = trip
+            return rs
 
     def search(self, session, query):
         # check for optimised indexStore based search (eg SQL translation)
@@ -207,6 +219,7 @@ class SimpleDatabase(SummaryObject, Database):
         else:
             rs = self._search(session, query)
         # now do top level stuff, like sort
+
         if rs.relevancy:
             rs.scale_weights()
             rs.order(session, "weight")

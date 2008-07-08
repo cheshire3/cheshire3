@@ -17,7 +17,6 @@ from PyZ3950 import SRWDiagnostics
 
 
 # Consider psycopg
-# ...psycopg2 has segfaults as of 2006/07/10
 import pg
 import time
 from PyZ3950 import CQLParser as cql
@@ -545,7 +544,7 @@ class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
         data = data.replace('\\012', '\n')
         # data is res.dictresult()
         cl = rdict['class']
-        rset = dynamic.buildObject(session, cl, [])
+        rset = dynamic.buildObject(session, cl, [[]])
         rset.deserialise(session,data)
         rset.id = id
         
