@@ -1277,8 +1277,6 @@ class PassThroughIndex(SimpleIndex):
         currDb = session.database
         session.database = self.database.id
         scans = self.remoteIndex.scan(session, clause, nTerms, direction, summary=0)
-        sys.stderr.write('New Fetch: %r\n' % scans)
-        sys.stderr.flush()
         if not scans:
             return []
 
@@ -1317,8 +1315,6 @@ class PassThroughIndex(SimpleIndex):
                 # fetch new scans
                 clause.term.value = scans[-1][0]
                 scans = self.remoteIndex.scan(session, clause, 10, direction, summary=0)
-                sys.stderr.write('More Fetch: %r\n' % scans)
-                sys.stderr.flush()
             else:
                 break
 
