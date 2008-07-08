@@ -589,7 +589,7 @@ class SimpleIndex(Index):
     
     def facets(self, session, resultSet, nTerms=0):
         """ Return a list of terms from this index which co-occur within the records in resultSet.
-            Terms are returned in ascending frequency order.
+            Terms are returned in ascending frequency (number of records) order.
         """
         termFreqs = {}
         recordFreqs = {}
@@ -609,7 +609,7 @@ class SimpleIndex(Index):
                         
         # sort list by descending frequency (decorate-sort-undecorate)
         # use 1 / freq - keeps terms with same freq in alpha order
-        sortList = [(1/v,k) for k,v in recordFreqs.iteritems()]
+        sortList = [(1.0/v,k) for k,v in recordFreqs.iteritems()]
         sortList.sort()
         tids = [x[1] for x in sortList]
         if nTerms:
