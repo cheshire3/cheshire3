@@ -175,7 +175,7 @@ def process_searchRetrieve(self, session, req):
             recs.append(ro)
 
         self.records = recs
-        nrp = startRecord + end+1
+        nrp = end + 1                                    # Back to SRU 1-based recordPosition
         if ( nrp < self.numberOfRecords and nrp > 0):
             self.nextRecordPosition = nrp
         if (rsn):
