@@ -131,6 +131,11 @@ class XmlDocumentStream(BaseDocumentStream):
         xpi = ""
         line = ""
         offOffset = 0
+
+        self.stream.seek(0, os.SEEK_END)
+        filelen = self.stream.tell()
+        self.stream.seek(0, os.SEEK_SET)
+
         while True:
             ol = len(line)
             # if 10000 bytes of garbage between docs, then will exit
@@ -178,7 +183,20 @@ class XmlDocumentStream(BaseDocumentStream):
                         offOffset += (byteCount - tlen)
                     else:
                         strStart = len(line)
-                        line += self.stream.read(1024)
+                        # check we have at least 1024 to read
+                        if self.stream.tell() == filelen:
+                            # we've got nuffink!
+                            if cache == 0:
+                                self.stream.close()
+                                raise StopIteration
+                            else:
+                                break
+                        if self.stream.tell() + 1024 < filelen:
+                            line += self.stream.read(1024)
+                        else:
+                            line += self.stream.read()
+                        
+                            
             if len(line) == ol and not m:
                 if cache == 0:
                     self.stream.close()
