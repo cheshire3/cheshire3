@@ -340,6 +340,14 @@ class SimpleIndex(Index):
         store = self.get_path(session, 'indexStore')
         matches = []
         rel = clause.relation
+        if (rel.prefix == 'cql' or rel.prefixURI == 'info:srw/cql-context-set/1/cql-v1.1'):
+            if (rel.value == 'scr'):
+                pm = db.get_path(session, 'protocolMap')
+                try:
+                    rel.value = pm.defaultRelation
+                except AttributeError:
+                    pass
+            
 
         if (rel.value in ['any', 'all', '=', 'exact', 'window'] and (rel.prefix == 'cql' or rel.prefixURI == 'info:srw/cql-context-set/1/cql-v1.1')):
             for k, qHash in res.iteritems():
@@ -446,6 +454,40 @@ class SimpleIndex(Index):
         # list of (term, occs)
         return tList
 
+
+    def facets(self, session, resultSet, nTerms=0):
+        """ Return a list of terms from this index which co-occur within the records in resultSet.
+            Terms are returned in ascending frequency (number of records) order.
+        """
+        termFreqs = {}
+        recordFreqs = {}
+        has = termFreqs.has_key
+        for r in resultSet:
+            # use vectors to identify terms
+            vec = self.fetch_vector(session, r)
+            if vec:
+                # store / increment freq
+                for t in vec[2]:
+                    try:
+                        termFreqs[t[0]] += t[1]
+                        recordFreqs[t[0]] += 1
+                    except:
+                        termFreqs[t[0]] = t[1]
+                        recordFreqs[t[0]] = 1
+                        
+        # sort list by descending frequency (decorate-sort-undecorate)
+        # use 1 / freq - keeps terms with same freq in alpha order
+        sortList = [(1.0/v,k) for k,v in recordFreqs.iteritems()]
+        sortList.sort()
+        tids = [x[1] for x in sortList]
+        if nTerms:
+            tids = tids[:min(len(tids), nTerms)]
+        terms = []
+        for termId in tids:
+            term = self.fetch_termById(session, termId)
+            # (term, (termId, nRecs, freq))
+            terms.append((term.decode('utf-8'), (termId, recordFreqs[termId], termFreqs[termId])))        
+        return terms
 
     # Internal API for stores
 
@@ -586,39 +628,6 @@ class SimpleIndex(Index):
 
     def commit_centralIndexing(self, session, filename=""):
         return self.indexStore.commit_centralIndexing(session, self, filename)
-    
-    def facets(self, session, resultSet, nTerms=0):
-        """ Return a list of terms from this index which co-occur within the records in resultSet.
-            Terms are returned in ascending frequency (number of records) order.
-        """
-        termFreqs = {}
-        recordFreqs = {}
-        has = termFreqs.has_key
-        for r in resultSet:
-            # use vectors to identify terms
-            vec = self.fetch_vector(session, r)
-            if vec:
-                # store / increment freq
-                for t in vec[2]:
-                    try:
-                        termFreqs[t[0]] += t[1]
-                        recordFreqs[t[0]] += 1
-                    except:
-                        termFreqs[t[0]] = t[1]
-                        recordFreqs[t[0]] = 1
-                        
-        # sort list by descending frequency (decorate-sort-undecorate)
-        # use 1 / freq - keeps terms with same freq in alpha order
-        sortList = [(1.0/v,k) for k,v in recordFreqs.iteritems()]
-        sortList.sort()
-        tids = [x[1] for x in sortList]
-        if nTerms:
-            tids = tids[:min(len(tids), nTerms)]
-        terms = []
-        for termId in tids:
-            term = self.fetch_termById(session, termId)
-            terms.append((term.decode('utf-8'), (termId, recordFreqs[termId], termFreqs[termId])))        
-        return terms
     
         
 class ProximityIndex(SimpleIndex):
