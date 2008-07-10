@@ -451,16 +451,6 @@ class CQLProtocolMap(ZeerexProtocolMap):
             raise(ConfigFileException("Unknown prefix: %s" % (name)))
 
     def resolveIndex(self, session, query):
-        if query.index.prefix == 'c3':
-            # Override
-            try:
-                idx = self.parent.get_object(session, query.index.value)
-            except ObjectDoesNotExistException:
-                # origValue is complete token
-                val = query.index.origValue.split('.')[1]
-                idx = self.parent.get_object(session, val)
-            return idx
-
         target = query
         while (target.parent):
             target = target.parent
@@ -469,9 +459,27 @@ class CQLProtocolMap(ZeerexProtocolMap):
         query.index.resolvePrefix()
         uri = query.index.prefixURI
         name = query.index.value
+
+        if uri == 'http://www.cheshire3.org/cql-context-set/internal':
+            # Override
+            try:
+                idx = self.parent.get_object(session, name)
+            except ObjectDoesNotExistException:
+                # origValue is complete token
+                val = query.index.origValue.split('.')[1]
+                idx = self.parent.get_object(session, val)
+            return idx
+        elif uri == 'info:srw/cql-context-set/1/cql-v1.1' and name == 'serverchoice' and hasattr(self, 'defaultIndex'):
+            dp, dn = self.defaultIndex.split('.')
+            du = self.resolvePrefix(dp)
+            query.index.prefix = dp
+            query.index.value = dn
+            query.index.prefixURI = du
+            return self.resolveIndex(session, query)
+        
         rel = query.relation.value
         relMods = query.relation.modifiers
-        
+
         # FIXME:  Better CQL->Index resolution
         # Check relevance, check stem, check str/word, check relation,
         # Check index
@@ -577,7 +585,7 @@ class CQLProtocolMap(ZeerexProtocolMap):
                     return (str(uri), str(index))
         elif (node.localName == 'default'):
             dtype = node.getAttribute('type')
-            pname = "default" + dtype[0].capitalize() + dtype[1:]
+            pname = "default" + dtype[0].capitalize() + dtype[1:] # XXX: would dtype.title() be nicer!?
             data = flattenTexts(node)
             if (data.isdigit()):
                 data = int(data)
