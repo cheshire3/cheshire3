@@ -835,7 +835,7 @@ class BdbIndexStore(IndexStore):
             lu = lf /2
             return [lu, sum([x[1] for x in unflatten]), unflatten]
         else:
-            return []
+            return [0,0,[]]
 
 
     def fetch_proxVector(self, session, index, rec, elemId=-1):

@@ -87,7 +87,7 @@ class SimpleIndex(Index):
                          'noUnindexDefault' : {"docs" : "If true, the index should not be called from db.unindex_record()", "type" : int, "options" : "0|1"},
                          'sortStore' : {"docs" : "Should the index build a sort store", 'type' : int, 'options' : '0|1'},
                          'termIds' : {"docs" : "Should the index store termId -> term", 'type' : int, 'options' : '0|1'},
-                         'vectors' : {"docs" : "Should the index store vectors (doc -> list of termIds", 'type' : int, 'options' : '0|1'},
+                         'vectors' : {"docs" : "Should the index store vectors (doc -> list of termIds.", 'type' : int, 'options' : '0|1'},
                          'proxVectors' : {"docs" : "Should the index store vectors that also maintain proximity for their terms", 'type' : int, 'options' : '0|1'},
                          'minimumSupport' : {"docs" : "Minimum number of records in which the term must appear for it to be indexed at all", 'type' : int},
                          'vectorMinGlobalFreq' : {"docs" : "Minimum global records for term to appear in a vector", 'type' : int},
@@ -465,7 +465,7 @@ class SimpleIndex(Index):
         for r in resultSet:
             # use vectors to identify terms
             vec = self.fetch_vector(session, r)
-            if vec:
+            if vec[2]:
                 # store / increment freq
                 for t in vec[2]:
                     try:
