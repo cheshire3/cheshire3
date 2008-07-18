@@ -150,12 +150,12 @@ class SimpleResultSet(RankedResultSet):
                 if type(val) in [dict, list, tuple]:
                     xml.append('<d n="%s" t="pickle">%s</d>' % (a, escape(cPickle.dumps(val))))
                 elif isinstance(val, Index):
-                    xml.append('<d n="%s" t="object">%s</d>' % (a, val.id))
-                elif a == 'query':
+                    xml.append('<d n="%s" t="object">%s</d>' % (a, escape(val.id)))
+                elif a == 'query' and val:
                     # XXX FIXME:  This breaks in postgres store with unicode
-                    xml.append('<d n="%s" t="cql">%s</d>' % (a, val.toCQL()))
+                    xml.append('<d n="%s" t="cql">%s</d>' % (a, escape(val.toCQL())))
                 else:
-                    xml.append('<d n="%s" t="%s">%s</d>' % (a, typehash.get(type(val), ''), val))
+                    xml.append('<d n="%s" t="%s">%s</d>' % (a, typehash.get(type(val), ''), escape(str(val))))
         xml.append('<items>')
         for item in self:
             xml.append(item.serialize(session, pickle))
@@ -173,25 +173,26 @@ class SimpleResultSet(RankedResultSet):
         # This is blindingly fast compared to old version!
 
         def value_of(elem):
-            typehash = {'int' : int, 'long' : long, 'bool' : bool, 'float' : float}
+            #typehash = {'int' : int, 'long' : long, 'bool' : bool, 'float' : float}
             t = elem.attrib['t']
+            txt = unescape(elem.text)
             if t == 'pickle':
-                val = cPickle.loads(str(elem.text))
+                val = cPickle.loads(str(txt))
             elif t == 'None':
                 val = None
             elif t == 'object':
                 # dereference id
                 db = session.server.get_object(session, session.database)
-                val = db.get_object(session, elem.text)
+                val = db.get_object(session, txt)
             elif t == 'cql':
                 try:
-                    val = CQLParser.parse(elem.text)
+                    val = CQLParser.parse(txt)
                 except:
                     val = None
             elif typehash.has_key(t):
-                val = typehash[t](elem.text)
+                val = typehash[t](txt)
             else:
-                val = elem.text
+                val = txt
             return val
 
         root = etree.fromstring(data)
@@ -553,7 +554,10 @@ class SimpleResultSet(RankedResultSet):
             self.termIdHash[o.termid] = o.queryTerm
             if o.fromStore:
                 #re-sort before combining as likely out of order
-                o.order(session, 'id')
+                if o[0].numericId != None:
+                    o.order(session, 'numericId')
+                else:
+                    o.order(session, 'id')
 
         chitem = cmpHash[comparison]
         if unit == "word":
@@ -804,7 +808,7 @@ class SimpleResultSet(RankedResultSet):
               # Sort by attribute of item
               tmplist = [(getattr(x, spec), x) for x in l]
               if ascending == None:
-                  if spec == 'id':
+                  if spec in ['id', 'numericId']:
                       ascending = 1
                   else:
                       ascending = 0
@@ -862,7 +866,7 @@ class SimpleResultSetItem(ResultSetItem):
     attributesToSerialize = []
 
     def __init__(self, session, id=0, recStore="", occs=0, database="", diagnostic=None, weight=0.5, resultSet = None, numeric=None):
-        self.attributesToSerialize = [('id', 0), ('recordStore', ''), ('database', ''),
+        self.attributesToSerialize = [('id', 0), ('numericId', None), ('recordStore', ''), ('database', ''),
                      ('occurences', 0), ('weight', 0.5), ('scaledWeight', 0.5)]
         self.id = id
         self.recordStore = recStore
@@ -885,7 +889,7 @@ class SimpleResultSetItem(ResultSetItem):
                     if pickle:
                         xml.append('<d n="%s" t="pickle">%s</d>' % (a, escape(cPickle.dumps(val))))
                 else:
-                    xml.append('<d n="%s" t="%s">%s</d>' % (a, typehash.get(type(val), ''), val))
+                    xml.append('<d n="%s" t="%s">%s</d>' % (a, typehash.get(type(val), ''), escape(unicode(val))))
         val = getattr(self, 'proxInfo')
         if val:
             # serialise to XML
