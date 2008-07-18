@@ -8,14 +8,67 @@ from permissionHandler import PermissionHandler
 
 from internal import defaultArchitecture
 
+class CaselessDictionary(dict):
+    """ Uses lower case keys, but preserves keys as inserted."""
+    def __init__(self, initval={}):
+        if isinstance(initval, dict):
+            for key, value in initval.iteritems():
+                self.__setitem__(key, value)
+        elif isinstance(initval, list):
+            for (key, value) in initval:
+                self.__setitem__(key, value)
+            
+    def __contains__(self, key):
+        return dict.__contains__(self, key.lower())
+  
+    def __getitem__(self, key):
+        return dict.__getitem__(self, key.lower())['val'] 
+  
+    def __setitem__(self, key, value):
+        return dict.__setitem__(self, key.lower(), {'key': key, 'val': value})
+
+    def get(self, key, default=None):
+        try:
+            v = dict.__getitem__(self, key.lower())
+        except KeyError:
+            return default
+        else:
+            return v['val']
+    
+    def has_key(self, key):
+        return key.lower() in self
+    
+    def items(self):
+        return [(v['key'], v['val']) for v in dict.itervalues(self)]
+    
+    def keys(self):
+        return [v['key'] for v in dict.itervalues(self)]
+    
+    def values(self):
+        return [v['val'] for v in dict.itervalues(self)]
+    
+    def iteritems(self):
+        for v in dict.itervalues(self):
+            yield v['key'], v['val']
+        
+    def iterkeys(self):
+        for v in dict.itervalues(self):
+            yield v['key']
+        
+    def itervalues(self):
+        for v in dict.itervalues(self):
+            yield v['val']
+    
+
 class C3Object(object):
+    """Base Class of Cheshire3 Object"""
     id = ""
     name = ""
     objectType = ""
     parent = None
     paths = {}
-    subConfigs = {}
-    objects = {}
+    subConfigs = {} # Will be a CaselessDictionary after __init__
+    objects = {} # Will be a CaselessDictionary after __init__
     configStore = None
     settings = {}
     defaults = {}
@@ -114,7 +167,7 @@ class C3Object(object):
         for mod in child.childNodes:
             if mod.nodeType == elementType and mod.localName == "subConfig":
                 id = mod.getAttributeNS(None,'id')
-                self.subConfigs[id.lower()] = mod
+                self.subConfigs[id] = mod
 
                 # Cache indexes and maps
                 type = mod.getAttributeNS(None,'type')
@@ -151,7 +204,7 @@ class C3Object(object):
                         path = os.path.join(self.get_path(session, 'defaultPath'), path)
                     dom = self._getDomFromFile(session, path)
                     id = mod.getAttributeNS(None,'id')
-                    self.subConfigs[id.lower()] = dom.childNodes[0]
+                    self.subConfigs[id] = dom.childNodes[0]
                     ot = mod.getAttributeNS(None,'type')
                     if ot == 'database':
                         self.databaseConfigs[id] = dom.childNodes[0]
@@ -165,9 +218,9 @@ class C3Object(object):
 
         self.docstring = ""
         self.parent = parent
-        self.subConfigs = {}
+        self.subConfigs = CaselessDictionary()
         self.paths = {}
-        self.objects = {}
+        self.objects = CaselessDictionary()
         self.settings = {}
         self.defaults = {}
         self.permissionHandlers = {}
@@ -294,7 +347,7 @@ class C3Object(object):
                     node= node.childNodes[0]
                     nid = node.getAttributeNS(None, 'id')
                     node.setAttributeNS(None, 'configStore', confStore.id)
-                    self.subConfigs[nid.lower()] = node
+                    self.subConfigs[nid] = node
                     ntype = node.getAttributeNS(None, 'type')
                     if ntype == 'index':
                         self.indexConfigs[nid] = node
@@ -316,7 +369,6 @@ class C3Object(object):
 
     def get_object(self, session, id):
         """Return an object with the given id within this object's scope, or search upwards for it."""
-        id = id.lower()
         if (self.objects.has_key(id)):
             return self.objects[id]
         else:
@@ -324,7 +376,6 @@ class C3Object(object):
             if config:
                 try:
                     obj = dynamic.makeObjectFromDom(session, config, self)
-                    
                 except (ConfigFileException, AttributeError, ImportError):
                     # Push back up as is 
                     print "... while trying to build object with id '%s'" % id
