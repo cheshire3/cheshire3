@@ -9,8 +9,12 @@ import cPickle
 import time
 from lxml import etree
 
-typehash = {int : 'int', long : 'long', str : 'str', unicode : 'unicode',
+srlz_typehash = {int : 'int', long : 'long', str : 'str', unicode : 'unicode',
                     bool : 'bool', type(None) : 'None', float : 'float'}
+
+dsrlz_typehash = {}
+for k,v in srlz_typehash.iteritems():
+    dsrlz_typehash[v] = k
 
 class RankedResultSet(ResultSet):
 
@@ -155,7 +159,7 @@ class SimpleResultSet(RankedResultSet):
                     # XXX FIXME:  This breaks in postgres store with unicode
                     xml.append('<d n="%s" t="cql">%s</d>' % (a, escape(val.toCQL())))
                 else:
-                    xml.append('<d n="%s" t="%s">%s</d>' % (a, typehash.get(type(val), ''), escape(str(val))))
+                    xml.append('<d n="%s" t="%s">%s</d>' % (a, srlz_typehash.get(type(val), ''), escape(str(val))))
         xml.append('<items>')
         for item in self:
             xml.append(item.serialize(session, pickle))
@@ -189,8 +193,8 @@ class SimpleResultSet(RankedResultSet):
                     val = CQLParser.parse(txt)
                 except:
                     val = None
-            elif typehash.has_key(t):
-                val = typehash[t](txt)
+            elif dsrlz_typehash.has_key(t):
+                val = dsrlz_typehash[t](txt)
             else:
                 val = txt
             return val
@@ -889,7 +893,7 @@ class SimpleResultSetItem(ResultSetItem):
                     if pickle:
                         xml.append('<d n="%s" t="pickle">%s</d>' % (a, escape(cPickle.dumps(val))))
                 else:
-                    xml.append('<d n="%s" t="%s">%s</d>' % (a, typehash.get(type(val), ''), escape(unicode(val))))
+                    xml.append('<d n="%s" t="%s">%s</d>' % (a, srlz_typehash.get(type(val), ''), escape(unicode(val))))
         val = getattr(self, 'proxInfo')
         if val:
             # serialise to XML

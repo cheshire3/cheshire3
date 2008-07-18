@@ -246,7 +246,11 @@ class PostgresStore(SimpleStore):
             # already exists
             pass
 
-        ndata = data.replace("'", "\\'")
+        try:
+            ndata = pg.escape_string(data)
+        except:
+            # insufficient PyGreSQL version
+            ndata = data.replace("'", "\\'")
 
         if metadata:
             extra = []
@@ -431,6 +435,10 @@ class PostgresDocumentStore(PostgresStore, SimpleDocumentStore):
 
 
 class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
+    _possibleSettings = {
+                         'overwriteOkay' : {'docs': 'Can resultSets in this store be overwritten by a resultSet with the same identifier. NB if the item membership or order of a resultSet change, then the resultSet is fundamentally altered and should be assigned a new identifier. A stored resultSet should NEVER be overwritten by one that has different items or ordering!. 1 = Yes, 0 = No (default).', 'type': int, 'options' : "0|1"}
+                        }
+    
     def __init__(self, session, node, parent):
         SimpleResultSetStore.__init__(self, session, node, parent)
         PostgresStore.__init__(self, session, node, parent)
@@ -507,9 +515,13 @@ class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
         srlz = rset.serialise(session)
         cl = str(rset.__class__)
         data = srlz.replace('\x00', '\\\\000')
-        ndata = data.replace("'", "\\'")
-
-        query = "INSERT INTO %s (identifier, data, size, class, timeCreated, timeAccessed, expires) VALUES ('%s', '%s', %s, '%s', '%s', '%s', '%s')" % (self.table, id, ndata, len(rset), cl, nowStr, nowStr, expiresStr)
+        try:
+            ndata = pg.escape_string(data)
+        except:
+            # insufficient PyGreSQL version
+            ndata = data.replace("'", "\\'")
+            
+        query = "INSERT INTO %s (identifier, data, size, class, timeCreated, timeAccessed, expires) VALUES ('%s', E'%s', %s, '%s', '%s', '%s', '%s')" % (self.table, id, ndata, len(rset), cl, nowStr, nowStr, expiresStr)
 
         try:
             self._query(query)
@@ -520,7 +532,10 @@ class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
                 id = self.generate_id(session)
                 if (self.idNormalizer != None):
                     id = self.idNormalizer.process_string(session, id)
-                query = "INSERT INTO %s (identifier, data, size, class, timeCreated, timeAccessed, expires) VALUES ('%s', '%s', %s, '%s', '%s', '%s', '%s')" % (self.table, id, ndata, len(rset), cl, nowStr, nowStr, expiresStr)
+                query = "INSERT INTO %s (identifier, data, size, class, timeCreated, timeAccessed, expires) VALUES ('%s', E'%s', %s, '%s', '%s', '%s', '%s')" % (self.table, id, ndata, len(rset), cl, nowStr, nowStr, expiresStr)
+                self._query(query)
+            elif self.get_setting(session, 'overwriteOkay', 0):
+                query = "UPDATE %s SET data = E'%s', size = %s, class = '%s', timeAccessed = '%s', expires = '%s' WHERE identifier = '%s';" % (self.table, ndata, len(rset), cl, nowStr, expiresStr, id)
                 self._query(query)
             else:
                 raise ObjectAlreadyExistsException(self.id + '/' + id)
