@@ -1,5 +1,5 @@
 
-from configParser import C3Object
+from configParser import C3Object, CaselessDictionary
 from baseObjects import Database, Index, ProtocolMap, Record
 from baseStore import SummaryObject
 from c3errors import ConfigFileException
@@ -38,10 +38,10 @@ class SimpleDatabase(SummaryObject, Database):
     records = {}
 
     def __init__(self, session, config, parent):
-        self.indexes = {}
-        self.protocolMaps = {}
-        self.indexConfigs = {}
-        self.protocolMapConfigs = {}
+        self.indexes = CaselessDictionary()
+        self.protocolMaps = CaselessDictionary()
+        self.indexConfigs = CaselessDictionary()
+        self.protocolMapConfigs = CaselessDictionary()
         self.records = {}
         Database.__init__(self, session, config, parent)
         SummaryObject.__init__(self, session, config, parent)
