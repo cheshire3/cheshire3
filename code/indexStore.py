@@ -942,7 +942,7 @@ class BdbIndexStore(IndexStore):
         return tfcxn
 
 
-    def fetch_termFrequencies(self, session, index, mType='occ', start=1, nTerms=100, direction=">"):
+    def fetch_termFrequencies(self, session, index, mType='occ', start=0, nTerms=100, direction=">"):
         cxn = self._openTermFreq(session, index, mType)
         if cxn == None:
             return []
