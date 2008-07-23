@@ -25,6 +25,7 @@ class IndexIter(object):
         self.index = index
         self.indexStore = index.indexStore
         self.session = Session()
+        self.summary = 0
         # populate with first term
         self.nextData = self.indexStore.fetch_termList(self.session, self.index, "", 1)[0]
 
@@ -614,7 +615,7 @@ class SimpleIndex(Index):
     def fetch_summary(self, session):
         return self.indexStore.fetch_summary(session, self)
 
-    def fetch_termFrequencies(self, session, mType='occ', start=1, nTerms=100, direction=">"):
+    def fetch_termFrequencies(self, session, mType='occ', start=0, nTerms=100, direction=">"):
         return self.indexStore.fetch_termFrequencies(session, self, mType, start, nTerms, direction)
 
     def fetch_metadata(self, session):
