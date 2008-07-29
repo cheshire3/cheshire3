@@ -184,9 +184,7 @@ def process_searchRetrieve(self, session, req):
     else:
         self.numberOfRecords = 0
     
-    # XXX: this needs emptying otherwise it remains from previous requests
-    self.extraResponseData = []
-    # XXX: following lines were indented, so only happened with 0 results - John
+    self.extraResponseData = []    # empty to prevent data from previous requests
     process_extraData(config.searchExtensionHash, req, self, rs)
     process_extraData(config.responseExtensionHash, req, self)
 
@@ -303,12 +301,12 @@ def process_explain(self, session, req):
             dbNode = et.xpath('//zrx:explain/zrx:databaseInfo', namespaces=nsHash)[0]
             try: impNode = dbNode.xpath('//zrx:implementation', namespaces=nsHash)[0]
             except IndexError:
-                impNode = etree.XML('''<implementation identifier="http://www.cheshire3.org" version="0.9.9">
+                impNode = etree.XML('''<implementation identifier="http://www.cheshire3.org" version="%d.%d.%d">
                 <title>Cheshire3 SRW/U Server</title>
                 <agents>
                     <agent type="vendor">The University of Liverpool</agent>
                 </agents>
-                </implementation>''')
+                </implementation>''' % internal.cheshireVersion)
                 dbNode.append(impNode)
                 
             if db.totalItems:
