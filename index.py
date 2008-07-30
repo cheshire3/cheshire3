@@ -357,25 +357,29 @@ class SimpleIndex(Index):
                 while (firstMask > 0) and (k[firstMask-1] == '\\'):
                     firstMask = self._locate_firstMask(k, firstMask+1)
                 # TODO: slow regex e.g. if first char is *
-                if (firstMask > 0):
+                if (firstMask > -1):
                     startK = k[:firstMask]
                     try: nextK = startK[:-1] + chr(ord(startK[-1])+1)
                     except IndexError:
-                        # we need to do something clever - seems they want left truncation
-                        # FIXME: need to do something cleverer than this!
+                        # left truncation, all terms from the index
+                        # TODO: we should check if there's a inversion of index keys
                         termList =  store.fetch_termList(session, self, startK, 0, '>=')
                     else:
                         termList =  store.fetch_termList(session, self, startK, 0, '>=', end=nextK)
+                    
                     maskBase = self.resultSetClass(session, [], recordStore=self.recordStore)
                     maskClause = CQLParser.parse(clause.toCQL())
                     maskClause.relation.value = u'any'
-                    if (firstMask < len(k)-1) or (k[firstMask] in ['?', '^']):
-                        # not simply right hand truncation
-                        k = self._regexify_wildcards(k)
-                        kRe = re.compile(k)
-                        mymatch = kRe.match
-                        termList = filter(lambda t: mymatch(t[0]), termList)
-
+                    if len(k) > 1:
+                        # filter terms by regex
+                        # FIXME: need to do something cleverer than this if first character is masked
+                        # this implementation will be incredibly slow for these cases...
+                        if (firstMask < len(k)-1) or (k[firstMask] in ['?', '^']):
+                            # not simply right hand truncation
+                            kRe = re.compile(self._regexify_wildcards(k))
+                            mymatch = kRe.match
+                            termList = filter(lambda t: mymatch(t[0]), termList)
+                    
                     try:
                         maskResultSets = [self.construct_resultSet(session, t[1], qHash) for t in termList]
                         maskBase = maskBase.combine(session, maskResultSets, maskClause, db)
@@ -383,10 +387,9 @@ class SimpleIndex(Index):
                         pass
                     else:
                         matches.append(maskBase)
-                    
+                                   
                 elif (firstMask == 0):
-                    # TODO: come up with some way of returning results, even though they're trying to mask the first character
-                    # above implementation would be incredibly slow for this case.
+                    
                     pass
                 else:
                     term = store.fetch_term(session, self, k)
@@ -1152,6 +1155,26 @@ class RecordIdentifierIndex(Index):
                     item.database = db.id
                     item.recordStore = recordStore.id
                     items.append(item)
+        elif clause.relation.value in ['<', '<='] and clause.term.value.isdigit():
+            t = long(clause.term.value)
+            if clause.relation.value == '<':
+                terms = range(t)
+            else:
+                terms = range(t+1)
+                
+            items = []
+            for t in terms:
+                if recordStore.fetch_metadata(session, t, 'wordCount') > -1:
+                    item = SimpleResultSetItem(session)
+                    item.id = t
+                    item.database = db.id
+                    item.recordStore = recordStore.id
+                    items.append(item)
+        else:
+            d = SRWDiagnostics.Diagnostic24()
+            d.details = '%s "%s"' % (clause.relation.toCQL(), clause.term.value)
+            raise d
+        
         base.fromList(items)
         base.index = self
         return base
