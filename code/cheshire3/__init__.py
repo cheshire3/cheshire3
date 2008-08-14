@@ -1,6 +1,6 @@
 
-from __future__ import print_function
-from __future__ import unicode_literals
+#from __future__ import print_function
+#from __future__ import unicode_literals
 
 # Tests for Python 3.0 incompatibility
 #import sys
