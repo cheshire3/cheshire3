@@ -2,7 +2,7 @@
   <subConfigs>
 
    <subConfig type="preParser" id="FimiPreParser">
-      <objectType>datamining.dmPreParser.Fimi1PreParser</objectType>
+      <objectType>datamining.preParser.Fimi1PreParser</objectType>
       <paths>
         <path type="filePath">/home/cheshire/cheshire3/code/datamining/apps/fimi</path>
       </paths>
@@ -12,7 +12,7 @@
     </subConfig>
 
    <subConfig type="preParser" id="TfpPreParser">
-      <objectType>datamining.dmPreParser.TFPPreParser</objectType>
+      <objectType>datamining.preParser.TFPPreParser</objectType>
       <paths>
         <path type="filePath">/home/cheshire/cheshire3/code/datamining/apps/tfp2</path>
         <path type="javaPath">/usr/local/jdk1.6.0_02/bin/java</path>
@@ -23,11 +23,11 @@
     </subConfig>
 
     <subConfig type="preParser" id="ARMVectorPreParser">
-      <objectType>datamining.dmPreParser.ARMVectorPreParser</objectType>
+      <objectType>datamining.preParser.ARMVectorPreParser</objectType>
     </subConfig>
 
     <subConfig type="preParser" id="VectorRenumberPreParser">
-      <objectType>datamining.dmPreParser.VectorRenumberPreParser</objectType>
+      <objectType>datamining.preParser.VectorRenumberPreParser</objectType>
       <paths>
         <path type="modelPath">renumber_hash.pickle</path>
       </paths>
@@ -37,7 +37,7 @@
     </subConfig>
 
     <subConfig type="preParser" id="UnRenumberPreParser">
-      <objectType>datamining.dmPreParser.VectorUnRenumberPreParser</objectType>
+      <objectType>datamining.preParser.VectorUnRenumberPreParser</objectType>
       <paths>
         <path type="modelPath">renumber_hash.pickle</path>
       </paths>
@@ -45,8 +45,6 @@
         <setting type="termOffset">1</setting>
       </options>
     </subConfig>
-
-
 
   </subConfigs>
 </config>

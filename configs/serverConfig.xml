@@ -2,10 +2,10 @@
 <config id="Cheshire3Server" type="server">
 
   <paths>
-    <path type="defaultPath">/home/cheshire/cheshire3</path>
-    <path type="sortPath">/bin/sort</path> 
+    <path type="defaultPath">/home/cheshire3/cheshire3</path>
+    <path type="sortPath">/home/cheshire3/install/bin/sort</path> 
     <path type="zserverConfig">configs/zserver.xml</path>
-    <object type="defaultLogger" ref="stdoutLogger"/>
+    <object type="logger" ref="stdoutLogger"/>
     <object type="z3950Logger" ref="z3950Logger"/>
     <object type="resultSetStore" ref="defaultResultSetStore"/>
     <object type="extractor" ref="SimpleExtractor"/>

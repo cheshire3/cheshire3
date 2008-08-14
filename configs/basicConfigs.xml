@@ -2,7 +2,7 @@
 <subConfigs>
 
 <subConfig type="documentFactory" id="defaultDocumentFactory">
-  <objectType>documentFactory.SimpleDocumentFactory</objectType>
+  <objectType>cheshire3.documentFactory.SimpleDocumentFactory</objectType>
 </subConfig>
 <subConfig type="documentFactory" id="ComponentDocumentFactory">
   <objectType>documentFactory.ComponentDocumentFactory</objectType>

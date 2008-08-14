@@ -10,31 +10,16 @@
     </subConfig>
 
     <subConfig type="normalizer" id="WordNetNormalizer">
-      <objectType>textmining.tmNormalizer.WordNetNormalizer</objectType>
-      <imports>
-       <module>
-         <name>textmining</name>
-       </module>
-     </imports>
+      <objectType>textmining.normalizer.WordNetNormalizer</objectType>
     </subConfig>  
 
     <subConfig type="normalizer" id="HypernymNormalizer">
-      <objectType>textmining.tmNormalizer.HypernymNormalizer</objectType>
-      <imports>
-       <module>
-         <name>textmining</name>
-       </module>
-     </imports>
+      <objectType>textmining.normalizer.HypernymNormalizer</objectType>
     </subConfig>  
 
     <!-- string with /POS tags -->
     <subConfig type="normalizer" id="TsuPosNormalizer">
-      <objectType>textmining.tmNormalizer.TsujiiPosNormalizer</objectType>
-      <imports>
-       <module>
-         <name>textmining</name>
-       </module>
-     </imports>
+      <objectType>textmining.normalizer.TsujiiPosNormalizer</objectType>
      <paths>
        <path type="taggerPath">/home/cheshire/cheshire3/code/textmining</path>
      </paths>
@@ -56,12 +41,7 @@
 
     <!-- string with XML for clauses -->
     <subConfig type="normalizer" id="EnjuNormalizer">
-      <objectType>textmining.tmNormalizer.EnjuNormalizer</objectType>
-      <imports>
-       <module>
-         <name>textmining</name>
-       </module>
-     </imports>
+      <objectType>textmining.normalizer.EnjuNormalizer</objectType>
        <paths>
          <path type="enjuPath">/home/cheshire/install/bin/enju</path>
        </paths>
@@ -69,12 +49,7 @@
 
 
     <subConfig type="preParser" id="EnjuTextPreParser">
-      <objectType>textmining.tmPreParser.EnjuTextPreParser</objectType>
-      <imports>
-       <module>
-         <name>textmining</name>
-       </module>
-     </imports>
+      <objectType>textmining.preParser.EnjuTextPreParser</objectType>
        <paths>
          <path type="enjuPath">/home/cheshire/install/bin/enju</path>
        </paths>
@@ -82,24 +57,14 @@
 
     <!-- raw genia output -->
     <subConfig type="normalizer" id="UnparsedGeniaNormalizer">
-       <objectType>textmining.tmNormalizer.GeniaNormalizer</objectType>
-       <imports>
-         <module>
-           <name>textmining</name>
-         </module>
-       </imports>
+       <objectType>textmining.normalizer.GeniaNormalizer</objectType>
        <paths>
          <path type="filePath">/home/cheshire/cheshire3/code/textmining</path>
        </paths>
     </subConfig>  
 
     <subConfig type="normalizer" id="TokenizingUnparsedGeniaNormalizer">
-       <objectType>textmining.tmNormalizer.GeniaNormalizer</objectType>
-       <imports>
-         <module>
-           <name>textmining</name>
-         </module>
-       </imports>
+       <objectType>textmining.normalizer.GeniaNormalizer</objectType>
        <paths>
          <path type="filePath">/home/cheshire/cheshire3/code/textmining</path>
        </paths>
@@ -109,12 +74,7 @@
     </subConfig>  
 
     <subConfig type="tokenizer" id="WordPosGeniaTokenizer">
-       <objectType>textmining.tmTokenizer.UnparsedGeniaTokenizer</objectType>
-       <imports>
-         <module>
-           <name>textmining</name>
-         </module>
-       </imports>
+       <objectType>textmining.tokenizer.UnparsedGeniaTokenizer</objectType>
        <options>
          <setting type="pos">1</setting>
        </options>
@@ -122,26 +82,14 @@
 
 
     <subConfig type="tokenizer" id="PosOnlyGeniaTokenizer">
-       <objectType>textmining.tmTokenizer.UnparsedGeniaTokenizer</objectType>
-       <imports>
-         <module>
-           <name>textmining</name>
-         </module>
-       </imports>
+       <objectType>textmining.tokenizer.UnparsedGeniaTokenizer</objectType>
        <options>
          <setting type="justPos">1</setting>
        </options>
     </subConfig>  
 
-
-
     <subConfig type="tokenizer" id="PhraseGeniaTokenizer">
-       <objectType>textmining.tmTokenizer.PhraseUnparsedGeniaTokenizer</objectType>
-       <imports>
-         <module>
-           <name>textmining</name>
-         </module>
-       </imports>
+       <objectType>textmining.tokenizer.PhraseUnparsedGeniaTokenizer</objectType>
        <paths>
          <path type="filePath">/home/cheshire/cheshire3/code/textmining</path>
        </paths>
@@ -150,12 +98,7 @@
 
     <!-- recombine into string -->
     <subConfig type="normalizer" id="PosStringGeniaNormalizer">
-       <objectType>textmining.tmNormalizer.ReconstructGeniaNormalizer</objectType>
-       <imports>
-         <module>
-           <name>textmining</name>
-         </module>
-       </imports>
+       <objectType>textmining.normalizer.ReconstructGeniaNormalizer</objectType>
        <paths>
          <path type="filePath">/home/cheshire/cheshire3/code/textmining</path>
        </paths>
@@ -166,12 +109,7 @@
 
     <!-- stems recombined -->
     <subConfig type="normalizer" id="StemStringGeniaNormalizer">
-       <objectType>textmining.tmNormalizer.ReconstructGeniaNormalizer</objectType>
-       <imports>
-         <module>
-           <name>textmining</name>
-         </module>
-       </imports>
+       <objectType>textmining.normalizer.ReconstructGeniaNormalizer</objectType>
        <paths>
          <path type="filePath">/home/cheshire/cheshire3/code/textmining</path>
        </paths>
@@ -181,12 +119,7 @@
     </subConfig> 
 
     <subConfig type="normalizer" id="StemPosStringGeniaNormalizer">
-       <objectType>textmining.tmNormalizer.ReconstructGeniaNormalizer</objectType>
-       <imports>
-         <module>
-           <name>textmining</name>
-         </module>
-       </imports>
+       <objectType>textmining.normalizer.ReconstructGeniaNormalizer</objectType>
        <paths>
          <path type="filePath">/home/cheshire/cheshire3/code/textmining</path>
        </paths>
@@ -197,12 +130,7 @@
     </subConfig> 
 
     <subConfig type="normalizer" id="XmlStringGeniaNormalizer">
-       <objectType>textmining.tmNormalizer.ReconstructGeniaNormalizer</objectType>
-       <imports>
-         <module>
-           <name>textmining</name>
-         </module>
-       </imports>
+       <objectType>textmining.normalizer.ReconstructGeniaNormalizer</objectType>
        <paths>
          <path type="filePath">/home/cheshire/cheshire3/code/textmining</path>
        </paths>
@@ -212,12 +140,7 @@
     </subConfig> 
 
     <subConfig type="preParser" id="StemPosGeniaVerbSpanPreParser">
-       <objectType>textmining.tmPreParser.GeniaVerbSpanPreParser</objectType>
-       <imports>
-         <module>
-           <name>textmining</name>
-         </module>
-       </imports>
+       <objectType>textmining.preParser.GeniaVerbSpanPreParser</objectType>
        <paths>
          <path type="filePath">/home/cheshire/cheshire3/code/textmining</path>
        </paths>
@@ -230,12 +153,7 @@
 
 
     <subConfig type="extractor" id="WordPosTaggedExtractor">
-       <objectType>textmining.tmExtractor.TaggedExtractor</objectType>
-       <imports>
-         <module>
-           <name>textmining</name>
-         </module>
-       </imports>
+       <objectType>textmining.extractor.TaggedExtractor</objectType>
        <options>
          <setting type="format">%(word)s/%(pos)s</setting>
          <setting type="prox">1</setting>
@@ -244,12 +162,7 @@
     </subConfig> 
 
     <subConfig type="extractor" id="StemPosTaggedExtractor">
-       <objectType>textmining.tmExtractor.TaggedExtractor</objectType>
-       <imports>
-         <module>
-           <name>textmining</name>
-         </module>
-       </imports>
+       <objectType>textmining.extractor.TaggedExtractor</objectType>
        <options>
          <setting type="format">%(stem)s/%(pos)s</setting>
          <setting type="prox">1</setting>
@@ -258,12 +171,7 @@
     </subConfig> 
 
     <subConfig type="extractor" id="WordTaggedExtractor">
-       <objectType>textmining.tmExtractor.TaggedExtractor</objectType>
-       <imports>
-         <module>
-           <name>textmining</name>
-         </module>
-       </imports>
+       <objectType>textmining.extractor.TaggedExtractor</objectType>
        <options>
          <setting type="format">%(word)s</setting>
          <setting type="prox">1</setting>
@@ -272,12 +180,7 @@
     </subConfig> 
 
     <subConfig type="extractor" id="StemTaggedExtractor">
-       <objectType>textmining.tmExtractor.TaggedExtractor</objectType>
-       <imports>
-         <module>
-           <name>textmining</name>
-         </module>
-       </imports>
+       <objectType>textmining.extractor.TaggedExtractor</objectType>
        <options>
          <setting type="format">%(stem)s</setting>
          <setting type="prox">1</setting>
@@ -286,12 +189,7 @@
     </subConfig> 
 
     <subConfig type="extractor" id="PosTaggedExtractor">
-       <objectType>textmining.tmExtractor.TaggedExtractor</objectType>
-       <imports>
-         <module>
-           <name>textmining</name>
-         </module>
-       </imports>
+       <objectType>textmining.extractor.TaggedExtractor</objectType>
        <options>
          <setting type="format">%(pos)s</setting>
          <setting type="prox">1</setting>
@@ -302,12 +200,7 @@
 
     <!-- keyword, with 'stem' key in hash, /POS in term -->
     <subConfig type="normalizer" id="KeywordGeniaNormalizer">
-       <objectType>textmining.tmNormalizer.HashGeniaNormalizer</objectType>
-       <imports>
-         <module>
-           <name>textmining</name>
-         </module>
-       </imports>
+       <objectType>textmining.normalizer.HashGeniaNormalizer</objectType>
        <paths>
          <path type="filePath">/home/cheshire/cheshire3/code/textmining</path>
        </paths>
@@ -315,23 +208,13 @@
 
 
     <subConfig type="normalizer" id="GeniaStemNormalizer">
-       <objectType>textmining.tmNormalizer.StemGeniaNormalizer</objectType>
-       <imports>
-         <module>
-           <name>textmining</name>
-         </module>
-       </imports>
+       <objectType>textmining.normalizer.StemGeniaNormalizer</objectType>
     </subConfig>  
 
 
     <!-- take POS tagged string and discover phrases -->
     <subConfig type="normalizer" id="PosPhraseNormalizer">
-       <objectType>textmining.tmNormalizer.PosPhraseNormalizer</objectType>
-       <imports>
-         <module>
-           <name>textmining</name>
-         </module>
-       </imports>
+       <objectType>textmining.normalizer.PosPhraseNormalizer</objectType>
        <options>
          <setting type="pattern">JJ*NN+</setting>
          <setting type="subPhrases">1</setting>
@@ -344,59 +227,39 @@
     </subConfig>  
 
     <subConfig type="normalizer" id="NounVerbFilterNormalizer">
-       <objectType>textmining.tmNormalizer.PosTypeNormalizer</objectType>
+       <objectType>textmining.normalizer.PosTypeNormalizer</objectType>
        <options>
          <setting type="posTypes">NN NNP NNS VB VBD VBZ VBG VBN VBP</setting>
          <!-- Can keep the pos tags: -->
          <!-- <setting type="pos">1</setting> -->
        </options>
-       <imports>
-         <module>
-           <name>textmining</name>
-         </module>
-       </imports>
     </subConfig>  
 
     <subConfig type="normalizer" id="NounVerbAdjFilterNormalizer">
-       <objectType>textmining.tmNormalizer.PosTypeNormalizer</objectType>
+       <objectType>textmining.normalizer.PosTypeNormalizer</objectType>
        <options>
          <setting type="posTypes">NN NNP NNS VB VBD VBZ VBG VBN VBP JJ JJR JJS</setting>
          <!-- Can keep the pos tags: -->
          <!-- <setting type="pos">1</setting> -->
        </options>
-       <imports>
-         <module>
-           <name>textmining</name>
-         </module>
-       </imports>
     </subConfig>  
 
     <subConfig type="normalizer" id="NounFilterNormalizer">
-       <objectType>textmining.tmNormalizer.PosTypeNormalizer</objectType>
+       <objectType>textmining.normalizer.PosTypeNormalizer</objectType>
        <options>
          <setting type="posTypes">NN NNP NNS</setting>
          <!-- Can keep the pos tags: -->
          <!-- <setting type="pos">1</setting> -->
        </options>
-       <imports>
-         <module>
-           <name>textmining</name>
-         </module>
-       </imports>
     </subConfig>  
 
     <subConfig type="normalizer" id="VerbFilterNormalizer">
-       <objectType>textmining.tmNormalizer.PosTypeNormalizer</objectType>
+       <objectType>textmining.normalizer.PosTypeNormalizer</objectType>
        <options>
          <setting type="posTypes">VB VBD VBZ VBG VBN VBP</setting>
          <!-- Can keep the pos tags: -->
          <!-- <setting type="pos">1</setting> -->
        </options>
-       <imports>
-         <module>
-           <name>textmining</name>
-         </module>
-       </imports>
     </subConfig>  
     
     <subConfig type="tokenizer" id="PunktTokenizer">
@@ -408,12 +271,7 @@
     </subConfig>
 
   <subConfig type="transformer" id="TsuTransformer">
-      <objectType>textmining.tmTransformer.TsujiiXPathTransformer</objectType>
-      <imports>
-       <module>
-         <name>textmining</name>
-       </module>
-     </imports>
+      <objectType>textmining.transformer.TsujiiXPathTransformer</objectType>
      <paths>
        <path type="taggerPath">/home/cheshire/cheshire3/code/textmining</path>
      </paths>
