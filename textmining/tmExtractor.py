@@ -1,2 +1,0 @@
-
-from extractor import SimpleExtractor
