@@ -24,6 +24,7 @@ socket.setdefaulttimeout(30)
 
 
 mimetypes.add_type('application/marc', '.marc')
+sliceRe = re.compile('^(.*)\[([0-9]+):([-0-9]+)\]$')
 
 # NB:
 # cache = 0:  yield, no caching
@@ -42,8 +43,12 @@ class BaseDocumentStream:
     locations = []
     documents = []
     length = 0
+    startOffset = 0
+    endOffset = -1
 
     def __init__(self, session, stream, format, tagName=None, codec=None, factory=None ):
+        self.startOffset = 0
+        self.endOffset = -1
         self.factory = factory
         self.format = format
         if type(tagName) == unicode:
@@ -59,7 +64,18 @@ class BaseDocumentStream:
             self.streamLocation = "UNKNOWN"
             return stream
         else:
-            if os.path.exists(stream):
+            exists = os.path.exists(stream)
+            m = sliceRe.match(stream)
+            if not exists and m:
+                (stream, start, end) = m.groups()
+                exists = os.path.exists(stream)
+                self.startOffset = int(start)
+                self.endOffset = int(end)
+            else:
+                self.startOffset = 0
+                self.endOffset = -1               
+                
+            if exists:
                 # is a file
                 self.streamLocation = stream
                 if not os.path.isdir(stream):
@@ -135,7 +151,10 @@ class XmlDocumentStream(BaseDocumentStream):
 
         self.stream.seek(0, os.SEEK_END)
         filelen = self.stream.tell()
-        self.stream.seek(0, os.SEEK_SET)
+        if self.startOffset > 0:
+            self.stream.seek(self.startOffset, os.SEEK_SET)
+        else:
+            self.stream.seek(0, os.SEEK_SET)
 
         while True:
             ol = len(line)
@@ -174,6 +193,13 @@ class XmlDocumentStream(BaseDocumentStream):
                             byteCount = len(txt.encode('utf-8'))
                         except:
                             byteCount = tlen
+
+                        if self.endOffset > 0 and myTell >= (self.endOffset - self.startOffset):
+                            if cache == 0:
+                                self.stream.close()
+                                raise StopIteration
+                            else:
+                                break
                             
                         if cache == 0:
                             yield StringDocument(xpi + txt, mimeType="text/xml", tagName=self.tagName, byteCount=byteCount, byteOffset=start+offOffset, filename=self.streamLocation)
