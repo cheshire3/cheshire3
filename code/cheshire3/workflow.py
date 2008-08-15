@@ -52,7 +52,6 @@ class SimpleWorkflow(Workflow):
         # Somewhere at the top there must be a server
         self.server = parent
 
-
     def _handleLxmlConfigNode(self, session, node):
         if node.tag == 'workflow':
             code = ['def handler(self, session, input=None):']
@@ -152,8 +151,11 @@ class SimpleWorkflow(Workflow):
             if n == "object":                    
                 code.extend(self._handleLxmlObject(c))
             elif n == "assign":
-                fro = c.attrib['from']
-                to = c.attrib['to']
+                try:
+                    fro = c.attrib['from']
+                    to = c.attrib['to']
+                except:
+                    raise ConfigFileException("Workflow element assign requires 'to' and 'from' attributes in %s" % self.id)
                 code.append("%s = %s" % (to, fro))
             elif n == "for-each":
                 fcode = self._handleForEach(c)
@@ -273,7 +275,10 @@ class SimpleWorkflow(Workflow):
 
     def _handleLxmlObject(self, node):
         ref = node.attrib.get('ref', '')
-        typ = node.attrib['type']
+        try:
+            typ = node.attrib['type']
+        except:
+            raise ConfigFileException("Workflow element 'object' requires 'type' attribute in %s" % self.id)
         function = node.attrib.get('function', '')
         return self._handleAnonObject(self, ref, typ, function)
 
@@ -442,8 +447,11 @@ class CachingWorkflow(SimpleWorkflow):
         return self._handleAnonObject(ref, typ, function)
 
     def _handleLxmlObject(self, node):
-        ref = node.attrib['ref']
-        typ = node.attrib['type']
+        ref = node.attrib.get('ref', '')
+        try:
+            typ = node.attrib['type']
+        except:
+            raise ConfigFileException("Workflow element 'object' requires attribute 'type' in %s" % self.id)
         function = node.get('function', '')
         return self._handleAnonObject(ref, typ, function)
 
