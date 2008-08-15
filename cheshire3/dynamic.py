@@ -63,7 +63,7 @@ def buildObject(session, objectType, args):
             except: pass
         if session.logger:
             session.logger.log_critical(session, "Module %s does not define class %s" % (modName, className))
-            raise
+        raise
                                        
     try:
         return parentClass(session, *args)    
