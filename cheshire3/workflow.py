@@ -272,9 +272,9 @@ class SimpleWorkflow(Workflow):
         return code
 
     def _handleLxmlObject(self, node):
-        ref = node.attrib['ref']
+        ref = node.attrib.get('ref', '')
         typ = node.attrib['type']
-        function = node.attrib['function']
+        function = node.attrib.get('function', '')
         return self._handleAnonObject(self, ref, typ, function)
 
     def _handleObject(self, node):
