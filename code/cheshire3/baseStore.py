@@ -574,8 +574,8 @@ class BdbStore(SimpleStore):
             if p and os.path.exists(p):
                 cxn = bdb.db.DB()
                 cxn.remove(p)
-                self._initDb(session, t)
-                self._verifyDatabase(session, t)
+                self._initDb(session, "%sReverse" % t)
+                self._verifyDatabase(session, "%sReverse" % t)
         return self
                 
     def clean(self, session):
