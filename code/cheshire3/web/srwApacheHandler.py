@@ -10,7 +10,7 @@ from PyZ3950 import SRWDiagnostics
 import cStringIO as StringIO
 
 from cheshire3.server import SimpleServer
-from cheshire3.utils import reader
+# from cheshire3.utils import reader
 from cheshire3.baseObjects import Session
 
 # Apache Config:
@@ -85,7 +85,7 @@ class reqHandler:
             if (req.method == "POST"):
                 try:
                     data = req.read()
-		    dstr = StringIO.StringIO(data)
+                    dstr = StringIO.StringIO(data)
                     ps = ParsedSoap(dstr, readerclass=reader)
                 except Exception, e:
                     try:
