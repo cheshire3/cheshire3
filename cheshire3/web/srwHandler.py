@@ -20,7 +20,7 @@ from xml.sax.saxutils import escape
 
 from srwExtensions import *
 
-from cheshrie3.baseObjects import Session, RecordStore
+from cheshire3.baseObjects import Session, RecordStore
 from cheshire3.document import StringDocument
 from cheshire3.utils import flattenTexts
 

@@ -212,7 +212,15 @@ class SimpleWorkflow(Workflow):
         text = flattenTexts(node)
         if text[0] != '"':
             text = repr(text)
-        code.append("object.log(session, str(%s).strip())" % text)
+
+        lvl = node.getAttributeNS(None, 'level')
+        if (lvl):
+            if lvl.isdigit():
+                code.append("object.log_lvl(session, %s, str(%s).strip())" % (int(lvl), text))
+            else:
+                code.append("object.log_%s(session, str(%s).strip())" % (lvl, text))
+        else:
+            code.append("object.log(session, str(%s).strip())" % text)
         return code
 
     def _handleLxmlLog(self, node):
@@ -225,7 +233,14 @@ class SimpleWorkflow(Workflow):
         text = flattenTexts(node)
         if text[0] != '"':
             text = repr(text)
-        code.append("object.log(session, str(%s).strip())" % text)
+        lvl = node.attrib.get('level', '')
+        if (lvl):
+            if lvl.isdigit():
+                code.append("object.log_lvl(session, %s, str(%s).strip())" % (int(lvl), text))
+            else:
+                code.append("object.log_%s(session, str(%s).strip())" % (lvl, text))
+        else:
+            code.append("object.log(session, str(%s).strip())" % text)
         return code
             
     def _handleForEach(self, node):
@@ -422,22 +437,40 @@ class CachingWorkflow(SimpleWorkflow):
         if text[0] != '"':
             text = repr(text)
         ref = node.getAttributeNS(None, 'ref')
+        lvl = node.getAttributeNS(None, 'level')
+        
         if (ref):
             self.objrefs.add(ref)
-            return ["self.objcache[%s].log(session, str(%s))" % (ref, text)]
+            obj = "self.objcache[%s]" % ref
         else:
-            return ["self.defaultLogger.log(session, str(%s))" % (text)]
+            obj = "self.defaultLogger"
+        if lvl:
+            if lvl.isdigit():
+                return ["%s.log_lvl(session, %s, str(%s).strip())" % (start, lvl, text)
+            else:
+                return ["%s.log_%s(session, str(%s).strip())" % (start, text)
+        else:
+            return ["%s.log(session, str(%s).strip())" % (start, text)]
+
 
     def _handleLxmlLog(self, node):
         text = flattenTexts(node)
         if text[0] != '"':
             text = repr(text)
         ref = node.attrib.get('ref', '')
+        lvl = node.attrib.get('level', '')
         if (ref):
             self.objrefs.add(ref)
-            return ["self.objcache[%s].log(session, str(%s).strip())" % (ref, text)]
+            obj = "self.objcache[%s]" % ref
         else:
-            return ["self.defaultLogger.log(session, str(%s).strip())" % (text)]
+            obj = "self.defaultLogger"
+        if lvl:
+            if lvl.isdigit():
+                return ["%s.log_lvl(session, %s, str(%s).strip())" % (start, lvl, text)
+            else:
+                return ["%s.log_%s(session, str(%s).strip())" % (start, text)
+        else:
+            return ["%s.log(session, str(%s).strip())" % (start, text)]
 
             
     def _handleObject(self, node):
