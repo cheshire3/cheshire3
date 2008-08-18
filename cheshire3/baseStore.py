@@ -561,9 +561,20 @@ class BdbStore(SimpleStore):
 
         self._openAll(session)
         if force or not 'expiresReverse' in self.cxns:
+            # Just delete the files
             deleted = self.cxns['database'].stat(bdb.db.DB_FAST_STAT)['nkeys']
-            for c in self.cxns:
-                self.cxns[c].truncate()
+            self._closeAll(session)
+            for t in self.get_storageTypes(session):
+                p = self.get_path(session, "%sPath" % t)
+                if p and os.path.exists(p):
+                    cxn = bdb.db.DB()
+                    cxn.remove(p)
+            for t in self.get_reverseMetadataTypes(session):
+                p = self.get_path(session, "%sReversePath" % t)
+                if p and os.path.exists(p):
+                    cxn = bdb.db.DB()
+                    cxn.remove(p)
+
         else:
             now = time.time()
             cxn = self._open(session, 'expiresReverse')
@@ -590,8 +601,8 @@ class BdbStore(SimpleStore):
                 except:
                     # Reached beginning
                     break
-        self._closeAll(session)        
-        return deleted
+            self._closeAll(session)        
+        return self
 
 
 class FileSystemIter(object):
