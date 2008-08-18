@@ -30,7 +30,7 @@ class SimpleLogger(Logger):
                 dfp = self.get_path(session, 'defaultPath')
                 fp = os.path.join(dfp, fp)
             self.fileh = file(fp, 'a')
-	self.cacheLen = self.get_setting(session, 'cacheLength', 0)
+        self.cacheLen = self.get_setting(session, 'cacheLength', 0)
         self.minLevel = self.get_setting(session, 'minLevel', 0)
         self.defaultLevel = self.get_default(session, 'level', 0)
 
@@ -48,7 +48,7 @@ class SimpleLogger(Logger):
 
         # templating here etc
         now = time.strftime("%Y-%m-%d %H:%M:%S")
-        lvlstr = ['NOTSET', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'][int(lvl/10)]        
+        lvlstr = ['NOTSET', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'][max(int(lvl/10), 6)]        
         line = "[%s] %s: %s" % (now, lvlstr, line)
 
         if (self.lineCache and self.lineCache[-1].startswith(line)):
@@ -77,7 +77,6 @@ class SimpleLogger(Logger):
         line.append(")")
         line = ''.join(line)
         self.log_lvl(None, 0, line)
-	    
 
     def log(self, session, msg):
         self.log_lvl(session, self.defaultLevel, msg)

@@ -15,7 +15,6 @@ import SRW
 import SRW.types
 from ZSI import *
 from PyZ3950.SRWDiagnostics import *
-from PyZ3950 import CQLParser
 from xml.sax.saxutils import escape
 
 from srwExtensions import *
@@ -23,6 +22,8 @@ from srwExtensions import *
 from cheshire3.baseObjects import Session, RecordStore
 from cheshire3.document import StringDocument
 from cheshire3.utils import flattenTexts
+from cheshire3 import internal
+import cheshire3.cqlParser as CQLParser
 
 # -------------------------------------------------------------------
 # Data transformations
