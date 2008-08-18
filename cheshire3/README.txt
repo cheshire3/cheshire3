@@ -224,8 +224,9 @@ commit the terms extracted.
    >>> idxStore.begin_indexing(session, idx)
    >>> for rec in recStore:
    ...     idx.index_record(session, rec)
-   >>> idxStore.commit_indexing(session, idx)
    recordStore/...   
+   >>> idxStore.commit_indexing(session, idx)
+
 
 More often than not, documents will require some sort of pre-processing step
 in order to ensure that they're valid XML in the schema that you want them in.
@@ -276,7 +277,7 @@ And note the extra space on the end of the identifier...
    >>> s = db.get_object(session, 'SpaceNormalizer')
    >>> h3 = s.process_hash(session, h2)
    >>> h3
-   {'oai:citeseerpsu:2': {'text': 'oai:citeseerpsu:2',
+   {'oai:citeseerpsu:2': {'text': 'oai:citeseerpsu:2',...
 
 Now it's ready to be stored in the index!
 
@@ -284,7 +285,7 @@ This is fine if you want to just store strings, but most searches should be
 at a word level.  Let's get the abstract text from the record:
 
    >>> xp2 = db.get_object(session, 'textXPath')
-   >>> elems = xp2.process_xpath(session, rec)
+   >>> elems = xp2.process_record(session, rec)
    >>> elems
    [[<Element {http://purl.org/dc/elements/1.1/}description ...
 
