@@ -224,7 +224,10 @@ class C3Object(object):
     def _recurseLxmlSubConfigs(self, session, elem):
         for e in elem.iterchildren(tag=etree.Element):
             if e.tag == 'subConfig':
-                id = e.attrib['id']
+                try:
+                    id = e.attrib['id']
+                except:
+                    raise ConfigFileException("SubConfig needs id attribute: %s" % etree.tostring(e))
                 typ = e.attrib['type']
                 self.subConfigs[id] = e
                 if typ == 'index':

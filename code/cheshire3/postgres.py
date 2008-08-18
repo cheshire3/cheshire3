@@ -446,6 +446,7 @@ class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
         try:
             self.cxn = pg.connect(self.database)
         except pg.InternalError, e:
+            raise e
             raise ConfigFileException(e.args)
 
         try:
