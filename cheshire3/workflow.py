@@ -446,11 +446,11 @@ class CachingWorkflow(SimpleWorkflow):
             obj = "self.defaultLogger"
         if lvl:
             if lvl.isdigit():
-                return ["%s.log_lvl(session, %s, str(%s).strip())" % (start, lvl, text)
+                return ["%s.log_lvl(session, %s, str(%s).strip())" % (obj, lvl, text)]
             else:
-                return ["%s.log_%s(session, str(%s).strip())" % (start, text)
+                return ["%s.log_%s(session, str(%s).strip())" % (obj, lvl, text)]
         else:
-            return ["%s.log(session, str(%s).strip())" % (start, text)]
+            return ["%s.log(session, str(%s).strip())" % (obj, text)]
 
 
     def _handleLxmlLog(self, node):
@@ -466,11 +466,11 @@ class CachingWorkflow(SimpleWorkflow):
             obj = "self.defaultLogger"
         if lvl:
             if lvl.isdigit():
-                return ["%s.log_lvl(session, %s, str(%s).strip())" % (start, lvl, text)
+                return ["%s.log_lvl(session, %s, str(%s).strip())" % (obj, lvl, text)]
             else:
-                return ["%s.log_%s(session, str(%s).strip())" % (start, text)
+                return ["%s.log_%s(session, str(%s).strip())" % (obj, lvl, text)]
         else:
-            return ["%s.log(session, str(%s).strip())" % (start, text)]
+            return ["%s.log(session, str(%s).strip())" % (obj, text)]
 
             
     def _handleObject(self, node):
