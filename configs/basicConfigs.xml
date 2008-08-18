@@ -8,7 +8,9 @@
   <objectType>cheshire3.documentFactory.ComponentDocumentFactory</objectType>
 </subConfig>
 
-
+<subConfig type="queryFactory" id="defaultQueryFactory">
+  <objectType>cheshire3.queryFactory.SimpleQueryFactory</objectType>
+</subConfig>
 
 <!-- Parser objects -->
 
