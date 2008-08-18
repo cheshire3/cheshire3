@@ -145,7 +145,6 @@ class SimpleDatabase(SummaryObject, Database):
             self._cacheIndexes(session)
         for idx in self.indexes.itervalues():
             idx.clear(session)
-        
         return None
 
     def _search(self, session, query):

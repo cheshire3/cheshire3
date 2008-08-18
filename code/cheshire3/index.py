@@ -1095,8 +1095,8 @@ class BitmapIndex(SimpleIndex):
 
         
     def deserialize_term(self, session, data, nRecs=-1, prox=0):
-	lsize = 3 * self.longStructSize
-	longs = data[:lsize]
+        lsize = 3 * self.longStructSize
+        longs = data[:lsize]
         terms = list(struct.unpack('lll', longs))
         if len(data) > lsize:
             bf = SimpleBitfield(data[lsize:])
@@ -1158,6 +1158,9 @@ class RecordIdentifierIndex(Index):
     def delete_record(self, session, rec):
         pass
 
+    def clear(self, session):
+        pass
+    
     def scan(self, session, clause, nTerms, direction):
         raise NotImplementedError()
 
@@ -1226,6 +1229,9 @@ class ReverseMetadataIndex(Index):
     def index_record(self, session, rec):
         return record
     def delete_record(self, session, rec):
+        pass
+
+    def clear(self, session):
         pass
 
     def scan(self, session, clause, nTerms, direction):
