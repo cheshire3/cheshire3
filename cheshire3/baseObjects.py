@@ -161,7 +161,9 @@ class Index(C3Object):
     def fetch_termFrequencies(self, session, mType, start, nTerms, direction):
         raise(NotImplementedError)
 
-
+    def clear(self, session):
+        raise(NotImplementedError)
+    
     def scan(self, session, clause, nTerms, direction=">="):
         """Produce an ordered term list with document frequencies and total occurences """
         raise(NotImplementedError)

@@ -60,9 +60,6 @@ Another useful path to know is the database's default path:
    >>> dfp = db.get_path(session, 'defaultPath')
 
 
-
-   
-
 === LOADING DATA ===
 
 In order to load data into your database you'll need a document
@@ -74,17 +71,16 @@ database needs its own record store.
    >>> df = db.get_object(session, "defaultDocumentFactory")
    >>> parser = db.get_object(session, "LxmlParser")
    >>> recStore = db.get_object(session, "recordStore")
-   >>> idxStore = db.get_object(session, 'indexStore')   
-
 
 Before we get started, we need to make sure that the stores are all clear.
-   >>> recStore.clean(session, 1)
-   >>> idxStore.clean(session, 1)
-
+   >>> recStore.clear(session)
+   <cheshire3.recordStore.BdbRecordStore object...
+   >>> db.clear_indexes(session)
    
 First you should call db.begin_indexing() in order to let the database
 initialise anything before indexing starts.  Ditto for the record store.
 
+   >>> idxStore = db.get_object(session, 'indexStore')   
    >>> db.begin_indexing(session)
    >>> recStore.begin_storing(session)   
 

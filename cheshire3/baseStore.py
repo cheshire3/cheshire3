@@ -292,7 +292,11 @@ class SimpleStore(C3Object, SummaryObject):
         # store value for mType metadata against id
         raise NotImplementedError
     
-    def clean(self, session, force=False):
+    def clean(self, session):
+        # delete expired data objects
+        raise NotImplementedError
+
+    def clear(self, session):
         # this would delete all the data out of self
         raise NotImplementedError
 
@@ -554,56 +558,56 @@ class BdbStore(SimpleStore):
             if cxn != None:
                 cxn.sync()
 
-    def clean(self, session, force=False):
-        # check for expires unless force is true
-        # NB this zeros the data pages, but does not zero the file size
-        # delete the files to do that ;)
+                
+    def clear(self, session):
+        self._closeAll(session)
+        self.cxns = {}
+        for t in self.get_storageTypes(session):
+            p = self.get_path(session, "%sPath" % t)
+            if p and os.path.exists(p):
+                cxn = bdb.db.DB()
+                cxn.remove(p)
+                self._initDb(session, t)
+                self._verifyDatabase(session, t)
+        for t in self.get_reverseMetadataTypes(session):
+            p = self.get_path(session, "%sReversePath" % t)
+            if p and os.path.exists(p):
+                cxn = bdb.db.DB()
+                cxn.remove(p)
+                self._initDb(session, t)
+                self._verifyDatabase(session, t)
+        return self
+                
+    def clean(self, session):
 
         self._openAll(session)
-        if force or not 'expiresReverse' in self.cxns:
-            # Just delete the files
-            deleted = self.cxns['database'].stat(bdb.db.DB_FAST_STAT)['nkeys']
-            self._closeAll(session)
-            for t in self.get_storageTypes(session):
-                p = self.get_path(session, "%sPath" % t)
-                if p and os.path.exists(p):
-                    cxn = bdb.db.DB()
-                    cxn.remove(p)
-            for t in self.get_reverseMetadataTypes(session):
-                p = self.get_path(session, "%sReversePath" % t)
-                if p and os.path.exists(p):
-                    cxn = bdb.db.DB()
-                    cxn.remove(p)
-
-        else:
-            now = time.time()
-            cxn = self._open(session, 'expiresReverse')
-            c = cxn.cursor()
-            deleted = 0
-            try:
-                (key, data) = c.set_range(str(now))
-                # float(time) --> object id
-                if (float(key) <= now):
-                    self.delete_data(session, data)
-                    deleted = 1
-                (key, data) = c.prev()
-            except:
-                # No database
-                deleted = 0
-                key = False
-            while key:
+        now = time.time()
+        cxn = self._open(session, 'expiresReverse')
+        c = cxn.cursor()
+        deleted = 0
+        try:
+            (key, data) = c.set_range(str(now))
+            # float(time) --> object id
+            if (float(key) <= now):
                 self.delete_data(session, data)
-                deleted += 1
-                try:
-                    (key, data) = c.prev()
-                    if not float(key):
-                        break
-                except:
-                    # Reached beginning
+                deleted = 1
+            (key, data) = c.prev()
+        except:
+            # No database
+            deleted = 0
+            key = False
+        while key:
+            self.delete_data(session, data)
+            deleted += 1
+            try:
+                (key, data) = c.prev()
+                if not float(key):
                     break
-            self._closeAll(session)        
+            except:
+                # Reached beginning
+                break
+        self._closeAll(session)        
         return self
-
 
 class FileSystemIter(object):
     store = None

@@ -206,13 +206,13 @@ class BdbIndexStore(IndexStore):
                 cxn.open(dbp)
             self.identifierMapCxn[rec.recordStore] = cxn    
         # Now we have cxn, check it rec exists
-	recid = rec.id
-	if type(recid) == unicode:
-	    try:
-		recid = rec.id.encode('utf-8')
-	    except:
-		recid = rec.id.encode('utf-16')
-	try:
+        recid = rec.id
+        if type(recid) == unicode:
+            try:
+                recid = rec.id.encode('utf-8')
+            except:
+                recid = rec.id.encode('utf-16')
+        try:
             data = cxn.get(recid)
             if data:
                 return long(data)
@@ -389,9 +389,9 @@ class BdbIndexStore(IndexStore):
         if (not index in self.outFiles):
             raise FileDoesNotExistException(index.id)
         sort = self.get_path(session, 'sortPath')
-	if (not os.path.exists(sort)):
-	    raise ConfigFileException("Sort executable for %s does not exist" % self.id)
-	
+        if (not os.path.exists(sort)):
+            raise ConfigFileException("Sort executable for %s does not exist" % self.id)
+
         fh = self.outFiles[index]
         fh.flush()
         fh.close()
@@ -407,14 +407,14 @@ class BdbIndexStore(IndexStore):
         basename = os.path.join(temp, basename)
         tempfile = basename + "_TEMP"
         sorted = basename + "_SORT"
-	cmd = "%s %s -T %s -o %s" % (sort, tempfile, temp, sorted)
-	commands.getoutput(cmd)
-	# Sorting might fail.
+        cmd = "%s %s -T %s -o %s" % (sort, tempfile, temp, sorted)
+        commands.getoutput(cmd)
+        # Sorting might fail.
         if (not os.path.exists(sorted)):
             raise ValueError("Failed to sort %s" % tempfile)
         if not index.get_setting(session, 'vectors'):
             os.remove(tempfile)
-	if hasattr(session, 'phase') and session.phase == 'commit_indexing1':
+        if hasattr(session, 'phase') and session.phase == 'commit_indexing1':
             return sorted
 
         # Original terms from data
@@ -427,15 +427,15 @@ class BdbIndexStore(IndexStore):
         dfp = self.get_path(session, 'defaultPath')
         if not os.path.isabs(temp):
             temp = os.path.join(dfp, temp)
-	if (not os.path.exists(sort)):
-	    raise ConfigFileException("Sort executable for %s does not exist" % self.id)
+        if (not os.path.exists(sort)):
+            raise ConfigFileException("Sort executable for %s does not exist" % self.id)
         basename = self._generateFilename(index)
         baseGlob = os.path.join(temp, "%sTask*SORT" % basename)
         sortFileList = glob.glob(baseGlob)
         sortFiles = " ".join(sortFileList)
         sorted = os.path.join(temp, "%s_SORT" % basename)
-	cmd = "%s -m -T %s -o %s %s" % (sort, temp, sorted, sortFiles)
-	out = commands.getoutput(cmd)
+        cmd = "%s -m -T %s -o %s %s" % (sort, temp, sorted, sortFiles)
+        out = commands.getoutput(cmd)
         if not os.path.exists(sorted):
             raise ValueError("Didn't sort %s" % index.id)
         for tsfn in sortFileList:
@@ -1080,8 +1080,7 @@ class BdbIndexStore(IndexStore):
             cxn.remove(dbname)
         self.create_index(session, index)
         return None
-
-
+    
     def delete_index(self, session, index):
         # Send Index object to delete, null return
         p = self.permissionHandlers.get('info:srw/operation/1/delete', None)

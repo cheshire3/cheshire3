@@ -251,17 +251,14 @@ class SQLiteStore(SimpleStore):
         cxn = sqlite3.connect(dbPath)
         self.cxn = cxn
 
-
-    def clean(self, session, force=False):
-        # check for expires unless force is true
-
-        if not force:
-            nowStr = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time.time()))
-            query = "DELETE FROM %s WHERE expires < '%s';" % (self.id, nowStr)
-        else:
-            # drop all
-            query = "DELETE FROM %s" % (self.id)
-
+    def clear(self, session):
+        query = "DELETE FROM %s" % (self.id)
+        self.cxn.execute(query)
+        return None
+        
+    def clean(self, session):
+        nowStr = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time.time()))
+        query = "DELETE FROM %s WHERE expires < '%s';" % (self.id, nowStr)
         self.cxn.execute(query)
         return None
 

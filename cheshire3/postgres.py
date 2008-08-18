@@ -325,17 +325,17 @@ class PostgresStore(SimpleStore):
             return None
         return value
 
-    def clean(self, session, force=False):
+    def clear(self, session):
+        self._openContainer(session)
+        query = "DELETE FROM %s" % (self.table)
+        self._query(query)    
+    
+    def clean(self, session):
         # here is where sql is nice...
         self._openContainer(session)
-        if not force:
-            nowStr = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time.time()))
-            query = "DELETE FROM %s WHERE expires < '%s';" % (self.table, nowStr)
-        else:
-            # drop all
-            query = "DELETE FROM %s" % (self.table)
+        nowStr = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time.time()))
+        query = "DELETE FROM %s WHERE expires < '%s';" % (self.table, nowStr)
         self._query(query)
-
 
     def get_dbSize(self, ession):
         query = "SELECT count(identifier) AS count FROM %s;" % (self.table)
