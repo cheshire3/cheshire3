@@ -212,7 +212,7 @@ class SimpleWorkflow(Workflow):
         text = flattenTexts(node)
         if text[0] != '"':
             text = repr(text)
-        code.append("object.log(session, str(%s))" % text)
+        code.append("object.log(session, str(%s).strip())" % text)
         return code
 
     def _handleLxmlLog(self, node):
@@ -225,7 +225,7 @@ class SimpleWorkflow(Workflow):
         text = flattenTexts(node)
         if text[0] != '"':
             text = repr(text)
-        code.append("object.log(session, str(%s))" % text)
+        code.append("object.log(session, str(%s).strip())" % text)
         return code
             
     def _handleForEach(self, node):
@@ -280,13 +280,13 @@ class SimpleWorkflow(Workflow):
         except:
             raise ConfigFileException("Workflow element 'object' requires 'type' attribute in %s" % self.id)
         function = node.attrib.get('function', '')
-        return self._handleAnonObject(self, ref, typ, function)
+        return self._handleAnonObject(ref, typ, function)
 
     def _handleObject(self, node):
         ref = node.getAttributeNS(None, 'ref')
         typ = node.getAttributeNS(None, 'type')
         function = node.getAttributeNS(None, 'function')
-        return self._handleAnonObject(self, ref, typ, function)
+        return self._handleAnonObject(ref, typ, function)
 
 
     def _handleLxmlSplit(self, node):
@@ -375,9 +375,9 @@ class CachingWorkflow(SimpleWorkflow):
         self.database = db        
         self.defaultLogger = db.get_path(session, 'defaultLogger')
         for o in self.objrefs:
-	    obj = db.get_object(session, o)
-	    if not obj:
-	        raise ObjectDoesNotExistException(o)
+            obj = db.get_object(session, o)
+            if not obj:
+                raise ObjectDoesNotExistException(o)
             self.objcache[o] = obj
 
 
@@ -435,9 +435,9 @@ class CachingWorkflow(SimpleWorkflow):
         ref = node.attrib.get('ref', '')
         if (ref):
             self.objrefs.add(ref)
-            return ["self.objcache[%s].log(session, str(%s))" % (ref, text)]
+            return ["self.objcache[%s].log(session, str(%s).strip())" % (ref, text)]
         else:
-            return ["self.defaultLogger.log(session, str(%s))" % (text)]
+            return ["self.defaultLogger.log(session, str(%s).strip())" % (text)]
 
             
     def _handleObject(self, node):
@@ -466,7 +466,7 @@ class CachingWorkflow(SimpleWorkflow):
             o = "input"
         elif typ:
             code.append("obj = self.database.get_path(session, '%s')" % typ)
-	    o = "obj"
+            o = "obj"
         else:
             raise ConfigFileException("Could not determine object")
         if not function:
