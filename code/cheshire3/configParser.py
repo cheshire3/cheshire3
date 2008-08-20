@@ -224,11 +224,8 @@ class C3Object(object):
     def _recurseLxmlSubConfigs(self, session, elem):
         for e in elem.iterchildren(tag=etree.Element):
             if e.tag == 'subConfig':
-                try:
-                    id = e.attrib['id']
-                except:
-                    raise ConfigFileException("SubConfig needs id attribute: %s" % etree.tostring(e))
-                typ = e.attrib['type']
+                id = e.attrib.get('id', '')
+                typ = e.attrib.get('type', '')
                 self.subConfigs[id] = e
                 if typ == 'index':
                     self.indexConfigs[id] = e
@@ -239,7 +236,7 @@ class C3Object(object):
                 elif typ == '':
                     raise ConfigFileException("Object must have a type attribute: %s" % id)
             elif e.tag == 'path':
-                typ = e.attrib['type']
+                typ = e.attrib.get('type', '')
                 if typ == 'includeConfigs':
                     if 'ref' in e.attrib:
                         self._includeConfigStores.append(e.attrib['ref'])
@@ -260,7 +257,7 @@ class C3Object(object):
                     dom = self._getDomFromFile(session, path)
                     id = e.attrib['id']
                     self.subConfigs[id] = dom
-                    ot = e.attrib['type']
+                    ot = e.attrib.get('type', '')
                     if ot == 'database':
                         self.databaseConfigs[id] = dom
  
@@ -292,7 +289,7 @@ class C3Object(object):
 
         # LXML
         if hasattr(config, 'attrib'):
-            self.id = config.attrib['id']
+            self.id = config.attrib.get('id', '')
             walker = config.iterchildren(tag=etree.Element)
             for e in walker:
                 if e.tag == 'name':
@@ -303,19 +300,25 @@ class C3Object(object):
                     for e2 in e.iterchildren(tag=etree.Element):
                         try:
                             typ = e2.attrib['type']
-                        except:
+                        except KeyError:
                             raise ConfigFileException("path must have type")
                         if e2.tag == 'path':
                             self.paths[typ] = e2.text
                         elif e2.tag == 'object':
-                            ref = e2.attrib['ref']
+                            try:
+                                ref = e2.attrib['ref']
+                            except KeyError:
+                                raise ConfigFileException("object must have ref")
                             pathObjects[typ] = ref
                 elif e.tag == 'subConfigs':
                     # recurse
                     self._recurseLxmlSubConfigs(session, e)
                 elif e.tag == 'options':
                     for e2 in e.iterchildren(tag=etree.Element):
-                        typ = e2.attrib['type']
+                        try:
+                            typ = e2.attrib['type']
+                        except KeyError:
+                            raise ConfigFileException("option (setting/default) must have type")
                         if e2.tag == 'setting':
                             value = self._verifySetting(typ, e2.text)
                             self.settings[typ] = value
