@@ -6,6 +6,7 @@ from cheshire3.configParser import C3Object
 from cheshire3.exceptions import ConfigFileException, ObjectDoesNotExistException
 from cheshire3.utils import elementType, textType, flattenTexts
 from cheshire3.cqlParser import modifierClauseType, indexType, relationType
+from cheshire3 import dynamic
 
 try:
     import cheshire3.web.srwExtensions
@@ -618,14 +619,17 @@ class CQLProtocolMap(ZeerexProtocolMap):
                     raise (ConfigFileException('Unknown extension type %s' % xn))               
                 sru = node.getAttributeNS(self.c3Namespace, 'sruName')
                 fn = node.getAttributeNS(self.c3Namespace, 'function')
+                data = flattenTexts(node)
+                data = data.strip()
+                data = tuple(data.split(' '))
 
                 if fn.find('.') > -1:
                     # new version
                     try:
-                        fn = dynamic.importObject(fn)
-                    except:
-                        raise ConfigFileException("Cannot find handler function %s" % fn)
-                    self.sruExtensionMap[sru] = (xn, fn)
+                        fn = dynamic.importObject(session, fn)
+                    except ImportError:
+                        raise ConfigFileException("Cannot find handler function %s (in %s)" % (fn, repr(sys.path)))
+                    self.sruExtensionMap[sru] = (xn, fn, data)
                 else:
                     if (hasattr(srwExtensions, fn)):
                         fn = getattr(srwExtensions, fn)
@@ -638,9 +642,6 @@ class CQLProtocolMap(ZeerexProtocolMap):
                         sruFunction = getattr(srwExtensions, xform)
                     else:
                         raise(ConfigFileException('Cannot find transformation function %s in srwExtensions.' % xform))
-                    data = flattenTexts(node)
-                    data = data.strip()
-                    data = tuple(data.split(' '))
                     hashAttr = xn + "ExtensionHash"                
                     curr = getattr(self, hashAttr)
                     curr[data] = fn
