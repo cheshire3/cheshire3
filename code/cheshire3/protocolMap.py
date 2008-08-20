@@ -432,6 +432,7 @@ class CQLProtocolMap(ZeerexProtocolMap):
         self.explainExtensionHash = {}
         self.responseExtensionHash = {}
         self.sruExtensionMap = {}
+        self.extensionTypeMap = {}
         ZeerexProtocolMap.__init__(self, session, node, parent)
 
 
@@ -611,31 +612,40 @@ class CQLProtocolMap(ZeerexProtocolMap):
             stype = node.getAttribute('type')
             if stype in ['extraData', 'extraSearchData', 'extraScanData', 'extraExplainData', 'extension']:
                 # function, xnType, sruName
-                fn = node.getAttributeNS(self.c3Namespace, 'function')
-                if (hasattr(srwExtensions, fn)):
-                    fn = getattr(srwExtensions, fn)
-                else:
-                    raise(ConfigFileException('Cannot find handler function %s in srwExtensions.' % fn))
+
                 xn = node.getAttributeNS(self.c3Namespace, 'type')
-                if (not xn in ['record', 'term', 'search', 'scan', 'explain', 'response']):
-                    raise (ConfigFileException('Incorrect extension type %s' % xn))               
-                xform = node.getAttributeNS(self.c3Namespace, 'sruFunction')
-                if not xform:
-                    sruFunction = srwExtensions.simpleRequestXform
-                elif hasattr(srwExtensions, xform):
-                    sruFunction = getattr(srwExtensions, xform)
-                else:
-                    raise(ConfigFileException('Cannot find transformation function %s in srwExtensions.' % xform))
-                    
+                if (not xn in ['record', 'term', 'searchRetrieve', 'scan', 'explain', 'response']):
+                    raise (ConfigFileException('Unknown extension type %s' % xn))               
                 sru = node.getAttributeNS(self.c3Namespace, 'sruName')
-                data = flattenTexts(node)
-                data = data.strip()
-                data = tuple(data.split(' '))
-                hashAttr = xn + "ExtensionHash"                
-		curr = getattr(self, hashAttr)
-		curr[data] = fn
-		setattr(self, hashAttr, curr)
-                self.sruExtensionMap[sru] = (data[0], data[1], sruFunction)
+                fn = node.getAttributeNS(self.c3Namespace, 'function')
+
+                if fn.find('.') > -1:
+                    # new version
+                    try:
+                        fn = dynamic.importObject(fn)
+                    except:
+                        raise ConfigFileException("Cannot find handler function %s" % fn)
+                    self.sruExtensionMap[sru] = (xn, fn)
+                else:
+                    if (hasattr(srwExtensions, fn)):
+                        fn = getattr(srwExtensions, fn)
+                    else:
+                        raise(ConfigFileException('Cannot find handler function %s in srwExtensions.' % fn))
+                    xform = node.getAttributeNS(self.c3Namespace, 'sruFunction')
+                    if not xform:
+                        sruFunction = srwExtensions.simpleRequestXform
+                    elif hasattr(srwExtensions, xform):
+                        sruFunction = getattr(srwExtensions, xform)
+                    else:
+                        raise(ConfigFileException('Cannot find transformation function %s in srwExtensions.' % xform))
+                    data = flattenTexts(node)
+                    data = data.strip()
+                    data = tuple(data.split(' '))
+                    hashAttr = xn + "ExtensionHash"                
+                    curr = getattr(self, hashAttr)
+                    curr[data] = fn
+                    setattr(self, hashAttr, curr)
+                    self.sruExtensionMap[sru] = (data[0], data[1], sruFunction)
         else:
             for c in node.childNodes:
                 if c.nodeType == elementType:

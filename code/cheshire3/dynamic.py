@@ -21,8 +21,8 @@ def makeObjectFromDom(session, topNode, parentObject):
     return buildObject(session, objectType, [topNode, parentObject])
 
 
-def buildObject(session, objectType, args):
 
+def importObject(session, objectType):
     try:
         (modName, className) = objectType.rsplit('.', 1)
     except:
@@ -33,12 +33,11 @@ def buildObject(session, objectType, args):
     except ImportError:
         if objectType[:9] != "cheshire3":
             try:
-                return buildObject(session, "cheshire3.%s" % objectType, args)
+                return importObject(session, "cheshire3.%s" % objectType)
             except: pass
         if session.logger:
             session.logger.log_critical(session, "Failed to import '%s'" % modName)
         raise
-
 
     # now split and fetch bits
     mods = modName.split('.')
@@ -48,7 +47,7 @@ def buildObject(session, objectType, args):
         except AttributeError:
             if objectType[:9] != "cheshire3":
                 try:
-                    return buildObject(session, "cheshire3.%s" % objectType, args)
+                    return importObject(session, "cheshire3.%s" % objectType)
                 except: pass
             if session.logger:
                 session.logger.log_critical(session, "Failed to import %s during %s" % (m, modName))
@@ -59,12 +58,17 @@ def buildObject(session, objectType, args):
     except AttributeError:
         if objectType[:9] != "cheshire3":
             try:
-                return buildObject(session, "cheshire3.%s" % objectType, args)
+                return importObject(session, "cheshire3.%s" % objectType)
             except: pass
         if session.logger:
             session.logger.log_critical(session, "Module %s does not define class %s" % (modName, className))
         raise
-                                       
+    return parentClass
+
+
+def buildObject(session, objectType, args):
+
+    parentClass = importObject(session, objectType)
     try:
         return parentClass(session, *args)    
     except:
