@@ -1252,7 +1252,7 @@ class ComponentDocumentFactory(SimpleDocumentFactory):
                             xp._handleConfigNode(session, node)
                         self.sources.append(xp)
 
-    def _handleConfigNode(self, session, node):
+    def _handleLxmlConfigNode(self, session, node):
         # Source
         if (node.tag == "source"):
             xpaths = []
