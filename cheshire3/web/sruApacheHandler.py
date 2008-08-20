@@ -93,13 +93,28 @@ class reqHandler:
         name = "echoed%sRequest" % oname
 
         echo = getattr(elemFac, name)()
+        extras = []
         for (k,v) in opts.items():
+            if k[:2] == 'x-':
+                # accumulate and include at end
+                extras.append((k,v))
             x = getattr(elemFac, k)()
             if isinstance(v, etree._Element):
                 x.append(v)
             else:
                 x.text = str(v)
             echo.append(x)
+        if extras:
+            extra = elemFac.extraRequestData()
+            x = 1
+            for e in extras:
+                # find real name from config
+                (ns, nm) = session.config.sruExtensionMap[e[0]][2]
+                txt = '<extns%s:%s xmlns:extns%s="%s">%s</extns%s:%s>' % (x, nm, x, ns, e[1], x, nm)
+                x += 1
+                node = etree.XML(txt)
+                extra.append(node)
+            echo.append(extra)
         echo.append(elemFac.baseUrl(session.path))
         return echo
 
@@ -107,7 +122,7 @@ class reqHandler:
         nodes = []
         for (k,v) in opts.items():
             if k[:2] == "x-" and k in session.config.sruExtensionMap:
-                (typ, fn) = session.config.sruExtensionMap[k]
+                (typ, fn, srw) = session.config.sruExtensionMap[k]
                 if typ == eType or (eType == 'response' and typ == opts['operation']):
                     node = fn(session, v, result, *args)
                     if node != None:
