@@ -160,7 +160,7 @@ class GrsMapTransformer(Transformer):
 
     def _handleLxmlConfigNode(self,session, node):
         if (node.tag == "transform"):
-            self.tagset = node.attrib['tagset']
+            self.tagset = node.attrib.get('tagset', '')
             maps = []
             for child in node.iterchildren(tag=etree.Element):
                 if child.tag == 'map':

@@ -383,7 +383,7 @@ class DateStringNormalizer(SimpleNormalizer):
         return str(data)   
 
 class DateYearNormalizer(SimpleNormalizer):
-    """ Normalizes a date in ISO8601 format to simply a year - very crude, simply reteunrs first 4 characters """
+    """ Normalizes a date in ISO8601 format to simply a year - very crude, simply returns first 4 characters """
     def process_string(self, session, data):
         return data[:4]
 
