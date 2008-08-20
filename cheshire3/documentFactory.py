@@ -4,6 +4,7 @@ from cheshire3.document import StringDocument
 from cheshire3.record import SaxRecord
 from cheshire3.bootstrap import BSParser
 from cheshire3.utils import elementType, getFirstData, flattenTexts
+from cheshire3.workflow import CachingWorkflow
 from cheshire3.xpathProcessor import SimpleXPathProcessor
 
 from ZSI.client import Binding
@@ -526,6 +527,7 @@ class ClusterDocumentStream(BaseDocumentStream):
             l = f.readline()
             l = l[:-1]
         f.close()
+
 
 class ComponentDocumentStream(BaseDocumentStream):
     # Accept a record, and componentize
@@ -1351,116 +1353,6 @@ class AccVectorTransformerStream(AccumulatingStream):
         yield doc
 
 
-
-if 0:
-    # XXX Fix Me!
-
-    class ClassClusterDocumentStream(AccumulatingStream):
-        """ Give it lots of documents, it will cluster and then read back in the cluster documents. Niiiiiiiice. [in theory] """
-
-        def _handleConfigNode(self, session, node):
-            if (node.localName == "cluster"):
-                maps = []
-                for child in node.childNodes:
-                    if (child.nodeType == elementType and child.localName == "map"):
-                        t = child.getAttributeNS(None, 'type')
-                        map = []
-                        for xpchild in child.childNodes:
-                            if (xpchild.nodeType == elementType and xpchild.localName == "xpath"):
-                                map.append(flattenTexts(xpchild))
-                            elif (xpchild.nodeType == elementType and xpchild.localName == "process"):
-                                # turn xpath chain to workflow
-                                ref = xpchild.getAttributeNS(None, 'ref')
-                                if ref:
-                                    process = self.get_object(session, ref)
-                                else:
-                                    try:
-                                        xpchild.localName = 'workflow'
-                                    except:
-                                        # 4suite dom sets read only
-                                        newTop = xpchild.ownerDocument.createElementNS(None, 'workflow')
-                                        for kid in xpchild.childNodes:
-                                            newTop.appendChild(kid)
-                                        xpchild = newTop
-                                    process = CachingWorkflow(session, xpchild, self)
-                                    process._handleConfigNode(session, xpchild)
-                                map.append(process)
-                        # XXX FIX ME 
-                        # vxp = verifyXPaths([map[0]])
-                        vxp = [map[0]]
-                        if (len(map) < 3):
-                            # default ExactExtractor
-                            map.append([['extractor', 'SimpleExtractor']])
-                        if (t == u'key'):
-                            self.keyMap = [vxp[0], map[1], map[2]]
-                        else:
-                            maps.append([vxp[0], map[1], map[2]])
-                self.maps = maps
-
-        def __init__(self, session, stream, format, tagName, codec, factory):
-            # XXX FIX ME:  Used to be an index!
-            self.keyMap = []
-            self.maps = []
-            Index.__init__(self, session, config, parent)
-
-            for m in range(len(self.maps)):
-                if isinstance(self.maps[m][2], list):
-                    for t in range(len(self.maps[m][2])):
-                        o = self.get_object(session, self.maps[m][2][t][1])
-                        if (o != None):
-                            self.maps[m][2][t][1] = o
-                        else:
-                            raise(ConfigFileException("Unknown object %s" % (self.maps[m][2][t][1])))
-            if isinstance(self.keyMap[2], list):
-                for t in range(len(self.keyMap[2])):
-                    o = self.get_object(session, self.keyMap[2][t][1])
-                    if (o != None):
-                        self.keyMap[2][t][1] = o
-                    else:
-                        raise(ConfigFileException("Unknown object %s" % (self.keyMap[2][t][1])))
-
-
-        def begin_indexing(self, session):
-            path = self.get_path(session, "tempPath")
-            if (not os.path.isabs(path)):
-                dfp = self.get_path(session, "defaultPath")
-                path = os.path.join(dfp, path)       
-            self.fileHandle = codecs.open(path, "w", 'utf-8')
-
-        def commit_indexing(self, session):
-            self.fileHandle.close()
-
-
-        def index_record(self, session, rec):
-            # Extract cluster information, append to temp file
-            # Step through .maps keys
-            p = self.permissionHandlers.get('info:srw/operation/2/cluster', None)
-            if p:
-                if not session.user:
-                    raise PermissionException("Authenticated user required to cluster using %s" % self.id)
-                okay = p.hasPermission(session, session.user)
-                if not okay:
-                    raise PermissionException("Permission required to cluster using %s" % self.id)
-
-            raw = rec.process_xpath(session, self.keyMap[0])
-            keyData = self.keyMap[2].process(session, [raw])
-            fieldData = []
-            for map in self.maps:
-                raw = rec.process_xpath(session, map[0])
-                fd = map[2].process(session, [raw])
-                for f in fd.keys():
-                    fieldData.append("%s\x00%s\x00" % (map[1], f))
-            d = "".join(fieldData)
-            for k in keyData.keys():
-                try:
-                    self.fileHandle.write(u"%s\x00%s\n" % (k, d))
-                    self.fileHandle.flush()
-                except:
-                    self.log_critical(session, "%s failed to write: %r" % (self.id, k))
-                    raise
-            
-
-
 class AccumulatingDocumentFactory(SimpleDocumentFactory):
     """ Will accumulate data across multiple .load() calls to produce 1 or more documents
     Just call load() repeatedly before fetching document(s)
@@ -1541,3 +1433,160 @@ class AccumulatingDocumentFactory(SimpleDocumentFactory):
             self.generator = self.docStream.find_documents(session, cache=self.cache)
         return SimpleDocumentFactory.get_document(self, session, n)
 
+
+class ClusterExtractionDocumentFactory(AccumulatingDocumentFactory):
+    """ Give it lots of documents, it will cluster and then read back in the cluster documents. Niiiiiiiice. [in theory] """
+
+    _possiblePaths = {'tempPath' : {'docs' : "Path to a file where cluster data will be stored temporarily during subsequent load() calls."}}
+
+    def __init__(self, session, config, parent):
+        self.keyMap = []
+        self.maps = []
+        AccumulatingDocumentFactory.__init__(self, session, config, parent)
+        
+        # architecture object existance checking
+        for m in range(len(self.maps)):
+            if isinstance(self.maps[m][2], list):
+                for t in range(len(self.maps[m][2])):
+                    o = self.get_object(session, self.maps[m][2][t][1])
+                    if (o != None):
+                        self.maps[m][2][t][1] = o
+                    else:
+                        raise(ConfigFileException("Unknown object %s" % (self.maps[m][2][t][1])))
+        
+        if isinstance(self.keyMap[2], list):
+            for t in range(len(self.keyMap[2])):
+                o = self.get_object(session, self.keyMap[2][t][1])
+                if (o != None):
+                    self.keyMap[2][t][1] = o
+                else:
+                    raise(ConfigFileException("Unknown object %s" % (self.keyMap[2][t][1])))
+                
+        path = self.get_path(session, "tempPath")
+        if (not os.path.isabs(path)):
+            dfp = self.get_path(session, "defaultPath")
+            path = os.path.join(dfp, path)
+
+        self.fileHandle = codecs.open(path, "w", self.codec)
+        self.tempPath = path
+        
+
+    def _handleConfigNode(self, session, node):
+        if (node.localName == "cluster"):
+            maps = []
+            for child in node.childNodes:
+                if (child.nodeType == elementType and child.localName == "map"):
+                    t = child.getAttributeNS(None, 'type')
+                    map = []
+                    for xpchild in child.childNodes:
+                        if (xpchild.nodeType == elementType and xpchild.localName == "xpath"):
+                            map.append(flattenTexts(xpchild))
+                        elif (xpchild.nodeType == elementType and xpchild.localName == "process"):
+                            # turn xpath chain to workflow
+                            ref = xpchild.getAttributeNS(None, 'ref')
+                            if ref:
+                                process = self.get_object(session, ref)
+                            else:
+                                try:
+                                    xpchild.localName = 'workflow'
+                                except:
+                                    # 4suite dom sets read only
+                                    newTop = xpchild.ownerDocument.createElementNS(None, 'workflow')
+                                    for kid in xpchild.childNodes:
+                                        newTop.appendChild(kid)
+                                    xpchild = newTop
+                                process = CachingWorkflow(session, xpchild, self)
+                                process._handleConfigNode(session, xpchild)
+                            map.append(process)
+                    # XXX FIX ME 
+                    # vxp = verifyXPaths([map[0]])
+                    vxp = [map[0]]
+                    if (len(map) < 3):
+                        # default ExactExtractor
+                        map.append([['extractor', 'SimpleExtractor']])
+                    if (t == u'key'):
+                        self.keyMap = [vxp[0], map[1], map[2]]
+                    else:
+                        maps.append([vxp[0], map[1], map[2]])
+            self.maps = maps
+
+
+    def _handleLxmlConfigNode(self, session, node):
+        if (node.tag == "cluster"):
+            maps = []
+            for child in node.iterchildren(tag=etree.Element):
+                if (child.tag == "map"):
+                    t = child.attrib.get('type', '')
+                    map = []
+                    for xpchild in child.iterchildren(tag=etree.Element):
+                        if (xpchild.tag == "xpath"):
+                            map.append(flattenTexts(xpchild))
+                        elif (xpchild.tag == "process"):
+                            # turn xpath chain to workflow
+                            ref = xpchild.attrib.get('ref', None)
+                            if ref is not None:
+                                process = self.get_object(session, ref)
+                            else:
+                                xpchild.tag = 'workflow'
+                                process = CachingWorkflow(session, xpchild, self)
+                                process._handleLxmlConfigNode(session, xpchild)
+                            map.append(process)
+                   
+                    vxp = [map[0]]
+                    if (len(map) < 3):
+                        # default ExactExtractor
+                        map.append([['extractor', 'SimpleExtractor']])
+                    if (t == u'key'):
+                        self.keyMap = [vxp[0], map[1], map[2]]
+                    else:
+                        maps.append([vxp[0], map[1], map[2]])
+            self.maps = maps
+
+    #XXX: used to be an index
+    #def index_record(self, session, rec):
+    def load(self, session, data=None, cache=None, format=None, tagName=None, codec=None):
+        # Extract cluster information, append to temp file
+        # data must be a record
+        p = self.permissionHandlers.get('info:srw/operation/2/cluster', None)
+        if p:
+            if not session.user:
+                raise PermissionException("Authenticated user required to cluster using %s" % self.id)
+            okay = p.hasPermission(session, session.user)
+            if not okay:
+                raise PermissionException("Permission required to cluster using %s" % self.id)
+
+        rec = data
+        raw = rec.process_xpath(session, self.keyMap[0])
+        keyData = self.keyMap[2].process(session, [raw])
+        fieldData = []
+        for map in self.maps:
+            raw = rec.process_xpath(session, map[0])
+            fd = map[2].process(session, [raw])
+            for f in fd.keys():
+                fieldData.append("%s\x00%s\x00" % (map[1], f))
+        d = "".join(fieldData)
+        for k in keyData.iterkeys():
+            if k.isspace():
+                continue
+            try:
+                self.fileHandle.write(u"%s\x00%s\n" % (k, d))
+                self.fileHandle.flush()
+            except ValueError:
+                self.fileHandle = codecs.open(path, "w", self.codec)
+                try:
+                    self.fileHandle.write(u"%s\x00%s\n" % (k, d))
+                    self.fileHandle.flush()
+                except:
+                    self.log_critical(session, "%s failed to write: %r" % (self.id, k))
+                    raise
+
+    def get_document(self, session, n=-1):
+        if self.previousIdx == -1:
+            self.fileHandle.close()
+            # now store and call generator
+            ds = ClusterDocumentStream(session, self.tempPath, 'cluster', 'cluster', self.codec, self)
+            self.docStream = ds
+            self.generator = ds.find_documents(session, cache=self.cache)
+    
+        return SimpleDocumentFactory.get_document(self, session, n)
+    
