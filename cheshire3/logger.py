@@ -48,7 +48,7 @@ class SimpleLogger(Logger):
 
         # templating here etc
         now = time.strftime("%Y-%m-%d %H:%M:%S")
-        lvlstr = ['NOTSET', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'][max(int(lvl/10), 6)]        
+        lvlstr = ['NOTSET', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'][min(int(lvl/10), 5)]
         line = "[%s] %s: %s" % (now, lvlstr, line)
 
         if (self.lineCache and self.lineCache[-1].startswith(line)):
