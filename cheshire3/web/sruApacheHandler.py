@@ -103,9 +103,22 @@ class reqHandler:
         echo.append(elemFac.baseUrl(session.path))
         return echo
 
-    def extraResponseData(self, opts, result):
-        pass
-
+    def extraData(self, eType, opts, result, *args):
+        nodes = []
+        for (k,v) in opts.items():
+            if k[:2] == "x-" and k in session.config.sruExtensionMap:
+                (typ, fn) = session.config.sruExtensionMap[k]
+                if typ == eType or (eType == 'response' and typ == opts['operation']):
+                    node = fn(session, v, result, *args)
+                    if node != None:
+                        nodes.append(node)
+        if nodes:
+            eName = 'extra%s%sData' % (eType[0].upper(), eType[1:])
+            extra = getattr(elemFac, eName)()
+            for n in nodes:
+                extra.append(n)
+            result.append(extra)
+                        
 
     def diagnosticToXml(self, diag):
         x = elemFac.diagnostic(
@@ -123,7 +136,6 @@ class reqHandler:
         result = self.process_explain({}, result)
         d = elemFac.diagnostics(self.diagnosticToXml(err))
         result.append(d)
-
         return result
 
     def process_explain(self, opts, result):
@@ -173,7 +185,7 @@ class reqHandler:
         rec = self.record(schema=recordMap['zeerex'],
                           packing=opts.get('recordPacking', 'xml'),
                           data=filestr)
-        # XXX ExtraRecordData here
+        self.extraData('record', opts, rec)
         result.append(rec)
         return result
 
@@ -216,6 +228,7 @@ class reqHandler:
         rsn = q.getResultSetId()
 
         rs = db.search(session, q)        
+        session.currentResultSet = rs
         result.append(elemFac.numberOfRecords(str(len(rs))))
 
         if (len(rs)):
@@ -237,7 +250,7 @@ class reqHandler:
                 xml = xmlVerRe.sub("", xml)
                 rec = self.record(schema=schema, packing=recordPacking,
                                   data=xml, identifier=str(rsi), position=rIdx)
-                # XXX ExtraRecordData here
+                self.extraData('record', opts, rec, rsi, r)
                 recs.append(rec)
 
             if rsn:
@@ -292,9 +305,9 @@ class reqHandler:
 
         terms = elemFac.terms()
         for d in data:
-            terms.append(self.term(value=d[0], num=d[1][1]))
-            # XXX ExtraTermData here
-
+            t = self.term(value=d[0], num=d[1][1])
+            self.extraData('term', opts, t, d)
+            terms.append(t)
         result.append(terms)
         return result
 
@@ -352,7 +365,8 @@ class reqHandler:
                         diags = elemFac.diagnostics(self.diagnosticToXml(d))
                         result.append(diags)
                     result.append(self.echoedQuery(opts))
-                    self.extraResponseData(opts, result)
+                    self.extraData('response', opts, result)
+                    session.currentResultSet = None
 
             text = etree.tostring(result, pretty_print=True)
             if 'stylesheet' in opts:
