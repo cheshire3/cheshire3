@@ -266,6 +266,29 @@ class NamedRegexpNormalizer(RegexpNormalizer):
         else:
             return ""
 
+class RegexpFilterNormalizer(SimpleNormalizer):
+    
+    _possibleSettings = {'regexp': {'docs' : "Regular expression to match in the data."}}
+    
+    def __init__(self, session, config, parent):
+        SimpleNormalizer.__init__(self, session, config, parent)
+        self.re = re.compile(self.get_setting(session, 'regexp', '^[a-zA-Z\'][a-zA-Z\'.-]+[?!,;:]?$'))
+
+    def process_string(self, session, data):
+        if self.re.match(data):
+            return data
+        else:
+            return None
+
+    def process_hash(self, session, data):
+        data = SimpleNormalizer.process_hash(self, session, data)
+        try:
+            del data[None]
+        except:
+            # may not have filtered anything
+            pass
+        return data
+
 
 class PossessiveNormalizer(SimpleNormalizer):
     """ Remove trailing 's or s' from words """
