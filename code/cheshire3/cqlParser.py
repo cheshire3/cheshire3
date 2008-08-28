@@ -507,7 +507,8 @@ class CQLshlex(shlex):
     def __init__(self, thing):
         shlex.__init__(self, thing)
         self.wordchars += "!@#$%^&*-+{}[];,.?|~`:\\"
-        self.wordchars += ''.join(map(chr, range(128,254)))
+        # self.wordchars += ''.join(map(chr, range(128,254)))
+        self.wordchars = self.wordchars.decode('utf-8')
 
     def read_token(self):
         "Read a token from the input stream (no pushback or inclusions)"
@@ -597,6 +598,8 @@ class CQLshlex(shlex):
                     diag.details = self.token[:-1]
                     raise diag
             elif self.state == 'a':
+                print repr(nextchar)
+                print repr(self.wordchars)
                 if not nextchar:
                     self.state = None   # end of file
                     break
@@ -609,7 +612,7 @@ class CQLshlex(shlex):
                 elif nextchar in self.commenters:
                     self.instream.readline()
                     self.lineno = self.lineno + 1
-                elif nextchar in self.wordchars or nextchar in self.quotes:
+                elif ord(nextchar) > 126 or  nextchar in self.wordchars or nextchar in self.quotes:
                     self.token = self.token + nextchar
                 elif nextchar in ['>', '<']:
                     self.nextToken = nextchar
@@ -828,18 +831,6 @@ class CQLParser:
 
 def parse(query):
     """Return a searchClause/triple object from CQL string"""
-
-    try:
-        query = query.encode("utf-8")
-    except Exception, e:
-        try:
-            query = query.decode('utf-8')
-            query = query.encode('utf-8')
-        except Exception, e:
-            diag = Diagnostic()
-            diag.code = 10
-            diag.details = "Cannot parse non utf-8: " + str(e)
-            raise diag
 
     q = StringIO(query)
     lexer = CQLshlex(q)
