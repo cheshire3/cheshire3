@@ -464,9 +464,6 @@ class BdbIndexStore(IndexStore):
         nonEmpty = cursor.first()
         metadataCxn = self._openMetadata(session)        
 
-        # Should this be:
-        # f = codecs.open(filePath, 'r', 'utf-8')    ?
-        f = file(filePath)
 
         tidIdx = index.get_path(session, 'termIdIndex', None)
         vectors = index.get_setting(session, 'vectors', 0)
@@ -516,6 +513,10 @@ class BdbIndexStore(IndexStore):
             tidcxn.open(dbname + "_TERMIDS")
         
 
+        # Should this be:
+        # f = codecs.open(filePath, 'r', 'utf-8')    ?
+        f = file(filePath)
+
         nTerms = 0
         nRecs = 0
         nOccs = 0
@@ -558,8 +559,10 @@ class BdbIndexStore(IndexStore):
                         try:
                             packed = t2s(session, termid, currData, nRecs=totalRecs, nOccs=totalOccs)
                         except:
-                            self.log_critical(session, "%s failed to t2s %s: %r %r" % (self.id, currTerm, termid, currData))
+                            # self.log_critical(session, "%s failed to t2s %s: %r %r" % (self.id, currTerm, termid, currData))
                             raise
+
+
                     nTerms += 1
                     nRecs += totalRecs
                     nOccs += totalOccs
@@ -567,6 +570,7 @@ class BdbIndexStore(IndexStore):
                     maxNRecs = max(maxNRecs, totalRecs)
                     maxNOccs = max(maxNOccs, totalOccs)
                     cxn.put(currTerm, packed)
+                    del packed
                     if (vectors or termIds) and tempTermId == termid:
                         tidcxn.put("%012d" % termid, currTerm)
                 # assign new line

@@ -5,7 +5,6 @@ from cheshire3.exceptions import ConfigFileException
 
 import os, random, cPickle, tempfile
 import commands, math, re, operator
-import numarray as na
 
 import svm
 from reverend import thomas
@@ -199,8 +198,8 @@ class Fimi1PreParser(ARMPreParser):
 
         # Check we know where TFP is etc
         self.filePath = self.get_path(session, 'filePath', None)
-        if not self.filePath:
-            raise ConfigFileException("%s requires the path: filePath" % self.id)
+        #if not self.filePath:
+        #    raise ConfigFileException("%s requires the path: filePath" % self.id)
         self.fisre = re.compile("([0-9 ]+) \(([0-9]+)\)")
         self.rulere = re.compile("([0-9 ]+) ==> ([0-9 ]+) \(([0-9.]+), ([0-9]+)\)")
         self.singleItems = self.get_setting(session, 'singleItems', 0)
@@ -220,14 +219,14 @@ class Fimi1PreParser(ARMPreParser):
         (qq, outfn) = tempfile.mkstemp(".txt")
         # go to directory and run
         o = os.getcwd()
-        os.chdir(self.filePath)
+        #os.chdir(self.filePath)
         if self.confidence > 0:
-            cmd = "./apriori %s %s %s %s" % (infn, outfn, self.support/100, self.confidence/100)
+            cmd = "apriori %s %s %s %s" % (infn, outfn, self.support/100, self.confidence/100)
             results = commands.getoutput(cmd)
         else:
-            cmd = "./apriori %s %s %s" % (infn, outfn, self.support/100)
+            cmd = "apriori %s %s %s" % (infn, outfn, self.support/100)
             results = commands.getoutput(cmd)
-        os.chdir(o)
+        #os.chdir(o)
 
         inh = file(outfn)
         fis = self.fisre
@@ -820,7 +819,9 @@ class BpnnPreParser(ClassificationPreParser):
 
 class PerceptronPreParser(ClassificationPreParser):
     # quick implementation of perceptron using numarray
-
+    
+    # DEPRECATED -- no longer distribute numarray
+    
     def load_model(self, session, path):
         self.model = na.fromfile(path)
 

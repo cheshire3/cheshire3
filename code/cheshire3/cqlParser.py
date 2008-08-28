@@ -829,13 +829,14 @@ class CQLParser:
 def parse(query):
     """Return a searchClause/triple object from CQL string"""
 
-    try:
-        query = query.encode("utf-8")
-    except Exception, e:
-        diag = Diagnostic()
-        diag.code = 10
-        diag.details = "Cannot parse non utf-8 characters: " + str(e)
-        raise diag
+    if type(query) == unicode:
+        try:
+            query = query.encode("utf-8")
+        except Exception, e:
+            diag = Diagnostic()
+            diag.code = 10
+            diag.details = "Cannot parse non utf-8: " + str(e)
+            raise diag
 
     q = StringIO(query)
     lexer = CQLshlex(q)
