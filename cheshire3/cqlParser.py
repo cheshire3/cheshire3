@@ -829,9 +829,12 @@ class CQLParser:
 def parse(query):
     """Return a searchClause/triple object from CQL string"""
 
-    if type(query) != unicode:
+    try:
+        query = query.encode("utf-8")
+    except Exception, e:
         try:
-            query = query.decode("utf-8")
+            query = query.decode('utf-8')
+            query = query.encode('utf-8')
         except Exception, e:
             diag = Diagnostic()
             diag.code = 10
