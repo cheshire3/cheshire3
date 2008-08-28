@@ -679,6 +679,7 @@ class WindowArmVectorTransformer(ArmVectorTransformer):
                 for pii in rec.proxInfo:
                     for t in [x[-1] for x in pii]:
                         tids[t] = 1
+
                 all = []
                 start = -1
                 hn = n/2

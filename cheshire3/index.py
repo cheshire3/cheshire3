@@ -690,7 +690,7 @@ class ProximityIndex(SimpleIndex):
         try:
             val =  struct.pack(*params)
         except:
-            self.log_critical(session, "%s failed to pack: %r" % (self.id, params))
+            self.log_critical(session, "%s failed to pack: %r" % (self.id, params[:4]))
             raise
         return val
         
