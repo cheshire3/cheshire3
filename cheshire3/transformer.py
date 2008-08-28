@@ -41,6 +41,8 @@ class LxmlXsltTransformer(Transformer):
     """ XSLT transformer using Lxml implementation. Requires LxmlRecord """
 
     _possiblePaths = {'xsltPath' : {'docs' : "Path to the XSLT file to use."}}
+    
+    _possibleSettings = {'parameter' : {'docs' : "Parameters to be passed to the transformer."}}
 
     def __init__(self, session, config, parent):
         Transformer.__init__(self, session, config, parent)
@@ -53,14 +55,26 @@ class LxmlXsltTransformer(Transformer):
         self.functionNamespace = ns
         self.parsedXslt = etree.parse(path)
         self.txr = etree.XSLT(self.parsedXslt)
+        self.params = None
+        parameter = self.get_setting(session, 'parameter', None)
+        if (parameter):
+            self.params = {}
+            kv = parameter.split(' ')
+            for pair in kv:
+                (k, v) = pair.split(':')
+                self.params[k] = '"%s"' % v
+                
 
     def process_record(self, session, rec):
         # return StringDocument
         dom = rec.get_dom(session)
         if (session.environment == 'apache'):
             self.txr = etree.XSLT(self.parsedXslt)
-
-        result = self.txr(dom)
+            
+        if self.params:
+            result = self.txr(dom, **self.params)
+        else:
+            result = self.txr(dom)
         return StringDocument(str(result))
 
 
