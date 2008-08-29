@@ -598,8 +598,6 @@ class CQLshlex(shlex):
                     diag.details = self.token[:-1]
                     raise diag
             elif self.state == 'a':
-                print repr(nextchar)
-                print repr(self.wordchars)
                 if not nextchar:
                     self.state = None   # end of file
                     break
@@ -831,6 +829,12 @@ class CQLParser:
 
 def parse(query):
     """Return a searchClause/triple object from CQL string"""
+
+    if type(query) == str:
+        try:
+            query = query.decode("utf-8")
+        except Exception, e:
+            raise
 
     q = StringIO(query)
     lexer = CQLshlex(q)
