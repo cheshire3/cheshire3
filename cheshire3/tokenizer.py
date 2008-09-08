@@ -67,6 +67,21 @@ class RegexpSubTokenizer(SimpleTokenizer):
         return txt.split()
 
 
+class RegexpSplitTokenizer(SimpleTokenizer):
+     
+     #A tokenizer that simply splits at the regex matches
+     
+     _possibleSettings = {'regexp' : {'docs' : 'Regular expression used to split string'}}
+     
+     def __init__(self, session, config, parent):
+         SimpleTokenizer.__init__(self, session, config, parent)
+         pre = self.get_setting(session, 'regexp', u"""([-.,'\")}\]]+((?=\s)|$)|(^|(?<=\s))[-.,']+|[`~!@+=\#\&\^*()\[\]{}\\\|\":;<>?/\u2026\u2013\u2014\u2018\u2019\u201c\u201d]|\.\.\.)""")
+         self.regexp = re.compile(pre)
+
+     def process_string(self, session, data):
+         return self.regexp.split(data)
+
+
 
 class RegexpFindTokenizer(SimpleTokenizer):
     # Some ideas thanks to NLTK's RegexpTokenizer
