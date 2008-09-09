@@ -163,17 +163,6 @@ class RegexpFindPunctuationOffsetTokenizer(RegexpFindOffsetTokenizer):
         return (tokens, positions)
 
 
-class SuppliedOffsetTokenizer(OffsetTokenizer):
-
-    def process_string(self, session, data):
-        tokens = []
-        positions = []
-        for t in data.split():
-            tokens.append(t[:t.rfind('/')])
-            positions.append(int(t[t.rfind('/')+1:]))
-        return (tokens, positions)
-
-
 # XXX This should be in TextMining, and NLTK should auto install
 try:
     import nltk
