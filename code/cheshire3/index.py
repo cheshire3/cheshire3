@@ -1272,6 +1272,18 @@ class ReverseMetadataIndex(Index):
 
 class PassThroughIndex(SimpleIndex):
 
+    
+    def _handleLxmlConfigNode(self, session, node):
+        # Source
+        if (node.tag == "xpath"):
+            ref = node.attrib.get('ref', '')
+            if ref:
+                xp = self.get_object(session, ref)
+            else:
+                xp = SimpleXPathProcessor(session, node, self)
+                xp.sources = [[xp._handleLxmlXPathNode(session, node)]]         
+            self.xpath = xp
+
     def _handleConfigNode(self, session, node):
         # Source
         if (node.tag == "xpath"):
@@ -1322,7 +1334,6 @@ class PassThroughIndex(SimpleIndex):
         currDb = session.database
         session.database = self.database.id
         rs = self.remoteIndex.search(session, clause, self.database)
-
         # fetch all matched records
         values = {}
         for rsi in rs:
