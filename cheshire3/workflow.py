@@ -292,7 +292,7 @@ class SimpleWorkflow(Workflow):
         ref = node.attrib.get('ref', '')
         try:
             typ = node.attrib['type']
-        except:
+        except KeyError:
             raise ConfigFileException("Workflow element 'object' requires 'type' attribute in %s" % self.id)
         function = node.attrib.get('function', '')
         return self._handleAnonObject(ref, typ, function)
@@ -483,7 +483,7 @@ class CachingWorkflow(SimpleWorkflow):
         ref = node.attrib.get('ref', '')
         try:
             typ = node.attrib['type']
-        except:
+        except KeyError:
             raise ConfigFileException("Workflow element 'object' requires attribute 'type' in %s" % self.id)
         function = node.get('function', '')
         return self._handleAnonObject(ref, typ, function)
