@@ -69,7 +69,8 @@ class SruResponse(SruObject):
     def __getattr__(self, name):
         if name == 'diagnostics':
             try:
-                return SruObject.__getattr__(self, name)
+                diags = SruObject.__getattr__(self, name) 
+                return [ el for el in diags.iterchildren(tag='{http://www.loc.gov/zing/srw/diagnostic/}diagnostic') ]
             except AttributeError:
                 return []
         else:
