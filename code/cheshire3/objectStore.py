@@ -57,12 +57,12 @@ class BdbObjectStore(BdbRecordStore, ObjectStore):
         # Split from fetch_object for Iterators
         dom = rec.get_dom(session)
 
-        try:
+        if (hasattr(dom, 'childNodes')):
             for d in dom.childNodes:
                 if d.nodeType == elementType:
                     topNode = d
                     break
-        except:
+        else:
             # LXML
             topNode = dom
             
