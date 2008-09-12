@@ -1,11 +1,11 @@
 
 from cheshire3.baseObjects import PreParser
 from cheshire3.document import StringDocument
+from cheshire3.marc_utils import MARC
 
 import re, gzip, string, binascii, cStringIO as StringIO
 import bz2, os, commands, time
 import httplib, mimetypes, tempfile
-from PyZ3950.zmarc import MARC
 from xml.sax.saxutils import escape
 
 try:
