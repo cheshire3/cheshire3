@@ -2,12 +2,12 @@
 from cheshire3.baseObjects import Record
 from cheshire3.exceptions import C3Exception
 from cheshire3.utils import flattenTexts, elementType
+from cheshire3.marc_utils import MARC, MARC8_to_Unicode
 
 import unicodedata
 import types, utils, os, re, sys
 from cStringIO import StringIO
 from xml.sax.saxutils import escape
-from PyZ3950.zmarc_relaxed import MARC, MARC8_to_Unicode
 from xml.sax import ContentHandler
 
 # 1 <name> <attrHash> parent predicate end

@@ -20,7 +20,7 @@ class BdbObjectIter(BdbIter):
 class BdbObjectStore(BdbRecordStore, ObjectStore):
     # Store XML records in RecordStore
     # Retrieve and instantiate
-    
+
     def __iter__(self):
         return BdbObjectIter(self.session, self)
     
