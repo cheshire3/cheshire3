@@ -56,17 +56,16 @@ class BdbObjectStore(BdbRecordStore, ObjectStore):
     def _processRecord(self, session, id, rec):
         # Split from fetch_object for Iterators
         dom = rec.get_dom(session)
-        for d in dom.childNodes:
-            if d.nodeType == elementType:
-                topNode = d
-                break
-        # Need to import stuff first, possibly
-        for child in topNode.childNodes:
-            if child.nodeType == elementType:
-                if (child.localName == "imports"):
-                    # deprecated
-                    pass
 
+        try:
+            for d in dom.childNodes:
+                if d.nodeType == elementType:
+                    topNode = d
+                    break
+        except:
+            # LXML
+            topNode = dom
+            
         object = dynamic.makeObjectFromDom(session, topNode, self)
         return object
 
