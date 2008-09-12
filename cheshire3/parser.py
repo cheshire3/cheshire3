@@ -3,7 +3,7 @@ from cheshire3.configParser import C3Object
 from cheshire3.baseObjects import Parser
 from cheshire3.record import SaxRecord, MinidomRecord
 from cheshire3.record import SaxContentHandler, LxmlRecord
-from cheshire3.utils import flattenTexts, elementType
+from cheshire3.utils import flattenTexts, elementType, nonTextToken
 
 from xml.dom.minidom import parseString as domParseString
 from xml.sax import ContentHandler, make_parser, ErrorHandler
@@ -99,6 +99,23 @@ class SaxParser(BaseParser):
         rec.byteCount = len(xml)
         self._copyData(doc, rec)
         ch.reinit()
+        return rec
+
+
+
+class StoredSaxParser(BaseParser):
+
+    def process_document(self, session, doc):
+        data = doc.get_raw(session)
+        data = unicode(data, 'utf-8')
+        sax = data.split(nonTextToken)
+        if sax[-1][0] == "9":
+            line = sax.pop()
+            elemHash = pickle.loads(str(line[2:]))
+        else:
+            elemHash = {}
+        rec = SaxRecord(sax)
+        rec.elementHash = elemHash
         return rec
 
 try:
