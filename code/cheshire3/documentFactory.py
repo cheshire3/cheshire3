@@ -7,9 +7,12 @@ from cheshire3.utils import elementType, getFirstData, flattenTexts
 from cheshire3.workflow import CachingWorkflow
 from cheshire3.xpathProcessor import SimpleXPathProcessor
 
+
 from ZSI.client import Binding
 from PyZ3950 import zoom
 import SRW
+
+
 
 from lxml import etree
 
