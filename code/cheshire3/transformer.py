@@ -4,9 +4,8 @@ from cheshire3.baseObjects import Transformer
 from cheshire3.document import StringDocument
 from cheshire3.exceptions import ConfigFileException
 from cheshire3.utils import nonTextToken
-from cheshire3.utils import elementType, flattenTexts
+from cheshire3.utils import elementType, flattenTexts, nonTextToken
 
-#from copy import deepcopy, copy
 #from xml.sax.saxutils import escape
 import os.path, time, types, re
 
@@ -26,6 +25,13 @@ class XmlTransformer(Transformer):
     def process_record(self,session, rec):
         return StringDocument(rec.get_xml(session))
 
+
+class SaxTransformer(Transformer):
+    def process_record(self, session, rec):
+        sax = [x.encode('utf8') for x in rec.get_sax(session)]
+        sax.append("9 " + pickle.dumps(rec.elementHash))
+        data = nonTextToken.join(sax)       
+        return StringDocument(data)
 
 # --- XSLT Transformers ---
 

@@ -9,6 +9,7 @@ from cheshire3.utils import nonTextToken
 
 import string, os
 import time
+from cheshire3.bootstrap import BSLxmlParser
 
 try:
     # 3.0 deprecation
@@ -100,9 +101,7 @@ class SimpleRecordStore(RecordStore):
             doc = self.inWorkflow.process(session, rec)
             data = doc.get_raw(session)
         else:
-            sax = [x.encode('utf8') for x in rec.get_sax(session)]
-            sax.append("9 " + pickle.dumps(rec.elementHash))
-            data = nonTextToken.join(sax)       
+            data = rec.get_xml(session)
 
         dig = self.generate_checkSum(session, data)
         md = {'byteCount' : rec.byteCount,
@@ -158,26 +157,24 @@ class SimpleRecordStore(RecordStore):
 
     def _process_data(self, session, id, data, parser=None):
         # Split from fetch record for Iterators
+
+        doc = StringDocument(data)
         if (parser != None):
-            doc = StringDocument(data)
             rec = parser.process_document(session, doc)
         elif (self.outParser != None):
-            doc = StringDocument(data)
             rec = self.outParser.process_document(session, doc)
         elif (self.outWorkflow != None):
-            doc = StringDocument(data)
             rec = self.outWorkflow.process(session, doc)
         else:
-            # Assume raw sax events
-            data = unicode(data, 'utf-8')
-            sax = data.split(nonTextToken)
-            if sax[-1][0] == "9":
-                line = sax.pop()
-                elemHash = pickle.loads(str(line[2:]))
-            else:
-                elemHash = {}
-            rec = SaxRecord(sax)
-            rec.elementHash = elemHash
+            # Assume raw XML into LXML
+            # try and set self.parser to an LxmlParser
+            try:
+                p = session.server.get_object(session, 'LxmlParser')
+                self.parser = p
+                rec = p.process_document(session, doc)
+            except:
+                rec = BSLxmlParser.process_document(session, doc)
+
         # Ensure basic required info
         rec.id = id
         rec.recordStore = self.id
