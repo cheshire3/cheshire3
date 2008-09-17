@@ -26,13 +26,13 @@ class SruObject:
             return self.tag[self.tag.find('}')+1:]
         elif name =='typecode':
             return
-        else:
-            return getattr(self.tree, name)    
+
+        return getattr(self.tree, name)    
 
     def __str__(self):
         return objectify.dump(self.tree)
         #return etree.tostring(self.tree)
-    
+        
     #- end SruObject ----------------------------------------------------------
 
 class SruRecord(SruObject):
@@ -49,11 +49,33 @@ class SruRecord(SruObject):
     
     def __getattr__(self, name):
         if name == 'recordData':
-            return self.tree.recordData.getchildren()[0]
-        else:
-            return SruObject.__getattr__(self, name)
+            return SruRecordData(self.tree.recordData.getchildren()[0])
+
+        return SruObject.__getattr__(self, name)
 
     #- end SruRecord ----------------------------------------------------------
+
+class SruRecordData(SruObject):
+    
+    def __dir__(self):
+        attrlist = SruObject.__dir__(self) 
+        attrlist.extend(['toxml'])
+        attrlist.sort()
+        return  attrlist
+    
+    def __getattr__(self, name):
+        if name == 'id':
+            try:
+                return self.tree.attrib['id']
+            except KeyError:
+                pass
+
+        return SruObject.__getattr__(self, name)
+    
+    def toxml(self):
+        return etree.tostring(self.tree)
+    
+    #- end SruRecordData ------------------------------------------------------
 
 class SruResponse(SruObject):
     """ Abstract class for SRU responses
@@ -73,8 +95,8 @@ class SruResponse(SruObject):
                 return [ el for el in diags.iterchildren(tag='{http://www.loc.gov/zing/srw/diagnostic/}diagnostic') ]
             except AttributeError:
                 return []
-        else:
-            return SruObject.__getattr__(self, name)
+
+        return SruObject.__getattr__(self, name)
 
     #- end SruResponse --------------------------------------------------------
     
@@ -92,8 +114,8 @@ class ExplainResponse(SruResponse):
     def __getattr__(self, name):
         if name == 'record':
             return SruRecord(self.tree.record)
-        else:
-            return SruResponse.__getattr__(self, name)
+        
+        return SruResponse.__getattr__(self, name)
             
     def __str__(self):
         return objectify.dump(self.tree)
@@ -115,8 +137,8 @@ class SearchRetrieveResponse(SruResponse):
     def __getattr__(self, name):
         if name == 'records':
             return [SruRecord(el) for el in self.tree.records.record]
-        else:
-            return SruResponse.__getattr__(self, name)
+    
+        return SruResponse.__getattr__(self, name)
         
     #- end SearchRetrieveResponse ---------------------------------------------
     
@@ -136,8 +158,8 @@ class ScanResponse(SruResponse):
                 return [el for el in self.tree.terms.term]
             except AttributeError:
                 return []
-        else:
-            return SruResponse.__getattr__(self, name)
+
+        return SruResponse.__getattr__(self, name)
     
     #- end ScanResponse -------------------------------------------------------
 
