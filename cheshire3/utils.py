@@ -22,17 +22,17 @@ def flattenTexts(elem):
                 # Recurse
                 texts.append(flattenTexts(e))
     else:
-        # libxml2 walker/iterator
+        # libxml2
         try:
+            return etree.tostring(elem, method='text')
+        except TypeError:
+            # predates lxml 1.3 - fall back to tree iteration
             walker = elem.getiterator()
-        except AttributeError:
-            # lxml 1.3 or later
-            walker = elem.iter()
-        for c in walker:
-            if c.text:
-                texts.append(c.text)
-            if c.tail:
-                texts.append(c.tail)
+            for c in walker:
+                if c.text:
+                    texts.append(c.text)
+                if c.tail:
+                    texts.append(c.tail)
     return ''.join(texts)
 
 
