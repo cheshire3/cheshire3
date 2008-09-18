@@ -1,5 +1,6 @@
 import  types, re
 from xml.dom import Node
+from lxml import etree
 import math
 
 elementType = Node.ELEMENT_NODE
