@@ -320,7 +320,7 @@ class SimpleDatabase(SummaryObject, Database):
         if (idx != None):
             return idx.scan(session, clause, nTerms, direction)
         else:
-            raise ObjectDoesNotExistException(query.index.toCQL())
+            raise ObjectDoesNotExistException(clause.index.toCQL())
 
 
 class OptimisingDatabase(SimpleDatabase):
