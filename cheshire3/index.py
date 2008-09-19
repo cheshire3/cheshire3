@@ -1444,7 +1444,7 @@ class ClusterExtractionIndex(SimpleIndex):
                     map = []
                     for xpchild in child.childNodes:
                         if (xpchild.nodeType == elementType and xpchild.localName == "xpath"):
-                            map.append(flattenTexts(xpchild))
+                            map.append(flattenTexts(xpchild).strip())
                         elif (xpchild.nodeType == elementType and xpchild.localName == "process"):
                             # turn xpath chain to workflow
                             ref = xpchild.getAttributeNS(None, 'ref')
@@ -1526,8 +1526,8 @@ class ClusterExtractionIndex(SimpleIndex):
             raw = rec.process_xpath(session, map[0])
             fd = map[2].process(session, [raw])
             for f in fd.keys():
-                fieldData.append("%s\x00%s\x00" % (map[1], f))
-        d = "".join(fieldData)
+                fieldData.append(u"%s\x00%s\x00" % (map[1], f))
+        d = u"".join(fieldData)
         for k in keyData.keys():
             try:
                 self.fileHandle.write(u"%s\x00%s\n" % (k, d))
