@@ -1438,7 +1438,7 @@ class AccumulatingDocumentFactory(SimpleDocumentFactory):
 
 
 class ClusterExtractionDocumentFactory(AccumulatingDocumentFactory):
-    """ Give it lots of documents, it will cluster and then read back in the cluster documents. Niiiiiiiice. [in theory] """
+    """ Give it lots of records, it will cluster and then read back in the cluster documents. Niiiiiiiice. [in theory] """
 
     _possiblePaths = {'tempPath' : {'docs' : "Path to a file where cluster data will be stored temporarily during subsequent load() calls."}}
 
@@ -1523,7 +1523,7 @@ class ClusterExtractionDocumentFactory(AccumulatingDocumentFactory):
                     map = []
                     for xpchild in child.iterchildren(tag=etree.Element):
                         if (xpchild.tag == "xpath"):
-                            map.append(flattenTexts(xpchild))
+                            map.append(flattenTexts(xpchild).strip())
                         elif (xpchild.tag == "process"):
                             # turn xpath chain to workflow
                             ref = xpchild.attrib.get('ref', None)
@@ -1535,18 +1535,16 @@ class ClusterExtractionDocumentFactory(AccumulatingDocumentFactory):
                                 process._handleLxmlConfigNode(session, xpchild)
                             map.append(process)
                    
-                    vxp = [map[0]]
+                    #vxp = [map[0]]
                     if (len(map) < 3):
                         # default ExactExtractor
                         map.append([['extractor', 'SimpleExtractor']])
                     if (t == u'key'):
-                        self.keyMap = [vxp[0], map[1], map[2]]
+                        self.keyMap = [map[0], map[1], map[2]]
                     else:
-                        maps.append([vxp[0], map[1], map[2]])
+                        maps.append([map[0], map[1], map[2]])
             self.maps = maps
 
-    #XXX: used to be an index
-    #def index_record(self, session, rec):
     def load(self, session, data=None, cache=None, format=None, tagName=None, codec=None):
         # Extract cluster information, append to temp file
         # data must be a record
@@ -1566,16 +1564,14 @@ class ClusterExtractionDocumentFactory(AccumulatingDocumentFactory):
             raw = rec.process_xpath(session, map[0])
             fd = map[2].process(session, [raw])
             for f in fd.keys():
-                fieldData.append("%s\x00%s\x00" % (map[1], f))
-        d = "".join(fieldData)
+                fieldData.append(u"%s\x00%s\x00" % (map[1], f))
+        d = u"".join(fieldData)
         for k in keyData.iterkeys():
-            if k.isspace():
-                continue
             try:
                 self.fileHandle.write(u"%s\x00%s\n" % (k, d))
                 self.fileHandle.flush()
             except ValueError:
-                self.fileHandle = codecs.open(path, "w", self.codec)
+                self.fileHandle = codecs.open(self.tempPath, "w", self.codec)
                 try:
                     self.fileHandle.write(u"%s\x00%s\n" % (k, d))
                     self.fileHandle.flush()
@@ -1589,7 +1585,5 @@ class ClusterExtractionDocumentFactory(AccumulatingDocumentFactory):
             # now store and call generator
             ds = ClusterDocumentStream(session, self.tempPath, 'cluster', 'cluster', self.codec, self)
             self.docStream = ds
-            self.generator = ds.find_documents(session, cache=self.cache)
-    
-        return SimpleDocumentFactory.get_document(self, session, n)
-    
+            
+        return AccumulatingDocumentFactory.get_document(self, session, n)

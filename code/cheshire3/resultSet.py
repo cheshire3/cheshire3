@@ -447,7 +447,7 @@ class SimpleResultSet(RankedResultSet):
 
         # XXX To Configuration
         relSetUri = "info:srw/cql-context-set/2/relevance-1.0"
-        cqlSet = "info:srw/cql-context-set/1/cql-v1.1"
+        cqlSets = ["info:srw/cql-context-set/1/cql-v1.1", "info:srw/cql-context-set/1/cql-v1.2"]
 
         relevancy = 0
         pi = 0
@@ -464,7 +464,7 @@ class SimpleResultSet(RankedResultSet):
                     algorithm = m.value
                 elif m.type.value == "combine":
                     combine = m.value
-            elif (m.type.prefixURI == cqlSet and m.type.value == "relevant"):
+            elif (m.type.prefixURI in cqlSets and m.type.value == "relevant"):
                 # Generic 'relevancy please' request
                 relevancy = 1
             elif m.type.value == 'proxinfo':
