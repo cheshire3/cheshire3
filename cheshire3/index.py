@@ -466,6 +466,9 @@ class SimpleIndex(Index):
         if not matches:
             return base
         else:
+            if clause.relation.value == "=" and isinstance(self, SimpleIndex):
+                # can't do prox!
+                clause.relation.value = "all"
             rs = base.combine(session, matches, clause, db)
             return rs
 
