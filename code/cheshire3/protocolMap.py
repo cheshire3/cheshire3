@@ -121,7 +121,7 @@ class CQLProtocolMap(ZeerexProtocolMap):
     transformerHash = {}
     recordExtensionHash = {}
     termExtensionHash = {}
-    searchExtensionHash = {}
+    searchRetrieveExtensionHash = {}
     scanExtensionHash = {}
     explainExtensionHash = {}
     responseExtensionHash = {}
