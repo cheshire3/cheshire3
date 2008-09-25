@@ -10,7 +10,7 @@ from cheshire3.resultSetStore import SimpleResultSetStore
 from cheshire3.resultSet import SimpleResultSet
 from cheshire3.baseObjects import IndexStore
 from cheshire3 import dynamic
-from cheshire3.utils import elementType, getFirstData, nonTextToken
+from cheshire3.utils import elementType, getFirstData, nonTextToken, flattenTexts
 from cheshire3.index import SimpleIndex
 import cheshire3.cqlParser as cql
 
@@ -18,6 +18,8 @@ import cheshire3.cqlParser as cql
 # Consider psycopg
 import pg
 import time
+
+from lxml import etree
 
 # Iterator for postgres stores
 
@@ -146,18 +148,41 @@ class PostgresStore(SimpleStore):
                                 ftype = getFirstData(fld)
                                 fields.append([fname, ftype, ''])
                     self.relations[relName] = fields
+        #- end _handleConfigNode ------------------------------------------
 
+    def _handleLxmlConfigNode(self, session, node):
+        if node.tag == 'relations':
+            self.relations = {}
+            for rel in node.iterchildren(tag=etree.Element):
+                if rel.tag == 'relation':
+                    relName = rel.attrib.get('name', None)
+                    if relName is None:
+                        raise ConfigFileException('Name not supplied for relation')
+                    fields = []
+                    for fld in rel.iterchildren(tag=etree.Element):
+                        if fld.tag == 'object':
+                            oid = flattenTexts(fld)
+                            fields.append([oid, 'VARCHAR', oid])
+                        elif fld.tag == 'field':
+                            fname = fld.attrib.get('name', None)
+                            if fname is None:
+                                raise ConfigFileException('Name not supplied for field')
+                            ftype = flattenTexts(fld)
+                            fields.append([fname, ftype, ''])
+                            
+                    self.relations[relName] = fields
+        #- end _handleLxmlConfigNode ------------------------------------------
 
     def _verifyDatabases(self, session):
         try:
             self.cxn = pg.connect(self.database)
-        except pg.InternalError, e:
+        except pg.InternalError as e:
             raise ConfigFileException(e.args)
 
         try:
             query = "SELECT identifier FROM %s LIMIT 1" % self.table
             res = self._query(query)
-        except pg.ProgrammingError, e:
+        except pg.ProgrammingError as e:
             # no table for self, initialise
             query = """
             CREATE TABLE %s (identifier VARCHAR PRIMARY KEY,
@@ -180,7 +205,7 @@ class PostgresStore(SimpleStore):
             try:
                 query = "SELECT identifier FROM %s_%s LIMIT 1" % (self.id,name)
                 res = self._query(query)
-            except pg.ProgrammingError, e:
+            except pg.ProgrammingError as e:
                 # No table for relation, initialise
                 query = "CREATE TABLE %s_%s (identifier SERIAL PRIMARY KEY, " % (self.id, name)
                 for f in fields:
@@ -337,7 +362,7 @@ class PostgresStore(SimpleStore):
         query = "DELETE FROM %s WHERE expires < '%s';" % (self.table, nowStr)
         self._query(query)
 
-    def get_dbSize(self, ession):
+    def get_dbSize(self, session):
         query = "SELECT count(identifier) AS count FROM %s;" % (self.table)
         res = self._query(query)
         return res.dictresult()[0]['count']
@@ -445,14 +470,13 @@ class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
         # Custom resultSetStore table
         try:
             self.cxn = pg.connect(self.database)
-        except pg.InternalError, e:
-            raise e
+        except pg.InternalError as e:
             raise ConfigFileException(e.args)
 
         try:
             query = "SELECT identifier FROM %s LIMIT 1" % self.table
             res = self._query(query)
-        except pg.ProgrammingError, e:
+        except pg.ProgrammingError as e:
             # no table for self, initialise
             query = """
             CREATE TABLE %s (identifier VARCHAR PRIMARY KEY,
@@ -472,7 +496,7 @@ class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
             try:
                 query = "SELECT identifier FROM %s_%s LIMIT 1" % (self.table,name)
                 res = self._query(query)
-            except pg.ProgrammingError, e:
+            except pg.ProgrammingError as e:
                 # No table for relation, initialise
                 query = "CREATE TABLE %s_%s (identifier SERIAL PRIMARY KEY, " % (self.table, name)
                 for f in fields:
@@ -524,7 +548,7 @@ class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
 
         try:
             self._query(query)
-        except pg.ProgrammingError, e:
+        except pg.ProgrammingError as e:
             # already exists, retry for create
             if hasattr(rset, 'retryOnFail'):
                 # generate new id, re-store
