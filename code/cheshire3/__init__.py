@@ -58,3 +58,13 @@ __all__ = ['database', 'documentFactory', 'document', 'exceptions',
            'server', 'sqlite', 'tokenizer', 'tokenMerger', 'transformer', 'user',
            'workflow', 'xpathProcessor']
 
+
+import cheshire3.internal
+sps = cheshire3.internal.get_subpackages()
+for sp in sps:
+    # call import for on init hooks
+    try:
+        __import__("cheshire3.%s" % sp)
+    except:
+        pass
+           
