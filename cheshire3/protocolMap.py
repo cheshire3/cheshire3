@@ -12,7 +12,7 @@ try:
 except:
     srwExtensions = None
 
-import sys, os, SRW
+import sys, os
 
 class ZeerexProtocolMap(ProtocolMap):
     protocol = ""
@@ -42,10 +42,9 @@ class UpdateProtocolMap(ZeerexProtocolMap):
 
     def __init__(self, session, node, parent):
         self.protocol = "http://www.loc.gov/zing/srw/update/"
-        self.protocolNamespaces = SRW.protocolNamespaces
-        self.recordNamespaces = SRW.recordNamespaces
-        self.profileNamespaces = SRW.update.profileNamespaces
-        self.extensionNamespaces = SRW.update.extensionNamespaces
+        self.protocolNamespaces = protocolNamespaces
+        self.recordNamespaces = recordNamespaces
+        self.extensionNamespaces = extensionNamespaces
 
         self.transformerHash = {}
         self.workflowHash = {}
@@ -132,11 +131,11 @@ class CQLProtocolMap(ZeerexProtocolMap):
         self.indexHash = {}
         self.transformerHash = {}
         self.prefixes = {}
-        self.protocolNamespaces = SRW.protocolNamespaces
-        self.recordNamespaces = SRW.recordNamespaces
-        self.contextSetNamespaces = SRW.contextSetNamespaces
-        self.profileNamespaces = SRW.profileNamespaces
-        self.extensionNamespaces = SRW.extensionNamespaces
+        self.protocolNamespaces = protocolNamespaces
+        self.recordNamespaces = recordNamespaces
+        self.contextSetNamespaces = contextSetNamespaces
+        self.profileNamespaces = profileNamespaces
+        self.extensionNamespaces = extensionNamespaces
 
         self.recordExtensionHash = {}
         self.termExtensionHash = {}
@@ -460,3 +459,51 @@ class OAIPMHProtocolMap(ZeerexProtocolMap):
                     self._walkZeeRex(session, c)
 
 
+
+protocolNamespaces = {
+  'srw' : 'http://www.loc.gov/zing/srw/',
+  'xcql' : 'http://www.loc.gov/zing/srw/xcql/',
+  'diag' : 'http://www.loc.gov/zing/srw/diagnostic/',
+  'ucp' : 'http://www.loc.gov/zing/srw/update/'
+}
+
+recordNamespaces = {
+  'dc' : 'info:srw/schema/1/dc-v1.1',
+  'diag' : 'info:srw/schema/1/diagnostic-v1.1',
+  'mods' : 'info:srw/schema/1/mods-v3.0',
+  'onix' : 'info:srw/schema/1/onix-v2.0',
+  'marcxml' : 'info:srw/schema/1/marcxml-v1.1',
+  'ead' : 'info:srw/schema/1/ead-2002',
+  'ccg' : 'http://srw.o-r-g.org/schemas/ccg/1.0/',
+  'marcsgml' : 'http://srw.o-r-g.org/schemas/marcsgml/12.0/',
+  'metar' : 'http://srw.o-r-g.org/schemas/metar/1.0/',
+  'unesco' : 'http://srw.o-r-g.org/schemas/unesco/1.0/',
+  'zthes' : 'http://zthes.z3950.org/xml/zthes-05.dtd',
+  'zeerex' : 'http://explain.z3950.org/dtd/2.0/',
+  'rec' : 'info:srw/schema/2/rec-1.0',
+  'xpath' : 'info:srw/schema/1/xpath-1.0'
+}
+
+contextSetNamespaces = {
+  'cql' : 'info:srw/cql-context-set/1/cql-v1.2',
+  'srw' : 'info:srw/cql-context-set/1/cql-v1.1',
+  'dc' : 'info:srw/cql-context-set/1/dc-v1.1',
+  'bath' : 'http://www.loc.gov/zing/cql/context-sets/bath/v1.1/',
+  'zthes' : 'http://zthes.z3950.org/cql/1.0/',
+  'ccg' : 'http://srw.cheshire3.org/contextSets/ccg/1.1/',
+  'ccg_l5r' : 'http://srw.cheshire3.org/contextSets/ccg/l5r/1.0/',
+  'rec' : 'info:srw/cql-context-set/2/rec-1.0',
+  'net' : 'info:srw/cql-context-set/2/net-1.0'
+}
+
+profileNamespaces = {
+  'bath' : 'http://zing.z3950.org/srw/bath/2.0/',
+  'zthes' : ' http://zthes.z3950.org/srw/0.5',
+  'ccg' : 'http://srw.cheshire3.org/profiles/ccg/1.0/',
+  'srw' : 'info:srw/profiles/1/base-profile-v1.1'
+}
+
+extensionNamespaces = {
+  'schemaNegotiation' : 'info:srw/extension/2/schemaNegotiation-1.0',
+  'authenticationToken' : 'info:srw/extension/2/auth-1.0'
+}
