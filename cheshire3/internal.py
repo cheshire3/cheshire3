@@ -1,20 +1,33 @@
 
+import os
+import cheshire3
+
 storeTypes = ['authStore', 'objectStore', 'configStore', 'recordStore', 'documentStore', 'resultSetStore', 'indexStore', 'queryStore']
 collTypes = ['server', 'database', 'index', 'workflow']
 processTypes = ['preParser', 'parser', 'normalizer', 'extractor', 'transformer', 'documentFactory', 'xpathProcessor', 'logger', 'tokenMerger', 'tokenizer']
 
 
+# XXX This should be dynamic
 # modules in which we can find configurable objects
 modules = ['database', 'documentFactory', 'documentStore', 'extractor', 'index', 'indexStore', 'logger', 'normalizer', 'objectStore', 'parser', 'postgres', 'preParser', 'protocolMap', 'queryFactory', 'queryStore', 'recordStore', 'resultSetStore', 'server', 'transformer', 'workflow', 'xpathProcessor', 'textmining.tmNormalizer', 'textmining.tmDocumentFactory', 'textmining.tmPreParser', 'textmining.tmTransformer', 'datamining.dmPreParser', 'datamining.dmTransformer', 'grid.srbIndex', 'grid.srbStore']
 
 
-cheshireVersion = (0,9,10)
+cheshireVersion = (0,9,11)
 
 cheshireRoot = "/home/cheshire/cheshire3"
 cheshireCode = "/home/cheshire/cheshire3/code/extensions"
 cheshireDbs = "/home/cheshire/cheshire3/dbs"
 cheshireWww = "/home/cheshire/cheshire3/www"
 
+def get_subpackages():
+    sps = []
+    p = cheshire3.__path__[0]
+    files = os.listdir(p)
+    for f in files:
+        fd = os.path.join(p, f)
+        if os.path.isdir(fd):
+            sps.append(f)
+    return sps
 
 class Architecture(object):
     # Facilitate Architecture Introspection 
