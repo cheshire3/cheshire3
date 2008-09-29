@@ -1,6 +1,18 @@
 
 This is some documentation, also used for testing!
 
+=== ABOUT ===
+
+Cheshire3 is a fast XML search engine, written in Python for extensability and using C libraries for speed. Cheshire3 is feature rich, including support for XML namespaces, unicode, a distributable object oriented model and all the features expected of a digital library system.
+
+Standards are foremost, including SRW/U and CQL, as well as Z39.50 and OAI (requires cheshire3.web sub-package). It is highly modular and configurable, enabling very specific needs to be addressed with a minimum of effort. The API is stable and fully documented, allowing easy third party development of components.
+
+Given a set of records, Cheshire3 can extract data into one or more indexes after processing with configurable workflows to add extra normalisation and processing. Once the indexes have been constructed, it supports such operations as search, retrieve, browse and sort.
+
+Cheshire3\'s extensive use of third party C-libraries (e.g. BerkeleyDB, libxml) may involve installing some pre-requisites, and we recommend that you download the necessary Cheshire3 packages from http://www.cheshire3.org/download/ and install them using the scripts provided, rather than just installing this package as a pure python module distribution.
+
+By installing the additional cheshire3.web sub-package, and using Apache handlers, any interface from a shop front, to SRU, Z39.50 to OAI can be provided (all included by default), but the abstract protocolHandler allows integration into any environment that will support Python.
+
 === INITIALIZATION ===
 
 If you are running from the Subversion repository, you need to do:
