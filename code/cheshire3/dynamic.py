@@ -9,8 +9,11 @@ def makeObjectFromDom(session, topNode, parentObject):
     # Lots of indirections from xml to object
     objectType = None
     try:
-        objectType = topNode.xpath('./objectType/text()')[0]            
-    except:
+        objectType = topNode.xpath('./objectType/text()')[0]
+    except IndexError:
+        from lxml import etree
+        print etree.tostring(topNode)            
+    except AttributeError:
         for c in topNode.childNodes:
             if (c.nodeType == elementType and c.localName == "objectType"):
                 # Here's what we want to instantiate
