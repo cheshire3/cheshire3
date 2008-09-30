@@ -10,9 +10,11 @@ from cheshire3.baseObjects import Session
 from cheshire3.resultSet import SimpleResultSet
 from cheshire3.document import StringDocument
 from cheshire3.exceptions import *
+from cheshire3.cqlParser import parse as cqlparse
+
+from PyZ3950 import SRWDiagnostics
 
 
-from PyZ3950 import CQLParser, SRWDiagnostics
 import datetime
 # import bits from oaipmh module
 from oaipmh.server import Server as OaiXmlServer
@@ -82,7 +84,7 @@ class Cheshire3OaiServer:
         # get some generally useful stuff now
         self.baseURL = self.protocolMap.baseURL
         # get earliest datestamp in database
-        q = CQLParser.parse('rec.lastModificationDate > "%s"' % (str(datetime.datetime.utcfromtimestamp(0)))) # get UTC of the epoch as query term
+        q = cqlparse('rec.lastModificationDate > "%s"' % (str(datetime.datetime.utcfromtimestamp(0)))) # get UTC of the epoch as query term
         try:
             tl = self.db.scan(session, q, 1)
         except SRWDiagnostics.Diagnostic16:
@@ -123,7 +125,7 @@ class Cheshire3OaiServer:
             mdw = Cheshire3OaiMetadataWriter(txr)
             self.metadataRegistry.registerWriter(metadataPrefix, mdw)
             
-        q = CQLParser.parse('rec.identifier exact "%s"' % (identifier))
+        q = cqlparse('rec.identifier exact "%s"' % (identifier))
         try:
             rs = self.db.search(session, q)
         except SRWDiagnostics.Diagnostic16:
@@ -135,7 +137,7 @@ class Cheshire3OaiServer:
         r = rs[0]        
         rec = r.fetch_record(session)
         # now reverse lookup lastModificationDate
-        q = CQLParser.parse('rec.lastModificationDate < "%s"' % (datetime.datetime.utcnow()))
+        q = cqlparse('rec.lastModificationDate < "%s"' % (datetime.datetime.utcnow()))
         pm = self.db.get_path(session, 'protocolMap') # get CQL ProtocolMap
         idx = pm.resolveIndex(session, q)
         vector = idx.fetch_vector(session, rec)
@@ -164,7 +166,7 @@ class Cheshire3OaiServer:
         if (until < from_):
             raise BadArgumentError('until argument value is earlier than from argument value.')
         
-        q = CQLParser.parse('rec.lastModificationDate > "%s" and rec.lastModificationDate < "%s"' % (from_, until))
+        q = cqlparse('rec.lastModificationDate > "%s" and rec.lastModificationDate < "%s"' % (from_, until))
         # actually need datestamp values as well as results - interact with indexes directly for efficiency
         pm = self.db.get_path(session, 'protocolMap') # get CQL ProtocolMap
         idx = pm.resolveIndex(session, q.leftOperand)
