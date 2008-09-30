@@ -8,6 +8,7 @@ from cheshire3.cqlParser import modifierClauseType, indexType, relationType
 
 from PyZ3950 import z3950, asn1
 
+
 class Z3950ProtocolMap(ZeerexProtocolMap):
     transformerHash = {}
 
@@ -294,3 +295,86 @@ class Z3950ProtocolMap(ZeerexProtocolMap):
         return (index, relation)
 
 
+class C3WepProtocolMap(ZeerexProtocolMap):
+    
+    def __init__(self, session, node, parent):
+        self.protocol = "http://www.cheshire3.org/protocols/workflow/1.0/"
+        ZeerexProtocolMap.__init__(self, session, node, parent)
+        
+    def _walkZeeRex(self, session, node):
+
+        if node.localName in ['databaseInfo', 'metaInfo']:
+            # Ignore
+            return
+        elif node.localName == 'serverInfo':
+            self.version = node.getAttribute('version')
+            for c in node.childNodes:
+                self._walkZeeRex(session, c)
+        elif node.localName == 'database':
+            self.databaseUrl = str(flattenTexts(node))
+        elif node.localName == 'host':
+            self.host = str(flattenTexts(node))
+        elif node.localName == 'port':
+            self.port = int(flattenTexts(node))           
+        else:
+            for c in node.childNodes:
+                if c.nodeType == elementType:
+                    self._walkZeeRex(session, c)
+
+
+class OAIPMHProtocolMap(ZeerexProtocolMap):
+    
+    def __init__(self, session, node, parent):
+        self.protocol = "http://www.openarchives.org/OAI/2.0/OAI-PMH"
+        self.recordNamespaces = {}    # key: metadataPrefix, value: XML Namespace
+        self.schemaLocations = {}     # key: XML Namespace, value: Schema Location
+        self.transformerHash = {}     # key: XML Namespace, value: Cheshire3 Transformer Object
+        self.contacts = []
+        ZeerexProtocolMap.__init__(self, session, node, parent)
+        # some validation checks
+        try:
+            self.baseURL = 'http://%s:%d/%s' % (self.host, self.port, self.databaseName)
+        except:
+            raise ConfigFileException("Unable to derive baseURL from host, port, database")
+        # metadatPrefix oai_dc is mandatory
+        if not 'oai_dc' in self.recordNamespaces:
+            raise ConfigFileException("Schema configuration for mandatory metadataPrefix 'oai_dc' required in schemaInfo.")
+        # at least 1 adminEmail address is mandatory for Identify response
+        if not len(self.contacts):
+            raise ConfigFileException("Contact e-mail address of a database administrator required in databaseInfo.")
+        
+        
+    def _walkZeeRex(self, session, node):
+        if node.localName in ['indexInfo']:
+            # Ignore
+            return
+        elif node.localName == 'serverInfo':
+            self.version = node.getAttribute('version')
+            for c in node.childNodes:
+                self._walkZeeRex(session, c)
+        elif node.localName == 'database':
+            self.databaseName = str(flattenTexts(node))
+        elif node.localName == 'host':
+            self.host = str(flattenTexts(node))
+        elif node.localName == 'port':
+            self.port = int(flattenTexts(node))
+        elif node.localName == 'title':
+            self.title = str(flattenTexts(node))
+        elif node.localName == 'contact':
+            self.contacts.append(str(flattenTexts(node)))
+        elif node.localName == 'schema':
+            id = node.getAttribute('identifier')
+            location = node.getAttribute('location')
+            name = node.getAttribute('name')
+            txrid = node.getAttributeNS(self.c3Namespace, 'transformer')
+            if (txrid):
+                txr = self.get_object(session, txrid)
+                if (txr == None):
+                    raise ConfigFileException("No transformer to map to for %s" % (txrid))
+                self.transformerHash[id] = txr
+            self.recordNamespaces[name] = id
+            self.schemaLocations[id] = location
+        else:
+            for c in node.childNodes:
+                if c.nodeType == elementType:
+                    self._walkZeeRex(session, c)
