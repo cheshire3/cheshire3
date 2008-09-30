@@ -2,7 +2,7 @@
 <subConfigs>
 
 <subConfig type = "workflow" id="buildIndexWorkflow">
-  <objectType>workflow.SimpleWorkflow</objectType>
+  <objectType>cheshire3.workflow.SimpleWorkflow</objectType>
   <workflow>
     <!-- input type:  documentFactory -->
     <log>Loading records</log>
@@ -19,7 +19,7 @@
 
 
 <subConfig type="workflow" id="buildIndexSingleWorkflow">
-   <objectType>workflow.SimpleWorkflow</objectType>
+   <objectType>cheshire3.workflow.SimpleWorkflow</objectType>
   <workflow>
     <!-- input type:  document -->
       <object type="workflow" ref="PreParserWorkflow"/>
@@ -38,7 +38,7 @@
 </subConfig>
 
 <subConfig type="workflow" id="PreParserWorkflow">
-   <objectType>workflow.SimpleWorkflow</objectType>
+   <objectType>cheshire3.workflow.SimpleWorkflow</objectType>
   <workflow>
     <!-- input type:  document -->
       <object type="parser" ref="SgmlPreParser"/>
