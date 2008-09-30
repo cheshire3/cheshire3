@@ -26,9 +26,9 @@
     <setting type="namespaces">1</setting>
   </options>
 </subConfig>
-<subConfig type="parser" id="FtParser">
-  <objectType>cheshire3.parser.FtParser</objectType>
-</subConfig>
+<!--<subConfig type="parser" id="FtParser">-->
+<!--  <objectType>cheshire3.parser.FtParser</objectType>-->
+<!--</subConfig>-->
 <subConfig type="parser" id="defaultRecordStoreParser">
   <objectType>cheshire3.parser.XmlRecordStoreParser</objectType> 
 </subConfig>
@@ -397,9 +397,6 @@
 
 <subConfig type="transformer" id="XmlTransformer">
   <objectType>cheshire3.transformer.XmlTransformer</objectType>
-</subConfig>
-<subConfig type="transformer" id="GRS1Transformer">
-  <objectType>cheshire3.transformer.GRS1Transformer</objectType>
 </subConfig>
 <subConfig type="transformer" id="defaultRecordStoreTransformer">
   <objectType>cheshire3.transformer.XmlRecordStoreTransformer</objectType>
