@@ -33,39 +33,39 @@ def importObject(session, objectType):
 
     try:
         m = __import__(modName)
-    except ImportError:
+    except ImportError as e:
         if objectType[:9] != "cheshire3":
             try:
                 return importObject(session, "cheshire3.%s" % objectType)
             except: pass
         if session.logger:
             session.logger.log_critical(session, "Failed to import '%s'" % modName)
-        raise
+        raise e
 
     # now split and fetch bits
     mods = modName.split('.')
     for mn in mods[1:]:
         try:
             m = getattr(m, mn)
-        except AttributeError:
+        except AttributeError as e:
             if objectType[:9] != "cheshire3":
                 try:
                     return importObject(session, "cheshire3.%s" % objectType)
                 except: pass
             if session.logger:
                 session.logger.log_critical(session, "Failed to import %s during %s" % (m, modName))
-            raise
+            raise e
 
     try:
         parentClass = getattr(m, className)
-    except AttributeError:
+    except AttributeError as e:
         if objectType[:9] != "cheshire3":
             try:
                 return importObject(session, "cheshire3.%s" % objectType)
             except: pass
         if session.logger:
             session.logger.log_critical(session, "Module %s does not define class %s" % (modName, className))
-        raise
+        raise e
     return parentClass
 
 
