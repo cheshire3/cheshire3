@@ -2,7 +2,7 @@
 from cheshire3.configParser import C3Object, CaselessDictionary
 from cheshire3.baseObjects import Database, Index, ProtocolMap, Record
 from cheshire3.baseStore import SummaryObject
-from cheshire3.exceptions import ConfigFileException, ObjectDoesNotExistException
+from cheshire3.exceptions import ConfigFileException, ObjectDoesNotExistException, QueryException
 from cheshire3.bootstrap import BSParser, BootstrapDocument
 from cheshire3.resultSet import SimpleResultSet, BitmapResultSet
 import cheshire3.cqlParser as cql
