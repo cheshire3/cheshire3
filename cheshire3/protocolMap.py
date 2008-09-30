@@ -8,7 +8,7 @@ from cheshire3.cqlParser import modifierClauseType, indexType, relationType
 from cheshire3 import dynamic
 
 try:
-    import cheshire3.web.srwExtensions
+    import cheshire3.web.srwExtensions as srwExtensions
 except:
     srwExtensions = None
 
