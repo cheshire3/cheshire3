@@ -167,7 +167,10 @@ def html_encode(txt):
 
 def multiReplace(txt, params):
     for k,v in params.iteritems():
-        txt = txt.replace(k,unicode(v).encode('ascii', 'xmlcharrefreplace'))
+        try:
+            txt = txt.replace(k,unicode(v).encode('ascii', 'xmlcharrefreplace'))
+        except UnicodeDecodeError:
+            txt = txt.replace(k,unicode(v, 'utf8').encode('ascii', 'xmlcharrefreplace'))
     return txt
 
 #- end multiReplace
