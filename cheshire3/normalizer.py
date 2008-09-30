@@ -390,12 +390,15 @@ try:
             stemmed = self.stemmer.stem(wds)
             return ' '.join(stemmed)
 
-except:
+except ImportError:
 
     class StemNormalizer(SimpleNormalizer):
         def __init__(self, session, config, parent):
             raise(ConfigFileException('Stemmer library not available'))
 
+    class PhraseStemNormalizer(SimpleNormalizer):
+        def __init__(self, session, config, parent):
+            raise(ConfigFileException('Stemmer library not available'))
 
 
 class DateStringNormalizer(SimpleNormalizer):
