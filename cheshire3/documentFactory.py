@@ -842,8 +842,8 @@ class AccumulatingDocumentFactory(SimpleDocumentFactory):
 
     def __init__(self, session, config, parent):
         SimpleDocumentFactory.__init__(self, session, config, parent)
-        self.register_stream(session, 'transformer', AccTransformerStream)
-        self.register_stream(session, 'vectorTransformer', AccVectorTransformerStream)
+        self.register_stream('transformer', AccTransformerStream)
+        self.register_stream('vectorTransformer', AccVectorTransformerStream)
 
     def loadMany(self, session, data=None, cache=None, format=None, tagName=None, codec=None):
         for item in data:
