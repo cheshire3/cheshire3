@@ -2,7 +2,7 @@
 from cheshire3.baseObjects import Index, Document, Session
 from cheshire3.configParser import C3Object
 from cheshire3.utils import elementType, getFirstData, flattenTexts
-from cheshire3.exceptions import ConfigFileException
+from cheshire3.exceptions import ConfigFileException, QueryException
 from cheshire3.record import SaxRecord, DomRecord
 from cheshire3.resultSet import SimpleResultSet, SimpleResultSetItem
 from cheshire3.workflow import CachingWorkflow
@@ -466,7 +466,7 @@ class SimpleIndex(Index):
         if not matches:
             return base
         else:
-            if clause.relation.value == "=" and isinstance(self, SimpleIndex):
+            if clause.relation.value == "=" and not isinstance(self, ProximityIndex):
                 # can't do prox!
                 clause.relation.value = "all"
             rs = base.combine(session, matches, clause, db)
