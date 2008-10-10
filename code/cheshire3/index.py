@@ -1363,6 +1363,7 @@ class PassThroughIndex(SimpleIndex):
         currDb = session.database
         session.database = self.database.id
         scans = self.remoteIndex.scan(session, clause, nTerms, direction, summary=0)
+
         if not scans:
             return []
 
@@ -1370,10 +1371,12 @@ class PassThroughIndex(SimpleIndex):
         storeHash = {}
         end = 0
 
-        while True:
+        while True:            
             for info in scans:
+                first = False
                 if len(info) == 3:
                     end = 1
+                    first = True
                 term = info[0]
                 termInfo = info[1]
                 trecs = 0
@@ -1395,15 +1398,21 @@ class PassThroughIndex(SimpleIndex):
                         toccs += info[2]
                 if trecs:
                     newscans.append([term, [termid, trecs, toccs]])
-                    if len(info) == 3:
-                        newscans[-1].append(info[2])
+                    if first:
+                        newscans[-1].append('first')
+#                    if len(info) == 3:
+#                        newscans[-1].append(info[2])
             if (not end) and len(newscans) < nTerms:
                 # fetch new scans
                 clause.term.value = scans[-1][0]
+                if direction == "<=":
+                    direction = "<"
+                elif direction == ">=":
+                    direction = ">"
                 scans = self.remoteIndex.scan(session, clause, 10, direction, summary=0)
             else:
                 break
-
+        print newscans
         return newscans[:nTerms]
 
     def fetch_sortValue(self, session, rec):
