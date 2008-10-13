@@ -1413,7 +1413,6 @@ class PassThroughIndex(SimpleIndex):
                 break
         if endMarker != '' and len(newscans):
             newscans[-1].append(endMarker)
-        print newscans
         return newscans[:nTerms]
 
     def fetch_sortValue(self, session, rec):
