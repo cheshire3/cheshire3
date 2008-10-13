@@ -1401,7 +1401,7 @@ class PassThroughIndex(SimpleIndex):
                         newscans[-1].append(endMarker)
                         endMarker = ''
 
-            if (not end) and len(newscans) < nTerms:
+            if (not end) and len(newscans) < nTerms + 1:
                 # fetch new scans
                 clause.term.value = scans[-1][0]
                 if direction == "<=":
@@ -1413,6 +1413,7 @@ class PassThroughIndex(SimpleIndex):
                 break
         if endMarker != '' and len(newscans):
             newscans[-1].append(endMarker)
+        print newscans
         return newscans[:nTerms]
 
     def fetch_sortValue(self, session, rec):
