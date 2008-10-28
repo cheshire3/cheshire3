@@ -1,15 +1,18 @@
 
 from cheshire3.baseObjects import User
 from cheshire3.exceptions import ConfigFileException
-from cheshire3.utils import getFirstData, elementType
+from cheshire3.utils import getFirstData, elementType, flattenTexts
 
 import crypt
 import hashlib
+
+from lxml import etree
 
 class SimpleUser(User):
     simpleNodes = ["username", "password", "email", "address", "tel", "realName", "description", "passwordType"]
     username = ""
     password = ""
+    passwordType = ""
     email = ""
     address =""
     tel = ""
@@ -52,7 +55,7 @@ class SimpleUser(User):
                                 obj = getFirstData(c2)
                             elif c2.localName == "value":
                                 flag = getFirstData(c2)
-                                if not flag in self.allFlags and flag[:4] != "c3fn":
+                                if (flag not in self.allFlags) and (flag[:4] != "c3fn"):
                                     raise ConfigFileException("Unknown flag: %s" % flag)
                     if obj == None or flag == None:
                         raise ConfigFileException("Missing object or value element for flag for user %s" % self.username)
@@ -69,6 +72,41 @@ class SimpleUser(User):
         elif (node.localName == "hostmask"):
             # Extract allowed hostmask list
             pass
+        
+    
+    def _handleLxmlConfigNode(self, session, node):
+        if (node.tag in self.simpleNodes):
+            setattr(self, node.tag, flattenTexts(node).strip())
+        elif (node.tag == "flags"):
+            # Extract Rights info
+            # <flags> <flag> <object> <value> </flag> </flags>
+            for c in node.iterchildren(tag=etree.Element):
+                if c.tag == "flag":
+                    obj = None
+                    flag = None
+                    for c2 in c.iterchildren(tag=etree.Element):
+                        if c2.tag == "object":
+                            obj = flattenTexts(c2).strip()
+                        elif c2.tag == "value":
+                            flag = flattenTexts(c2).strip()
+                            if (flag not in self.allFlags) and (flag[:4] != "c3fn"):
+                                raise ConfigFileException("Unknown flag: %s" % flag)
+                    if obj == None or flag == None:
+                        raise ConfigFileException("Missing object or value element for flag for user %s" % self.username)
+                    if (obj):
+                        f = self.flags.get(flag, [])
+                        if f != "":
+                            f.append(obj)
+                            self.flags[flag] = f
+                    else:
+                        self.flags[flag] = ""
+        elif (node.tag == "history"):
+            # Extract user history
+            pass
+        elif (node.tag == "hostmask"):
+            # Extract allowed hostmask list
+            pass
+    
 
     def __init__(self, session, config, parent):
         self.flags = {}
