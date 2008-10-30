@@ -816,13 +816,14 @@ class ProximityIndex(SimpleIndex):
             s.queryFreq = queryHash['occurences']
             s.queryPositions = []
             # not sure about this nProxInts??
-	    try:
-		for x in queryHash['positions'][1::self.nProxInts]:
-		    s.queryPositions.append(x)
-	    except:
-		# no queryPos?
-		pass
-	if (terms):
+            try:
+                for x in queryHash['positions'][1::self.nProxInts]:
+                    s.queryPositions.append(x)
+            except:
+                # no queryPos?
+                pass
+            
+        if (terms):
             s.termid = terms[0]
             s.totalRecs = terms[1]
             s.totalOccs = terms[2]
@@ -831,8 +832,6 @@ class ProximityIndex(SimpleIndex):
             s.totalOccs = 0
 
         return s
-
-
 
 
 
