@@ -414,9 +414,6 @@ class SimpleIndex(Index):
                     else:
                         termList =  store.fetch_termList(session, self, startK, 0, '>=', end=nextK)
                     
-                    maskBase = self.resultSetClass(session, [], recordStore=self.recordStore)
-                    maskClause = cql.parse(clause.toCQL())
-                    maskClause.relation.value = u'any'
                     if len(k) > 1:
                         # filter terms by regex
                         # FIXME: need to do something cleverer than this if first character is masked
@@ -427,16 +424,26 @@ class SimpleIndex(Index):
                             mymatch = kRe.match
                             termList = filter(lambda t: mymatch(t[0]), termList)
                     
+                    maskBase = self.resultSetClass(session, [], recordStore=self.recordStore)
+                    maskClause = cql.parse(clause.toCQL())
+                    maskClause.relation.value = u'any'
+                    if (clause.relation.value == u'='):
+                        # tell combine to keep proxInfo
+                        pass
+                            
                     try:
                         maskResultSets = [self.construct_resultSet(session, t[1], qHash) for t in termList]
                         maskBase = maskBase.combine(session, maskResultSets, maskClause, db)
+                        maskBase.queryTerm = qHash['text']
+                        maskBase.queryPositions = qHash['positions']
                     except:
+                        raise
                         pass
                     else:
                         matches.append(maskBase)
                                    
                 elif (firstMask == 0):
-                    
+                    # No longer used - better to be slow than to refuse to do a search.
                     pass
                 else:
                     term = store.fetch_term(session, self, k)
