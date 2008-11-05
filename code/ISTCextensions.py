@@ -189,15 +189,15 @@ class CountryofPrintNormalizer(SimpleNormalizer):
         elif data in self.England:
             return 'England'
         elif data in self.France or 'france' in data.split():
-            return 'France (includes French-speaking Switzerland)'
+            return 'France'
         elif data in self.Germany or 'germany' in data.split():
-            return 'Germany (includes German-speaking Switzerland, Austria & Alsace)'
+            return 'Germany'
         elif data in self.Hungary:
             return 'Hungary'
         elif data in self.Italy or 'italy' in data.split():
             return 'Italy'
         elif data in self.LowCountries or 'netherlands' in data.split():
-            return 'Low Countries (includes towns under Burgundian rule)'
+            return 'Low Countries'
         elif data in self.Poland:
             return 'Poland'
         elif data in self.Portugal:
