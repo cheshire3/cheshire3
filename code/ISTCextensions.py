@@ -99,7 +99,7 @@ class ISTCTransfomer(LxmlXsltTransformer):
 class BibRefNormalizer(SimpleNormalizer):
     
     def __init__(self, session, config, parent):
-        self.serv = SimpleServer(session, '/home/cheshire/cheshire3/cheshire3/configs/serverConfig.xml')
+        self.serv = SimpleServer(session, '/home/cheshire/cheshire3/configs/serverConfig.xml')
         self.db3 = self.serv.get_object(session, 'db_refs')
         self.qf = self.db3.get_object(session, 'DefaultQueryFactory')
     
