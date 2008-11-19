@@ -161,6 +161,7 @@ class reqHandler:
         f = open(p, "r")
         if f:
             filestr = f.read()
+            f.close()
             # insert some database metadata
             db = session.config.parent
             session.database = db.id
@@ -331,11 +332,17 @@ class reqHandler:
         path = req.uri[1:]
         if (path[-1] == "/"):
             path = path[:-1]
-                    
-	if not configs.has_key(path):
+            
+        if not configs.has_key(path):
             # unknown endpoint
             # no specification
-            pass
+            xml = ['<databases>']
+            for k in configs:
+                xml.append("<database><path>%s</path></database>" % k)
+            xml.append('</databases>')
+            txt = ''.join(xml)
+            self.send_xml(txt, req)
+        
         else:
             config = configs[path]['http://www.loc.gov/zing/srw/']
             session.path = "http://%s/%s" % (req.hostname, path)
