@@ -12,9 +12,11 @@ from cheshire3.utils import flattenTexts
 from cheshire3 import cqlParser
 from cheshire3 import internal
 
+cheshirePath = os.environ.get('C3HOME', '/home/cheshire')
+
 session = Session()
 session.environment = "apache"
-serv = SimpleServer(session, '/home/cheshire/cheshire3/configs/serverConfig.xml')
+serv = SimpleServer(session, os.path.join(cheshirePath, 'cheshire3', 'configs', 'serverConfig.xml'))
 
 configs = {}
 serv._cacheDatabases(session)

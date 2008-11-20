@@ -31,12 +31,12 @@ from oaipmh.error import *
 #</Directory>
 # NB. SetHandler, not AddHandler.
 
-
-
 # Cheshire3 architecture
+cheshirePath = os.environ.get('C3HOME', '/home/cheshire')
+
 session = Session()
 session.environment = "apache"
-serv = SimpleServer(session, '/home/cheshire/cheshire3/configs/serverConfig.xml')
+serv = SimpleServer(session, os.path.join(cheshirePath, 'cheshire3', 'configs', 'serverConfig.xml'))
 lxmlParser = serv.get_object(session, 'LxmlParser')
 
 configs = {}

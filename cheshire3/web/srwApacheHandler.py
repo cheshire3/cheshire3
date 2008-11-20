@@ -23,10 +23,11 @@ from cheshire3.baseObjects import Session
 
 # NB. SetHandler, not AddHandler.
 
+cheshirePath = os.environ.get('C3HOME', '/home/cheshire')
 
 session = Session()
 session.environment = "apache"
-serv = SimpleServer(session, '/home/cheshire/cheshire3/configs/serverConfig.xml')
+serv = SimpleServer(session, os.path.join(cheshirePath, 'cheshire3', 'configs', 'serverConfig.xml'))
 
 configs = {}
 serv._cacheDatabases(session)

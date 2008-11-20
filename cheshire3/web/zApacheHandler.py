@@ -28,9 +28,11 @@ from cheshire3.baseObjects import Session, Database, Transformer, Workflow
 from cheshire3.server import SimpleServer
 from cheshire3 import internal
 
+cheshirePath = os.environ.get('C3HOME', '/home/cheshire')
+
 session = Session()
 session.environment = "apache"
-server = SimpleServer(session, '/home/cheshire/cheshire3/configs/serverConfig.xml')
+serv = SimpleServer(session, os.path.join(cheshirePath, 'cheshire3', 'configs', 'serverConfig.xml'))
 configs = {}
 dbmap = {}
 server._cacheDatabases(session)
