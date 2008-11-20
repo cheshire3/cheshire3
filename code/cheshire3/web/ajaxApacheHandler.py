@@ -10,10 +10,11 @@ from cheshire3.baseObjects import Session
 from cheshire3.document import StringDocument
 from cheshire3.internal import storeTypes, collTypes, processTypes, Architecture
 
+cheshirePath = os.environ.get('C3HOME', '/home/cheshire')
 
 session = Session()
 session.environment = "apache"
-serv = SimpleServer(session, '/home/cheshire/cheshire3/configs/serverConfig.xml')
+serv = SimpleServer(session, os.path.join(cheshirePath, 'cheshire3', 'configs', 'serverConfig.xml'))
 
 lastRefresh = time.time()
 arch = Architecture()

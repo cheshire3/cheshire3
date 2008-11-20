@@ -34,7 +34,7 @@ from mod_python import apache
 from mod_python.util import FieldStorage
 
 from xml.dom.minidom import parseString as domParseString, Document as DomDocument
-import time
+import time, os
 import cStringIO as StringIO
 
 from cheshire3.server import SimpleServer
@@ -45,9 +45,11 @@ from cheshire3.workflow import SimpleWorkflow, CachingWorkflow
 from cheshire3 import dynamic
 from cheshire3.exceptions import *
 
+cheshirePath = os.environ.get('C3HOME', '/home/cheshire')
+
 session = Session()
 session.environment = "apache"
-serv = SimpleServer(session, '/home/cheshire/cheshire3/configs/serverConfig.xml')
+serv = SimpleServer(session, os.path.join(cheshirePath, 'cheshire3', 'configs', 'serverConfig.xml'))
 mdp = serv.get_object(session, 'defaultParser')
 
 configs = {}
