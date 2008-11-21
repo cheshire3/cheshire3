@@ -49,7 +49,11 @@ class SruRecord(SruObject):
     
     def __getattr__(self, name):
         if name == 'recordData':
-            return SruRecordData(self.tree.recordData.getchildren()[0])
+            if self.recordPacking == 'string':
+                return SruRecordData(objectify.fromstring(str(self.tree.recordData)))
+            else:
+                # default: recordPacking == 'xml'
+                return SruRecordData(self.tree.recordData.getchildren()[0])
 
         return SruObject.__getattr__(self, name)
 
