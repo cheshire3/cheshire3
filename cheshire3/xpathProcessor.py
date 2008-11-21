@@ -114,13 +114,22 @@ class SpanXPath(SimpleXPathProcessor):
             record.elementHash = eval(sax[-1][2:])
         else:
             record = rec
-        raw = record.process_xpath(session, self.sources[0][0]['xpath'])
+
+        startTag = self.sources[0][0]['string']
+        raw = record.process_xpath(session, startTag)
+
+        endTag = self.sources[0][1]['string']
+        if endTag != startTag:
+            endRaw = record.process_xpath(session, self.sources[0][1]['string'])
+        else:
+            endRaw = raw[:]
+
+        endRawStarts = [x[0] for x in endRaw]
+
         initialSlide = int(self.sources[0][0].get('slide', 0))
-        endTag = self.sources[0][1]['xpath'][-1][0][1]
         endNum = int(self.sources[0][1].get('window', '1'))
         slide = int(self.sources[0][1].get('slide', endNum))
         comps = []
-        # check if start and end are the same
 
         for r in raw[initialSlide::slide]:
             start = int(r[-1][r[-1].rfind(' ')+1:])            
@@ -136,20 +145,19 @@ class SpanXPath(SimpleXPathProcessor):
                 n += 1
                 line = record.sax[start+n]
                 if(line[0] in ['1', '4']):
-                    # Check it                            
-                    if (record._checkSaxXPathLine(self.sources[0][1]['xpath'][1], start + n)):
+                    if (line in endRawStarts):
                         # Matched end
                         currNum += 1
                         if currNum >= endNum:
                             okay = 0
                             continue
+
                     # Add tags to close if not end or not endNum reached
                     if line[0] == '4':
                         end = line.rfind("}")
                         stuff = eval(line[2:end+1])
                         ns, tag = stuff[0], stuff[1]
                         openTags.append((ns, tag))
-                    #*** added by Cat Rob needs to check - no openning tags showing in returned fragment
                         comp.append(line)
                     else:
                         openTags.append(record._convert_elem(line)[0])
@@ -187,9 +195,6 @@ class MetadataXPath(SimpleXPathProcessor):
         for src in self.sources:
             # list of {}s
             for xp in src:
-                # just use last item
-                #full = xp['xpath']
-                #name = full[1][-1][1]
                 name = xp['string']
                 if hasattr(record, name):
                     vals.append([getattr(record, name)])
