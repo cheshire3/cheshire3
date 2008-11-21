@@ -497,6 +497,123 @@ except:
         pass
 
 
+
+try:
+    from xpath import ParsedRelativeLocationPath, ParsedAbsoluteLocationPath, \
+             ParsedStep, ParsedNodeTest, ParsedExpr, Compile, \
+             ParsedAbbreviatedAbsoluteLocationPath, ParsedAbbreviatedRelativeLocationPath, \
+             ParsedNodeTest
+except:
+     raise
+
+def traversePath(node):
+
+    if (isinstance(node, ParsedRelativeLocationPath.ParsedRelativeLocationPath)):
+        left  = traversePath(node._left)
+        right = traversePath(node._right)
+        if (left == []):
+            # self::node()
+            return [right]
+        elif (type(left[0]) in types.StringTypes):
+            return [left, right]
+        else:
+            left.append(right)
+            return left
+    elif (isinstance(node, ParsedAbsoluteLocationPath.ParsedAbsoluteLocationPath)):
+        left = ['/']
+        if (node._child):
+            right = traversePath(node._child)
+        else:
+            return left
+        if (type(right[0]) == types.StringType):
+            return [left, right]
+        else:
+            left.extend(right)
+            return left
+    elif (isinstance(node, ParsedAbbreviatedRelativeLocationPath.ParsedAbbreviatedRelativeLocationPath)):
+        left  = traversePath(node._left)
+        right = traversePath(node._right)
+        right[0] = 'descendant'
+        if (left == []):
+            # self::node()
+            return [right]
+        elif (type(left[0]) in types.StringTypes):
+            return [left, right]
+        else:
+            left.append(right)
+            return left
+    elif (isinstance(node, ParsedStep.ParsedStep)):
+        # TODO: Check that axis is something we can parse
+        a = node._axis._axis
+        if (a == 'self'):
+            return []
+        n = node._nodeTest
+        local = ParsedNodeTest.NodeNameTest
+        nameattr = "_nodeName"
+        if (isinstance(n, local)):
+            n = getattr(n, nameattr)
+        elif (isinstance(n, ParsedNodeTest.TextNodeTest)):
+            n = "__text()"
+        elif (isinstance(n, ParsedNodeTest.QualifiedNameTest)):
+            n = n._prefix + ":" + n._localName
+        elif (isinstance(n, ParsedNodeTest.PrincipalTypeTest)):
+            n = "*"
+        else:
+            raise(NotImplementedError)
+
+        preds = node._predicates
+        pp = []
+        if (preds):
+            for pred in preds:
+                pp.append(traversePath(pred))
+        return [a, n, pp]
+    elif (isinstance(node, ParsedExpr.ParsedEqualityExpr) or isinstance(node, ParsedExpr.ParsedRelationalExpr)):
+        # @id="fish"
+        op = node._op
+        # Override check for common: [position()=int]
+        if (op == '=' and isinstance(node._left, ParsedExpr.FunctionCall) and node._left._name == 'position' and isinstance(node._right, ParsedExpr.ParsedNLiteralExpr)):
+            return node._right._literal
+        left = traversePath(node._left)
+        if (type(left) == types.ListType and left[0] == "attribute"):
+            left = left[1]
+        right = traversePath(node._right)
+        if not op in ('=', '!='):
+            op = ['<', '<=', '>', '>='][op]
+        return [left, op, right]
+    elif (isinstance(node, ParsedExpr.ParsedNLiteralExpr) or isinstance(node, ParsedExpr.ParsedLiteralExpr)):
+        # 7 or "fish"
+        return node._literal
+    elif (isinstance(node, ParsedExpr.FunctionCall)):
+        if (node._name == 'last'):
+            # Override for last using Pythonic expr
+            return -1
+        elif node._name == 'name':
+            return ['FUNCTION', '__name()']
+        elif node._name == 'starts-with':
+            # only for foo[starts-with(@bar, 'baz')]
+            return ['FUNCTION', 'starts-with', traversePath(node._arg0)[1], node._arg1._literal]
+        elif node._name == 'regexp':
+            return ['FUNCTION', 'regexp', traversePath(node._arg0)[1], re.compile(node._arg1._literal)]
+        elif node._name == 'count':
+            return ['FUNCTION', 'count', traversePath(node._arg0)]
+        else:
+            raise(NotImplementedError)
+    elif (isinstance(node, ParsedExpr.ParsedAndExpr)):
+        return [traversePath(node._left), 'and', traversePath(node._right)]
+    elif (isinstance(node, ParsedExpr.ParsedOrExpr)):
+        return [traversePath(node._left), 'or', traversePath(node._right)]
+    else:
+        # We'll need to do full XPath vs DOM
+        raise(NotImplementedError)
+    
+def parseOldXPath(p):
+    xpObj = Compile(p)
+    t = traversePath(xpObj)
+    if (t[0] <> '/' and type(t[0]) in types.StringTypes):
+        t= [t]
+    return [xpObj, t]
+
+
 class SaxRecord(Record):
 
     def __init__(self, data, xml="", docId=None, wordCount=0, byteCount=0):
@@ -518,13 +635,7 @@ class SaxRecord(Record):
 
         if (not isinstance(xpath, list)):
             # Raw XPath
-            # c = utils.verifyXPaths([xpath])
-            if (not c or not c[0][1]):
-                if session.logger:
-                    session.logger.log_critical(session, "SAX: XPATH: %r" % xpath)
-		return []
-            else:
-                xpath = c[0]
+            xpath = parseOldXPath(xpath)
 
         xp = xpath[1]
         try:
