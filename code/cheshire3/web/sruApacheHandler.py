@@ -339,7 +339,7 @@ class reqHandler:
             # unknown endpoint
             # no specification
             xml = ['<databases>']
-            for k in configs:
+            for k in sorted(configs.keys()):
                 xml.append("<database><path>%s</path></database>" % k)
             xml.append('</databases>')
             txt = ''.join(xml)
