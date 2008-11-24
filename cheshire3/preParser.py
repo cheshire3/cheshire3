@@ -377,7 +377,7 @@ class SgmlPreParser(PreParser):
         txt = self.attr_re.sub(self._attributeFix, txt)
         txt = self.elem_re.sub(self._lowerElement, txt)
         for t in self.emptyTags:
-            empty_re = re.compile('<(%s( [^>]+)?)[\s/]*>' % t)
+            empty_re = re.compile('<(%s( [^>/]+)?)[\s/]*>' % t)
             txt = empty_re.sub(self._emptyElement, txt)
         # strip processing instructions.
         txt = self.pi_re.sub('', txt)
