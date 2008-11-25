@@ -141,7 +141,7 @@ class SimpleDatabase(SummaryObject, Database):
 
 
     def clear_indexes(self, session):
-        if not self.indexes:
+        if not len(self.indexes):
             self._cacheIndexes(session)
         for idx in self.indexes.itervalues():
             idx.clear(session)

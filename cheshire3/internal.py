@@ -12,7 +12,7 @@ processTypes = ['preParser', 'parser', 'normalizer', 'extractor', 'transformer',
 modules = ['database', 'documentFactory', 'documentStore', 'extractor', 'index', 'indexStore', 'logger', 'normalizer', 'objectStore', 'parser', 'postgres', 'preParser', 'protocolMap', 'queryFactory', 'queryStore', 'recordStore', 'resultSetStore', 'server', 'transformer', 'workflow', 'xpathProcessor', 'textmining.tmNormalizer', 'textmining.tmDocumentFactory', 'textmining.tmPreParser', 'textmining.tmTransformer', 'datamining.dmPreParser', 'datamining.dmTransformer', 'grid.srbIndex', 'grid.srbStore']
 
 
-cheshireVersion = (0,9,11)
+cheshireVersion = (1,0,0)
 
 cheshireRoot = "/home/cheshire/cheshire3"
 cheshireCode = "/home/cheshire/cheshire3/code/extensions"

@@ -178,7 +178,10 @@ class SimpleIndex(Index):
                     if ref:
                         preprocess = self.get_object(session, ref)
                     else:
-                        child.localName = 'workflow'
+                        # create new element
+                        e = etree.XML(etree.tostring(child))
+                        e.tag = 'workflow'
+                        e.set('id', self.id + "-preworkflow")
                         preprocess = CachingWorkflow(session, child, self)
                         preprocess._handleLxmlConfigNode(session, child)
                 elif child.tag == "process":
@@ -188,15 +191,11 @@ class SimpleIndex(Index):
                         process = self.get_object(session, ref)
                     else:
                         # create new element
-                        e = etree.Element('workflow')
+                        e = etree.XML(etree.tostring(child))
+                        e.tag = 'workflow'
                         e.set('id', self.id + "-workflow")
-                        for v in child.attrib:
-                            e.set(v, child.attrib[v])
-                        for c in child.iterchildren(tag=etree.Element):
-                            e.append(c)
                         process = CachingWorkflow(session, e, self)
                         process._handleLxmlConfigNode(session, e)
-
             for m in modes:
                 self.sources.setdefault(m, []).append((xp, process, preprocess))
 
@@ -220,8 +219,9 @@ class SimpleIndex(Index):
             self.longStructSize = int(lss)
         else:
             self.longStructSize = len(struct.pack('L', 1))
+            
+        
         self.recordStoreSizes = self.get_setting(session, 'recordStoreSizes', 0)
-
         # We need a Store object
         iStore = self.get_path(session, 'indexStore', None)
         self.indexStore = iStore

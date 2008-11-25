@@ -270,7 +270,7 @@ class C3Object(object):
         topNode:  The <config> or <subConfig> domNode for the configuration
         parent:   The object that provides the scope for this object.
         """
-
+        
         self.docstring = ""
         self.parent = parent
         self.subConfigs = CaselessDictionary()
@@ -286,7 +286,7 @@ class C3Object(object):
         self.logger = None
 
         pathObjects = {}
-
+        
         # LXML
         if hasattr(config, 'attrib'):
             self.id = config.attrib.get('id', '')
@@ -331,6 +331,9 @@ class C3Object(object):
                     self.docstring = e.text
                 else:
                     self._handleLxmlConfigNode(session, e)
+            
+            del walker
+            
         else:
             if (config.hasAttributeNS(None, 'id')):
                 self.id = config.getAttributeNS(None, 'id')
@@ -388,7 +391,7 @@ class C3Object(object):
                         self.docstring = getFirstData(child)
                     else:
                         self._handleConfigNode(session, child)
-
+        
         if ('pythonPath' in self.paths):
             sys.path.append(self.paths['pythonPath'][1])
 
