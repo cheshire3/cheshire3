@@ -557,8 +557,8 @@ class ComponentDocumentStream(BaseDocumentStream):
                             docstr = etree.tostring(r)
                             tree = r.getroottree()
                             path = tree.getpath(r)
-                            #if (r.nsmap):
-                            if hasNs:
+                            if (r.nsmap):
+                            #if hasNs:
                                 namespaceList = []
                                 for (pref, ns) in r.nsmap.iteritems():
                                     namespaceList.append("xmlns:%s=\"%s\"" % (pref, ns))
