@@ -504,7 +504,9 @@ try:
              ParsedAbbreviatedAbsoluteLocationPath, ParsedAbbreviatedRelativeLocationPath, \
              ParsedNodeTest
 except:
-     raise
+    # This means we can't do xpaths on SaxRecords...
+    # making them a bit pointless, but not fatal as we likely don't need them
+    pass
 
 def traversePath(node):
 

@@ -136,6 +136,7 @@ class SpanXPath(SimpleXPathProcessor):
             comp = r
             startTag = record._convert_elem(comp[0])[0]
             usingNs = comp[0][0]
+            actualNs = 0
             n = len(comp)-1
             currNum = 0
             okay = 1
@@ -157,6 +158,8 @@ class SpanXPath(SimpleXPathProcessor):
                         end = line.rfind("}")
                         stuff = eval(line[2:end+1])
                         ns, tag = stuff[0], stuff[1]
+                        if ns != None:
+                            actualNs = 1
                         openTags.append((ns, tag))
                         comp.append(line)
                     else:
@@ -178,13 +181,17 @@ class SpanXPath(SimpleXPathProcessor):
             if (openTags):
                 openTags.reverse()
                 for o in openTags:
-                    if usingNs == '1':
-                        comp.append("2 %s %s" % (o, start))
+                    if usingNs == '4':
+                        if actualNs:
+                            comp.append("5 u'%s', u'%s', u'', None" % o)
+                        else:
+                            comp.append("2 %s %s" % (o[1], start))
                     else:
-                        comp.append("5 u'%s', u'%s', u'', None" % o)
+                        comp.append("2 %s %s" % (o, start))
             comps.append(comp)
         
         return [comps]
+
 
 
 class MetadataXPath(SimpleXPathProcessor):
