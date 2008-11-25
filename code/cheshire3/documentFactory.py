@@ -535,6 +535,7 @@ class ComponentDocumentStream(BaseDocumentStream):
             # nothing to offset into
             raise NotImplementedError
         rec = self.stream
+        hasNsRe = re.compile('<([a-zA-Z1-9_-]+:[a-zA-Z1-9_-])[ >]')
         for src in self.sources:
             raw = src.process_record(session, rec)
             for xp in raw:
@@ -542,8 +543,9 @@ class ComponentDocumentStream(BaseDocumentStream):
                     if (type(r) == types.ListType):
                         tempRec = SaxRecord(r)
                         docstr = tempRec.get_xml(session)
+                        hasNs = hasNsRe.search(docstr)
                         saxid = r[-1][r[-1].rfind(' ')+1:]
-                        if r[0][0] == "4":
+                        if hasNs:
                             docstr = "<c3:component xmlns:c3=\"http://www.cheshire3.org/\" parent=\"%r\" event=\"%s\">%s</c3:component>" % (rec, saxid, docstr)
                         else:
                             docstr = "<c3component parent=\"%r\" event=\"%s\">%s</c3component>" % (rec, saxid, docstr)
@@ -555,7 +557,8 @@ class ComponentDocumentStream(BaseDocumentStream):
                             docstr = etree.tostring(r)
                             tree = r.getroottree()
                             path = tree.getpath(r)
-                            if (r.nsmap):
+                            #if (r.nsmap):
+                            if hasNs:
                                 namespaceList = []
                                 for (pref, ns) in r.nsmap.iteritems():
                                     namespaceList.append("xmlns:%s=\"%s\"" % (pref, ns))
