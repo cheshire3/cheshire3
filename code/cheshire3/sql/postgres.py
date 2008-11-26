@@ -175,7 +175,8 @@ class PostgresStore(SimpleStore):
 
     def _verifyDatabases(self, session):
         try:
-            self.cxn = pg.connect(self.database)
+#            self.cxn = pg.connect(self.database)
+            self._openContainer(session)
         except pg.InternalError as e:
             raise ConfigFileException(e.args)
 
