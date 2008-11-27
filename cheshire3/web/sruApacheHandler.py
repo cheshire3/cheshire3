@@ -160,8 +160,11 @@ class reqHandler:
         if (not os.path.isabs(p)):
             p2 = session.config.get_path(session, 'defaultPath')
             p = os.path.join(p2, p)
-        f = open(p, "r")
-        if f:
+        try:
+            f = open(p, "r")
+        except:
+            pass
+        else:
             filestr = f.read()
             f.close()
             # insert some database metadata
@@ -338,7 +341,7 @@ class reqHandler:
         if not configs.has_key(path):
             # unknown endpoint
             # no specification
-            xml = ['<databases>']
+            xml = ['<databases numberOfDatabases="%d">' % (len(configs))]
             for k in sorted(configs.keys()):
                 xml.append("<database><path>%s</path></database>" % k)
             xml.append('</databases>')
