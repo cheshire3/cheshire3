@@ -101,10 +101,8 @@ class C3Object(object):
         
         f = file(fileName)
         doc = BootstrapDocument(f)
-        f.close()
 
         # Look on self for instantiated parser, otherwise use bootstrap
-        # XXX: are we ignoring the parser provided ?
         p = self.get_path(session, 'parser', None)
         try:
             if (p != None):
@@ -116,6 +114,7 @@ class C3Object(object):
         except Exception as e:
             raise ConfigFileException("Cannot parse %s: %s" % (fileName, e))
         dom = record.get_dom(session)
+        f.close()
         return dom
 
 
