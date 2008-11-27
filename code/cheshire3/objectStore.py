@@ -7,23 +7,8 @@ from cheshire3.exceptions import ConfigFileException
 from cheshire3 import dynamic
 from cheshire3.baseStore import BdbIter
 
-class BdbObjectIter(BdbIter):
-    # Get data from bdbIter and turn into record, then process reocrd into object
 
-    def next(self):
-        d = BdbIter.next(self)
-        rec = self.store._process_data(None, d[0], d[1])
-        obj = self.store._processRecord(None, d[0], rec)
-        return obj
-    
-
-class BdbObjectStore(BdbRecordStore, ObjectStore):
-    # Store XML records in RecordStore
-    # Retrieve and instantiate
-
-    def __iter__(self):
-        return BdbObjectIter(self.session, self)
-    
+class SimpleObjectStore(ObjectStore):
     def get_storageTypes(self, session):
         # assume that we want to store wordCount, byteCount
         types = ['database']
@@ -69,3 +54,20 @@ class BdbObjectStore(BdbRecordStore, ObjectStore):
         object = dynamic.makeObjectFromDom(session, topNode, self)
         return object
 
+
+class BdbObjectIter(BdbIter):
+    # Get data from bdbIter and turn into record, then process reocrd into object
+
+    def next(self):
+        d = BdbIter.next(self)
+        rec = self.store._process_data(None, d[0], d[1])
+        obj = self.store._processRecord(None, d[0], rec)
+        return obj
+
+    
+class BdbObjectStore(BdbRecordStore, SimpleObjectStore):
+    # Store XML records in RecordStore
+    # Retrieve and instantiate
+
+    def __iter__(self):
+        return BdbObjectIter(self.session, self)
