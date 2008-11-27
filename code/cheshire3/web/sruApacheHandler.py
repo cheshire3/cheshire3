@@ -147,7 +147,7 @@ class reqHandler:
             x.append(elemFac.message(diag.message))
         return x
 
-    def processUnknownOperation(self, err):
+    def processUnknownOperation(self, err, config):
         result = elemFac.explainResponse(elemFac.version('1.2'))
         # add explain record
         result = self.process_explain({}, result)
