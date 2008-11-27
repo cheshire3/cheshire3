@@ -20,7 +20,7 @@ serv = SimpleServer(session, os.path.join(cheshirePath, 'cheshire3', 'configs', 
 
 configs = {}
 serv._cacheDatabases(session)
-for db in serv.databases.values():
+for db in serv.databases.itervalues():
     if db.get_setting(session, 'SRW') or db.get_setting(session, 'srw'):
         db._cacheProtocolMaps(session)
         map = db.protocolMaps.get('http://www.loc.gov/zing/srw/', None)
@@ -96,7 +96,7 @@ class reqHandler:
 
         echo = getattr(elemFac, name)()
         extras = []
-        for (k,v) in opts.items():
+        for (k,v) in opts.iteritems():
             if k[:2] == 'x-':
                 # accumulate and include at end
                 extras.append((k,v))
@@ -122,7 +122,7 @@ class reqHandler:
 
     def extraData(self, eType, opts, result, *args):
         nodes = []
-        for (k,v) in opts.items():
+        for (k,v) in opts.iteritems():
             if k[:2] == "x-" and k in session.config.sruExtensionMap:
                 (typ, fn, srw) = session.config.sruExtensionMap[k]
                 if typ == eType or (eType == 'response' and typ == opts['operation']):
