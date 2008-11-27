@@ -9,6 +9,7 @@ from cheshire3.documentFactory import BaseDocumentStream, SimpleDocumentFactory
 from cheshire3.resultSetStore import SimpleResultSetStore
 from cheshire3.resultSet import SimpleResultSet
 from cheshire3.baseObjects import IndexStore
+from cheshire3.objectStore import SimpleObjectStore
 from cheshire3 import dynamic
 from cheshire3.utils import elementType, getFirstData, nonTextToken, flattenTexts
 from cheshire3.index import SimpleIndex
@@ -83,6 +84,15 @@ class PostgresDocumentIter(PostgresIter):
         data = d[1]
         doc = self.store._process_data(self.session, d[0], data)
         return doc
+    
+    
+class PostgresObjectIter(PostgresRecordIter):
+    # Get data from bdbIter and turn into record, then process reocrd into object
+
+    def next(self):
+        rec = PostgresRecordIter.next(self)
+        obj = self.store._processRecord(None, rec.id, rec)
+        return obj
 
 # Idea is to take the results of an SQL search and XMLify them into documents.
 # FIXME:  Implement PostgresDocumentStream
@@ -223,8 +233,9 @@ class PostgresStore(SimpleStore):
             self.cxn = pg.connect(self.database)
 
     def _closeContainer(self, session):
-        self.cxn.close()
-        self.cxn = None
+        if self.cxn is not None:
+            self.cxn.close()
+            self.cxn = None
 
     def _query(self, query):           
         query = query.encode('utf-8')
@@ -470,7 +481,8 @@ class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
     def _verifyDatabases(self, session):
         # Custom resultSetStore table
         try:
-            self.cxn = pg.connect(self.database)
+            #self.cxn = pg.connect(self.database)
+            self._openContainer(session)
         except pg.InternalError as e:
             raise ConfigFileException(e.args)
 
@@ -607,6 +619,14 @@ class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
         query = "DELETE FROM %s WHERE identifier = '%s';" % (self.table, sid)
         self._query(query)
 
+
+class PostgresObjectStore(PostgresRecordStore, SimpleObjectStore):
+    """An interface to PosgreSQL storage mechanism for configured Cheshire3 objects."""
+    
+    def __iter__(self):
+        # Return an iterator object to iter through
+        return PostgresObjectIter(self.session, self)
+    
 
 # -- non proximity, just store occurences of type per record
 # CREATE TABLE parent.id + self.id + index.id (identifier SERIAL PRIMARY KEY, term VARCHAR, occurences INT, recordId VARCHAR, stem VARCHAR, pos VARCHAR);
