@@ -140,7 +140,10 @@ class SearchRetrieveResponse(SruResponse):
            
     def __getattr__(self, name):
         if name == 'records':
-            return [SruRecord(el) for el in self.tree.records.record]
+            try:
+                return [SruRecord(el) for el in self.tree.records.record]
+            except AttributeError:
+                return []
     
         return SruResponse.__getattr__(self, name)
         
