@@ -69,7 +69,7 @@ class reqHandler:
         if (path[-1] == "/"):
             path = path[:-1]
                     
-	if not configs.has_key(path):
+        if not configs.has_key(path):
             if req.method == "POST":
                 self.send_fault(Fault(Fault.Client, "Unknown Database Path %s" % (repr(configs.keys()))), req)
             else:
@@ -181,8 +181,8 @@ class reqHandler:
         
     def call(self, req):
         result = req.responseType(req.responseName)
-	# ??! Necessary garbage
-	result.extraResponseData = result.extraResponseData
+        # ??! Necessary garbage
+        result.extraResponseData = result.extraResponseData
         try:
             result.processQuery(session, req)
         except SRWDiagnostics.SRWDiagnostic, diag:
