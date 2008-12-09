@@ -111,7 +111,11 @@ class reqHandler:
             extra = elemFac.extraRequestData()
             for x, e in enumerate(extras):
                 # find real name from config
-                (ns, nm) = session.config.sruExtensionMap[e[0]][:2]
+                try:
+                    (ns, nm) = session.config.sruExtensionMap[e[0]][:2]
+                except KeyError:
+                    # diagnostic for unsupported extension?
+                    continue
                 txt = '<extns%s:%s xmlns:extns%s="%s">%s</extns%s:%s>' % (x+1, nm, x+1, ns, e[1], x+1, nm)
                 node = etree.XML(txt)
                 extra.append(node)
