@@ -24,6 +24,7 @@ from xml.sax.saxutils import escape
 
 #from cheshire3.utils import reader as domReader
 #reader = domReader()
+from lxml import etree
 
 # Simple SRU->SRW transformation
 
@@ -38,7 +39,7 @@ def simpleRequestXform(item, config):
 # Extension Handler Functions:
 
 import cheshire3.internal
-def implementationResponseHandler(req, resp, other=None):
+def implementationResponseHandler(session, val, resp, other=None):
     # Put our implementation id into the response
     # Stored in ZeeRex, so on config object
     txt = """
@@ -49,18 +50,14 @@ def implementationResponseHandler(req, resp, other=None):
       <ident:version>%s</ident:version>
     </ident:serverInfo>
     """ % ('.'.join([str(x) for x in internal.cheshireVersion]))
-    resp.extraResponseData.append(reader.fromString(txt))
+    return etree.XML(txt)
 
-def docidRecordHandler(req, ro, other):
+def docidRecordHandler(session, val, ro, other):
     # Put the record identifier into extraRecordData
     txt = '<docid:recordIdentifier xmlns:docid="info:srw/extension/2/docid-v1.0">%s</docid:recordIdentifier>' % escape(str(other))
-    xrdn = reader.fromString(txt)
-    try:
-        ro.extraRecordData.append(xrdn)
-    except AttributeError:
-        ro.extraRecordData = [xrdn]
+    return etree.XML(txt)
 
-def recordMetadataHandler(req, ro, rec):
+def recordMetadataHandler(session, val, ro, rsi, rec):
     # Put resultSetItem info into extraRecordData
     mdBits = ['<rec:metaData xmlns:rec="http://www.archiveshub.ac.uk/srw/extension/2/record-1.1">']
     # ids may contain nasties - escape them
@@ -72,7 +69,6 @@ def recordMetadataHandler(req, ro, rec):
     if rec.wordCount:
         mdBits.append('<rec:byteCount>%d</rec:byteCount>' % rec.byteCount)
     # now get stuff from resultSetItem
-    rsi = rec.resultSetItem
     if rsi.weight:
         mdBits.append('<rec:relevanceValue rec:relevanceType="raw">%f</rec:relevanceValue>' % rsi.weight)
     if rsi.scaledWeight:
@@ -83,15 +79,9 @@ def recordMetadataHandler(req, ro, rec):
         mdBits.append('<rec:termPositionList>%r</rec:termPositionList>' % (rsi.proxInfo))
         
     mdBits.append('</rec:metaData>')
-    txt = ''.join(mdBits)
-    xrd = reader.fromString(txt)
-    try:
-        ro.extraRecordData.append(xrd)
-    except AttributeError:
-        ro.extraRecordData = [xrd]
+    return etree.XML(''.join(mdBits))
     
-    
-def resultSetSummaryHandler(req, ro, rs):
+def resultSetSummaryHandler(session, val, ro, rs):
     # puts summary of resultSet into extraSearchData
     if not len(rs):
         return
@@ -108,9 +98,4 @@ def resultSetSummaryHandler(req, ro, rs):
         mdBits.append('<rs:proxInfo>%r</rs:proxInfo>' % prox)
         
     mdBits.append('</rs:resultSetData>')
-    txt = ''.join(mdBits)
-    xsd = reader.fromString(txt)
-    try:
-        ro.extraResponseData.append(xsd)
-    except AttributeError:
-        ro.extraResponseData = [xsd]
+    return etree.XML(''.join(mdBits))

@@ -99,6 +99,7 @@ class reqHandler:
         for (k,v) in opts.iteritems():
             if k[:2] == 'x-':
                 # accumulate and include at end
+                k = k[2:]
                 extras.append((k,v))
             x = getattr(elemFac, k)()
             if isinstance(v, etree._Element):
@@ -108,12 +109,10 @@ class reqHandler:
             echo.append(x)
         if extras:
             extra = elemFac.extraRequestData()
-            x = 1
-            for e in extras:
+            for x, e in enumerate(extras):
                 # find real name from config
-                (ns, nm) = session.config.sruExtensionMap[e[0]][2]
-                txt = '<extns%s:%s xmlns:extns%s="%s">%s</extns%s:%s>' % (x, nm, x, ns, e[1], x, nm)
-                x += 1
+                (ns, nm) = session.config.sruExtensionMap[e[0]][:2]
+                txt = '<extns%s:%s xmlns:extns%s="%s">%s</extns%s:%s>' % (x+1, nm, x+1, ns, e[1], x+1, nm)
                 node = etree.XML(txt)
                 extra.append(node)
             echo.append(extra)
@@ -123,12 +122,32 @@ class reqHandler:
     def extraData(self, eType, opts, result, *args):
         nodes = []
         for (k,v) in opts.iteritems():
-            if k[:2] == "x-" and k in session.config.sruExtensionMap:
-                (typ, fn, srw) = session.config.sruExtensionMap[k]
-                if typ == eType or (eType == 'response' and typ == opts['operation']):
+            if k[:2] == "x-":
+                try:
+                    (typ, fn, srw) = session.config.sruExtensionMap[k]
+                except KeyError:
+                    try:
+                        (typ, fn, srw) = session.config.sruExtensionMap[k[2:]]
+                    except KeyError:
+                        continue #unsupported extension
+                    
+                if not isinstance(srw, tuple):
+                    # old style - i.e. in srwExtensions
+                    srw = (typ, fn) # (uri, name) pairs previously used as keys for xxxExtensionHash
+                    hashAttr = eType + "ExtensionHash"
+                    curr = getattr(session.config, hashAttr)
+                    try:
+                        fn = curr[srw]
+                    except KeyError:
+                        continue
+                    else:
+                        typ = eType
+                    
+                if (typ == eType or (eType == 'response' and typ == opts['operation'])):
                     node = fn(session, v, result, *args)
                     if node != None:
                         nodes.append(node)
+                
         if nodes:
             eName = 'extra%s%sData' % (eType[0].upper(), eType[1:])
             extra = getattr(elemFac, eName)()
@@ -149,10 +168,10 @@ class reqHandler:
 
     def processUnknownOperation(self, err, config):
         result = elemFac.explainResponse(elemFac.version('1.2'))
-        # add explain record
-        result = self.process_explain({}, result)
         d = elemFac.diagnostics(self.diagnosticToXml(err))
         result.append(d)
+        # add explain record
+        result = self.process_explain({}, result)
         return result
 
     def process_explain(self, opts, result):
@@ -270,7 +289,7 @@ class reqHandler:
                     xml = r.get_xml(session)
                 xml = xmlVerRe.sub("", xml)
                 rec = self.record(schema=schema, packing=recordPacking,
-                                  data=xml, identifier=str(rsi), position=rIdx)
+                                  data=xml, identifier=str(rsi), position=rIdx+1) # Fencepost.  SRW starts at 1, C3 starts at 0
                 self.extraData('record', opts, rec, rsi, r)
                 recs.append(rec)
 
@@ -282,6 +301,8 @@ class reqHandler:
             nrp = end + 1
             if ( nrp < len(rs) and nrp > 0):
                 result.append(elemFac.nextRecordPosition(str(nrp)))
+        
+        self.extraData('searchRetrieve', opts, result, rs)
         return result
 
 
