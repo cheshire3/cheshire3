@@ -170,30 +170,47 @@ class SimpleExtractor(Extractor):
         return new
 
 
+from cheshire3.record import SaxContentHandler
+from lxml import etree, sax
+
 class TeiExtractor(SimpleExtractor):
 
+    _possibleSettings = {'imageSections' : {'docs' : 'put in {{ at each new image section', 'type' : int}}
 
     def process_node(self, session, data):
-        raise NotImplementedError
+
+        # Turn into SAX and process_eventList() for the mean time
+        handler = SaxContentHandler()
+        sax.saxify(data, handler)
+        saxl= handler.currentText
+        return self.process_eventList(session, saxl)
     
 
     def process_eventList(self, session, data):
+        # easy to find image sections
+        includeBraces = self.get_setting(session, 'imageSections', 0)
+
         # Step through a SAX event list and extract
-        attrRe = re.compile("u['\"](.+?)['\"]: u['\"](.*?)['\"](, |})")
+        attrRe = re.compile("u?['\"](.+?)['\"]\)?: u?['\"](.*?)['\"](, |})")
         txt = []
         # None == skip element.  Otherwise fn to call on txt
         processStack = []
         for e in data:
-            if e[0] == "1":
+            if e[0] in ["1", '4']:
                 start = e.find("{")
                 name = e[2:start-1]                
+                sp = name.split(',')
+                if len(sp) == 4:
+                    name = sp[1][2:-1]
                 if e[start+1] == '}':
                     attrs = {}
                 else:
-                    attrList = attrRe.findall(e)
+                    attrList = attrRe.findall(e[start:])
                     attrs = {}
                     for m in attrList:
                         attrs[unicode(m[0])] = unicode(m[1])
+                if includeBraces and 'img.x' in attrs and name != "initial":
+                    txt.append(' {{ ')
 
                 if name == "uc":
                     processStack.append((name, string.upper))
@@ -216,6 +233,10 @@ class TeiExtractor(SimpleExtractor):
             elif (e[0] == "2"):                
                 if processStack and processStack[-1][0] == e[2:len(processStack[-1][0])+2]:
                     processStack.pop()
+            elif e[0] == '5':
+                if processStack and processStack[-1][0] == e[9:len(processStack[-1][0])+9]:
+                    processStack.pop()
+                
             elif (e[0] == "3"):
                 if (len(txt) and txt[-1] and txt[-1][-1] != ' ' and repr(e[2]).isalnum()):
                     txt.append(' ')
@@ -234,6 +255,6 @@ class TeiExtractor(SimpleExtractor):
             lno = self._getProxLocEventList(session, data)
         else:
             lno = -1
-        return {txt:{'text' : txt, 'occurences' : 1, 'proxLoc' : lno}}
+        return {txt:{'text' : txt, 'occurences' : 1, 'proxLoc' : [lno]}}
 
 
