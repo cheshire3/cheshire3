@@ -242,9 +242,13 @@ class SimpleDatabase(SummaryObject, Database):
                 self._cacheProtocolMaps(session)
                 pm = self.protocolMaps.get('http://www.loc.gov/zing/srw/')
                 self.paths['protocolMap'] = pm
+            exact = cql.Relation('exact')
+            term = cql.Term('')
             for idx in sk:
                 # resolve index
-                index = pm.resolveIndex(session, query)
+                sc = cql.SearchClause(idx, exact, term)
+
+                index = pm.resolveIndex(session, sc)
                 # and find params from modifiers
                 if idx['ascending']:
                     ascending=True
