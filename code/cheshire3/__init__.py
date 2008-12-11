@@ -9,6 +9,9 @@ import sys, os
 # Tests for Python 3.0 incompatibility
 #sys.py3kwarning = True
 
+# Ignore md5 DeprecationWarning from PyZ3950.yacc
+from warnings import filterwarnings
+filterwarnings('ignore', 'the md5 module is deprecated; use hashlib instead',  DeprecationWarning, 'yacc')
 
 # Hack to allow us to patch a module in a different directory
 import __builtin__
