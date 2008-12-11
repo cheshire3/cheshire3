@@ -185,7 +185,7 @@ class CQLProtocolMap(ZeerexProtocolMap):
                 val = query.index.origValue.split('.')[1]
                 idx = self.parent.get_object(session, val)
             return idx
-        elif uri == 'info:srw/cql-context-set/1/cql-v1.1' and name == 'serverchoice' and hasattr(self, 'defaultIndex'):
+        elif uri in ['info:srw/cql-context-set/1/cql-v1.1', 'info:srw/cql-context-set/1/cql-v1.2'] and name == 'serverchoice' and hasattr(self, 'defaultIndex'):
             dp, dn = self.defaultIndex.split('.')
             du = self.resolvePrefix(dp)
             query.index.prefix = dp
