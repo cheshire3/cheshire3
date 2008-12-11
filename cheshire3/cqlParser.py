@@ -40,7 +40,7 @@ class Diagnostic(Exception):
         return "%s%s [%s]: %s" % (self.uri, self.code, self.message, self.details)
 
     def __init__(self, code=10, message="Malformed Query", details=""):
-        self.uri = "info:srw/diagnostic/1/"
+        self.uri = "info:srw/diagnostic/1/%d" % code
         self.code = code
         self.message=message
         self.details=details
