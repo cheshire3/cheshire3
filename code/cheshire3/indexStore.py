@@ -1341,6 +1341,10 @@ class BdbIndexStore(IndexStore):
             if (relation in [">", ">="] and term > key):
                 # Asked for > than maximum key
                 return []
+        if (end and relation in ['>', '>='] and key > end):
+            return []
+        elif (end and relation in ['<', '<='] and key < end):
+            return []
 
         tlist = []
         fetching = 1
