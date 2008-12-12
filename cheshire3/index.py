@@ -501,8 +501,11 @@ class SimpleIndex(Index):
         store = self.get_path(session, 'indexStore')
         if direction == "=":
             k = res.keys()[0]
-            k2 = k[:-1] + chr(ord(k[-1])+1)
-            tList = store.fetch_termList(session, self, k, nTerms=nTerms, end=k2, summary=summary)
+            if not k:
+                k2 = "!"
+            else:
+                k2 = k[:-1] + chr(ord(k[-1])+1)
+            tList = store.fetch_termList(session, self, k, nTerms=nTerms, end=k2, summary=summary, relation='>=')
         else:
             tList = store.fetch_termList(session, self, res.keys()[0], nTerms=nTerms, relation=direction, summary=summary)
         # list of (term, occs)
