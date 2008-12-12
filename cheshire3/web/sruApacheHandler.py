@@ -19,15 +19,33 @@ session.environment = "apache"
 serv = SimpleServer(session, os.path.join(cheshirePath, 'cheshire3', 'configs', 'serverConfig.xml'))
 
 configs = {}
-serv._cacheDatabases(session)
-for db in serv.databases.itervalues():
-    if db.get_setting(session, 'SRW') or db.get_setting(session, 'srw'):
-        db._cacheProtocolMaps(session)
-        map = db.protocolMaps.get('http://www.loc.gov/zing/srw/', None)
-        map2 = db.protocolMaps.get('http://www.loc.gov/zing/srw/update/', None)
-        configs[map.databaseUrl] = {'http://www.loc.gov/zing/srw/' : map,
-                                    'http://www.loc.gov/zing/srw/update/' : map2}
-
+if len(serv.databaseConfigs) < 25:
+    serv._cacheDatabases(session)
+    for db in serv.databases.itervalues():
+        if db.get_setting(session, 'SRW') or db.get_setting(session, 'srw'):
+            db._cacheProtocolMaps(session)
+            map = db.protocolMaps.get('http://www.loc.gov/zing/srw/', None)
+            map2 = db.protocolMaps.get('http://www.loc.gov/zing/srw/update/', None)
+            configs[map.databaseUrl] = {'http://www.loc.gov/zing/srw/' : map,
+                                        'http://www.loc.gov/zing/srw/update/' : map2}
+else:
+    for dbid, conf in serv.databaseConfigs.iteritems():
+        db = serv.get_object(session, dbid)
+        session.database = dbid
+        if db.get_setting(session, 'SRW') or db.get_setting(session, 'srw'):
+            db._cacheProtocolMaps(session)
+            pmap = db.protocolMaps.get('http://www.loc.gov/zing/srw/', None)
+            if pmap is not None:
+                configs[pmap.databaseUrl] = (dbid,    {'http://www.loc.gov/zing/srw/': pmap.id})
+                pmap2 = db.protocolMaps.get('http://www.loc.gov/zing/srw/update/', None)
+                if pmap2 is not None:
+                    configs[pmap.databaseUrl][1]['http://www.loc.gov/zing/srw/update/'] = pmap2.id
+    
+        try: del serv.objects[dbid]
+        except KeyError: pass
+    
+    del dbid, db, pmap, pmap2
+    
 protocolMap ={
     'sru' : 'http://www.loc.gov/zing/srw/',
     'diag' : 'http://www.loc.gov/zing/srw/diagnostic/'
@@ -359,10 +377,7 @@ class reqHandler:
 
 
     def dispatch(self, req):
-        path = req.uri[1:]
-        if (path[-1] == "/"):
-            path = path[:-1]
-            
+        path = req.uri.strip('/')
         if not configs.has_key(path):
             # unknown endpoint
             # no specification
@@ -374,7 +389,14 @@ class reqHandler:
             self.send_xml(txt, req)
         
         else:
-            config = configs[path]['http://www.loc.gov/zing/srw/']
+            dbconf = configs[path]
+            if isinstance(dbconf, tuple):
+                dbid = configs[path][0]
+                db = serv.get_object(session, dbid)
+                config = db.get_object(session, configs[path][1]['http://www.loc.gov/zing/srw/'])
+            else:
+                config = dbconf['http://www.loc.gov/zing/srw/']
+                
             session.path = "http://%s/%s" % (req.hostname, path)
             session.config = config
             store = FieldStorage(req)
@@ -427,8 +449,12 @@ class reqHandler:
                 text = u'<?xml version="1.0"?>\n%s' % text
 
             self.send_xml(text, req)
-        
+            if len(serv.databaseConfigs) >=25:
+                # cleanup memory
+                try: del serv.objects[config.parent.id]
+                except KeyError: pass
 
+        
 srwh = reqHandler()        
 def handler(req):
     # do stuff
