@@ -228,7 +228,7 @@ class C3Object(object):
             if e.tag == 'subConfig':
                 id = e.attrib.get('id', '')
                 typ = e.attrib.get('type', '')
-                self.version = e.attrib.get('version, '')
+                self.version = e.attrib.get('version', '')
                 self.subConfigs[id] = e
                 if typ == 'index':
                     self.indexConfigs[id] = e
