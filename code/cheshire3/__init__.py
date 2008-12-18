@@ -71,5 +71,5 @@ for sp in sps:
     try:
         __import__("cheshire3.%s" % sp)
     except:
-        raise
+        pass
            
