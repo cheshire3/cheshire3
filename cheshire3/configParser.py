@@ -502,7 +502,7 @@ class C3Object(object):
         else:
             return default
 
-    def add_logging(self, name):
+    def add_logging(self, session, name):
         """ Set a named function to log invocations."""
         if (name == "__all__"):
             names = dir(self)
@@ -512,11 +512,24 @@ class C3Object(object):
             if (hasattr(self, name) and callable(getattr(self,name)) and name[0] != '_'):
                 func = getattr(self, name)
                 setattr(self, "__postlog_%s" % (name), getattr(self, name))
-                code = """def mylogfn(self, *args, **kw):\n  if (hasattr(self,'__postlog_get_path')):\n    fn = self.__postlog_get_path\n  else:\n    fn = self.get_path\n  fl = fn(None, 'functionLogger');\n  if (fl):\n    fl.log_fn(self, '%s', *args, **kw);\n  return self.__postlog_%s(*args, **kw);""" % (name, name)
+                code = """
+def mylogfn(self, *args, **kw):
+    if (hasattr(self,'__postlog_get_path')):
+        fn = self.__postlog_get_path
+    else:
+        fn = self.get_path
+    if (isinstance(args[0], Session)):
+        sess = args[0]
+    else:
+        sess = None
+    fl = fn(sess, 'functionLogger');
+    if (fl):
+        fl.log_fn(self, sess, '%s', *args, **kw);
+    return self.__postlog_%s(*args, **kw);""" % (name, name)
                 exec(code)
                 setattr(self, name, MethodType(locals()['mylogfn'], self, self.__class__))
 
-    def remove_logging(self, name):
+    def remove_logging(self, session, name):
         """Remove the logging from a named function."""
         if (name == "__all__"):
             names = dir(self)
@@ -527,7 +540,7 @@ class C3Object(object):
                 setattr(self, name, getattr(self, '__postlog_%s' % name))
                 delattr(self, '__postlog_%s' % name)
 
-    def add_auth(self, name):
+    def add_auth(self, session, name):
         """Add an authorisation layer on top of a named function."""
         if (hasattr(self, name) and callable(getattr(self,name)) and name[0] != '_'):
             func = getattr(self, name)
@@ -546,7 +559,7 @@ def myauthfn(self, session, *args, **kw):
             setattr(self, name, MethodType(locals()['myauthfn'], self, self.__class__))
 
 
-    def remove_auth(self, name):
+    def remove_auth(self, session, name):
         """Remove the authorisation requirement from the named function."""
         if (name == "__all__"):
             names = dir(self)

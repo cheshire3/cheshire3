@@ -61,7 +61,7 @@ class SimpleLogger(Logger):
             self.fileh.flush()
             self.lineCache = []
 
-    def log_fn(self, object, fn, *args, **kw):
+    def log_fn(self, session, object, fn, *args, **kw):
         # just construct message
 
         frame = sys._getframe(2)
@@ -76,7 +76,7 @@ class SimpleLogger(Logger):
         line.append(atxt)
         line.append(")")
         line = ''.join(line)
-        self.log_lvl(None, 0, line)
+        self.log_lvl(session, 0, line)
 
     def log(self, session, msg):
         self.log_lvl(session, self.defaultLevel, msg)
