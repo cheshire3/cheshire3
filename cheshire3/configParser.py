@@ -65,6 +65,8 @@ class C3Object(object):
     """Base Class of Cheshire3 Object"""
     id = ""
     version = ""
+    complexity = ""
+    volatility = ""
     name = ""
     objectType = ""
     parent = None
@@ -229,6 +231,8 @@ class C3Object(object):
                 id = e.attrib.get('id', '')
                 typ = e.attrib.get('type', '')
                 self.version = e.attrib.get('version', '')
+                self.complexity = e.attrib.get('complexity', '')
+                self.volatility = e.attrib.get('volatility', '')
                 self.subConfigs[id] = e
                 if typ == 'index':
                     self.indexConfigs[id] = e
