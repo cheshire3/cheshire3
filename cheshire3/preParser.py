@@ -340,7 +340,7 @@ class SgmlPreParser(PreParser):
 
     def __init__(self, session, config, parent):
         PreParser.__init__(self, session, config, parent)
-        self.doctype_re = (re.compile('<!DOCTYPE (.+?)"(.+?)">'))
+        self.doctype_re = (re.compile('<!DOCTYPE\s+?(.+?)["\'](.+?)["\']>'))
         self.attr_re = re.compile(' ([a-zA-Z0-9_]+)[ ]*=[ ]*([-:_.a-zA-Z0-9]+)([ >])')
         self.pi_re = re.compile("<\?(.*?)\?>")
         self.elem_re = re.compile('(<[/]?)([a-zA-Z0-9_]+)')
