@@ -1,6 +1,6 @@
 
 from cheshire3.configParser import C3Object
-from cheshire3.baseObjects import RecordStore, Record
+from cheshire3.baseObjects import RecordStore, Record, ResultSetItem
 from cheshire3.baseStore import SimpleStore, BdbStore, DeletedObject
 from cheshire3.record import SaxRecord
 from cheshire3.exceptions import *
@@ -148,7 +148,7 @@ class SimpleRecordStore(RecordStore):
                 raise PermissionException("Permission required to replace an object from %s" % self.id)
 
         # FIXME: API: This if sucks but not sure how to avoid for workflow
-        if isinstance(id, Record):
+        if isinstance(id, Record) or isinstance(id, ResultSetItem):
             id = id.id
         self.delete_data(session, id)
 
