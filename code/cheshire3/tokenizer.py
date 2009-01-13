@@ -100,6 +100,8 @@ class RegexpFindTokenizer(SimpleTokenizer):
     # As related to 8 am, 8:00 am, 1.2 Million, $ 1.2, $1.2 Million
     # vs $1200000 vs $ 1200000 vs four million dollars
 
+    # Require acronyms to have at least TWO letters Eg U.S not just J.
+
     _possibleSettings = {'regexp' : {'docs' : ''},
                          'gaps' : {'docs' : '', 'type' : int, 'options' : "0|1"}
                          }
@@ -116,10 +118,10 @@ class RegexpFindTokenizer(SimpleTokenizer):
            |[$\xa3\xa5\u20AC][0-9]+                        #single money
            |[0-9]+(?=[a-zA-Z]+)                            #split: 8am 1Million
            |[0-9]+%                                        #single percentage 
-           |(?:[A-Z]\.)+[A-Z]?                             #acronym
+           |(?:[A-Z]\.)+[A-Z\.]                            #acronym
            |[oOd]'[a-zA-Z]+                                #o'clock, O'brien, d'Artagnan   
            |[a-zA-Z]+://[^\s]+                             #URI
-           |\w+'(?:d've|d|t|ll've|ll|ve|s|re)                #don't, we've
+           |\w+'(?:d've|d|t|ll've|ll|ve|s|re)              #don't, we've
            |(?:[hH]allowe'en|[mM]a'am|[Ii]'m|[fF]o'c's'le|[eE]'en|[sS]'pose)
            |[\w+]+                                         #basic words, including +
           )""")
