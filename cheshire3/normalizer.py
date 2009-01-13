@@ -245,7 +245,6 @@ class RegexpNormalizer(SimpleNormalizer):
                     return self.regexp.sub(self.char, data)
                 except:
                     raise
-    
 
 class NamedRegexpNormalizer(RegexpNormalizer):
     """ As RegexpNormalizer, but allow named groups and reconstruction of token using a template and those groups. """
@@ -268,17 +267,19 @@ class NamedRegexpNormalizer(RegexpNormalizer):
 
 class RegexpFilterNormalizer(SimpleNormalizer):
     
-    _possibleSettings = {'regexp': {'docs' : "Regular expression to match in the data."}}
+    _possibleSettings = {'regexp': {'docs' : "Regular expression to match in the data."},
+                         'keep' : {'docs' : '', 'type' : int}}
     
     def __init__(self, session, config, parent):
         SimpleNormalizer.__init__(self, session, config, parent)
         self.re = re.compile(self.get_setting(session, 'regexp', '^[a-zA-Z\'][a-zA-Z\'.-]+[?!,;:]?$'))
+        self.keep = self.get_setting(session, 'keep', 1)
 
     def process_string(self, session, data):
         if self.re.match(data):
-            return data
+            return data if self.keep else None
         else:
-            return None
+            return None if self.keep else data
 
     def process_hash(self, session, data):
         data = SimpleNormalizer.process_hash(self, session, data)
@@ -334,8 +335,9 @@ class StoplistNormalizer(SimpleNormalizer):
         l = f.readlines()
         f.close()
         for sw in l:
-            # chomp
-            self.stoplist[sw[:-1]] = 1
+            sw = sw.replace("\n", '')
+            sw = sw.replace("\r", '')
+            self.stoplist[sw] = 1
             
     def process_string(self, session, data):
         if (data in self.stoplist):

@@ -538,7 +538,6 @@ class BdbIndexStore(IndexStore):
                     currData.extend(fullinfo)
             else:
                 # Store
-                #if currData and totalRecs >= minTerms:
                 if currData:                
                     if (nonEmpty):
                         val = cxn.get(currTerm)
@@ -562,27 +561,24 @@ class BdbIndexStore(IndexStore):
                             # self.log_critical(session, "%s failed to t2s %s: %r %r" % (self.id, currTerm, termid, currData))
                             raise
 
-
-                    nTerms += 1
-                    nRecs += totalRecs
-                    nOccs += totalOccs
-                    totalChars += len(currTerm)
-                    maxNRecs = max(maxNRecs, totalRecs)
-                    maxNOccs = max(maxNOccs, totalOccs)
-                    cxn.put(currTerm, packed)
-                    del packed
-                    if (vectors or termIds) and tempTermId == termid:
-                        tidcxn.put("%012d" % termid, currTerm)
-                # assign new line
+                    if totalRecs >= minTerms:
+                        nTerms += 1
+                        nRecs += totalRecs
+                        nOccs += totalOccs
+                        totalChars += len(currTerm)
+                        maxNRecs = max(maxNRecs, totalRecs)
+                        maxNOccs = max(maxNOccs, totalOccs)
+                        cxn.put(currTerm, packed)
+                        del packed
+                        if (vectors or termIds) and tempTermId == termid:
+                            tidcxn.put("%012d" % termid, currTerm)
                 try:
                     totalOccs = fullinfo[2]
-                    # we'll decrement if we already exist
                     termid += 1
                     currTerm = term
                     currData = fullinfo
                     totalRecs = 1
                 except:
-                    # end of file
                     pass
 
         self._closeIndex(session, index)
@@ -671,11 +667,16 @@ class BdbIndexStore(IndexStore):
                         #???
                         continue
                     tdata = self.fetch_term(session, index, term, summary=True)
-                    try:
-                        (tid, tdocs, tfreq) = tdata[:3]
-                    except:
-                        self.log_critical(session, "Broken: %r %r %r" % (term, index.id, tdata))
-                        raise
+                    if tdata:
+                        try:
+                            (tid, tdocs, tfreq) = tdata[:3]
+                        except:
+                            self.log_critical(session, "Broken: %r %r %r" % (term, index.id, tdata))
+                            raise
+                    else:
+                        termCache[term] = (0,0)
+                        freqCache[term] = (0,0)
+                        continue
                     termCache[term] = tid
                     freqCache[term] = [tdocs, tfreq]
                     # check caches aren't exploding
@@ -686,6 +687,8 @@ class BdbIndexStore(IndexStore):
                         del freqCache[k]
                 else:
                     (tdocs, tfreq) = freqCache[term]
+                    if not tdocs or not tfreq:
+                        continue
                 if ( (minGlobalFreq == -1 or tdocs >= minGlobalFreq) and
                      (maxGlobalFreq == -1 or tdocs <= maxGlobalFreq) and
                      (minGlobalOccs == -1 or tfreq >= minGlobalOccs) and
@@ -914,7 +917,6 @@ class BdbIndexStore(IndexStore):
 
 
     def _openTermFreq(self, session, index, which):
-
         fl = index.get_setting(session, "freqList", "") 
         if fl.find(which) == -1:
             return None
