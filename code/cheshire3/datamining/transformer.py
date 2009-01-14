@@ -346,8 +346,12 @@ class ArmVectorTransformer(Transformer):
         ignoreTermids = []
         for w in sw.split(' '):
             if w:
-                (tid, bla, bla2) = self.vectorIndex.fetch_term(session, w, summary=True)
-                ignoreTermids.append(tid)
+                try:
+                    (tid, bla, bla2) = self.vectorIndex.fetch_term(session, w, summary=True)                    
+                    ignoreTermids.append(tid)
+                except ValueError:
+                    # term doesn't exist
+                    pass
         self.ignoreTermids = ignoreTermids
         self._clear(session)
 

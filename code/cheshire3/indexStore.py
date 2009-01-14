@@ -572,6 +572,9 @@ class BdbIndexStore(IndexStore):
                         del packed
                         if (vectors or termIds) and tempTermId == termid:
                             tidcxn.put("%012d" % termid, currTerm)
+                    else:
+                        # cheat and undo our term increment
+                        termid -= 1
                 try:
                     totalOccs = fullinfo[2]
                     termid += 1
