@@ -335,8 +335,7 @@ class StoplistNormalizer(SimpleNormalizer):
         l = f.readlines()
         f.close()
         for sw in l:
-            sw = sw.replace("\n", '')
-            sw = sw.replace("\r", '')
+            sw = sw.strip()
             self.stoplist[sw] = 1
             
     def process_string(self, session, data):
