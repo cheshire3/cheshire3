@@ -289,7 +289,7 @@ class SearchClause (PrefixableObject):
                 text.append('>%s="%s"' % (p, self.prefixes[p]))
             else:
                 text.append('>"%s"' % (self.prefixes[p]))
-        text.append('%s %s "%s"' % (self.index, self.relation.toCQL(), self.term))
+        text.append('%s %s "%s"' % (self.index, self.relation.toCQL(), self.term.toCQL()))
         return ' '.join(text)
 
     def getResultSetId(self, top=None):
