@@ -250,6 +250,9 @@ class Fimi1PreParser(ARMPreParser):
                     cl = map(int, conc.split(' '))
                     rules.append((float(conf), int(supp), al, cl))
         inh.close()
+        # delete temp files!
+        os.remove(outfn)
+        os.remove(infn)
 
         if not matches:
             # no FIS for some reason, return results??
