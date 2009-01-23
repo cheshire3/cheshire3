@@ -176,8 +176,11 @@ def fetch_data(myUrl, tries=3):
     for x in range(tries):
         try:
             f = urllib2.urlopen(req)
-        except (urllib2.URLError, httplib.BadStatusLine):
+        except (urllib2.URLError):
             # problem accessing remote service
+            break
+        except (httplib.BadStatusLine):
+            # problem with response
             time.sleep(1)
             continue
         else:
