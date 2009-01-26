@@ -188,7 +188,7 @@ class PostgresStore(SimpleStore):
 #            self.cxn = pg.connect(self.database)
             self._openContainer(session)
         except pg.InternalError as e:
-            raise ConfigFileException(e.args)
+            raise ConfigFileException("Cannot connect to Postgres: %r" % e.args)
 
         try:
             query = "SELECT identifier FROM %s LIMIT 1" % self.table
@@ -484,7 +484,7 @@ class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
             #self.cxn = pg.connect(self.database)
             self._openContainer(session)
         except pg.InternalError as e:
-            raise ConfigFileException(e.args)
+            raise ConfigFileException("Cannot connect to Postgres: %r" % e.args)
 
         try:
             query = "SELECT identifier FROM %s LIMIT 1" % self.table
