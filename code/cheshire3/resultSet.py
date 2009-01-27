@@ -18,7 +18,6 @@ from lxml import etree
 
 srlz_typehash = {int : 'int', long : 'long', str : 'str', unicode : 'unicode',
                     bool : 'bool', type(None) : 'None', float : 'float'}
-
 dsrlz_typehash = {}
 for k,v in srlz_typehash.iteritems():
     dsrlz_typehash[v] = k
@@ -152,25 +151,31 @@ class SimpleResultSet(RankedResultSet):
     def serialise(self, session, pickleOk=1):
         # Turn into XML
         # this is pretty fast, and generates better XML than previous
-        xml = ['<resultSet>']
+        xml = [u'<resultSet>']
 
         rsetattrs = self.attributesToSerialize
         for (a, deft) in rsetattrs:
             val = getattr(self, a)
             if val != deft:
                 if type(val) in [dict, list, tuple]:
-                    xml.append('<d n="%s" t="pickle">%s</d>' % (a, escape(pickle.dumps(val))))
+                    xml.append(u'<d n="%s" t="pickle">%s</d>' % (a, escape(pickle.dumps(val))))
                 elif isinstance(val, Index):
-                    xml.append('<d n="%s" t="object">%s</d>' % (a, escape(val.id)))
+                    xml.append(u'<d n="%s" t="object">%s</d>' % (a, escape(val.id)))
                 elif a == 'query' and val:
-                    # XXX FIXME:  This breaks in postgres store with unicode
-                    xml.append('<d n="%s" t="cql">%s</d>' % (a, escape(val.toCQL())))
+                    xml.append(u'<d n="%s" t="cql">%s</d>' % (a, escape(val.toCQL())))
                 else:
-                    xml.append('<d n="%s" t="%s">%s</d>' % (a, srlz_typehash.get(type(val), ''), escape(str(val))))
+                    xml.append(u'<d n="%s" t="%s">' % (a, srlz_typehash.get(type(val), '')))
+                    if type(val) in [int, long, float, bool, None]:
+                        xml.append(escape(unicode(val)))
+                    else:
+                        xml.append(escape(val))
+                    xml.append(u'</d>')
+                        
         for item in self:
             xml.append(item.serialize(session, pickleOk))
         xml.append('</resultSet>')
-        return u''.join(xml)
+        all =  u''.join(xml)
+        return all.encode('utf-8')
     
     # TODO: fix nasty rename hack
     def deserialize(self, session, data):
@@ -195,7 +200,7 @@ class SimpleResultSet(RankedResultSet):
                 try:
                     val = cqlParser.parse(txt)
                 except:
-                    val = None
+                    raise
             elif t in dsrlz_typehash:
                 val = dsrlz_typehash[t](txt)
             else:
