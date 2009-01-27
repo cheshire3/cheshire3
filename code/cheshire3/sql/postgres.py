@@ -223,9 +223,9 @@ class PostgresStore(SimpleStore):
                     query += ("%s %s" % (f[0], f[1]))
                     if f[2]:
                         # Foreign Key
-                        query += (" REFERENCES %s (identifier)" % f[2])
+                        query += (" REFERENCES %s (identifier) ON DELETE cascade" % f[2])
                     query += ", "
-                query = query[:-2] + ");"                        
+                query = query[:-2] + ") ;"                        
                 res = self._query(query)
 
     def _openContainer(self, session):
@@ -235,6 +235,7 @@ class PostgresStore(SimpleStore):
     def _closeContainer(self, session):
         if self.cxn is not None:
             self.cxn.close()
+            del self.cxn
             self.cxn = None
 
     def _query(self, query):           
@@ -282,7 +283,7 @@ class PostgresStore(SimpleStore):
             pass
 
         try:
-            ndata = pg.escape_string(data)
+            ndata = pg.escape_bytea(data)
         except:
             # insufficient PyGreSQL version
             ndata = data.replace("'", "\\'")
@@ -318,6 +319,13 @@ class PostgresStore(SimpleStore):
 	        data = res.dictresult()[0]['data']
         except IndexError:
 	    	raise ObjectDoesNotExistException(id)
+        
+        try:
+            ndata = pg.unescape_bytea(data)
+        except:
+            # insufficient PyGreSQL version
+            ndata = data.replace("\\'", "'")
+            
         data = data.replace('\\000\\001', nonTextToken)
         data = data.replace('\\012', '\n')
         return data
@@ -552,27 +560,30 @@ class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
         cl = str(rset.__class__)
         data = srlz.replace('\x00', '\\\\000')
         try:
-            ndata = pg.escape_string(data)
+            ndata = pg.escape_bytea(data)
         except:
-            # insufficient PyGreSQL version
+            # insufficient PyGreSQL version - do the best we can
             ndata = data.replace("'", "\\'")
             
         query = "INSERT INTO %s (identifier, data, size, class, timeCreated, timeAccessed, expires) VALUES ('%s', E'%s', %s, '%s', '%s', '%s', '%s')" % (self.table, id, ndata, len(rset), cl, nowStr, nowStr, expiresStr)
-
         try:
             self._query(query)
         except pg.ProgrammingError as e:
-            # already exists, retry for create
-            if hasattr(rset, 'retryOnFail'):
+            # already exists, retry for overwrite, create
+            if self.get_setting(session, 'overwriteOkay', 0):
+                query = "UPDATE %s SET data = E'%s', size = %s, class = '%s', timeAccessed = '%s', expires = '%s' WHERE identifier = '%s';" % (self.table, ndata, len(rset), cl, nowStr, expiresStr, id)
+                self._query(query)
+            elif hasattr(rset, 'retryOnFail'):
                 # generate new id, re-store
                 id = self.generate_id(session)
                 if (self.idNormalizer != None):
                     id = self.idNormalizer.process_string(session, id)
                 query = "INSERT INTO %s (identifier, data, size, class, timeCreated, timeAccessed, expires) VALUES ('%s', E'%s', %s, '%s', '%s', '%s', '%s')" % (self.table, id, ndata, len(rset), cl, nowStr, nowStr, expiresStr)
-                self._query(query)
-            elif self.get_setting(session, 'overwriteOkay', 0):
-                query = "UPDATE %s SET data = E'%s', size = %s, class = '%s', timeAccessed = '%s', expires = '%s' WHERE identifier = '%s';" % (self.table, ndata, len(rset), cl, nowStr, expiresStr, id)
-                self._query(query)
+                try:
+                    self._query(query)
+                except pg.ProgrammingError:
+                    raise ValueError(data)
+                    
             else:
                 raise ObjectAlreadyExistsException(self.id + '/' + id)
         return rset
@@ -591,6 +602,12 @@ class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
             raise ObjectDoesNotExistException('%s/%s' % (self.id, sid))
 
         data = rdict['data']
+        try:
+            ndata = pg.unescape_bytea(data)
+        except:
+            # insufficient PyGreSQL version
+            ndata = data.replace("\\'", "'")
+            
         data = data.replace('\\000', '\x00')
         data = data.replace('\\012', '\n')
         # data is res.dictresult()
