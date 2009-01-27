@@ -326,9 +326,9 @@ class PostgresStore(SimpleStore):
             # insufficient PyGreSQL version
             ndata = data.replace("\\'", "'")
             
-        data = data.replace('\\000\\001', nonTextToken)
-        data = data.replace('\\012', '\n')
-        return data
+        ndata = ndata.replace('\\000\\001', nonTextToken)
+        ndata = ndata.replace('\\012', '\n')
+        return ndata
 
     def delete_data(self, session, id):
         self._openContainer(session)
@@ -582,7 +582,7 @@ class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
                 try:
                     self._query(query)
                 except pg.ProgrammingError:
-                    raise ValueError(data)
+                    raise ValueError(ndata)
                     
             else:
                 raise ObjectAlreadyExistsException(self.id + '/' + id)
@@ -608,12 +608,12 @@ class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
             # insufficient PyGreSQL version
             ndata = data.replace("\\'", "'")
             
-        data = data.replace('\\000', '\x00')
-        data = data.replace('\\012', '\n')
+        ndata = ndata.replace('\\000', '\x00')
+        ndata = ndata.replace('\\012', '\n')
         # data is res.dictresult()
         cl = rdict['class']
         rset = dynamic.buildObject(session, cl, [[]])
-        rset.deserialise(session,data)
+        rset.deserialise(session, ndata)
         rset.id = id
         
         # Update expires 
