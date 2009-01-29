@@ -72,10 +72,11 @@ class SimpleExtractor(Extractor):
                     texts.append(c.text)
                 if c.tag in self.extraSpaceElems:
                     texts.append(' ')
-                if c.tail:
+                if c.tail and c != elem:
                     texts.append(c.tail)
-                if c.tag in self.extraSpaceElems:
-                    texts.append(' ')
+                    if c.tag in self.extraSpaceElems:
+                        texts.append(' ')
+                
         return ''.join(texts)
 
     def process_string(self, session, data):

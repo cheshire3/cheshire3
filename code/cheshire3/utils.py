@@ -26,15 +26,20 @@ def flattenTexts(elem):
     else:
         # libxml2
         try:
-            return etree.tostring(elem, method='text')
-        except (TypeError, UnicodeEncodeError):
-            # predates lxml 1.3 - fall back to tree iteration
             walker = elem.getiterator()
-            for c in walker:
-                if c.text:
-                    texts.append(c.text)
-                if c.tail:
-                    texts.append(c.tail)
+        except AttributeError:
+            # lxml 1.3 or later
+            try: walker = elem.iter()
+            except:
+                # lxml smart string object
+                return elem
+                
+        for c in walker:
+            if c.text:
+                texts.append(c.text)
+            if c.tail and c != elem:
+                texts.append(c.tail)
+                
     return ''.join(texts)
 
 
