@@ -1,17 +1,15 @@
 
+from cheshire3.configParser import C3Object
 from cheshire3.baseStore import SimpleStore
+from cheshire3.baseObjects import Database
+from cheshire3.recordStore import SimpleRecordStore
+from cheshire3.documentStore import SimpleDocumentStore
+from cheshire3.objectStore import SimpleObjectStore
+from cheshire3.resultSetStore import SimpleResultSetStore
 
 import irods
 
-# Store metadata on irodsCollection object as userMetadata
-# eg:
-
-                
-# fileStore style:  one object in irods per object sent to store
-# object metadata on object
-# reverse metadata per object ... in bdb?
-
-class BaseIrodsStore(SimpleStore):
+class IrodsStore(SimpleStore):
 
     cxn = None
     coll = None
@@ -105,7 +103,7 @@ class BaseIrodsStore(SimpleStore):
 
         # now look for object's storage area
         if (isinstance(self.parent, Database)):
-            sc = parent.id
+            sc = self.parent.id
             dirs = c.getSubCollections()
             if not sc in dirs:
                 c.createCollection(sc)
@@ -123,7 +121,11 @@ class BaseIrodsStore(SimpleStore):
         for u in umd:
             umdHash[u[0]] = u[1:]            
         for md in myMetadata:
-            setattr(self, md, myMetadata[md](umdHash[md][0]))
+            try:
+                setattr(self, md, myMetadata[md](umdHash[md][0]))
+            except KeyError:
+                # hasn't been set yet
+                pass
 
         if self.totalItems != 0:
             self.meanWordCount = self.totalWordCount / self.totalItems
@@ -132,17 +134,13 @@ class BaseIrodsStore(SimpleStore):
             self.meanWordCount = 1
             self.meanByteCount = 1
 
-        # XXX now open reverse metadata stuff?
-
         
     def _close(self, session):
-        # XXX close reverse metadata stuff
         irods.rcDisconnect(self.cxn)
         self.cxn = None
         self.coll = None
 
     def commit_metadata(self, session):
-        # self.coll.addUserMetadata(type, value, units)
         mymd = self.get_metadataTypes(session)
         # need to delete values first
         umd = self.coll.getUserMetadata()
@@ -150,7 +148,12 @@ class BaseIrodsStore(SimpleStore):
         for u in umd:
             umdHash[u[0]] = u[1:]                    
         for md in mymd:
-            self.coll.rmUserMetadata(md, umdHash[md][0])
+            try:
+                self.coll.rmUserMetadata(md, umdHash[md][0])
+            except KeyError:
+                # not been set yet
+                pass
+            # should this check for unicode and encode('utf-8') ?
             self.coll.addUserMetadata(md, str(getattr(self, md)))
 
     def begin_storing(self, session):
@@ -176,20 +179,7 @@ class BaseIrodsStore(SimpleStore):
             id = str(id)
 
         self.coll.delete(id)
-
-        for dbt in self.storageTypes:
-            # XXX still don't know
-            break
-            cxn = self._open(session, dbt)
-            if cxn != None:
-                if dbt in self.reverseMetadataTypes:
-                    # fetch value here, delete reverse
-                    data = cxn.get(id)
-                    cxn2 = self._open(session, dbt + "Reverse")                
-                    if cxn2 != None:
-                        cxn2.delete(data)
-                cxn.delete(id)
-                cxn.sync()
+        # all metadata stored on object, no need to delete from elsewhere
 
         # Maybe store the fact that this object used to exist.
         if self.get_setting(session, 'storeDeletions', 0):
@@ -219,19 +209,14 @@ class BaseIrodsStore(SimpleStore):
         if data and self.expires:
             expires = self.generate_expires(session)
             f.addUserMetadata('expires', expires)
-            # XXX is this actually useful?
         return data
 
     def store_data(self, session, id, data, metadata):
         dig = metadata.get('digest', "")
-        if dig:
-            # cxn = self._open(session, 'digestReverse')
-            # XXX where to store?
-            raise
-            if cxn:
-                exists = cxn.get(dig)
-                if exists:
-                    raise ObjectAlreadyExistsException(exists)
+        if 0 and dig:
+            raise NotImplementedError()
+            if self.cxn.queryUserMetadata('select data_name where ...'):
+                raise ObjectAlreadyExistsException(exists)
 
         if id == None:
             id = self.generate_id(session)
@@ -250,7 +235,7 @@ class BaseIrodsStore(SimpleStore):
 
         # store metadata with object
         for (m, val) in metadata.iteritems():
-            f.addUserMetadata(m, val)
+            f.addUserMetadata(m, str(val))
         return None
 
     def fetch_metadata(self, session, id, mType):
@@ -269,10 +254,11 @@ class BaseIrodsStore(SimpleStore):
     
     def clean(self, session):
         # delete expired data objects
+        # self.cxn.query('select data_name from bla where expire < now')
         raise NotImplementedError
 
     def clear(self, session):
-        # this would delete all the data out of self
+        # delete all objects
         for o in self.coll.getObjects():
             self.coll.delete(o)
         return None
@@ -281,3 +267,28 @@ class BaseIrodsStore(SimpleStore):
         # ensure all data is flushed to disk
         # don't think there's an equivalent
         return None
+
+
+# hooray for multiple inheritance!
+
+class IrodsRecordStore(SimpleRecordStore, IrodsStore):
+    def __init__(self, session, config, parent):
+        IrodsStore.__init__(self, session, config, parent)
+        SimpleRecordStore.__init__(self, session, config, parent)
+
+class IrodsDocumentStore(SimpleDocumentStore, IrodsStore):
+    def __init__(self, session, config, parent):
+        IrodsStore.__init__(self, session, config, parent)
+        SimpleDocumentStore.__init__(self, session, config, parent)
+        
+class IrodsObjectStore(SimpleObjectStore, IrodsStore):
+    def __init__(self, session, config, parent):
+        IrodsStore.__init__(self, session, config, parent)
+        SimpleObjectStore.__init__(self, session, config, parent)
+
+class IrodsResultSetStore(SimpleResultSetStore, IrodsStore):
+    def __init__(self, session, config, parent):
+        IrodsStore.__init__(self, session, config, parent)
+        SimpleResultSetStore.__init__(self, session, config, parent)
+
+

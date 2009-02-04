@@ -7,13 +7,6 @@ from cheshire3.exceptions import ConfigFileException
 from cheshire3 import dynamic
 
 import os, types, struct, sys, commands, string, time
-
-
-# name of result set needs to be unique within RSS
-# But users may name result sets non uniquely in Z
-# This map needs to happen at the user/session end
-# Hence only the RSS can name a result set.
-
 NumTypes = [types.IntType, types.LongType]
 
 class SimpleResultSetStore(ResultSetStore):
@@ -40,14 +33,6 @@ class SimpleResultSetStore(ResultSetStore):
                 self.databaseHash[long(w)] = wds[w]
                 self.databaseHashReverse[wds[w]] = long(w)
 
-
-class BdbResultSetStore(SimpleResultSetStore, BdbStore):
-
-    def __init__(self, session, config, parent):
-        self.databaseTypes = ['database', 'expires']
-        SimpleResultSetStore.__init__(self, session, config, parent)
-        BdbStore.__init__(self, session, config, parent)
-
     def create_resultSet(self, session, rset=None):
         id = self.generate_id(session)
         if (not rset):
@@ -64,70 +49,6 @@ class BdbResultSetStore(SimpleResultSetStore, BdbStore):
             self.store_resultSet(session, rset)
         return id
 
-    def delete_resultSet(self, session, id):
-        self.delete_data(session, id)
-        self.commit_storing(session)
-
-    def fetch_resultSet(self, session, id):
-        data = self.fetch_data(session, id)
-        if (data):
-            unpacked = struct.unpack("L" * (len(data) / 4), data)
-            items = []
-            for o in range(len(unpacked))[::4]:
-                db = self.databaseHash[unpacked[o+3]]
-                items.append(SimpleResultSetItem(session, unpacked[o], self.storeHash[unpacked[o+1]], unpacked[o+2], db)) 
-            return SimpleResultSet(session, items, id)
-        elif (isinstance(data, DeletedObject)):
-            raise ObjectDeletedException(data)
-        else:
-            return SimpleResultSet(session, [], id)
-
-    def store_resultSet(self, session, rset):
-        idlist = []
-        for k in range(len(rset)):
-            storeid = rset[k].recordStore
-
-            id = rset[k].id
-            if (not type(storeid) in NumTypes):
-                # Map
-                if (storeid in self.storeHashReverse):
-                    storeid = self.storeHashReverse[storeid]
-                else:
-                    self.storeHashReverse[storeid] = len(self.storeHash.keys())
-                    self.storeHash[self.storeHashReverse[storeid]] = storeid
-                    storeid = self.storeHashReverse[storeid]
-            databaseid = rset[k].database
-            if (not type(databaseid) in NumTypes):
-                # Map
-                if (databaseid in self.databaseHashReverse):
-                    databaseid = self.databaseHashReverse[databaseid]
-                else:
-                    self.databaseHashReverse[databaseid] = len(self.databaseHash.keys())
-                    self.databaseHash[self.databaseHashReverse[databaseid]] = databaseid
-                    databaseid = self.databaseHashReverse[databaseid]
-                    
-            idlist.extend([id, storeid, rset[k].occurences, databaseid])
-        params = ['L' * len(idlist)]
-        params.extend(idlist)
-        data = apply(struct.pack, params)
-        expires = self.generate_expires(session, rset)
-        if expires:
-            md = {'expires' : expires}
-        else:
-            md = {}
-        self.store_data(session, rset.id, data, md)
-
-
-class BdbResultSetStore2(BdbResultSetStore):
-
-    _possibleSettings = {'proxInfo' : {'docs' : "Should the result set store maintain proximity information. Defaults to Yes (1), but if this is not needed, it is a significant increase in speed to turn it off (0)", 'type': int}}
-
-    storeHash = {}
-    storeHashReverse = {}
-    databaseHash = {}
-    databaseHashReverse = {}
-    cxn = None
-    txn = None
 
     def fetch_resultSet(self, session, id):
         data = self.fetch_data(session, id)
@@ -152,3 +73,28 @@ class BdbResultSetStore2(BdbResultSetStore):
         else:
             md = {}
         self.store_data(session, rset.id, data, md)
+
+    def delete_resultSet(self, session, id):
+        self.delete_data(session, id)
+        self.commit_storing(session)
+
+
+class BdbResultSetStore(SimpleResultSetStore, BdbStore):
+    _possibleSettings = {'proxInfo' : {'docs' : "Should the result set store maintain proximity information. Defaults to Yes (1), but if this is not needed, it is a significant increase in speed to turn it off (0)", 'type': int}}
+    
+    storeHash = {}
+    storeHashReverse = {}
+    databaseHash = {}
+    databaseHashReverse = {}
+    cxn = None
+    txn = None
+    
+    def __init__(self, session, config, parent):
+        self.databaseTypes = ['database', 'expires']
+        SimpleResultSetStore.__init__(self, session, config, parent)
+        BdbStore.__init__(self, session, config, parent)
+
+
+class BdbResultSetStore2(BdbResultSetStore):
+    pass
+
