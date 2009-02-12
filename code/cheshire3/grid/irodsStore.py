@@ -53,22 +53,8 @@ class IrodsStore(SimpleStore):
         self.outWorkflow = self.get_path(session, 'outWorkflow', None)
         self.session = session
 
-        # need to put these in a special directory
-        dbts = self.get_storageTypes(session)
-        self.storageTypes = dbts
-        revdbts = self.get_reverseMetadataTypes(session)
-        self.reverseMetadataTypes = revdbts
-
         self.useUUID = self.get_setting(session, 'useUUID', 0)
         self.expires = self.get_default(session, 'expires', 0)
-
-        for dbt in dbts:
-            self._initDb(session, dbt)
-            self._verifyDatabase(session, dbt)
-            if dbt in revdbts:
-                dbt = dbt + "Reverse"
-                self._initDb(session, dbt)
-                self._verifyDatabase(session, dbt)
 
     def get_metadataTypes(self, session):
         return {'totalItems' : long,
@@ -290,5 +276,51 @@ class IrodsResultSetStore(SimpleResultSetStore, IrodsStore):
     def __init__(self, session, config, parent):
         IrodsStore.__init__(self, session, config, parent)
         SimpleResultSetStore.__init__(self, session, config, parent)
+
+
+class IrodsDirectoryDocumentStream(MultipleDocumentStream):
+
+    def find_documents(self, session, cache=0):
+        # given a location in irods, go there and descend looking for files
+
+        myEnv, status = irods.getRodsEnv()
+        conn, errMsg = irods.rcConnect(myEnv.getRodsHost(), myEnv.getRodsPort(), 
+                                       myEnv.getRodsUserName(), myEnv.getRodsZone())
+        status = irods.clientLogin(conn)
+        if status:
+            raise ConfigFileException("Cannot connect to iRODS: (%s) %s" % (status, errMsg))
+
+        home = myEnv.getRodsHome()
+        c = irods.irodsCollection(conn, home)
+        dirs = c.getSubCollections()
+
+        # check if abs path to home dir
+        if self.streamLocation.startswith(home):
+            self.streamLocation = self.streamLocation[len(home):]
+            if self.streamLocation[0] == "/":
+                self.streamLocation = self.streamLocation[1:]
+
+        colls = self.streamLocation.split('/')
+        for cln in colls:
+            c.openCollection(cln)
+        
+        # now at top of data... recursively look for files
+
+
+        for root, dirs, files in os.walk(self.streamLocation):
+            for d in dirs:
+                if os.path.islink(os.path.join(root, d)):
+                    for root2, dirs2, files2 in os.walk(os.path.join(root,d)):
+                        files2.sort()
+                        files2 = [os.path.join(root2, x) for x in files2]
+                        # Psyco Map Reduction
+                        # files2 = map(lambda x: os.path.join(root2, x), files2)
+                        for f in self._processFiles(session, files2, cache):
+                            yield f
+            files.sort()
+            files = [os.path.join(root, x) for x in files]
+            # files = map(lambda x: os.path.join(root, x), files)
+            for f in self._processFiles(session, files, cache):
+                yield f
 
 
