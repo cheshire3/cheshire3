@@ -435,9 +435,11 @@ class SimpleIndex(Index):
                         maskResultSets = [self.construct_resultSet(session, t[1], qHash) for t in termList]
                         maskBase = maskBase.combine(session, maskResultSets, maskClause, db)
                         maskBase.queryTerm = qHash['text']
-                        maskBase.queryPositions = qHash['positions']
+                        try:
+                            maskBase.queryPositions = qHash['positions']
+                        except KeyError:
+                            pass
                     except:
-                        raise
                         pass
                     else:
                         matches.append(maskBase)
