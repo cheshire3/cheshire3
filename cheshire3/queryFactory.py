@@ -25,7 +25,7 @@ else:
         
         def __init__(self):
             QueryStream.__init__(self)
-            self.phraseRe = re.compile('".+?"')
+            self.phraseRe = re.compile('".*?"')
         
         def parse(self, session, data, codec, db):
             form = data

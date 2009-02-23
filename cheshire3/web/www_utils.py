@@ -33,7 +33,7 @@
 
 
 import re, time
-phraseRe = re.compile('".+?"')
+phraseRe = re.compile('".*?"')
 
 def generate_cqlQuery(form):
     global phraseRe
