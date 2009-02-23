@@ -50,21 +50,24 @@ def generate_cqlQuery(form):
         idxs = cgi_decode(form.getfirst('fieldidx%d' % i, 'cql.anywhere'))
         rel = cgi_decode(form.getfirst('fieldrel%d'  % i, 'all/relevant/proxinfo'))
         idxClauses = []
-        # in case they're trying to do phrase searching
-        if (rel.find('exact') != -1 or rel.find('=') != -1 or rel.find('/string') != -1):
+        if (rel.startswith('exact') or rel.startswith('=') or rel.find('/string') != -1):
             # don't allow phrase searching for exact or /string searches
             cont = cont.replace('"', '\\"')
-        else:
-            phrases = phraseRe.findall(cont)
-            for ph in phrases:
-                subClauses.append('(%s =/relevant/proxinfo %s)' % (idx, ph))
-            
-            cont = phraseRe.sub('', cont)
-            
         for idx in idxs.split('||'):
             subClauses = []
             if (rel[:3] == 'all'): subBool = ' and/relevant/proxinfo '
             else: subBool = ' or/relevant/proxinfo '
+
+            # in case they're trying to do phrase searching
+            if (rel.find('exact') != -1 or rel.find('=') != -1 or rel.find('/string') != -1):
+                # don't allow phrase searching for exact or /string searches
+                pass # we already did quote escaping
+            else:
+                phrases = phraseRe.findall(cont)
+                for ph in phrases:
+                    subClauses.append('(%s =/relevant/proxinfo %s)' % (idx, ph))
+                
+                cont = phraseRe.sub('', cont)
                      
             if (idx and rel and cont):
                 subClauses.append('%s %s "%s"' % (idx, rel, cont.strip()))
