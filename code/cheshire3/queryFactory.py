@@ -57,11 +57,11 @@ else:
                         # don't allow phrase searching for exact or /string searches
                         pass # we already did quote escaping
                     else:
-                        phrases = phraseRe.findall(cont)
+                        phrases = self.phraseRe.findall(cont)
                         for ph in phrases:
                             subClauses.append('(%s =/relevant/proxinfo %s)' % (idx, ph))
                         
-                        cont = phraseRe.sub('', cont)
+                        cont = self.phraseRe.sub('', cont)
                         
                     if (idx and rel and cont):
                         subClauses.append('%s %s "%s"' % (idx, rel, cont.strip()))
