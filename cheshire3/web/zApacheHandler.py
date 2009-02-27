@@ -32,7 +32,7 @@ cheshirePath = os.environ.get('C3HOME', '/home/cheshire')
 
 session = Session()
 session.environment = "apache"
-serv = SimpleServer(session, os.path.join(cheshirePath, 'cheshire3', 'configs', 'serverConfig.xml'))
+server = SimpleServer(session, os.path.join(cheshirePath, 'cheshire3', 'configs', 'serverConfig.xml'))
 configs = {}
 dbmap = {}
 server._cacheDatabases(session)
