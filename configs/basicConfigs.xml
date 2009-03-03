@@ -391,6 +391,9 @@
 <subConfig type="normalizer" id="DateYearNormalizer">
   <objectType>cheshire3.normalizer.DateYearNormalizer</objectType>
 </subConfig>
+<subConfig type="normalizer" id="UcaNormalizer">
+  <objectType>cheshire3.normalizer.UnicodeCollationNormalizer</objectType>
+</subConfig>
 
 
 <!-- Transformer Objects -->
