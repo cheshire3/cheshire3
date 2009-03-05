@@ -30,8 +30,8 @@ class SruObject:
         return getattr(self.tree, name)    
 
     def __str__(self):
-        return objectify.dump(self.tree)
-        #return etree.tostring(self.tree)
+#        return objectify.dump(self.tree)
+        return etree.tostring(self.tree)
         
     #- end SruObject ----------------------------------------------------------
 
@@ -178,10 +178,10 @@ def fetch_data(myUrl, tries=3):
             f = urllib2.urlopen(req)
         except (urllib2.URLError):
             # problem accessing remote service
-            break
+            continue
         except (httplib.BadStatusLine):
             # problem with response
-            time.sleep(1)
+            time.sleep(0.5)
             continue
         else:
             data = f.read()
