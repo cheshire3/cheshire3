@@ -25,6 +25,7 @@ from xml.sax.saxutils import escape
 #from cheshire3.utils import reader as domReader
 #reader = domReader()
 from lxml import etree
+from lxml.builder import ElementMaker
 
 # Simple SRU->SRW transformation
 
@@ -36,11 +37,30 @@ def simpleRequestXform(item, config):
         return val
     return None
 
+namespaces = {
+    'sru' : 'http://www.loc.gov/zing/srw/',
+    'diag' : 'http://www.loc.gov/zing/srw/diagnostic/'
+    }
+
+sruElemFac = ElementMaker(namespace=namespaces['sru'], nsmap=namespaces)
+diagElemFac = ElementMaker(namespace=namespaces['diag'], nsmap=namespaces)
+# Diagnostic XML formatter
+def diagnosticToXML(diag):
+    el = diagElemFac.diagnostic(
+        diagElemFac.uri(diag.uri)
+        )
+    if diag.message:
+        el.append(diagElemFac.message(diag.message))
+    if diag.details:
+        el.append(diagElemFac.details(diag.details))
+    return el
+
+
 # Extension Handler Functions:
 
 import cheshire3.internal
 def implementationResponseHandler(session, val, resp, other=None):
-    # Put our implementation id into the response
+    """ Put our implementation id into the response """
     # Stored in ZeeRex, so on config object
     txt = """
     <ident:serverInfo xmlns:ident="info:srw/extensions/1/ident-v1.0">
@@ -52,14 +72,17 @@ def implementationResponseHandler(session, val, resp, other=None):
     """ % ('.'.join([str(x) for x in internal.cheshireVersion]))
     return etree.XML(txt)
 
-def docidRecordHandler(session, val, ro, other):
-    # Put the record identifier into extraRecordData
-    txt = '<docid:recordIdentifier xmlns:docid="info:srw/extension/2/docid-v1.0">%s</docid:recordIdentifier>' % escape(str(other))
+
+# Record
+def docidRecordHandler(session, val, resp, rec):
+    """ Put the record identifier into extraRecordData"""
+    txt = '<docid:recordIdentifier xmlns:docid="info:srw/extension/2/docid-v1.0">%s</docid:recordIdentifier>' % escape(str(rec))
     return etree.XML(txt)
 
-def recordMetadataHandler(session, val, ro, rsi, rec):
-    # Put resultSetItem info into extraRecordData
-    mdBits = ['<rec:metaData xmlns:rec="http://www.archiveshub.ac.uk/srw/extension/2/record-1.1">']
+
+def recordMetadataHandler(session, val, resp, rsi, rec):
+    """ Put resultSetItem info into extraRecordData"""
+    mdBits = ['<rec:metaData xmlns:rec="http://www.cheshire3.org/sru/extension/2/record-1.1">']
     # ids may contain nasties - escape them
     mdBits.append('<rec:identifier>%s</rec:identifier>' % escape(unicode(rec.id, 'utf-8')))
     if rec.recordStore:
@@ -80,22 +103,103 @@ def recordMetadataHandler(session, val, ro, rsi, rec):
         
     mdBits.append('</rec:metaData>')
     return etree.XML(''.join(mdBits))
-    
-def resultSetSummaryHandler(session, val, ro, rs):
-    # puts summary of resultSet into extraSearchData
-    if not len(rs):
+
+
+# SearchRetrieve    
+def resultSetSummaryHandler(session, val, resp, resultSet=[], db=None):
+    """ Put summary of resultSet into extraSearchRetrieveData"""
+    if not len(resultSet):
         return
     
-    mdBits = ['<rs:resultSetData xmlns:rs="http://www.archiveshub.ac.uk/srw/extension/2/resultSet-1.1">']
-    if hasattr(rs[0], 'weight'):
-        allids = [escape(r.id) for r in rs] # ids may contain nasties - escape them
+    mdBits = ['<rs:resultSetData xmlns:rs="http://www.cheshire3.org/sru/extension/2/resultSet-1.1">']
+    if hasattr(resultSet[0], 'weight'):
+        allids = [escape(r.id) for r in resultSet] # ids may contain nasties - escape them
         mdBits.append('<rs:ids>%r</rs:ids>' % allids)
-    if hasattr(rs[0], 'weight'):
-        allweights = [r.weight for r in rs]
+    if hasattr(resultSet[0], 'weight'):
+        allweights = [r.weight for r in resultSet]
         mdBits.append('<rs:weights>%r</rs:weights>' % allweights)
-    if hasattr(rs[0], 'proxInfo') and rs[0].proxInfo:
-        prox = [r.proxInfo for r in rs]
+    if hasattr(resultSet[0], 'proxInfo') and resultSet[0].proxInfo:
+        prox = [r.proxInfo for r in resultSet]
         mdBits.append('<rs:proxInfo>%r</rs:proxInfo>' % prox)
         
     mdBits.append('</rs:resultSetData>')
     return etree.XML(''.join(mdBits))
+
+
+import cheshire3.cqlParser as cql
+def resultSetFacetsHandler(session, val, resp, resultSet=[], db=None):
+    """Put facet for requested index into extraSearchRetrieveData
+       val is a CQL query. 
+           Boolean used is meaningless, facets are returned for each clause.
+           Term in each clause is also meaningless and need be nothing more than *
+       Result looks something like browse response e.g.
+    <facets>
+        <facetByIndex index="dc.subject" relation"exact">
+            <term>
+                <value>Genetics</value>
+                <numberOfRecords>2</numberOfRecords>
+            </term>
+            ...
+        </facet>
+        ...
+    </facets>
+    """
+    # quick escapes
+    if not len(resultSet) or db is None:
+        return
+    
+    global namespaces, sruElemFac
+    myNamespaces = namespaces.copy()
+    myNamespaces['fct'] = "http://www.cheshire3.org/sru/extension/2/facets-1.0"
+    
+    pm = db.get_path(session, 'protocolMap')
+    if not pm:
+        db._cacheProtocolMaps(session)
+        pm = db.protocolMaps.get('http://www.loc.gov/zing/srw/')
+        self.paths['protocolMap'] = pm
+        
+    fctElemFac = ElementMaker(namespace=myNamespaces['fct'], nsmap=myNamespaces)
+
+    def getFacets(query):
+        if (isinstance(query, cql.SearchClause)):
+            fctEl = fctElemFac.facetsByIndex({'index': query.index.toCQL(), 'relation': query.relation.toCQL()})
+#            fctEl.append(sruElemFac.index(query.index.toCQL()))
+#            fctEl.append(sruElemFac.relation(query.relation.toCQL()))
+            idx = pm.resolveIndex(session, query)
+            if idx is None:
+                fctEl.append(diagnosticToXML(cql.Diagnostic(code=16, message="Unsupported Index", details=query.index.toCQL())))
+                return fctEl
+            
+            try:
+                facets = idx.facets(session, resultSet)
+            except:
+                # index doesn't support facets
+                # TODO: diagnostic?
+                facets = []
+                
+            termsEl = sruElemFac.terms()
+            for f in facets:
+                termsEl.append(sruElemFac.term(
+                                               sruElemFac.value(f[0]),
+                                               sruElemFac.numberOfRecords(str(f[1][1]))
+                                               )
+                               )
+                
+            fctEl.append(termsEl)
+            return [fctEl]
+        else:
+            fctEls = getFacets(query.leftOperand)
+            fctEls.extend(getFacets(query.rightOperand))
+            return fctEls
+        
+    fctsEl = fctElemFac.facets()
+    try:
+        query = cql.parse(val)
+    except cql.Diagnostic as d:
+        fctsEl.append(diagnosticToXML(d))
+        return fctsEl
+    
+    for el in getFacets(query):
+        fctsEl.append(el)
+        
+    return fctsEl

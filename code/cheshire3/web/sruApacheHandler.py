@@ -66,6 +66,7 @@ recordMap = {
     }
 
 elemFac = ElementMaker(namespace=protocolMap['sru'], nsmap=protocolMap)
+diagElemFac = ElementMaker(namespace=protocolMap['diag'], nsmap=protocolMap)
 xmlVerRe = re.compile("[ ]*<\?xml[^>]+>")
 
 class reqHandler:
@@ -179,13 +180,14 @@ class reqHandler:
                         
 
     def diagnosticToXml(self, diag):
-        x = elemFac.diagnostic(
-            elemFac.uri("%s%s" % (diag.uri, diag.code))
+        x = diagElemFac.diagnostic(
+            #elemFac.uri("%s%s" % (diag.uri, diag.code)) # uri already contains code
+            diagElemFac.uri(diag.uri)
             )
-        if diag.details:
-            x.append(elemFac.details(diag.details))
         if diag.message:
-            x.append(elemFac.message(diag.message))
+            x.append(diagElemFac.message(diag.message))
+        if diag.details:
+            x.append(diagElemFac.details(diag.details))
         return x
 
     def processUnknownOperation(self, err, config):
@@ -324,7 +326,7 @@ class reqHandler:
             if ( nrp < len(rs) and nrp > 0):
                 result.append(elemFac.nextRecordPosition(str(nrp)))
         
-        self.extraData('searchRetrieve', opts, result, rs)
+        self.extraData('searchRetrieve', opts, result, rs, db)
         return result
 
 
