@@ -13,7 +13,7 @@ import traceback, codecs, sys, os
 from PyZ3950.asn1 import Ctx, IncrementalDecodeCtx, GeneralString 
 from PyZ3950 import asn1, CQLUtils, ccl
 from PyZ3950.z3950_2001 import *
-from z3950_utils import *
+from cheshire3.web.z3950_utils import *
 from PyZ3950.zdefs import *
 from PyZ3950 import oids
 
@@ -442,7 +442,7 @@ handler = ZHandler()
 def connectionhandler(conn):
     # Apache level stuff
 
-    if (conn.local_addr[1] != 2100):
+    if (conn.local_addr[1] not in [210, 2100]):
         return apache.DECLINED
     try:
         session.resultSets = {}
