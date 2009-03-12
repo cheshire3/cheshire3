@@ -266,6 +266,7 @@ class reqHandler:
         session.database = db.id
         rss = db.get_object(session, 'defaultResultSetStore')
 
+        recordMap.update(session.config.recordNamespaces)
         schema = opts.get('recordSchema', '')
         if not schema and hasattr(session.config, 'defaultRetrieveSchema'):
             schema = session.config.defaultRetrieveSchema
