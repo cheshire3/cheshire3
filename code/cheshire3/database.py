@@ -236,7 +236,14 @@ class SimpleDatabase(SummaryObject, Database):
         else:
             # CQL 1.2 sort definition
             # URI: info:srw/cql-context-set/1/sort-v1.0
-            sk = query.sortKeys
+            try:
+                sk = query.sortKeys
+            except AttributeError:
+                # pre CQL 1.2
+                query.resultSet = rs
+                rs.queryTime = time.time() - start
+                return rs
+            
             sk.reverse()  # stable sort = keys in reverse order
             pm = self.get_path(session, 'protocolMap')
             if not pm:
