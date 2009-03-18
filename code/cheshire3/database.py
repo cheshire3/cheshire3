@@ -148,7 +148,8 @@ class SimpleDatabase(SummaryObject, Database):
         return None
 
     def _search(self, session, query):
-        if (isinstance(query, cql.SearchClause)):
+        #if (isinstance(query, cql.SearchClause)):
+        if not hasattr(query, 'leftOperand'):
             # Check resultset
             rsid = query.getResultSetId()
             if (rsid):
