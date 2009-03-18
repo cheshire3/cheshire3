@@ -204,12 +204,10 @@ class Index(C3Object):
 
 
 
-class XPathProcessor(C3Object):
-    """An XPathProcessor is a simple wrapper around an XPath.  It is used
-    to evaluate the XPath expression according to a given record in
-    workflows"""
+class Selector(C3Object):
+    """A Selector is a simple wrapper around an XPath or other means of selecting data from a parsed structure in a Record"""
     def process_record(self, session, record):
-        """Process the XPath for the given record and return the results."""
+        """Process the given record and return the results."""
         raise(NotImplementedError)
 
 
