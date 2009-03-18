@@ -28,6 +28,7 @@ class SimpleWorkflow(Workflow):
                        u'extractor' : 'process_xpathResult',
                        u'normalizer' : 'process_hash',
                        u'xpathProcessor' : 'process_record',
+                       u'selector' : 'process_record',
                        u'documentFactory' : 'load',
                        u'logger' : 'log',
                        u'documentStore' : 'create_document',

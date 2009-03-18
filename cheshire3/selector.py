@@ -48,7 +48,7 @@ class SimpleSelector(Selector):
             except KeyError:
                 raise ConfigFileException("Location element in %s must have 'type' attribute" % self.id)
 
-        if data['type'] == 'xpath':
+        if data['type'] in ['xpath', 'sparql']:
             for a in child.nsmap:
                 data['maps'][a] = child.nsmap[a]
         for a in child.attrib:
