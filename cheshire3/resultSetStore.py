@@ -63,7 +63,7 @@ class SimpleResultSetStore(ResultSetStore):
 
     def store_resultSet(self, session, rset):
         # Serialise resultSet to data + class
-        srlz = rset.serialise(session, pickle=self.get_setting(session, 'proxInfo', 1))
+        srlz = rset.serialise(session, pickleOk=self.get_setting(session, 'proxInfo', 1))
         cl = str(rset.__class__)
         data = cl + "||" + srlz        
 
