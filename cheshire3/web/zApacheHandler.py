@@ -27,6 +27,7 @@ asn1.register_oid(Z3950_QUERY_CQL, asn1.GeneralString)
 from cheshire3.baseObjects import Session, Database, Transformer, Workflow
 from cheshire3.server import SimpleServer
 from cheshire3 import internal
+from cheshire3 import cqlParser
 
 cheshirePath = os.environ.get('C3HOME', '/home/cheshire')
 
@@ -204,6 +205,7 @@ class ZHandler:
                         q = CQLUtils.rpn2cql(query[1], cfg)               
                         self.log("--> " + q.toCQL())
                     session.database = db.id
+                    q = cqlParser.parse(q.toCQL())
                     resultSets.append(db.search(session, q))
                 else:
                     raise ValueError("%s not in %r" % (dbname, self.session.configs.keys()))
@@ -277,6 +279,7 @@ class ZHandler:
                 clause.term.value = 'a'
             nstms = nt * (step + 1)
             terms = []
+            clause = cqlParser.parse(clause.toCQL())
             if (rp == 1):
                 data = db.scan(session, clause, nstms, direction=">=")
             elif (rp == 0):
