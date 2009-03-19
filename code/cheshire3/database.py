@@ -148,7 +148,6 @@ class SimpleDatabase(SummaryObject, Database):
         return None
 
     def _search(self, session, query):
-        #if (isinstance(query, cql.SearchClause)):
         if not hasattr(query, 'leftOperand'):
             # Check resultset
             rsid = query.getResultSetId()
@@ -321,7 +320,7 @@ class SimpleDatabase(SummaryObject, Database):
         return rs
 
     def scan(self, session, clause, nTerms=25, direction=">="):
-        if (not isinstance(clause, cql.SearchClause)):
+        if (hasattr(clause, 'leftOperand')):
             raise QueryException("Cannot use boolean in scan", 38)
         pm = self.get_path(session, 'protocolMap')
         if not pm:
@@ -343,7 +342,7 @@ class OptimisingDatabase(SimpleDatabase):
         self.maskRe = re.compile(r'(?<!\\)[*?]')
         
     def _rewriteQuery(self, session, query):
-        if isinstance(query, cql.SearchClause):
+        if not hasattr(query, 'leftOperand'):
             if query.relation.value == "all" :
                 # rewrite to AND triples
                 nbool = " and "
@@ -375,7 +374,7 @@ class OptimisingDatabase(SimpleDatabase):
             return None
 
     def _attachResultCount(self, session, query):
-        if (isinstance(query, cql.SearchClause)):
+        if not (hasattr(query, 'leftOperand')):
             # If have masking chrs, assign positive number
             if self.maskRe.search(query.term.value):
                 query.resultCount = 100
@@ -446,14 +445,14 @@ class OptimisingDatabase(SimpleDatabase):
             return idxStore.search(session, query, self)
         else:
 
-            if (isinstance(query, cql.SearchClause) and query.relation.value == "any"):
+            if ((not hasattr(query, 'leftOperand')) and query.relation.value == "any"):
                 # don't try to rewrite, futile.
                 pass
             else:
                 n = self._rewriteQuery(session, query)
                 if n:
                     query = n
-            if (isinstance(query, cql.SearchClause)):
+            if not hasattr(query, 'leftOperand'):
                 # single term or any in single clause
                 query.resultCount = 1
                 rs = self._search(session, query)
