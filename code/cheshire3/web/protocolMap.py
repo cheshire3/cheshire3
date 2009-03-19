@@ -17,6 +17,7 @@ class Z3950ProtocolMap(ZeerexProtocolMap):
         self.transformerHash = {}
         self.indexHash = {}
         self.prefixes = {}
+        self.defaultAttribute = []
         ZeerexProtocolMap.__init__(self, session, node, parent)
         self.defaultAttributeHash = {}
         for x in self.defaultAttribute:

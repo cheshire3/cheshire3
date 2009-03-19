@@ -1,7 +1,7 @@
 
 # In Apache config, for example:
-# Listen 127.0.0.1:2100
-# <VirtualHost 127.0.0.1:2100>
+# Listen 127.0.0.1:210
+# <VirtualHost 127.0.0.1:210>
 #      PythonPath "sys.path+['/path/to/code/']"
 #      PythonConnectionHandler filenameOfCode
 #      PythonDebug On  
@@ -197,7 +197,7 @@ class ZHandler:
                 q = CQLParser.parse(query[1])
             for dbname in dbs:
                 cfg = self.session.configs.get(dbname, None)
-                if cfg:
+                if cfg is not None:
                     db = cfg.parent
                     if query[0] == 'rpn':
                         self.log("Trying to convert: %s" % (repr(query[1])))
@@ -206,7 +206,7 @@ class ZHandler:
                     session.database = db.id
                     resultSets.append(db.search(session, q))
                 else:
-                    raise ValueError
+                    raise ValueError("%s not in %r" % (dbname, self.session.configs.keys()))
             if len(resultSets) > 1:
                 rs = resultSets[0]
                 for r in resultSets[1:]:
@@ -295,6 +295,7 @@ class ZHandler:
                     data = data[1:]
                 data.reverse()
                 data.extend(data1)
+            
             for d in data[::step+1]:
                 t = TermInfo()
                 t.term = ('general', d[0])
