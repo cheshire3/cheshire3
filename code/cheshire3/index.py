@@ -1295,7 +1295,7 @@ class PassThroughIndex(SimpleIndex):
                 xp = self.get_object(session, ref)
             else:
                 xp = SimpleXPathProcessor(session, node, self)
-                xp.sources = [[xp._handleLxmlXPathNode(session, node)]]         
+                xp.sources = [[xp._handleLxmlLocationNode(session, node)]]         
             self.xpath = xp
 
     def _handleConfigNode(self, session, node):
@@ -1306,7 +1306,7 @@ class PassThroughIndex(SimpleIndex):
                 xp = self.get_object(session, ref)
             else:
                 xp = SimpleXPathProcessor(session, node, self)
-                xp.sources = [[xp._handleLxmlXPathNode(session, node)]]
+                xp.sources = [[xp._handleLxmlLocationNode(session, node)]]
             self.xpath = xp
 
     def __init__(self, session, config, parent):
