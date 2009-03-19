@@ -42,28 +42,6 @@ class ISTCPassThroughIndex(PassThroughIndex):
         session.database = currDb
         return self.localIndex.search(session, localq, db)
     
-#    def search(self, session, clause, db):
-#        # first do search on remote index
-#        currDb = session.database
-#        session.database = self.database.id
-#        rs = self.remoteIndex.search(session, clause, self.database)
-#        qstring = []
-#        # fetch all matched records
-#        values = {}
-#        for rsi in rs:
-#            rec = rsi.fetch_record(session)
-#            # process xpath
-#            try:
-#                value = self.xpath.process_record(session, rec)[0][0]
-#            except:
-#                # no data where we expect it
-#                continue
-#            if value:
-#                qstring.append('c3.%s exact "%s"' % (self.localIndex.id, value))
-#        # construct search from keys and return local search
-#        localq = cql.parse(' or '.join(qstring))
-#        session.database = currDb
-#        return self.localIndex.search(session, localq, db)
     
 class FormatTokenizer(SimpleTokenizer):
     
@@ -183,29 +161,29 @@ class CountryofPrintNormalizer(SimpleNormalizer):
     
     def process_string(self, session, data):
         if data in self.Balkans:
-            return 'Balkans'
+            return 'balkans'
         elif data in self.BohemiaMoravia:
-            return 'Bohemia and Moravia'
+            return 'bohemia and moravia'
         elif data in self.England:
-            return 'England'
+            return 'england'
         elif data in self.France or 'france' in data.split():
-            return 'France'
+            return 'france'
         elif data in self.Germany or 'germany' in data.split():
-            return 'Germany'
+            return 'germany'
         elif data in self.Hungary:
-            return 'Hungary'
+            return 'hungary'
         elif data in self.Italy or 'italy' in data.split():
-            return 'Italy'
+            return 'italy'
         elif data in self.LowCountries or 'netherlands' in data.split():
-            return 'Low Countries'
+            return 'low countries'
         elif data in self.Poland:
-            return 'Poland'
+            return 'poland'
         elif data in self.Portugal:
-            return 'Portugal'
+            return 'portugal'
         elif data in self.Scandinavia:
-            return 'Scandinavia'
+            return 'scandinavia'
         elif data in self.Spain:
-            return 'Spain'
+            return 'spain'
         else :
             return data
         
