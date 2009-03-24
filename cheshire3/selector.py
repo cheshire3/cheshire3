@@ -84,12 +84,14 @@ class SimpleSelector(Selector):
 
 
 class TransformerSelector(SimpleSelector):
+    u"""Selector that applies a Transformer to the Record to select data."""
+    
     def __init__(self, session, config, parent):
         SimpleSelector.__init__(self, session, config, parent)
         self.transformer = self.get_path(session, 'transformer')
 
     def process_record(self, session, record):
-        # give record to txr, and then return data
+        u"""Apply Transformer to the Record, return the resulting data."""
         doc = self.transformer.process_record(session, record)
         try:
             return [[doc.text.decode('utf-8')]]
@@ -97,8 +99,10 @@ class TransformerSelector(SimpleSelector):
             return [[doc.text]]
 
 class MetadataSelector(SimpleSelector):
+    u"""Selector that specifies an attribute or function to select data from Records."""
 
     def process_record(self, session, record):
+        u"""Extract the attribute, or run the specified function, return the resulting data."""
         # Check name against record metadata
         vals = []
         for src in self.sources:
@@ -130,4 +134,3 @@ class MetadataSelector(SimpleSelector):
                     raise ConfigFileException("Unknown metadata selector type: %s" % typ)
 
         return vals
-
