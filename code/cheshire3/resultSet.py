@@ -445,9 +445,9 @@ class SimpleResultSet(RankedResultSet):
 
     def combine(self, session, others, clause, db=None):
 
-        if (isinstance(clause, cqlParser.Triple)):
+        try:
             cql = clause.boolean
-        else:
+        except AttributeError:
             cql = clause.relation
 
         # XXX To Configuration
