@@ -158,7 +158,7 @@ class SimpleResultSet(RankedResultSet):
             val = getattr(self, a)
             if val != deft:
                 if type(val) in [dict, list, tuple]:
-                    xml.append(u'<d n="%s" t="pickle">%s</d>' % (a, escape(pickle.dumps(val))))
+                    xml.append(u'<d n="%s" t="pickle">%s</d>' % (a, escape(unicode(pickle.dumps(val)))))
                 elif isinstance(val, Index):
                     xml.append(u'<d n="%s" t="object">%s</d>' % (a, escape(val.id)))
                 elif a == 'query' and val:
