@@ -1300,13 +1300,13 @@ class PassThroughIndex(SimpleIndex):
 
     def _handleConfigNode(self, session, node):
         # Source
-        if (node.tag == "xpath"):
-            ref = node.attrib('ref', '')
+        if (node.localname == "xpath"):
+            ref = node.getAttributeNS('ref')
             if ref:
                 xp = self.get_object(session, ref)
             else:
                 xp = SimpleXPathProcessor(session, node, self)
-                xp.sources = [[xp._handleLxmlLocationNode(session, node)]]
+                xp.sources = [[xp._handleLocationNode(session, node)]]
             self.xpath = xp
 
     def __init__(self, session, config, parent):
