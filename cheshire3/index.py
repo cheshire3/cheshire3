@@ -406,7 +406,7 @@ class SimpleIndex(Index):
                 # TODO: slow regex e.g. if first char is *
                 if (firstMask > -1):
                     startK = k[:firstMask]
-                    try: nextK = startK[:-1] + chr(ord(startK[-1])+1)
+                    try: nextK = startK[:-1] + unichr(ord(startK[-1])+1)
                     except IndexError:
                         # left truncation, all terms from the index
                         # TODO: we should check if there's a inversion of index keys
@@ -506,7 +506,7 @@ class SimpleIndex(Index):
             if not k:
                 k2 = "!"
             else:
-                k2 = k[:-1] + chr(ord(k[-1])+1)
+                k2 = k[:-1] + unichr(ord(k[-1])+1)
             tList = store.fetch_termList(session, self, k, nTerms=nTerms, end=k2, summary=summary, relation='>=')
         else:
             tList = store.fetch_termList(session, self, res.keys()[0], nTerms=nTerms, relation=direction, summary=summary)
