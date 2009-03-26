@@ -556,7 +556,7 @@ class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
             id = self.idNormalizer.process_string(session, id)
 
         # Serialise and store
-        srlz = rset.serialise(session)
+        srlz = rset.serialize(session)
         cl = str(rset.__class__)
         data = srlz.replace('\x00', '\\\\000')
         try:
