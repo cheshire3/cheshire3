@@ -8,6 +8,9 @@ import cStringIO as StringIO
 
 from xml.sax.saxutils import escape, unescape
 
+def ucescape(data):
+    return unicode(escape(data), 'latin-1')
+
 try:
     import cPickle as pickle
 except:
@@ -158,8 +161,8 @@ class SimpleResultSet(RankedResultSet):
             val = getattr(self, a)
             if val != deft:
                 if type(val) in [dict, list, tuple]:
-                    valstr = pickle.dumps(val, pickle.HIGHEST_PROTOCOL) # use later version of pickle protocol to deal with new-style classes, unicode etc.
-                    xml.append(u'<d n="%s" t="pickle">%s</d>' % (a, unicode(escape(valstr), 'latin-1')))
+                    valstr = pickle.dumps(val)#, pickle.HIGHEST_PROTOCOL) # use later version of pickle protocol to deal with new-style classes, unicode etc.
+                    xml.append(u'<d n="%s" t="pickle">%s</d>' % (a, ucescape(valstr)))
                 elif isinstance(val, Index):
                     xml.append(u'<d n="%s" t="object">%s</d>' % (a, escape(val.id)))
                 elif a == 'query' and val:
@@ -190,7 +193,7 @@ class SimpleResultSet(RankedResultSet):
             t = elem.attrib['t']
             txt = unescape(elem.text)
             if t == 'pickle':
-                val = pickle.loads(str(txt))
+                val = pickle.loads(txt.encode('utf-8'))
             elif t == 'None':
                 val = None
             elif t == 'object':
@@ -906,8 +909,8 @@ class SimpleResultSetItem(ResultSetItem):
             if val != deft:
                 if type(val) in [dict, list, tuple]:
                     if pickleOk:
-                        valstr = pickle.dumps(val, pickle.HIGHEST_PROTOCOL) # use later version of pickle protocol to deal with new-style classes, unicode etc.
-                        xml.append(u'<d n="%s" t="pickle">%s</d>' % (a, unicode(escape(valstr), 'latin-1')))
+                        valstr = pickle.dumps(val)#, pickle.HIGHEST_PROTOCOL) # use later version of pickle protocol to deal with new-style classes, unicode etc.
+                        xml.append(u'<d n="%s" t="pickle">%s</d>' % (a, ucescape(valstr)))
                 else:
                     xml.append(u'<d n="%s" t="%s">%s</d>' % (a, srlz_typehash.get(type(val), ''), escape(unicode(val))))
         val = getattr(self, 'proxInfo')
