@@ -145,10 +145,10 @@ class SimpleResultSet(RankedResultSet):
         self._list = data
 
     # TODO: fix nasty rename hack
-    def serialize(self, session, pickleOk=1):
-        return self.serialise(session, pickleOk)
-
     def serialise(self, session, pickleOk=1):
+        return self.serialize(session, pickleOk)
+
+    def serialize(self, session, pickleOk=1):
         # Turn into XML
         # this is pretty fast, and generates better XML than previous
         xml = [u'<resultSet>']
@@ -158,7 +158,8 @@ class SimpleResultSet(RankedResultSet):
             val = getattr(self, a)
             if val != deft:
                 if type(val) in [dict, list, tuple]:
-                    xml.append(u'<d n="%s" t="pickle">%s</d>' % (a, escape(unicode(pickle.dumps(val)))))
+                    valstr = pickle.dumps(val, pickle.HIGHEST_PROTOCOL) # use later version of pickle protocol to deal with new-style classes, unicode etc.
+                    xml.append(u'<d n="%s" t="pickle">%s</d>' % (a, unicode(escape(valstr), 'latin-1')))
                 elif isinstance(val, Index):
                     xml.append(u'<d n="%s" t="object">%s</d>' % (a, escape(val.id)))
                 elif a == 'query' and val:
@@ -173,15 +174,15 @@ class SimpleResultSet(RankedResultSet):
                         
         for item in self:
             xml.append(item.serialize(session, pickleOk))
-        xml.append('</resultSet>')
+        xml.append(u'</resultSet>')
         all =  u''.join(xml)
         return all.encode('utf-8')
     
     # TODO: fix nasty rename hack
-    def deserialize(self, session, data):
-        return self.deserialise(session, data)
-
     def deserialise(self, session, data):
+        return self.deserialize(session, data)
+
+    def deserialize(self, session, data):
         # This is blindingly fast compared to old version!
 
         def value_of(elem):
@@ -898,38 +899,39 @@ class SimpleResultSetItem(ResultSetItem):
 
 
     def serialize(self, session, pickleOk=1):
-        xml = ['<item>']
+        xml = [u'<item>']
         itemattrs = self.attributesToSerialize
         for (a, deft) in itemattrs:
             val = getattr(self, a)
             if val != deft:
                 if type(val) in [dict, list, tuple]:
                     if pickleOk:
-                        xml.append('<d n="%s" t="pickle">%s</d>' % (a, escape(pickle.dumps(val))))
+                        valstr = pickle.dumps(val, pickle.HIGHEST_PROTOCOL) # use later version of pickle protocol to deal with new-style classes, unicode etc.
+                        xml.append(u'<d n="%s" t="pickle">%s</d>' % (a, unicode(escape(valstr), 'latin-1')))
                 else:
-                    xml.append('<d n="%s" t="%s">%s</d>' % (a, srlz_typehash.get(type(val), ''), escape(unicode(val))))
+                    xml.append(u'<d n="%s" t="%s">%s</d>' % (a, srlz_typehash.get(type(val), ''), escape(unicode(val))))
         val = getattr(self, 'proxInfo')
         if val:
-            # serialise to XML
-            xml.append('<proxInfo>')
+            # serialize to XML
+            xml.append(u'<proxInfo>')
             for hit in val:
-                xml.append('<hit>')
+                xml.append(u'<hit>')
                 for w in hit:
                     if len(w) == 4:
-                        xml.append('<w e="%s" w="%s" o="%s" t="%s"/>' % tuple(w))
+                        xml.append(u'<w e="%s" w="%s" o="%s" t="%s"/>' % tuple(w))
                     elif len(w) == 3:
-                        xml.append('<w e="%s" w="%s" o="%s"/>' % tuple(w))
+                        xml.append(u'<w e="%s" w="%s" o="%s"/>' % tuple(w))
                     else:
                         try:
-                            xml.append('<w e="%s" w="%s"/>' % tuple(w))
+                            xml.append(u'<w e="%s" w="%s"/>' % tuple(w))
                         except:
                             # should really error!
-                            xml.append('<w e="%s" w="%s" o="%s" t="%s"/>' % tuple(w[:4]))
+                            xml.append(u'<w e="%s" w="%s" o="%s" t="%s"/>' % tuple(w[:4]))
                             
-                xml.append('</hit>')
-            xml.append('</proxInfo>')
-        xml.append('</item>')
-        return ''.join(xml)
+                xml.append(u'</hit>')
+            xml.append(u'</proxInfo>')
+        xml.append(u'</item>')
+        return u''.join(xml)
 
     def fetch_record(self, session):
         # return record from store
@@ -1010,9 +1012,15 @@ class BitmapResultSet(ResultSet):
         return self.bitfield.lenTrueItems()
 
     def serialise(self, session):
+        return self.serialize(session)
+    
+    def serialize(self, session):
         return str(self.bitfield)
 
     def deserialise(self, data):
+        return self.deserialize(data)
+        
+    def deserialize(self, data):
         self.bitfield = SimpleBitfield(data)
 
     def get_item(self, item):
