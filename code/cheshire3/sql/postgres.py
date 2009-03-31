@@ -613,7 +613,7 @@ class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
         # data is res.dictresult()
         cl = rdict['class']
         rset = dynamic.buildObject(session, cl, [[]])
-        rset.deserialise(session, ndata)
+        rset.deserialize(session, ndata)
         rset.id = id
         
         # Update expires 
