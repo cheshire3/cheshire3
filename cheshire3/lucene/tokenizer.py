@@ -3,6 +3,9 @@ from cheshire3.tokenizer import SimpleTokenizer
 import lucene
 
 class LuceneTokenizer(SimpleTokenizer):
+
+    _possibleSettings = {'tokenizer' : {'docs' : ''}}
+
     def __init__(self, session, config, parent):
         SimpleTokenizer.__init__(self, session, config, parent)
         tknr = self.get_setting(session, 'tokenizer')

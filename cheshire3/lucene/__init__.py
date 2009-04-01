@@ -1,5 +1,5 @@
 
-__all__ = ['normalizer', 'tokenizer', 'workflow', 'wrapper']
+__all__ = ['normalizer', 'tokenizer', 'workflow', 'wrapper', 'indexStore']
 
 # Initialize JVM ___ONCE___
 import lucene
@@ -9,3 +9,4 @@ import cheshire3.lucene.normalizer
 import cheshire3.lucene.tokenizer
 import cheshire3.lucene.workflow
 import cheshire3.lucene.wrapper
+import cheshire3.lucene.indexStore
