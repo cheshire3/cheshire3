@@ -13,6 +13,9 @@ class LuceneIndexStore(IndexStore):
         path = self.get_path(session, 'defaultPath')
         self.analyzer = NullC3Analyzer()
         self.dir = lucene.FSDirectory.getDirectory(path, False)
+        self.parser = lucene.QueryParser("", lucene.StandardAnalyzer())
+        self.searcher = lucene.IndexSearcher(self.dir)
+
         self.writer = None
         self.currDoc = None
         self.currRec = None
@@ -59,11 +62,9 @@ class LuceneIndexStore(IndexStore):
             db._cacheProtocolMaps(session)
             pm = db.protocolMaps.get('http://www.loc.gov/zing/srw/')
         query.config = pm
-        lq = cqlToLucene(query, pm)
-        qp = lucene.QueryParser("", lucene.StandardAnalyzer())
-        q = qp.parse(lq)
-        searcher = lucene.IndexSearcher(self.dir)
-        results = searcher.search(q, lucene.Sort.RELEVANCE)
+        lq = cqlToLucene(session, query, pm)
+        q = self.parser.parse(lq)
+        results = self.searcher.search(q, lucene.Sort.RELEVANCE)
 
         # now map to a ResultSet
         items = []
