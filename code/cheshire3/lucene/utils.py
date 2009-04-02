@@ -2,7 +2,7 @@
 import lucene
 
 
-def cqlToLucene(query, config):
+def cqlToLucene(session, query, config):
     # parsed CQL query, produce Lucene Query String
     # (date < 2000 and title = fish) or subject any "squirrel bat"
     # --> ( +date:{0000 TO 2000} +title:fish) (title:squirrel title:bat)
@@ -11,8 +11,8 @@ def cqlToLucene(query, config):
 
     if hasattr(query, 'boolean'):
         # dealing with AND/OR/NOT/PROX
-        lt = cqlToLucene(query.leftOperand, config)
-        rt = cqlToLucene(query.rightOperand, config)
+        lt = cqlToLucene(session, query.leftOperand, config)
+        rt = cqlToLucene(session, query.rightOperand, config)
         if query.boolean.value == 'and':
             qstr = "(+%s +%s)" % (lt, rt)
         elif query.boolean.value == 'or':
@@ -20,42 +20,47 @@ def cqlToLucene(query, config):
         elif query.boolean.value == 'not':
             qstr = "(+%s -%s)" % (lt, rt)
         elif query.boolean.value == "prox":
-            raise NotImplementedError
+            raise NotImplementedError()
         return qstr
         
     else:
         # dealing with searchClause
 
         # resolve to index
-        idxo = config.resolveIndex(None, query)
+        idxo = config.resolveIndex(session, query)
         idx = idxo.id
+
+        # process as per document terms
+        res = {}
+        for src in idxo.sources.get(query.relation.toCQL(),
+                                    idxo.sources.get(query.relation.value,
+                                                     idxo.sources[u'data'])):
+            res.update(src[1].process(session, [[query.term.value]]))
+        wds = res.keys()
 
         if query.relation.value == 'any':
             s = ['(']
-            wds = query.term.value.split(' ')
             for w in wds:
                 s.append('%s:%s' % (idx, w))
             s.append(')')
             qstr = ' '.join(s)
         elif query.relation.value in ['all', '=']:
             s = ['(']
-            wds = query.term.value.split(' ')
             for w in wds:
                 s.append('+%s:%s' % (idx, w))
             s.append(')')
             qstr = ' '.join(s)
         elif query.relation.value == 'exact':
-            qstr = '%s:%s' % (idx, query.term.value)
+            qstr = '%s:%s' % (idx, wds[0])
         elif query.relation.value == 'adj':
             s = []
-            wds = query.term.value.split(' ')
             for w in wds:
                 s.append('%s:%s' % (idx, w))
             qstr = "spanNear([%s],0,true)" % ' '.join(s)
         elif query.relation.value in ["<", "<="]:
-            qstr = "%s:{0 TO %s}" % (idx, query.term.value)
+            qstr = "%s:{0 TO %s}" % (idx, wds[0])
         elif query.relation.value in [">", ">="]:
-            qstr = "%s:{%s TO \x7f}" % (idx, query.term.value)
+            qstr = "%s:{%s TO \x7f}" % (idx, wds[0])
         else:
             raise NotImplementedError()
         return qstr
