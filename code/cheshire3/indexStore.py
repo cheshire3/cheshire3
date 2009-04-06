@@ -1125,11 +1125,11 @@ class BdbIndexStore(IndexStore):
             cxn = self.sortStoreCxn[index]
         except:
             cxn = self._openSortStore(session, index)
-        try:
-            return cxn.get("%s/%s" % (str(rec.recordStore), rec.id))
-        except:
-            cxn = self._openSortStore(session, index)
-            return cxn.get("%s/%s" % (str(rec.recordStore), rec.id))
+
+        val = cxn.get("%s/%s" % (str(rec.recordStore), rec.id))
+        if val == None:
+            val = cxn.get("%s/%s" % (str(rec.recordStore), rec.numericId)) 
+        return val
 
 
     def store_terms(self, session, index, terms, rec):

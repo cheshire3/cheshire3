@@ -800,7 +800,8 @@ class SimpleResultSet(RankedResultSet):
         elif isinstance(spec, Index) and spec.get_setting(session, 'vectors'):
             # This assumes termid is ordered properly
             # if it isn't write a normalizer, see pyuca normalizer
-            tmplist = [(spec.fetch_vector(session, x)[2][0][0], x) for x in l]
+            miss = lambda x: x[2][0][0] if x[2] else None
+            tmplist = [(miss(spec.fetch_vector(session, x)), x) for x in l]
 
         elif isinstance(spec, Index):
             # Extract data as per indexing, MUCH slower
