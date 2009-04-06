@@ -1,6 +1,9 @@
 
 import os, sys, time, glob
+import hashlib
+import inspect
 from types import MethodType
+
 
 from cheshire3 import dynamic
 from cheshire3.utils import getFirstData, elementType
@@ -66,7 +69,8 @@ class C3Object(object):
     id = ""
     version = ""
     complexity = ""
-    volatility = ""
+    stability = ""
+    checkSums = {}
     name = ""
     objectType = ""
     parent = None
@@ -232,7 +236,7 @@ class C3Object(object):
                 typ = e.attrib.get('type', '')
                 self.version = e.attrib.get('version', '')
                 self.complexity = e.attrib.get('complexity', '')
-                self.volatility = e.attrib.get('volatility', '')
+                self.stability = e.attrib.get('stability', '')
                 self.subConfigs[id] = e
                 if typ == 'index':
                     self.indexConfigs[id] = e
@@ -291,7 +295,8 @@ class C3Object(object):
         self._objectRefs = []
         self._includeConfigStores = []
         self.logger = None
-
+        self.checkSums = {}
+        
         pathObjects = {}
         
         # LXML
@@ -303,6 +308,10 @@ class C3Object(object):
                     self.name = e.text
                 elif e.tag == 'objectType':
                     self.objectType = e.text
+                elif e.tag == 'checkSum':
+                    # store checksum on self, and hash code against it
+                    ct = e.attrib.get('type', 'md5')
+                    self.checkSums[ct] = e.text
                 elif e.tag == 'paths':
                     for e2 in e.iterchildren(tag=etree.Element):
                         try:
@@ -429,6 +438,18 @@ class C3Object(object):
         # Add default Object types to paths
         for t in pathObjects.keys():
             self.unresolvedObjects[t] = pathObjects[t]
+
+
+        # now checksum self
+        if self.checkSums:
+            code = inspect.getsource(self.__class__)
+            for (ct, val) in self.checkSums.items():
+                m = hashlib.new(ct)
+                m.update(code)               
+                digest = m.hexdigest()
+                if digest != val:
+                    raise IntegrityException(self.id)
+        
             
         # Now check for configStore objects
 ##         for csid in self._includeConfigStores:

@@ -46,6 +46,9 @@ class QueryException(C3Exception):
 class PermissionException(C3Exception):
     pass
 
+class IntegrityException(C3Exception):
+    pass
+
 class ExternalSystemException(C3Exception):
     pass
 

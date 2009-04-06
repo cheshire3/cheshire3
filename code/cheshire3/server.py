@@ -21,6 +21,7 @@ class SimpleServer(Server):
         except:
             topNode = dom
         C3Object.__init__(self, session, topNode, None)
+        # and here is a new line
 
     def _cacheDatabases(self, session):
         for dbid in self.databaseConfigs.keys():
