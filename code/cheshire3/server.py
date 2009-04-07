@@ -2,6 +2,7 @@
 from cheshire3.baseObjects import Server
 from cheshire3.configParser import C3Object
 
+
 class SimpleServer(Server):
     databases = {}
     # here because it's global to the install
@@ -21,6 +22,7 @@ class SimpleServer(Server):
             topNode = dom
         C3Object.__init__(self, session, topNode, None)
 
+        
     def _cacheDatabases(self, session):
         for dbid in self.databaseConfigs.keys():
             db = self.get_object(session, dbid)
