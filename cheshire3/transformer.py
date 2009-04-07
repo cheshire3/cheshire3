@@ -105,7 +105,7 @@ class LxmlQueryTermHighlightingTransformer(Transformer):
     
     _possibleSettings = {'highlightTag': {'docs' : 'Tag to indicate highlighted section (will be inserted into output document as: <highlightTag>blah blah</highlightTag>)'}
                         ,'tagAttrList': {'docs': 'Space separated list of attribute name="value" pairs (will be inserted into output document as: <highlightTag name="value">blah blah</highlightTag>)'}
-                        ,'breakElements': {'docs': 'Space separated list of element names to break at when tagging Query Terms. This can be useful when a speedy response is more important than complete tagging.'}
+                        ,'breakElementsList': {'docs': 'Space separated list of element names to break at when tagging Query Terms. This can be useful when a speedy response is more important than complete tagging.'}
                         }
     
     def __init__(self, session, config, parent):
