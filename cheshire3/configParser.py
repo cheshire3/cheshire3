@@ -448,7 +448,7 @@ class C3Object(object):
                 m.update(code)               
                 digest = m.hexdigest()
                 if digest != val:
-                    raise IntegrityException(self.id)
+                    raise IntegrityException(self.id + ": " + digest)
         
             
         # Now check for configStore objects
