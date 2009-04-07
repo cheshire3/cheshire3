@@ -229,7 +229,7 @@ class LxmlOffsetQueryTermHighlightingTransformer(LxmlQueryTermHighlightingTransf
                                     end = len(text)
                                 located = 'tail'
                                 c.tail = text[:start]
-                                hel = etree.Element(self.tag)
+                                hel = etree.Element(self.highlightTag)
                                 hel.attrib.update(self.attrs)
                                 hel.text = text[start:end]
                                 hel.tail = text[end:]
