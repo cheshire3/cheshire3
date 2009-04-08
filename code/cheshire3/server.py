@@ -2,7 +2,6 @@
 from cheshire3.baseObjects import Server
 from cheshire3.configParser import C3Object
 
-
 class SimpleServer(Server):
     databases = {}
     # here because it's global to the install
