@@ -126,6 +126,11 @@ class IrodsStore(SimpleStore):
         self.cxn = None
         self.coll = None
 
+
+    def _queryMeta(self, q):
+        genQueryInp = irods.genQueryInp_t()
+        
+
     def commit_metadata(self, session):
         mymd = self.get_metadataTypes(session)
         # need to delete values first
