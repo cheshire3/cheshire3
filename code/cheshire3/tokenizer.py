@@ -68,22 +68,22 @@ class RegexpSubTokenizer(SimpleTokenizer):
 
 
 class RegexpSplitTokenizer(SimpleTokenizer):
+    """A tokenizer that simply splits at the regex matches."""
      
-     #A tokenizer that simply splits at the regex matches
+    _possibleSettings = {'regexp' : {'docs' : 'Regular expression used to split string'}}
      
-     _possibleSettings = {'regexp' : {'docs' : 'Regular expression used to split string'}}
-     
-     def __init__(self, session, config, parent):
-         SimpleTokenizer.__init__(self, session, config, parent)
-         pre = self.get_setting(session, 'regexp', u"""([-.,'\")}\]]+((?=\s)|$)|(^|(?<=\s))[-.,']+|[`~!@+=\#\&\^*()\[\]{}\\\|\":;<>?/\u2026\u2013\u2014\u2018\u2019\u201c\u201d]|\.\.\.)""")
-         self.regexp = re.compile(pre)
+    def __init__(self, session, config, parent):
+        SimpleTokenizer.__init__(self, session, config, parent)
+        pre = self.get_setting(session, 'regexp', u"""([-.,'\")}\]]+((?=\s)|$)|(^|(?<=\s))[-.,']+|[`~!@+=\#\&\^*()\[\]{}\\\|\":;<>?/\u2026\u2013\u2014\u2018\u2019\u201c\u201d]|\.\.\.)""")
+        self.regexp = re.compile(pre)
 
-     def process_string(self, session, data):
-         return self.regexp.split(data)
+    def process_string(self, session, data):
+        return self.regexp.split(data)
 
 
 
 class RegexpFindTokenizer(SimpleTokenizer):
+    """A tokenizer that returns all words that match the regex."""
     # Some ideas thanks to NLTK's RegexpTokenizer
 
     # Some more ' words:
@@ -137,7 +137,8 @@ class RegexpFindTokenizer(SimpleTokenizer):
 
 
 class RegexpFindOffsetTokenizer(OffsetTokenizer, RegexpFindTokenizer):
-
+    """A tokenizer that returns all words that match the regex, and also the character offset at which each word occurs."""
+    
     def __init__(self, session, config, parent):
         # Only init once!
         RegexpFindTokenizer.__init__(self, session, config, parent)
