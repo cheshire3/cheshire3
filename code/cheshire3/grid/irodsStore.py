@@ -6,8 +6,35 @@ from cheshire3.recordStore import SimpleRecordStore
 from cheshire3.documentStore import SimpleDocumentStore
 from cheshire3.objectStore import SimpleObjectStore
 from cheshire3.resultSetStore import SimpleResultSetStore
+from cheshire3.documentFactory import MultipleDocumentStream
+from cheshire3.exceptions import ObjectAlreadyExistsException, ObjectDoesNotExistException
 
-import irods
+import irods, irods_error
+import time, datetime, dateutil
+
+
+def icatValToPy(val, un):
+    if un in ['int', 'long']:
+        return long(val)
+    elif un == 'unicode':
+        return val.decode('utf-8')
+    elif un == 'float':
+        return float(val)
+    else:
+        return val
+
+def pyValToIcat(val):
+    x = type(val)
+    if x in [int, long]:
+        return ("%020d" % val, 'long')
+    elif x == unicode:
+        return (val.encode('utf-8'), 'unicode')
+    elif x == float:
+        return ('%020f' % val, 'float')
+    else:
+        return (val, 'str')
+
+    
 
 class IrodsStore(SimpleStore):
 
@@ -28,7 +55,8 @@ class IrodsStore(SimpleStore):
     _possiblePaths = {'idNormalizer' : {'docs' : "Identifier for Normalizer to use to turn the data object's identifier into a suitable form for storing. Eg: StringIntNormalizer"},
                       'outIdNormalizer' : {'docs' : "Normalizer to reverse the process done by idNormalizer"},
                       'inWorkflow' : {'docs' : "Workflow with which to process incoming data objects."},
-                      'outWorkflow' : {'docs' : "Workflow with which to process stored data objects when requested."}
+                      'outWorkflow' : {'docs' : "Workflow with which to process stored data objects when requested."},
+                      'irodsCollection' : {'docs' : "Top collection in irods"}
                       }
 
     _possibleSettings = {'useUUID' : {'docs' : "Each stored data object should be assigned a UUID.", 'type': int, 'options' : "0|1"},
@@ -40,11 +68,11 @@ class IrodsStore(SimpleStore):
     _possibleDefaults = {'expires': {"docs" : 'Default time after ingestion at which to delete the data object in number of seconds.  Can be overridden by the individual object.', 'type' : int}}
     
 
-
     def __init__(self, session, config, parent):
         C3Object.__init__(self, session, config, parent)
         self.cxn = None
         self.coll = None
+        self.env = None
         self._open(session)
 
         self.idNormalizer = self.get_path(session, 'idNormalizer', None)
@@ -67,27 +95,34 @@ class IrodsStore(SimpleStore):
                 'lastModified' : str}
 
     def _open(self, session):
-        # XXX Find location from config
-        path = 'cheshire3'
 
-        # connect to iRODS
-        myEnv, status = irods.getRodsEnv()
-        conn, errMsg = irods.rcConnect(myEnv.getRodsHost(), myEnv.getRodsPort(), 
-                                       myEnv.getRodsUserName(), myEnv.getRodsZone())
-        status = irods.clientLogin(conn)
-        if status:
-            raise ConfigFileException("Cannot connect to iRODS: (%s) %s" % (status, errMsg))
+        if self.cxn == None:
+            # connect to iRODS
+            myEnv, status = irods.getRodsEnv()
+            conn, errMsg = irods.rcConnect(myEnv.getRodsHost(), myEnv.getRodsPort(), 
+                                           myEnv.getRodsUserName(), myEnv.getRodsZone())
+            status = irods.clientLogin(conn)
+            if status:
+                raise ConfigFileException("Cannot connect to iRODS: (%s) %s" % (status, errMsg))
+            self.cxn = conn
+            self.env = myEnv
+            
+        if self.coll != None:
+            # already open, just skip
+            return None
 
-        c = irods.irodsCollection(conn, myEnv.getRodsHome())
-        self.cxn = conn
+        c = irods.irodsCollection(self.cxn, self.env.getRodsHome())
         self.coll = c
 
+        # move into cheshire3 section
+        path = self.get_path(session, 'irodsCollection', 'cheshire3')
         dirs = c.getSubCollections()
         if not path in dirs:
             c.createCollection(path)
         c.openCollection(path)
 
         # now look for object's storage area
+        # maybe move into database collection
         if (isinstance(self.parent, Database)):
             sc = self.parent.id
             dirs = c.getSubCollections()
@@ -95,6 +130,7 @@ class IrodsStore(SimpleStore):
                 c.createCollection(sc)
             c.openCollection(sc)
 
+        # move into store collection
         dirs = c.getSubCollections()
         if not self.id in dirs:
             c.createCollection(self.id)
@@ -105,10 +141,11 @@ class IrodsStore(SimpleStore):
         umd = c.getUserMetadata()
         umdHash = {}
         for u in umd:
-            umdHash[u[0]] = u[1:]            
+            umdHash[u[0]] = icatValToPy(*u[1:])
+
         for md in myMetadata:
             try:
-                setattr(self, md, myMetadata[md](umdHash[md][0]))
+                setattr(self, md, umdHash[md])
             except KeyError:
                 # hasn't been set yet
                 pass
@@ -127,9 +164,46 @@ class IrodsStore(SimpleStore):
         self.coll = None
 
 
-    def _queryMeta(self, q):
+    def _queryMetadata(self, session, attName, opName, attValue):
+
         genQueryInp = irods.genQueryInp_t()
+        # select what we want to fetch
+        i1 = irods.inxIvalPair_t()
+        i1.addInxIval(irods.COL_DATA_NAME, 0)
+        genQueryInp.setSelectInp(i1)
+
+        attValue, units = pyValToIcat(attValue)
         
+        i2 = irods.inxValPair_t()
+        i2.addInxVal(irods.COL_META_DATA_ATTR_NAME, "='%s'" % attName)
+        i2.addInxVal(irods.COL_META_DATA_ATTR_VALUE, "%s '%s'" % (opName, attValue))
+
+        self._open(session)
+        collName = self.coll.getCollName()
+        i2.addInxVal(irods.COL_COLL_NAME, "= '%s'" % collName)
+
+        genQueryInp.setSqlCondInp(i2)
+
+        # configure paging
+        genQueryInp.setMaxRows(1000)
+        genQueryInp.setContinueInx(0)
+
+        matches = []
+        # do query
+        genQueryOut, status = irods.rcGenQuery(self.cxn, genQueryInp)
+        if status == irods_error.CAT_NO_ROWS_FOUND:
+            return []
+        elif status == 0:
+            sqlResults = genQueryOut.getSqlResult()
+            matches = sqlResults[0].getValues()
+        
+        while status == 0 and genQueryOut.getContinueInx() > 0:
+            genQueryInp.setContinueInx(genQueryOut.getContinueInx())
+            genQueryOut, status = irods.rcGenQuery(self.cxn, genQueryInp)
+            sqlResults = genQueryOut.getSqlResult()
+            matches.extend(sqlResults[0].getValues())
+        return matches
+
 
     def commit_metadata(self, session):
         mymd = self.get_metadataTypes(session)
@@ -137,24 +211,23 @@ class IrodsStore(SimpleStore):
         umd = self.coll.getUserMetadata()
         umdHash = {}
         for u in umd:
-            umdHash[u[0]] = u[1:]                    
+            umdHash[u[0]] = u[1:]            
         for md in mymd:
             try:
                 self.coll.rmUserMetadata(md, umdHash[md][0])
             except KeyError:
                 # not been set yet
                 pass
-            # should this check for unicode and encode('utf-8') ?
-            self.coll.addUserMetadata(md, str(getattr(self, md)))
+            val, un = pyValToIcat(getattr(self, md))
+            self.coll.addUserMetadata(md, val, un)
 
     def begin_storing(self, session):
-        if not this.cxn:
-            self._open(session)
+        self._open(session)
         return None
 
     def commit_storing(self, session):
         self.commit_metadata(session)
-        self._close()
+        self._close(session)
         return None
 
     def get_dbSize(self, session):
@@ -169,12 +242,13 @@ class IrodsStore(SimpleStore):
         else:
             id = str(id)
 
-        self.coll.delete(id)
         # all metadata stored on object, no need to delete from elsewhere
+        self._open(session)
+        self.coll.delete(id)
 
         # Maybe store the fact that this object used to exist.
         if self.get_setting(session, 'storeDeletions', 0):
-            now = datetime.datetime.now(dateutil.tz.tzutc()).strftime("%Y-%m-%dT%H:%M:%S%Z").replace('UTC', 'Z')            
+            now = datetime.datetime.now(dateutil.tz.tzutc()).strftime("%Y-%m-%dT%H:%M:%S%Z").replace('UTC', 'Z')
             data = "\0http://www.cheshire3.org/status/DELETED:%s" % now
             f = self.coll.create(id)
             f.write(data)
@@ -190,24 +264,28 @@ class IrodsStore(SimpleStore):
         else:
             id = str(id)
 
+        self._open(session)
         f = self.coll.open(id)        
-        data = f.read()
-        f.close()
-
+        if f:
+            data = f.read()
+            f.close()
+        else:
+            return None
+        
         if data and data[:41] == "\0http://www.cheshire3.org/status/DELETED:":
             data = DeletedObject(self, id, data[41:])
 
         if data and self.expires:
             expires = self.generate_expires(session)
-            f.addUserMetadata('expires', expires)
+            self.store_metadata(session, id, 'expires', expires)
         return data
 
     def store_data(self, session, id, data, metadata):
         dig = metadata.get('digest', "")
-        if 0 and dig:
-            raise NotImplementedError()
-            if self.cxn.queryUserMetadata('select data_name where ...'):
-                raise ObjectAlreadyExistsException(exists)
+        if dig:
+            match = self._queryMetadata(session, 'digest', '=', dig)
+            if match:
+                raise ObjectAlreadyExistsException(match[0])
 
         if id == None:
             id = self.generate_id(session)
@@ -220,43 +298,71 @@ class IrodsStore(SimpleStore):
 
         if type(data) == unicode:
             data = data.encode('utf-8')
+        self._open(session)
         f = self.coll.create(id)
         f.write(data)
         f.close()
 
         # store metadata with object
         for (m, val) in metadata.iteritems():
-            f.addUserMetadata(m, str(val))
+            self.store_metadata(session, id, m, val)
         return None
 
     def fetch_metadata(self, session, id, mType):
         # open irodsFile and get metadata from it
+
+        if (self.idNormalizer != None):
+            id = self.idNormalizer.process_string(session, id)
+        elif type(id) == unicode:
+            id = id.encode('utf-8')
+        else:
+            id = str(id)
+
+        self._open(session)
         f = self.coll.open(id)
         umd = f.getUserMetadata()
         for x in umd:
             if x[0] == mType:
-                return x[1]
+                return icatValToPy(x[1], x[2])
         
     def store_metadata(self, session, id, mType, value):
         # store value for mType metadata against id
+
+        if (self.idNormalizer != None):
+            id = self.idNormalizer.process_string(session, id)
+        elif type(id) == unicode:
+            id = id.encode('utf-8')
+        else:
+            id = str(id)
+
+        self._open(session)
         f = self.coll.open(id)
-        f.addUserMetadata(mType, value)
+        f.addUserMetadata(mType, *pyValToIcat(value))
         f.close()
     
     def clean(self, session):
         # delete expired data objects
         # self.cxn.query('select data_name from bla where expire < now')
-        raise NotImplementedError
+        now = time.time()
+        now = pyValToIcat(now)[0]
+        matches = self._queryMetadata(session, 'expires', '<', now)
+        for m in matches:
+            self.delete_data(session, m)
+        return None
 
     def clear(self, session):
         # delete all objects
+        self._open(session)
         for o in self.coll.getObjects():
             self.coll.delete(o)
+        # reset metadata
+        mt = self.get_metadataTypes(session)
+        for (n, t) in mt.iteritems():
+            setattr(self, n, t(0))
         return None
             
     def flush(self, session):
-        # ensure all data is flushed to disk
-        # don't think there's an equivalent
+        # ensure all data is flushed to disk... don't think there's an equivalent
         return None
 
 
@@ -283,6 +389,14 @@ class IrodsResultSetStore(SimpleResultSetStore, IrodsStore):
         SimpleResultSetStore.__init__(self, session, config, parent)
 
 
+#-------------------------------
+
+class IrodsIndexStore(SimpleIndexStore):
+    pass
+
+
+
+#-------------------------------
 class IrodsDirectoryDocumentStream(MultipleDocumentStream):
 
     def find_documents(self, session, cache=0):
@@ -310,8 +424,7 @@ class IrodsDirectoryDocumentStream(MultipleDocumentStream):
             c.openCollection(cln)
         
         # now at top of data... recursively look for files
-
-
+        # XXX FIX
         for root, dirs, files in os.walk(self.streamLocation):
             for d in dirs:
                 if os.path.islink(os.path.join(root, d)):
