@@ -107,6 +107,11 @@ class SimpleRecordStore(RecordStore):
         md = {'byteCount' : rec.byteCount,
               'wordCount' : rec.wordCount,
               'digest' : dig}
+        # check for expires
+        e = self.generate_expires(session, rec)
+        if e:
+            md['expires'] = e
+
         # Might raise ObjectAlreadyExistsException
         self.store_data(session, rec.id, data, metadata=md)
         # Now accumulate metadata
