@@ -212,7 +212,10 @@ class LxmlOffsetQueryTermHighlightingTransformer(LxmlQueryTermHighlightingTransf
                                 hel.attrib.update(self.attrs)
                                 hel.text = text[start:end]
                                 hel.tail = text[end:]
-                                c.insert(0, hel)
+                                try:
+                                    c.insert(0, hel)
+                                except TypeError:
+                                    c.append(hel)
                                 break
                         else:
                             # adjust offset accordingly
