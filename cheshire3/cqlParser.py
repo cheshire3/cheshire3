@@ -37,7 +37,7 @@ class Diagnostic(Exception):
     detils = ""
 
     def __str__(self):
-        return "%s%s [%s]: %s" % (self.uri, self.code, self.message, self.details)
+        return "%s [%s]: %s" % (self.uri, self.message, self.details)
 
     def __init__(self, code=10, message="Malformed Query", details=""):
         self.uri = "info:srw/diagnostic/1/%d" % code
