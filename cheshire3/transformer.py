@@ -143,23 +143,29 @@ class LxmlOffsetQueryTermHighlightingTransformer(LxmlQueryTermHighlightingTransf
     
     def __init__(self, session, config, parent):
         LxmlQueryTermHighlightingTransformer.__init__(self, session, config, parent)
-        self.wordRe = re.compile(u"""
-          (?xu)                                            #verbose, unicode
-          (?:
-            [a-zA-Z0-9!#$%*/?|^{}`~&'+-=_]+@[0-9a-zA-Z.-]+ #email
-           |(?:[\w+-]+)?[+-]/[+-]                          #alleles
-           |\w+(?:-\w+)+(?:'(?:t|ll've|ll|ve|s|d've|d|re))?  #hypenated word (maybe 'xx on the end)
-           |[$\xa3\xa5\u20AC]?[0-9]+(?:[.,:-][0-9]+)+[%]?  #date/num/money/time
-           |[$\xa3\xa5\u20AC][0-9]+                        #single money
-           |[0-9]+(?=[a-zA-Z]+)                            #split: 8am 1Million
-           |[0-9]+%                                        #single percentage 
-           |(?:[A-Z]\.)+[A-Z\.]                            #acronym
-           |[oOd]'[a-zA-Z]+                                #o'clock, O'brien, d'Artagnan   
-           |[a-zA-Z]+://[^\s]+                             #URI
-           |\w+'(?:d've|d|t|ll've|ll|ve|s|re)              #don't, we've
-           |(?:[hH]allowe'en|[mM]a'am|[Ii]'m|[fF]o'c's'le|[eE]'en|[sS]'pose)
-           |[\w+]+                                         #basic words, including +
-          )""")
+        try:
+            # try to get database's own version of RegexpFindOffsetTokenizer in case config is non-default
+            db = session.server.get_object(session, session.database)
+            self.wordRe = db.get_object(session, 'RegexpFindOffsetTokenizer').regexp
+            del db
+        except:
+            self.wordRe = re.compile(u"""
+              (?xu)                                            #verbose, unicode
+              (?:
+                [a-zA-Z0-9!#$%*/?|^{}`~&'+-=_]+@[0-9a-zA-Z.-]+ #email
+               |(?:[\w+-]+)?[+-]/[+-]                          #alleles
+               |\w+(?:-\w+)+(?:'(?:t|ll've|ll|ve|s|d've|d|re))?  #hypenated word (maybe 'xx on the end)
+               |[$\xa3\xa5\u20AC]?[0-9]+(?:[.,:-][0-9]+)+[%]?  #date/num/money/time
+               |[$\xa3\xa5\u20AC][0-9]+                        #single money
+               |[0-9]+(?=[a-zA-Z]+)                            #split: 8am 1Million
+               |[0-9]+%                                        #single percentage 
+               |(?:[A-Z]\.)+[A-Z\.]                            #acronym
+               |[oOd]'[a-zA-Z]+                                #o'clock, O'brien, d'Artagnan   
+               |[a-zA-Z]+://[^\s]+                             #URI
+               |\w+'(?:d've|d|t|ll've|ll|ve|s|re)              #don't, we've
+               |(?:[hH]allowe'en|[mM]a'am|[Ii]'m|[fF]o'c's'le|[eE]'en|[sS]'pose)
+               |[\w+]+                                         #basic words, including +
+              )""")
         
     
     def process_record(self, session, rec):
@@ -196,7 +202,7 @@ class LxmlOffsetQueryTermHighlightingTransformer(LxmlQueryTermHighlightingTransf
                 
                 el = recDom.xpath(xps[ni])[0]
                 located = None
-                for ci, c in enumerate(el.getiterator()):
+                for ci, c in enumerate(el.iter(tag=etree.Element)): #ignore comments processing instructions etc.
                     if c.text:
                         text = c.text
                         if len(c.text) > offset:
@@ -207,15 +213,14 @@ class LxmlOffsetQueryTermHighlightingTransformer(LxmlQueryTermHighlightingTransf
                                 if end == -1:
                                     end = len(text)
                                 located = 'text'
-                                c.text = text[:start]
                                 hel = etree.Element(self.highlightTag)
                                 hel.attrib.update(self.attrs)
+                                if c.tag == hel.tag and c.attrib == hel.attrib:
+                                    break
+                                c.text = text[:start]
                                 hel.text = text[start:end]
                                 hel.tail = text[end:]
-                                try:
-                                    c.insert(0, hel)
-                                except TypeError:
-                                    c.append(hel)
+                                c.insert(0, hel)
                                 break
                         else:
                             # adjust offset accordingly
@@ -231,9 +236,11 @@ class LxmlOffsetQueryTermHighlightingTransformer(LxmlQueryTermHighlightingTransf
                                 if end == -1:
                                     end = len(text)
                                 located = 'tail'
-                                c.tail = text[:start]
                                 hel = etree.Element(self.highlightTag)
                                 hel.attrib.update(self.attrs)
+                                if c.tag == hel.tag and c.attrib == hel.attrib:
+                                    break
+                                c.tail = text[:start]
                                 hel.text = text[start:end]
                                 hel.tail = text[end:]
                                 p = c.getparent()
