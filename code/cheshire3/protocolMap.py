@@ -132,7 +132,7 @@ class CQLProtocolMap(ZeerexProtocolMap):
         self.transformerHash = {}
         self.prefixes = {}
         self.protocolNamespaces = protocolNamespaces
-        self.recordNamespaces = recordNamespaces
+        self.recordNamespaces = {}
         self.contextSetNamespaces = contextSetNamespaces
         self.profileNamespaces = profileNamespaces
         self.extensionNamespaces = extensionNamespaces
