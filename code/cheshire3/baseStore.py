@@ -166,6 +166,7 @@ class SimpleStore(C3Object, SummaryObject):
     currentId = -1
     useUUID = 0
     session = None
+    switching = 0
 
     _possiblePaths = {'idNormalizer' : {'docs' : "Identifier for Normalizer to use to turn the data object's identifier into a suitable form for storing. Eg: StringIntNormalizer"},
                       'outIdNormalizer' : {'docs' : "Normalizer to reverse the process done by idNormalizer"},
@@ -189,6 +190,10 @@ class SimpleStore(C3Object, SummaryObject):
 
         # don't inherit metadataPath!
         C3Object.__init__(self, session, config, parent)
+        self.switching = self.get_setting(session, 'bucketType', '') or \
+                         self.get_setting(session, 'maxBuckets', 0) or \
+                         self.get_setting(session, 'maxItemsPerBucket', 0)
+
         SummaryObject.__init__(self, session, config, parent)
         self.idNormalizer = self.get_path(session, 'idNormalizer', None)
         self.outIdNormalizer = self.get_path(session, 'outIdNormalizer', None)
@@ -205,9 +210,6 @@ class SimpleStore(C3Object, SummaryObject):
         self.useUUID = self.get_setting(session, 'useUUID', 0)
         self.expires = self.get_default(session, 'expires', 0)
 
-        self.switching = self.get_setting(session, 'bucketType', '') or \
-                         self.get_setting(session, 'maxBuckets', 0) or \
-                         self.get_setting(session, 'maxItemsPerBucket', 0)
 
         for dbt in dbts:
             self._initDb(session, dbt)
