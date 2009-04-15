@@ -391,9 +391,6 @@ class IrodsResultSetStore(SimpleResultSetStore, IrodsStore):
 
 #-------------------------------
 
-class IrodsIndexStore(SimpleIndexStore):
-    pass
-
 
 
 #-------------------------------
