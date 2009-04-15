@@ -79,8 +79,7 @@ class reqHandler:
 
 
     def diagnostic(self, code, msg="", details=""):
-        err = cqlParser.Diagnostic()
-        err.code = code
+        err = cqlParser.Diagnostic(code)
         err.message = msg
         err.details = details
         return err
@@ -272,7 +271,7 @@ class reqHandler:
             schema = session.config.defaultRetrieveSchema
         if (schema in recordMap):
             schema = recordMap[schema]
-        if (schema and not schema in recordMap.values()):
+        if (schema and not (schema in recordMap.values())):
             raise self.diagnostic(66, details=schema)
         txr = session.config.transformerHash.get(schema, None)
 
