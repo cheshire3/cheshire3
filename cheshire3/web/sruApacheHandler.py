@@ -271,7 +271,7 @@ class reqHandler:
             schema = session.config.defaultRetrieveSchema
         if (schema in recordMap):
             schema = recordMap[schema]
-        if (schema and not (schema in recordMap.values())):
+        if (schema and not (schema in session.config.recordNamespaces.values())):
             raise self.diagnostic(66, details=schema)
         txr = session.config.transformerHash.get(schema, None)
 
