@@ -350,13 +350,26 @@ class BdbIter(object):
 
 class SwitchingBdbConnection(object):
 
-    def __init__(self, session, parent, extra=""):
+    def __init__(self, session, parent, path="", maxBuckets=0, maxItemsPerBucket=0, bucketType=''):
         self.session = session
         self.store = parent
-        self.maxBuckets = parent.get_setting(session, 'maxBuckets', 0) 
-        self.maxItemsPerBucket = parent.get_setting(session, 'maxItemsPerBucket', 0)
 
-        self.bucketType = parent.get_setting(session, 'bucketType', '')
+        # allow per call overrides, eg if parent object has multiple types
+        if maxBuckets == 0:
+            self.maxBuckets = parent.get_setting(session, 'maxBuckets', 0) 
+        else:
+            self.maxBuckets = maxBuckets
+
+        if maxItemsPerBucket == 0:
+            self.maxItemsPerBucket = parent.get_setting(session, 'maxItemsPerBucket', 0)
+        else:
+            self.maxItemsPerBucket = maxItemsPerBucket
+
+        if bucketType == '':
+            self.bucketType = parent.get_setting(session, 'bucketType', '')
+        else:
+            self.bucketType = bucketType
+
         if not self.bucketType:
             if self.maxItemsPerBucket:
                 self.bucketType = 'int'
@@ -365,12 +378,12 @@ class SwitchingBdbConnection(object):
             else:
                 self.bucketType = 'term1'
 
-        dfp = parent.get_path(session, 'defaultPath')
-        basename = parent.id
-        if extra:
-            basename += "--" + extra
-        self.basePath = os.path.join(dfp, basename)        
-        self.openPath = ""
+        if os.path.isabs(path):
+            self.basePath = path
+        else:
+            dfp = parent.get_path(session, 'defaultPath')
+            basename = parent.id
+            self.basePath = os.path.join(dfp, basename)        
 
         self.cxns = {}
         self.createArgs = {}
@@ -465,13 +478,10 @@ class SwitchingBdbConnection(object):
             cxn = bdb.db.DB()
             if self.preOpenFlags:
                 cxn.set_flags(self.preOpenFlags)
-            if self.openPath:
-                dbp = self.openPath + "_" + b
-            else:
-                dbp = self.basePath + "_" + b
+            dbp = self.basePath + "_" + b
 
             if (not os.path.exists(dbp)):
-                cxn.open(dbp, **self.store.createArgs[self.openPath])
+                cxn.open(dbp, **self.store.createArgs[self.basePath])
                 cxn.close()
                 cxn = bdb.db.DB()                
 
@@ -507,7 +517,7 @@ class SwitchingBdbConnection(object):
 
     def open(self, what, flags=0, dbtype=0, mode=0):
         # delay open until try to write
-        self.openPath = what
+        self.basePath = what
         if flags == bdb.db.DB_CREATE:
             self.store.createArgs[what] = {'flags' : flags, 'dbtype' : dbtype, 'mode' : mode}
         elif flags:
@@ -547,12 +557,17 @@ class SwitchingBdbCursor(object):
         self.currCursor = cur
         return cur
         
-    def first(self):
-        cursor = self.set_cursor(self.buckets[0])
-        return cursor.first()
+    def first(self, doff=0, dlen=-1):
+        if self.currBucketIdx != 0:
+            cursor = self.set_cursor(self.buckets[0])
+        if dlen != -1:
+            return cursor.first(doff=doff, dlen=dlen)
+        else:
+            return cursor.first()
 
     def last(self):
-        cursor = self.set_cursor(self.buckets[-1])
+        if self.currBucketIdx != len(self.buckets)-1:
+            cursor = self.set_cursor(self.buckets[-1])
         return cursor.last()
 
     def next(self):
@@ -564,6 +579,8 @@ class SwitchingBdbCursor(object):
                 return c.first()
             else:
                 return x
+        else:
+            return self.first()
 
     def prev(self):
         # Needs to wrap
@@ -574,6 +591,8 @@ class SwitchingBdbCursor(object):
                 return c.last()
             else:
                 return x
+        else:
+            return self.last()
         
     def set_range(self, where):
         # jump to where bucket
