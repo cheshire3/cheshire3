@@ -58,7 +58,7 @@ class SummaryObject(object):
 
         if (not os.path.exists(mp)):
             # We don't exist, try and instantiate new database
-            self._initialise(mp)
+            self._create(session, mp)
         else:
             cxn = bdb.db.DB()
             try:
@@ -85,7 +85,7 @@ class SummaryObject(object):
                 cxn.close()
             except:
                 # Doesn't exist in usable form
-                self._initialise(mp)
+                self._create(session, mp)
 
     def _initDb(self, session, dbt):
             dbp = dbt + "Path"
@@ -100,7 +100,7 @@ class SummaryObject(object):
                 databasePath = os.path.join(dfp, databasePath)
             self.paths[dbp] = databasePath
                     
-    def _initialise(self, dbPath):
+    def _create(self, session, dbPath):
         cxn = bdb.db.DB()
         cxn.set_flags(bdb.db.DB_RECNUM)
         try:
@@ -173,10 +173,14 @@ class SimpleStore(C3Object, SummaryObject):
                       'outWorkflow' : {'docs' : "Workflow with which to process stored data objects when requested."}
                       }
 
+
     _possibleSettings = {'useUUID' : {'docs' : "Each stored data object should be assigned a UUID.", 'type': int, 'options' : "0|1"},
                          'digest' : {'docs' : "Type of digest/checksum to use. Defaults to no digest", 'options': 'sha|md5'},
                          'expires' : {'docs' : "Time after ingestion at which to delete the data object in number of seconds.", 'type' : int },
-                         'storeDeletions' : {'docs' : "Maintain when an object was deleted from this store.", 'type' : int, 'options' : "0|1"}
+                         'storeDeletions' : {'docs' : "Maintain when an object was deleted from this store.", 'type' : int, 'options' : "0|1"},
+                         'bucketType' : {'docs' : ''},
+                         'maxBuckets' : {'docs' : '', 'type' : long},
+                         'maxItemsPerBucket' : {'docs' : '', 'type' : long}
                          }
 
     _possibleDefaults = {'expires': {"docs" : 'Default time after ingestion at which to delete the data object in number of seconds.  Can be overridden by the individual object.', 'type' : int}}
@@ -201,16 +205,20 @@ class SimpleStore(C3Object, SummaryObject):
         self.useUUID = self.get_setting(session, 'useUUID', 0)
         self.expires = self.get_default(session, 'expires', 0)
 
+        self.switching = self.get_setting(session, 'bucketType', '') or \
+                         self.get_setting(session, 'maxBuckets', 0) or \
+                         self.get_setting(session, 'maxItemsPerBucket', 0)
+
         for dbt in dbts:
             self._initDb(session, dbt)
-            self._verifyDatabase(session, dbt)
+            self._verifyDb(session, dbt)
             if dbt in revdbts:
                 dbt = dbt + "Reverse"
                 self._initDb(session, dbt)
-                self._verifyDatabase(session, dbt)
+                self._verifyDb(session, dbt)
 
 
-    def _verifyDatabase(self, session, dbType):
+    def _verifyDb(self, session, dbType):
         pass
 
     def generate_checkSum(self, session, data):
@@ -243,13 +251,13 @@ class SimpleStore(C3Object, SummaryObject):
 
     def _openAll(self, session):
         for t in self.storageTypes:
-            self._open(session, t)
+            self._openDb(session, t)
 
     def _closeAll(self, session):
         for t in self.storageTypes:
-            self._close(session, t)
+            self._closeDb(session, t)
         for t in self.reverseMetadataTypes:
-            self._close(session, t + "Reverse")
+            self._closeDb(session, t + "Reverse")
 
     def generate_id(self, session):
         # generate a new unique identifier
@@ -314,7 +322,7 @@ class BdbIter(object):
     def __init__(self, session, store):
         self.store = store
         self.session = session
-        self.cxn = store._open(self.session, 'database')
+        self.cxn = store._openDb(self.session, 'database')
         self.cursor = self.cxn.cursor()
         self.nextData = self.cursor.first()
 
@@ -337,86 +345,354 @@ class BdbIter(object):
         return self.nextData[0]
 
 
+
+class SwitchingBdbConnection(object):
+
+    def __init__(self, session, parent, extra=""):
+        self.session = session
+        self.store = parent
+        self.maxBuckets = parent.get_setting(session, 'maxBuckets', 0) 
+        self.maxItemsPerBucket = parent.get_setting(session, 'maxItemsPerBucket', 0)
+
+        self.bucketType = parent.get_setting(session, 'bucketType', '')
+        if not self.bucketType:
+            if self.maxItemsPerBucket:
+                self.bucketType = 'int'
+            elif self.maxBuckets:
+                self.bucketType = 'hash'
+            else:
+                self.bucketType = 'term1'
+
+        dfp = parent.get_path(session, 'defaultPath')
+        basename = parent.id
+        if extra:
+            basename += "--" + extra
+        self.basePath = os.path.join(dfp, basename)        
+        self.openPath = ""
+
+        self.cxns = {}
+        self.createArgs = {}
+        self.openArgs = {}
+        self.preOpenFlags = 0
+        self.bucketFns = {'term1' : self.termBucket1,
+                          'term2' : self.termBucket2,
+                          'hash' : self.hashBucket,
+                          'int' : self.intBucket}
+        self.listBucketFns = {'term1' : self.listTermBucket1,
+                          'term2' : self.listTermBucket2,
+                          'hash' : self.listHashBucket,
+                          'int' : self.listIntBucket}
+
+    def bucket(self, key):
+        # bucket type and settings from parent
+        fn = self.bucketFns[self.bucketType]
+        return fn(key)
+
+    def listBuckets(self):
+        fn = self.listBucketFns[self.bucketType]
+        return fn()
+
+    def termBucket1(self, key):
+        if not key:
+            return "other"
+        elif key[0].isalnum():
+            return key[0].lower()
+        elif key[0] > 'z':
+            return 'extended'
+        else:
+            return "other"
+
+    def listTermBucket1(self):
+        l = ['other', 'extended']
+        l.extend([str(x) for x in range(10)])
+        l.extend([chr(x) for x in range(97, 123)])
+        return l
+
+    def termBucket2(self, key):
+        if not key:
+            return "other"
+        elif key[0].isdigit():
+            return key[0]
+        elif key[0].isalpha():
+            if len(key) == 1:
+                return key + "0"
+            elif not key[1].isalnum():
+                return key[0].lower + '_'
+            else:
+                return key[:2].lower()
+        else:
+            return "other"
+
+    def listTermBucket2(self):
+        lets = [chr(x) for x in range(97, 123)]
+        nums = [str(x) for x in range(10)]
+        all = []
+        all.extend(lets)
+        all.extend(nums)
+        all.append('_')
+        l = ['other']
+        l.extend(nums)
+        for let in lets:
+            l.extend([let + x for x in all])
+        return l
+
+    def hashBucket(self, key):
+        # essentially random division, constrained number of buckets
+        return str(hash(key) % self.maxBuckets)
+
+    def listHashBucket(self):
+        return [str(x) for x in range(self.maxBuckets)]
+
+    def intBucket(self, key):
+        # constrained number of items per bucket
+        # must be integer key!  (eg internal record id)
+        if not type(key) in [int, long] and not key.isdigit():
+            raise ConfigFileException("Cannot use 'int' bucket method if keys are not numbers")
+        else:
+            return str(long(key) / self.maxItemsPerBucket)
+
+    def listIntBucket(self):
+        # find out how many
+        x = self.store.get_dbSize(self.session)
+        return [str(y) for y in range((x/self.maxItemsPerBucket)+1)]
+
+    def _open(self, b):
+        if self.cxns.has_key(b) and self.cxns[b] != None:
+            return self.cxns[b]
+        else:
+            cxn = bdb.db.DB()
+            if self.preOpenFlags:
+                cxn.set_flags(self.preOpenFlags)
+            if self.openPath:
+                dbp = self.openPath + "_" + b
+            else:
+                dbp = self.basePath + "_" + b
+
+            if (not os.path.exists(dbp)):
+                cxn.open(dbp, **self.store.createArgs[self.openPath])
+                cxn.close()
+                cxn = bdb.db.DB()                
+
+            cxn.open(dbp, **self.openArgs)
+            self.cxns[b] = cxn
+            return cxn
+
+    def _cursor(self, b):
+        cxn = self._open(b)
+        return b.cursor()
+
+    def get(self, key):
+        # Find the correct bucket, and look in that cxn
+        b = self.bucket(key)
+        cxn = self._open(b)
+        return cxn.get(key)
+
+    def put(self, key, val):
+        b = self.bucket(key)
+        cxn = self._open(b)
+        return cxn.put(key, val)
+
+    def cursor(self):
+        # create a switching cursor!
+        l = self.listBuckets()
+        return SwitchingBdbCursor(self, l)
+
+    def sync(self):
+        # sync all
+        for c in self.cxns.itervalues():
+            c.sync()
+        return None
+
+    def open(self, what, flags=0, dbtype=0, mode=0):
+        # delay open until try to write
+        self.openPath = what
+        if flags == bdb.db.DB_CREATE:
+            self.store.createArgs[what] = {'flags' : flags, 'dbtype' : dbtype, 'mode' : mode}
+        elif flags:
+            self.openArgs = {'flags' : flags}
+        return None
+
+    def close(self):
+        for (k, c) in self.cxns.iteritems():
+            c.close()
+            self.cxns[k] = None
+        return None
+
+    def set_flags(self, f):
+        self.preOpenFlags = f
+        return None        
+
+
+
+class SwitchingBdbCursor(object):
+
+    def __init__(self, cxn, l):
+        self.switch = cxn
+        self.buckets = l
+        self.currCursor = None
+        self.currBucketIdx = -1
+
+    def set_cursor(self, b):
+        try:
+            idx = self.buckets.index(b)
+            self.currBucketIdx = idx
+        except:
+            raise ValueError("%r is not a known bucket (%r)" % (b, self.buckets))
+        cxn = self.switch._open(b)
+        cur = cxn.cursor()
+        if self.currCursor != None:
+            self.currCursor.close()
+        self.currCursor = cur
+        return cur
+        
+    def first(self):
+        cursor = self.set_cursor(self.buckets[0])
+        return cursor.first()
+
+    def last(self):
+        cursor = self.set_cursor(self.buckets[-1])
+        return cursor.last()
+
+    def next(self):
+        # Needs to wrap
+        if self.currCursor:
+            x = self.currCursor.next()
+            if x == None and self.currBucketIdx != len(self.buckets) -1:
+                c = self.set_cursor(self.buckets[self.currBucketIdx+1])
+                return c.first()
+            else:
+                return x
+
+    def prev(self):
+        # Needs to wrap
+        if self.currCursor:
+            x = self.currCursor.prev()
+            if x == None and self.currBucketIdx != 0:
+                c = self.set_cursor(self.buckets[self.currBucketIdx-1])
+                return c.last()
+            else:
+                return x
+        
+    def set_range(self, where):
+        # jump to where bucket
+        b = self.switch.bucket(where)
+        cursor = self.set_cursor(b)
+        return cursor.set_range(where)
+
+
+
 class BdbStore(SimpleStore):
     """ Berkeley DB based storage """
     cxns = {}
 
     def __init__(self, session, config, parent):
         self.cxns = {}
+        self.createArgs = {}
         SimpleStore.__init__(self, session, config, parent)
 
     def __iter__(self):
         # Return an iterator object to iter through... keys?
         return BdbIter(self.session, self)
 
-    def _verifyDatabase(self, session, dbType):
+    def _create(self, session, dbp):
+        if self.switching:
+            cxn = SwitchingBdbConnection(session, self, dbp)
+        else:
+            cxn = bdb.db.DB()
+        cxn.set_flags(bdb.db.DB_RECNUM)
+        try:
+            cxn.open(dbp, dbtype=bdb.db.DB_BTREE, flags = bdb.db.DB_CREATE, mode=0660)
+        except:
+            raise ValueError("Could not create: %s" % dbp)
+        cxn.close()
+
+    def _verifyDb(self, session, dbType):
         dbp = self.get_path(session, dbType + "Path")
+        if self.switching and dbType in self.get_noSwitchTypes(session):
+            self.switching = False
+            rv =  self._verify(session, dbp)
+            self.switching = True
+            return rv
+        else:
+            return self._verify(session, dbp)
+
+    def _verify(self, session, dbp):
         if (not os.path.exists(dbp)):
             # We don't exist, try and instantiate new database
-            self._initialise(dbp)
+            self._create(session, dbp)
         else:
             cxn = bdb.db.DB()
             try:
                 cxn.open(dbp)
                 cxn.close()
             except:
-                # Busted. Try to initialise
-                self._initialise(dbp)
+                # try to recreate
+                self._create(session, dbp)
 
-    def _initialise(self, dbPath):
-        cxn = bdb.db.DB()
-        cxn.set_flags(bdb.db.DB_RECNUM)
-        try:
-            cxn.open(dbPath, dbtype=bdb.db.DB_BTREE, flags = bdb.db.DB_CREATE, mode=0660)
-        except:
-            raise ValueError("Could not create: %s" % dbPath)
-        cxn.close()
-
-    def _open(self, session, dbType):
+    def _openDb(self, session, dbType):
         cxn = self.cxns.get(dbType, None)
         if cxn == None:
             if dbType in self.storageTypes or (dbType[-7:] == 'Reverse' and dbType[:-7] in self.reverseMetadataTypes):
-                cxn = bdb.db.DB()
-                cxn.set_flags(bdb.db.DB_RECNUM)
                 dbp = self.get_path(session, dbType + 'Path')
-                if dbp:
-                    if session.environment == "apache":
-                        cxn.open(dbp, flags=bdb.db.DB_NOMMAP)
-                    else:
-                        cxn.open(dbp)
-                    self.cxns[dbType] = cxn
-                    return cxn
+                if self.switching and dbType in self.get_noSwitchTypes(session):
+                    self.switching = False
+                    cxn = self._open(session, dbp)
+                    self.switching = True
                 else:
-                    return None
+                    cxn = self._open(session, dbp)
+                self.cxns[dbType] = cxn
+                return cxn
             else:
                 # trying to store something we don't care about
                 return None
         else:
             return cxn
 
-    def _close(self, session, dbType):
+    def _open(self, session, dbp):
+        if self.switching:
+            cxn = SwitchingBdbConnection(session, self, dbp)
+        else:
+            cxn = bdb.db.DB()
+        cxn.set_flags(bdb.db.DB_RECNUM)
+        if session.environment == "apache":
+            cxn.open(dbp, flags=bdb.db.DB_NOMMAP)
+        else:
+            cxn.open(dbp)
+        return cxn
+
+    def _closeDb(self, session, dbType):
         cxn = self.cxns.get(dbType, None)
         if cxn != None:
             try:
-                self.cxns[dbType].close()
+                cxn.close()
             except:
                 # silently fail, as we're closing anyway
                 pass
             self.cxns[dbType] = None
 
+    def _remove(self, session, dbp):
+        try:
+            cxn = bdb.db.DB()
+            cxn.remove(dbp)
+        except:
+            pass
+
+    def get_noSwitchTypes(self, session):
+        return ['digest', 'digestReverse', 'metadata']
+
     def get_dbSize(self, session):
-        cxn = self._open(session, 'digest')
+        cxn = self._openDb(session, 'digest')
         if cxn == None:
-            cxn = self._open(session, 'database')
+            cxn = self._openDb(session, 'database')
         return cxn.stat(bdb.db.DB_FAST_STAT)['nkeys']
 
     def generate_id(self, session):
         if self.useUUID:
             return gen_uuid()
 
-        cxn = self._open(session, 'digest')
+        cxn = self._openDb(session, 'digest')
         if cxn == None:
-            cxn = self._open(session, 'database')
+            cxn = self._openDb(session, 'database')
         if (self.currentId == -1 or session.environment == "apache"):
             c = cxn.cursor()
             item = c.last()
@@ -443,13 +719,13 @@ class BdbStore(SimpleStore):
     def store_data(self, session, id, data, metadata={}):        
         dig = metadata.get('digest', "")
         if dig:
-            cxn = self._open(session, 'digestReverse')
+            cxn = self._openDb(session, 'digestReverse')
             if cxn:
                 exists = cxn.get(dig)
                 if exists:
                     raise ObjectAlreadyExistsException(exists)
 
-        cxn = self._open(session, 'database')
+        cxn = self._openDb(session, 'database')
         # Should always have an id by now, but just in case
         if id == None:
             id = self.generate_id(session)
@@ -469,7 +745,7 @@ class BdbStore(SimpleStore):
         return None
 
     def fetch_data(self, session, id):
-        cxn = self._open(session, 'database')
+        cxn = self._openDb(session, 'database')
         if (self.idNormalizer != None):
             id = self.idNormalizer.process_string(session, id)
         elif type(id) == unicode:
@@ -480,9 +756,7 @@ class BdbStore(SimpleStore):
 
         if data and data[:41] == "\0http://www.cheshire3.org/status/DELETED:":
             data = DeletedObject(self, id, data[41:])
-        # This needs to happen in real object
-        #elif self.outWorkflow:
-        #    data = self.outWorkflow.process(session, data)
+
         if data and self.expires:
             # update touched
             expires = self.generate_expires(session)
@@ -491,7 +765,7 @@ class BdbStore(SimpleStore):
         
     def delete_data(self, session, id):
         self._openAll(session)
-        cxn = self._open(session, 'database')
+        cxn = self._openDb(session, 'database')
 
         if (self.idNormalizer != None):
             id = self.idNormalizer.process_string(session, id)
@@ -502,12 +776,12 @@ class BdbStore(SimpleStore):
 
         # main database is a storageType now
         for dbt in self.storageTypes:
-            cxn = self._open(session, dbt)
+            cxn = self._openDb(session, dbt)
             if cxn != None:
                 if dbt in self.reverseMetadataTypes:
                     # fetch value here, delete reverse
                     data = cxn.get(id)
-                    cxn2 = self._open(session, dbt + "Reverse")                
+                    cxn2 = self._openDb(session, dbt + "Reverse")                
                     if cxn2 != None:
                         cxn2.delete(data)
                 cxn.delete(id)
@@ -515,7 +789,7 @@ class BdbStore(SimpleStore):
 
         # Maybe store the fact that this object used to exist.
         if self.get_setting(session, 'storeDeletions', 0):
-            cxn = self._open(session, 'database')
+            cxn = self._openDb(session, 'database')
             now = datetime.datetime.now(dateutil.tz.tzutc()).strftime("%Y-%m-%dT%H:%M:%S%Z").replace('UTC', 'Z')            
             cxn.put(id, "\0http://www.cheshire3.org/status/DELETED:%s" % now)
             cxn.sync()
@@ -529,7 +803,7 @@ class BdbStore(SimpleStore):
                 id = id.encode('utf-8')
             elif type(id) != str:
                 id = str(id)
-        cxn = self._open(session, mType)
+        cxn = self._openDb(session, mType)
         if cxn != None:
             data = cxn.get(id)
             if data:
@@ -542,13 +816,13 @@ class BdbStore(SimpleStore):
             return None
 
     def store_metadata(self, session, id, mType, value):
-        cxn = self._open(session, mType)
+        cxn = self._openDb(session, mType)
         if cxn != None:
             if type(value) in (int, long, float):
                 value = str(value)
             cxn.put(id, value)
             if mType in self.reverseMetadataTypes:
-                cxn = self._open(session, mType + "Reverse")
+                cxn = self._openDb(session, mType + "Reverse")
                 if cxn != None:
                     cxn.put(value, id)
         
@@ -564,18 +838,14 @@ class BdbStore(SimpleStore):
         self.cxns = {}
         for t in self.get_storageTypes(session):
             p = self.get_path(session, "%sPath" % t)
-            if p and os.path.exists(p):
-                cxn = bdb.db.DB()
-                cxn.remove(p)
-                self._initDb(session, t)
-                self._verifyDatabase(session, t)
+            self._remove(session, p)
+            self._initDb(session, t)
+            self._verifyDb(session, t)
         for t in self.get_reverseMetadataTypes(session):
             p = self.get_path(session, "%sReversePath" % t)
-            if p and os.path.exists(p):
-                cxn = bdb.db.DB()
-                cxn.remove(p)
-                self._initDb(session, "%sReverse" % t)
-                self._verifyDatabase(session, "%sReverse" % t)
+            self._remove(session, p)
+            self._initDb(session, "%sReverse" % t)
+            self._verifyDatabase(session, "%sReverse" % t)
         return self
                 
     def clean(self, session):

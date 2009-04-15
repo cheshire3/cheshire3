@@ -164,7 +164,6 @@ class BdbIndexStore(IndexStore):
             basename = self._generateFilename(index)
             dbname = os.path.join(dfp, basename)
             cxn = bdb.db.DB()
-            #cxn.set_flags(bdb.db.DB_RECNUM)
             if session.environment == "apache":
                 cxn.open(dbname, flags=bdb.db.DB_NOMMAP)
             else:
@@ -512,9 +511,6 @@ class BdbIndexStore(IndexStore):
             tidcxn = bdb.db.DB()
             tidcxn.open(dbname + "_TERMIDS")
         
-
-        # Should this be:
-        # f = codecs.open(filePath, 'r', 'utf-8')    ?
         f = file(filePath)
 
         nTerms = 0
@@ -1485,6 +1481,346 @@ class BdbIndexStore(IndexStore):
             val = cxn.get(term)
         return val
 
+
+
+
+class BucketingBdbIndexStore(BdbIndexStore):
+
+    def commit_centralIndexing(self, session, index, filePath):
+        p = self.permissionHandlers.get('info:srw/operation/2/index', None)
+        if p:
+            if not session.user:
+                raise PermissionException("Authenticated user required to add to indexStore %s" % self.id)
+            okay = p.hasPermission(session, session.user)
+            if not okay:
+                raise PermissionException("Permission required to add to indexStore %s" % self.id)
+
+        if not filePath:
+            temp = self.get_path(session, 'tempPath')
+            dfp = self.get_path(session, 'defaultPath')
+            if not os.path.isabs(temp):
+                temp = os.path.join(dfp, temp)
+            basename = self._generateFilename(index)
+            filePath = os.path.join(temp, basename + "_SORT")
+            
+        cxn = self._openIndex(session, index)
+        cursor = cxn.cursor()
+        nonEmpty = cursor.first()
+        metadataCxn = self._openMetadata(session)        
+
+
+        tidIdx = index.get_path(session, 'termIdIndex', None)
+        vectors = index.get_setting(session, 'vectors', 0)
+        proxVectors = index.get_setting(session, 'proxVectors', 0)
+        termIds = index.get_setting(session, 'termIds', 0)
+
+        if not nonEmpty:
+            termid = long(0)
+        else:
+            # find highest termid. First check termid->term map
+            tidcxn = None
+            if vectors:
+                tidcxn = self.termIdCxn.get(index, None)
+                if not tidcxn:
+                    self._openVectors(session, index)
+                    tidcxn = self.termIdCxn.get(index, None)
+            if not tidcxn:
+                # okay, no termid hash. hope for best with final set
+                # of terms from regular index
+                (term, value) = cursor.last(doff=0, dlen=3*index.longStructSize)
+                (last, x,y) = index.deserialize_term(session, value)                    
+            else:
+                tidcursor = tidcxn.cursor()
+                (finaltid, term) = tidcursor.last()
+                last = long(finaltid)
+                tidcxn.close()
+                del tidcxn
+                self.termIdCxn[index] = None
+            termid = last
+
+        currTerm = None
+        currData = []
+        l = 1
+
+        s2t = index.deserialize_term
+        mt = index.merge_term
+        t2s = index.serialize_term
+        minTerms = index.get_setting(session, 'minimumSupport')
+        if not minTerms:
+            minTerms = 0
+
+        dfp = self.get_path(session, 'defaultPath')
+        basename = self._generateFilename(index)
+        dbname = os.path.join(dfp, basename)
+        if vectors or termIds:
+            tidcxn = bdb.db.DB()
+            tidcxn.open(dbname + "_TERMIDS")
+        
+        f = file(filePath)
+
+        nTerms = 0
+        nRecs = 0
+        nOccs = 0
+        totalChars = 0
+        maxNRecs = 0
+        maxNOccs = 0
+        
+        start = time.time()
+        while(l):
+            l = f.readline()[:-1]
+            data = l.split(nonTextToken)
+            term = data[0]
+            fullinfo = [long(x) for x in data[1:]]
+            if term == currTerm:
+                # accumulate
+                if fullinfo:
+                    totalRecs += 1
+                    totalOccs += fullinfo[2]
+                    currData.extend(fullinfo)
+            else:
+                # Store
+                if currData:                
+                    if (nonEmpty):
+                        val = cxn.get(currTerm)
+                        if (val != None):
+                            unpacked = s2t(session, val)
+                            tempTermId = unpacked[0]
+                            unpacked = mt(session, unpacked, currData, 'add', nRecs=totalRecs, nOccs=totalOccs)
+                            totalRecs = unpacked[1]
+                            totalOccs = unpacked[2]
+                            unpacked = unpacked[3:]
+                            termid -= 1
+                        else:
+                            tempTermId = termid
+                            unpacked = currData
+                        packed = t2s(session, tempTermId, unpacked, nRecs=totalRecs, nOccs=totalOccs)
+                    else:
+                        tempTermId = termid
+                        try:
+                            packed = t2s(session, termid, currData, nRecs=totalRecs, nOccs=totalOccs)
+                        except:
+                            # self.log_critical(session, "%s failed to t2s %s: %r %r" % (self.id, currTerm, termid, currData))
+                            raise
+
+                    if totalRecs >= minTerms:
+                        nTerms += 1
+                        nRecs += totalRecs
+                        nOccs += totalOccs
+                        totalChars += len(currTerm)
+                        maxNRecs = max(maxNRecs, totalRecs)
+                        maxNOccs = max(maxNOccs, totalOccs)
+                        cxn.put(currTerm, packed)
+                        del packed
+                        if (vectors or termIds) and tempTermId == termid:
+                            tidcxn.put("%012d" % termid, currTerm)
+                    else:
+                        # cheat and undo our term increment
+                        termid -= 1
+                try:
+                    totalOccs = fullinfo[2]
+                    termid += 1
+                    currTerm = term
+                    currData = fullinfo
+                    totalRecs = 1
+                except:
+                    pass
+
+        self._closeIndex(session, index)
+        os.remove(filePath)
+
+        if metadataCxn:
+            # LLLLLL:  nTerms, nRecs, nOccs, maxRecs, maxOccs, totalChars
+            val = struct.pack("LLLLLL", nTerms, nRecs, nOccs, maxNRecs, maxNOccs, totalChars)
+            metadataCxn.put(index.id.encode('utf8'), val)
+            self._closeMetadata(session)
+
+        if vectors or termIds:
+            tidcxn.close()
+
+        if vectors:
+            # build vectors here
+            termCache = {}
+            freqCache = {}
+            maxCacheSize = index.get_setting(session, 'maxVectorCacheSize', -1)
+            if maxCacheSize == -1:
+                maxCacheSize = self.get_setting(session, 'maxVectorCacheSize', 50000)
+
+            rand = random.Random()
+
+            # settings for what to go into vector store
+            # -1 for just put everything in
+            minGlobalFreq = int(index.get_setting(session, 'vectorMinGlobalFreq', '-1'))
+            maxGlobalFreq = int(index.get_setting(session, 'vectorMaxGlobalFreq', '-1'))
+            minGlobalOccs = int(index.get_setting(session, 'vectorMinGlobalOccs', '-1'))
+            maxGlobalOccs = int(index.get_setting(session, 'vectorMaxGlobalOccs', '-1'))
+            minLocalFreq = int(index.get_setting(session, 'vectorMinLocalFreq', '-1'))
+            maxLocalFreq = int(index.get_setting(session, 'vectorMaxLocalFreq', '-1'))
+
+            base = filePath[:-4] + "TEMP"
+            fh = codecs.open(base, 'r', 'utf-8', 'xmlcharrefreplace')
+            # read in each line, look up 
+            currDoc = "000000000000"
+            currStore = "0"
+            docArray = []
+            proxHash = {}
+            cxn = bdb.db.DB()
+            cxn.open( dbname + "_VECTORS")
+            if proxVectors:
+                proxCxn = bdb.db.DB()
+                proxCxn.open(dbname +"_PROXVECTORS")
+
+            totalTerms = 0
+            totalFreq = 0
+            while True:            
+                try:
+                    l = fh.readline()[:-1]
+                    bits = l.split(nonTextToken)
+                except:
+                    break
+                if len(bits) < 4:
+                    break
+                (term, docid, storeid, freq) = bits[:4]
+                if docArray and (docid != currDoc or currStore != storeid):
+                    # store previous
+                    docArray.sort()
+                    flat = []
+                    [flat.extend(x) for x in docArray]
+                    fmt = "L" * len(flat)                    
+                    packed = struct.pack(fmt, *flat)
+                    cxn.put(str("%s|%s" % (currStore, currDoc.encode('utf8'))), packed)
+                    docArray = []
+                    if proxVectors:
+                        pdocid = long(currDoc)
+                        for (elem, parr) in proxHash.iteritems():
+                            proxKey = struct.pack('LL', pdocid, elem)
+                            if elem < 0 or elem > 4294967295:
+                                raise ValueError(elem)
+
+                            proxKey = "%s|%s" % (currStore.encode('utf8'), proxKey)
+                            parr.sort()
+                            flat = []
+                            [flat.extend(x) for x in parr]
+                            proxVal = struct.pack('L' * len(flat), *flat)
+                            proxCxn.put(proxKey, proxVal)
+                        proxHash = {}                        
+                currDoc = docid
+                currStore = storeid
+                tid = termCache.get(term, None)
+                if tid == None:
+                    if not term:
+                        #???
+                        continue
+                    tdata = self.fetch_term(session, index, term, summary=True)
+                    if tdata:
+                        try:
+                            (tid, tdocs, tfreq) = tdata[:3]
+                        except:
+                            self.log_critical(session, "Broken: %r %r %r" % (term, index.id, tdata))
+                            raise
+                    else:
+                        termCache[term] = (0,0)
+                        freqCache[term] = (0,0)
+                        continue
+                    termCache[term] = tid
+                    freqCache[term] = [tdocs, tfreq]
+                    # check caches aren't exploding
+                    ltc = len(termCache)
+                    if ltc >= maxCacheSize:
+                        # select random key to remove
+                        (k,v) = termCache.popitem()
+                        del freqCache[k]
+                else:
+                    (tdocs, tfreq) = freqCache[term]
+                    if not tdocs or not tfreq:
+                        continue
+                if ( (minGlobalFreq == -1 or tdocs >= minGlobalFreq) and
+                     (maxGlobalFreq == -1 or tdocs <= maxGlobalFreq) and
+                     (minGlobalOccs == -1 or tfreq >= minGlobalOccs) and
+                     (maxGlobalOccs == -1 or tfreq <= maxGlobalOccs) and
+                     (minLocalFreq == -1 or tfreq >= minLocalFreq) and
+                     (maxLocalFreq == -1 or tfreq <= maxLocalFreq) ):
+                    docArray.append([tid, long(freq)])
+                    totalTerms += 1
+                    totalFreq += long(freq)                    
+                if proxVectors:
+                    nProxInts = index.get_setting(session, 'nProxInts', 2)
+                    proxInfo = [long(x) for x in bits[4:]]
+                    tups = [proxInfo[x:x+nProxInts] for x in range(0,len(proxInfo),nProxInts)]
+                    for t in tups:
+                        val = [t[1], tid]
+                        val.extend(t[2:])                        
+                        try:
+                            proxHash[t[0]].append(val)
+                        except KeyError:
+                            proxHash[t[0]] = [val]
+                    
+            # Catch final document
+            if docArray:
+                docArray.sort()
+                # Put in total terms, total occurences
+                flat = []
+                [flat.extend(x) for x in docArray]
+                fmt = "L" * len(flat)
+                packed = struct.pack(fmt, *flat)
+                cxn.put(str("%s|%s" % (storeid, docid.encode('utf8'))), packed)
+                if proxVectors:
+                    pdocid = long(currDoc)
+                    for (elem, parr) in proxHash.iteritems():
+                        proxKey = struct.pack('LL', pdocid, elem)
+                        proxKey = "%s|%s" % (storeid.encode('utf8'), proxKey)
+                        parr.sort()
+                        flat = []
+                        [flat.extend(x) for x in parr]
+                        proxVal = struct.pack('L' * len(flat), *flat)
+                        proxCxn.put(proxKey, proxVal)
+                    proxCxn.close()
+            fh.close()
+            cxn.close()
+            os.remove(base)
+
+        fl = index.get_setting(session, 'freqList', "")
+        if fl:
+            cxn = self._openIndex(session, index)
+            cursor = cxn.cursor()
+            dataLen = index.longStructSize * self.reservedLongs
+            terms = []
+
+            try:
+                (term, val) = cursor.first(doff=0, dlen=dataLen)
+                while (val):
+                    (termid, recs, occs) = struct.unpack('lll', val)
+                    terms.append({'i' : termid, 'r' : recs, 'o' : occs})
+                    try:
+                        (term, val) = cursor.next(doff=0, dlen=dataLen)
+                    except:
+                        val = 0
+                lt = len(terms)
+                if fl.find('rec') > -1:
+                    # 1 = most frequent
+                    terms.sort(key=lambda x: x['r'], reverse=True)
+                    cxn = bdb.db.DB()
+                    cxn.open(dbname + "_FREQ_REC")
+                    for (t, term) in enumerate(terms):
+                        termidstr = struct.pack('ll', term['i'], term['r'])
+                        cxn.put("%012d" % t, termidstr)                                        
+                    cxn.close()
+
+                if fl.find('occ') > -1:
+                    terms.sort(key=lambda x: x['o'], reverse=True)                
+                    cxn = bdb.db.DB()
+                    cxn.open(dbname + "_FREQ_OCC")
+                    for (t, term) in enumerate(terms):
+                        termidstr = struct.pack('ll', term['i'], term['o'])
+                        cxn.put("%012d" % t, termidstr)                                        
+                    cxn.close()                
+            except TypeError:
+                # no data in index
+                pass
+            self._closeIndex(session, index)
+
+        return None
+
+    
 
 
 
