@@ -99,7 +99,11 @@ class SimpleIndex(Index):
                          'freqList' : {'docs' : 'Store a frequency sorted list to step through of records, occurences or both', 'options' : 'rec|occ|rec occ|occ rec'},
                          'longSize' : {"docs" : "Size of a long integer in this index's underlying data structure (eg to migrate between 32 and 64 bit platforms)", 'type' : int},
                          'recordStoreSizes' : {"docs" : "Should we use recordStore sizes instead of database sizes", 'type' : int},
-                         'maxVectorCacheSize' : {'docs' : "Number of terms to cache when building vectors", 'type' :int}
+                         'maxVectorCacheSize' : {'docs' : "Number of terms to cache when building vectors", 'type' :int},
+                         'bucketType' :{'docs' : ''},
+                         'maxItemsPerBucket' : {'docs' : '', 'type' : int},
+                         'maxBuckets' : {'docs' : '', 'type' : int}
+                         
                          }
 
 
