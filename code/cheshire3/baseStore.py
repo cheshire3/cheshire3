@@ -398,6 +398,9 @@ class SwitchingBdbConnection(object):
                           'hash' : self.listHashBucket,
                           'int' : self.listIntBucket}
 
+    def bucket_exists(self, b):
+        return os.path.exists(self.basePath + '_' + b)
+
     def bucket(self, key):
         # bucket type and settings from parent
         fn = self.bucketFns[self.bucketType]
@@ -424,6 +427,7 @@ class SwitchingBdbConnection(object):
         return l
 
     def termBucket2(self, key):
+
         if not key:
             return "other"
         elif key[0].isdigit():
@@ -432,7 +436,7 @@ class SwitchingBdbConnection(object):
             if len(key) == 1:
                 return key + "0"
             elif not key[1].isalnum():
-                return key[0].lower + '_'
+                return key[0].lower() + '_'
             else:
                 return key[:2].lower()
         else:
@@ -493,11 +497,14 @@ class SwitchingBdbConnection(object):
         cxn = self._open(b)
         return b.cursor()
 
-    def get(self, key):
+    def get(self, key, doff=-1, dlen=-1):
         # Find the correct bucket, and look in that cxn
         b = self.bucket(key)
         cxn = self._open(b)
-        return cxn.get(key)
+        if doff != -1:
+            return cxn.get(key, doff=doff, dlen=dlen)
+        else:
+            return cxn.get(key)
 
     def put(self, key, val):
         b = self.bucket(key)
@@ -540,7 +547,11 @@ class SwitchingBdbCursor(object):
 
     def __init__(self, cxn, l):
         self.switch = cxn
-        self.buckets = l
+        nl = []
+        for b in l:
+            if cxn.bucket_exists(b):
+                nl.append(b)
+        self.buckets = nl
         self.currCursor = None
         self.currBucketIdx = -1
 
@@ -557,7 +568,7 @@ class SwitchingBdbCursor(object):
         self.currCursor = cur
         return cur
         
-    def first(self, doff=0, dlen=-1):
+    def first(self, doff=-1, dlen=-1):
         if self.currBucketIdx != 0:
             cursor = self.set_cursor(self.buckets[0])
         if dlen != -1:
@@ -565,40 +576,68 @@ class SwitchingBdbCursor(object):
         else:
             return cursor.first()
 
-    def last(self):
+    def last(self, doff=-1, dlen=-1):
         if self.currBucketIdx != len(self.buckets)-1:
             cursor = self.set_cursor(self.buckets[-1])
-        return cursor.last()
+        if dlen != -1:
+            return cursor.last(doff=doff, dlen=dlen)
+        else:
+            return cursor.last()
 
-    def next(self):
+    def next(self, doff=-1, dlen=-1):
         # Needs to wrap
         if self.currCursor:
-            x = self.currCursor.next()
+            if dlen != -1:
+                x = self.currCursor.next(doff=doff, dlen=dlen)
+            else:
+                x = self.currCursor.next()
             if x == None and self.currBucketIdx != len(self.buckets) -1:
                 c = self.set_cursor(self.buckets[self.currBucketIdx+1])
-                return c.first()
+                if dlen != -1:
+                    return c.first(doff=doff, dlen=dlen)
+                else:
+                    return c.first()
             else:
                 return x
         else:
-            return self.first()
+            return self.first(doff=doff, dlen=dlen)
 
-    def prev(self):
+    def prev(self, doff=-1, dlen=-1):
         # Needs to wrap
         if self.currCursor:
-            x = self.currCursor.prev()
-            if x == None and self.currBucketIdx != 0:
+            if dlen != -1:
+                x = self.currCursor.prev(doff=doff, dlen=dlen)
+            else:
+                x = self.currCursor.prev()
+            if x == None and self.currBucketIdx != 0:                
                 c = self.set_cursor(self.buckets[self.currBucketIdx-1])
-                return c.last()
+                if dlen != -1:
+                    return c.last(doff=doff, dlen=dlen)
+                else:
+                    return c.last()
             else:
                 return x
         else:
-            return self.last()
+            return self.last(doff=doff, dlen=dlen)
         
-    def set_range(self, where):
+    def set_range(self, where, dlen=-1, doff=-1):
         # jump to where bucket
         b = self.switch.bucket(where)
         cursor = self.set_cursor(b)
-        return cursor.set_range(where)
+        if dlen != -1:
+            x = cursor.set_range(where, dlen=dlen, doff=doff)
+        else:
+            x = cursor.set_range(where)
+        # at end of where bucket, step to next
+        if x == None and self.currBucketIdx != len(self.buckets) -1:
+            c = self.set_cursor(self.buckets[self.currBucketIdx+1])
+            if dlen != -1:
+                return c.first(doff=doff, dlen=dlen)
+            else:
+                return c.first()
+        else:
+            # end of index
+            return None
 
 
 
