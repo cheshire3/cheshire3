@@ -114,6 +114,10 @@ class BdbIndexStore(IndexStore):
                                self.get_setting(session, 'vectorMaxBuckets', 0) or \
                                self.get_setting(session, 'vectorMaxItemsPerBucket', 0)
         
+
+        self.switchingClass = SwitchingBdbConnection
+        self.vectorSwitchingClass = SwitchingBdbConnection
+
         self.storeHash = {}
         rsh = self.get_path(session, 'recordStoreHash')
         if rsh:
@@ -197,10 +201,10 @@ class BdbIndexStore(IndexStore):
                 vmb = index.get_setting(session, 'maxBuckets', 0) 
                 vmi = index.get_setting(session, 'maxItemsPerBucket', 0)
                 if vbt or vmb or vmi:
-                    cxn = SwitchingBdbConnection(session, self, fullname, bucketType=vbt,
+                    cxn = self.switchingClass(session, self, fullname, bucketType=vbt,
                                                  maxBuckets=vmb, maxItemsPerBucket=vmi)
                 else:
-                    cxn = SwitchingBdbConnection(session, self, dbp)
+                    cxn = self.switchingClass(session, self, dbp)
             else:
                 cxn = bdb.db.DB()
 
@@ -361,7 +365,7 @@ class BdbIndexStore(IndexStore):
                     vbt = self.get_setting(session, 'vectorBucketType', '')
                     vmb = self.get_setting(session, 'vectorMaxBuckets', 0) 
                     vmi = self.get_setting(session, 'vectorMaxItemsPerBucket', 0)
-                    cxn = SwitchingBdbConnection(session, self, fullname, bucketType=vbt,
+                    cxn = self.vectorSwitchingClass(session, self, fullname, bucketType=vbt,
                                                  maxBuckets=vmb, maxItemsPerBucket=vmi)
                 else:
                     cxn = bdb.db.DB()
@@ -820,7 +824,7 @@ class BdbIndexStore(IndexStore):
             vbt = self.get_setting(session, 'vectorBucketType', '')
             vmb = self.get_setting(session, 'vectorMaxBuckets', 0) 
             vmi = self.get_setting(session, 'vectorMaxItemsPerBucket', 0)            
-            cxn = SwitchingBdbConnection(session, self, fullname, bucketType=vbt,
+            cxn = self.vectorSwitchingClass(session, self, fullname, bucketType=vbt,
                                          maxBuckets=vmb, maxItemsPerBucket=vmi)
         else:
             cxn = bdb.db.DB()
@@ -831,7 +835,7 @@ class BdbIndexStore(IndexStore):
         if index.get_setting(session, 'vectors'):
             dbp = dbname + "_VECTORS"
             if self.vectorSwitching:
-                cxn = SwitchingBdbConnection(session, self, fullname, bucketType=vbt,
+                cxn = self.vectorSwitchingClass(session, self, fullname, bucketType=vbt,
                                              maxBuckets=vmb, maxItemsPerBucket=vmi)
             else:
                 cxn = bdb.db.DB()
@@ -841,7 +845,7 @@ class BdbIndexStore(IndexStore):
         if index.get_setting(session, 'proxVectors'):
             dbp = dbname + "_PROXVECTORS"
             if self.vectorSwitching:
-                cxn = SwitchingBdbConnection(session, self, fullname, bucketType=vbt,
+                cxn = self.vectorSwitchingClass(session, self, fullname, bucketType=vbt,
                                              maxBuckets=vmb, maxItemsPerBucket=vmi)
             else:
                 cxn = bdb.db.DB()
@@ -982,7 +986,7 @@ class BdbIndexStore(IndexStore):
             vbt = self.get_setting(session, 'vectorBucketType', '')
             vmb = self.get_setting(session, 'vectorMaxBuckets', 0) 
             vmi = self.get_setting(session, 'vectorMaxItemsPerBucket', 0)
-            tfcxn = SwitchingBdbConnection(session, self, dbp, bucketType=vbt,
+            tfcxn = self.vectorSwitchingClass(session, self, dbp, bucketType=vbt,
                                            maxBuckets=vmb, vectorMaxItemsPerBucket=vmi)
         else:
             tfcxn = bdb.db.DB()
@@ -1072,12 +1076,12 @@ class BdbIndexStore(IndexStore):
         if os.path.exists(dbname):
             raise FileAlreadyExistsException(dbname) 
         if vectorType == 0 and self.switching:
-            cxn = SwitchingBdbConnection(session, self, dbname)
+            cxn = self.switchingClass(session, self, dbname)
         elif vectorType and self.vectorSwitching:
             vbt = self.get_setting(session, 'vectorBucketType', '')
             vmb = self.get_setting(session, 'vectorMaxBuckets', 0) 
             vmi = self.get_setting(session, 'vectorMaxItemsPerBucket', 0)
-            cxn = SwitchingBdbConnection(session, self, fullname, bucketType=vbt,
+            cxn = self.vectorSwitchingClass(session, self, fullname, bucketType=vbt,
                                          maxBuckets=vmb, maxItemsPerBucket=vmi)
         else:
             cxn = bdb.db.DB()
@@ -1419,10 +1423,10 @@ class BdbIndexStore(IndexStore):
                 vmb = index.get_setting(session, 'maxBuckets', 0) 
                 vmi = index.get_setting(session, 'maxItemsPerBucket', 0)
                 if vbt or vmb or vmi:
-                    cxn = SwitchingBdbConnection(session, self, fullname, bucketType=vbt,
+                    cxn = self.switchingClass(session, self, fullname, bucketType=vbt,
                                                  maxBuckets=vmb, maxItemsPerBucket=vmi)
                 else:
-                    cxn = SwitchingBdbConnection(session, self, dbp)
+                    cxn = self.switchingClass(session, self, dbp)
 
             else:
                 cxn = bdb.db.DB()
