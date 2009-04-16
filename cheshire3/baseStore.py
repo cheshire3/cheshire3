@@ -390,12 +390,16 @@ class SwitchingBdbConnection(object):
         self.openArgs = {}
         self.preOpenFlags = 0
         self.bucketFns = {'term1' : self.termBucket1,
+                          'term-1' : self.termBucket_1,
                           'term2' : self.termBucket2,
+                          'term-2' : self.termBucket_2,
                           'hash' : self.hashBucket,
                           'int' : self.intBucket,
                           'null' : self.nullBucket}
         self.listBucketFns = {'term1' : self.listTermBucket1,
+                              'term-1' : self.listTermBucket1,
                               'term2' : self.listTermBucket2,
+                              'term-2' : self.listTermBucket_2,
                               'hash' : self.listHashBucket,
                               'int' : self.listIntBucket,
                               'null' : self.listNullBucket
@@ -429,8 +433,17 @@ class SwitchingBdbConnection(object):
         l.extend([chr(x) for x in range(97, 123)])
         return l
 
-    def termBucket2(self, key):
+    def termBucket_1(self, key):
+        if not key:
+            return "other"
+        elif key[-1].isalnum():
+            return key[-1].lower()
+        elif key[-1] > 'z':
+            return 'extended'
+        else:
+            return "other"
 
+    def termBucket2(self, key):
         if not key:
             return "other"
         elif key[0].isdigit():
@@ -445,6 +458,22 @@ class SwitchingBdbConnection(object):
         else:
             return "other"
 
+    def termBucket_2(self, key):
+        if not key:
+            return "other"
+        elif key[-1].isdigit():
+            return key[-1]
+        elif key[-1].isalpha():
+            if len(key) == 1:
+                return '0' + key
+            elif not key[-2].isalnum():
+                return '_' + key[-1].lower()
+            else:
+                return key[-2:].lower()
+        else:
+            return "other"
+
+
     def listTermBucket2(self):
         lets = [chr(x) for x in range(97, 123)]
         nums = [str(x) for x in range(10)]
@@ -457,6 +486,21 @@ class SwitchingBdbConnection(object):
         for let in lets:
             l.extend([let + x for x in all])
         return l
+
+    def listTermBucket_2(self):
+        # reversed order...
+        lets = [chr(x) for x in range(97, 123)]
+        nums = [str(x) for x in range(10)]
+        all = []
+        all.extend(lets)
+        all.extend(nums)
+        all.append('_')
+        l = ['other']
+        l.extend(nums)
+        for let in all:
+            l.extend([let + x for x in lets])
+        return l
+
 
     def hashBucket(self, key):
         # essentially random division, constrained number of buckets
@@ -634,12 +678,26 @@ class SwitchingBdbCursor(object):
     def set_range(self, where, dlen=-1, doff=-1):
         # jump to where bucket
         b = self.switch.bucket(where)
-        cursor = self.set_cursor(b)
+        try:
+            cursor = self.set_cursor(b)
+        except ValueError:
+            # non existant bucket
+            tl = self.buckets[:]
+            tl.append(b)
+            tl.sort()
+            idx = tl.index(b)
+            if idx != len(self.buckets):
+                nb = self.buckets[idx]
+            else:
+                nb = self.buckets[-1]
+            cursor = self.set_cursor(nb)
+           
         if dlen != -1:
             x = cursor.set_range(where, dlen=dlen, doff=doff)
         else:
             x = cursor.set_range(where)
         # at end of where bucket, step to next
+
         if x == None and self.currBucketIdx != len(self.buckets) -1:
             c = self.set_cursor(self.buckets[self.currBucketIdx+1])
             if dlen != -1:
@@ -648,7 +706,7 @@ class SwitchingBdbCursor(object):
                 return c.first()
         else:
             # end of index
-            return None
+            return x
 
 
 
