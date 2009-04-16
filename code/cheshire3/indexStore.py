@@ -61,12 +61,14 @@ class BdbIndexStore(IndexStore):
     outFiles = {}
     storeHash = {}
     storeHashReverse = {}
+
     sortStoreCxn = {}
     identifierMapCxn = {}
     indexCxn = {}
     vectorCxn = {}
     proxVectorCxn = {}
     termIdCxn = {}
+
     reservedLongs = 3
 
     _possiblePaths = {'recordStoreHash' : {'docs' : "Space separated list of recordStore identifiers kept in this indexStore (eg map from position in list to integer)"}
@@ -333,6 +335,8 @@ class BdbIndexStore(IndexStore):
         if self.dirPerIndex:
             try:
                 os.mkdir(os.path.join(temp, index.id))
+            except OSError:
+                pass
             except:
                 raise
 
@@ -384,8 +388,12 @@ class BdbIndexStore(IndexStore):
         if not os.path.isabs(temp):
             temp = os.path.join(dfp, temp)
 
-        for k in self.sortStoreCxn:
-            self.sortStoreCxn[k].close()
+        try:
+            self.sortStoreCxn[index].close()
+            del self.sortStoreCxn[index]
+        except KeyError:
+            pass
+
         if (not index in self.outFiles):
             raise FileDoesNotExistException(index.id)
         sort = self.get_path(session, 'sortPath')
@@ -479,10 +487,10 @@ class BdbIndexStore(IndexStore):
             tidcxn = None
             if vectors:
                 tidcxn = self.termIdCxn.get(index, None)
-                if not tidcxn:
+                if tidcxn == None:
                     self._openVectors(session, index)
                     tidcxn = self.termIdCxn.get(index, None)
-            if not tidcxn:
+            if tidcxn == None:
                 # okay, no termid hash. hope for best with final set
                 # of terms from regular index
                 (term, value) = cursor.last(doff=0, dlen=3*index.longStructSize)
@@ -492,8 +500,8 @@ class BdbIndexStore(IndexStore):
                 (finaltid, term) = tidcursor.last()
                 last = long(finaltid)
                 tidcxn.close()
-                del tidcxn
                 self.termIdCxn[index] = None
+                del tidcxn
             termid = last
 
         currTerm = None
@@ -512,7 +520,7 @@ class BdbIndexStore(IndexStore):
         dbname = os.path.join(dfp, basename)
         if vectors or termIds:
             tidcxn = self.termIdCxn.get(index, None)
-            if not tidcxn:
+            if tidcxn == None:
                 self._openVectors(session, index)
                 tidcxn = self.termIdCxn.get(index, None)
         
@@ -596,6 +604,8 @@ class BdbIndexStore(IndexStore):
 
         if vectors or termIds:
             tidcxn.close()
+            self.termIdCxn[index] = None
+            del tidcxn
 
         if vectors:
             # build vectors here
@@ -737,6 +747,8 @@ class BdbIndexStore(IndexStore):
                         proxVal = struct.pack('L' * len(flat), *flat)
                         proxCxn.put(proxKey, proxVal)
                     proxCxn.close()
+                    self.proxVectorCxn[index] = None
+                    del proxCxn
             fh.close()
             cxn.close()
             os.remove(base)
@@ -763,12 +775,11 @@ class BdbIndexStore(IndexStore):
                     terms.sort(key=lambda x: x['r'], reverse=True)
 
                     cxn = self._openTermFreq(session, index, 'rec')
-                    #cxn = bdb.db.DB()
-                    #cxn.open(dbname + "_FREQ_REC")
                     for (t, term) in enumerate(terms):
                         termidstr = struct.pack('ll', term['i'], term['r'])
-                        cxn.put("%012d" % t, termidstr)                                        
-                    cxn.close()
+                        cxn.put("%012d" % t, termidstr)
+                    self._closeTermFreq(session, index, 'rec')
+
 
                 if fl.find('occ') > -1:
                     terms.sort(key=lambda x: x['o'], reverse=True)                
@@ -777,8 +788,9 @@ class BdbIndexStore(IndexStore):
                     #cxn.open(dbname + "_FREQ_OCC")
                     for (t, term) in enumerate(terms):
                         termidstr = struct.pack('ll', term['i'], term['o'])
-                        cxn.put("%012d" % t, termidstr)                                        
-                    cxn.close()                
+                        cxn.put("%012d" % t, termidstr)
+                    self._closeTermFreq(session, index, 'occ')
+                    
             except TypeError:
                 # no data in index
                 pass
@@ -812,6 +824,7 @@ class BdbIndexStore(IndexStore):
                                          maxBuckets=vmb, maxItemsPerBucket=vmi)
         else:
             cxn = bdb.db.DB()
+
         cxn.open(dbp)
         self.termIdCxn[index] = cxn
 
@@ -839,7 +852,7 @@ class BdbIndexStore(IndexStore):
         # rec can be resultSetItem or record
 
         tidcxn = self.termIdCxn.get(index, None)
-        if not tidcxn:
+        if tidcxn == None:
             self._openVectors(session, index)
             tidcxn = self.termIdCxn.get(index, None)
             cxn = self.vectorCxn.get(index, None)
@@ -925,7 +938,7 @@ class BdbIndexStore(IndexStore):
 
     def fetch_termById(self, session, index, termId):
         tidcxn = self.termIdCxn.get(index, None)
-        if not tidcxn:
+        if tidcxn == None:
             self._openVectors(session, index)
             tidcxn = self.termIdCxn.get(index, None)
         termid = "%012d" % termId
@@ -939,10 +952,14 @@ class BdbIndexStore(IndexStore):
 
 
     def _closeTermFreq(self, session, index, which):
-        try: cxns = self.termFreqCxn[index]
-        except KeyError: return
-        try: cxns[which].close()
-        except KeyError: return
+        try:
+            cxns = self.termFreqCxn[index]
+        except KeyError:
+            return
+        try:
+            cxns[which].close()
+        except KeyError:
+            return
         del self.termFreqCxn[index][which]
 
 
@@ -1283,7 +1300,28 @@ class BdbIndexStore(IndexStore):
                     unpacked = unpacked[3:]
                 else:
                     # This will screw up non vectorised indexes.
-                    termid = cxn.stat()['nkeys']
+                    # XXX FIX
+
+                    vecs = index.get_setting(session, "vectors")
+                    tids = index.get_setting(session, "termIds")
+                    tidcxn = None
+                    if vecs or tids:
+                        tidcxn = self.termIdCxn.get(index, None)
+                        if tidcxn == None:
+                            self._openVectors(session, index)
+                            tidcxn = self.termIdCxn.get(index, None)
+                    if tidcxn == None:
+                        # okay, no termid hash. hope for best with final set
+                        # of terms from regular index
+                        cursor = cxn.cursor()
+                        (term, value) = cursor.last(doff=0, dlen=3*index.longStructSize)
+                        (last, x,y) = index.deserialize_term(session, value)                    
+                    else:
+                        tidcursor = tidcxn.cursor()
+                        (finaltid, term) = tidcursor.last()
+                        last = long(finaltid)
+
+                    termid = last + 1
                     unpacked = stuff
                     totalRecs = 1
                     totalOccs = k['occurences']
