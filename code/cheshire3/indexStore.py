@@ -120,7 +120,7 @@ class BdbIndexStore(IndexStore):
                 self.storeHash[w] = wd
                 self.storeHashReverse[wd] = w
 
-        self.dirPerIndex = self.get_setting(session, 'dirPerIndex')
+        self.dirPerIndex = self.get_setting(session, 'dirPerIndex', 0)
 
         # Record Hash (in bdb) 
         fnbase = "recordIdentifiers_" + self.id + "_"
@@ -190,7 +190,15 @@ class BdbIndexStore(IndexStore):
             dbp = os.path.join(dfp, basename)
 
             if self.switching:
-                cxn = SwitchingBdbConnection(session, self, dbp)
+                # check for overrides
+                vbt = index.get_setting(session, 'bucketType', '')
+                vmb = index.get_setting(session, 'maxBuckets', 0) 
+                vmi = index.get_setting(session, 'maxItemsPerBucket', 0)
+                if vbt or vmb or vmi:
+                    cxn = SwitchingBdbConnection(session, self, fullname, bucketType=vbt,
+                                                 maxBuckets=vmb, maxItemsPerBucket=vmi)
+                else:
+                    cxn = SwitchingBdbConnection(session, self, dbp)
             else:
                 cxn = bdb.db.DB()
 
@@ -1369,7 +1377,15 @@ class BdbIndexStore(IndexStore):
             end = end[::-1]
 
             if self.switching:
-                cxn = SwitchingBdbConnection(session, fullname)
+                vbt = index.get_setting(session, 'bucketType', '')
+                vmb = index.get_setting(session, 'maxBuckets', 0) 
+                vmi = index.get_setting(session, 'maxItemsPerBucket', 0)
+                if vbt or vmb or vmi:
+                    cxn = SwitchingBdbConnection(session, self, fullname, bucketType=vbt,
+                                                 maxBuckets=vmb, maxItemsPerBucket=vmi)
+                else:
+                    cxn = SwitchingBdbConnection(session, self, dbp)
+
             else:
                 cxn = bdb.db.DB()
             if session.environment == "apache":

@@ -392,11 +392,14 @@ class SwitchingBdbConnection(object):
         self.bucketFns = {'term1' : self.termBucket1,
                           'term2' : self.termBucket2,
                           'hash' : self.hashBucket,
-                          'int' : self.intBucket}
+                          'int' : self.intBucket,
+                          'null' : self.nullBucket}
         self.listBucketFns = {'term1' : self.listTermBucket1,
-                          'term2' : self.listTermBucket2,
-                          'hash' : self.listHashBucket,
-                          'int' : self.listIntBucket}
+                              'term2' : self.listTermBucket2,
+                              'hash' : self.listHashBucket,
+                              'int' : self.listIntBucket,
+                              'null' : self.listNullBucket
+                              }
 
     def bucket_exists(self, b):
         return os.path.exists(self.basePath + '_' + b)
@@ -474,6 +477,14 @@ class SwitchingBdbConnection(object):
         # find out how many
         x = self.store.get_dbSize(self.session)
         return [str(y) for y in range((x/self.maxItemsPerBucket)+1)]
+
+
+    def nullBucket(self, key):
+        # all in one bucket
+        return '0'
+
+    def listNullBucket(self):
+        return ['0']
 
     def _open(self, b):
         if self.cxns.has_key(b) and self.cxns[b] != None:
