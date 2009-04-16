@@ -566,6 +566,12 @@ class SwitchingBdbConnection(object):
         cxn = self._open(b)
         return cxn.put(key, val)
 
+    def delete(self, key):
+        b = self.bucket(key)
+        cxn = self._open(b)
+        return cxn.delete(key)
+        
+
     def cursor(self):
         # create a switching cursor!
         l = self.listBuckets()
@@ -634,6 +640,8 @@ class SwitchingBdbCursor(object):
     def last(self, doff=-1, dlen=-1):
         if self.currBucketIdx != len(self.buckets)-1:
             cursor = self.set_cursor(self.buckets[-1])
+        else:
+            cursor = self.currCursor
         if dlen != -1:
             return cursor.last(doff=doff, dlen=dlen)
         else:
