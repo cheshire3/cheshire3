@@ -80,7 +80,8 @@ class BdbIndexStore(IndexStore):
                          'maxItemsPerBucket' : {'docs' : '', 'type' : int},
                          'vectorBucketType' : {'docs' : '', 'options' : 'hash|int'},
                          'vectorMaxBuckets' : {'docs' : '', 'type' : int},
-                         'vectorMaxItemsPerBucket' : {'docs' : '', 'type' : int}
+                         'vectorMaxItemsPerBucket' : {'docs' : '', 'type' : int},
+                         'dirPerIndex' : {'docs' : '', 'type': int, 'options' : '0|1'}
                          }
 
     def __init__(self, session, config, parent):
@@ -118,6 +119,8 @@ class BdbIndexStore(IndexStore):
             for (w, wd) in enumerate(wds):
                 self.storeHash[w] = wd
                 self.storeHashReverse[wd] = w
+
+        self.dirPerIndex = self.get_setting(session, 'dirPerIndex')
 
         # Record Hash (in bdb) 
         fnbase = "recordIdentifiers_" + self.id + "_"
@@ -178,8 +181,6 @@ class BdbIndexStore(IndexStore):
             self.indexCxn[index].close()
             del self.indexCxn[index]
 
-
-
     def _openIndex(self, session, index):
         if index in self.indexCxn:
             return self.indexCxn[index]
@@ -200,12 +201,11 @@ class BdbIndexStore(IndexStore):
             self.indexCxn[index] = cxn
             return cxn
 
-
-
-
     def _generateFilename(self, index):
-        stuff = [self.id, "--", index.id, ".index"]
-        return ''.join(stuff)
+        if self.dirPerIndex:
+            return os.path.join(index.id, index.id + ".index")
+        else:
+            return "%s--%s.index" % (self.id, index.id)
         
     def _listExistingFiles(self, session, index):
         dfp = self.get_path(session, "defaultPath")
@@ -322,6 +322,12 @@ class BdbIndexStore(IndexStore):
         elif (not os.path.isdir(temp)):
             raise(ConfigFileException('TempPath is not a directory.'))
 
+        if self.dirPerIndex:
+            try:
+                os.mkdir(os.path.join(temp, index.id))
+            except:
+                raise
+
         basename = os.path.join(temp, self._generateFilename(index))
         if (hasattr(session, 'task')):
             basename += str(session.task)
@@ -338,9 +344,6 @@ class BdbIndexStore(IndexStore):
                 dfp = self.get_path(session, "defaultPath")
                 name = self._generateFilename(index) + "_VALUES"
                 fullname = os.path.join(dfp, name)
-                if (not os.path.exists(fullname)):
-                    raise FileDoesNotExistException(fullname)
-
 
                 if self.vectorSwitching:
                     vbt = self.get_setting(session, 'vectorBucketType', '')
@@ -450,7 +453,10 @@ class BdbIndexStore(IndexStore):
             
         cxn = self._openIndex(session, index)
         cursor = cxn.cursor()
-        nonEmpty = cursor.first()
+        try:
+            nonEmpty = cursor.first()
+        except:
+            nonEmpty = False
         metadataCxn = self._openMetadata(session)        
 
         tidIdx = index.get_path(session, 'termIdIndex', None)
@@ -1036,12 +1042,18 @@ class BdbIndexStore(IndexStore):
         return os.path.exists(os.path.join(dfp, name))
     
     
-    def _create_indexFile(self, dbname, flags=[]):
+    def _create(self, session, dbname, flags=[], vectorType=1):
         # for use by self.create_index
         if os.path.exists(dbname):
             raise FileAlreadyExistsException(dbname) 
-        if self.switching:
+        if vectorType == 0 and self.switching:
             cxn = SwitchingBdbConnection(session, self, dbname)
+        elif vectorType and self.vectorSwitching:
+            vbt = self.get_setting(session, 'vectorBucketType', '')
+            vmb = self.get_setting(session, 'vectorMaxBuckets', 0) 
+            vmi = self.get_setting(session, 'vectorMaxItemsPerBucket', 0)
+            cxn = SwitchingBdbConnection(session, self, fullname, bucketType=vbt,
+                                         maxBuckets=vmb, maxItemsPerBucket=vmi)
         else:
             cxn = bdb.db.DB()
 
@@ -1066,28 +1078,34 @@ class BdbIndexStore(IndexStore):
                 raise PermissionException("Permission required to create index in %s" % self.id)
 
         dfp = self.get_path(session, "defaultPath")
+        if self.dirPerIndex:
+            idp = os.path.join(dfp, index.id)
+            if not os.path.exists(idp):
+                os.mkdir(idp)
+                    
+
         name = self._generateFilename(index)
         fullname = os.path.join(dfp, name)
-        try: self._create_indexFile(fullname)
+        try: self._create(session, fullname, vectorType=0)
         except FileAlreadyExistsException: pass
         
         if (index.get_setting(session, "sortStore")):
-            try: self._create_indexFile(fullname + "_VALUES")
+            try: self._create(session, fullname + "_VALUES")
             except FileAlreadyExistsException: pass
             
         vecs = index.get_setting(session, "vectors")
         tids = index.get_setting(session, "termIds")
         if vecs or tids:
-            try: self._create_indexFile(fullname + "_TERMIDS", flags=[bdb.db.DB_RECNUM])
+            try: self._create(session, fullname + "_TERMIDS", flags=[bdb.db.DB_RECNUM])
             except FileAlreadyExistsException: pass
 
         if vecs:
             try:
-                try: self._create_indexFile(fullname + "_VECTORS", flags=[bdb.db.DB_RECNUM])
+                try: self._create(session, fullname + "_VECTORS", flags=[bdb.db.DB_RECNUM])
                 except FileAlreadyExistsException: pass
 
                 if index.get_setting(session, 'proxVectors'):
-                    try: self._create_indexFile(fullname + "_PROXVECTORS", flags=[bdb.db.DB_RECNUM])
+                    try: self._create(session, fullname + "_PROXVECTORS", flags=[bdb.db.DB_RECNUM])
                     except FileAlreadyExistsException: pass
 
             except:
@@ -1095,11 +1113,11 @@ class BdbIndexStore(IndexStore):
         fl = index.get_setting(session, "freqList", "") 
         if fl:
             if fl.find('rec') > -1: 
-                try: self._create_indexFile(fullname + "_FREQ_REC", flags=[bdb.db.DB_RECNUM])
+                try: self._create(session, fullname + "_FREQ_REC", flags=[bdb.db.DB_RECNUM])
                 except FileAlreadyExistsException: pass
 
             if fl.find('occ') > -1:
-                try: self._create_indexFile(fullname + "_FREQ_OCC", flags=[bdb.db.DB_RECNUM])
+                try: self._create(session, fullname + "_FREQ_OCC", flags=[bdb.db.DB_RECNUM])
                 except FileAlreadyExistsException: pass
 
         return 1
@@ -1142,7 +1160,7 @@ class BdbIndexStore(IndexStore):
         dfp = self.get_path(session, "defaultPath")
         name = self._generateFilename(index) + "_VALUES"
         fullname = os.path.join(dfp, name)
-        if self.switching:
+        if self.vectorSwitching:
             pass
         else:
             cxn = bdb.db.DB()
@@ -1349,8 +1367,11 @@ class BdbIndexStore(IndexStore):
             fullname += "_REVERSE"
             term = term[::-1]
             end = end[::-1]
-            cxn = bdb.db.DB()
-            # cxn.set_flags(bdb.db.DB_RECNUM)
+
+            if self.switching:
+                cxn = SwitchingBdbConnection(session, fullname)
+            else:
+                cxn = bdb.db.DB()
             if session.environment == "apache":
                 cxn.open(fullname, flags=bdb.db.DB_NOMMAP)
             else:
@@ -1364,10 +1385,11 @@ class BdbIndexStore(IndexStore):
         term = term.encode('utf-8')
         try:
             if summary:
-                (key, data) = c.set_range(term, dlen=dataLen,doff=0)
+                (key, data) = c.set_range(term, dlen=dataLen, doff=0)
             else:
                 (key, data) = c.set_range(term)
         except Exception as e:
+            raise
             try:
                 if summary:
                     (key, data) = c.last(dlen=dataLen, doff=0)
