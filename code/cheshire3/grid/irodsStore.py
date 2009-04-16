@@ -11,6 +11,7 @@ from cheshire3.exceptions import ObjectAlreadyExistsException, ObjectDoesNotExis
 
 import irods, irods_error
 import time, datetime, dateutil
+import sys, os
 
 
 def icatValToPy(val, un):
@@ -390,6 +391,149 @@ class IrodsResultSetStore(SimpleResultSetStore, IrodsStore):
 
 
 #-------------------------------
+
+from cheshire3.baseStore import SwitchingBdbConnection
+import bsddb as bdb
+
+class IrodsSwitchingBdbConnection(SwitchingBdbConnection):
+
+    # Fetch to local for manipulation, but maintain in irods
+
+    def __init__(self, session, parent, path="", maxBuckets=0, maxItemsPerBucket=0, bucketType=''):
+        SwitchingBdbConnection.__init__(self, session, parent, path, maxBuckets, maxItemsPerBucket, bucketType)
+        self.irodsObjects = parent.coll.getObjects()
+        self.cxnFiles = {}
+
+
+    def bucket_exists(self, b):
+        return b in self.irodsObjects or os.path.exists(self.basePath + '_' + b)
+            
+    def _open(self, b):
+        if self.cxns.has_key(b) and self.cxns[b] != None:
+            return self.cxns[b] 
+        else:
+            cxn = bdb.db.DB()
+            if self.preOpenFlags:
+                cxn.set_flags(self.preOpenFlags)
+            dbp = self.basePath + "_" + b
+
+            if (not os.path.exists(dbp)):
+                # find file name
+                (d, fn) = os.path.split(dbp)
+                if fn in self.irodsObjects:
+                    # suck it down
+                    inf = self.store.coll.open(fn)
+                    outf = file(dbp,'w')
+                    data = inf.read(1024000)
+                    while data:
+                        outf.write(data)
+                        data = inf.read(1024000)
+                    inf.close()
+                    outf.close()
+                else:
+                    cxn.open(dbp, **self.store.createArgs[self.basePath])
+                    cxn.close()
+                    cxn = bdb.db.DB()                
+
+            cxn.open(dbp, **self.openArgs)
+            self.cxns[b] = cxn
+            self.cxnFiles[cxn] = dbp
+            return cxn
+
+    def close(self):
+        for (k, c) in self.cxns.iteritems():
+            c.close()
+            # upload to irods
+            srcPath = self.cxnFiles[c]
+            (dirn, fn) = os.path.split(srcPath)        
+
+            # use file/C api
+            dataObjOprInp = irods.dataObjInp_t()
+            dataObjOprInp.setOprType(irods.PUT_OPR)
+            dataObjOprInp.setOpenFlags(irods.O_RDWR)
+            targPath = self.store.coll.getCollName() + "/" + fn
+            statbuf = os.stat(srcPath)            
+            dataObjOprInp.setCreateMode(statbuf.st_mode)
+            dataObjOprInp.setObjPath(targPath)
+            dataObjOprInp.setDataSize(statbuf.st_size)
+            irods.rcDataObjPut(self.store.cxn, dataObjOprInp, srcPath)
+
+            self.cxns[k] = None
+        return None
+
+    def sync(self):
+        # sync all
+        for (k, c) in self.cxns.iteritems():
+            c.sync()
+        return None
+
+
+from cheshire3.indexStore import BdbIndexStore
+class IrodsIndexStore(BdbIndexStore):
+
+    def __init__(self, session, config, parent):
+        BdbIndexStore.__init__(self, session, config, parent)
+
+        self.switchingClass = IrodsSwitchingBdbConnection
+        self.vectorSwitchingClass = IrodsSwitchingBdbConnection
+        self.coll = None
+        self.cxn = None
+        self.env = None
+        
+        # And open irods
+        self._open(session)
+        
+
+    def _open(self, session):
+
+        if self.cxn == None:
+            # connect to iRODS
+            myEnv, status = irods.getRodsEnv()
+            conn, errMsg = irods.rcConnect(myEnv.getRodsHost(), myEnv.getRodsPort(), 
+                                           myEnv.getRodsUserName(), myEnv.getRodsZone())
+            status = irods.clientLogin(conn)
+            if status:
+                raise ConfigFileException("Cannot connect to iRODS: (%s) %s" % (status, errMsg))
+            self.cxn = conn
+            self.env = myEnv
+            
+        if self.coll != None:
+            # already open, just skip
+            return None
+
+        c = irods.irodsCollection(self.cxn, self.env.getRodsHome())
+        self.coll = c
+
+        # move into cheshire3 section
+        path = self.get_path(session, 'irodsCollection', 'cheshire3')
+        dirs = c.getSubCollections()
+        if not path in dirs:
+            c.createCollection(path)
+        c.openCollection(path)
+
+        # now look for object's storage area
+        # maybe move into database collection
+        if (isinstance(self.parent, Database)):
+            sc = self.parent.id
+            dirs = c.getSubCollections()
+            if not sc in dirs:
+                c.createCollection(sc)
+            c.openCollection(sc)
+
+        # move into store collection
+        dirs = c.getSubCollections()
+        if not self.id in dirs:
+            c.createCollection(self.id)
+        c.openCollection(self.id)
+
+        
+    def _close(self, session):
+        irods.rcDisconnect(self.cxn)
+        self.cxn = None
+        self.coll = None
+        self.env = None
+
+
 
 
 
