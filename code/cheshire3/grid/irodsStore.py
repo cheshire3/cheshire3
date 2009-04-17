@@ -2,12 +2,17 @@
 from cheshire3.configParser import C3Object
 from cheshire3.baseStore import SimpleStore
 from cheshire3.baseObjects import Database
-from cheshire3.recordStore import SimpleRecordStore
+from cheshire3.recordStore import SimpleRecordStore, BdbRecordStore
 from cheshire3.documentStore import SimpleDocumentStore
 from cheshire3.objectStore import SimpleObjectStore
 from cheshire3.resultSetStore import SimpleResultSetStore
 from cheshire3.documentFactory import MultipleDocumentStream
 from cheshire3.exceptions import ObjectAlreadyExistsException, ObjectDoesNotExistException
+
+from cheshire3.indexStore import BdbIndexStore
+from cheshire3.baseStore import SwitchingBdbConnection
+import bsddb as bdb
+
 
 import irods, irods_error
 import time, datetime, dateutil
@@ -84,6 +89,7 @@ class IrodsStore(SimpleStore):
 
         self.useUUID = self.get_setting(session, 'useUUID', 0)
         self.expires = self.get_default(session, 'expires', 0)
+
 
     def get_metadataTypes(self, session):
         return {'totalItems' : long,
@@ -392,8 +398,6 @@ class IrodsResultSetStore(SimpleResultSetStore, IrodsStore):
 
 #-------------------------------
 
-from cheshire3.baseStore import SwitchingBdbConnection
-import bsddb as bdb
 
 class IrodsSwitchingBdbConnection(SwitchingBdbConnection):
 
@@ -401,6 +405,8 @@ class IrodsSwitchingBdbConnection(SwitchingBdbConnection):
 
     def __init__(self, session, parent, path="", maxBuckets=0, maxItemsPerBucket=0, bucketType=''):
         SwitchingBdbConnection.__init__(self, session, parent, path, maxBuckets, maxItemsPerBucket, bucketType)
+        if parent.coll == None:
+            parent._openIrods(session)
         self.irodsObjects = parent.coll.getObjects()
         self.cxnFiles = {}
 
@@ -468,7 +474,71 @@ class IrodsSwitchingBdbConnection(SwitchingBdbConnection):
         return None
 
 
-from cheshire3.indexStore import BdbIndexStore
+
+class IrodsSwitchingRecordStore(BdbRecordStore):
+
+    def __init__(self, session, config, parent):
+        self.switchingClass = IrodsSwitchingBdbConnection
+        self.coll = None
+        self.cxn = None
+        self.env = None
+        
+        # And open irods
+        BdbRecordStore.__init__(self, session, config, parent)
+        self.switchingClass = IrodsSwitchingBdbConnection
+        self._openIrods(session)
+        
+
+    def _openIrods(self, session):
+
+        if self.cxn == None:
+            # connect to iRODS
+            myEnv, status = irods.getRodsEnv()
+            conn, errMsg = irods.rcConnect(myEnv.getRodsHost(), myEnv.getRodsPort(), 
+                                           myEnv.getRodsUserName(), myEnv.getRodsZone())
+            status = irods.clientLogin(conn)
+            if status:
+                raise ConfigFileException("Cannot connect to iRODS: (%s) %s" % (status, errMsg))
+            self.cxn = conn
+            self.env = myEnv
+            
+        if self.coll != None:
+            # already open, just skip
+            return None
+
+        c = irods.irodsCollection(self.cxn, self.env.getRodsHome())
+        self.coll = c
+
+        # move into cheshire3 section
+        path = self.get_path(session, 'irodsCollection', 'cheshire3')
+        dirs = c.getSubCollections()
+        if not path in dirs:
+            c.createCollection(path)
+        c.openCollection(path)
+
+        # now look for object's storage area
+        # maybe move into database collection
+        if (isinstance(self.parent, Database)):
+            sc = self.parent.id
+            dirs = c.getSubCollections()
+            if not sc in dirs:
+                c.createCollection(sc)
+            c.openCollection(sc)
+
+        # move into store collection
+        dirs = c.getSubCollections()
+        if not self.id in dirs:
+            c.createCollection(self.id)
+        c.openCollection(self.id)
+
+        
+    def _closeIrods(self, session):
+        irods.rcDisconnect(self.cxn)
+        self.cxn = None
+        self.coll = None
+        self.env = None
+
+
 class IrodsIndexStore(BdbIndexStore):
 
     def __init__(self, session, config, parent):

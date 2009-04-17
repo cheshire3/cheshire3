@@ -726,6 +726,7 @@ class BdbStore(SimpleStore):
         self.cxns = {}
         self.createArgs = {}
         SimpleStore.__init__(self, session, config, parent)
+        self.switchingClass = SwitchingBdbConnection
 
     def __iter__(self):
         # Return an iterator object to iter through... keys?
@@ -733,7 +734,7 @@ class BdbStore(SimpleStore):
 
     def _create(self, session, dbp):
         if self.switching:
-            cxn = SwitchingBdbConnection(session, self, dbp)
+            cxn = self.switchingClass(session, self, dbp)
         else:
             cxn = bdb.db.DB()
         cxn.set_flags(bdb.db.DB_RECNUM)
@@ -787,7 +788,7 @@ class BdbStore(SimpleStore):
 
     def _open(self, session, dbp):
         if self.switching:
-            cxn = SwitchingBdbConnection(session, self, dbp)
+            cxn = self.switchingClass(session, self, dbp)
         else:
             cxn = bdb.db.DB()
         cxn.set_flags(bdb.db.DB_RECNUM)
