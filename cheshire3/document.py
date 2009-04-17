@@ -17,6 +17,8 @@ class StringDocument(Document):
         self.byteCount = byteCount
         self.byteOffset = byteOffset
         self.expires = 0
+        self.metadata = {}
+
 	if (history):
             self.processHistory = history
         else:
