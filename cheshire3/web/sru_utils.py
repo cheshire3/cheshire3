@@ -1,4 +1,4 @@
-import time, httplib, urllib2
+import time, httplib, urllib2, socket
 from lxml import etree
 from lxml import objectify
 
@@ -179,7 +179,7 @@ def fetch_data(myUrl, tries=3):
         except (urllib2.URLError):
             # problem accessing remote service
             continue
-        except (httplib.BadStatusLine):
+        except (httplib.BadStatusLine, socket.timeout):
             # problem with response
             time.sleep(0.5)
             continue
