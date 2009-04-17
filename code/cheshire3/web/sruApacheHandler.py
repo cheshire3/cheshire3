@@ -259,7 +259,7 @@ class reqHandler:
             q.config = session.config
             opts['xQuery'] = etree.XML(q.toXCQL())
         else:
-            raise self.diagnostic(7, "Mandatory 'query' parameter not supplied", 'query')
+            raise self.diagnostic(7, msg="Mandatory parameter not supplied", details='query')
 
         db = session.config.parent
         session.database = db.id
@@ -272,12 +272,12 @@ class reqHandler:
         if (schema in recordMap):
             schema = recordMap[schema]
         if (schema and not (schema in session.config.recordNamespaces.values())):
-            raise self.diagnostic(66, details=schema)
+            raise self.diagnostic(66, msg="Unknown schema for retrieval", details=schema)
         txr = session.config.transformerHash.get(schema, None)
 
         recordPacking = opts.get('recordPacking', 'xml')
         if not recordPacking  in ["string", "xml"]:
-            raise self.diagnostic(71, details=recordPacking)
+            raise self.diagnostic(71, msg="Unsupported record packing", details=recordPacking)
 
         # Fencepost.  SRW starts at 1, C3 starts at 0
         startRecord = opts.get('startRecord', 1) -1
@@ -338,12 +338,12 @@ class reqHandler:
             q = cqlParser.parse(opts['scanClause'])
             opts['xQuery'] = etree.XML(q.toXCQL())
         else:
-            raise self.diagnostic(7, "Missing 'scanClause' parameter", 'scanClause')
+            raise self.diagnostic(7, msg="Mandatory parameter not supplied", details='scanClause')
 
         mt = opts.get('maximumTerms', 20)
         rp = opts.get('responsePosition', 0)
         if (rp < 0 or rp > (mt+1)):
-            raise self.diagnostic(120, "Response position out of range", str(rp))
+            raise self.diagnostic(120, msg="Response position out of range", details=str(rp))
 
         if (not q.term.value):
             q.term.value = chr(0)
@@ -416,10 +416,10 @@ class reqHandler:
                     'recordPacking' : 'xml'
                     }
             if not 'operation' in opts:
-                err = self.diagnostic(7, "Mandatory 'operation' parameter not supplied", 'operation')
+                err = self.diagnostic(7, msg="Mandatory parameter not supplied", details='operation')
                 result = self.processUnknownOperation(err, config)
             elif not opts['operation'] in ['explain', 'searchRetrieve', 'scan']:
-                err = self.diagnostic(4, "Unknown Operation", opts['operation'])
+                err = self.diagnostic(4, msg="Unsupported Operation", details=opts['operation'])
                 result = self.processUnknownOperation(err, config)
             else:
                 respName = "%sResponse" % opts['operation']
@@ -428,7 +428,7 @@ class reqHandler:
                 result.append(v)
                 
                 if not 'version' in opts:
-                    err = self.diagnostic(7, "Mandatory 'version' parameter not supplied", 'version')
+                    err = self.diagnostic(7, msg="Mandatory parameter not supplied", details='version')
                     dx = self.diagnosticToXml(err)
                     x = elemFac.diagnostics()
                     x.append(dx)
