@@ -453,7 +453,7 @@ class PostgresStore(SimpleStore):
                     linkHash[name] = row[i]
 
             links.append((link, linkHash))
-            return links
+        return links
 
 
 class PostgresRecordStore(PostgresStore, SimpleRecordStore):
