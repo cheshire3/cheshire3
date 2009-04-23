@@ -49,3 +49,4 @@ class SimpleQueryStore(BdbStore, QueryStore):
 
         self.store_data(session, id, data)
         return query
+
