@@ -8,6 +8,7 @@ from cheshire3.resultSet import SimpleResultSetItem
 from cheshire3.documentFactory import BaseDocumentStream, SimpleDocumentFactory
 from cheshire3.resultSetStore import SimpleResultSetStore
 from cheshire3.resultSet import SimpleResultSet
+from cheshire3.queryStore import SimpleQueryStore
 from cheshire3.baseObjects import IndexStore
 from cheshire3.objectStore import SimpleObjectStore
 from cheshire3 import dynamic
@@ -25,6 +26,8 @@ from lxml import etree
 # Iterator for postgres stores
 
 class PostgresIter(object):
+    """Iterator for Cheshire3 PostgresStores."""
+    
     store = None
     cxn = None
     idList = None
@@ -45,6 +48,7 @@ class PostgresIter(object):
         return self
 
     def next(self):
+        """Return next data from Iterator"""
         try:
             query = "SELECT * FROM %s WHERE identifier='%s' LIMIT 1" % (self.store.table, self.idList[self.cursor])
             query = query.encode('utf-8')
@@ -66,9 +70,10 @@ class PostgresIter(object):
 
 
 class PostgresRecordIter(PostgresIter):
-    # Get data from bdbIter and turn into record
+    """Iterator for Cheshire3 PostgresRecordStores."""
 
     def next(self):
+        """Get the next data from iterator, turn it into a Record object and return."""
         d = PostgresIter.next(self)
         data = d[1]
         data = data.replace('\\000\\001', nonTextToken)
@@ -77,9 +82,9 @@ class PostgresRecordIter(PostgresIter):
         return rec
     
 class PostgresDocumentIter(PostgresIter):
-    # Get data from bdbIter and turn into document
 
     def next(self):
+        """Get the next data from iterator, turn it into a Document object and return."""
         d = PostgresIter.next(self)
         data = d[1]
         doc = self.store._process_data(self.session, d[0], data)
@@ -87,9 +92,10 @@ class PostgresDocumentIter(PostgresIter):
     
     
 class PostgresObjectIter(PostgresRecordIter):
-    # Get data from bdbIter and turn into record, then process reocrd into object
+    """Iterator for Cheshire3 PostgresObjectStores"""
 
     def next(self):
+        """Get the next data from iterator, turn it into a Cheshire3 object and return."""
         rec = PostgresRecordIter.next(self)
         obj = self.store._processRecord(None, rec.id, rec)
         return obj
@@ -121,6 +127,8 @@ class PostgresDocumentFactory(SimpleDocumentFactory):
 
         
 class PostgresStore(SimpleStore):
+    """An interface to PosgreSQL storage mechanism for Cheshire3 objects (Abstract)."""
+    
     cxn = None
     relations = {}
 
@@ -457,6 +465,9 @@ class PostgresStore(SimpleStore):
 
 
 class PostgresRecordStore(PostgresStore, SimpleRecordStore):
+    """PostgreSQL RecordStore implementation."""
+    
+    
     def __init__(self, session, node, parent):
         SimpleRecordStore.__init__(self, session, node, parent)
         PostgresStore.__init__(self, session, node, parent)
@@ -467,6 +478,8 @@ class PostgresRecordStore(PostgresStore, SimpleRecordStore):
 
 
 class PostgresDocumentStore(PostgresStore, SimpleDocumentStore):
+    """PostgreSQL DocumentStore implementation."""
+    
     def __init__(self, session, node, parent):
         SimpleDocumentStore.__init__(self, session, node, parent)
         PostgresStore.__init__(self, session, node, parent)
@@ -478,6 +491,8 @@ class PostgresDocumentStore(PostgresStore, SimpleDocumentStore):
 
 
 class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
+    """PostgreSQL ResultSetStore implementation."""
+    
     _possibleSettings = {
                          'overwriteOkay' : {'docs': 'Can resultSets in this store be overwritten by a resultSet with the same identifier. NB if the item membership or order of a resultSet change, then the resultSet is fundamentally altered and should be assigned a new identifier. A stored resultSet should NEVER be overwritten by one that has different items or ordering!. 1 = Yes, 0 = No (default).', 'type': int, 'options' : "0|1"}
                         }
@@ -638,13 +653,19 @@ class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
 
 
 class PostgresObjectStore(PostgresRecordStore, SimpleObjectStore):
-    """An interface to PosgreSQL storage mechanism for configured Cheshire3 objects."""
+    """PostgreSQL ObjectStore implementation."""
     
     def __iter__(self):
         # Return an iterator object to iter through
         return PostgresObjectIter(self.session, self)
     
-
+class PostgresQueryStore(PostgresStore, SimpleQueryStore):
+    """PostgreSQL QueryStore implementation."""
+    
+    def __init__(self, session, node, parent):
+        PostgresStore.__init__(self, session, node, parent)
+        
+    
 # -- non proximity, just store occurences of type per record
 # CREATE TABLE parent.id + self.id + index.id (identifier SERIAL PRIMARY KEY, term VARCHAR, occurences INT, recordId VARCHAR, stem VARCHAR, pos VARCHAR);
 
@@ -663,6 +684,8 @@ class PostgresObjectStore(PostgresRecordStore, SimpleObjectStore):
 # CLUSTER aboveIndex on aboveTable;
 
 class PostgresIndexStore(IndexStore, PostgresStore):
+    """PostgreSQL IndexStore implementation."""
+    
     database = ""
     transaction = 0
 
@@ -866,6 +889,7 @@ class PostgresIndexStore(IndexStore, PostgresStore):
 
 
 class PostgresIndex(SimpleIndex):
+    """PostgreSQL Index implementation."""
     
     def construct_resultSet(self, session, terms, queryHash={}):
         # in: res.dictresult()
