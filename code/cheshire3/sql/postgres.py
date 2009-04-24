@@ -222,11 +222,11 @@ class PostgresStore(SimpleStore):
         # And check additional relations
         for (name, fields) in self.relations.iteritems():
             try:
-                query = "SELECT identifier FROM %s_%s LIMIT 1" % (self.id,name)
+                query = "SELECT identifier FROM %s_%s LIMIT 1" % (self.table,name)
                 res = self._query(query)
             except pg.ProgrammingError as e:
                 # No table for relation, initialise
-                query = "CREATE TABLE %s_%s (identifier SERIAL PRIMARY KEY, " % (self.id, name)
+                query = "CREATE TABLE %s_%s (identifier SERIAL PRIMARY KEY, " % (self.table, name)
                 for f in fields:
                     query += ("%s %s" % (f[0], f[1]))
                     if f[2]:
@@ -402,7 +402,8 @@ class PostgresStore(SimpleStore):
         fields = []
         values = []
         for obj in args:
-            fields.append(obj.recordStore)
+            #fields.append(obj.recordStore)
+            fields.append(self.table)        # allows to link for objects other than Records
             oid = obj.id
             if (self.idNormalizer):
                 oid = self.idNormalizer.process_string(session, oid)                
@@ -411,41 +412,43 @@ class PostgresStore(SimpleStore):
             fields.append(name)
             values.append(value)
 
-        fstr = ""
-        valstr = ""
-        for x in range(len(fields)):
-            fstr += (fields[x] + ", ")
-            valstr += ("%r, " % values[x])
+#        fstrs = []
+#        valstrs = []
+#        for x in range(len(fields)):
+#            fstrs.append(fields[x])
+#            valstrs.append(repr(values[x]))
 
-        query = "INSERT INTO %s_%s (%s) VALUES (%s);" % (self.table, relation, fstr[:-2], valstr[:-2])
+        query = "INSERT INTO %s_%s (%s) VALUES (%s);" % (self.table, relation, ', '.join(fields), ', '.join(map(repr, values)))
         self._query(query)
 
 
     # Also NOT API
     def unlink(self, session, relation, *args, **kw):
-        cond = ""
+        conds = []
         for obj in args:
             oid = obj.id
             if (self.idNormalizer):
                 oid = self.idNormalizer.process_string(session, oid)                
-            cond += ("%s = %r, " % (obj.recordStore, oid))
+            #cond += ("%s = %r, " % (obj.recordStore, oid))
+            conds.append("%s = %r" % (self.table, oid)) # allows to unlink for objects other than Records
         for (name, value) in kw.iteritems():
-            cond += ("%s = %r, " % (name, value))
-        query = "DELETE FROM %s_%s WHERE %s;" % (self.table, relation, cond[:-2])
+            conds.append("%s = %r" % (name, value))
+        query = "DELETE FROM %s_%s WHERE %s;" % (self.table, relation, ', '.join(cond))
         self._query(query)
 
 
     # STILL NOT API
     def get_links(self, session, relation, *args, **kw):
-        cond = ""
+        conds = []
         for obj in args:
             oid = obj.id
             if (self.idNormalizer):
                 oid = self.idNormalizer.process_string(session, oid)                
-            cond += ("%s = %r, " % (obj.recordStore, oid))
+            #cond += ("%s = %r, " % (obj.recordStore, oid))
+            conds.append("%s = %r" % (self.table, oid))        # allows get_links for objects other than Records
         for (name, value) in kw.iteritems():
-            cond += ("%s = %r, " % (name, value))           
-        query = "SELECT * FROM %s_%s WHERE %s;" % (self.table, relation, cond[:-2])
+            conds.append("%s = %r" % (name, value))           
+        query = "SELECT * FROM %s_%s WHERE %s;" % (self.table, relation, ', '.join(conds))
         res = self._query(query)
 
         links = []
