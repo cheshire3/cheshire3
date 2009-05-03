@@ -66,12 +66,10 @@ class CorpusPrepTransformer(Transformer):
         wordOffset = 0
         for s in tree.xpath('//s') :   
             text = re.sub(self.regexp, ' ', self.extractor._flattenTexts(s)).strip()           
-            print text
             wordCount = 0
             start = 0
             nList = []
             tBase, oBase = self.rfot.process_string(self.session, text)
-            print oBase
             txt = etree.Element('txt')
             txt.text = text
             #create toks and delete the children of s
@@ -139,7 +137,6 @@ class CorpusPrepTransformer(Transformer):
                     #deal with the tag itself
                     else:  
                         if lookingForW:
-                            print 'wordCount: %d' % wordCount
                             try:
                                 waiting.set('offset', str(oBase[wordCount] + totalOffset))
                             except:
@@ -212,8 +209,7 @@ class CorpusPrepTransformer(Transformer):
                 s.text = ''
             totalOffset += len(text) + 1
             s.append(txt)            
-            s.append(toks) 
-            print etree.tostring(toks)            
+            s.append(toks)          
         return StringDocument(etree.tostring(tree))
           
 
