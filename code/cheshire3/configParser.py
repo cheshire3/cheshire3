@@ -12,7 +12,8 @@ from cheshire3.bootstrap import BSParser, BootstrapDocument
 from cheshire3.bootstrap import BSLxmlParser
 from cheshire3.exceptions import *
 from cheshire3.permissionHandler import PermissionHandler
-from cheshire3.internal import defaultArchitecture
+from cheshire3.internal import defaultArchitecture, get_api
+
 
 from lxml import etree
 
@@ -532,13 +533,9 @@ class C3Object(object):
     def add_logging(self, session, name):
         """ Set a named function to log invocations."""
         if (name == "__all__"):
-            # log everything that uses Session
-            fns = inspect.getmembers(self, inspect.ismethod)
-            names = []
-            for fn in fns:
-                aspec = inspect.getargspec(fn[1])
-                if len(aspec.args) > 1 and aspec.args[1] == 'session':
-                    names.append(fn[0])
+            names = get_api(self, True)
+        elif name == "__api__":
+            names = get_api(self)
         else:
             names = [name]
         for name in names:
