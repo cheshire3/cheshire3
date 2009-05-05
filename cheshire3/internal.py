@@ -1,6 +1,7 @@
 
 import os
 import cheshire3
+import inspect
 
 storeTypes = ['authStore', 'objectStore', 'configStore', 'recordStore', 'documentStore', 'resultSetStore', 'indexStore', 'queryStore']
 collTypes = ['server', 'database', 'index', 'workflow']
@@ -18,6 +19,40 @@ cheshireRoot = "/home/cheshire/cheshire3"
 cheshireCode = "/home/cheshire/cheshire3/code/extensions"
 cheshireDbs = "/home/cheshire/cheshire3/dbs"
 cheshireWww = "/home/cheshire/cheshire3/www"
+
+
+def get_api(object, all=False):
+
+    if all:
+        base = object.__class__
+    else:
+        l = inspect.getmro(object.__class__)
+        for cls in l:
+            if cls.__module__ == 'cheshire3.baseObjects':
+                base = cls
+                break
+        parents = base.__bases__
+
+    fns = inspect.getmembers(base, inspect.ismethod)
+    names = []
+    for (nm, fn) in fns:
+        if nm[0] == '_':
+            continue
+        aspec = inspect.getargspec(fn)
+        if len(aspec.args) > 1 and aspec.args[1] == 'session':            
+            if all:
+                names.append(nm)
+            else:
+                found = 0
+                for p in parents:
+                    if hasattr(p, nm):
+                        found = 1
+                        break
+                if not found:
+                    names.append(nm)
+    return names
+
+    
 
 def get_subpackages():
     sps = []
