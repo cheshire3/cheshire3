@@ -1,5 +1,6 @@
 # Version 1.0b1
 
+from cheshire3.session import Session
 from cheshire3.configParser import C3Object
 
 class Server(C3Object):
@@ -635,23 +636,6 @@ class Record:
 
     def fetch_vector(self, session, index, summary=False):
         raise(NotImplementedError)
-
-class Session:
-    """An object to be passed around amongst the processing objects to
-    maintain a session.  It stores, for example, the current
-    environment, user and identifier for the database."""
-    user = None
-    logger = None
-    task = ""
-    database = ""
-    environment = ""
-
-    def __init__(self, user=None, logger=None, task="", database="", environment="terminal"):
-        self.user = user
-        self.logger = logger
-        self.task = task
-        self.database = database
-        self.environment = environment
 
 
 class Workflow(C3Object):

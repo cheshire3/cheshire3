@@ -4,6 +4,7 @@ import hashlib
 import inspect
 from types import MethodType
 
+from cheshire3.session import Session
 
 from cheshire3 import dynamic
 from cheshire3.utils import getFirstData, elementType
@@ -419,14 +420,6 @@ class C3Object(object):
             if p[0:5] == 'c3fn:':
                 self.add_auth(p[5:])
 
-        # Built, maybe set function logging
-        log = self.get_setting(session, 'log')
-        if (log):
-            logList = log.strip().split()
-            for l in logList:
-                self.add_logging(l)
-            del self.settings['log']
-
         # Dynamically Instantiate objects. This is mindbending :}
         # Mindbending2: JIT building!
         if self.parent:
@@ -439,6 +432,15 @@ class C3Object(object):
         for t in pathObjects.keys():
             self.unresolvedObjects[t] = pathObjects[t]
 
+        # Built, maybe set function logging
+        log = self.get_setting(session, 'log')
+        if (log):
+            self.functionLogger = self.get_path(session, 'functionLogger')
+            print self.functionLogger
+            logList = log.strip().split()
+            for l in logList:
+                self.add_logging(session, l)
+            del self.settings['log']
 
         # now checksum self
         if self.checkSums:
@@ -530,7 +532,13 @@ class C3Object(object):
     def add_logging(self, session, name):
         """ Set a named function to log invocations."""
         if (name == "__all__"):
-            names = dir(self)
+            # log everything that uses Session
+            fns = inspect.getmembers(self, inspect.ismethod)
+            names = []
+            for fn in fns:
+                aspec = inspect.getargspec(fn[1])
+                if len(aspec.args) > 1 and aspec.args[1] == 'session':
+                    names.append(fn[0])
         else:
             names = [name]
         for name in names:
@@ -539,17 +547,13 @@ class C3Object(object):
                 setattr(self, "__postlog_%s" % (name), getattr(self, name))
                 code = """
 def mylogfn(self, *args, **kw):
-    if (hasattr(self,'__postlog_get_path')):
-        fn = self.__postlog_get_path
-    else:
-        fn = self.get_path
     if (isinstance(args[0], Session)):
         sess = args[0]
     else:
         sess = None
-    fl = fn(sess, 'functionLogger');
+    fl = self.functionLogger
     if (fl):
-        fl.log_fn(self, sess, '%s', *args, **kw);
+        fl.log_fn(sess, self, '%s', *args, **kw);
     return self.__postlog_%s(*args, **kw);""" % (name, name)
                 exec(code)
                 setattr(self, name, MethodType(locals()['mylogfn'], self, self.__class__))

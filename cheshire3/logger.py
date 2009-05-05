@@ -15,7 +15,7 @@ class SimpleLogger(Logger):
     _possiblePaths = {'filePath' : {'docs' : "Path to the where the logger will store its logs"}}
     _possibleSettings = {'cacheLength' : {'docs' : "The number of log entries to cache in memory before writing to disk", 'type': int},
                          'minLevel' : {'docs' : 'The minimum level that this logger will record, if a level is given.', 'type' : int}}
-    _possibleDefaults = {'defaultLevel' : {'docs' : 'The default level to assign to logged messages if one isn\'t provided', 'type' : int}
+    _possibleDefaults = {'level' : {'docs' : 'The default level to assign to logged messages if one isn\'t provided', 'type' : int}
                          }
 
     def __init__(self, session, config, parent):
@@ -76,7 +76,7 @@ class SimpleLogger(Logger):
         line.append(atxt)
         line.append(")")
         line = ''.join(line)
-        self.log_lvl(session, 0, line)
+        self.log_lvl(session, self.defaultLevel, line)
 
     def log(self, session, msg):
         self.log_lvl(session, self.defaultLevel, msg)
