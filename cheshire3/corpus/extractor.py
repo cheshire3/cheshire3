@@ -19,24 +19,29 @@ class TaggedTermExtractor(SimpleExtractor):
     def _flattenTexts(self, elem):
         # XXX This only implements LXML version
         texts = []
+        
         ws = elem.xpath('.//toks/w')
         lastOffset = 10000000000
         totalOffset = 0
         thisOffset = 0
+        lastLen = 0
         for w in ws:
             bits = {}
             attr = w.attrib
             bits['text'] = w.text
             bits['pos'] = attr.get('p', '??')
             bits['stem'] = attr.get('s', w.text)
-            o = int(attr.get('o', '-1'))
-            if o < lastOffset:
+            o = int(attr.get('o', '-1'))           
+            if o < lastOffset + lastLen:               
                 totalOffset += thisOffset
                 thisOffset = len(w.xpath('../../txt/text()')[0]) + 1
+            lastLen = len(w.text)
             lastOffset = o
             o += totalOffset
+            
             bits['offset'] = o
-            texts.append("%(text)s/%(pos)s/%(stem)s/%(offset)s" % bits)
+            texts.append("%(text)s/%(pos)s/%(stem)s/%(offset)s" % bits)           
+           
         return ' '.join(texts)
 
         
