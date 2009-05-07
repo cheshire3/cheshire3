@@ -434,14 +434,20 @@ class C3Object(object):
             self.unresolvedObjects[t] = pathObjects[t]
 
         # Built, maybe set function logging
-        log = self.get_setting(session, 'log')
-        if (log):
-            self.functionLogger = self.get_path(session, 'functionLogger')
-            print self.functionLogger
-            logList = log.strip().split()
-            for l in logList:
-                self.add_logging(session, l)
-            del self.settings['log']
+        log = self.get_setting(session, 'log', session.server.defaultFunctionLog)
+        if log:
+            fl = self.get_path(session, 'functionLogger')
+            if fl != self:
+                self.functionLogger = fl
+                logList = log.strip().split()
+                for l in logList:
+                    self.add_logging(session, l)
+                try:
+                    del self.settings['log']
+                except KeyError:
+                    # from default
+                    pass
+
 
         # now checksum self
         if self.checkSums:
@@ -523,7 +529,10 @@ class C3Object(object):
         elif (id in self.unresolvedObjects):
             o = self.get_object(session, self.unresolvedObjects[id])
             self.paths[id] = o
-            del self.unresolvedObjects[id]
+            try:
+                del self.unresolvedObjects[id]
+            except KeyError:
+                pass
             return o
         elif (self.parent != None):
             return self.parent.get_path(session, id, default)

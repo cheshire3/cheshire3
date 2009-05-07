@@ -58,7 +58,8 @@ class SimpleLogger(Logger):
         if (len(self.lineCache) > self.cacheLen):
             for l in self.lineCache:
                 self.fileh.write(l + "\n")
-            self.fileh.flush()
+            if hasattr(self.fileh, 'flush'):
+                self.fileh.flush()
             self.lineCache = []
 
     def log_fn(self, session, object, fn, *args, **kw):

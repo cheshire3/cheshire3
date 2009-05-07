@@ -27,7 +27,7 @@ __all__ = ['database', 'documentFactory', 'document', 'exceptions',
 
 
 import cheshire3.internal
-sps = cheshire3.internal.get_subpackages()
+# sps = cheshire3.internal.get_subpackages()
 
 sps= ['web']
 

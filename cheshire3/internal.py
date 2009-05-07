@@ -27,10 +27,13 @@ def get_api(object, all=False):
         base = object.__class__
     else:
         l = inspect.getmro(object.__class__)
+        base = None
         for cls in l:
             if cls.__module__ == 'cheshire3.baseObjects':
                 base = cls
                 break
+        if not base:
+            return []
         parents = base.__bases__
 
     fns = inspect.getmembers(base, inspect.ismethod)
