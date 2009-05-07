@@ -875,11 +875,11 @@ class BdbIndexStore(IndexStore):
         docid = "%s|%s" % (self.storeHashReverse[rec.recordStore], docid)
 
         if summary:
-            data = cxn.get(docid, doff=0, dlen=8)
+            data = cxn.get(docid, doff=0, dlen=2*index.longStructSize)
         else:
             data = cxn.get(docid)
         if data:
-            flat = struct.unpack('L' * (len(data)/4), data)
+            flat = struct.unpack('L' * (len(data)/index.longStructSize), data)
             lf = len(flat)
             unflatten = [(flat[x], flat[x+1]) for x in xrange(0,lf,2)]
             # totalTerms, totalFreq, [(termId, freq),...]
@@ -906,8 +906,9 @@ class BdbIndexStore(IndexStore):
                 docid = self._get_internalId(session, rec)         
 
         nProxInts = index.get_setting(session, 'nProxInts', 2)
+        longStructSize = index.longStructSize
         def unpack(data):
-            flat = struct.unpack('L' * (len(data)/4), data)
+            flat = struct.unpack('L' * (len(data)/longStructSize), data)
             lf = len(flat)
             unflat = [flat[x:x+nProxInts] for x in range(0,lf,nProxInts)]
             return unflat
