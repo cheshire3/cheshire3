@@ -1565,3 +1565,6 @@ class ClusterExtractionIndex(SimpleIndex):
 
     def delete_record(self, session, rec):
         pass
+    
+    
+    
