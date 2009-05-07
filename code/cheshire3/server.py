@@ -8,7 +8,8 @@ class SimpleServer(Server):
     _possiblePaths = {'sortPath' : {"docs" : "Path to the 'sort' utility"}}
 
     def __init__(self, session, configFile="serverConfig.xml"):
-        self.defaultFunctionLog = "__api__"
+        # self.defaultFunctionLog = "__api__"
+        self.defaultFunctionLog = ""
         self.databaseConfigs = {}
         self.databases = {}
         self.id = "DefaultServer"
