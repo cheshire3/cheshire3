@@ -8,6 +8,7 @@ class SimpleServer(Server):
     _possiblePaths = {'sortPath' : {"docs" : "Path to the 'sort' utility"}}
 
     def __init__(self, session, configFile="serverConfig.xml"):
+        self.defaultFunctionLog = "__api__"
         self.databaseConfigs = {}
         self.databases = {}
         self.id = "DefaultServer"
@@ -20,6 +21,7 @@ class SimpleServer(Server):
         except:
             topNode = dom
         C3Object.__init__(self, session, topNode, None)
+
         
     def _cacheDatabases(self, session):
         for dbid in self.databaseConfigs.keys():

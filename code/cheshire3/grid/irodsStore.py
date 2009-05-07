@@ -1,13 +1,15 @@
 
 from cheshire3.configParser import C3Object
 from cheshire3.baseStore import SimpleStore
-from cheshire3.baseObjects import Database
+from cheshire3.baseObjects import Database, Logger
 from cheshire3.recordStore import SimpleRecordStore, BdbRecordStore
 from cheshire3.documentStore import SimpleDocumentStore
 from cheshire3.objectStore import SimpleObjectStore
 from cheshire3.resultSetStore import SimpleResultSetStore
 from cheshire3.documentFactory import MultipleDocumentStream
 from cheshire3.exceptions import ObjectAlreadyExistsException, ObjectDoesNotExistException
+
+from cheshire3.logger import SimpleLogger
 
 from cheshire3.indexStore import BdbIndexStore
 from cheshire3.baseStore import SwitchingBdbConnection
@@ -41,6 +43,55 @@ def pyValToIcat(val):
         return (val, 'str')
 
     
+
+class IrodsLogger(SimpleLogger):
+
+    def __init__(self, session, config, parent):
+        Logger.__init__(self, session, config, parent)
+        fp = self.get_path(session, 'filePath', 'log.txt')
+        self.fp = fp
+        myEnv, status = irods.getRodsEnv()
+        conn, errMsg = irods.rcConnect(myEnv.getRodsHost(), myEnv.getRodsPort(), 
+                                       myEnv.getRodsUserName(), myEnv.getRodsZone())
+        status = irods.clientLogin(conn)
+        if status:
+            raise ConfigFileException("Cannot connect to iRODS: (%s) %s" % (status, errMsg))
+        self.cxn = conn
+        self.env = myEnv
+            
+        c = irods.irodsCollection(self.cxn, self.env.getRodsHome())
+        self.coll = c
+        c.openCollection('cheshire3')
+        c.openCollection('logs')
+
+        f = self.coll.create(fp)
+        self.fileh = f
+
+        self.cacheLen = self.get_setting(session, 'cacheLength', 10)
+        self.minLevel = self.get_setting(session, 'minLevel', 0)
+        self.defaultLevel = self.get_default(session, 'level', 0)
+
+    def _logLine(self, lvl, line, *args, **kw):
+
+        # templating here etc
+        now = time.strftime("%Y-%m-%d %H:%M:%S")
+        lvlstr = ['NOTSET', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'][min(int(lvl/10), 5)]
+        line = "[%s] %s: %s" % (now, lvlstr, line)
+        
+        if (self.lineCache and self.lineCache[-1].startswith(line)):
+            self.lineCache[-1] += "."
+        else:
+            self.lineCache.append(line)
+        if (len(self.lineCache) > self.cacheLen):
+            for l in self.lineCache:
+                self.fileh.write(l + "\n")
+            # and now close and reopen with append
+            self.fileh.close()
+            fp = self.coll.getCollName() + '/' + self.fp
+            self.fileh = irods.iRodsOpen(self.cxn, fp, 'w')
+            self.fileh.seek(self.fileh.getSize())
+            self.lineCache = []
+        
 
 class IrodsStore(SimpleStore):
 
