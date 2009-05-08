@@ -298,6 +298,7 @@ class C3Object(object):
         self._includeConfigStores = []
         self.logger = None
         self.checkSums = {}
+        self.pathCheckSums = {}
         
         pathObjects = {}
         
@@ -312,8 +313,16 @@ class C3Object(object):
                     self.objectType = e.text
                 elif e.tag == 'checkSum':
                     # store checksum on self, and hash code against it
+                    pt = e.attrib.get('pathType', '__code__')
                     ct = e.attrib.get('type', 'md5')
-                    self.checkSums[ct] = e.text
+                    if pt != '__code__':
+                        try:
+                            self.pathCheckSums[pt].append((ct, e.text))
+                        except KeyError:
+                            self.pathCheckSums[pt] = [(ct, e.text)]
+                    else:
+                        self.checkSums[ct] = e.text
+                    
                 elif e.tag == 'paths':
                     for e2 in e.iterchildren(tag=etree.Element):
                         try:
@@ -458,6 +467,33 @@ class C3Object(object):
                 digest = m.hexdigest()
                 if digest != val:
                     raise IntegrityException(self.id + ": " + digest)
+
+        if self.pathCheckSums:
+            # step through each referenced file and check
+            for (pt, chk) in self.pathCheckSums.items():
+                for (ct, val) in chk:
+                    m = hashlib.new(ct)
+                    # read in file
+                    fn = self.get_path(session, pt)
+                    if not os.path.isabs(fn):
+                        if pt == 'executable':
+                            # search
+                            dp = self.get_path('session', 'executablePath', '')
+                            if not dp:
+                                dp = commands.getoutput('which %s' % fn)                        
+                        else:
+                            dp = self.get_path(session, 'defaultPath')
+                        fn = os.path.join(dp, fn)
+                    fh = file(fn)
+                    data = fh.read()
+                    fh.close()
+
+                    m.update(data)
+                    digest = m.hexdigest()
+                    if digest != val:
+                        raise IntegrityException("%s/%s (%s): %s" % (self.id, pt, fn, digest))
+                
+            
         
             
         # Now check for configStore objects

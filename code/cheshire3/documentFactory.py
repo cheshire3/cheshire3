@@ -150,7 +150,7 @@ class XmlDocumentStream(BaseDocumentStream):
         while True:
             ol = len(line)
             # if 10000 bytes of garbage between docs, then will exit
-            if not self.tagName and ol < self.maxGarbageBytes:
+            if self.tagName or ol < self.maxGarbageBytes:
                 line += self.stream.read(1024)
             else:
                 self.factory.log_critical(session, "Exiting from XML Document Stream before end of stream (%s), reached maximum garbage bytes (%s)" % (self.streamLocation, self.maxGarbageBytes))
