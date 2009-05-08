@@ -36,7 +36,7 @@ class BaseDocumentStream:
     startOffset = 0
     endOffset = -1
 
-    def __init__(self, session, stream, format, tagName=None, codec=None, factory=None ):
+    def __init__(self, session, stream, format, tagName="", codec=None, factory=None ):
         self.startOffset = 0
         self.endOffset = -1
         self.factory = factory
@@ -127,6 +127,7 @@ class XmlDocumentStream(BaseDocumentStream):
         else:
             self.start = re.compile("<%s[\s>]" % tagName)
             self.endtag = "</" + tagName + ">"
+        self.maxGarbageBytes = factory.get_setting(session, 'maxGarbageBytes', 10000)
             
     def find_documents(self, session, cache=0):
 
@@ -149,8 +150,10 @@ class XmlDocumentStream(BaseDocumentStream):
         while True:
             ol = len(line)
             # if 10000 bytes of garbage between docs, then will exit
-            if ol < 10000:
+            if not self.tagName and ol < self.maxGarbageBytes:
                 line += self.stream.read(1024)
+            else:
+                self.factory.log_critical(session, "Exiting from XML Document Stream before end of stream (%s), reached maximum garbage bytes (%s)" % (self.streamLocation, self.maxGarbageBytes))
             pi = line.find("<?xml ")                
             if (pi > -1):
                 # Store info
@@ -620,7 +623,8 @@ class SimpleDocumentFactory(DocumentFactory):
     _possibleSettings = {'filterRegexp' : {'docs' : "Filename filter for files to attempt to load in a multiple document stream (eg from a directory)"}
                          , 'googleKey' : {'docs' : "Key supplied by Google for using their web service interface"}
                          , 'osdUrl' : {'docs' : "URL to the OpenSearch description document"}
-                         , 'linkedItem' : {'docs' : "Should the factory return the RSS/ATOM item, or the item which it is linked to."}
+                         , 'linkedItem' : {'docs' : "Should the factory return the RSS/ATOM item, or the item which it is linked to."},
+                         'maxGarbageBytes' : {'docs' : 'Number of bytes of non document content after which to exit', 'type' : int}
                          }
 
     
