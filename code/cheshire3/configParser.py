@@ -299,12 +299,20 @@ class C3Object(object):
         self.logger = None
         self.checkSums = {}
         self.pathCheckSums = {}
+
+        self.version = ""
+        self.complexity = ""
+        self.stability = ""
         
         pathObjects = {}
         
         # LXML
         if hasattr(config, 'attrib'):
             self.id = config.attrib.get('id', '')
+            self.version = e.attrib.get('version', '')
+            self.complexity = e.attrib.get('complexity', '')
+            self.stability = e.attrib.get('stability', '')
+
             walker = config.iterchildren(tag=etree.Element)
             for e in walker:
                 if e.tag == 'name':

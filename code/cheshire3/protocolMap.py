@@ -17,7 +17,7 @@ import sys, os
 class ZeerexProtocolMap(ProtocolMap):
     protocol = ""
     version = ""
-    c3Namespace = "http://www.cheshire3.org/schemas/explain/"
+    c3Namespace = "http://www.cheshire3.org/schemas/explain"
 
 
     _possiblePaths = {'zeerexPath' : {'docs' : "Path to ZeeRex file."}}

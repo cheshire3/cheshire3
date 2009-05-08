@@ -892,7 +892,7 @@ class BdbStore(SimpleStore):
             id = str(id)
         data = cxn.get(id)
 
-        if data and data[:41] == "\0http://www.cheshire3.org/status/DELETED:":
+        if data and data[:44] == "\0http://www.cheshire3.org/ns/status/DELETED:":
             data = DeletedObject(self, id, data[41:])
 
         if data and self.expires:
@@ -929,7 +929,7 @@ class BdbStore(SimpleStore):
         if self.get_setting(session, 'storeDeletions', 0):
             cxn = self._openDb(session, 'database')
             now = datetime.datetime.now(dateutil.tz.tzutc()).strftime("%Y-%m-%dT%H:%M:%S%Z").replace('UTC', 'Z')            
-            cxn.put(id, "\0http://www.cheshire3.org/status/DELETED:%s" % now)
+            cxn.put(id, "\0http://www.cheshire3.org/ns/status/DELETED:%s" % now)
             cxn.sync()
 
 
@@ -1117,7 +1117,7 @@ class FileSystemStore(BdbStore):
             self.currFileHandle.seek(start)
         data = self.currFileHandle.read(length)
 
-        if data and data[:41] == "\0http://www.cheshire3.org/status/DELETED:":
+        if data and data[:44] == "\0http://www.cheshire3.org/ns/status/DELETED:":
             data = DeletedObject(self, id, data[41:])
         elif self.outWorkflow:
             data = self.outWorkflow.process(session, data)
@@ -1158,7 +1158,7 @@ class FileSystemStore(BdbStore):
         # Maybe store the fact that this object used to exist.
         if self.get_setting(session, 'storeDeletions', 0):
             now = datetime.datetime.now(dateutil.tz.tzutc()).strftime("%Y-%m-%dT%H:%M:%S%Z").replace('UTC', 'Z')            
-            out = "\0http://www.cheshire3.org/status/DELETED:%s" % now
+            out = "\0http://www.cheshire3.org/ns/status/DELETED:%s" % now
 
             if len(out) < length:
                 f = file(filename, 'w')
