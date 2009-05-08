@@ -227,18 +227,19 @@ class C3Object(object):
 
     def _parseLxmlIncludes(self, session, path):
         dom = self._getDomFromFile(session, path)
-        for e in dom.iterchildren(tag=etree.Element):
-            if e.tag == 'subConfigs':
-                self._recurseLxmlSubConfigs(session, e)
+        idt = dom.attrib.get('id', '')
+        if dom.tag == 'config' and idt:
+            self.subConfigs[idt] = dom
+        else:
+            for e in dom.iterchildren(tag=etree.Element):
+                if e.tag == 'subConfigs':
+                    self._recurseLxmlSubConfigs(session, e)
 
     def _recurseLxmlSubConfigs(self, session, elem):
         for e in elem.iterchildren(tag=etree.Element):
             if e.tag == 'subConfig':
                 id = e.attrib.get('id', '')
                 typ = e.attrib.get('type', '')
-                self.version = e.attrib.get('version', '')
-                self.complexity = e.attrib.get('complexity', '')
-                self.stability = e.attrib.get('stability', '')
                 self.subConfigs[id] = e
                 if typ == 'index':
                     self.indexConfigs[id] = e
@@ -309,9 +310,9 @@ class C3Object(object):
         # LXML
         if hasattr(config, 'attrib'):
             self.id = config.attrib.get('id', '')
-            self.version = e.attrib.get('version', '')
-            self.complexity = e.attrib.get('complexity', '')
-            self.stability = e.attrib.get('stability', '')
+            self.version = config.attrib.get('version', '')
+            self.complexity = config.attrib.get('complexity', '')
+            self.stability = config.attrib.get('stability', '')
 
             walker = config.iterchildren(tag=etree.Element)
             for e in walker:
