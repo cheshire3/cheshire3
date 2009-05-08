@@ -1,0 +1,7 @@
+<config>
+  <subConfigs>
+    <subConfig type="transformer" id="GRS1Transformer">
+      <objectType>cheshire3.web.transformer.GRS1Transformer</objectType>
+    </subConfig>
+  </subConfigs>
+</config>
