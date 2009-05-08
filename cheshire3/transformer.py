@@ -53,7 +53,7 @@ from lxml import etree
 
 def myTimeFn(dummy):
     # call as <xsl:value-of select="c3fn:now()"/>
-    # with c3fn defined as http://www.cheshire3.org/ns/function/xsl
+    # with c3fn defined as http://www.cheshire3.org/ns/function/xsl/
     return time.strftime("%Y-%m-%dT%H:%M:%SZ")
  
 
@@ -72,7 +72,7 @@ class LxmlXsltTransformer(Transformer):
         dfp = self.get_path(session, "defaultPath")
         path = os.path.join(dfp, xfrPath)
         
-        ns = etree.FunctionNamespace('http://www.cheshire3.org/ns/function/xsl')
+        ns = etree.FunctionNamespace('http://www.cheshire3.org/ns/function/xsl/')
         ns['now'] = myTimeFn
         self.functionNamespace = ns
         self.parsedXslt = etree.parse(path)
@@ -113,7 +113,7 @@ class LxmlQueryTermHighlightingTransformer(Transformer):
         htag = self.get_setting(session, 'highlightTag', None)
         if htag is None:
             self.highlightTag = 'c3:highlight'
-            self.attrs = {'xmlns:c3': "http://www.cheshire3.org/schemas/highlight"}
+            self.attrs = {'xmlns:c3': "http://www.cheshire3.org/schemas/highlight/"}
         else:
             self.highlightTag = htag 
             self.attrs = {}

@@ -549,7 +549,7 @@ class ComponentDocumentStream(BaseDocumentStream):
                         hasNs = hasNsRe.search(docstr)
                         saxid = r[-1][r[-1].rfind(' ')+1:]
                         if hasNs:
-                            docstr = "<c3:component xmlns:c3=\"http://www.cheshire3.org/schemas/component\" parent=\"%r\" event=\"%s\">%s</c3:component>" % (rec, saxid, docstr)
+                            docstr = "<c3:component xmlns:c3=\"http://www.cheshire3.org/schemas/component/\" parent=\"%r\" event=\"%s\">%s</c3:component>" % (rec, saxid, docstr)
                         else:
                             docstr = "<c3component parent=\"%r\" event=\"%s\">%s</c3component>" % (rec, saxid, docstr)
                     elif (type(r) == types.StringType):
@@ -566,7 +566,7 @@ class ComponentDocumentStream(BaseDocumentStream):
                                 for (pref, ns) in r.nsmap.iteritems():
                                     namespaceList.append("xmlns:%s=\"%s\"" % (pref, ns))
                                 namespaces = " ".join(namespaceList)
-                                docstr = """<c3:component xmlns:c3="http://www.cheshire3.org/schemas/component" %s parent="%r" xpath="%s">%s</c3component>""" % (namespaces, rec, path, docstr)
+                                docstr = """<c3:component xmlns:c3="http://www.cheshire3.org/schemas/component/" %s parent="%r" xpath="%s">%s</c3component>""" % (namespaces, rec, path, docstr)
                             else:
                                 docstr = """<c3component parent="%r" xpath="%s">%s</c3component>""" % (rec, path, docstr)
                         else:
