@@ -18,18 +18,29 @@ class TsujiiChunkerPreParser(PreParser):
     inh = None
     outh = None
 
-    _possiblePaths = {'chunkerPath' : {'docs' : "Path to the directory where the chunker lives."}}
+    _possiblePaths = {'executablePath' : {'docs' : "Path to the directory where the chunker lives."},
+                      'executable' : {'docs' : 'Name of the executable'}}
 
     def __init__(self, session, node, parent):
 	PreParser.__init__(self, session, node, parent)
+
+        tp = self.get_path(session, 'executablePath', '')
+        exe = self.get_path(session, 'executable', './parser')
+        if not tp:
+            tp = commands.getoutput('which %s' % exe)
+	    tp = os.path.dirname(tp)
+            
+        tp = os.path.join(tp, exe)
+
+	if not tp:
+            raise ConfigFileException("%s requires the path: filePath" % self.id)
+
+        o = os.getcwd()
+	os.chdir(tp)
+
 	o = os.getcwd()
-        tp = self.get_path(session, 'chunkerPath')
-        if tp:
-            os.chdir(tp)
-        else:
-            os.chdir('../../code/textmining')
-        cmd = './parser'
-        self.pipe = Popen(cmd, shell=True, bufsize=1, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        os.chdir(tp)
+        self.pipe = Popen(exe, shell=True, bufsize=1, stdin=PIPE, stdout=PIPE, stderr=PIPE)
         os.chdir(o)
         
     def process_document(self, session, doc):

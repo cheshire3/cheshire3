@@ -11,14 +11,17 @@ class TsujiiObject:
     pipe = None
     tokenizer = None
 
-    _possiblePaths = {'taggerPath' : {'docs' : "Path to the tagger executable's directory, as must be run from there."}}
+    _possiblePaths = {'executablePath' : {'docs' : "Path to the tagger executable's directory, as must be run from there."},
+                      'executable' : {'docs' : 'Name of executable'}}
 
     def __init__(self, session, node, parent):
         o = os.getcwd()
-        tp = self.get_path(session, 'taggerPath')
+        tp = self.get_path(session, 'executablePath')
 	if tp:
             os.chdir(tp)
-        self.pipe = Popen("./tagger", shell=True, bufsize=1, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        exe = self.get_path(session, 'executable', './tagger')
+
+        self.pipe = Popen(exe, shell=True, bufsize=1, stdin=PIPE, stdout=PIPE, stderr=PIPE)
         os.chdir(o)
         
     def tag(self, session, data, xml=0):
@@ -52,17 +55,19 @@ class EnjuObject:
     pipe = None
     tokenizer = None
 
-    _possiblePaths = {'enjuPath'  : {'docs' : "Path to enju executable."}}
+    _possiblePaths = {'executablePath'  : {'docs' : "Path to enju executable."},
+                      'executable' : {'docs' : 'Name of executable'}}
     _possibleSettings = {'xml' : {'docs' : 'Should return XML form (1, default) or text (0)',
                                   'type' : int,
                                   'options' : '0|1'}}
 
     def __init__(self, session, node, parent):
-        tp = self.get_path(session, 'enjuPath')
+        tp = self.get_path(session, 'executablePath', '')
+        exe = self.get_path(session, 'executable', 'enju')
         if not tp:
-            tp = commands.getoutput('which enju')
-        if not tp:
-            raise ConfigFileException("%s requires the path: enjuPath" % self.id)
+            tp = commands.getoutput('which %s' % exe)
+        else:
+            tp = os.path.join(tp, exe)
         xml = self.get_setting(session, 'xml', 1)
         if xml:            
             cmd = "%s -xml" % tp
@@ -93,26 +98,34 @@ class GeniaObject:
     pipe = None
     tokenizer = None
 
-    _possiblePaths = {'filePath' : {'docs' : "Path to geniatagger executable."}}
+    _possiblePaths = {'executablePath' : {'docs' : "Path to geniatagger executable."},
+                      'executable' : {'docs' : 'Name of executable'}}
+                      }
+
     _possibleSettings = {'parseOutput' : {'docs' : "If 0 (default), then the output from the object will be the lines from genia, otherwise it will interpret back to word/POS", 'type' : int, 'options' : "0|1"},
                          'tokenize' : {'docs' : '', 'type' : int, 'options' : '0|1'}
                          }
 
     def __init__(self, session, node, parent):
         self.unparsedOutput = self.get_setting(session, 'parseOutput', 0)
-        tp = self.get_path(session, 'filePath')
+
+        tp = self.get_path(session, 'executablePath', '')
+        exe = self.get_path(session, 'executable', './geniatagger')
         if not tp:
-            tp = commands.getoutput('which geniatagger')
+            tp = commands.getoutput('which %s' % exe)
 	    tp = os.path.dirname(tp)
+            
+        tp = os.path.join(tp, exe)
+
 	if not tp:
             raise ConfigFileException("%s requires the path: filePath" % self.id)
-        # must be run in right directory :(
+
         o = os.getcwd()
 	os.chdir(tp)
         if self.get_setting(session, 'tokenize', 0):
-            cmd = "./geniatagger"
+            cmd = exe
         else:
-            cmd ="./geniatagger -nt"
+            cmd ="%s -nt" % exe
         self.pipe = Popen(cmd, shell=True, bufsize=1, stdin=PIPE, stdout=PIPE, stderr=PIPE)
 
         l = ""
