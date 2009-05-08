@@ -112,10 +112,11 @@
   <subConfig type="preParser" id="PdfXmlPreParser">
      <objectType>cheshire3.preParser.CmdLinePreParser</objectType>
      <paths>
-       <path type="commandLine">pdftohtml -xml %INDOC% %OUTDOC%</path>
+        <path type="executable">pdftohtml</path>
      </paths>
      <options>
        <setting type="outMimeType">text/xml</setting>
+       <setting type="commandLine">-xml %INDOC% %OUTDOC%</setting>
      </options>
   </subConfig>
 
@@ -152,10 +153,11 @@
    <subConfig type="preParser" id="PsPdfPreParser">
      <objectType>cheshire3.preParser.CmdLinePreParser</objectType>
      <paths>
-       <path type="commandLine">ps2pdf - -</path>
+        <path type="executable">ps2pdf</path>
      </paths>
      <options>
        <setting type="outMimeType">application/pdf</setting>
+       <setting type="commandLine">- -</setting>
      </options>
    </subConfig>
 
@@ -164,10 +166,11 @@
    <subConfig type="preParser" id="PdfToTxtPreParser">
      <objectType>cheshire3.preParser.CmdLinePreParser</objectType>
      <paths>
-       <path type="commandLine">pdftotext -raw -nopgbrk %INDOC% %OUTDOC%</path>
+       <path type="executable">pdftotext</path>
      </paths>
      <options>
        <setting type="outMimeType">text/plain</setting>
+        <setting type="commandLine">-raw -nopgbrk %INDOC% %OUTDOC%</setting>
      </options>
    </subConfig>
 
@@ -183,10 +186,11 @@
   <subConfig type="preParser" id="HtmlTidyPreParser">
      <objectType>cheshire3.preParser.CmdLinePreParser</objectType>
      <paths>
-       <path type="commandLine">tidy -asxml -i -o %OUTDOC% %INDOC%</path>
+       <path type="executable">tidy</path>
      </paths>
      <options>
        <setting type="outMimeType">text/xml</setting>
+       <setting type="commandLine">-asxml -i -o %OUTDOC% %INDOC%</setting>
      </options>
   </subConfig>
 
