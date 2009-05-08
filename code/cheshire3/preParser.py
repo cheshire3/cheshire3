@@ -2,6 +2,7 @@
 from cheshire3.baseObjects import PreParser
 from cheshire3.document import StringDocument
 from cheshire3.marc_utils import MARC
+from cheshire3.exceptions import ConfigFileException
 
 import re, gzip, string, binascii, cStringIO as StringIO
 import bz2, os, commands, time
