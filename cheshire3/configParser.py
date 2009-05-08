@@ -311,17 +311,18 @@ class C3Object(object):
                     self.name = e.text
                 elif e.tag == 'objectType':
                     self.objectType = e.text
-                elif e.tag == 'checkSum':
-                    # store checksum on self, and hash code against it
-                    pt = e.attrib.get('pathType', '__code__')
-                    ct = e.attrib.get('type', 'md5')
-                    if pt != '__code__':
-                        try:
-                            self.pathCheckSums[pt].append((ct, e.text))
-                        except KeyError:
-                            self.pathCheckSums[pt] = [(ct, e.text)]
-                    else:
-                        self.checkSums[ct] = e.text
+                elif e.tag == 'checkSums':
+                    for e2 in e.iterchildren(tag=etree.Element):
+                        # store checksum on self, and hash code against it
+                        pt = e2.attrib.get('pathType', '__code__')
+                        ct = e2.attrib.get('type', 'md5')
+                        if pt != '__code__':
+                            try:
+                                self.pathCheckSums[pt].append((ct, e2.text))
+                            except KeyError:
+                                self.pathCheckSums[pt] = [(ct, e2.text)]
+                        else:
+                            self.checkSums[ct] = e2.text
                     
                 elif e.tag == 'paths':
                     for e2 in e.iterchildren(tag=etree.Element):
