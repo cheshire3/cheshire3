@@ -63,13 +63,22 @@ class UnicodeDecodePreParser(PreParser):
 
 class CmdLinePreParser(TypedPreParser):
 
-    _possiblePaths = {'commandLine' : {'docs' : "Command line to use.  %INDOC% is substituted to create a temporary file to read, and %OUTDOC% is substituted for a temporary file for the process to write to"}}
+    _possiblePaths = {'executable' : {'docs' : "Name of the executable to run"},
+                      'executablePath' : {'docs' : "Path to the executable"}}
+    _possibleSettings = {'commandLine' : {'docs' : "Command line to use.  %INDOC% is substituted to create a temporary file to read, and %OUTDOC% is substituted for a temporary file for the process to write to"}}
 
     def __init__(self, session, config, parent):
         TypedPreParser.__init__(self, session, config, parent)
-        self.cmd = self.get_path(session, 'commandLine', '')
-        if not self.cmd:
-            raise ConfigFileException("Missing mandatory 'commandLine' path in %s" % self.id)
+        exe = self.get_path(session, 'executable', '')
+        if not exe:
+            raise ConfigFileException("Missing mandatory 'executable' path in %s" % self.id)
+        tp = self.get_path(session, 'executablePath', '')
+        if tp:
+            exe = os.path.join(tp, exe)
+
+        cl = self.get_setting(session, 'commandLine', '')
+        self.cmd = exe + ' ' + cl
+
         # %INDOC%: create temp file for in
         # %OUTDOC%: create temp file to out
                    
