@@ -181,7 +181,7 @@ class SQLiteStore(SimpleStore):
             raise ObjectDoesNotExistException(id)
         data = data.decode('string_escape')
 
-        if data and data[:41] == "\0http://www.cheshire3.org/status/DELETED:":
+        if data and data[:44] == "\0http://www.cheshire3.org/ns/status/DELETED:":
             data = DeletedObject(self, id, data[41:])
         if data and self.expires:
             # update touched
@@ -205,7 +205,7 @@ class SQLiteStore(SimpleStore):
         if self.get_setting(session, 'storeDeletions', 0):
             now = datetime.datetime.now(dateutil.tz.tzutc()).strftime("%Y-%m-%dT%H:%M:%S%Z").replace('UTC', 'Z')            
             query = "INSERT INTO %s ('identifier', 'data', 'modifiedTime') VALUES (?, ? ,?)" % self.id
-            data = "\0http://www.cheshire3.org/status/DELETED:%s" % now
+            data = "\0http://www.cheshire3.org/ns/status/DELETED:%s" % now
             self.cxn.execute(query, (id, data, now))
         self.flush(session)
         return None

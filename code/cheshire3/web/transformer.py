@@ -149,7 +149,7 @@ class GrsMapTransformer(Transformer):
         elif xpath[:8] == '#PARENT#':
             # Get parent docid out of record
             try: 
-                parent = rec.process_xpath(session, '/c3:component/@parent', {'c3':'http://www.cheshire3.org/'})[0]
+                parent = rec.process_xpath(session, '/c3:component/@parent', {'c3':'http://www.cheshire3.org/schemas/component/'})[0]
             except IndexError:
                 # probably no namespaces
                 parent = rec.process_xpath(session, '/c3component/@parent')[0]

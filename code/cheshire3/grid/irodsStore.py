@@ -307,7 +307,7 @@ class IrodsStore(SimpleStore):
         # Maybe store the fact that this object used to exist.
         if self.get_setting(session, 'storeDeletions', 0):
             now = datetime.datetime.now(dateutil.tz.tzutc()).strftime("%Y-%m-%dT%H:%M:%S%Z").replace('UTC', 'Z')
-            data = "\0http://www.cheshire3.org/status/DELETED:%s" % now
+            data = "\0http://www.cheshire3.org/ns/status/DELETED:%s" % now
             f = self.coll.create(id)
             f.write(data)
             f.close()
@@ -330,7 +330,7 @@ class IrodsStore(SimpleStore):
         else:
             return None
         
-        if data and data[:41] == "\0http://www.cheshire3.org/status/DELETED:":
+        if data and data[:44] == "\0http://www.cheshire3.org/ns/status/DELETED:":
             data = DeletedObject(self, id, data[41:])
 
         if data and self.expires:
