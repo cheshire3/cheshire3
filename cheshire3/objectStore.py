@@ -60,8 +60,8 @@ class BdbObjectIter(BdbIter):
 
     def next(self):
         d = BdbIter.next(self)
-        rec = self.store._process_data(None, d[0], d[1])
-        obj = self.store._processRecord(None, d[0], rec)
+        rec = self.store._process_data(self.session, d[0], d[1])
+        obj = self.store._processRecord(self.session, d[0], rec)
         return obj
 
     
