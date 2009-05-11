@@ -15,6 +15,8 @@ from cheshire3.permissionHandler import PermissionHandler
 from cheshire3.internal import defaultArchitecture, get_api
 
 
+CONFIG_NS = "http://www.cheshire3.org/schemas/config/"
+
 from lxml import etree
 
 class CaselessDictionary(dict):
@@ -228,11 +230,12 @@ class C3Object(object):
     def _parseLxmlIncludes(self, session, path):
         dom = self._getDomFromFile(session, path)
         idt = dom.attrib.get('id', '')
-        if dom.tag == 'config' and idt:
+        
+        if dom.tag in ['config', '{%s}config' % CONFIG_NS] and idt:
             self.subConfigs[idt] = dom
         else:
             for e in dom.iterchildren(tag=etree.Element):
-                if e.tag == 'subConfigs':
+                if e.tag in ['subConfigs', '{%s}subConfigs' % CONFIG_NS]:
                     self._recurseLxmlSubConfigs(session, e)
 
     def _recurseLxmlSubConfigs(self, session, elem):

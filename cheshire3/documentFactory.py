@@ -128,6 +128,17 @@ class XmlDocumentStream(BaseDocumentStream):
             self.start = re.compile("<%s[\s>]" % tagName)
             self.endtag = "</" + tagName + ">"
         self.maxGarbageBytes = factory.get_setting(session, 'maxGarbageBytes', 10000)
+
+
+    def _getStreamLen(self):
+        if hasattr(self.stream, 'getSize'):
+            return self.stream.getSize()
+        else:
+            orig = self.stream.tell()
+            self.stream.seek(0, os.SEEK_END)
+            fl =  self.stream.tell()
+            self.stream.seek(orig, os.SEEK_SET)
+            return fl
             
     def find_documents(self, session, cache=0):
 
@@ -140,8 +151,8 @@ class XmlDocumentStream(BaseDocumentStream):
         line = ""
         offOffset = 0
 
-        self.stream.seek(0, os.SEEK_END)
-        filelen = self.stream.tell()
+        filelen = self._getStreamLen()
+
         if self.startOffset > 0:
             self.stream.seek(self.startOffset, os.SEEK_SET)
         else:
@@ -203,19 +214,23 @@ class XmlDocumentStream(BaseDocumentStream):
                         offOffset += (byteCount - tlen)
                     else:
                         strStart = len(line)
+                        # Can we get by without using 'tell()' ?
+                        # eg for stream APIs that don't support it
+                        #if self.stream.tell() == filelen:
+
                         # check we have at least 1024 to read
-                        if self.stream.tell() == filelen:
+                        if myTell == filelen:
                             # we've got nuffink!
                             if cache == 0:
                                 self.stream.close()
                                 raise StopIteration
                             else:
                                 break
-                        if self.stream.tell() + 1024 < filelen:
+                        #if self.stream.tell() + 1024 < filelen:
+                        if myTell + 1024 < filelen:
                             line += self.stream.read(1024)
                         else:
                             line += self.stream.read()
-                        
                             
             if len(line) == ol and not m:
                 if cache == 0:
