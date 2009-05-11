@@ -1,15 +1,15 @@
 
 from cheshire3.configParser import C3Object
 from cheshire3.baseStore import SimpleStore
-from cheshire3.baseObjects import Database, Logger
+from cheshire3.baseObjects import Database
 from cheshire3.recordStore import SimpleRecordStore, BdbRecordStore
 from cheshire3.documentStore import SimpleDocumentStore
 from cheshire3.objectStore import SimpleObjectStore
 from cheshire3.resultSetStore import SimpleResultSetStore
 from cheshire3.documentFactory import MultipleDocumentStream
-from cheshire3.exceptions import ObjectAlreadyExistsException, ObjectDoesNotExistException
 
-from cheshire3.logger import SimpleLogger
+from cheshire3.exceptions import ObjectAlreadyExistsException, ObjectDoesNotExistException, ConfigFileException
+
 
 from cheshire3.indexStore import BdbIndexStore
 from cheshire3.baseStore import SwitchingBdbConnection
@@ -43,56 +43,6 @@ def pyValToIcat(val):
         return (val, 'str')
 
     
-
-class IrodsLogger(SimpleLogger):
-
-    def __init__(self, session, config, parent):
-        Logger.__init__(self, session, config, parent)
-        fp = self.get_path(session, 'filePath', 'log.txt')
-        self.fp = fp
-        myEnv, status = irods.getRodsEnv()
-        conn, errMsg = irods.rcConnect(myEnv.getRodsHost(), myEnv.getRodsPort(), 
-                                       myEnv.getRodsUserName(), myEnv.getRodsZone())
-        status = irods.clientLogin(conn)
-        if status:
-            raise ConfigFileException("Cannot connect to iRODS: (%s) %s" % (status, errMsg))
-        self.cxn = conn
-        self.env = myEnv
-            
-        c = irods.irodsCollection(self.cxn, self.env.getRodsHome())
-        self.coll = c
-        c.openCollection('cheshire3')
-        c.openCollection('logs')
-
-        f = self.coll.create(fp)
-        self.fileh = f
-
-        self.cacheLen = self.get_setting(session, 'cacheLength', 10)
-        self.minLevel = self.get_setting(session, 'minLevel', 0)
-        self.defaultLevel = self.get_default(session, 'level', 0)
-
-    def _logLine(self, lvl, line, *args, **kw):
-
-        # templating here etc
-        now = time.strftime("%Y-%m-%d %H:%M:%S")
-        lvlstr = ['NOTSET', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'][min(int(lvl/10), 5)]
-        line = "[%s] %s: %s" % (now, lvlstr, line)
-        
-        if (self.lineCache and self.lineCache[-1].startswith(line)):
-            self.lineCache[-1] += "."
-        else:
-            self.lineCache.append(line)
-        if (len(self.lineCache) > self.cacheLen):
-            for l in self.lineCache:
-                self.fileh.write(l + "\n")
-            # and now close and reopen with append
-            self.fileh.close()
-            fp = self.coll.getCollName() + '/' + self.fp
-            self.fileh = irods.iRodsOpen(self.cxn, fp, 'w')
-            self.fileh.seek(self.fileh.getSize())
-            self.lineCache = []
-        
-
 class IrodsStore(SimpleStore):
 
     cxn = None
@@ -590,6 +540,8 @@ class IrodsSwitchingRecordStore(BdbRecordStore):
         self.env = None
 
 
+# -----------------------------------------------------------
+
 class IrodsIndexStore(BdbIndexStore):
 
     def __init__(self, session, config, parent):
@@ -653,54 +605,4 @@ class IrodsIndexStore(BdbIndexStore):
         self.cxn = None
         self.coll = None
         self.env = None
-
-
-
-
-
-#-------------------------------
-class IrodsDirectoryDocumentStream(MultipleDocumentStream):
-
-    def find_documents(self, session, cache=0):
-        # given a location in irods, go there and descend looking for files
-
-        myEnv, status = irods.getRodsEnv()
-        conn, errMsg = irods.rcConnect(myEnv.getRodsHost(), myEnv.getRodsPort(), 
-                                       myEnv.getRodsUserName(), myEnv.getRodsZone())
-        status = irods.clientLogin(conn)
-        if status:
-            raise ConfigFileException("Cannot connect to iRODS: (%s) %s" % (status, errMsg))
-
-        home = myEnv.getRodsHome()
-        c = irods.irodsCollection(conn, home)
-        dirs = c.getSubCollections()
-
-        # check if abs path to home dir
-        if self.streamLocation.startswith(home):
-            self.streamLocation = self.streamLocation[len(home):]
-            if self.streamLocation[0] == "/":
-                self.streamLocation = self.streamLocation[1:]
-
-        colls = self.streamLocation.split('/')
-        for cln in colls:
-            c.openCollection(cln)
-        
-        # now at top of data... recursively look for files
-        # XXX FIX
-        for root, dirs, files in os.walk(self.streamLocation):
-            for d in dirs:
-                if os.path.islink(os.path.join(root, d)):
-                    for root2, dirs2, files2 in os.walk(os.path.join(root,d)):
-                        files2.sort()
-                        files2 = [os.path.join(root2, x) for x in files2]
-                        # Psyco Map Reduction
-                        # files2 = map(lambda x: os.path.join(root2, x), files2)
-                        for f in self._processFiles(session, files2, cache):
-                            yield f
-            files.sort()
-            files = [os.path.join(root, x) for x in files]
-            # files = map(lambda x: os.path.join(root, x), files)
-            for f in self._processFiles(session, files, cache):
-                yield f
-
 
