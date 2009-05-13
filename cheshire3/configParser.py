@@ -470,7 +470,6 @@ class C3Object(object):
                     # from default
                     pass
 
-
         # now checksum self
         if self.checkSums:
             code = inspect.getsource(self.__class__)

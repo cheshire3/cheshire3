@@ -131,6 +131,8 @@ class XmlDocumentStream(BaseDocumentStream):
 
 
     def _getStreamLen(self):
+        # irods
+        # irods tell:  strm.getPosition()
         if hasattr(self.stream, 'getSize'):
             return self.stream.getSize()
         else:
@@ -216,10 +218,9 @@ class XmlDocumentStream(BaseDocumentStream):
                         strStart = len(line)
                         # Can we get by without using 'tell()' ?
                         # eg for stream APIs that don't support it
-                        #if self.stream.tell() == filelen:
-
-                        # check we have at least 1024 to read
                         if myTell == filelen:
+                        #if self.stream.tell() == filelen:
+                            # check we have at least 1024 to read
                             # we've got nuffink!
                             if cache == 0:
                                 self.stream.close()
