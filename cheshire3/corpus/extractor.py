@@ -17,7 +17,6 @@ class TaggedTermExtractor(SimpleExtractor):
             return 0
 
     def _flattenTexts(self, elem):
-        # XXX This only implements LXML version
         texts = []
         
         ws = elem.xpath('.//toks/w')
@@ -68,7 +67,11 @@ class TaggedTermExtractor(SimpleExtractor):
                 dictStr =  str(a.group())
                 d = eval(dictStr)
                 spanStartOffset = int(d[(None, 'offset')])   
-                wordCount = int(d[(None, 'wordOffset')])    
+                wordCount = int(d[(None, 'wordOffset')])
+                try:
+                    eid = int(d[(None, 'eid')])  
+                except:
+                    eid = 0
             elif e[0] == "4" :
                 m = re.search(tagRe, e.split()[3])
                 if m.group() == 'w':
@@ -118,8 +121,9 @@ class TaggedTermExtractor(SimpleExtractor):
             txt = self.spaceRe.sub(' ', txt)
 
         if self.get_setting(session, 'prox', 0):
-            lno = 0
-        
+            lno = eid
+        else:
+            lno = -1
         return {txt:{'text' : txt, 'occurences' : 1, 'proxLoc' : [lno], 'wordOffs' : wordOffs}}
 
 
