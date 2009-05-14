@@ -14,7 +14,7 @@ class CorpusPrepTransformer(Transformer):
 # Adds all the required elements if they are not already in the input xml:
 #    adds eid on requested elements
 
-    _possibleSettings = {'eidXpath' : {'docs' : 'xpath to all nodes which need eid attributes (these should be all nodes which you want to index and retrieve at their own level - not span indexes)'},
+    _possibleSettings = {'eidXpath' : {'docs' : 'xpath to all nodes which need eid attributes (these should be all nodes which you want to index and retrieve at their own level including span indexes)'},
                          'nodes' : {'docs' : ''}
                          }
     
