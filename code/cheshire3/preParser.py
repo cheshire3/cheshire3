@@ -92,9 +92,11 @@ class CmdLinePreParser(TypedPreParser):
         stdIn = cmd.find('%INDOC%') == -1
         stdOut = cmd.find('%OUTDOC%') == -1
         if not stdIn:
-            if doc.mimeType:
-                # guess our extn~n
-                suff = mimetypes.guess_extension(doc.mimeType[0])
+            if doc.mimeType or doc.filename:
+                # guess our extn~n                
+                suff = mimetypes.guess_extension(doc.mimeType)
+                if not suff:
+                    suff = mimetypes.guess_extension(doc.filename)
                 if suff:
                     (qq, infn) = tempfile.mkstemp(suff)
                 else:
