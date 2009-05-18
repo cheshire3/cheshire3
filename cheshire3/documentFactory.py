@@ -325,7 +325,7 @@ class MultipleDocumentStream(BaseDocumentStream):
         elif (mimetype[0] == 'application/marc'):
             trip = ('stream', MarcDocumentStream, 'marc')
         else:
-            trip = ('document', None, mimetype)
+            trip = ('document', None, mimetype[0])
 
         s = self._fetchStream(item)
         if trip[0] == 'stream':
@@ -338,6 +338,8 @@ class MultipleDocumentStream(BaseDocumentStream):
             data = s.read()
             s.close()
             doc = StringDocument(data, mimeType=trip[2], filename=name)
+            if mimetype[1]:
+                doc.compression = mimetype[1]
             return ('document', doc)
 
     def _processFiles(self, session, items, cache=0):
