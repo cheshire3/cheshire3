@@ -5,7 +5,7 @@ from cheshire3.marc_utils import MARC
 from cheshire3.exceptions import ConfigFileException
 
 import re, gzip, string, binascii, cStringIO as StringIO
-import bz2, os, commands, time
+import bz2, os, commands, time, glob
 import httplib, mimetypes, tempfile
 from xml.sax.saxutils import escape
 
@@ -82,7 +82,7 @@ class CmdLinePreParser(TypedPreParser):
         cl = self.get_setting(session, 'commandLine', '')
         self.cmd = exe + ' ' + cl
 
-        self.working = self.get_setting(session, 'workingPath', '')
+        self.working = self.get_path(session, 'workingPath', '')
 
         # %INDOC%: create temp file for in
         # %OUTDOC%: create temp file to out
