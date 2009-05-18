@@ -95,6 +95,15 @@ class BaseDocumentStream:
     def find_documents(self, session, cache=0):
         raise(NotImplementedError)
 
+
+class FileDocumentStream(BaseDocumentStream):
+    def find_documents(self, session, cache=0):
+        # just read in single file
+        if cache == 0:
+            yield StringDocument(self.stream.read())
+        elif cache == 2:
+            self.documents = [StringDocument(self.stream.read())]
+
 class TermHashDocumentStream(BaseDocumentStream):
 
     def open_stream(self, stream):
@@ -275,6 +284,8 @@ class MarcDocumentStream(BaseDocumentStream):
         self.locations = locs
         self.documents = docs
         self.length = max(len(locs), len(docs))
+
+    
         
 # XmlTapeDocStream
 # ArcFileDocStream
@@ -614,7 +625,8 @@ streamHash = {"xml" : XmlDocumentStream,
               "cluster" : ClusterDocumentStream,
               "locate" : LocateDocumentStream,
               "component" : ComponentDocumentStream,
-              "termHash" : TermHashDocumentStream
+              "termHash" : TermHashDocumentStream,
+              "file" : FileDocumentStream
               }
 
 class SimpleDocumentFactory(DocumentFactory):
@@ -692,19 +704,25 @@ class SimpleDocumentFactory(DocumentFactory):
                     format = 'ftp'
                 elif data[:6] == "srb://":
                     format = 'srb'
+                elif data[:6] == "irods://":
+                    format = 'irods'
                 elif data[:7] == "http://" or data[:8] == "https://":
                     format = "http"
                     if data.find('?') > -1:
                         # parse url and extract param names
                         bits = urlparse.urlsplit(data)
-                        # plist = map(lambda x: x.split('=')[0], bits[3].split('&'))
                         plist = [x.split('=')[0] for x in bits[3].split('&')]
                         if 'verb' in plist and 'metadataPrefix' in plist:
                             format = 'oai'
                         elif 'operation' in plist and 'version' in plist and 'query' in plist:
                             format = 'sru'
 
-        cls = self.streamHash[format]
+        try:
+            cls = self.streamHash[format]
+        except KeyError:
+            # just assume single binary data file path
+            cls = self.streamHash['file']
+            
         ds = cls(session, data, format, tagName, codec, self)
         
         # Store and call generator on first ping

@@ -65,7 +65,9 @@ class UnicodeDecodePreParser(PreParser):
 class CmdLinePreParser(TypedPreParser):
 
     _possiblePaths = {'executable' : {'docs' : "Name of the executable to run"},
-                      'executablePath' : {'docs' : "Path to the executable"}}
+                      'executablePath' : {'docs' : "Path to the executable"},
+                      'workingPath' : {'docs' : 'Path to be in when executing command'}}
+
     _possibleSettings = {'commandLine' : {'docs' : "Command line to use.  %INDOC% is substituted to create a temporary file to read, and %OUTDOC% is substituted for a temporary file for the process to write to"}}
 
     def __init__(self, session, config, parent):
@@ -79,6 +81,8 @@ class CmdLinePreParser(TypedPreParser):
 
         cl = self.get_setting(session, 'commandLine', '')
         self.cmd = exe + ' ' + cl
+
+        self.working = self.get_setting(session, 'workingPath', '')
 
         # %INDOC%: create temp file for in
         # %OUTDOC%: create temp file to out
@@ -111,7 +115,13 @@ class CmdLinePreParser(TypedPreParser):
                 (qq, outfn) = tempfile.mkstemp()
             cmd = cmd.replace("%OUTDOC%", outfn)               
             os.close(qq)
-
+        
+        if self.working:
+            old = os.getcwd()
+            os.chdir(self.working)            
+        else:
+            old = ''
+            
         if stdIn:
             pipe = Popen(cmd, bufsize=0, shell=True,
                          stdin=PIPE, stdout=PIPE, stderr=PIPE)
@@ -138,6 +148,9 @@ class CmdLinePreParser(TypedPreParser):
                 result = fh.read()
                 fh.close()
                 os.remove(outfn)
+
+        if old:
+            os.chdir(old)
 
         mt = self.outMimeType
         if not mt:
@@ -168,6 +181,7 @@ class FileUtilPreParser(TypedPreParser):
                 # just stuff them on doc for now
                 (type, value) = b.split('=')
                 setattr(doc, type, value)
+
         if mt == "text/plain":
             # we might be sgml, xml, text etc
             res = commands.getoutput("file -b %s" % infn)
