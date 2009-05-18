@@ -9,5 +9,19 @@
         <setting type="commandLine">-b %INDOC%</setting>
       </options>
     </subConfig>
+    
+    <subConfig type="preParser" id="DroidMetadataDiscoveryPreParser">
+        <objectType>cheshire3.formats.preParser.DroidCmdLineMetadataDiscoveryPreParser</objectType>
+        <paths>
+            <path type="executable">java -jar droid.jar</path>
+            <path type="workingPath">/home/cheshire/cheshire3/build/DROID 3.0</path>
+        </paths>
+        <options>
+            <setting type="outMimeType">text/xml</setting>
+            <setting type="metadataType">DROID</setting>
+            <setting type="commandLine">-SDROID_SignatureFile_V16.xml -L%INDOC% -O%OUTDOC% -FXML</setting>
+        </options>
+    </subConfig>
+    
   </subConfigs>
 </config>
