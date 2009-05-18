@@ -1,0 +1,13 @@
+<config>
+  <subConfigs>
+    <subConfig type="preParser" id="UnixFileUtilityMetadataDiscoveryPreParser">
+      <objectType>cheshire3.formats.preParser.CmdLineMetadataDiscoveryPreParser</objectType>
+      <paths>
+        <path type="executable">file</path>
+      </paths>
+      <options>
+        <setting type="commandLine">-b %INDOC%</setting>
+      </options>
+    </subConfig>
+  </subConfigs>
+</config>
