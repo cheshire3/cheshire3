@@ -687,7 +687,7 @@ class SimpleDocumentFactory(DocumentFactory):
             tagName = self.tagName
         if codec == None:
             codec = self.codec
-
+        
         # Some laziness checking
         if not format:
             if os.path.exists(data):
@@ -709,6 +709,8 @@ class SimpleDocumentFactory(DocumentFactory):
                 elif data[:6] == "irods://":
                     format = 'irods'
                 elif data[:7] == "http://" or data[:8] == "https://":
+                    if hasattr(data, '_formatter_parser'): # rdf URIRef
+                        data = str(data)
                     format = "http"
                     if data.find('?') > -1:
                         # parse url and extract param names
