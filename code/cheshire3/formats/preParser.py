@@ -1,9 +1,12 @@
 
 import os, commands, mimetypes, tempfile, glob
+from lxml import etree
 
-from cheshire3.document import StringDocument
-from cheshire3.bootstrap import BSLxmlParser
+from cheshire3.record import LxmlRecord
 from cheshire3.preParser import CmdLinePreParser
+from cheshire3.workflow import CachingWorkflow
+from cheshire3.xpathProcessor import SimpleXPathProcessor
+
 
 class CmdLineMetadataDiscoveryPreParser(CmdLinePreParser):
     """Command Line PreParser to use external program for metadata discovery."""
@@ -17,7 +20,7 @@ class CmdLineMetadataDiscoveryPreParser(CmdLinePreParser):
         else:
             self.metadataType = self.get_path(session, 'executable', self.cmd.split()[0])
         
-    def _processResult(self, data):
+    def _processResult(self, session, data):
         """Process result from external program."""
         return data
         
@@ -95,27 +98,84 @@ class CmdLineMetadataDiscoveryPreParser(CmdLinePreParser):
         return doc
         
         
-class DroidCmdLineMetadataDiscoveryPreParser(CmdLineMetadataDiscoveryPreParser):
-    """Command Line PreParser to use the National Archives' DROID software for format identification."""
+class XmlParsingCmdLineMetadataDiscoveryPreParser(CmdLineMetadataDiscoveryPreParser):
+    """Command Line PreParser to take the results of an external program given in XML, parse it, and extract metadata into a hash."""
     
+    def __init__(self, session, config, parent):
+        self.sources = {}
+        CmdLineMetadataDiscoveryPreParser.__init__(self, session, config, parent)
+        
+    
+    def _handleLxmlConfigNode(self, session, node):
+        # Source
+        if (node.tag == "source"):
+            key = node.attrib.get('id', None)
+            default = node.attrib.get('default', None)
+            process = None
+            preprocess = None
+            xp = None
+            for child in node.iterchildren(tag=etree.Element):
+                if child.tag == "xpath":
+                    if xp == None:
+                        ref = child.attrib.get('ref', '')
+                        if ref:
+                            xp = self.get_object(session, ref)
+                        else:
+                            node.set('id', self.id + '-xpath')
+                            xp = SimpleXPathProcessor(session, node, self)
+                            xp._handleLxmlConfigNode(session, node)
+                elif child.tag == "preprocess":
+                    # turn preprocess chain to workflow
+                    ref = child.attrib.get('ref', '')
+                    if ref:
+                        preprocess = self.get_object(session, ref)
+                    else:
+                        # create new element
+                        e = etree.XML(etree.tostring(child))
+                        e.tag = 'workflow'
+                        e.set('id', self.id + "-preworkflow")
+                        preprocess = CachingWorkflow(session, child, self)
+                        preprocess._handleLxmlConfigNode(session, child)
+                elif child.tag == "process":
+                    # turn xpath chain to workflow
+                    ref = child.attrib.get('ref', '')
+                    if ref:
+                        process = self.get_object(session, ref)
+                    else:
+                        # create new element
+                        e = etree.XML(etree.tostring(child))
+                        e.tag = 'workflow'
+                        e.set('id', self.id + "-workflow")
+                        process = CachingWorkflow(session, e, self)
+                        process._handleLxmlConfigNode(session, e)
+                        
+            self.sources[key] = {'source': (xp, process, preprocess), 'default': default}
+            
     def _processResult(self, session, data):
-        """Process output from DROID."""
-        bsdoc = StringDocument(data)
-        bsrec = BSLxmlParser.process_document(session,bsdoc)
-        dom = bsrec.get_dom(session)
-        nsdict = {'tna': "http://www.nationalarchives.gov.uk/pronom/FileCollection"}
+        """Process XML output from external program, process self.sources to create dictionary of metadata items."""
+        try:
+            et = etree.fromstring(data)
+        except AssertionError:
+            data = data.decode('utf8')
+            et = etree.XML(data)
+            
+        record = LxmlRecord(et)
+        record.byteCount = len(data)
         mddict = {}
-        try: mddict['Certainty'] = dom.xpath('/tna:FileCollection/tna:IdentificationFile/@IdentQuality', namespaces=nsdict)[0]
-        except IndexError: mddict['certainty'] = 'Unknown'
-        mddict['mimeType'] = dom.xpath('string(//tna:IdentificationFile/tna:FileFormatHit/tna:MimeType)', namespaces=nsdict)
-        if not len(mddict['mimeType']): mddict['mimeType'] = 'Unknown'
+        for key, src in self.sources.iteritems():
+            (xpath, process, preprocess) = src['source']
+            if preprocess is not None:
+                record = preprocess.process(session, record)
+            if xpath is not None:
+                rawlist = xpath.process_record(session, record)
+                processed = process.process(session, rawlist)
+            else:
+                processed = process.process(session, record)
             
-        for mdbit in ['Name', 'Version', 'PUID']:
-            mddict['Format ' + mdbit] = dom.xpath('string(//tna:IdentificationFile/tna:FileFormatHit/tna:%s)' % (mdbit), namespaces=nsdict)
+            if processed:
+                mddict[key] = ' '.join(processed.keys())
+            elif src['default'] is not None:
+                mddict[key] = src['default']
             
-        warn = dom.xpath('string(//tna:IdentificationFile/tna:FileFormatHit/tna:IdentificationWarning)', namespaces=nsdict)
-        if warn: mddict['Warning'] = warn 
-
         return mddict
-    
-    
+        
