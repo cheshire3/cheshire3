@@ -12,6 +12,12 @@ class GraphRecord(Record):
         self.parent = ('','',-1)
         self.context = None
 
+    def process_xpath(self, session, q, map={}):
+        return self.process_sparql(session, q, map)
+
+    def process_sparql(self, session, q, map={}):
+        return self.graph.query(q, initNs=map)
+
     def get_graph(self, session):
         return self.graph
 
