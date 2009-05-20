@@ -94,7 +94,8 @@ class CmdLinePreParser(TypedPreParser):
         if not stdIn:
             if doc.mimeType or doc.filename:
                 # guess our extn~n                
-                suff = mimetypes.guess_extension(doc.mimeType)
+                try: suff = mimetypes.guess_extension(doc.mimeType)
+                except: suff = ''
                 if not suff:
                     suff = mimetypes.guess_extension(doc.filename)
                 if suff:
@@ -102,7 +103,8 @@ class CmdLinePreParser(TypedPreParser):
                 else:
                     (qq, infn) = tempfile.mkstemp()                    
             else:
-                (qq, infn) = tempfile.mkstemp()
+                (qq, infn) = tempfile.mkstemp()                 
+            
             os.close(qq)
             fh = file(infn, 'w')
             fh.write(doc.get_raw(session))
@@ -147,7 +149,10 @@ class CmdLinePreParser(TypedPreParser):
                         if os.path.getsize(m) > 0:
                             fh = file(m)
                             break
-                result = fh.read()
+                try:
+                    result = fh.read()
+                except:
+                    raise ValueError('Error from command: %s' % (cmd))
                 fh.close()
                 os.remove(outfn)
 
