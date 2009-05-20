@@ -8,6 +8,31 @@ from cheshire3.workflow import CachingWorkflow
 from cheshire3.xpathProcessor import SimpleXPathProcessor
 
 
+class DependentCmdLinePreParser(CmdLinePreParser):
+    """Command Line PreParser to start an external service before processing document."""
+    
+    
+    _possiblePaths = {"dependencyExecutable": {'docs' : "Name of the executable to run to start required service."}
+                     ,'dependencyExecutablePath' : {'docs' : "Path to the dependency's executable"}
+                     }
+    
+    _possibleSettings = {'dependencyCommandLine' : {'docs' : "Command line to use when starting dependency"}}
+    
+    dependency = None
+    
+    def __init__(self, session, config, parent):
+        CmdLinePreParser.__init__(self, session, config, parent)
+        exe = self.get_path(session, 'dependencyExecutable', '')
+        if not exe:
+            raise ConfigFileException("Missing mandatory 'dependencyExecutable' path in %s" % self.id)
+        tp = self.get_path(session, 'dependencyExecutablePath', '')
+        if tp:
+            exe = os.path.join(tp, exe)
+
+        cl = self.get_setting(session, 'dependencyCommandLine', '')
+        self.dependency = os.popen(exe + ' ' + cl)
+
+
 class CmdLineMetadataDiscoveryPreParser(CmdLinePreParser):
     """Command Line PreParser to use external program for metadata discovery."""
     

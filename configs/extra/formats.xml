@@ -1,5 +1,23 @@
 <config>
   <subConfigs>
+    
+    <subConfig type="preParser" id="OpenOfficeToPdfPreParser">
+        <objectType>cheshire3.formats.preParser.DependentCmdLinePreParser</objectType>
+        <docs>PreParser to start OpenOffice service, then convert documents to PDF.</docs>
+        <paths>
+            <path type="dependencyExecutable">soffice</path>
+            <path type="executable">python</path>
+            <path type="executablePath">/opt/openoffice.org2.3/program</path>
+        </paths>
+        <options>
+            <setting type="outMimeType">application/pdf</setting>
+            <setting type="dependencyCommandLine">-headless -accept="socket,port=8100;urp;"</setting>
+            <setting type="commandLine">~/cheshire3/install/lib/python2.6/DocumentConverter.py %INDOC% %OUTDOC%</setting>
+        </options>
+    </subConfig>
+    
+    <!-- Metadata Discovery PreParsers -->
+
     <subConfig type="preParser" id="UnixFileUtilityMetadataDiscoveryPreParser">
       <objectType>cheshire3.formats.preParser.CmdLineMetadataDiscoveryPreParser</objectType>
       <docs>PreParser to use the UNIX file utility for format identification.</docs>
