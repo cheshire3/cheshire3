@@ -238,8 +238,8 @@ class DateTokenizer(SimpleTokenizer):
         self.normalisedDateRe = re.compile('(?<=\d)xx+')
         self.isoDateRe = re.compile('''
         ([0-2]\d\d\d)        # match any year up to 2999
-        (0[1-9]|1[0-2]|xx)?      # match any month 00-12 or xx
-        ([0-2][0-9]|3[0-1]|xx)?  # match any date up to 00-31 or xx
+        (0[1-9]|1[0-2]|xx)?      # match any month 01-12 or xx
+        (0[1-9]|[1-2][0-9]|3[0-1]|xx)?  # match any date up to 01-31 or xx
         ''', re.VERBOSE|re.IGNORECASE)
         if default:
             self.default = dateparser.parse(default.encode('utf-8'), dayfirst=self.dayfirst, fuzzy=self.fuzzy)
@@ -276,12 +276,13 @@ class DateTokenizer(SimpleTokenizer):
 
         # separate ISO date elements with - for better recognition by date parser
         data = self.isoDateRe.sub(self._convertIsoDates, data)
-        if len(data) and len(data) < 18 and data.find('-'):
+        if len(data):
             midpoint = len(data)/2
-            if data[midpoint] == '-':
-                # probably a range separated by -
+            print midpoint
+            if data[midpoint] in ['-', '/']:
+                # probably a range
                 data = '%s %s' % (data[:midpoint], data[midpoint+1:])
-                del midpoint                
+            del midpoint                
         return self._tokenize(data)
 
 
