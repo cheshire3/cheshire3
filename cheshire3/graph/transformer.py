@@ -12,6 +12,6 @@ class RdfXmlTransformer(Transformer):
         if isinstance(rec, GraphRecord):
             fmt = self.get_setting(session, 'format', 'xml')
             data = rec.graph.serialize(format=fmt)
-            return StringDOcument(session, data)
+            return StringDocument(session, data)
         else:
             raise NotImplementedError("Can only transform GraphRecords")
