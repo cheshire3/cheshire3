@@ -171,7 +171,9 @@ class ScanResponse(SruResponse):
     #- end ScanResponse -------------------------------------------------------
 
 
-def fetch_data(myUrl, tries=3):
+def fetch_data(myUrl, tries=1, timeout=20):
+    oldtimeout = socket.getdefaulttimeout()
+    socket.setdefaulttimeout(timeout)
     req = urllib2.Request(url=myUrl)
     for x in range(tries):
         try:
@@ -179,8 +181,11 @@ def fetch_data(myUrl, tries=3):
         except (urllib2.URLError):
             # problem accessing remote service
             continue
-        except (httplib.BadStatusLine, socket.timeout):
-            # problem with response
+        except socket.timeout:
+            # remote server there, but unresponsive
+            break
+        except httplib.BadStatusLine:
+            # response broken
             time.sleep(0.5)
             continue
         else:
@@ -188,26 +193,27 @@ def fetch_data(myUrl, tries=3):
             f.close()
             return data
         
+    socket.setdefaulttimeout(oldtimeout)
     return None
 
 
 # functions to fetch and return a parsed response object when given a URL
-def get_explainResponse(url):
-    data = fetch_data(url)
+def get_explainResponse(url, tries=1, timeout=20):
+    data = fetch_data(url, tries=tries, timeout=timeout)
     if data:
         tree = objectify.fromstring(data)
         return ExplainResponse(tree)
         
 
-def get_searchRetrieveResponse(url):
-    data = fetch_data(url)
+def get_searchRetrieveResponse(url, tries=1, timeout=20):
+    data = fetch_data(url, tries=tries, timeout=timeout)
     if data:
         tree = objectify.fromstring(data)
         return SearchRetrieveResponse(tree)
 
     
-def get_scanResponse(url):
-    data = fetch_data(url)
+def get_scanResponse(url, tries=1, timeout=20):
+    data = fetch_data(url, tries=tries, timeout=timeout)
     if data:
         tree = objectify.fromstring(data)
         return ScanResponse(tree)
