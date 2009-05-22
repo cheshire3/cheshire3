@@ -1448,7 +1448,6 @@ class BdbIndexStore(IndexStore):
             else:
                 (key, data) = c.set_range(term)
         except Exception as e:
-            raise
             try:
                 if summary:
                     (key, data) = c.last(dlen=dataLen, doff=0)
