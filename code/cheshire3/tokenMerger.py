@@ -12,19 +12,18 @@ class SimpleTokenMerger(TokenMerger):
             if d:
                 for t in val['text']:
                     if t in new:
-                        new[t]['occurences'] += 1
+                        new[t]['occurences'] += val['occurences']
                     else:
                         # this will discard any second or further locations
                         # -very- minor edge case when this will break things
                         # if important, use ProximityTokenMerger.
                         try:
-                            new[t] = {'text' : t, 'occurences' : 1,
+                            new[t] = {'text' : t, 'occurences' : val['occurences'],
                                       'proxLoc' : val['proxLoc']}
                         except KeyError:
                             # may already have been tokenized and merged
-                            new[t] = {'text' : t, 'occurences' : 1,
-                                      'positions' : val['positions']}
-                        
+                            new[t] = {'text' : t, 'occurences' : val['occurences'],
+                                      'positions' : val['positions']}            
         return new
 
 class ProximityTokenMerger(SimpleTokenMerger):
@@ -167,9 +166,9 @@ class NGramTokenMerger(SimpleTokenMerger):
                 nGram = split[i:(i+n)]
                 nGramStr = ' '.join(nGram)
                 if nGramStr in kw:
-                    kw[nGramStr]['occurences'] += 1
+                    kw[nGramStr]['occurences'] += val['occurences']
                 else:
-                    kw[nGramStr] = {'text' : nGramStr, 'occurences' : 1}
+                    kw[nGramStr] = {'text' : nGramStr, 'occurences' : val['occurences']}
         return kw
 
 class ReconstructTokenMerger(SimpleTokenMerger):
