@@ -278,7 +278,6 @@ class DateTokenizer(SimpleTokenizer):
         data = self.isoDateRe.sub(self._convertIsoDates, data)
         if len(data):
             midpoint = len(data)/2
-            print midpoint
             if data[midpoint] in ['-', '/']:
                 # probably a range
                 data = '%s %s' % (data[:midpoint], data[midpoint+1:])
