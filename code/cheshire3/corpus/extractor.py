@@ -9,7 +9,17 @@ import re, types, string, copy
 class TaggedTermExtractor(SimpleExtractor):
     """Each term has been tagged in XML already, extract information."""
     
-
+    _possibleSettings = {"pos" : {'docs' : "do you want to extract part of speech (should be in attribute p)? 1|0"},
+                         "stem" : {'docs' : "do you want to extract stem (should be in attribute s)? 1|0"},
+                         "offset" : {'docs' : "do you want to extract offset (should be in attribute o)? 1|0"}
+                         }
+    def __init__(self, session, config, parent):
+        SimpleExtractor.__init__(self, session, config, parent)
+        self.pos = self.get_setting(session, 'pos', 0)
+        self.stem = self.get_setting(session, 'stem', 0)
+        self.offset = self.get_setting(session, 'offset', 0)
+        
+        
     def _getProxLocNode(self, session, node):
         try:
             return int(node.attrib.get('eid'))
@@ -28,19 +38,29 @@ class TaggedTermExtractor(SimpleExtractor):
             bits = {}
             attr = w.attrib
             bits['text'] = w.text
-            bits['pos'] = attr.get('p', '??')
-            bits['stem'] = attr.get('s', w.text)
-            o = int(attr.get('o', '-1'))           
-            if o < lastOffset + lastLen:               
-                totalOffset += thisOffset
-                thisOffset = len(w.xpath('../../txt/text()')[0]) + 1
-            lastLen = len(w.text)
-            lastOffset = o
-            o += totalOffset
+            if self.pos:
+                bits['pos'] = attr.get('p', '??')
+            if self.stem:
+                bits['stem'] = attr.get('s', w.text)
+            if self.offset:
+                o = int(attr.get('o', '-1'))           
+                if o < lastOffset + lastLen:               
+                    totalOffset += thisOffset
+                    thisOffset = len(w.xpath('../../txt/text()')[0]) + 1
+                lastLen = len(w.text)
+                lastOffset = o
+                o += totalOffset
             
-            bits['offset'] = o
-            texts.append("%(text)s/%(pos)s/%(stem)s/%(offset)s" % bits)           
-           
+                bits['offset'] = o
+            output = [bits['text']]
+            if self.pos:
+                output.append('/%s' % bits['pos'])      
+            if self.stem:
+                output.append('/%s' % bits['stem'])
+            if self.offset:
+                output.append('/%s' % bits['offset'])
+            texts.append(''.join(output))
+                
         return ' '.join(texts)
 
         
