@@ -52,8 +52,8 @@ for db in serv.databases.values():
 
 
 class Cheshire3OaiMetadataWriter:
-    """ An implementation of a 'MetadataWriter' complying with the oaipmh module's API. 
-    """
+    """An implementation of a 'MetadataWriter' complying with the oaipmh module's API."""
+    
     def __init__(self, txr):
         self.txr = txr
     
@@ -72,7 +72,8 @@ class Cheshire3OaiMetadataWriter:
 
 
 class Cheshire3OaiServer:
-    """ A server object complying with the oaipmh module's API. """
+    """A server object complying with the oaipmh module's API."""
+    
     protocolMap = None
     db = None
     
@@ -108,14 +109,14 @@ class Cheshire3OaiServer:
     
     
     def getRecord(self, metadataPrefix, identifier):
-        """ Get a record for a metadataPrefix and identifier.
-            metadataPrefix - identifies metadata set to retrieve
+        """Return a (header, metadata, about) tuple for the the record.
+         
+            metadataPrefix - identifies metadata set to retrieve the record in
             identifier - repository-unique identifier of record
             Should raise error.CannotDisseminateFormatError if metadataPrefix is unknown or not supported by identifier.
             Should raise error.IdDoesNotExistError if identifier is unknown or illegal.
-            Returns a header, metadata, about tuple describing the record.
         """
-        if metadataPrefix and not self.protocolMap.recordNamespaces.has_key(metadataPrefix):
+        if metadataPrefix and not (metadataPrefix in self.protocolMap.recordNamespaces):
             raise CannotDisseminateFormatError()
         
         if not self.metadataRegistry.hasWriter(metadataPrefix):
@@ -146,16 +147,12 @@ class Cheshire3OaiServer:
         return (Header(str(r.id), datestamp, [], None), rec, None)    
     
     def identify(self):
-        """ Retrieve information about the repository.
-            Returns an Identify object describing the repository.
-        """
+        """Return an Identify object describing the repository."""
         return Identify(self.repositoryName, self.baseURL, self.protocolVersion, self.adminEmails,
                         self.earliestDatestamp, self.deletedRecord, self.granularity, self.compression)
 
     def _listResults(self, metadataPrefix, set=None, from_=None, until=None):
-        """ Internal functions to get a list of datestamp, resultSet tuples, suitable for use by: listIdentifiers, listRecords
-            Returns a list of datestamp, resultSet tuples, suitable for use by: listIdentifiers, listRecords
-        """
+        """Return a list of (datestamp, resultSet) tuples, suitable for use by: listIdentifiers, listRecords."""
         if until and until < self.earliestDatestamp:
             raise BadArgumentError('until argument value is earlier than earliestDatestamp.')
         if not from_:
@@ -186,16 +183,16 @@ class Cheshire3OaiServer:
         return tuples
 
     def listIdentifiers(self, metadataPrefix, set=None, from_=None, until=None):
-        """ Get a list of header information on records.
+        """Return a list of Header objects for records which match the given parameters.
+        
             metadataPrefix - identifies metadata set to retrieve
             set - set identifier; only return headers in set (optional)
             from_ - only retrieve headers from from_ date forward (optional)
             until - only retrieve headers with dates up to and including until date (optional)
             Should raise error.CannotDisseminateFormatError if metadataPrefix is not supported by the repository.
             Should raise error.NoSetHierarchyError if the repository does not support sets.
-            Returns an iterable of headers.
         """
-        if metadataPrefix and not self.protocolMap.recordNamespaces.has_key(metadataPrefix):
+        if metadataPrefix and not (metadataPrefix in self.protocolMap.recordNamespaces):
             raise CannotDisseminateFormatError()
         # Cheshire3 does not support sets
         if set:
@@ -213,21 +210,38 @@ class Cheshire3OaiServer:
         return headers
         
     def listMetadataFormats(self, identifier=None):
-        """List metadata formats supported by repository or record.
-            identifier - identify record for which we want to know all
+        """Return a list of (metadataPrefix, schema, metadataNamespace) tuples (tuple items are strings).
+        
+            identifier - identify record for which we want to know all 
                          supported metadata formats. if absent, list all metadata
                          formats supported by repository. (optional)
             Should raise error.IdDoesNotExistError if record with identifier does not exist.
             Should raise error.NoMetadataFormatsError if no formats are available for the indicated record.
-            Returns an iterable of metadataPrefix, schema, metadataNamespace tuples (each entry in the tuple is a string).
+            
+            N.B.: Cheshire3 should supply same formats to all records in a database
         """
+        if identifier is not None:
+            q = cqlparse('rec.identifier exact "%s"' % (identifier))
+            try:
+                rs = self.db.search(session, q)
+            except SRWDiagnostics.Diagnostic16:
+                raise ConfigFileException('Index map for rec.identifier required in protocolMap: %s' % self.db.get_path(session, 'protocolMap').id)
+                
+            if not len(rs) or len(rs) > 1:
+                raise IdDoesNotExistError('%s records exist for identifier: %s' % (len(rs), identifier))
+            
+        # all records should be available in the same formats in a Cheshire3 database
         mfs = []
         for prefix, ns in self.protocolMap.recordNamespaces.iteritems():
             mfs.append((prefix, self.protocolMap.schemaLocations[ns], ns))
+            
+        if not len(mfs):
+            raise NoMetadataFormatsError()
         return mfs
         
     def listRecords(self, metadataPrefix, set=None, from_=None, until=None):
-        """Get a list of header, metadata and about information on records.
+        """Return a list of (header, metadata, about) tuples for records which match the given parameters.
+        
             metadataPrefix - identifies metadata set to retrieve
             set - set identifier; only return records in set (optional)
             from_ - only retrieve records from from_ date forward (optional)
@@ -235,9 +249,8 @@ class Cheshire3OaiServer:
                     until date (optional)
             Should raise error.CannotDisseminateFormatError if metadataPrefix is not supported by the repository.
             Should raise error.NoSetHierarchyError if the repository does not support sets.
-            Returns an iterable of header, metadata, about tuples.
         """
-        if metadataPrefix and not self.protocolMap.recordNamespaces.has_key(metadataPrefix):
+        if metadataPrefix and not (metadataPrefix in self.protocolMap.recordNamespaces):
             raise CannotDisseminateFormatError()
         # Cheshire3 does not support sets
         if set:
@@ -264,9 +277,9 @@ class Cheshire3OaiServer:
         return records
 
     def listSets(self):
-        """Get a list of sets in the repository.
+        """Return an iterable of (setSpec, setName) tuples (tuple items are strings).
+        
             Should raise error.NoSetHierarchyError if the repository does not support sets.
-            Returns an iterable of setSpec, setName tuples (strings).
         """
         raise NoSetHierarchyError()
         
