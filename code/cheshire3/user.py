@@ -93,13 +93,10 @@ class SimpleUser(User):
                                 raise ConfigFileException("Unknown flag: %s" % flag)
                     if obj == None or flag == None:
                         raise ConfigFileException("Missing object or value element for flag for user %s" % self.username)
+                    f = self.flags.get(flag, [])
                     if (obj):
-                        f = self.flags.get(flag, [])
-                        if f != "":
-                            f.append(obj)
-                            self.flags[flag] = f
-                    else:
-                        self.flags[flag] = ""
+                        f.append(obj)
+                    self.flags[flag] = f
         elif (node.tag == "history"):
             # Extract user history
             pass
