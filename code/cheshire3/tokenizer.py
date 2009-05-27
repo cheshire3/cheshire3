@@ -223,12 +223,13 @@ class LineTokenizer(SimpleTokenizer):
 
 
 class DateTokenizer(SimpleTokenizer):
-    """ Extracts a single date. Multiple dates, ranges not yet implemented """
-    """ Now extracts multiple dates, but slowly and less reliably. Ranges dealt with by DateRangeExtracter. JPH Jan '07"""
+    """Tokenizer to identify date tokens, and return only these.
+    
+    Capable of extracting multiple dates, but slowly and less reliably than single ones."""
 
     _possibleDefaults = {'datetime' : {"docs" : "Default datetime to use for values not supplied in the data"}}
-    _possibleSettings = {'fuzzy' : {"docs" : "Should the parser use fuzzy matching."}
-                        , 'dayfirst' : {"docs" : "Is the day before the month, if unclear. 1 = Yes, 0 = No (default)", 'type' : int, 'options' : '0|1'}}
+    _possibleSettings = {'fuzzy' : {"docs" : "Should the parser use fuzzy matching.", 'type' : int, 'options' : '0|1'}
+                        , 'dayfirst' : {"docs" : "Is the day before the month (when ambiguous). 1 = Yes, 0 = No (default)", 'type' : int, 'options' : '0|1'}}
 
     def __init__(self, session, config, parent):
         SimpleTokenizer.__init__(self, session, config, parent)
@@ -254,6 +255,8 @@ class DateTokenizer(SimpleTokenizer):
         return '-'.join(dateparts)
     
     def _tokenize(self, data):
+        # reconstruct data word by word and feed to parser?.
+        # Must be a better way to do this...,but for now...
         tks = []
         wds = data.split()
         while (len(wds)):
@@ -270,18 +273,22 @@ class DateTokenizer(SimpleTokenizer):
 
     
     def process_string(self, session, data):
-        # reconstruct data word by word and feed to parser?.
-        # Must be a better way to do this
-        # not sure, but I'll do that for now :p - JH
-
         # separate ISO date elements with - for better recognition by date parser
         data = self.isoDateRe.sub(self._convertIsoDates, data)
         if len(data):
-            midpoint = len(data)/2
-            if data[midpoint] in ['-', '/']:
-                # probably a range
-                data = '%s %s' % (data[:midpoint], data[midpoint+1:])
-            del midpoint                
+            # a range?
+            if data.count('/') == 1:
+                bits = data.split('/')
+                tks = self._tokenize(bits[0]) + self._tokenize(bits[1])
+            elif data.count('-') == 1:
+                bits = data.split('-')
+                tks = self._tokenize(bits[0]) + self._tokenize(bits[1])
+            else:
+                tks = []
+                
+            if len(tks):
+                return tks
+            
         return self._tokenize(data)
 
 
