@@ -1,5 +1,5 @@
 
-import sys, os, cgitb
+import sys, os, cgitb, time
 from mod_python import apache
 from mod_python.util import FieldStorage
 
@@ -12,14 +12,17 @@ from cheshire3.document import StringDocument
 from cheshire3.exceptions import *
 from cheshire3.cqlParser import parse as cqlparse
 
+from cheshire3.web.oai_utils import *
+
 from PyZ3950 import SRWDiagnostics
 
 
 import datetime
 # import bits from oaipmh module
-from oaipmh.server import Server as OaiXmlServer
-from oaipmh.common import Header, Identify
-from oaipmh.metadata import  MetadataRegistry as OaiMetadataRegistry
+import oaipmh.server
+from oaipmh.server import Server as OaiServer, XMLTreeServer, Resumption as ResumptionServer, decodeResumptionToken, encodeResumptionToken
+from oaipmh.common import Header, Identify, getMethodForVerb
+from oaipmh.metadata import  MetadataRegistry as OaiMetadataRegistry, global_metadata_registry
 from oaipmh.error import *
 
 # Apache Config:
@@ -69,6 +72,66 @@ class Cheshire3OaiMetadataWriter:
         return element.append(dom)
       
     #= end OaiMetadataWriter ------------------------------------------------------
+
+class MinimalOaiServer(OaiServer):
+    """A server that responds to messages by returning OAI-PMH compliant XML.
+
+    Takes a server object complying with the OAIPMH interface.
+    
+    Sub-classed only so that correct class of MinimalXMLTreeServer instantiated
+    """
+    
+    def __init__(self, server, metadata_registry=None, resumption_batch_size=10):
+        self._tree_server = MinimalXMLTreeServer(server, metadata_registry, resumption_batch_size)
+
+
+class MinimalXMLTreeServer(XMLTreeServer):
+    """A server that responds to messages by returning XML trees.
+
+    Takes an object conforming to the OAIPMH API.
+    Sub-classed only so that correct class of MinimalResumptionServer instantiated
+    """
+    def __init__(self, server, metadata_registry, resumption_batch_size=10):
+        self._server = MinimalResumptionServer(server, resumption_batch_size)
+        self._metadata_registry = (metadata_registry or global_metadata_registry)
+        self._nsmap = nsmap
+
+class MinimalResumptionServer(ResumptionServer):
+    """Handles resumption tokens etc.
+    More efficient than default implementations, as only contructs minimal resultSet needed for response."""
+    
+    def handleVerb(self, verb, kw):
+        # fetch the method for the verb
+        method = getMethodForVerb(self._server, verb)
+        if verb in ['ListSets', 'ListIdentifiers', 'ListRecords']:
+            batch_size = self._batch_size
+            # check for resumption token
+            if 'resumptionToken' in kw:
+                kw, cursor = decodeResumptionToken(kw['resumptionToken'])
+            else:
+                cursor = 0
+
+            kw['cursor'] = cursor
+            end_batch = cursor + batch_size        
+            # fetch only self._batch_size results
+            kw['batch_size'] = batch_size + 1 # request 1 more so that we know whether resumptionToken is needed we'll trim this off later
+            result = method(**kw)
+            del kw['cursor'], kw['batch_size']
+            # XXX defeat the laziness effect of any generators..
+            result = list(result)
+            if len(result) > batch_size:
+                # we need a resumption token
+                resumptionToken = encodeResumptionToken(kw, end_batch)
+                result.pop(-1)
+            else:
+                resumptionToken = None
+                
+            return result, resumptionToken
+        else:
+            result = method(**kw)
+
+        return result
+    
 
 
 class Cheshire3OaiServer:
@@ -182,7 +245,7 @@ class Cheshire3OaiServer:
         tuples = [(datetime.datetime.strptime(t[0], '%Y-%m-%d %H:%M:%S'), idx.construct_resultSet(session, t[1])) for t in termList]
         return tuples
 
-    def listIdentifiers(self, metadataPrefix, set=None, from_=None, until=None):
+    def listIdentifiers(self, metadataPrefix, set=None, from_=None, until=None, cursor=0, batch_size=10):
         """Return a list of Header objects for records which match the given parameters.
         
             metadataPrefix - identifies metadata set to retrieve
@@ -203,10 +266,18 @@ class Cheshire3OaiServer:
         # need to return iterable of header objects
         # Header(identifier, datestamp, setspec, deleted) - identifier: string, datestamp: dtaetime.datetime instance, setspec: list, deleted: boolean?
         headers = []
+        i = 0
         for (datestamp, rs) in tuples:
             for r in rs:
+                if i < cursor:
+                    i+=1
+                    continue
+                
                 headers.append(Header(str(r.id), datestamp, [], None))
-        
+                i+=1
+                if (len(headers) >= batch_size):
+                    return headers
+                
         return headers
         
     def listMetadataFormats(self, identifier=None):
@@ -239,7 +310,7 @@ class Cheshire3OaiServer:
             raise NoMetadataFormatsError()
         return mfs
         
-    def listRecords(self, metadataPrefix, set=None, from_=None, until=None):
+    def listRecords(self, metadataPrefix, set=None, from_=None, until=None, cursor=0, batch_size=10):
         """Return a list of (header, metadata, about) tuples for records which match the given parameters.
         
             metadataPrefix - identifies metadata set to retrieve
@@ -267,16 +338,23 @@ class Cheshire3OaiServer:
         tuples = self._listResults(metadataPrefix, set, from_, until)
         # need to return iterable of (header, metadata, about) tuples
         # Header(identifier, datestamp, setspec, deleted) - identifier: string, datestamp: dtaetime.datetime instance, setspec: list, deleted: boolean?
+                
         records = []
-        if len(tuples):
-            for (datestamp, rs) in tuples:
-                for r in rs:
-                    rec = r.fetch_record(session)
-                    records.append((Header(str(r.id), datestamp, [], None), rec, None))
+        i = 0
+        for (datestamp, rs) in tuples:
+            for r in rs:
+                if i < cursor:
+                    i+=1
+                    continue
+                rec = r.fetch_record(session)
+                records.append((Header(str(r.id), datestamp, [], None), rec, None))
+                i+=1
+                if (len(records) == batch_size):
+                    return records
         
         return records
 
-    def listSets(self):
+    def listSets(self, cursor=0, batch_size=10):
         """Return an iterable of (setSpec, setName) tuples (tuple items are strings).
         
             Should raise error.NoSetHierarchyError if the repository does not support sets.
@@ -295,7 +373,7 @@ class reqHandler:
         
         
     def dispatch(self, req):
-        global configs, oaiMetadataRegistry, oaiDcReader
+        global configs, oaiDcReader, c3OaiServers
         path = req.uri[1:]
         if (path[-1] == "/"):
             path = path[:-1]
@@ -307,8 +385,12 @@ class reqHandler:
             for qp in store.list:
                 args[qp.name] = qp.value
                             
-            oai = Cheshire3OaiServer(path)
-            oaixml = OaiXmlServer(oai, oai.metadataRegistry)
+            try:
+                oaixml = MinimalOaiServer(c3OaiServers[path], c3OaiServers[path].metadataRegistry)
+            except KeyError:
+                oai = Cheshire3OaiServer(path)
+                c3OaiServers[path] = oai
+                oaixml = MinimalOaiServer(oai, oai.metadataRegistry)
             try:
                 xmlresp = oaixml.handleRequest(args)
             except DatestampError:
@@ -317,7 +399,7 @@ class reqHandler:
                 except:
                     xmlresp = oaixml.handleException(args, sys.exc_info())
             except C3Exception, e:
-                xmlresp = '<c3error code="%s">%s</c3error>' % (str(e.__class__).split('.')[-1], e.reason)
+                xmlresp = '<c3:error xmlns:c3="http://www.cheshire3.org/schemas/error" code="%s">%s</c3:error>' % (str(e.__class__).split('.')[-1], e.reason)
 
             self.send_xml(xmlresp, req)
         else:
@@ -327,7 +409,7 @@ class reqHandler:
             else:
                 # TODO: send proper OAI error
                 dbps = ['<database>%s</database>' % dbp for dbp in configs.keys()]
-                self.send_xml('<c3error>Incomplete baseURL, requires a database path from: <databases>%s</databases></c3error>' % (''.join(dbps)), req)
+                self.send_xml('<c3:error xmlns:c3="http://www.cheshire3.org/schemas/error">Incomplete baseURL, requires a database path from: <databases>%s</databases></c3:error>' % (''.join(dbps)), req)
                     
 #- end reqHandler -------------------------------------------------------------
     
@@ -335,16 +417,21 @@ class reqHandler:
 # OAI-PMH friendly ISO8601 UTCdatetime obtained with the following
 # datetime.datetime.now(datetime.tzutc()).strftime('%Y-%m-%dT%H:%M:%S%Z').replace('UTC', 'Z')
 
-h = reqHandler()        
+c3OaiServers = {}
+
+h = reqHandler()
 
 def handler(req):
     # do stuff
-    try:
-        h.dispatch(req)
-    except:
-        req.content_type = "text/html"
-        cgitb.Hook(file = req).handle()                                            # give error info
-    else:
-        return apache.OK
+    st = time.time()
+    with open('/home/cheshire/oaitesting.log', 'a') as f:
+        try:
+            h.dispatch(req)
+        except:
+            req.content_type = "text/html"
+            cgitb.Hook(file = req).handle()                                            # give error info
+        else:
+            f.write(str(time.time()-st)+'\n')
+            return apache.OK
 
 # Add AuthHandler here when necesary ------------------------------------------
