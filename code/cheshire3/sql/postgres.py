@@ -304,9 +304,9 @@ class PostgresStore(SimpleStore):
                 else:
                     extra.append("%s = '%s'" % (n,v))
             extraq = ', '.join(extra)
-            query = "UPDATE %s SET data = '%s', %s, timeModified = '%s' WHERE identifier = '%s';" % (self.table, ndata, extraq, now, id)
+            query = "UPDATE %s SET data = E'%s', %s, timeModified = '%s' WHERE identifier = '%s';" % (self.table, ndata, extraq, now, id)
         else:
-            query = "UPDATE %s SET data = '%s', timeModified = '%s' WHERE  identifier = '%s';" % (self.table, ndata, now, id)
+            query = "UPDATE %s SET data = E'%s', timeModified = '%s' WHERE  identifier = '%s';" % (self.table, ndata, now, id)
 
         try:
             self._query(query)
@@ -433,7 +433,7 @@ class PostgresStore(SimpleStore):
             conds.append("%s = %r" % (self.table, oid)) # allows to unlink for objects other than Records
         for (name, value) in kw.iteritems():
             conds.append("%s = %r" % (name, value))
-        query = "DELETE FROM %s_%s WHERE %s;" % (self.table, relation, ', '.join(cond))
+        query = "DELETE FROM %s_%s WHERE %s;" % (self.table, relation, ' AND '.join(conds))
         self._query(query)
 
 
