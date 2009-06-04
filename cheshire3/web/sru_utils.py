@@ -181,9 +181,6 @@ def fetch_data(myUrl, tries=1, timeout=20):
         except (urllib2.URLError):
             # problem accessing remote service
             continue
-        except socket.timeout:
-            # remote server there, but unresponsive
-            break
         except httplib.BadStatusLine:
             # response broken
             time.sleep(0.5)
@@ -197,23 +194,25 @@ def fetch_data(myUrl, tries=1, timeout=20):
     return None
 
 
+objectifier = objectify.makeparser(remove_blank_text=False)
+
 # functions to fetch and return a parsed response object when given a URL
 def get_explainResponse(url, tries=1, timeout=20):
     data = fetch_data(url, tries=tries, timeout=timeout)
     if data:
-        tree = objectify.fromstring(data)
+        tree = objectify.fromstring(data, objectifier)
         return ExplainResponse(tree)
         
 
 def get_searchRetrieveResponse(url, tries=1, timeout=20):
     data = fetch_data(url, tries=tries, timeout=timeout)
     if data:
-        tree = objectify.fromstring(data)
+        tree = objectify.fromstring(data, objectifier)
         return SearchRetrieveResponse(tree)
 
     
 def get_scanResponse(url, tries=1, timeout=20):
     data = fetch_data(url, tries=tries, timeout=timeout)
     if data:
-        tree = objectify.fromstring(data)
+        tree = objectify.fromstring(data, objectifier)
         return ScanResponse(tree)
