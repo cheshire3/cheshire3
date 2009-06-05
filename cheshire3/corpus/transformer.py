@@ -37,13 +37,15 @@ class CorpusPrepTransformer(Transformer):
             else:
                 if cnw:
                     el= etree.Element('n')
-                    el.text = escape(''.join(cnw))
+                    el.text = ''.join(cnw)
+ #                   el.text = escape(''.join(cnw))
                     alltoks.append(el)
                 cnw = [c]
                 space = csp
         if cnw:
             el= etree.Element('n')
-            el.text = escape(''.join(cnw))
+            el.text = ''.join(cnw)
+#            el.text = escape(''.join(cnw))
             alltoks.append(el)
         return alltoks
             
@@ -209,7 +211,8 @@ class CorpusPrepTransformer(Transformer):
                 s.text = ''
             totalOffset += len(text) + 1
             s.append(txt)            
-            s.append(toks)          
+            s.append(toks)  
+        print etree.tostring(tree)        
         return StringDocument(etree.tostring(tree))
           
 
