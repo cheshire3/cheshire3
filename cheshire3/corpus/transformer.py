@@ -211,8 +211,7 @@ class CorpusPrepTransformer(Transformer):
                 s.text = ''
             totalOffset += len(text) + 1
             s.append(txt)            
-            s.append(toks)  
-        print etree.tostring(tree)        
+            s.append(toks)       
         return StringDocument(etree.tostring(tree))
           
 
