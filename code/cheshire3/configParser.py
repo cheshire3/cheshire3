@@ -660,7 +660,7 @@ def myauthfn(self, session, *args, **kw):
             self.logger.log_lvl(session, lvl, msg, *args, **kw)
         else:
             if type(msg) == unicode:
-            msg = msg.encode('utf8')
+                msg = msg.encode('utf8')
             sys.stdout.write(msg)
             sys.stdout.flush()
             #logger = self.get_path(session, 'logger')
