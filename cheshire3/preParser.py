@@ -9,6 +9,8 @@ import bz2, os, commands, time, glob
 import httplib, mimetypes, tempfile
 from xml.sax.saxutils import escape
 
+from lxml import etree
+
 try:
     import cPickle as pickle
 except:
@@ -243,7 +245,7 @@ class MagicRedirectPreParser(TypedPreParser):
             # nasty
             fu = db.get_object(session, 'FileUtilPreParser')
             doc2 = fu.process_document(session, doc)
-            mt = doc.mimeType
+            mt = doc2.mimeType
             if not mt and doc.filename:
                 # try and guess from filename
                 mts = mimetypes.guess_type(doc.filename)
