@@ -1,5 +1,5 @@
 
-import os, commands, mimetypes, tempfile, glob
+import os, commands, mimetypes, tempfile, glob, re
 from lxml import etree
 
 from cheshire3.record import LxmlRecord
@@ -115,6 +115,10 @@ class CmdLineMetadataDiscoveryPreParser(CmdLinePreParser):
                 result = ofh.read()
                 ofh.close()
                 os.remove(outfn)
+                
+            # strip input filename from result if present (this is a tempfile so the name is useless)
+            if result.startswith(infn):
+                result = re.sub('^%s\s*[:-]?\s*' % (infn), '', result)
 
         if old:
             os.chdir(old)
