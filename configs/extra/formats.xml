@@ -12,7 +12,7 @@
         <options>
             <setting type="outMimeType">application/pdf</setting>
             <setting type="dependencyCommandLine">-headless -accept="socket,port=8100;urp;"</setting>
-            <setting type="commandLine">~/cheshire3/code/DocumentConverter.py %INDOC% %OUTDOC%</setting>
+            <setting type="commandLine">~/cheshire3/cheshire3/code/DocumentConverter.py %INDOC% %OUTDOC%</setting>
         </options>
     </subConfig>
     
@@ -25,7 +25,19 @@
         <path type="executable">file</path>
       </paths>
       <options>
-        <setting type="commandLine">-b %INDOC%</setting>
+        <setting type="commandLine">%INDOC%</setting>
+      </options>
+    </subConfig>
+    
+    <subConfig type="preParser" id="ClamVirusScanPreParser">
+      <objectType>cheshire3.formats.preParser.CmdLineMetadataDiscoveryPreParser</objectType>
+      <docs>PreParser to use the ClamAV to scan the document for viruses, adding the result of the scan to document metadata.</docs>
+      <paths>
+        <path type="executable">clamscan</path>
+      </paths>
+      <options>
+        <setting type="commandLine">--stdout --no-summary %INDOC%</setting>
+        <setting type="metadataType">ClamAntiVirus</setting>
       </options>
     </subConfig>
     
