@@ -152,7 +152,7 @@ class XmlDocumentStream(BaseDocumentStream):
             return fl
             
     def find_documents(self, session, cache=0):
-
+        
         docs = []
         locs = []
         endtag = self.endtag
@@ -314,9 +314,9 @@ class MultipleDocumentStream(BaseDocumentStream):
             m = self.filterRe.search(name)
             if not m:
                 return None
+                
         mimetype = mimetypes.guess_type(name, 0)
-
-        if (mimetype[0] in ['text/sgml', 'text/xml']):
+        if (mimetype[0] in ['text/sgml', 'text/xml', 'application/sgml', 'application/xml']):
             trip = ('stream', XmlDocumentStream, 'xml')
         elif (mimetype[0] == 'application/x-tar'):
             trip = ('stream', TarDocumentStream, 'tar')
@@ -728,7 +728,6 @@ class SimpleDocumentFactory(DocumentFactory):
             cls = self.streamHash['file']
             
         ds = cls(session, data, format, tagName, codec, self)
-        
         # Store and call generator on first ping
         self.docStream = ds
         self.generator = ds.find_documents(session, cache=cache)
@@ -813,8 +812,9 @@ class AccumulatingStream(BaseDocumentStream):
 
 
 class AccTransformerStream(AccumulatingStream):
-    """ Call a transformer on each input record and concatenate results
-    Transformer should return a string
+    """Call a transformer on each input record and concatenate results.
+    
+        Transformer should return a string
     """
 
     def __init__(self, session, stream, format, tagName=None, codec=None, factory=None ):
@@ -838,9 +838,7 @@ class AccTransformerStream(AccumulatingStream):
 
 
 class AccVectorTransformerStream(AccumulatingStream):
-    """
-    Accumulate data to be fed to DM, via a vector transformer
-    """
+    """Accumulate data to be fed to DM, via a vector transformer."""
 
     def __init__(self, session, stream, format, tagName=None, codec=None, factory=None ):
         if not factory:
