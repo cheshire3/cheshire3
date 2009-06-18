@@ -7,12 +7,12 @@ from cheshire3.baseObjects import Document
 class StringDocument(Document):
 
     def __init__(self, data, creator="", history=[], mimeType="", parent=None, filename=None, tagName="", byteCount=0, byteOffset=0, wordCount=0):
-	self.id = None
-	self.tagName = tagName
+        self.id = None
+        self.tagName = tagName
         self.size = 0
         self.text = data
         self.mimeType = mimeType
-	self.filename = filename
+        self.filename = filename
         self.wordCount = wordCount
         self.byteCount = byteCount
         self.byteOffset = byteOffset
