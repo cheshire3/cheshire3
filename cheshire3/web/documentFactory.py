@@ -1,5 +1,5 @@
 
-from cheshire3.documentFactory import BaseDocumentStream
+from cheshire3.documentFactory import BaseDocumentStream, AccumulatingStream
 from cheshire3.documentFactory import MultipleDocumentStream
 from cheshire3.document import StringDocument
 from cheshire3.bootstrap import BSParser
@@ -177,7 +177,7 @@ class HttpDocumentStream(RemoteDocumentStream, MultipleDocumentStream):
         else:
             s = None
 
-        if (mimetype[0] in ['text/sgml', 'text/xml']):
+        if (mimetype[0] in ['text/sgml', 'text/xml', 'application/sgml', 'application/xml']):
             trip = ('stream', XmlDocumentStream, 'xml')
         elif (mimetype[0] == 'application/x-tar'):
             trip = ('stream', TarDocumentStream, ftype)
@@ -475,7 +475,7 @@ except:
 try:
     import feedparser
     class SyndicationDocumentStream(HttpDocumentStream):
-        # Use universal feed parser to import rss, atom, etc
+        """Use universal feed parser to import rss, atom, etc."""
 
         def _toXml(self, i):
             xml = ['<sdc:dc xmlns:sdc="info:srw/schema/1/dc-schema" xmlns:dc="http://purl.org/dc/elements/1.1/">']
@@ -523,6 +523,26 @@ except:
         pass
     
 
+class AccHttpDocumentStream(AccumulatingStream, HttpDocumentStream):
+    """AccumulatingDocumentFactory friendly version of HttpDocumentStream.
+    
+    Accumulate documents from a number of URLs (e.g. when web-crawling)."""
+    
+    urls = []
+    
+    def __init__(self, session, stream, format, tagName=None, codec=None, factory=None ):
+        self.urls = []
+        AccumulatingStream.__init__(self, session, stream, format, tagName=tagName, codec=codec, factory=factory)
+    
+    def accumulate(self, session, stream, format, tagName=None, codec=None, factory=None ):
+        self.urls.append(stream)
+        
+    def find_documents(self, session, cache=0):
+        for f in self._processFiles(session, self.urls, cache):
+            yield f
+    
+    
+
 streamHash = {
     "oai" : OaiDocumentStream,
     "sru" : SruDocumentStream,
@@ -532,4 +552,8 @@ streamHash = {
     "ftp" : FtpDocumentStream,
     "http" : HttpDocumentStream,
     "rss" : SyndicationDocumentStream
+}
+
+accStreamHash = {
+     "http": AccHttpDocumentStream
 }

@@ -829,7 +829,7 @@ class AccTransformerStream(AccumulatingStream):
         AccumulatingStream.__init__(self, session, stream, format, tagName, codec, factory)
 
     def accumulate(self, session, stream, format, tagName=None, codec=None, factory=None ):
-        # session should be record instance
+        # stream should be record instance
         doc = self.transformer.process_record(session, stream)
         self.data.append(doc.get_raw(session))
 
@@ -885,8 +885,6 @@ class AccumulatingDocumentFactory(SimpleDocumentFactory):
 
     def __init__(self, session, config, parent):
         SimpleDocumentFactory.__init__(self, session, config, parent)
-        self.register_stream('transformer', AccTransformerStream)
-        self.register_stream('vectorTransformer', AccVectorTransformerStream)
 
     def loadMany(self, session, data=None, cache=None, format=None, tagName=None, codec=None):
         for item in data:
@@ -954,6 +952,10 @@ class AccumulatingDocumentFactory(SimpleDocumentFactory):
             # call find docs for real
             self.generator = self.docStream.find_documents(session, cache=self.cache)
         return SimpleDocumentFactory.get_document(self, session, n)
+
+
+AccumulatingDocumentFactory.register_stream('transformer', AccTransformerStream)
+AccumulatingDocumentFactory.register_stream('vectorTransformer', AccVectorTransformerStream)
 
 
 class ClusterExtractionDocumentFactory(AccumulatingDocumentFactory):
