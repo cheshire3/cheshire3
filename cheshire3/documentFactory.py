@@ -889,6 +889,9 @@ class AccumulatingDocumentFactory(SimpleDocumentFactory):
     def loadMany(self, session, data=None, cache=None, format=None, tagName=None, codec=None):
         for item in data:
             self.load(session, item, cache, format, tagName, codec)
+            
+        # Return self for workflows, mostly can ignore
+        return self
 
     def load(self, session, data=None, cache=None, format=None, tagName=None, codec=None):
 
