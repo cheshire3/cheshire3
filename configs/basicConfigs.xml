@@ -4,6 +4,9 @@
 <subConfig type="documentFactory" id="defaultDocumentFactory">
   <objectType>cheshire3.documentFactory.SimpleDocumentFactory</objectType>
 </subConfig>
+<subConfig type="documentFactory" id="defaultAccumulatingDocumentFactory">
+  <objectType>cheshire3.documentFactory.AccumulatingDocumentFactory</objectType>
+</subConfig>
 <subConfig type="documentFactory" id="ComponentDocumentFactory">
   <objectType>cheshire3.documentFactory.ComponentDocumentFactory</objectType>
 </subConfig>
