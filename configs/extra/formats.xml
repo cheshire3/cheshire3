@@ -12,7 +12,7 @@
         <options>
             <setting type="outMimeType">application/pdf</setting>
             <setting type="dependencyCommandLine">-headless -accept="socket,port=8100;urp;"</setting>
-            <setting type="commandLine">~/cheshire3/cheshire3/code/DocumentConverter.py %INDOC% %OUTDOC%</setting>
+            <setting type="commandLine">~/cheshire3/code/DocumentConverter.py %INDOC% %OUTDOC%</setting>
         </options>
     </subConfig>
     
@@ -46,7 +46,7 @@
         <docs>PreParser to use The National Archives' DROID software for format identification. REQUIRES Java!</docs>
         <paths>
             <path type="executable">java -jar droid.jar</path>
-            <path type="workingPath">/home/cheshire/cheshire3/install/DROID 3.0</path>
+            <path type="workingPath">/home/cheshire/install/DROID 3.0</path>
         </paths>
         <options>
             <setting type="outMimeType">text/xml</setting>
@@ -96,11 +96,11 @@
         <docs>PreParser to use the JHOVE for format identification. REQUIRES Java!</docs>
         <paths>
             <path type="executable">jhove</path>
-            <path type="executablePath">/home/cheshire/cheshire3/install/jhove</path>
+            <path type="executablePath">/home/cheshire/install/jhove</path>
         </paths>
         <options>
             <setting type="outMimeType">text/xml</setting>
-            <setting type="commandLine">-c ~/cheshire3/install/jhove/conf/jhove.conf -h XML %INDOC%</setting>
+            <setting type="commandLine">-c ~/install/jhove/conf/jhove.conf -h XML %INDOC%</setting>
         </options>
         
         <source id="analysisDate">
