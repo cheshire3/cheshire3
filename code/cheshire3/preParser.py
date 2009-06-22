@@ -6,7 +6,7 @@ from cheshire3.exceptions import ConfigFileException
 
 import re, gzip, string, binascii, cStringIO as StringIO
 import bz2, os, commands, time, glob
-import httplib, mimetypes, tempfile
+import httplib, mimetypes, tempfile, hashlib
 from xml.sax.saxutils import escape
 
 from lxml import etree
@@ -760,3 +760,30 @@ class CharacterEntityPreParser(PreParser):
 
         return StringDocument(txt, self.id, doc.processHistory, mimeType=doc.mimeType, parent=doc.parent, filename=doc.filename)
         
+        
+
+class DataChecksumPreParser(PreParser):
+    """PreParser to carry out checksums on the document data and add this to document metadata."""
+    
+    _possibleSettings = {'sumType': {'docs': "Type of checkSum to carry out.", 'type': str, 'default': 'md5'}}
+    
+    def __init__(self, session, config, parent):
+        PreParser.__init__(self, session, config, parent)
+        self.sumType = self.get_setting(session, 'sumType', 'md5')
+        try:
+            hashlib.new(self.sumType)
+        except ValueError as e:
+            raise ConfigFileException(str(e))
+            
+        
+    def process_document(self, session, doc):
+        data = doc.get_raw(session)
+        h = hashlib.new(self.sumType)
+        h.update(data)
+        md = {self.sumType:h.hexdigest()}
+        try:
+            doc.metadata['checksum'].update(md)
+        except KeyError:
+            doc.metadata['checksum'] = md
+        return doc
+    
