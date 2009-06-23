@@ -176,6 +176,7 @@ class XmlDocumentStream(BaseDocumentStream):
                 line += self.stream.read(1024)
             else:
                 self.factory.log_critical(session, "Exiting from XML Document Stream before end of stream (%s), reached maximum garbage bytes (%s)" % (self.streamLocation, self.maxGarbageBytes))
+                break
             pi = line.find("<?xml ")                
             if (pi > -1):
                 # Store info
@@ -227,8 +228,8 @@ class XmlDocumentStream(BaseDocumentStream):
                         strStart = len(line)
                         # Can we get by without using 'tell()' ?
                         # eg for stream APIs that don't support it
-                        if myTell == filelen:
-                        #if self.stream.tell() == filelen:
+
+                        if self.stream.tell() == filelen:
                             # check we have at least 1024 to read
                             # we've got nuffink!
                             if cache == 0:
@@ -236,11 +237,11 @@ class XmlDocumentStream(BaseDocumentStream):
                                 raise StopIteration
                             else:
                                 break
-                        #if self.stream.tell() + 1024 < filelen:
-                        if myTell + 1024 < filelen:
+                        if self.stream.tell() + 1024 < filelen:
                             line += self.stream.read(1024)
                         else:
                             line += self.stream.read()
+                            
                             
             if len(line) == ol and not m:
                 if cache == 0:
