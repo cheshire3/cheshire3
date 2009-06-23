@@ -126,7 +126,7 @@ class Z3950DocumentStream(RemoteDocumentStream):
             if self.resultSet.preferredRecordSyntax == 'USMARC':
                 mt = "application/marc"
             else:
-                mt = mimetypes.guess_type(self.resultSet.preferredRecordSyntax)
+                mt = mimetypes.guess_type(self.resultSet.preferredRecordSyntax)[0]
             doc = StringDocument(item.data, mimeType=mt)
             if cache == 0:
                 yield doc
@@ -186,7 +186,7 @@ class HttpDocumentStream(RemoteDocumentStream, MultipleDocumentStream):
         elif (mimetype[0] == 'application/marc'):
             trip = ('stream', MarcDocumentStream, 'marc')
         else:
-            trip = ('document', None, mimetype)
+            trip = ('document', None, mimetype[0])
 
         if not s:
             s = self._fetchStream(item)
