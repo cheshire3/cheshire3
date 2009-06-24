@@ -36,18 +36,23 @@ class DependentCmdLinePreParser(CmdLinePreParser):
 class CmdLineMetadataDiscoveryPreParser(CmdLinePreParser):
     """Command Line PreParser to use external program for metadata discovery."""
     
+    _possibleSettings = {"metadataType": {'docs' : "Key to use in document.metadata dictionary (often the name of the external program)"}
+                        ,"metadataSubType": {'docs' : "Key to use in document.metadata[metadataKey] dictionary (allows output from running command multiple times with different arguments to be merged into single dictionary)"}
+                         }
+    
     def __init__(self, session, config, parent):
-        self._possibleSettings["metadataType"] = {'docs' : "Key to use in document.metadata dictionary (often the name of the external program)"}
         CmdLinePreParser.__init__(self, session, config, parent)
-        mdt = self.get_setting(session, 'metadataType', None)
+        mdt = self.get_setting(session, 'metadataKey', None)
         if mdt is not None:
             self.metadataType = mdt
         else:
             self.metadataType = self.get_path(session, 'executable', self.cmd.split()[0])
+            
+        self.metadataSubType = self.get_setting(session, 'metadataSubType', 'result')
         
     def _processResult(self, session, data):
         """Process result from external program."""
-        return data
+        return {self.metadataSubType: data}
         
     def process_document(self, session, doc):
         """Pass the document to external executable, add results to document metadata."""
@@ -123,7 +128,11 @@ class CmdLineMetadataDiscoveryPreParser(CmdLinePreParser):
         if old:
             os.chdir(old)
                 
-        doc.metadata[self.metadataType] = self._processResult(session, result)
+        try:
+            doc.metadata[self.metadataType].update(self._processResult(session, result))
+        except:
+            doc.metadata[self.metadataType] = self._processResult(session, result)
+            
         return doc
         
         
