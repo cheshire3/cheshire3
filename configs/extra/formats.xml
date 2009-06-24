@@ -12,20 +12,45 @@
         <options>
             <setting type="outMimeType">application/pdf</setting>
             <setting type="dependencyCommandLine">-headless -accept="socket,port=8100;urp;"</setting>
-            <setting type="commandLine">~/cheshire3/code/DocumentConverter.py %INDOC% %OUTDOC%</setting>
+            <setting type="commandLine">~/cheshire3/cheshire3/code/DocumentConverter.py %INDOC% %OUTDOC%</setting>
         </options>
     </subConfig>
     
     <!-- Metadata Discovery PreParsers -->
 
-    <subConfig type="preParser" id="UnixFileUtilityMetadataDiscoveryPreParser">
+    <subConfig type="preParser" id="UnixFileFormatMetadataDiscoveryPreParser">
       <objectType>cheshire3.formats.preParser.CmdLineMetadataDiscoveryPreParser</objectType>
       <docs>PreParser to use the UNIX file utility for format identification.</docs>
       <paths>
         <path type="executable">file</path>
       </paths>
       <options>
+        <setting type="metadataSubType">format</setting>
         <setting type="commandLine">%INDOC%</setting>
+      </options>
+    </subConfig>
+    
+    <subConfig type="preParser" id="UnixFileMimeTypeMetadataDiscoveryPreParser">
+      <objectType>cheshire3.formats.preParser.CmdLineMetadataDiscoveryPreParser</objectType>
+      <docs>PreParser to use the UNIX file utility for format identification.</docs>
+      <paths>
+        <path type="executable">file</path>
+      </paths>
+      <options>
+        <setting type="metadataSubType">mimeType</setting>
+        <setting type="commandLine">--mime-type %INDOC%</setting>
+      </options>
+    </subConfig>
+    
+    <subConfig type="preParser" id="UnixFileMimeEncodingMetadataDiscoveryPreParser">
+      <objectType>cheshire3.formats.preParser.CmdLineMetadataDiscoveryPreParser</objectType>
+      <docs>PreParser to use the UNIX file utility for format identification.</docs>
+      <paths>
+        <path type="executable">file</path>
+      </paths>
+      <options>
+        <setting type="metadataSubType">mimeEncoding</setting>
+        <setting type="commandLine">--mime-encoding %INDOC%</setting>
       </options>
     </subConfig>
     
@@ -46,7 +71,7 @@
         <docs>PreParser to use The National Archives' DROID software for format identification. REQUIRES Java!</docs>
         <paths>
             <path type="executable">java -jar droid.jar</path>
-            <path type="workingPath">/home/cheshire/install/DROID 3.0</path>
+            <path type="workingPath">/home/cheshire/cheshire3/install/DROID 3.0</path>
         </paths>
         <options>
             <setting type="outMimeType">text/xml</setting>
@@ -96,11 +121,11 @@
         <docs>PreParser to use the JHOVE for format identification. REQUIRES Java!</docs>
         <paths>
             <path type="executable">jhove</path>
-            <path type="executablePath">/home/cheshire/install/jhove</path>
+            <path type="executablePath">/home/cheshire/cheshire3/install/jhove</path>
         </paths>
         <options>
             <setting type="outMimeType">text/xml</setting>
-            <setting type="commandLine">-c ~/install/jhove/conf/jhove.conf -h XML %INDOC%</setting>
+            <setting type="commandLine">-c ~/cheshire3/install/jhove/conf/jhove.conf -h XML %INDOC%</setting>
         </options>
         
         <source id="analysisDate">
