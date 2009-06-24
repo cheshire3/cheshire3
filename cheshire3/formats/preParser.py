@@ -52,7 +52,19 @@ class CmdLineMetadataDiscoveryPreParser(CmdLinePreParser):
         
     def _processResult(self, session, data):
         """Process result from external program."""
-        return {self.metadataSubType: data}
+        res = {}
+        # look for a version number (most common use of this base class is *nix file utility)
+        vRe = re.compile('''(?:[,:;]\s)?    # possibly a leading comma followed by whitespace
+                            v(?:ersion)?\s? # 'v' 'version' 'v ' or 'version '
+                            (\d+(\.\d+)*)   # this is the actual version number, possibly with major, minor revision parts 
+                        ''', re.VERBOSE)
+        vMatch = vRe.search(data) 
+        if vMatch is not None:
+            res['version'] = vMatch.group(1)
+            data = vRe.sub('', data)
+            
+        res[self.metadataSubType] = data
+        return res
         
     def process_document(self, session, doc):
         """Pass the document to external executable, add results to document metadata."""
