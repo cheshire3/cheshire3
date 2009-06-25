@@ -220,12 +220,13 @@ class Fimi1PreParser(ARMPreParser):
         # go to directory and run
         o = os.getcwd()
         #os.chdir(self.filePath)
+
         if self.confidence > 0:
-            cmd = "apriori %s %s %s %s" % (infn, outfn, self.support/100, self.confidence/100)
-            results = commands.getoutput(cmd)
+            cmd = "apriori %s %s %f %s" % (infn, outfn, self.support/100, self.confidence/100)
         else:
             cmd = "apriori %s %s %s" % (infn, outfn, self.support/100)
-            results = commands.getoutput(cmd)
+        results = commands.getoutput(cmd)
+
         #os.chdir(o)
 
         inh = file(outfn)

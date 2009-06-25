@@ -100,7 +100,6 @@ class GeniaObject:
 
     _possiblePaths = {'executablePath' : {'docs' : "Path to geniatagger executable."},
                       'executable' : {'docs' : 'Name of executable'}}
-                      }
 
     _possibleSettings = {'parseOutput' : {'docs' : "If 0 (default), then the output from the object will be the lines from genia, otherwise it will interpret back to word/POS", 'type' : int, 'options' : "0|1"},
                          'tokenize' : {'docs' : '', 'type' : int, 'options' : '0|1'}
@@ -110,15 +109,14 @@ class GeniaObject:
         self.unparsedOutput = self.get_setting(session, 'parseOutput', 0)
 
         tp = self.get_path(session, 'executablePath', '')
-        exe = self.get_path(session, 'executable', './geniatagger')
+        exe = self.get_path(session, 'executable', 'geniatagger')
         if not tp:
             tp = commands.getoutput('which %s' % exe)
 	    tp = os.path.dirname(tp)
             
-        tp = os.path.join(tp, exe)
-
+        tpe = os.path.join(tp, exe)
 	if not tp:
-            raise ConfigFileException("%s requires the path: filePath" % self.id)
+            raise ConfigFileException("%s requires the path: executablePath" % self.id)
 
         o = os.getcwd()
 	os.chdir(tp)
