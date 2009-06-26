@@ -1,0 +1,54 @@
+div#header {
+	height: 125px;
+}
+
+div#navbar {
+	background-color: #009bdf;
+	top: 100px;
+	height: 25px;
+}
+
+div#content,
+div#single,
+div#leftcol,
+div#rightcol {
+	top: 75px;
+	bottom: 0;
+}
+
+div#footer {
+	max-height: 0px;
+	height: 0px;
+	background-color: blue;
+}
+
+.helpMark {
+	background-color: #d7e5f5;
+}
+
+.bar, .hitnav, #hitreport {
+    background-color: #eaf3f5;
+    border-color: #0d3082;
+	padding: 0.5ex 0;
+}
+
+.hitnav, #hitreport {
+	text-align: center;
+}
+
+.navButton {
+	vertical-align: middle;
+}
+
+.logo {
+	padding: 10px;
+}
+
+div#leftcol {
+	width: 59%;
+}
+
+div#rightcol {
+	width: 39%;
+	margin-left: 60%;
+}

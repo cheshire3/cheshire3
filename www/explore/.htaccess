@@ -1,0 +1,3 @@
+AddHandler mod_python .py
+PythonHandler webHandler
+PythonDebug On 

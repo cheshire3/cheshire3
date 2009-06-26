@@ -1,0 +1,102 @@
+/* @override http://archives.liv.ac.uk/ead/css/print.css */
+
+/*
+	This file was produced, and released as part of Cheshire for Archives v3.x
+	Copyright &copy; 2005-2007 the University of Liverpool
+*/
+
+body {
+	background: white;
+	padding: 0;
+	font-family: Times, serif;
+}
+
+div#banner {
+	top: 0;
+	width: 100%;
+	background: none;
+}
+
+div#banner div { padding: 5px 15px 5px 15px; }
+div#banner h1, h2 { font-size: 14pt; }
+
+div#crest{ float: left; }
+div#c3logo{ display: none }
+div#banner div#navbar{
+	padding-top: 0;
+	padding-bottom:0;
+	clear: both;
+}
+
+div#navbar,
+div.pagenav,
+div#full-link,
+div.daos,
+div.dsc-count,
+div.scannav,
+span.printlink,
+a.jstoggle-text,
+td.cross-search
+{
+	display: none;
+}
+
+div#leftcol {
+	display: none;
+	float:left;
+	height: 0;
+}
+
+div#leftcol.searchresults,
+div#eadheader {
+	display: block;
+}
+
+div#rightcol {
+	page-break-inside: auto;
+	top: 0;
+	width: auto;
+	clear: both;
+}
+
+div#rightcol.facets {
+	display: none;
+}
+
+div#footer { 
+	display: none;
+	position: static;
+	height: 50px;
+	background: white;
+	border-top: 2px solid silver;
+	clear: both;
+}
+
+div.component {
+	page-break-inside: avoid;
+}
+
+div.toclist,
+table {
+	clear: both;	
+}
+
+div.heading,
+h3.cheshireaddedheading,
+h3.bar,
+h3.ead
+{
+	background-color: white;
+	border:0;
+}
+
+ul.hierarchy,
+ul.unmarked {
+  list-style-type: none;
+  list-style-position: outside;
+  padding-left: 10px;
+}
+
+a:link {
+	color: black;
+}
