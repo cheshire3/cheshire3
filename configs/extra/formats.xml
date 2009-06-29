@@ -166,6 +166,11 @@
         </source>
     </subConfig>
     
+    <subConfig type="preParser" id="EmailToXmlPreParser">
+    	<objectType>cheshire3.formats.preParser.EmailToXmlPreParser</objectType>
+    	<docs>PreParser that parses email documents into and returns an XML representation.</docs>
+    </subConfig>
+    
   </subConfigs>
   
 </config>
