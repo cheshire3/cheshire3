@@ -3,6 +3,8 @@ import os, commands, mimetypes, tempfile, glob, re
 from lxml import etree
 
 from cheshire3.record import LxmlRecord
+from cheshire3.baseObjects import PreParser
+from cheshire3.document import StringDocument
 from cheshire3.preParser import CmdLinePreParser
 from cheshire3.workflow import CachingWorkflow
 from cheshire3.xpathProcessor import SimpleXPathProcessor
@@ -229,3 +231,23 @@ class XmlParsingCmdLineMetadataDiscoveryPreParser(CmdLineMetadataDiscoveryPrePar
             
         return mddict
         
+
+import email
+        
+class EmailToXmlPreParser(PreParser):
+    
+    def process_document(self, session, doc):
+        data = doc.get_raw(session)
+        msg = email.message_from_string(data)
+        if msg.is_multipart():
+            raise NotImplementedError('Multipart messages (e.g. with attachments) not yet supported.')
+        
+        outlines = [u'<message>', u'\t<headers>']
+        for k,v in msg.items():
+            outlines.append(u'\t\t<%s>%s</%s>' % (k,v,k))
+        outlines.append(u'\t</headers>')
+        outlines.append(u'\t<payload>')
+        outlines.append(unicode(msg.get_payload()))
+        outlines.append(u'\t</payload>')
+        outlines.append(u'</message>')
+        return StringDocument(u'\n'.join(outlines))
