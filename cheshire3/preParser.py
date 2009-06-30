@@ -147,7 +147,9 @@ class CmdLinePreParser(TypedPreParser):
                     # command probably added something to the end
                     # annoying
                     matches = glob.glob(outfn + "*")
-                    for m in matches:
+                    # or maybe ignored absolute path and put it in pwd...
+                    matches2 = glob.glob(os.path.split(outfn)[-1] + '*')
+                    for m in matches + matches2:
                         if os.path.getsize(m) > 0:
                             fh = file(m)
                             break
