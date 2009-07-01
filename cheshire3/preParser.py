@@ -8,7 +8,7 @@ import re, gzip, string, binascii, cStringIO as StringIO
 import bz2, os, commands, time, glob
 import httplib, mimetypes, tempfile, hashlib
 from xml.sax.saxutils import escape
-
+from warnings import warn
 from lxml import etree
 
 try:
@@ -108,7 +108,7 @@ class CmdLinePreParser(TypedPreParser):
                 (qq, infn) = tempfile.mkstemp()                 
             
             os.close(qq)
-            fh = file(infn, 'w')
+            fh = open(infn, 'w')
             fh.write(doc.get_raw(session))
             fh.close()
             cmd = cmd.replace("%INDOC%", infn)
@@ -142,7 +142,7 @@ class CmdLinePreParser(TypedPreParser):
             os.remove(infn)
             if not stdOut:
                 if os.path.exists(outfn) and os.path.getsize(outfn) > 0:
-                    fh = file(outfn)
+                    fh = open(outfn)
                 else:
                     # command probably added something to the end
                     # annoying
@@ -151,14 +151,19 @@ class CmdLinePreParser(TypedPreParser):
                     matches2 = glob.glob(os.path.split(outfn)[-1] + '*')
                     for m in matches + matches2:
                         if os.path.getsize(m) > 0:
-                            fh = file(m)
+                            fh = open(m)
                             break
                 try:
-                    result = fh.read()
-                except:
-                    raise ValueError('Error from command: %s' % (cmd))
-                fh.close()
-                os.remove(outfn)
+                    try:
+                        result = fh.read()
+                    except:
+                        raise ValueError('Error from command: %s' % (cmd))
+                    else:
+                        fh.close()
+                finally:
+                    os.remove(outfn)
+                    try: os.remove(fh.name) # clean up when data was written somewhere other than outfn
+                    except OSError: pass
 
         if old:
             os.chdir(old)
@@ -172,13 +177,17 @@ class CmdLinePreParser(TypedPreParser):
 
 class FileUtilPreParser(TypedPreParser):
     # Call 'file' util to find out the current type of file
+    
+    def __init__(self, session, config, parent):
+        TypedPreParser.__init__(self, session, config, parent)
+        warn('%s is deprecated in favour of objects available from the cheshire3.formats package.' % (self.__class__.__name__), DeprecationWarning, stacklevel=6)
 
     def process_document(self, session, doc):
 
         cmd = "file -i -b %INDOC%"
         (qq, infn) = tempfile.mkstemp()
         os.close(qq)
-        fh = file(infn, 'w')
+        fh = open(infn, 'w')
         fh.write(doc.get_raw(session))
         fh.close()
         cmd = cmd.replace("%INDOC%", infn)
