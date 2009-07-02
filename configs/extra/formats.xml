@@ -7,12 +7,12 @@
         <paths>
             <path type="dependencyExecutable">soffice</path>
             <path type="executable">python</path>
-            <path type="executablePath">/opt/openoffice.org2.3/program</path>
+            <path type="executablePath">/opt/openoffice.org3/program</path>
         </paths>
         <options>
             <setting type="outMimeType">application/pdf</setting>
             <setting type="dependencyCommandLine">-headless -accept="socket,port=8100;urp;"</setting>
-            <setting type="commandLine">~/cheshire3/cheshire3/code/DocumentConverter.py %INDOC% %OUTDOC%</setting>
+            <setting type="commandLine">~/cheshire3/code/DocumentConverter.py %INDOC% %OUTDOC%</setting>
         </options>
     </subConfig>
     
@@ -169,6 +169,9 @@
     <subConfig type="preParser" id="EmailToXmlPreParser">
     	<objectType>cheshire3.formats.preParser.EmailToXmlPreParser</objectType>
     	<docs>PreParser that parses email documents into and returns an XML representation.</docs>
+    	<options>
+    		<setting type="outMimeType">application/xml</setting>
+    	</options>
     </subConfig>
     
   </subConfigs>
