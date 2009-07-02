@@ -1,5 +1,6 @@
 
 import os, commands, mimetypes, tempfile, glob, re
+from xml.sax.saxutils import escape
 from lxml import etree
 
 from cheshire3.record import LxmlRecord
@@ -234,20 +235,41 @@ class XmlParsingCmdLineMetadataDiscoveryPreParser(CmdLineMetadataDiscoveryPrePar
 
 import email
         
-class EmailToXmlPreParser(PreParser):
+class EmailToXmlPreParser(TypedPreParser):
+    
+    def _processHeaders(self, msg):
+        out = ['<headers>']
+        for k,v in msg.items():
+            out.append('<%s>%s</%s>' % (k,escape(v),k))
+        out.append('</headers>')
+        return out
+    
+    
+    def _processPayload(self, msg):
+        out = []
+        if msg.is_multipart():
+            out.append('<multipart-mixed>')
+            for part in msg.walk():
+                if part == msg:
+                    continue
+                out.append('<part>')
+                out.extend(self._processHeaders(part))
+                out.extend(self._processPayload(part))
+                out.append('</part>')
+            out.append('</multipart-mixed>')
+        else:
+            out.extend(['<body mime-type="%s">' % (msg.get_content_type()), escape(msg.get_payload()), '</body>'])
+        return out
+    
     
     def process_document(self, session, doc):
         data = doc.get_raw(session)
         msg = email.message_from_string(data)
-        if msg.is_multipart():
-            raise NotImplementedError('Multipart messages (e.g. with attachments) not yet supported.')
-        
-        outlines = [u'<message>', u'\t<headers>']
-        for k,v in msg.items():
-            outlines.append(u'\t\t<%s>%s</%s>' % (k,v,k))
-        outlines.append(u'\t</headers>')
-        outlines.append(u'\t<payload>')
-        outlines.append(unicode(msg.get_payload()))
-        outlines.append(u'\t</payload>')
-        outlines.append(u'</message>')
-        return StringDocument(u'\n'.join(outlines))
+        out = ['<email>', ]
+        out.extend(self._processHeaders(msg))
+        out.extend(self._processPayload(msg))
+        out.append('</email>')
+        mt = self.outMimeType
+        if not mt:
+            mt = doc.mimeType
+        return StringDocument(''.join(out), self.id, doc.processHistory, mimeType=mt, parent=doc.parent, filename=doc.filename)
