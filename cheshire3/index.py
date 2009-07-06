@@ -520,7 +520,8 @@ class SimpleIndex(Index):
 
     def facets(self, session, resultSet, nTerms=0):
         """ Return a list of terms from this index which co-occur within the records in resultSet.
-            Terms are returned in ascending frequency (number of records) order.
+        
+            Terms are returned in descending frequency (number of records) order.
         """
         termFreqs = {}
         recordFreqs = {}
@@ -560,7 +561,11 @@ class SimpleIndex(Index):
             nOccs = sum(data[2::3])
         fmt = 'lll' * (nRecs + 1)
         params = [fmt, termId, nRecs, nOccs] + data
-        return struct.pack(*params)
+        try:
+            return struct.pack(*params)
+        except:
+            self.log_critical(session, 'Error while serializing index terms.\nHINT: are you trying to put proximity information into a SimpleIndex?\n')
+            raise
         
     def deserialize_term(self, session, data, nRecs=-1, prox=1):
         if nRecs == -1:
