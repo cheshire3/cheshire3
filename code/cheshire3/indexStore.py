@@ -612,150 +612,7 @@ class BdbIndexStore(IndexStore):
             del tidcxn
 
         if vectors:
-            # build vectors here
-            termCache = {}
-            freqCache = {}
-            maxCacheSize = index.get_setting(session, 'maxVectorCacheSize', -1)
-            if maxCacheSize == -1:
-                maxCacheSize = self.get_setting(session, 'maxVectorCacheSize', 50000)
-
-            rand = random.Random()
-
-            # settings for what to go into vector store
-            # -1 for just put everything in
-            minGlobalFreq = int(index.get_setting(session, 'vectorMinGlobalFreq', '-1'))
-            maxGlobalFreq = int(index.get_setting(session, 'vectorMaxGlobalFreq', '-1'))
-            minGlobalOccs = int(index.get_setting(session, 'vectorMinGlobalOccs', '-1'))
-            maxGlobalOccs = int(index.get_setting(session, 'vectorMaxGlobalOccs', '-1'))
-            minLocalFreq = int(index.get_setting(session, 'vectorMinLocalFreq', '-1'))
-            maxLocalFreq = int(index.get_setting(session, 'vectorMaxLocalFreq', '-1'))
-
-            base = filePath[:-4] + "TEMP"
-            fh = codecs.open(base, 'r', 'utf-8', 'xmlcharrefreplace')
-            # read in each line, look up 
-            currDoc = "000000000000"
-            currStore = "0"
-            docArray = []
-            proxHash = {}
-
-
-            cxn = self.vectorCxn.get(index, None)
-            if cxn == None:
-                self._openVectors(session, index)
-                cxn = self.vectorCxn[index]
-            if proxVectors:
-                proxCxn = self.proxVectorCxn[index]
-            
-            totalTerms = 0
-            totalFreq = 0
-            while True:            
-                try:
-                    l = fh.readline()[:-1]
-                    bits = l.split(nonTextToken)
-                except:
-                    break
-                if len(bits) < 4:
-                    break
-                (term, docid, storeid, freq) = bits[:4]
-                if docArray and (docid != currDoc or currStore != storeid):
-                    # store previous
-                    docArray.sort()
-                    flat = []
-                    [flat.extend(x) for x in docArray]
-                    fmt = "L" * len(flat)                    
-                    packed = struct.pack(fmt, *flat)
-                    cxn.put(str("%s|%s" % (currStore, currDoc.encode('utf8'))), packed)
-                    docArray = []
-                    if proxVectors:
-                        pdocid = long(currDoc)
-                        for (elem, parr) in proxHash.iteritems():
-                            proxKey = struct.pack('LL', pdocid, elem)
-                            if elem < 0 or elem > 4294967295:
-                                raise ValueError(elem)
-
-                            proxKey = "%s|%s" % (currStore.encode('utf8'), proxKey)
-                            parr.sort()
-                            flat = []
-                            [flat.extend(x) for x in parr]
-                            proxVal = struct.pack('L' * len(flat), *flat)
-                            proxCxn.put(proxKey, proxVal)
-                        proxHash = {}                        
-                currDoc = docid
-                currStore = storeid
-                tid = termCache.get(term, None)
-                if tid == None:
-                    if not term:
-                        #???
-                        continue
-                    tdata = self.fetch_term(session, index, term, summary=True)
-                    if tdata:
-                        try:
-                            (tid, tdocs, tfreq) = tdata[:3]
-                        except:
-                            self.log_critical(session, "Broken: %r %r %r" % (term, index.id, tdata))
-                            raise
-                    else:
-                        termCache[term] = (0,0)
-                        freqCache[term] = (0,0)
-                        continue
-                    termCache[term] = tid
-                    freqCache[term] = [tdocs, tfreq]
-                    # check caches aren't exploding
-                    ltc = len(termCache)
-                    if ltc >= maxCacheSize:
-                        # select random key to remove
-                        (k,v) = termCache.popitem()
-                        del freqCache[k]
-                else:
-                    (tdocs, tfreq) = freqCache[term]
-                    if not tdocs or not tfreq:
-                        continue
-                if ( (minGlobalFreq == -1 or tdocs >= minGlobalFreq) and
-                     (maxGlobalFreq == -1 or tdocs <= maxGlobalFreq) and
-                     (minGlobalOccs == -1 or tfreq >= minGlobalOccs) and
-                     (maxGlobalOccs == -1 or tfreq <= maxGlobalOccs) and
-                     (minLocalFreq == -1 or tfreq >= minLocalFreq) and
-                     (maxLocalFreq == -1 or tfreq <= maxLocalFreq) ):
-                    docArray.append([tid, long(freq)])
-                    totalTerms += 1
-                    totalFreq += long(freq)                    
-                if proxVectors:
-                    nProxInts = index.get_setting(session, 'nProxInts', 2)
-                    proxInfo = [long(x) for x in bits[4:]]
-                    tups = [proxInfo[x:x+nProxInts] for x in range(0,len(proxInfo),nProxInts)]
-                    for t in tups:
-                        val = [t[1], tid]
-                        val.extend(t[2:])                        
-                        try:
-                            proxHash[t[0]].append(val)
-                        except KeyError:
-                            proxHash[t[0]] = [val]
-                    
-            # Catch final document
-            if docArray:
-                docArray.sort()
-                # Put in total terms, total occurences
-                flat = []
-                [flat.extend(x) for x in docArray]
-                fmt = "L" * len(flat)
-                packed = struct.pack(fmt, *flat)
-                cxn.put(str("%s|%s" % (storeid, docid.encode('utf8'))), packed)
-                if proxVectors:
-                    pdocid = long(currDoc)
-                    for (elem, parr) in proxHash.iteritems():
-                        proxKey = struct.pack('LL', pdocid, elem)
-                        proxKey = "%s|%s" % (storeid.encode('utf8'), proxKey)
-                        parr.sort()
-                        flat = []
-                        [flat.extend(x) for x in parr]
-                        proxVal = struct.pack('L' * len(flat), *flat)
-                        proxCxn.put(proxKey, proxVal)
-                    proxCxn.close()
-                    self.proxVectorCxn[index] = None
-                    del proxCxn
-            fh.close()
-            cxn.close()
-            os.remove(base)
+            self._buildVectors(session, index, filePath[:-4] + "TEMP")
 
         fl = index.get_setting(session, 'freqList', "")
         if fl:
@@ -802,6 +659,156 @@ class BdbIndexStore(IndexStore):
 
         return None
     
+
+    def _buildVectors(self, session, index, filePath):
+        # build vectors here
+        termCache = {}
+        freqCache = {}
+        maxCacheSize = index.get_setting(session, 'maxVectorCacheSize', -1)
+        if maxCacheSize == -1:
+            maxCacheSize = self.get_setting(session, 'maxVectorCacheSize', 50000)
+
+        rand = random.Random()
+
+        # settings for what to go into vector store
+        # -1 for just put everything in
+        minGlobalFreq = int(index.get_setting(session, 'vectorMinGlobalFreq', '-1'))
+        maxGlobalFreq = int(index.get_setting(session, 'vectorMaxGlobalFreq', '-1'))
+        minGlobalOccs = int(index.get_setting(session, 'vectorMinGlobalOccs', '-1'))
+        maxGlobalOccs = int(index.get_setting(session, 'vectorMaxGlobalOccs', '-1'))
+        minLocalFreq = int(index.get_setting(session, 'vectorMinLocalFreq', '-1'))
+        maxLocalFreq = int(index.get_setting(session, 'vectorMaxLocalFreq', '-1'))
+
+        proxVectors = index.get_setting(session, 'proxVectors', 0)
+
+        # temp filepath
+        base = filePath
+        fh = codecs.open(base, 'r', 'utf-8', 'xmlcharrefreplace')
+        # read in each line, look up 
+        currDoc = "000000000000"
+        currStore = "0"
+        docArray = []
+        proxHash = {}
+
+        cxn = self.vectorCxn.get(index, None)
+        if cxn == None:
+            self._openVectors(session, index)
+            cxn = self.vectorCxn[index]
+        if proxVectors:
+            proxCxn = self.proxVectorCxn[index]
+
+        totalTerms = 0
+        totalFreq = 0
+        while True:            
+            try:
+                l = fh.readline()[:-1]
+                bits = l.split(nonTextToken)
+            except:
+                break
+            if len(bits) < 4:
+                break
+            (term, docid, storeid, freq) = bits[:4]
+            if docArray and (docid != currDoc or currStore != storeid):
+                # store previous
+                docArray.sort()
+                flat = []
+                [flat.extend(x) for x in docArray]
+                fmt = "L" * len(flat)                    
+                packed = struct.pack(fmt, *flat)
+                cxn.put(str("%s|%s" % (currStore, currDoc.encode('utf8'))), packed)
+                docArray = []
+                if proxVectors:
+                    pdocid = long(currDoc)
+                    for (elem, parr) in proxHash.iteritems():
+                        proxKey = struct.pack('LL', pdocid, elem)
+                        if elem < 0 or elem > 4294967295:
+                            raise ValueError(elem)
+
+                        proxKey = "%s|%s" % (currStore.encode('utf8'), proxKey)
+                        parr.sort()
+                        flat = []
+                        [flat.extend(x) for x in parr]
+                        proxVal = struct.pack('L' * len(flat), *flat)
+                        proxCxn.put(proxKey, proxVal)
+                    proxHash = {}                        
+            currDoc = docid
+            currStore = storeid
+            tid = termCache.get(term, None)
+            if tid == None:
+                if not term:
+                    #???
+                    continue
+                tdata = self.fetch_term(session, index, term, summary=True)
+                if tdata:
+                    try:
+                        (tid, tdocs, tfreq) = tdata[:3]
+                    except:
+                        self.log_critical(session, "Broken: %r %r %r" % (term, index.id, tdata))
+                        raise
+                else:
+                    termCache[term] = (0,0)
+                    freqCache[term] = (0,0)
+                    continue
+                termCache[term] = tid
+                freqCache[term] = [tdocs, tfreq]
+                # check caches aren't exploding
+                ltc = len(termCache)
+                if ltc >= maxCacheSize:
+                    # select random key to remove
+                    (k,v) = termCache.popitem()
+                    del freqCache[k]
+            else:
+                (tdocs, tfreq) = freqCache[term]
+                if not tdocs or not tfreq:
+                    continue
+            if ( (minGlobalFreq == -1 or tdocs >= minGlobalFreq) and
+                 (maxGlobalFreq == -1 or tdocs <= maxGlobalFreq) and
+                 (minGlobalOccs == -1 or tfreq >= minGlobalOccs) and
+                 (maxGlobalOccs == -1 or tfreq <= maxGlobalOccs) and
+                 (minLocalFreq == -1 or tfreq >= minLocalFreq) and
+                 (maxLocalFreq == -1 or tfreq <= maxLocalFreq) ):
+                docArray.append([tid, long(freq)])
+                totalTerms += 1
+                totalFreq += long(freq)                    
+            if proxVectors:
+                nProxInts = index.get_setting(session, 'nProxInts', 2)
+                proxInfo = [long(x) for x in bits[4:]]
+                tups = [proxInfo[x:x+nProxInts] for x in range(0,len(proxInfo),nProxInts)]
+                for t in tups:
+                    val = [t[1], tid]
+                    val.extend(t[2:])                        
+                    try:
+                        proxHash[t[0]].append(val)
+                    except KeyError:
+                        proxHash[t[0]] = [val]
+
+        # Catch final document
+        if docArray:
+            docArray.sort()
+            # Put in total terms, total occurences
+            flat = []
+            [flat.extend(x) for x in docArray]
+            fmt = "L" * len(flat)
+            packed = struct.pack(fmt, *flat)
+            cxn.put(str("%s|%s" % (storeid, docid.encode('utf8'))), packed)
+            if proxVectors:
+                pdocid = long(currDoc)
+                for (elem, parr) in proxHash.iteritems():
+                    proxKey = struct.pack('LL', pdocid, elem)
+                    proxKey = "%s|%s" % (storeid.encode('utf8'), proxKey)
+                    parr.sort()
+                    flat = []
+                    [flat.extend(x) for x in parr]
+                    proxVal = struct.pack('L' * len(flat), *flat)
+                    proxCxn.put(proxKey, proxVal)
+                proxCxn.close()
+                self.proxVectorCxn[index] = None
+                del proxCxn
+        fh.close()
+        cxn.close()
+        os.remove(base)
+        
+
     
     def _closeVectors(self, session, index):
         for cxnx in [self.termIdCxn, self.vectorCxn, self.proxVectorCxn]:

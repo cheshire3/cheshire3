@@ -315,6 +315,7 @@ class ArmVectorTransformer(Transformer):
                          'minLocalFreq' : {'docs' : "", 'type' : int},
                          'maxLocalFreq' : {'docs' : "", 'type' : int},
                          'stopwords' : {'docs' : '', 'type' : str},
+                         'reqdwords' : {'docs' : '', 'type' :str},
                          'proxElement' : {'docs' : "", 'type' :int, 'options' : '0|1'},
                          'matchesOnly' : {'docs' : "", 'type' :int, 'options' : '0|1'},
                          'stripMatch' : {'docs' : "", 'type' :int, 'options' : '0|1'}
@@ -342,6 +343,7 @@ class ArmVectorTransformer(Transformer):
         self.prox = self.get_setting(session, 'proxElement', 0)
         self.matches = self.get_setting(session, 'matchesOnly', 0)
         self.stripMatch = self.get_setting(session, 'stripMatch', 0)
+
         sw = self.get_setting(session, 'stopwords', '')
         ignoreTermids = []
         for w in sw.split(' '):
@@ -353,6 +355,19 @@ class ArmVectorTransformer(Transformer):
                     # term doesn't exist
                     pass
         self.ignoreTermids = ignoreTermids
+
+        sw = self.get_setting(session, 'reqdwords', '')
+        mandatoryTermids = []
+        for w in sw.split(' '):
+            if w:
+                try:
+                    (tid, bla, bla2) = self.vectorIndex.fetch_term(session, w, summary=True)                    
+                    mandatoryTermids.append(tid)
+                except ValueError:
+                    # term doesn't exist
+                    pass
+        self.mandatoryTermids = mandatoryTermids
+
         self._clear(session)
 
     def _clear(self, session):
@@ -404,6 +419,15 @@ class ArmVectorTransformer(Transformer):
         if self.ignoreTermids:
             its = self.ignoreTermids
             v = [x for x in v if not x[0] in its]
+        if self.mandatoryTermids:
+            mts = self.mandatoryTermids
+            found = 0
+            for x in v:
+                if x[0] in mts:
+                    found = 1
+                    break
+            if not found:
+                v = {}
 
         vhash = {}
         vhash.update(v)

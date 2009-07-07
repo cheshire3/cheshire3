@@ -126,6 +126,21 @@ class GeniaTransformer(Transformer):
                     bits.append(">")
                     doc.append(' '.join(bits))
                     t = s.text
+                    if t:
+                        try:
+                            toks = self.geniafy(t)
+                            ttxt = ''.join(toks)
+                            val = '<txt>%s</txt><toks>%s</toks>' % (escape(t), ttxt)
+                            doc.append(val.encode('utf8'))
+                        except:
+                            raise
+                    doc.append("</s>")
+                doc.append("</p>\n")
+            elif sub.tag in ["headline", "lead"]:
+                # tag headline and lead too
+                doc.append('<%s>' % sub.tag)
+                t = sub.text
+                if t:
                     try:
                         toks = self.geniafy(t)
                         ttxt = ''.join(toks)
@@ -133,19 +148,6 @@ class GeniaTransformer(Transformer):
                         doc.append(val.encode('utf8'))
                     except:
                         raise
-                    doc.append("</s>")
-                doc.append("</p>\n")
-            elif sub.tag in ["headline", "lead"]:
-                # tag headline and lead too
-                doc.append('<%s>' % sub.tag)
-                t = sub.text
-                try:
-                    toks = self.geniafy(t)
-                    ttxt = ''.join(toks)
-                    val = '<txt>%s</txt><toks>%s</toks>' % (escape(t), ttxt)
-                    doc.append(val.encode('utf8'))
-                except:
-                    raise
                 doc.append('</%s>' % sub.tag)
             else:
             # just useless <br/> tags
@@ -172,6 +174,7 @@ class GeniaTransformer(Transformer):
     
 
     def geniafy(self, text):
+        print text
         t = self.rfot.process_string(self.session, text)
         words = t[0]
         offsets = t[1]

@@ -1,4 +1,7 @@
 
+import os
+import cPickle
+
 from cheshire3.baseObjects import TokenMerger
 
 class SimpleTokenMerger(TokenMerger):
@@ -82,30 +85,6 @@ class OffsetProximityTokenMerger(ProximityTokenMerger):
                     x += 1
         return new
         
-##class PositionTokenMerger(ProximityTokenMerger):
-##    def process_hash(self, session, data):
-##        new = {}
-##        has = new.has_key
-##        for d, val in data.iteritems():
-##            if d:
-##                x = 0
-##                for t in val['text']:
-##                    if has(t):
-##                        new[t]['occurences'] += 1
-##                        try:
-##                            new[t]['positions'].extend((val['proxLoc'], x))
-##                        except KeyError:
-##                            new[t]['positions'].extend(val['positions'])
-##                    else:
-##                        try:
-##                            new[t] = {'text' : t, 'occurences' : 1, 'positions' : [val['proxLoc'],x]}
-##                        except KeyError:
-##                            new[t] = {'text' : t, 'occurences' : 1,
-##                                      'positions' : val['positions']}
-##                    x += 1
-##        return new
-    
-
 
 class SequenceRangeTokenMerger(SimpleTokenMerger):
     # assume that we've tokenized a single value into pairs,
@@ -192,3 +171,63 @@ class ReconstructTokenMerger(SimpleTokenMerger):
             kval['text'] = txt
             kw[k] = kval
         return kw
+
+class PhraseTokenMerger(ProximityTokenMerger):
+    _possiblePaths = {'mergeHashPickle' : {'docs' : 'Pickled hash of words to merge'}}
+
+    def __init__(self, session, config, parent):
+        ProximityTokenMerger.__init__(self, session, config, parent)
+        mp = self.get_path(session, 'mergeHashPickle', '')
+        if not mp:
+            raise ConfigFileException("%s needs path: mergeHashPickle" % self.id)
+        elif not os.path.exists(mp):
+            raise FileDoesNotExistException(" mergeHashPickle path on %s does not exist" % self.id)
+            
+        inh = file(mp)
+        data = inh.read()
+        inh.close()
+        self.mergeHash = cPickle.loads(data)
+
+    def process_hash(self, session, data):
+        new = {}
+        for d, val in data.iteritems():
+            if d:
+                x = 0
+                merging = []
+                for t in val['text']:
+
+                    # check if t in self.mergeHash
+                    if self.mergeHash.has_key(t) and len(val['text']) > x+1:
+                        nexts = self.mergeHash[t]
+                        next = val['text'][x+1]
+                        if next in nexts:
+                            merging.append(t)
+                            continue
+                    elif merging:
+                        merging.append(t)
+                        t = "_".join(merging)
+                        merging = []
+
+                    if t in new:
+                        new[t]['occurences'] += val['occurences']
+                        try:
+                            pls = [(pl,x) for pl in val['proxLoc']]
+                            for p in pls:
+                                new[t]['positions'].extend(p)
+                        except KeyError:
+                            new[t]['positions'].extend(val['positions'])
+                    else:
+                        try:
+                            pls = [(pl,x) for pl in val['proxLoc']]
+                            new[t] = {'text' : t, 'occurences' : len(pls), 'positions' : []}
+                            for p in pls:
+                                new[t]['positions'].extend(p)
+                        except KeyError:
+                            new[t] = {'text' : t, 'occurences' : val['occurences'],
+                                      'positions' : val['positions'][:]}
+                    x += 1
+
+
+        return new
+
+    
