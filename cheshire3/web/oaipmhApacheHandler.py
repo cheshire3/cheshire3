@@ -408,8 +408,8 @@ class reqHandler:
                 req.sendfile(os.path.join(apache.server_root(), 'htdocs', path))
             else:
                 # TODO: send proper OAI error
-                dbps = ['<database>%s</database>' % dbp for dbp in configs.keys()]
-                self.send_xml('<c3:error xmlns:c3="http://www.cheshire3.org/schemas/error">Incomplete baseURL, requires a database path from: <databases>%s</databases></c3:error>' % (''.join(dbps)), req)
+                dbps = ['<database>%s</database>' % dbp for dbp in configs.iterkeys()]
+                self.send_xml('<c3:error xmlns:c3="http://www.cheshire3.org/schemas/error">Incomplete baseURL, requires a database path from: <databases numberOfDatabases="%d">%s</databases></c3:error>' % (len(configs), ''.join(dbps)), req)
                     
 #- end reqHandler -------------------------------------------------------------
     
@@ -424,14 +424,12 @@ h = reqHandler()
 def handler(req):
     # do stuff
     st = time.time()
-    with open('/home/cheshire/oaitesting.log', 'a') as f:
-        try:
-            h.dispatch(req)
-        except:
-            req.content_type = "text/html"
-            cgitb.Hook(file = req).handle()                                            # give error info
-        else:
-            f.write(str(time.time()-st)+'\n')
-            return apache.OK
+    try:
+        h.dispatch(req)
+    except:
+        req.content_type = "text/html"
+        cgitb.Hook(file = req).handle()                                            # give error info
+    else:
+        return apache.OK
 
 # Add AuthHandler here when necesary ------------------------------------------
