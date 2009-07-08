@@ -308,6 +308,8 @@ class C3Object(object):
         self.complexity = ""
         self.stability = ""
         
+        self.initTime = time.time()
+        
         pathObjects = {}
         
         # LXML

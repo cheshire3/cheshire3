@@ -1,7 +1,7 @@
  
 from mod_python import apache
 from mod_python.util import FieldStorage
-import os, re
+import os, re, time
 from xml.sax.saxutils import escape
 from lxml import etree
 from lxml.builder import ElementMaker
@@ -19,6 +19,7 @@ session.environment = "apache"
 serv = SimpleServer(session, os.path.join(cheshirePath, 'cheshire3', 'configs', 'serverConfig.xml'))
 
 configs = {}
+
 if len(serv.databaseConfigs) < 25:
     serv._cacheDatabases(session)
     for db in serv.databases.itervalues():
@@ -393,11 +394,24 @@ class reqHandler:
         else:
             dbconf = configs[path]
             if isinstance(dbconf, tuple):
-                dbid = configs[path][0]
+                dbid = dbconf[0]
                 db = serv.get_object(session, dbid)
-                config = db.get_object(session, configs[path][1]['http://www.loc.gov/zing/srw/'])
+                config = db.get_object(session, dbconf[1]['http://www.loc.gov/zing/srw/'])
             else:
                 config = dbconf['http://www.loc.gov/zing/srw/']
+                
+            # check db hasn't changed since instantiated
+            db = config.parent
+            fp = db.get_path(session, 'metadataPath')    # attempt to find filepath for db metadata
+            if os.stat(fp).st_mtime > db.initTime:
+                # rediscover objects
+                dbid = db.id
+                del db
+                try: del serv.objects[dbid]
+                except KeyError: pass
+                try: del serv.databases[dbid]
+                except KeyError: pass
+                db = serv.get_object(session, dbid)
                 
             session.path = "http://%s/%s" % (req.hostname, path)
             session.config = config
