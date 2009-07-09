@@ -87,8 +87,6 @@ class IrodsStore(SimpleStore):
         self.cxn = None
         self.coll = None
         self.env = None
-        self._open(session)
-
         self.idNormalizer = self.get_path(session, 'idNormalizer', None)
         self.outIdNormalizer = self.get_path(session, 'outIdNormalizer', None)
         self.inWorkflow = self.get_path(session, 'inWorkflow', None)
@@ -103,6 +101,8 @@ class IrodsStore(SimpleStore):
         self.user = self.get_setting(session, 'irodsUser', '')
         self.zone = self.get_setting(session, 'irodsZone', '')
         self.passwd = self.get_setting(session, 'irodsPassword', '')
+
+        self._open(session)
 
 
     def get_metadataTypes(self, session):
@@ -126,7 +126,6 @@ class IrodsStore(SimpleStore):
             user = self.user if self.host else myEnv.getRodsUserName()
             zone = self.zone if self.host else myEnv.getRodsZone()
             
-
             conn, errMsg = irods.rcConnect(host, port, user, zone)
             if self.passwd:
                 status = irods.clientLoginWithPassword(conn, zone)
