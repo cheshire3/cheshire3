@@ -1,12 +1,12 @@
 
-import os, commands, mimetypes, tempfile, glob, re
+import os, commands, mimetypes, tempfile, glob, re, time
 from xml.sax.saxutils import escape
 from lxml import etree
 
 from cheshire3.record import LxmlRecord
 from cheshire3.baseObjects import PreParser
 from cheshire3.document import StringDocument
-from cheshire3.preParser import CmdLinePreParser
+from cheshire3.preParser import CmdLinePreParser, TypedPreParser
 from cheshire3.workflow import CachingWorkflow
 from cheshire3.xpathProcessor import SimpleXPathProcessor
 
@@ -45,7 +45,7 @@ class CmdLineMetadataDiscoveryPreParser(CmdLinePreParser):
     
     def __init__(self, session, config, parent):
         CmdLinePreParser.__init__(self, session, config, parent)
-        mdt = self.get_setting(session, 'metadataKey', None)
+        mdt = self.get_setting(session, 'metadataType', None)
         if mdt is not None:
             self.metadataType = mdt
         else:
@@ -147,6 +147,9 @@ class CmdLineMetadataDiscoveryPreParser(CmdLinePreParser):
             doc.metadata[self.metadataType].update(self._processResult(session, result))
         except:
             doc.metadata[self.metadataType] = self._processResult(session, result)
+            
+        if 'analysisDateTime' not in doc.metadata[self.metadataType]:
+            doc.metadata[self.metadataType]['analysisDateTime'] = time.strftime('%Y-%m-%dT%H:%M:%S%Z')
             
         return doc
         
