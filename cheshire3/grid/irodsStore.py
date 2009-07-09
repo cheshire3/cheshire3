@@ -75,8 +75,7 @@ class IrodsStore(SimpleStore):
                          'irodsUser' : {'docs' :'', 'type' : str},
                          'irodsZone' : {'docs' :'', 'type' : str},
                          'irodsPasswd' : {'docs' :'', 'type' : str},
-
-                         
+                         'createSubDir' : {'docs' :'', 'type' : int, 'options' : "0|1"}
                          }
 
     _possibleDefaults = {'expires': {"docs" : 'Default time after ingestion at which to delete the data object in number of seconds.  Can be overridden by the individual object.', 'type' : int}}
@@ -157,20 +156,21 @@ class IrodsStore(SimpleStore):
             c.createCollection(path)
         c.openCollection(path)
 
-        # now look for object's storage area
-        # maybe move into database collection
-        if (isinstance(self.parent, Database)):
-            sc = self.parent.id
-            dirs = c.getSubCollections()
-            if not sc in dirs:
-                c.createCollection(sc)
-            c.openCollection(sc)
 
-        # move into store collection
-        dirs = c.getSubCollections()
-        if not self.id in dirs:
-            c.createCollection(self.id)
-        c.openCollection(self.id)
+        if self.get_setting(session, 'createSubDir', 1):
+            # now look for object's storage area
+            # maybe move into database collection
+            if (isinstance(self.parent, Database)):
+                sc = self.parent.id
+                dirs = c.getSubCollections()
+                if not sc in dirs:
+                    c.createCollection(sc)
+                c.openCollection(sc)
+            # move into store collection
+            dirs = c.getSubCollections()
+            if not self.id in dirs:
+                c.createCollection(self.id)
+            c.openCollection(self.id)
 
         # Fetch user metadata
         myMetadata = self.get_metadataTypes(session)
