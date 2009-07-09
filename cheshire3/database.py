@@ -24,7 +24,8 @@ class SimpleDatabase(SummaryObject, Database):
     _possibleSettings = {'srw' : {'docs' : 'Should the database be available via the SRW protocol', 'type' : int, 'options' : "0|1"},
                          'z3950' : {'docs' : 'Should the database be available via the Z39.50 protocol', 'type' : int, 'options' : "0|1"},
                          'remoteWorkflow' : {'docs' : 'Should the database be available via the remote workflow protocol for Cheshire3. This MUST be secured, so it is not recommended without fully understanding the implications', 'type' : int, 'options' : "0|1"},
-                         'oai-pmh' : {'docs' : 'Should the database be available via the OAI protocol', 'type' : int, 'options' : "0|1"}
+                         'oai-pmh' : {'docs' : 'Should the database be available via the OAI protocol', 'type' : int, 'options' : "0|1"},
+                         'www' : {'docs' : "Should the database be available via Cheshire3's introspective web search interface.", 'type': int, 'options': "0|1"}
                          }
 
     _possiblePaths = {'indexStoreList' : {'docs' : "Space separated list of indexStore identifiers for this database."}
