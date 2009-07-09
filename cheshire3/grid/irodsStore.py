@@ -69,7 +69,14 @@ class IrodsStore(SimpleStore):
     _possibleSettings = {'useUUID' : {'docs' : "Each stored data object should be assigned a UUID.", 'type': int, 'options' : "0|1"},
                          'digest' : {'docs' : "Type of digest/checksum to use. Defaults to no digest", 'options': 'sha|md5'},
                          'expires' : {'docs' : "Time after ingestion at which to delete the data object in number of seconds.", 'type' : int },
-                         'storeDeletions' : {'docs' : "Maintain when an object was deleted from this store.", 'type' : int, 'options' : "0|1"}
+                         'storeDeletions' : {'docs' : "Maintain when an object was deleted from this store.", 'type' : int, 'options' : "0|1"},
+                         'irodsHost' : {'docs' :'', 'type' : str},
+                         'irodsPort' : {'docs' :'', 'type' : int},
+                         'irodsUser' : {'docs' :'', 'type' : str},
+                         'irodsZone' : {'docs' :'', 'type' : str},
+                         'irodsPasswd' : {'docs' :'', 'type' : str},
+
+                         
                          }
 
     _possibleDefaults = {'expires': {"docs" : 'Default time after ingestion at which to delete the data object in number of seconds.  Can be overridden by the individual object.', 'type' : int}}
@@ -91,6 +98,12 @@ class IrodsStore(SimpleStore):
         self.useUUID = self.get_setting(session, 'useUUID', 0)
         self.expires = self.get_default(session, 'expires', 0)
 
+        self.host = self.get_setting(session, 'irodsHost', '')
+        self.port = self.get_setting(session, 'irodsPort', 0)
+        self.user = self.get_setting(session, 'irodsUser', '')
+        self.zone = self.get_setting(session, 'irodsZone', '')
+        self.passwd = self.get_setting(session, 'irodsPassword', '')
+
 
     def get_metadataTypes(self, session):
         return {'totalItems' : long,
@@ -107,13 +120,29 @@ class IrodsStore(SimpleStore):
         if self.cxn == None:
             # connect to iRODS
             myEnv, status = irods.getRodsEnv()
-            conn, errMsg = irods.rcConnect(myEnv.getRodsHost(), myEnv.getRodsPort(), 
-                                           myEnv.getRodsUserName(), myEnv.getRodsZone())
-            status = irods.clientLogin(conn)
+
+            host = self.host if self.host else myEnv.getRodsHost()
+            port = self.port if self.host else myEnv.getRodsPort()
+            user = self.user if self.host else myEnv.getRodsUserName()
+            zone = self.zone if self.host else myEnv.getRodsZone()
+            
+
+            conn, errMsg = irods.rcConnect(host, port, user, zone)
+            if self.passwd:
+                status = irods.clientLoginWithPassword(conn, zone)
+            else:
+                status = irods.clientLogin(conn)
+
             if status:
                 raise ConfigFileException("Cannot connect to iRODS: (%s) %s" % (status, errMsg))
             self.cxn = conn
             self.env = myEnv
+
+            resources = irods.getResources(self.cxn)
+            self.resourceHash = {}
+            for r in resources:
+                self.resourceHash[r.getName()] = r
+
             
         if self.coll != None:
             # already open, just skip
@@ -315,6 +344,25 @@ class IrodsStore(SimpleStore):
         for (m, val) in metadata.iteritems():
             self.store_metadata(session, id, m, val)
         return None
+
+    def replicate_data(self, session, id, location):
+
+        if not self.resourceHash.has_key(location):
+            raise ObjectDoesNotExistException('Unknown Storage Resource: %s' % location)
+
+        if id == None:
+            id = self.generate_id(session)
+        if (self.idNormalizer != None):
+            id = self.idNormalizer.process_string(session, id)
+        elif type(id) == unicode:
+            id = id.encode('utf-8')
+        else:
+            id = str(id)
+
+        f = self.coll.open(id)
+        f.replicate(location)
+        f.close()
+
 
     def fetch_metadata(self, session, id, mType):
         # open irodsFile and get metadata from it
