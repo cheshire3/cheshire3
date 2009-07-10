@@ -23,6 +23,10 @@ class RdfGraphParser(BaseParser):
         rec = GraphRecord(session, graph)
         return rec
 
+class ForesiteGraphParser(BaseParser):
+    pass
+    
+
 
 class RdfaParser(BaseParser):
     options = None
