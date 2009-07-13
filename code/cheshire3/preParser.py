@@ -4,7 +4,7 @@ from cheshire3.document import StringDocument
 from cheshire3.marc_utils import MARC
 from cheshire3.exceptions import ConfigFileException
 
-import re, gzip, string, binascii, cStringIO as StringIO
+import re, time, gzip, string, binascii, cStringIO as StringIO
 import bz2, os, commands, time, glob
 import httplib, mimetypes, tempfile, hashlib
 from xml.sax.saxutils import escape
@@ -791,7 +791,11 @@ class DataChecksumPreParser(PreParser):
         data = doc.get_raw(session)
         h = hashlib.new(self.sumType)
         h.update(data)
-        md = {self.sumType:h.hexdigest()}
+        md = {self.sumType: {'hexdigest': h.hexdigest()
+                            ,'analysisDateTime': time.strftime('%Y-%m-%dT%H:%M:%S%Z')
+                            }
+        
+            }
         try:
             doc.metadata['checksum'].update(md)
         except KeyError:
