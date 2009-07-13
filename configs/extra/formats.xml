@@ -62,107 +62,105 @@
       </paths>
       <options>
         <setting type="commandLine">--stdout --no-summary %INDOC%</setting>
-        <setting type="metadataType">ClamAntiVirus</setting>
+        <setting type="metadataType">VirusScan</setting>
       </options>
+    </subConfig>
+    
+    <subConfig type="workflow" id="ExactExtractorWorkflow">
+    	<objectType>cheshire3.workflow.CachingWorkflow</objectType>
+    	<workflow>
+    		<object type="extractor" ref="ProxExtractor" />
+    	</workflow>
     </subConfig>
     
     <subConfig type="preParser" id="DroidMetadataDiscoveryPreParser">
         <objectType>cheshire3.formats.preParser.XmlParsingCmdLineMetadataDiscoveryPreParser</objectType>
-        <docs>PreParser to use The National Archives' DROID software for format identification. REQUIRES Java!</docs>
+        <docs>PreParser that uses The National Archives' DROID software for format identification and inserts its findings into document.metadata. REQUIRES Java!</docs>
         <paths>
             <path type="executable">java -jar droid.jar</path>
-            <path type="workingPath">/home/cheshire/cheshire3/install/DROID 3.0</path>
+            <path type="workingPath">/home/cheshire/install/DROID 3.0</path>
         </paths>
         <options>
             <setting type="outMimeType">text/xml</setting>
             <setting type="metadataType">droid</setting>
             <setting type="commandLine">-SDROID_SignatureFile_V13.xml -L%INDOC% -O%OUTDOC% -FXML</setting>
         </options>
+        <source id="softwareVersion">
+            <xpath xmlns:tna="http://www.nationalarchives.gov.uk/pronom/FileCollection">/tna:FileCollection/tna:DROIDVersion</xpath>
+            <process ref="ExactExtractorWorkflow"/>
+        </source>
+        <source id="analysisDateTime">
+            <xpath xmlns:tna="http://www.nationalarchives.gov.uk/pronom/FileCollection">/tna:FileCollection/tna:DateCreated</xpath>
+            <process ref="ExactExtractorWorkflow"/>
+        </source>
         <source id="certainty" default="Unknown">
             <xpath xmlns:tna="http://www.nationalarchives.gov.uk/pronom/FileCollection">/tna:FileCollection/tna:IdentificationFile/@IdentQuality</xpath>
-            <process>
-                <object type="extractor" ref="SimpleExtractor" />
-            </process>    
+            <process ref="ExactExtractorWorkflow"/>    
         </source>
         <source id="mimeType" default="Unknown">
             <xpath xmlns:tna="http://www.nationalarchives.gov.uk/pronom/FileCollection">/tna:FileCollection/tna:IdentificationFile/tna:FileFormatHit/tna:MimeType</xpath>
-            <process>
-                <object type="extractor" ref="SimpleExtractor" />
-            </process>
+            <process ref="ExactExtractorWorkflow"/>
         </source>
         <source id="format" default="Unknown">
             <xpath xmlns:tna="http://www.nationalarchives.gov.uk/pronom/FileCollection">/tna:FileCollection/tna:IdentificationFile/tna:FileFormatHit/tna:Name</xpath>
-            <process>
-                <object type="extractor" ref="SimpleExtractor" />
-            </process>
+            <process ref="ExactExtractorWorkflow"/>
         </source>
         <source id="version">
             <xpath xmlns:tna="http://www.nationalarchives.gov.uk/pronom/FileCollection">/tna:FileCollection/tna:IdentificationFile/tna:FileFormatHit/tna:Version</xpath>
-            <process>
-                <object type="extractor" ref="SimpleExtractor" />
-            </process>
+            <process ref="ExactExtractorWorkflow"/>
         </source>
         <source id="puid">
             <xpath xmlns:tna="http://www.nationalarchives.gov.uk/pronom/FileCollection">/tna:FileCollection/tna:IdentificationFile/tna:FileFormatHit/tna:PUID</xpath>
-            <process>
-                <object type="extractor" ref="SimpleExtractor" />
-            </process>
-        </source>    
+            <process ref="ExactExtractorWorkflow"/>
+        </source>  
+        <source id="identStatus">
+            <xpath xmlns:tna="http://www.nationalarchives.gov.uk/pronom/FileCollection">/tna:FileCollection/tna:IdentificationFile/tna:FileFormatHit/tna:Status</xpath>
+            <process ref="ExactExtractorWorkflow"/>
+        </source>
         <source id="warning">
             <xpath xmlns:tna="http://www.nationalarchives.gov.uk/pronom/FileCollection">/tna:FileCollection/tna:IdentificationFile/tna:FileFormatHit/tna:IdentificationWarning</xpath>
-            <process>
-                <object type="extractor" ref="SimpleExtractor" />
-            </process>
+            <process ref="ExactExtractorWorkflow"/>
         </source>
     </subConfig>
     
     <subConfig type="preParser" id="JhoveMetadataDiscoveryPreParser">
         <objectType>cheshire3.formats.preParser.XmlParsingCmdLineMetadataDiscoveryPreParser</objectType>
-        <docs>PreParser to use the JHOVE for format identification. REQUIRES Java!</docs>
+        <docs>PreParser that uses the JHOVE for format identification and inserts its findings into document.metadata. REQUIRES Java!</docs>
         <paths>
             <path type="executable">jhove</path>
-            <path type="executablePath">/home/cheshire/cheshire3/install/jhove</path>
+            <path type="executablePath">/home/cheshire/install/jhove</path>
         </paths>
         <options>
             <setting type="outMimeType">text/xml</setting>
-            <setting type="commandLine">-c ~/cheshire3/install/jhove/conf/jhove.conf -h XML %INDOC%</setting>
+            <setting type="commandLine">-c ~/install/jhove/conf/jhove.conf -h XML %INDOC%</setting>
         </options>
-        
-        <source id="analysisDate">
+        <source id="softwareVersion">
+        	<xpath xmlns:j="http://hul.harvard.edu/ois/xml/ns/jhove">/j:jhove/@release</xpath>
+        	<process ref="ExactExtractorWorkflow"/>
+        </source>
+        <source id="analysisDateTime">
             <xpath xmlns:j="http://hul.harvard.edu/ois/xml/ns/jhove">/j:jhove/j:date</xpath>
-            <process>
-                <object type="extractor" ref="SimpleExtractor" />
-            </process>
+			<process ref="ExactExtractorWorkflow"/>
         </source>
         <source id="mimeType">
             <xpath xmlns:j="http://hul.harvard.edu/ois/xml/ns/jhove">/j:jhove/j:repInfo/j:mimeType</xpath>
-            <process>
-                <object type="extractor" ref="SimpleExtractor" />
-            </process>
+            <process ref="ExactExtractorWorkflow"/>
         </source>
         <source id="byteSize">
             <xpath xmlns:j="http://hul.harvard.edu/ois/xml/ns/jhove">/j:jhove/j:repInfo/j:size</xpath>
-            <process>
-                <object type="extractor" ref="SimpleExtractor" />
-            </process>
+            <process ref="ExactExtractorWorkflow"/>
         </source>
         <source id="format" default="Unknown">
             <xpath xmlns:j="http://hul.harvard.edu/ois/xml/ns/jhove">/j:jhove/j:repInfo/j:format</xpath>
-            <process>
-                <object type="extractor" ref="SimpleExtractor" />
-            </process>
+            <process ref="ExactExtractorWorkflow"/>
         </source>
         <source id="version">
             <xpath xmlns:j="http://hul.harvard.edu/ois/xml/ns/jhove">/j:jhove/j:repInfo/j:version</xpath>
-            <process>
-                <object type="extractor" ref="SimpleExtractor" />
-            </process>
+            <process ref="ExactExtractorWorkflow"/>
         </source>
-        <source id="status">
+        <source id="fileStatus">
             <xpath xmlns:j="http://hul.harvard.edu/ois/xml/ns/jhove">/j:jhove/j:repInfo/j:status</xpath>
-            <process>
-                <object type="extractor" ref="SimpleExtractor" />
-            </process>
+            <process ref="ExactExtractorWorkflow"/>
         </source>
     </subConfig>
     

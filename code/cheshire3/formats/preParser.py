@@ -209,11 +209,17 @@ class XmlParsingCmdLineMetadataDiscoveryPreParser(CmdLineMetadataDiscoveryPrePar
             
     def _processResult(self, session, data):
         """Process XML output from external program, process self.sources to create dictionary of metadata items."""
+        with open('/tmp/' + self.id, 'w') as fh:
+            fh.write(data)
+        
         try:
             et = etree.fromstring(data)
         except AssertionError:
             data = data.decode('utf8')
-            et = etree.XML(data)
+            et = etree.fromstring(data)
+        except etree.XMLSyntaxError:
+            print data
+            raise
             
         record = LxmlRecord(et)
         record.byteCount = len(data)
@@ -228,8 +234,14 @@ class XmlParsingCmdLineMetadataDiscoveryPreParser(CmdLineMetadataDiscoveryPrePar
             else:
                 processed = process.process(session, record)
             
-            if processed:
-                mddict[key] = ' '.join(processed.keys())
+            if len(processed) > 1:
+                mddict[key] = []
+                for pl, k in sorted([(val['proxLoc'], k) for k, val in processed.iteritems()]):
+                    for x in pl:
+                        mddict[key].append(k)
+                    
+            elif len(processed) == 1:
+                mddict[key] = processed.keys()[0]
             elif src['default'] is not None:
                 mddict[key] = src['default']
             
