@@ -8,7 +8,7 @@ class RdfXmlTransformer(Transformer):
 
     _possibleSettings = {'format' : {'docs' : 'format to serialize to, default to simple xml.'}}
 
-    def process_record(session, rec):
+    def process_record(self, session, rec):
         if isinstance(rec, GraphRecord):
             fmt = self.get_setting(session, 'format', 'xml')
             data = rec.graph.serialize(format=fmt)

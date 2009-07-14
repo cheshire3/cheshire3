@@ -5,7 +5,7 @@ from cheshire3.baseObjects import Record
 class GraphRecord(LxmlRecord):
     graph = None
 
-    def __init__(self, session, data, xml="", docId=None, wordCount=0, byteCount=0):
+    def __init__(self, data, xml="", docId=None, wordCount=0, byteCount=0):
         self.graph = data
         self.xml = xml
         self.id = docId
@@ -17,7 +17,7 @@ class GraphRecord(LxmlRecord):
 
     def get_graph(self, session):
         return self.graph
-
+    
     def process_xpath(self, session, q, map={}):
         if not self.dom:
             self.get_xml(session)
