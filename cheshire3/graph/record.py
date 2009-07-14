@@ -41,3 +41,8 @@ class GraphRecord(LxmlRecord):
         if not self.dom:
             self.get_xml(session)
         return self.dom
+
+class OreGraphRecord(GraphRecord):
+    aggregation = None
+
+    
