@@ -75,7 +75,8 @@ class IrodsStore(SimpleStore):
                          'irodsUser' : {'docs' :'', 'type' : str},
                          'irodsZone' : {'docs' :'', 'type' : str},
                          'irodsPasswd' : {'docs' :'', 'type' : str},
-                         'createSubDir' : {'docs' :'', 'type' : int, 'options' : "0|1"}
+                         'createSubDir' : {'docs' :'', 'type' : int, 'options' : "0|1"},
+                         'allowStoreSubDirs' : {'docs' : '', 'type' : int, 'options' : '0|1'}
                          }
 
     _possibleDefaults = {'expires': {"docs" : 'Default time after ingestion at which to delete the data object in number of seconds.  Can be overridden by the individual object.', 'type' : int}}
@@ -101,6 +102,7 @@ class IrodsStore(SimpleStore):
         self.zone = self.get_setting(session, 'irodsZone', '')
         self.passwd = self.get_setting(session, 'irodsPassword', '')
 
+        self.allowStoreSubDirs = self.get_setting(session, 'allowStoreSubDirs', 1)
         self._open(session)
 
 
@@ -280,6 +282,22 @@ class IrodsStore(SimpleStore):
 
         # all metadata stored on object, no need to delete from elsewhere
         self._open(session)
+
+        upwards = 0
+        if id.find('/') > -1 and self.allowStoreSubDirs:
+            idp = id.split('/')
+            id = idp.pop()
+            while idp:
+                dn = idp.pop(0)
+                if not dn in self.coll.getSubCollections():
+                    for x in range(upwards):
+                        self.coll.upCollection()
+                    raise ObjectDoesNotExistException(id)
+                self.coll.openCollection(dn)
+                upwards += 1
+        else:
+            id = id.replace('/', '--')
+
         self.coll.delete(id)
 
         # Maybe store the fact that this object used to exist.
@@ -289,6 +307,9 @@ class IrodsStore(SimpleStore):
             f = self.coll.create(id)
             f.write(data)
             f.close()
+
+        for x in range(upwards):
+            self.coll.upCollection()
         return None
 
     def fetch_data(self, session, id):
@@ -301,19 +322,39 @@ class IrodsStore(SimpleStore):
             id = str(id)
 
         self._open(session)
+
+        upwards = 0
+        if id.find('/') > -1 and self.allowStoreSubDirs:
+            idp = id.split('/')
+            id = idp.pop()
+            while idp:
+                dn = idp.pop(0)
+                if not dn in self.coll.getSubCollections():                    
+                    for x in range(upwards):
+                        self.coll.upCollection()
+                    return None
+                self.coll.openCollection(dn)
+                upwards += 1
+        else:
+            id = id.replace('/', '--')
+
         f = self.coll.open(id)        
         if f:
             data = f.read()
             f.close()
         else:
+            print "COULD NOT FIND: %s in %s" % (id, self.coll.getCollName())
+            for x in range(upwards):
+                self.coll.upCollection()
             return None
         
         if data and data[:44] == "\0http://www.cheshire3.org/ns/status/DELETED:":
             data = DeletedObject(self, id, data[41:])
-
         if data and self.expires:
             expires = self.generate_expires(session)
             self.store_metadata(session, id, 'expires', expires)
+        for x in range(upwards):
+            self.coll.upCollection()
         return data
 
     def store_data(self, session, id, data, metadata):
@@ -335,13 +376,36 @@ class IrodsStore(SimpleStore):
         if type(data) == unicode:
             data = data.encode('utf-8')
         self._open(session)
+
+        upwards = 0
+        if id.find('/') > -1 and self.allowStoreSubDirs:
+            idp = id.split('/')
+            id = idp.pop()
+            while idp:
+                dn = idp.pop(0)
+                if not dn in self.coll.getSubCollections():
+                    self.coll.createCollection(dn)
+                self.coll.openCollection(dn)
+                upwards += 1
+        else:
+            id = id.replace('/', '--')
+            
+        # XXX This should be in a try/except/finally block
         f = self.coll.create(id)
+        if not f:
+            for x in range(upwards):
+                self.coll.upCollection()
+            raise ValueError("Cannot create new file: %s" % id)
         f.write(data)
         f.close()
 
         # store metadata with object
         for (m, val) in metadata.iteritems():
             self.store_metadata(session, id, m, val)
+
+        for x in range(upwards):
+            self.coll.upCollection()
+
         return None
 
     def replicate_data(self, session, id, location):
@@ -358,10 +422,27 @@ class IrodsStore(SimpleStore):
         else:
             id = str(id)
 
+        upwards = 0
+        if id.find('/') > -1 and self.allowStoreSubDirs:
+            idp = id.split('/')
+            id = idp.pop()
+            while idp:
+                dn = idp.pop(0)
+                if not dn in self.coll.getSubCollections():
+                    for x in range(upwards):
+                        self.coll.upCollection()
+                    raise ObjectDoesNotExistException(id)
+                self.coll.openCollection(dn)
+                upwards += 1
+        else:
+            id = id.replace('/', '--')
+
         f = self.coll.open(id)
         f.replicate(location)
         f.close()
-
+        for x in range(upwards):
+            self.coll.upCollection()
+        return None
 
     def fetch_metadata(self, session, id, mType):
         # open irodsFile and get metadata from it
@@ -374,11 +455,34 @@ class IrodsStore(SimpleStore):
             id = str(id)
 
         self._open(session)
+
+        upwards = 0
+        if id.find('/') > -1 and self.allowStoreSubDirs:
+            idp = id.split('/')
+            id = idp.pop()
+            while idp:
+                dn = idp.pop(0)
+                if not dn in self.coll.getSubCollections():
+                    for x in range(upwards):
+                        self.coll.upCollection()
+                    raise ObjectDoesNotExistException(id)
+                self.coll.openCollection(dn)
+                upwards += 1
+        else:
+            id = id.replace('/', '--')
+
         f = self.coll.open(id)
         umd = f.getUserMetadata()
+        val = None
         for x in umd:
             if x[0] == mType:
-                return icatValToPy(x[1], x[2])
+                val = icatValToPy(x[1], x[2])
+                break
+        f.close()
+        for x in range(upwards):
+            self.coll.upCollection()
+        return val
+
         
     def store_metadata(self, session, id, mType, value):
         # store value for mType metadata against id
