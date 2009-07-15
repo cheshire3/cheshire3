@@ -6,6 +6,7 @@ from cheshire3.recordStore import SimpleRecordStore, BdbRecordStore
 from cheshire3.documentStore import SimpleDocumentStore
 from cheshire3.objectStore import SimpleObjectStore
 from cheshire3.resultSetStore import SimpleResultSetStore
+
 from cheshire3.documentFactory import MultipleDocumentStream
 
 from cheshire3.exceptions import ObjectAlreadyExistsException, ObjectDoesNotExistException, ConfigFileException
@@ -75,6 +76,7 @@ class IrodsStore(SimpleStore):
                          'irodsUser' : {'docs' :'', 'type' : str},
                          'irodsZone' : {'docs' :'', 'type' : str},
                          'irodsPasswd' : {'docs' :'', 'type' : str},
+                         'irodsResource' : {'docs' :'', 'type' : str},
                          'createSubDir' : {'docs' :'', 'type' : int, 'options' : "0|1"},
                          'allowStoreSubDirs' : {'docs' : '', 'type' : int, 'options' : '0|1'}
                          }
@@ -101,7 +103,8 @@ class IrodsStore(SimpleStore):
         self.user = self.get_setting(session, 'irodsUser', '')
         self.zone = self.get_setting(session, 'irodsZone', '')
         self.passwd = self.get_setting(session, 'irodsPassword', '')
-
+        self.resource = self.get_setting(session, 'irodsResource', '')
+        
         self.allowStoreSubDirs = self.get_setting(session, 'allowStoreSubDirs', 1)
         self._open(session)
 
@@ -298,7 +301,10 @@ class IrodsStore(SimpleStore):
         else:
             id = id.replace('/', '--')
 
-        self.coll.delete(id)
+        if self.resource:
+            self.coll.delete(id, self.resource)
+        else:
+            self.coll.delete(id)
 
         # Maybe store the fact that this object used to exist.
         if self.get_setting(session, 'storeDeletions', 0):
@@ -338,12 +344,14 @@ class IrodsStore(SimpleStore):
         else:
             id = id.replace('/', '--')
 
-        f = self.coll.open(id)        
+        if self.resource:
+            f = self.coll.open(id, self.resource)
+        else:
+            f = self.coll.open(id)        
         if f:
             data = f.read()
             f.close()
         else:
-            print "COULD NOT FIND: %s in %s" % (id, self.coll.getCollName())
             for x in range(upwards):
                 self.coll.upCollection()
             return None
@@ -391,7 +399,10 @@ class IrodsStore(SimpleStore):
             id = id.replace('/', '--')
             
         # XXX This should be in a try/except/finally block
-        f = self.coll.create(id)
+        if self.resource:
+            f = self.coll.create(id, self.resource)
+        else:
+            f = self.coll.create(id)
         if not f:
             for x in range(upwards):
                 self.coll.upCollection()
@@ -471,7 +482,10 @@ class IrodsStore(SimpleStore):
         else:
             id = id.replace('/', '--')
 
-        f = self.coll.open(id)
+        if self.resource:
+            f = self.coll.open(id, self.resource)
+        else:
+            f = self.coll.open(id)
         umd = f.getUserMetadata()
         val = None
         for x in umd:
@@ -495,7 +509,14 @@ class IrodsStore(SimpleStore):
             id = str(id)
 
         self._open(session)
-        f = self.coll.open(id)
+
+        if self.resource:
+            f = self.coll.open(id, self.resource)
+        else:
+            f = self.coll.open(id)
+
+        if not f:
+            return
         f.addUserMetadata(mType, *pyValToIcat(value))
         f.close()
     
@@ -513,7 +534,7 @@ class IrodsStore(SimpleStore):
         # delete all objects
         self._open(session)
         for o in self.coll.getObjects():
-            self.coll.delete(o)
+            self.coll.delete(o[0], o[1])
         # reset metadata
         mt = self.get_metadataTypes(session)
         for (n, t) in mt.iteritems():
