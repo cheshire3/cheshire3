@@ -56,14 +56,15 @@ class IrodsDirectoryDocumentStream(IrodsStream, MultipleDocumentStream):
 
     def open_stream(self, path):
         # filename in current directory
-        if path:
-            return self.coll.open(path)
+        if path:            
+            strm = self.coll.open(path)
+            return strm
 
     def find_documents(self, session, cache=0):
         # given a location in irods, go there and descend looking for files
         c = self.coll
-
         files = c.getObjects()
+        files = [x[0] for x in files]
         files.sort()
         for f in self._processFiles(session, files):
             yield f
@@ -77,6 +78,7 @@ class IrodsDirectoryDocumentStream(IrodsStream, MultipleDocumentStream):
                 upColls += 1
 
             files = c.getObjects()
+            files = [x[0] for x in files]
             files.sort()
             for f in self._processFiles(session, files):
                 yield f
