@@ -1,3 +1,4 @@
+from lxml import etree
 
 from cheshire3.record import LxmlRecord
 from cheshire3.baseObjects import Record
