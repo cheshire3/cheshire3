@@ -6,7 +6,6 @@ from rdflib import StringInputSource, URIRef
 from rdflib import ConjunctiveGraph as Graph
 from pyRdfa import parseRDFa, Options
 
-from foresite import RdfLibParser, AtomParser, RdfAParser, RdfLibSerializer
 
 class RdfGraphParser(BaseParser):
 
@@ -23,28 +22,6 @@ class RdfGraphParser(BaseParser):
             graph.parse(inpt)
         rec = GraphRecord(graph)
         return rec
-
-    def __init__(self, session, config, parent):
-        BaseParser.__init__(self, session, config, parent)        
-        fmt = self.get_setting(session, 'format', 'rdflib')
-        if fmt == 'rdflib':
-            self.oreParser = RdfLibParser()
-        elif fmt == 'atom':
-            self.oreParser = AtomParser()
-        else:
-            self.oreParser = RdfAParser()
-        self.oreSerializer = RdfLibSerializer('xml')
-            
-
-    def process_document(self, session, doc):
-        data = doc.get_raw(session)
-        rd = ReMDocument('uri', data=data)
-        rem = self.oreParser.parse(rd)
-        graph = self.oreSerializer.merge_graphs(rem)
-        rec = OreGraphRecord(graph)
-        rec.aggregation = rem.aggregation
-        return rec
-
 
 class RdfaParser(BaseParser):
     options = None
