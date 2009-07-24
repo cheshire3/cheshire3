@@ -16,7 +16,7 @@ class SparqlSelector(SimpleSelector):
                 for xp in src:
                     # this will be a SparqlQueryResult object
                     mv = record.process_sparql(session, xp['string'], xp['maps'])
-                    vals.extend(mv.selected)
+                    vals.append(mv.selected)
             return vals
     
 
