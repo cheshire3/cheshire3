@@ -24,10 +24,6 @@ class RdfGraphParser(BaseParser):
         rec = GraphRecord(graph)
         return rec
 
-class OreGraphParser(BaseParser):
-
-    _possibleSettings = {'format' : {'docs' : 'Format to parse. One of:  atom, rdflib, rdfa'}}
-
     def __init__(self, session, config, parent):
         BaseParser.__init__(self, session, config, parent)        
         fmt = self.get_setting(session, 'format', 'rdflib')
@@ -67,4 +63,3 @@ class RdfaParser(BaseParser):
         rec = GraphRecord(graph)
         return rec
         
-
