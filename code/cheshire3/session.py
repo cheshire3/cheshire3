@@ -18,4 +18,5 @@ class Session:
         self.environment = environment
 
         # A random comment
+        # Another random comment
         
