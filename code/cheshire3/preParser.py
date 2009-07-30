@@ -11,6 +11,7 @@ from xml.sax.saxutils import escape
 from warnings import warn
 from lxml import etree
 
+
 try:
     import cPickle as pickle
 except:
