@@ -734,13 +734,28 @@ class IrodsIndexStore(BdbIndexStore):
         if self.cxn == None:
             # connect to iRODS
             myEnv, status = irods.getRodsEnv()
-            conn, errMsg = irods.rcConnect(myEnv.getRodsHost(), myEnv.getRodsPort(), 
-                                           myEnv.getRodsUserName(), myEnv.getRodsZone())
-            status = irods.clientLogin(conn)
+
+            host = self.host if self.host else myEnv.getRodsHost()
+            port = self.port if self.host else myEnv.getRodsPort()
+            user = self.user if self.host else myEnv.getRodsUserName()
+            zone = self.zone if self.host else myEnv.getRodsZone()
+            
+            conn, errMsg = irods.rcConnect(host, port, user, zone)
+            if self.passwd:
+                status = irods.clientLoginWithPassword(conn, zone)
+            else:
+                status = irods.clientLogin(conn)
+
             if status:
                 raise ConfigFileException("Cannot connect to iRODS: (%s) %s" % (status, errMsg))
             self.cxn = conn
             self.env = myEnv
+
+            resources = irods.getResources(self.cxn)
+            self.resourceHash = {}
+            for r in resources:
+                self.resourceHash[r.getName()] = r
+
             
         if self.coll != None:
             # already open, just skip
@@ -756,20 +771,22 @@ class IrodsIndexStore(BdbIndexStore):
             c.createCollection(path)
         c.openCollection(path)
 
-        # now look for object's storage area
-        # maybe move into database collection
-        if (isinstance(self.parent, Database)):
-            sc = self.parent.id
-            dirs = c.getSubCollections()
-            if not sc in dirs:
-                c.createCollection(sc)
-            c.openCollection(sc)
 
-        # move into store collection
-        dirs = c.getSubCollections()
-        if not self.id in dirs:
-            c.createCollection(self.id)
-        c.openCollection(self.id)
+        if self.get_setting(session, 'createSubDir', 1):
+            # now look for object's storage area
+            # maybe move into database collection
+            if (isinstance(self.parent, Database)):
+                sc = self.parent.id
+                dirs = c.getSubCollections()
+                if not sc in dirs:
+                    c.createCollection(sc)
+                c.openCollection(sc)
+            # move into store collection
+            dirs = c.getSubCollections()
+            if not self.id in dirs:
+                c.createCollection(self.id)
+            c.openCollection(self.id)
+
 
         
     def _close(self, session):
