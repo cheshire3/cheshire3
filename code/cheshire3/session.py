@@ -16,3 +16,5 @@ class Session:
         self.task = task
         self.database = database
         self.environment = environment
+
+        # a comment
