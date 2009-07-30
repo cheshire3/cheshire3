@@ -715,6 +715,27 @@ class IrodsSwitchingRecordStore(BdbRecordStore):
 # -----------------------------------------------------------
 
 class IrodsIndexStore(BdbIndexStore):
+    
+    _possiblePaths = {'idNormalizer' : {'docs' : "Identifier for Normalizer to use to turn the data object's identifier into a suitable form for storing. Eg: StringIntNormalizer"},
+                      'outIdNormalizer' : {'docs' : "Normalizer to reverse the process done by idNormalizer"},
+                      'inWorkflow' : {'docs' : "Workflow with which to process incoming data objects."},
+                      'outWorkflow' : {'docs' : "Workflow with which to process stored data objects when requested."},
+                      'irodsCollection' : {'docs' : "Top collection in irods"}
+                      }
+
+    _possibleSettings = {'useUUID' : {'docs' : "Each stored data object should be assigned a UUID.", 'type': int, 'options' : "0|1"},
+                         'digest' : {'docs' : "Type of digest/checksum to use. Defaults to no digest", 'options': 'sha|md5'},
+                         'expires' : {'docs' : "Time after ingestion at which to delete the data object in number of seconds.", 'type' : int },
+                         'storeDeletions' : {'docs' : "Maintain when an object was deleted from this store.", 'type' : int, 'options' : "0|1"},
+                         'irodsHost' : {'docs' :'', 'type' : str},
+                         'irodsPort' : {'docs' :'', 'type' : int},
+                         'irodsUser' : {'docs' :'', 'type' : str},
+                         'irodsZone' : {'docs' :'', 'type' : str},
+                         'irodsPasswd' : {'docs' :'', 'type' : str},
+                         'irodsResource' : {'docs' :'', 'type' : str},
+                         'createSubDir' : {'docs' :'', 'type' : int, 'options' : "0|1"},
+                         'allowStoreSubDirs' : {'docs' : '', 'type' : int, 'options' : '0|1'}
+                         }
 
     def __init__(self, session, config, parent):
         BdbIndexStore.__init__(self, session, config, parent)
