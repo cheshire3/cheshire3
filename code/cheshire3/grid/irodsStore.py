@@ -75,7 +75,7 @@ class IrodsStore(SimpleStore):
                          'irodsPort' : {'docs' :'', 'type' : int},
                          'irodsUser' : {'docs' :'', 'type' : str},
                          'irodsZone' : {'docs' :'', 'type' : str},
-                         'irodsPasswd' : {'docs' :'', 'type' : str},
+                         'irodsPassword' : {'docs' :'', 'type' : str},
                          'irodsResource' : {'docs' :'', 'type' : str},
                          'createSubDir' : {'docs' :'', 'type' : int, 'options' : "0|1"},
                          'allowStoreSubDirs' : {'docs' : '', 'type' : int, 'options' : '0|1'}
@@ -126,13 +126,13 @@ class IrodsStore(SimpleStore):
             myEnv, status = irods.getRodsEnv()
 
             host = self.host if self.host else myEnv.getRodsHost()
-            port = self.port if self.host else myEnv.getRodsPort()
-            user = self.user if self.host else myEnv.getRodsUserName()
-            zone = self.zone if self.host else myEnv.getRodsZone()
+            port = self.port if self.port else myEnv.getRodsPort()
+            user = self.user if self.user else myEnv.getRodsUserName()
+            zone = self.zone if self.zone else myEnv.getRodsZone()
             
             conn, errMsg = irods.rcConnect(host, port, user, zone)
             if self.passwd:
-                status = irods.clientLoginWithPassword(conn, zone)
+                status = irods.clientLoginWithPassword(conn, self.passwd)
             else:
                 status = irods.clientLogin(conn)
 
@@ -345,7 +345,7 @@ class IrodsStore(SimpleStore):
             id = id.replace('/', '--')
 
         if self.resource:
-            f = self.coll.open(id, self.resource)
+            f = self.coll.open(id, rescName=self.resource)
         else:
             f = self.coll.open(id)        
         if f:
@@ -483,7 +483,7 @@ class IrodsStore(SimpleStore):
             id = id.replace('/', '--')
 
         if self.resource:
-            f = self.coll.open(id, self.resource)
+            f = self.coll.open(id, rescName=self.resource)
         else:
             f = self.coll.open(id)
         umd = f.getUserMetadata()
@@ -731,7 +731,7 @@ class IrodsIndexStore(BdbIndexStore):
                          'irodsPort' : {'docs' :'', 'type' : int},
                          'irodsUser' : {'docs' :'', 'type' : str},
                          'irodsZone' : {'docs' :'', 'type' : str},
-                         'irodsPasswd' : {'docs' :'', 'type' : str},
+                         'irodsPassword' : {'docs' :'', 'type' : str},
                          'irodsResource' : {'docs' :'', 'type' : str},
                          'createSubDir' : {'docs' :'', 'type' : int, 'options' : "0|1"},
                          'allowStoreSubDirs' : {'docs' : '', 'type' : int, 'options' : '0|1'}
@@ -745,6 +745,15 @@ class IrodsIndexStore(BdbIndexStore):
         self.coll = None
         self.cxn = None
         self.env = None
+
+	self.host = self.get_setting(session, 'irodsHost', '')
+        self.port = self.get_setting(session, 'irodsPort', 0)
+        self.user = self.get_setting(session, 'irodsUser', '')
+        self.zone = self.get_setting(session, 'irodsZone', '')
+        self.passwd = self.get_setting(session, 'irodsPassword', '')
+        self.resource = self.get_setting(session, 'irodsResource', '')
+        
+        self.allowStoreSubDirs = self.get_setting(session, 'allowStoreSubDirs', 1)
         
         # And open irods
         self._open(session)
@@ -755,20 +764,19 @@ class IrodsIndexStore(BdbIndexStore):
         if self.cxn == None:
             # connect to iRODS
             myEnv, status = irods.getRodsEnv()
-
             host = self.host if self.host else myEnv.getRodsHost()
-            port = self.port if self.host else myEnv.getRodsPort()
-            user = self.user if self.host else myEnv.getRodsUserName()
-            zone = self.zone if self.host else myEnv.getRodsZone()
-            
-            conn, errMsg = irods.rcConnect(host, port, user, zone)
+            port = self.port if self.port else myEnv.getRodsPort()
+            user = self.user if self.user else myEnv.getRodsUserName()
+            zone = self.zone if self.zone else myEnv.getRodsZone()
+         
+	    conn, errMsg = irods.rcConnect(host, port, user, zone) 
             if self.passwd:
-                status = irods.clientLoginWithPassword(conn, zone)
+                status = irods.clientLoginWithPassword(conn, self.passwd)
             else:
                 status = irods.clientLogin(conn)
 
             if status:
-                raise ConfigFileException("Cannot connect to iRODS: (%s) %s" % (status, errMsg))
+                raise ConfigFileException("Cannot connect to iRODS: (%s) %s" % (status, errMsg.getMsg()))
             self.cxn = conn
             self.env = myEnv
 
