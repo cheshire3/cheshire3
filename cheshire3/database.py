@@ -10,7 +10,6 @@ import cheshire3.cqlParser as cql
 import os, sys, re, time
 from lxml import etree
 
-
 try:
     # name when installed by hand
     import bsddb3 as bdb
