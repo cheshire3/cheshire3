@@ -17,3 +17,5 @@ class Session:
         self.database = database
         self.environment = environment
 
+        # A random comment
+        
