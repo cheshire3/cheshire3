@@ -11,14 +11,12 @@ from xml.sax.saxutils import escape
 from warnings import warn
 from lxml import etree
 
-
 try:
     import cPickle as pickle
 except:
     import pickle
 
 # TODO: All PreParsers should set mimetype, and record in/out mimetype
-
 
 class TypedPreParser(PreParser):
     _possibleSettings = {"inMimeType" : {'docs' : "The mimetype expected for incoming documents"},
