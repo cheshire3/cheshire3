@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF
+  xmlns:foaf='http://xmlns.com/foaf/0.1/'
+  xmlns:dcterms='http://purl.org/dc/terms/'
+  xmlns:bibo='http://purl.org/ontology/bibo/'
+  xmlns:pms='http://id.loc.gov/standards/premis/rdf/'
+  xmlns:dc='http://purl.org/dc/elements/1.1/'
+  xmlns:rdf='http://www.w3.org/1999/02/22-rdf-syntax-ns#'
+  xmlns:ore='http://www.openarchives.org/ore/terms/'
+  xmlns:rdfs1='http://www.w3.org/2001/01/rdf-schema#'
+>
+  <ore:ResourceMap rdf:about="http://nara.cheshire3.org/repo/eprints/temp/94033.xml">
+    <ore:describes>
+      <ore:Aggregation rdf:about="http://nara.cheshire3.org/repo/eprints/temp/94033">
+        <ore:aggregates rdf:resource="http://nara.cheshire3.org/repo/eprints/94033/files/1"/>
+        <ore:aggregates rdf:resource="http://nara.cheshire3.org/repo/eprints/94033/files/2"/>
+        <dcterms:published>2007</dcterms:published>
+        <rdf:type rdf:resource="http://purl.org/ontology/bibo/Article"/>
+        <dcterms:abstract>The global impact of shipping on atmospheric chemistry and radiative forcing, as well as the associated uncertainties, have been quantified using an ensemble of ten state-of-the-art atmospheric chemistry models and a pre-defined set of emission data. The analysis is performed for present-day conditions (year 2000) and for two future ship emission scenarios. In one scenario ship emissions stabilize at 2000 levels; in the other ship emissions increase with a constant annual growth rate of 2.2% up to 2030 (termed the "Constant Growth Scenario" (CGS)). Most other anthropogenic emissions follow the IPCC (Intergovernmental Panel on Climate Change) SRES (Special Report on Emission Scenarios) A2 scenario, while biomass burning and natural emissions remain at year 2000 levels. An intercomparison of the model results with observations over the Northern Hemisphere (25°–60° N) oceanic regions in the lower troposphere showed that the models are capable to reproduce ozone (O3) and nitrogen oxides (NOx=NO+NO2) reasonably well, whereas sulphur dioxide (SO2)  in the marine boundary layer is significantly underestimated. The most pronounced changes in annual mean tropospheric NO2 and sulphate columns are simulated over the Baltic and North Seas. Other significant changes occur over the North Atlantic, the Gulf of Mexico and along the main shipping lane from Europe to Asia, across the Red and Arabian Seas. Maximum contributions from shipping to annual mean near-surface O3 are found over the North Atlantic (5–6 ppbv in 2000; up to 8 ppbv in 2030). Ship contributions to tropospheric O3 columns over the North Atlantic and Indian Oceans reach 1 DU in 2000 and up to 1.8 DU in 2030. Tropospheric O3 forcings due to shipping are 9.8±2.0 mW/m2 in 2000 and 13.6±2.3 mW/m2 in 2030. Whilst increasing O3, ship NOx simultaneously enhances hydroxyl radicals over the remote ocean, reducing the global methane lifetime by 0.13 yr in 2000, and by up to 0.17 yr in 2030, introducing a negative radiative forcing. The models show future increases in NOx and O3 burden which scale almost linearly with increases in NOx emission totals. Increasing emissions from shipping would significantly counteract the benefits derived from reducing SO2 emissions from all other anthropogenic sources under the A2 scenario over the continents, for example in Europe. Globally, shipping contributes 3% to increases in O3 burden between 2000 and 2030, and 4.5% to increases in sulphate under A2/CGS. However, if future ground based emissions follow a more stringent scenario, the relative importance of ship emissions will increase. Inter-model differences in the simulated O3 contributions from ships are significantly smaller than estimated uncertainties stemming from the ship emission inventory, mainly the ship emission totals, the distribution of the emissions over the globe, and the neglect of ship plume dispersion.</dcterms:abstract>
+        <dcterms:subject>F20</dcterms:subject>
+        <dc:title>Multi-model simulations of the impact of international shipping on Atmospheric Chemistry and Climate in 2000 and 2030</dc:title>
+      </ore:Aggregation>
+    </ore:describes>
+    <dcterms:modified>2009-06-11T11:56:13Z</dcterms:modified>
+    <dcterms:created>2009-06-11T11:56:13Z</dcterms:created>
+    <dcterms:creator>
+      <rdf:Description rdf:about="http://foresite-toolkit.googlecode.com/#pythonAgent">
+        <foaf:name>Foresite Toolkit (Python)</foaf:name>
+        <foaf:mbox>foresite@googlegroups.com</foaf:mbox>
+      </rdf:Description>
+    </dcterms:creator>
+    <dc:format>application/rdf+xml</dc:format>
+  </ore:ResourceMap>
+  <rdf:Description rdf:about="http://www.openarchives.org/ore/terms/Aggregation">
+    <rdfs1:label>Aggregation</rdfs1:label>
+    <rdfs1:isDefinedBy rdf:resource="http://www.openarchives.org/ore/terms/"/>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://nara.cheshire3.org/repo/eprints/94033/files/2">
+    <pms:originalLocation rdf:resource="https://eprints.kfupm.edu.sa/106980/2/106980_2.doc"/>
+    <dc:language>en</dc:language>
+    <pms:originalName>106980_2.doc</pms:originalName>
+    <dc:format>application/msword</dc:format>
+    <dcterms:extent>24576</dcterms:extent>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://nara.cheshire3.org/repo/eprints/94033/files/1">
+    <pms:originalLocation rdf:resource="https://eprints.kfupm.edu.sa/106980/1/106980_1.pdf"/>
+    <dc:language>en</dc:language>
+    <pms:originalName>106980_1.pdf</pms:originalName>
+    <dcterms:extent>4537</dcterms:extent>
+    <dc:format>application/pdf</dc:format>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.openarchives.org/ore/terms/ResourceMap">
+    <rdfs1:label>ResourceMap</rdfs1:label>
+    <rdfs1:isDefinedBy rdf:resource="http://www.openarchives.org/ore/terms/"/>
+  </rdf:Description>
+</rdf:RDF>
