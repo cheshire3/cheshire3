@@ -56,7 +56,7 @@ def is_fixed (num):
     return num < 10
 
 fieldsep = '\x1e'
-sep = '\x1f' # XXX or 1D for pseudo-marc output from z3950.c
+sep = '\x1f'#'\x1f' # XXX or 1D for pseudo-marc output from z3950.c
 recsep = '\x1d'
 
 intfixre = re.compile('[^0-9]')
@@ -242,8 +242,13 @@ class MARC:
         zerostr = self.fields [0][0]
         for i in range (len (zerostr)):
             hdrlist [self.hdrbits [i]] = zerostr [i]
-        hdrlist [10] = '2' # replace these with data map, assert on read
+        hdrlist [5] = 'n' # replace these with data map, assert on read
+        hdrlist [6] = 'a'
+        hdrlist [7] = 'm'
+        hdrlist [9] = 'a'
+        hdrlist [10] = '2' 
         hdrlist [11] = '2'
+        hdrlist [17] = '7'
         hdrlist [20] = '4'
         hdrlist [21] = '5'
         hdrlist [22] = '0'
@@ -252,6 +257,7 @@ class MARC:
         # directory: 3 of tag, 4 of field len, 5 of starting pos (rel.
         # to base address of data, 12-16
         fields = self.fields.keys ()
+        fields.sort() # added by CS to make sure control fields come before data fields
         data = ''
         directory = ''
         for field in fields:
@@ -271,9 +277,10 @@ class MARC:
                 length = len (data) - start
                 directory += "%.03d%.04d%.05d" % (field, length, start)
         def id (x): return x
-        data += fieldsep + recsep
+        directory += '\x1e'
+        data += recsep #data += fieldsep + recsep changed from commented code to current code by Cat
         hdrlist [0:5] = map (id, "%.05d" % (len (hdrlist) + len (directory) +
-                                   len (data),))
+                                   len (data.encode('UTF-8')),)) #encode bit added by Cat to allow for different byte length of unicode strings
         hdrlist [12:17] = map (id,"%.05d" % (len (hdrlist) + len (directory),))
         return "".join (hdrlist) + directory + data
 
