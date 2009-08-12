@@ -264,7 +264,10 @@ class MARC:
             if field == 0: # pseudofield
                 continue
             for fielddat in self.fields [field]:
-                start = len (data)
+                try:
+                    start = len (data.encode('UTF-8'))
+                except:
+                    start = len(data)
                 if is_fixed (field):
                     data += fielddat
                 else:
@@ -273,14 +276,20 @@ class MARC:
                                              fielddat[2])))
                     data += sublist
                 data += fieldsep # XXX is this right?
-
-                length = len (data) - start
+                try:
+                    length = len (data.encode('UTF-8')) - start
+                except:
+                    length = len (data) - start
                 directory += "%.03d%.04d%.05d" % (field, length, start)
         def id (x): return x
         directory += '\x1e'
         data += recsep #data += fieldsep + recsep changed from commented code to current code by Cat
-        hdrlist [0:5] = map (id, "%.05d" % (len (hdrlist) + len (directory) +
+        try:
+            hdrlist [0:5] = map (id, "%.05d" % (len (hdrlist) + len (directory) +
                                    len (data.encode('UTF-8')),)) #encode bit added by Cat to allow for different byte length of unicode strings
+        except:
+            hdrlist [0:5] = map (id, "%.05d" % (len (hdrlist) + len (directory) +
+                                   len (data),))
         hdrlist [12:17] = map (id,"%.05d" % (len (hdrlist) + len (directory),))
         return "".join (hdrlist) + directory + data
 
