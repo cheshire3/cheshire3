@@ -302,7 +302,7 @@ class MarcTransformer(Transformer):
 
         leader = tree.xpath('//leader')[0]
         l = leader.text
-        fields[0] = [''.join([l[5:9], l[17:20]])]
+        fields[0] = [''.join([l[5:10], l[17:20]])]
         marcObject = MARC()
         marcObject.fields = fields
         return StringDocument(marcObject.get_MARC())
