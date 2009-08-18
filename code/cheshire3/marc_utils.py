@@ -163,7 +163,7 @@ class MARC:
     used structures, but this was some of the first Python code I ever
     wrote.
     """
-    hdrbits = [5,6,7,8,17,18,19]
+    hdrbits = [5,6,7,8, 9, 17,18,19]
     # Status, Type, Bib. Level, Type of Ctrl., Enc. Level,
     # Descr. Cat. Form, Linked Rcd Reqt are all part of pseudoentry 0
 
@@ -242,13 +242,8 @@ class MARC:
         zerostr = self.fields [0][0]
         for i in range (len (zerostr)):
             hdrlist [self.hdrbits [i]] = zerostr [i]
-        hdrlist [5] = 'n' # replace these with data map, assert on read
-        hdrlist [6] = 'a'
-        hdrlist [7] = 'm'
-        hdrlist [9] = 'a'
-        hdrlist [10] = '2' 
+        hdrlist [10] = '2' # replace these with data map, assert on read
         hdrlist [11] = '2'
-        hdrlist [17] = '7'
         hdrlist [20] = '4'
         hdrlist [21] = '5'
         hdrlist [22] = '0'
@@ -300,7 +295,6 @@ class MARC:
 
 
         xmllist = ["<record>\n", "  <leader>%s</leader>\n" % (self.get_MARC()[:24])]
-
         for key in keys:
             if key == 0:
                 # XXX Skip?? What are these??
