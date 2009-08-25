@@ -349,10 +349,10 @@ class StoplistNormalizer(FileAssistedNormalizer):
 
     def __init__(self, session, config, parent):
         FileAssistedNormalizer.__init__(self, session, config, parent)
+        self.stoplist = {}
         lines = self._processPath(session, 'stoplist')
-        for sw in lines:
-            sw = sw.strip()
-            self.stoplist[sw] = 1
+        for sw in lines: # this is quicker than using dict.fromkeys() - I checked! JH
+            self.stoplist[sw.strip()] = 1
             
     def process_string(self, session, data):
         if (data in self.stoplist):
@@ -373,12 +373,12 @@ class TokenExpansionNormalizer(FileAssistedNormalizer):
     
     def __init__(self, session, config, parent):
         FileAssistedNormalizer.__init__(self, session, config, parent)
+        self.expansions = {}
         self.keepOriginal = self.get_setting(session, 'keepOriginal', 0)
         lines = self._processPath(session, 'expansions')
-        self.expansions = {}
         for exp in lines:
-            bits = exp.split()
-            self.expansions[unicode(bits[0])] = [unicode(b) for b in bits[1:]]
+            bits = unicode(exp).split()
+            self.expansions[bits[0]] = bits[1:]
     
     def process_string(self, session, data):
         try: return ' '.join(expansions[data])
