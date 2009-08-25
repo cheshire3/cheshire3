@@ -173,7 +173,7 @@ class ArticleNormalizer(SimpleNormalizer):
             return data[3:]
         else:
             return data
-
+        
 
 class NumericEntityNormalizer(SimpleNormalizer):
     """ Replace characters matching regular expression with the equivalent numeric character entity """
@@ -318,23 +318,39 @@ class StringIntNormalizer(SimpleNormalizer):
             return "%012d" % (d)
         except:
             return None
+      
+      
+class FileAssistedNormalizer(SimpleNormalizer):
+    """Abstract class for Normalizers that can be configured using an additional file."""
+    
+    def _processPath(self, session, path):
+        fp = self.get_path(session, path)
+        if fp is None:
+            raise ConfigFileException("No {0} file specified for object with id '{1}'.".format(path, self.id))
 
-class StoplistNormalizer(SimpleNormalizer):
+        if (not os.path.isabs(fp)):
+            dfp = self.get_path(session, "defaultPath")
+            fp = os.path.join(dfp, fp)
+            
+        try: fh = open(fp, 'r')
+        except IOError as e:
+            raise ConfigFileException("{0} for object with id '{1}'.".format(str(e), self.id))
+            
+        l = fh.readlines()
+        fh.close()
+        return l
+
+        
+class StoplistNormalizer(FileAssistedNormalizer):
     """ Remove words that match a stopword list """
     stoplist = {}
 
-    _possiblePaths = {'stoplist' : {'docs' : "Path file containing set of stop terms, one term per line.", 'required' : True}}
+    _possiblePaths = {'stoplist' : {'docs' : "Path to file containing set of stop terms, one term per line.", 'required' : True}}
 
     def __init__(self, session, config, parent):
-        SimpleNormalizer.__init__(self, session, config, parent)
-        p = self.get_path(session, "stoplist")
-        if (not os.path.isabs(p)):
-            dfp = self.get_path(session, "defaultPath")
-            p = os.path.join(dfp, p)
-        f = file(p)
-        l = f.readlines()
-        f.close()
-        for sw in l:
+        FileAssistedNormalizer.__init__(self, session, config, parent)
+        lines = self._processPath(session, 'stoplist')
+        for sw in lines:
             sw = sw.strip()
             self.stoplist[sw] = 1
             
@@ -343,6 +359,59 @@ class StoplistNormalizer(SimpleNormalizer):
             return None
         else:
             return data     
+
+
+class TokenExpansionNormalizer(FileAssistedNormalizer):
+    """ Expand acronyms or compound words.
+    
+    Only works with tokens NOT exact strings. 
+    """
+    expansions = {}
+    
+    _possiblePaths = {'expansions' : {'required' : True, 'docs' : "Path to file containing set of expansions, one expansion per line. First token in line is taken to be the thing to be expanded, remaining tokens are what occurences should be replaced with."}}
+    _possibleSettings = {'keepOriginal' : {'docs' : 'Should the original token be kept as well as its expansion (e.g. potentialy useful when browsing). Defaults to False.', 'type' : int, 'options' : "0|1"}}
+    
+    def __init__(self, session, config, parent):
+        FileAssistedNormalizer.__init__(self, session, config, parent)
+        self.keepOriginal = self.get_setting(session, 'keepOriginal', 0)
+        lines = self._processPath(session, 'expansions')
+        self.expansions = {}
+        for exp in lines:
+            bits = exp.split()
+            self.expansions[unicode(bits[0])] = [unicode(b) for b in bits[1:]]
+    
+    def process_string(self, session, data):
+        try: return ' '.join(expansions[data])
+        except KeyError: return data 
+
+    def process_hash(self, session, data):
+        kw = {}
+        if not len(data):
+            return kw
+                    
+        keep = self.keepOriginal
+        process = self.process_string
+        map = self.expansions
+        for d in data.itervalues():
+            if 'positions' in d or 'charOffsets' in d:
+                raise NotImplementedError
+            t = d['text']
+            if (t in map):
+                dlist = map[t]
+                for new in dlist:
+                    if (new in kw):
+                        kw[new]['occurences'] += 1
+                    else:
+                        nd = d.copy()
+                        nd['text'] = new
+                        kw[new] = nd
+                if keep:
+                    kw[t] = d
+                    
+            else:
+                kw[t] = d
+        return kw
+
 
 try:
     import txngstemmer as Stemmer
@@ -416,7 +485,7 @@ class DateYearNormalizer(SimpleNormalizer):
 
 
 class RangeNormalizer(SimpleNormalizer):
-    """ TODO XXX: Should normalise ranges?... unfinished??? delete??? """ 
+    """ XXX: This is actually a job for a TokenMerger. Deprecated""" 
 
     def process_hash(self, session, data):
         # Need to step through positions in order
