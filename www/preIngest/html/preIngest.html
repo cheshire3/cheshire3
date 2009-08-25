@@ -8,6 +8,7 @@
     <link rel="stylesheet" type="text/css" href="../css/struc-all.css"/>
     <link rel="stylesheet" type="text/css" href="../css/style.css"/>
     <link rel="stylesheet" type="text/css" href="../css/localStyle.css"/>
+    <link rel="stylesheet" type="text/css" href="../css/preIngestStyles.css"/>
     
     <link href="../css/ricoTree.css" type="text/css" rel="stylesheet" />
 
@@ -22,27 +23,6 @@
     <script src="../js/prototype.js" type="text/javascript"></script>
     <script src="../js/preIngest.js" type="text/javascript"></script>	
 
-    <script type='text/javascript'>
-	addRootNode();
-    </script>
-
-<style type="text/css">
-div.ricoTree {
-  background-color:#eeeedd;
-  width:300px;
-  height:300px;
-  border:1px solid black;
-  padding:4px;
-}
-.ricoTreeLevel0{
-  font-weight: bold;
-  font-size: larger;
-}
-.ricoTreeBranch{
-  margin-left: 10px;
-}
-</style>
-	
 </head>
 
 <body>
@@ -63,26 +43,28 @@ div.ricoTree {
     <div id="content">
 	<div id="single">
 
-     <table border="1">
-	<tr><th>Resource Map</th><th>Edit Checked Node(s)</th></tr>
-	<tr>
-		<td valign="top">
-			<div id='tree1' class='ricoTree'></div>
-		</td>		
-		<td>		
-			<table id="dtable"></table>				
-		</td>	
-	</tr>
-     </table>
+     		<table border="1">
+			<tr><th>Resource Map</th><th>Node Details</th><th>Edit Node</th></tr>
+			<tr>
+				<td valign="top">
+					<div id='tree1' class='ricoTree'></div>
+				</td>	
+                <td valign="top">
+					<div>
+                        <table id='nodeDetailTable></table>
+                    </div>
+				</td>	
+				<td valign="top">		
+					<table id="editNodeTable"></table>				
+				</td>	
+			</tr>
+     		</table>
 
-
-    <script>
-	createNewItemOptions('ore:Aggregation', 'dtable');
-    </script>
-
-
+    		<script>
+			    loadRicoTree(null);
+    		</script>
 	
-    </div> <!-- /single -->
+    	</div> <!-- /single -->
     </div> <!-- content -->
 
 </body>
