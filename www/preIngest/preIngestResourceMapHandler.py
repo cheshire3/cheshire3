@@ -1,4 +1,3 @@
-
 from mod_python import apache
 from mod_python.util import FieldStorage
 import urlparse, httplib
@@ -7,6 +6,8 @@ import cgitb
 import os, re, sys
 
 import simplejson as json
+cheshirePath = os.environ.get('C3HOME', "/home/cheshire3")
+
 from rdflib import ConjunctiveGraph, URIRef, StringInputSource
 import uuid
 from foresite import *
@@ -28,7 +29,7 @@ class Handler(object):
     def __init__(self):
         # load up our ORE/RDF graph
         self.graph_ORE_RDF = ConjunctiveGraph()
-        os.chdir('/home/cheshire/cheshire3/www/preIngest')
+        os.chdir(cheshirePath + '/cheshire3/www/preIngest')
         f1 = file(url_Resource_Map_XML_File)
         data1 = f1.read()
         f1.close()
@@ -52,7 +53,7 @@ class Handler(object):
         elif req.uri.find('/Read/') != -1:
             data = self.read_DOM_ORE_ResourceMap()
         else:
-            data = 'error: uri not recognised 2'
+            data = 'error: uri not recognised 2: ' + req.uri
 
         self.send(data, req, ct='text/plain')
 
