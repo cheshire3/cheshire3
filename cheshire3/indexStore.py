@@ -831,7 +831,9 @@ class BdbIndexStore(IndexStore):
             vbt = self.get_setting(session, 'vectorBucketType', '')
             vmb = self.get_setting(session, 'vectorMaxBuckets', 0) 
             vmi = self.get_setting(session, 'vectorMaxItemsPerBucket', 0)            
-            cxn = self.vectorSwitchingClass(session, self, fullname, bucketType=vbt,
+#            cxn = self.vectorSwitchingClass(session, self, fullname, bucketType=vbt,
+#                                         maxBuckets=vmb, maxItemsPerBucket=vmi)
+            cxn = self.vectorSwitchingClass(session, self, dbp, bucketType=vbt,
                                          maxBuckets=vmb, maxItemsPerBucket=vmi)
         else:
             cxn = bdb.db.DB()
@@ -842,7 +844,9 @@ class BdbIndexStore(IndexStore):
         if index.get_setting(session, 'vectors'):
             dbp = dbname + "_VECTORS"
             if self.vectorSwitching:
-                cxn = self.vectorSwitchingClass(session, self, fullname, bucketType=vbt,
+#                cxn = self.vectorSwitchingClass(session, self, fullname, bucketType=vbt,
+#                                             maxBuckets=vmb, maxItemsPerBucket=vmi)
+                cxn = self.vectorSwitchingClass(session, self, dbp, bucketType=vbt,
                                              maxBuckets=vmb, maxItemsPerBucket=vmi)
             else:
                 cxn = bdb.db.DB()
@@ -1086,10 +1090,13 @@ class BdbIndexStore(IndexStore):
         if vectorType == 0 and self.switching:
             cxn = self.switchingClass(session, self, dbname)
         elif vectorType and self.vectorSwitching:
+            dbp = dbname + "_VECTORS"
             vbt = self.get_setting(session, 'vectorBucketType', '')
             vmb = self.get_setting(session, 'vectorMaxBuckets', 0) 
             vmi = self.get_setting(session, 'vectorMaxItemsPerBucket', 0)
-            cxn = self.vectorSwitchingClass(session, self, fullname, bucketType=vbt,
+#            cxn = self.vectorSwitchingClass(session, self, fullname, bucketType=vbt,
+#                                         maxBuckets=vmb, maxItemsPerBucket=vmi)
+            cxn = self.vectorSwitchingClass(session, self, dbp, bucketType=vbt,
                                          maxBuckets=vmb, maxItemsPerBucket=vmi)
         else:
             cxn = bdb.db.DB()
@@ -1311,8 +1318,7 @@ class BdbIndexStore(IndexStore):
                     (termid, totalRecs, totalOccs) = unpacked[:3]
                     unpacked = unpacked[3:]
                 else:
-                    # This will screw up non vectorised indexes.
-                    # XXX FIX
+                    # FIXME: This will screw up non vectorised indexes.
 
                     vecs = index.get_setting(session, "vectors")
                     tids = index.get_setting(session, "termIds")
