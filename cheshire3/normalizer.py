@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -ü-
 
 from cheshire3.configParser import C3Object
 from cheshire3.baseObjects import Normalizer
@@ -470,6 +471,48 @@ except ImportError:
         def __init__(self, session, config, parent):
             raise(ConfigFileException('Stemmer library not available'))
 
+
+class PhoneticNormalizer(SimpleNormalizer):
+    u"""Carries out phonetic normalization.
+    
+    Currently fairly simple normalization after "Introduction to Information Retrieval" by Christopher D. Manning, Prabhakar Raghavan & Hinrich Schütze
+    except that length of final term is configurable (i.e. not hard-coded to 4 characters.)"""
+    
+    _possibleSettings = {'termSize' : {'docs': "Number of characters to reduce/pad the phonetically normalized term to. If not a positive integer no reduction/padding applied (default).", 'type': int}}
+    
+    def __init__(self, session, config, parent):
+        SimpleNormalizer.__init__(self, session, config, parent)
+        self.nChars = self.get_setting(session, 'termSize', 0)
+        self.re0 = re.compile('[aeiouhwy]+', re.IGNORECASE|re.UNICODE)
+        self.re1 = re.compile('[bfpv]+', re.IGNORECASE|re.UNICODE)
+        self.re2 = re.compile('[cgjkqsxz]+', re.IGNORECASE|re.UNICODE)
+        self.re3 = re.compile('[dt]+', re.IGNORECASE|re.UNICODE)
+        self.re4 = re.compile('[l]+', re.IGNORECASE|re.UNICODE)
+        self.re5 = re.compile('[mn]+', re.IGNORECASE|re.UNICODE)
+        self.re6 = re.compile('[r]+', re.IGNORECASE|re.UNICODE)
+
+    def process_string(self, session, data):
+        # 0. Prepare by stripping leading/trailing whitespace
+        data = data.strip()
+        # 1. Retain the first letter of the term.
+        # 2. Change all occurrences of the following letters to '0' (zero): 'A', E', 'I', 'O', 'U', 'H', 'W', 'Y'.
+        # 3. Change letters to digits as follows: B, F, P, V to 1. C, G, J, K, Q, S, X, Z to 2. D,T to 3. L to 4. M, N to 5. R to 6.
+        # 4. Repeatedly remove one out of each pair of consecutive identical digits.
+        tail = data[1:] 
+        for i,regex in enumerate([self.re0, self.re1, self.re2, self.re3, self.re4, self.re5, self.re6]):
+            tail = regex.sub(str(i), tail)
+        # 5. Remove all zeros from the resulting string.
+        tail = tail.replace('0', '')
+        result = data[0]+tail
+        if self.nChars:
+            # Pad the resulting string with trailing zeros and return the first self.nChars positions
+            result = '{0:0<{1}}'.format(result[:self.nChars], self.nChars) 
+
+        if type(data) == unicode:
+            return unicode(result)
+        else:
+            return result 
+        
 
 class DateStringNormalizer(SimpleNormalizer):
     """ Turns a Date object into ISO8601 format """
