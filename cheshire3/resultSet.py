@@ -120,6 +120,8 @@ class SimpleResultSet(RankedResultSet):
         self.id = id
         self.recordStore = recordStore
         
+        self.relevanceContextSets = {"info:srw/cql-context-set/2/relevance-1.0": 1.0, "info:srw/cql-context-set/2/relevance-1.1": 1.1}
+        
         self.termid = -1
         self.totalOccs = 0
         self.totalRecs = 0
@@ -258,131 +260,148 @@ class SimpleResultSet(RankedResultSet):
             self.append(i)
 
     def _lrAssign(self, session, others, clause, cql, db):
-            if (db):
-                totalDocs = db.totalItems
-                if totalDocs == 0:
-                    raise ValueErorr("No documents in database?")
-            else:
-                # Uhoh
-                raise NameError("Database not supplied to relevancy algorithm")
+        """Assign Logarithmic Regression weights and merge items in resultSets in others into self in a single method."""
+        if (db):
+            totalDocs = db.totalItems
+            if totalDocs == 0:
+                raise ValueErorr("No documents in database?")
+        else:
+            # Uhoh
+            raise NameError("Database not supplied to relevancy algorithm")
 
-            # William S Cooper proposes:
-            constants = [-3.7, 1.269, -0.31, 0.679, -0.0674, 0.223, 2.01]
+        # William S Cooper proposes:
+        constants = [-3.7, 1.269, -0.31, 0.679, -0.0674, 0.223, 2.01]
 
-            # Ray R Larson proposes:
-            constants = [-3.7, 1.269, -0.31, 0.679, -0.021, 0.223, 4.01]
+        # Ray R Larson proposes:
+        constants = [-3.7, 1.269, -0.31, 0.679, -0.021, 0.223, 4.01]
 
-            # Index Configuration proposes:
-            idx = db.protocolMaps['http://www.loc.gov/zing/srw/'].resolveIndex(session, clause)
-            if (idx):
-                for x in range(7):
-                    temp = idx.get_setting(session, 'lr_constant%d' % x)
-                    if (temp):
-                        constants[x] = float(temp)
+        # Index Configuration proposes:
+        pm = db.get_path(session, 'protocolMap')
+        if not pm:
+            db._cacheProtocolMaps(session)
+            pm = db.protocolMaps.get('http://www.loc.gov/zing/srw/')
+            db.paths['protocolMap'] = pm
+            
+        idx = pm.resolveIndex(session, clause)
+        
+        if (idx):
+            for x in range(7):
+                temp = idx.get_setting(session, 'lr_constant%d' % x)
+                if (temp):
+                    constants[x] = float(temp)
 
-            # Query proposes:
-            relSetUri = "info:srw/cql-context-set/2/relevance-1.0"
-            for m in cql.modifiers:
-                # Already been pinged for resolve()
-                if (m.type.prefixURI == relSetUri):
-                    if m.type.value[:5] == "const":
-                        try:
-                            constants[int(m.type.value[5])] = float(m.value)
-                        except ValueError:
-                            # Invalid literal for float()
-                            pass
-                        except IndexError:
-                            # list index out of range
-                            pass
+        # Query proposes:
+        for m in cql.modifiers:
+            # Already been pinged for resolve()
+            if (m.type.prefixURI in self.relevanceContextSets):
+                if m.type.value.startswith("const"):
+                    try:
+                        constants[int(m.type.value[5])] = float(m.value)
+                    except ValueError:
+                        # Invalid literal for float()
+                        pass
+                    except IndexError:
+                        # list index out of range
+                        pass
 
-            sumLogQueryFreq = 0.0
-            sumQueryFreq = 0
-            sumIDF = 0.0
+        sumLogQueryFreq = 0.0
+        sumQueryFreq = 0
+        sumIDF = 0.0
 
-            # Sort rss by length
+        # Sort rss by length
 
-            # Each rs represents one unique word in query
-            for rs in others:
-                sumLogQueryFreq += math.log(rs.queryFreq)
-                sumQueryFreq += rs.queryFreq
-                n = len(rs)
-                if n:
-                    rs.idf = math.log(totalDocs / float(n))
-            x2 = math.sqrt(sumQueryFreq)
+        # Each rs represents one unique word in query
+        for rs in others:
+            sumLogQueryFreq += math.log(rs.queryFreq)
+            sumQueryFreq += rs.queryFreq
+            n = len(rs)
+            if n:
+                rs.idf = math.log(totalDocs / float(n))
+        x2 = math.sqrt(sumQueryFreq)
 
-            # resultSets will be sorted by item already
-            # Step through all concurrently
+        # resultSets will be sorted by item already
+        # Step through all concurrently
 
-            tmpList =  []
-            cont = 1
-            oidxs = range(1,len(others))
-            nors = len(others)
-            positions = [0] * nors
-            all = cql.value in ['all', 'and', '=', 'prox', 'adj']
-            maxWeight = -1
-            minWeight = 9999999999
+        tmplist =  []
+        recStores = {}
+        nors = len(others)
+        lens = [len(o) for o in others]
+        oidxs = range(1,nors)
+        positions = [0] * nors
+        all = cql.value in ['all', 'and', '=', 'prox', 'adj']
+        maxWeight = -1
+        minWeight = 9999999999
 
-            while cont:                
-                items = [others[0][positions[0]]]
-                rspos = [0]
-                for o in oidxs:
-                    nitem = others[o][positions[o]]
-                    if nitem == items[0]:
-                        items.append(nitem)
-                        rspos.append(o)
-                    elif nitem < items[0]:
-                        if all:
-                            # skip until equal or greater
-                            positions[o] += 1
-                            while others[o][positions[o]] < items[0]:
-                                positions[o] += 1
-                        else:
-                            items = [nitem]
-                            rspos = [o]
-                for r in rspos:
-                    positions[r] += 1
-
-                while others and positions[0] == len(others[0])-1:
-                    others.pop(0)
-                    positions.pop(0)
-                if not others:
-                    cont = 0
-                if all and len(items) < nors:
-                    continue
-
-                # sumLogDAF = sum(map(math.log, [x.occurences for x in items]))
-                sumLogDAF = sum([math.log(x) for x in [y.occurences for y in items]])
-                sumIdx = sum([x.resultSet.idf for x in items])
-
-                x1 = sumLogQueryFreq / float(n)
-                x3 = sumLogDAF / float(n)
-                x5 = sumIDF / float(n)
-                x6 = math.log(float(n))
+        cont = 1
+        while cont:
+            items = [others[0][positions[0]]]
+            rspos = [0]
+            for o in oidxs:
                 try:
-                    recStore = recStores[item.recordStore]
-                except:
-                    db = session.server.get_object(session, session.database)
-                    recStore = db.get_object(session, item.recordStore)
-                    recStores[item.recordStore] = recStore
-                doclen = recStore.fetch_recordMetadata(session, item.id, 'wordCount')
-                x4 = math.sqrt(doclen)
-                logodds = constants[0] + (constants[1] * x1) + (constants[2] * x2) + \
-                          (constants[3] * x3) + (constants[4] * x4) + (constants[5] * x5) + \
-                          (constants[6] * x6)
-                item.weight= 0.75 * (math.exp(logodds) / (1 + math.exp(logodds)))
-                tmplist.append(item)
-                if item.weight > maxWeight:
-                    maxWeight = item.weight
-                elif item.weight < minWeight:
-                    minWeight = item.weight
+                    nitem = others[o][positions[o]]
+                except IndexError:
+                    # no more items in this rs
+                    continue
+                
+                if nitem == items[0]:
+                    items.append(nitem)
+                    rspos.append(o)
+                elif nitem < items[0]:
+                    if all:
+                        # skip until equal or greater
+                        positions[o] += 1
+                        while positions[o] < lens[o] and others[o][positions[o]] < items[0]:
+                            positions[o] += 1
 
-            self._list = tmplist
-            self.minWeight = minWeight
-            self.maxWeight = maxWeight
-            self.relevancy = 1
-            return 1
+                    else:
+                        items = [nitem]
+                        rspos = [o]
+            for r in rspos:
+                positions[r] += 1
+
+            while others and positions[0] == len(others[0])-1:
+                others.pop(0)
+                positions.pop(0)
+            if not others:
+                cont = 0
+            if all and len(items) < nors:
+                continue
+
+            # sumLogDAF = sum(map(math.log, [x.occurences for x in items]))
+            sumLogDAF = sum([math.log(x) for x in [y.occurences for y in items]])
+            sumIdx = sum([x.resultSet.idf for x in items])
+
+            x1 = sumLogQueryFreq / float(n)
+            x3 = sumLogDAF / float(n)
+            x5 = sumIDF / float(n)
+            x6 = math.log(float(n))
+            # FIXME: item undefined
+            try:
+                recStore = recStores[item.recordStore]
+            except KeyError:
+                db = session.server.get_object(session, session.database)
+                recStore = db.get_object(session, item.recordStore)
+                recStores[item.recordStore] = recStore
+            doclen = recStore.fetch_recordMetadata(session, item.id, 'wordCount')
+            x4 = math.sqrt(doclen)
+            logodds = constants[0] + (constants[1] * x1) + (constants[2] * x2) + \
+                      (constants[3] * x3) + (constants[4] * x4) + (constants[5] * x5) + \
+                      (constants[6] * x6)
+            item.weight= 0.75 * (math.exp(logodds) / (1 + math.exp(logodds)))
+            tmplist.append(item)
+            if item.weight > maxWeight:
+                maxWeight = item.weight
+            elif item.weight < minWeight:
+                minWeight = item.weight
+
+        self._list = tmplist
+        self.minWeight = minWeight
+        self.maxWeight = maxWeight
+        self.relevancy = 1
+        return 1
 
     def _coriAssign(self, session, others, clause, cql, db):
+        """Assign CORI weighting to each items in each resultSet in others."""
         if (db):
             totalDocs = float(db.totalItems)
             avgSize = float(db.meanWordCount)
@@ -425,6 +444,8 @@ class SimpleResultSet(RankedResultSet):
         return 0
 
     def _tfidfAssign(self, session, others, clause, cql, db):
+        """Assign TF-IDF weighting to each item in each resultSet in others."""
+        # each rs in others represents records matching a single term
         # w(i,j) = tf(i,j) * (log ( N / df(i)))
         if (db):
             totalDocs = float(db.totalItems)
@@ -446,7 +467,93 @@ class SimpleResultSet(RankedResultSet):
                 if rs.minWeight > weight:
                     rs.minWeight = weight
         return 0
+    
+    def _okapiAssign(self, session, others, clause, cql, db):
+        """Assign Okapi BM-25 weighting to each item in each resultSet in others."""
+        if (db):
+            totalDocs = float(db.totalItems)
+            avgSize = float(db.meanWordCount)
+            if not totalDocs or not avgSize:
+                raise ValueError("0 documents in database")
+        else:
+                raise NameError("Database not supplied to relevancy algorithm")
+            
+        # tuning parameters [b, k1, k3]
+        # default
+        constants = [0.75, 1.5, 1.5]
+        
+        # Index Configuration proposes:
+        pm = db.get_path(session, 'protocolMap')
+        if not pm:
+            db._cacheProtocolMaps(session)
+            pm = db.protocolMaps.get('http://www.loc.gov/zing/srw/')
+            db.paths['protocolMap'] = pm
+            
+        idx = pm.resolveIndex(session, clause)
+        
+        if (idx):
+            for i, const in enumerate(['b', 'k1', 'k3']):
+                temp = idx.get_setting(session, 'okapi_constant_' + const)
+                if (temp):
+                    constants[i] = float(temp)
+                    
+        # Query proposes:
+        for m in cql.modifiers:
+            # Already been pinged for resolve()
+            if (m.type.prefixURI in self.relevanceContextSets):
+                if m.type.value.startswith("const"):
+                    try:
+                        constants[int(m.type.value[5])] = float(m.value)
+                    except ValueError:
+                        # Invalid literal for float()
+                        pass
+                    except IndexError:
+                        # list index out of range
+                        pass
 
+        rsizes = clause.relation['recstoresizes']
+        if not rsizes:
+            rsizes = self.recordStoreSizes
+
+        recStoreSizes = {}
+        recStores = {}
+        b, k1, k3 = constants
+        for rs in others:
+            matches = float(len(rs))
+            if not matches:
+                rs.minWeight = 1.0
+                rs.maxWeight = -1.0
+                continue
+            
+            idf = math.log(totalDocs / matches)
+#            idf = max(0.0, math.log(totalDocs - matches + 0.5 / matches + 0.5)) # give it a floor of 0
+
+            qtw = ((k3 + 1) * rs.queryFreq) / (k3 + rs.queryFreq)
+            
+            rs.minWeight = 1000000.0
+            rs.maxWeight = -1.0
+            for item in rs:
+                docFreq = float(item.occurences)
+                recStore = recStores.get(item.recordStore, None)
+                if recStore is None:
+                    recStore = db.get_object(session, item.recordStore)
+                    recStores[item.recordStore] = recStore
+                size = recStore.fetch_recordMetadata(session, item.id, 'wordCount')
+                
+                if rsizes:
+                    avgSize = recStore.meanWordCount
+                    
+                T = ((k1 + 1) * docFreq) / ((k1 * ((1 - b) + b * (size / avgSize))) + docFreq)
+                     
+                item.weight = idf * T * qtw
+
+                if item.weight > rs.maxWeight:
+                    rs.maxWeight = item.weight
+                if item.weight < rs.minWeight:
+                    rs.minWeight = item.weight
+            
+        return 0
+    
     def combine(self, session, others, clause, db=None):
 
         try:
@@ -455,7 +562,7 @@ class SimpleResultSet(RankedResultSet):
             cql = clause.relation
 
         # XXX To Configuration
-        relSetUri = "info:srw/cql-context-set/2/relevance-1.0"
+        relSets = self.relevanceContextSets
         cqlSets = ["info:srw/cql-context-set/1/cql-v1.1", "info:srw/cql-context-set/1/cql-v1.2"]
 
         relevancy = 0
@@ -466,13 +573,13 @@ class SimpleResultSet(RankedResultSet):
         for m in cql.modifiers:
             m.type.parent = clause
             m.type.resolvePrefix()
-            if (m.type.prefixURI == relSetUri):
+            if (m.type.prefixURI in relSets):
                 # Relevancy info
                 relevancy = 1
                 if m.type.value == "algorithm":
-                    algorithm = m.value
+                    algorithm = m.value.lower()
                 elif m.type.value == "combine":
-                    combine = m.value
+                    combine = m.value.lower()
             elif (m.type.prefixURI in cqlSets and m.type.value == "relevant"):
                 # Generic 'relevancy please' request
                 relevancy = 1
