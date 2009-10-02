@@ -12,6 +12,9 @@ class C3Exception(Exception):
 
     def __repr__(self):
         return str(self.__class__) + ": " + self.reason
+    
+class C3ObjectTypeError(C3Exception):
+    pass
 
 class ConfigFileException(C3Exception):
     pass

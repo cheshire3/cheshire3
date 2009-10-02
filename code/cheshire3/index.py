@@ -2,14 +2,14 @@
 from cheshire3.baseObjects import Index, Document, Session
 from cheshire3.configParser import C3Object
 from cheshire3.utils import elementType, getFirstData, flattenTexts
-from cheshire3.exceptions import ConfigFileException, QueryException
+from cheshire3.exceptions import ConfigFileException, QueryException, C3ObjectTypeError
 from cheshire3.record import SaxRecord, DomRecord
 from cheshire3.resultSet import SimpleResultSet, SimpleResultSetItem
 from cheshire3.workflow import CachingWorkflow
 from cheshire3.xpathProcessor import SimpleXPathProcessor
 import cheshire3.cqlParser as cql
 
-import re, types, sys, os, struct, time
+import re, types, sys, os, struct, time, math
 
 import codecs
 import gzip, StringIO
@@ -83,6 +83,9 @@ class SimpleIndex(Index):
                          'lr_constant4' : {"docs" : "", 'type' : float},
                          'lr_constant5' : {"docs" : "", 'type' : float},
                          'lr_constant6' : {"docs" : "", 'type' : float},
+                         'okapi_constant_b' : {"docs" : "Constant to use for tuning parameter 'b' in the OKAPI BM-25 algorithm. 0 <= b <= 1 determines effect of document length on term weight scaling. 0 -> no effect, 1 -> full scaling.", 'type' : float},
+                         'okapi_constant_k1' : {"docs" : "", 'type' : float},
+                         'okapi_constant_k3' : {"docs" : "", 'type' : float},
                          'noIndexDefault' : {"docs" : "If true, the index should not be called from db.index_record()", "type" : int, "options" : "0|1"},
                          'noUnindexDefault' : {"docs" : "If true, the index should not be called from db.unindex_record()", "type" : int, "options" : "0|1"},
                          'sortStore' : {"docs" : "Should the index build a sort store", 'type' : int, 'options' : '0|1'},
@@ -269,7 +272,10 @@ class SimpleIndex(Index):
         if preprocess:
             record = preprocess.process(session, record)
         if xpath:
-            rawlist = xpath.process_record(session, record)
+            try:
+                rawlist = xpath.process_record(session, record)
+            except C3ObjectTypeError:
+                rawlist = [[]]
             processed = process.process(session, rawlist)
         else:
             processed = process.process(session, record)
@@ -388,7 +394,7 @@ class SimpleIndex(Index):
         # try to get process for relation/modifier, failing that relation, fall back to that used for data
         for src in self.sources.get(clause.relation.toCQL(), self.sources.get(clause.relation.value, self.sources[u'data'])):
             res.update(src[1].process(session, [[clause.term.value]]))
-
+            
         store = self.get_path(session, 'indexStore')
         matches = []
         rel = clause.relation
@@ -400,7 +406,6 @@ class SimpleIndex(Index):
                 except AttributeError:
                     pass
             
-
         if (rel.value in ['any', 'all', '=', 'exact', 'window'] and (rel.prefix == 'cql' or rel.prefixURI == 'info:srw/cql-context-set/1/cql-v1.1')):
             for k, qHash in res.iteritems():
                 if k[0] == '^': k = k[1:]      
@@ -472,7 +477,6 @@ class SimpleIndex(Index):
         else:
             raise QueryException('%s "%s"' % (clause.relation.toCQL(), clause.term.value), 24)
 
-
         base = self.resultSetClass(session, [], recordStore=self.recordStore)
         base.recordStoreSizes = self.recordStoreSizes
         base.index = self
@@ -519,7 +523,7 @@ class SimpleIndex(Index):
 
 
     def facets(self, session, resultSet, nTerms=0):
-        """ Return a list of terms from this index which co-occur within the records in resultSet.
+        """ Return a list of terms from this index which occur within the records in resultSet.
         
             Terms are returned in descending frequency (number of records) order.
         """
@@ -551,7 +555,8 @@ class SimpleIndex(Index):
             # (term, (termId, nRecs, freq))
             terms.append((term.decode('utf-8'), (termId, recordFreqs[termId], termFreqs[termId])))        
         return terms
-
+    
+    
     # Internal API for stores
 
     def serialize_term(self, session, termId, data, nRecs=0, nOccs=0):
@@ -582,10 +587,15 @@ class SimpleIndex(Index):
         return [(a,b)]
 
     def merge_term(self, session, currentData, newData, op="replace", nRecs=0, nOccs=0):
-        # structTerms = output of deserialiseTerms
-        # newTerms = flat list
-        # op = replace, add, delete
-        # recs, occs = total recs/occs in newTerms
+        """Merge (add, replace or delete) newData into currentData and return the result.
+        
+        currentData = output of deserialiseTerms
+        newData = flat list
+        op = replace, add, delete
+        nRecs = total records in newData
+        nOccs = total occurrences in newdata
+        """
+        
 
         (termid, oldTotalRecs, oldTotalOccs) = currentData[0:3]
         currentData = list(currentData[3:])
