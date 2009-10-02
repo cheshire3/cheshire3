@@ -1,5 +1,6 @@
 
 from cheshire3.selector import SimpleSelector
+from cheshire3.exceptions import C3ObjectTypeError
 from cheshire3.graph.record import GraphRecord
 
 class SparqlSelector(SimpleSelector):
@@ -9,7 +10,7 @@ class SparqlSelector(SimpleSelector):
 
     def process_record(self, session, record):
         if not isinstance(record, GraphRecord):
-            raise SomeException("Can only process GraphRecords")
+            raise C3ObjectTypeError("{0.__class__.__name__} can only process GraphRecords; {1.__class__.__name__} supplied".format(self, record))
         else:
             vals = []
             for src in self.sources:
