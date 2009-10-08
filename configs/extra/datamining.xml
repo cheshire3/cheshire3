@@ -1,0 +1,50 @@
+<config>
+  <subConfigs>
+
+   <subConfig type="preParser" id="FimiPreParser">
+      <objectType>datamining.preParser.Fimi1PreParser</objectType>
+      <paths>
+        <path type="filePath">/home/cheshire/cheshire3/code/datamining/apps/fimi</path>
+      </paths>
+      <options>
+        <setting type="support">0.03</setting>
+      </options>
+    </subConfig>
+
+   <subConfig type="preParser" id="TfpPreParser">
+      <objectType>datamining.preParser.TFPPreParser</objectType>
+      <paths>
+        <path type="filePath">/home/cheshire/cheshire3/code/datamining/apps/tfp2</path>
+        <path type="javaPath">/usr/local/jdk1.6.0_02/bin/java</path>
+      </paths>
+      <options>
+        <setting type="support">3</setting>
+      </options>
+    </subConfig>
+
+    <subConfig type="preParser" id="ARMVectorPreParser">
+      <objectType>datamining.preParser.ARMVectorPreParser</objectType>
+    </subConfig>
+
+    <subConfig type="preParser" id="VectorRenumberPreParser">
+      <objectType>datamining.preParser.VectorRenumberPreParser</objectType>
+      <paths>
+        <path type="modelPath">renumber_hash.pickle</path>
+      </paths>
+      <options>
+        <setting type="termOffset">1</setting>
+      </options>
+    </subConfig>
+
+    <subConfig type="preParser" id="UnRenumberPreParser">
+      <objectType>datamining.preParser.VectorUnRenumberPreParser</objectType>
+      <paths>
+        <path type="modelPath">renumber_hash.pickle</path>
+      </paths>
+      <options>
+        <setting type="termOffset">1</setting>
+      </options>
+    </subConfig>
+
+  </subConfigs>
+</config>
