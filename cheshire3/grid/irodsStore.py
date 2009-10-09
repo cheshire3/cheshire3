@@ -482,17 +482,27 @@ class IrodsStore(SimpleStore):
         else:
             id = id.replace('/', '--')
 
-        if self.resource:
-            f = self.coll.open(id, rescName=self.resource)
-        else:
-            f = self.coll.open(id)
-        umd = f.getUserMetadata()
+	collPath = self.coll.getCollName()
+	umd = irods.getFileUserMetadata(self.cxn, '{0}/{1}'.format(collPath, id))
+
+        #if self.resource:
+        #    f = self.coll.open(id, rescName=self.resource)
+        #else:
+        #    f = self.coll.open(id)
+	
+	#if not f:
+	#    for x in range(upwards):
+        #        self.coll.upCollection()
+        #    return None
+	#umd = f.getUserMetadata()
+	#f.close()
+
         val = None
         for x in umd:
             if x[0] == mType:
                 val = icatValToPy(x[1], x[2])
                 break
-        f.close()
+        
         for x in range(upwards):
             self.coll.upCollection()
         return val
@@ -509,16 +519,40 @@ class IrodsStore(SimpleStore):
             id = str(id)
 
         self._open(session)
-
-        if self.resource:
-            f = self.coll.open(id, self.resource)
+	upwards = 0
+        if id.find('/') > -1 and self.allowStoreSubDirs:
+            idp = id.split('/')
+            id = idp.pop() # file is final part
+            while idp:
+                dn = idp.pop(0)
+                if not dn in self.coll.getSubCollections():
+                    for x in range(upwards):
+                        self.coll.upCollection()
+                    raise ObjectDoesNotExistException(id)
+                self.coll.openCollection(dn)
+                upwards += 1
         else:
-            f = self.coll.open(id)
+            id = id.replace('/', '--')
 
-        if not f:
-            return
-        f.addUserMetadata(mType, *pyValToIcat(value))
-        f.close()
+	collPath = self.coll.getCollName()
+	irods.addFileUserMetadata(self.cxn, '{0}/{1}'.format(collPath, id), mType, *pyValToIcat(value))
+
+#	if self.resource:
+#            f = self.coll.open(id, rescName=self.resource)
+#        else:
+#            f = self.coll.open(id)
+
+#	if not f:
+#	    for x in range(upwards):
+#		self.coll.upCollection()
+#	    return None
+            
+#        f.addUserMetadata(mType, *pyValToIcat(value))
+#        f.close()
+
+	for x in range(upwards):
+            self.coll.upCollection()
+
     
     def clean(self, session):
         # delete expired data objects
