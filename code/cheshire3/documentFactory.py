@@ -100,9 +100,9 @@ class FileDocumentStream(BaseDocumentStream):
     def find_documents(self, session, cache=0):
         # just read in single file
         if cache == 0:
-            yield StringDocument(self.stream.read())
+            yield StringDocument(self.stream.read(), filename=self.streamLocation)
         elif cache == 2:
-            self.documents = [StringDocument(self.stream.read())]
+            self.documents = [StringDocument(self.stream.read(), filename=self.streamLocation)]
 
 class TermHashDocumentStream(BaseDocumentStream):
 
@@ -226,10 +226,13 @@ class XmlDocumentStream(BaseDocumentStream):
                         offOffset += (byteCount - tlen)
                     else:
                         strStart = len(line)
-                        # Can we get by without using 'tell()' ?
+                        # Can we get by without using 'tell()' or similar?
                         # eg for stream APIs that don't support it
-
-                        if self.stream.tell() == filelen:
+			try:
+                            tll = self.stream.tell()
+                        except AttributeError:
+			    tll = self.stream.getPosition()
+                        if tll == filelen:
                             # check we have at least 1024 to read
                             # we've got nuffink!
                             if cache == 0:
@@ -237,7 +240,7 @@ class XmlDocumentStream(BaseDocumentStream):
                                 raise StopIteration
                             else:
                                 break
-                        if self.stream.tell() + 1024 < filelen:
+                        if tll + 1024 < filelen:
                             line += self.stream.read(1024)
                         else:
                             line += self.stream.read()
