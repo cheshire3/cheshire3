@@ -5,8 +5,9 @@ from cheshire3.exceptions import ConfigFileException, FileDoesNotExistException,
 from cheshire3.resultSet import SimpleResultSetItem
 from cheshire3.index import *
 from cheshire3.baseStore import SwitchingBdbConnection
+from cheshire3.utils import getShellResult
 
-import os, types, struct, sys, commands, time, glob
+import os, types, struct, sys, time, glob
 try:
     # Python 2.3 vs 2.2
     import bsddb as bdb
@@ -420,7 +421,7 @@ class BdbIndexStore(IndexStore):
         tempfile = basename + "_TEMP"
         sorted = basename + "_SORT"
         cmd = "%s %s -T %s -o %s" % (sort, tempfile, temp, sorted)
-        commands.getoutput(cmd)
+        getShellResult(cmd)
         # Sorting might fail.
         if (not os.path.exists(sorted)):
             raise ValueError("Failed to sort %s" % tempfile)
@@ -447,7 +448,7 @@ class BdbIndexStore(IndexStore):
         sortFiles = " ".join(sortFileList)
         sorted = os.path.join(temp, "%s_SORT" % basename)
         cmd = "%s -m -T %s -o %s %s" % (sort, temp, sorted, sortFiles)
-        out = commands.getoutput(cmd)
+        out = getShellResult(cmd)
         if not os.path.exists(sorted):
             raise ValueError("Didn't sort %s" % index.id)
         for tsfn in sortFileList:

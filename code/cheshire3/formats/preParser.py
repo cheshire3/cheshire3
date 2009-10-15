@@ -1,5 +1,5 @@
 
-import os, commands, mimetypes, tempfile, glob, re, time
+import os, mimetypes, tempfile, glob, re, time
 from xml.sax.saxutils import escape
 from lxml import etree
 
@@ -9,6 +9,7 @@ from cheshire3.document import StringDocument
 from cheshire3.preParser import CmdLinePreParser, TypedPreParser
 from cheshire3.workflow import CachingWorkflow
 from cheshire3.xpathProcessor import SimpleXPathProcessor
+from cheshire3.utils import getShellResult
 
 
 class DependentCmdLinePreParser(CmdLinePreParser):
@@ -110,16 +111,17 @@ class CmdLineMetadataDiscoveryPreParser(CmdLinePreParser):
             old = ''
             
         if stdIn:
-            pipe = Popen(cmd, bufsize=0, shell=True,
-                         stdin=PIPE, stdout=PIPE, stderr=PIPE)
+            pipe = subprocess.Popen(cmd, bufsize=0, shell=True,
+                         stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             pipe.stdin.write(doc.get_raw(session))
             pipe.stdin.close()
             result = pipe.stdout.read()
             pipe.stdout.close()
             pipe.stderr.close()
+            del pipe
         else:
             # result will read stdout+err regardless
-            result = commands.getoutput(cmd)
+            result = getShellResult(cmd)
             os.remove(infn)
             if not stdOut:
                 if os.path.exists(outfn) and os.path.getsize(outfn) > 0:
