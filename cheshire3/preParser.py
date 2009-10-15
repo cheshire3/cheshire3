@@ -2,10 +2,11 @@
 from cheshire3.baseObjects import PreParser
 from cheshire3.document import StringDocument
 from cheshire3.marc_utils import MARC
-from cheshire3.exceptions import ConfigFileException
+from cheshire3.utils import getShellResult
+from cheshire3.exceptions import ConfigFileException, ExternalSystemException
 
 import re, time, gzip, string, binascii, cStringIO as StringIO
-import bz2, os, commands, time, glob
+import bz2, os, time, glob
 import httplib, mimetypes, tempfile, hashlib
 from xml.sax.saxutils import escape
 from warnings import warn
@@ -99,6 +100,8 @@ class CmdLinePreParser(TypedPreParser):
                 except: suff = ''
                 if not suff:
                     suff = mimetypes.guess_extension(doc.filename)
+                    if not suff:
+                        (foofn, suff) = os.path.splitext(doc.filename)
                 if suff:
                     (qq, infn) = tempfile.mkstemp(suff)
                 else:
@@ -128,16 +131,17 @@ class CmdLinePreParser(TypedPreParser):
             old = ''
             
         if stdIn:
-            pipe = Popen(cmd, bufsize=0, shell=True,
-                         stdin=PIPE, stdout=PIPE, stderr=PIPE)
+            pipe = subprocess.Popen(cmd, bufsize=0, shell=True,
+                         stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             pipe.stdin.write(doc.get_raw(session))
             pipe.stdin.close()
             result = pipe.stdout.read()
             pipe.stdout.close()
             pipe.stderr.close()
+            del pipe
         else:
             # result will read stdout+err regardless
-            result = commands.getoutput(cmd)
+            result = getShellResult(cmd)
             os.remove(infn)
             if not stdOut:
                 if os.path.exists(outfn) and os.path.getsize(outfn) > 0:
@@ -156,7 +160,7 @@ class CmdLinePreParser(TypedPreParser):
                     try:
                         result = fh.read()
                     except:
-                        raise ValueError('Error from command: %s' % (cmd))
+                        raise ExternalSystemException('Error from command: %s' % (cmd))
                     else:
                         fh.close()
                 finally:
@@ -190,7 +194,8 @@ class FileUtilPreParser(TypedPreParser):
         fh.write(doc.get_raw(session))
         fh.close()
         cmd = cmd.replace("%INDOC%", infn)
-        res = commands.getoutput(cmd)
+        getShellResult(cmd)
+
         mt = res.strip()
 
         if mt.find(';') > -1:
@@ -203,7 +208,7 @@ class FileUtilPreParser(TypedPreParser):
 
         if mt == "text/plain":
             # we might be sgml, xml, text etc
-            res = commands.getoutput("file -b %s" % infn)
+            res = getShellResult("file -b {0}".format(infn)
             mt2 = res.strip()
             if mt2 == "exported SGML document text":
                 mt = "text/sgml"

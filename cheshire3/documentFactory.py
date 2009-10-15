@@ -2,14 +2,14 @@
 from cheshire3.baseObjects import DocumentFactory
 from cheshire3.document import StringDocument
 from cheshire3.record import SaxRecord
-from cheshire3.utils import elementType, getFirstData, flattenTexts
+from cheshire3.utils import elementType, getFirstData, flattenTexts, getShellResult
 from cheshire3.workflow import CachingWorkflow
 from cheshire3.xpathProcessor import SimpleXPathProcessor
 
 from lxml import etree
 
 import re, os, cStringIO
-import commands, codecs, types
+import codecs, types
 import mimetypes
 import zipfile, tarfile
 
@@ -464,7 +464,7 @@ class ZipDocumentStream(DirectoryDocumentStream):
 
 class LocateDocumentStream(DirectoryDocumentStream):
     def find_documents(self, session, cache=0):
-        fl = commands.getoutput("locate %s | grep %s$" % (self.stream, self.stream))
+        fl = getShellResult("locate %s | grep %s$" % (self.stream, self.stream))
         docs = fl.split('\n')
         while docs and docs[0][:8] == "warning:":
             docs.pop(0)
@@ -496,7 +496,7 @@ class ClusterDocumentStream(BaseDocumentStream):
         data = self.streamLocation
         sortx = self.factory.get_path(session, 'sortPath', None)
         if sortx == None:
-            sortx = commands.getoutput('which sort')
+            sortx = getShellResult('which sort')
         sorted = data + "_SORT"
         os.spawnl(os.P_WAIT, sortx, sortx, data, '-o', sorted)
 

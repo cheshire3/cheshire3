@@ -7,7 +7,7 @@ from types import MethodType
 from cheshire3.session import Session
 
 from cheshire3 import dynamic
-from cheshire3.utils import getFirstData, elementType
+from cheshire3.utils import getFirstData, elementType, getShellResult
 from cheshire3.bootstrap import BSParser, BootstrapDocument
 from cheshire3.bootstrap import BSLxmlParser
 from cheshire3.exceptions import *
@@ -494,7 +494,8 @@ class C3Object(object):
                             # search
                             dp = self.get_path('session', 'executablePath', '')
                             if not dp:
-                                dp = commands.getoutput('which %s' % fn)                        
+                                dp = getShellResult('which {0}'.format(fn))
+                      
                         else:
                             dp = self.get_path(session, 'defaultPath')
                         fn = os.path.join(dp, fn)
