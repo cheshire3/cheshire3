@@ -91,9 +91,8 @@ except:
     except:
         # No luck, try to generate using unix command
         
-        import commands
         def gen_uuid():
-            return commands.getoutput('uuidgen')
+            return getShellResult('uuidgen')
 
         uuidre = re.compile("[0-9a-fA-F-]{36}")
         uuid = gen_uuid()
@@ -111,6 +110,25 @@ except:
                     uuidl.append('-')
                 uuidl.pop(-1)  # strip trailing -
                 return ''.join(uuidl)
+
+import commands, subprocess
+def getShellResult(cmd):
+    """Execute a command in the O/S shell and return the result.
+
+    Convenience function for use throughout Cheshire3 to cope with execution in different environments (e.g. iRODS Microservices.)
+    """
+    try:
+        result = commands.getoutput(cmd) # causes bug in iRODS
+    except IOError:
+        # *very* edge case; fails when run in a microservice under a delayExec rule in iRODS
+        pipe = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        result = pipe.stdout.read()
+        pipe.stdout.close()
+        pipe.stderr.close()
+        del pipe
+
+    return result
+
 
 def now():
     return time.strftime("%Y-%m-%dT%H:%M:%S")
