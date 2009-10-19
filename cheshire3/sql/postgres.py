@@ -263,7 +263,7 @@ class PostgresStore(SimpleStore):
         self._openContainer(session)
         # Find greatest current id
         if (self.currentId == -1 or session.environment == 'apache'):
-            query = "SELECT identifier FROM %s ORDER BY identifier DESC LIMIT 1;" % self.table
+            query = "SELECT CAST(identifier AS int) FROM %s ORDER BY identifier DESC LIMIT 1;" % self.table
             res = self._query(query)
             try:
                 id = int(res.dictresult()[0]['identifier']) +1
