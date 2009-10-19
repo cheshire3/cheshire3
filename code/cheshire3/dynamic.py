@@ -75,6 +75,6 @@ def buildObject(session, objectType, args):
     try:
         return parentClass(session, *args)    
     except:
-        if session.logger:
-            session.logger.log_critical(session, "Failed to create '%s' type of object" % (parentClass))
+        try: session.logger.log_critical(session, "Failed to create '%s' type of object" % (parentClass))
+        except AttributeError: pass # most likely session == None or session.logger == None
         raise
