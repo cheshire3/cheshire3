@@ -14,34 +14,14 @@ from cheshire3.exceptions import ObjectAlreadyExistsException, ObjectDoesNotExis
 
 from cheshire3.indexStore import BdbIndexStore
 from cheshire3.baseStore import SwitchingBdbConnection
+from cheshire3.grid.irods_utils import icatValToPy, pyValToIcat
+
 import bsddb as bdb
 
 
 import irods, irods_error
 import time, datetime, dateutil
 import sys, os
-
-
-def icatValToPy(val, un):
-    if un in ['int', 'long']:
-        return long(val)
-    elif un == 'unicode':
-        return val.decode('utf-8')
-    elif un == 'float':
-        return float(val)
-    else:
-        return val
-
-def pyValToIcat(val):
-    x = type(val)
-    if x in [int, long]:
-        return ("%020d" % val, 'long')
-    elif x == unicode:
-        return (val.encode('utf-8'), 'unicode')
-    elif x == float:
-        return ('%020f' % val, 'float')
-    else:
-        return (val, 'str')
 
     
 class IrodsStore(SimpleStore):
@@ -77,7 +57,7 @@ class IrodsStore(SimpleStore):
                          'irodsZone' : {'docs' :'', 'type' : str},
                          'irodsPassword' : {'docs' :'', 'type' : str},
                          'irodsResource' : {'docs' :'', 'type' : str},
-                         'createSubDir' : {'docs' :'', 'type' : int, 'options' : "0|1"},
+                         'createSubDir' : {'docs' :'Should a sub-directory/sub-collection be used for this store', 'type' : int, 'options' : "0|1"},
                          'allowStoreSubDirs' : {'docs' : '', 'type' : int, 'options' : '0|1'}
                          }
 
@@ -482,8 +462,8 @@ class IrodsStore(SimpleStore):
         else:
             id = id.replace('/', '--')
 
-	collPath = self.coll.getCollName()
-	umd = irods.getFileUserMetadata(self.cxn, '{0}/{1}'.format(collPath, id))
+        collPath = self.coll.getCollName()
+        umd = irods.getFileUserMetadata(self.cxn, '{0}/{1}'.format(collPath, id))
 
         #if self.resource:
         #    f = self.coll.open(id, rescName=self.resource)
