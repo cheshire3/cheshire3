@@ -1,6 +1,8 @@
 
 from cheshire3.documentFactory import MultipleDocumentStream, FileDocumentStream
+from cheshire3.document import StringDocument
 from cheshire3.exceptions import ConfigFileException
+from cheshire3.grid.irods_utils import icatValToPy
 
 import irods, irods_error
 import os
@@ -43,6 +45,21 @@ class IrodsFileDocumentStream(IrodsStream, FileDocumentStream):
         fn = os.path.basename(path)
         if path:
             return self.coll.open(fn)
+
+    def find_documents(self, session, cache=0):
+        # read in single file
+        doc = StringDocument(self.stream.read(), filename=self.stream.getName())
+        # attach any iRODS metadata
+        umd = self.stream.getUserMetadata()
+	md = {}
+        for x in umd:
+            md[x[0]] = icatValToPy(x[1], x[2])
+	if md:
+            doc.metadata['iRODS'] = md
+        if cache == 0:
+            yield doc
+        elif cache == 2:
+            self.documents = [doc]
     
 
 
@@ -67,6 +84,11 @@ class IrodsDirectoryDocumentStream(IrodsStream, MultipleDocumentStream):
         files = [x[0] for x in files]
         files.sort()
         for f in self._processFiles(session, files):
+            md = {}
+            for x in irods.getFileUserMetadata(self.cxn, '{0}/{1}'.format(c.getCollName(), f.filename)):
+                md[x[0]] = icatValToPy(x[1], x[2])
+            if len(md):
+                f.metadata['iRODS'] = md
             yield f
 
         dirs = c.getSubCollections()
@@ -81,6 +103,11 @@ class IrodsDirectoryDocumentStream(IrodsStream, MultipleDocumentStream):
             files = [x[0] for x in files]
             files.sort()
             for f in self._processFiles(session, files):
+                md = {}
+                for x in irods.getFileUserMetadata(self.cxn, '{0}/{1}'.format(c.getCollName(), f.filename)):
+                    md[x[0]] = icatValToPy(x[1], x[2])
+                if len(md):
+                    f.metadata['iRODS'] = md
                 yield f
 
             ndirs = c.getSubCollections()
@@ -90,4 +117,7 @@ class IrodsDirectoryDocumentStream(IrodsStream, MultipleDocumentStream):
             for x in range(upColls):
                 c.upCollection()
 
-            
+streamHash = {"idir" : IrodsDirectoryDocumentStream
+             ,"ifile": IrodsFileDocumentStream
+             }
+
