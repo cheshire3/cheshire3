@@ -1,6 +1,14 @@
 <config>
   <subConfigs>
-  
+
+    <!-- Parsers -->
+    
+    <subConfig type="parser" id="RdfGraphParser">
+        <objectType>cheshire3.graph.parser.RdfGraphParser</objectType>
+    </subConfig>
+    
+    <!-- Extractors -->
+      
 	<subConfig type="extractor" id="RdfExtractor">
   		<objectType>cheshire3.graph.extractor.RdfExtractor</objectType>
   	</subConfig>
@@ -12,6 +20,12 @@
 	    <setting type="reversable">1</setting>
 	  </options>
 	</subConfig>
-  
+	
+	<!-- Transformers -->
+	
+	<subConfig type="transformer" id="RdfXmlTransformer">
+        <objectType>cheshire3.graph.transformer.RdfXmlTransformer</objectType>
+    </subConfig>
+        
   </subConfigs>  
 </config>
