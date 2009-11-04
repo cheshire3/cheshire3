@@ -19,7 +19,7 @@ class DeletedObject(object):
     def __nonzero__(self):
         return False
 
-    def __init__(self, store, id, time="dunno when"):
+    def __init__(self, store, id, time="unknown"):
         self.store = store
         self.id = id
         self.time = time
@@ -934,7 +934,7 @@ class BdbStore(SimpleStore):
 
 
     def fetch_metadata(self, session, id, mType):
-        if mType[-7:] != "Reverse":
+        if not mType.endswith("Reverse"):#mType[-7:] != "Reverse":
             if (self.idNormalizer != None):
                 id = self.idNormalizer.process_string(session, id)
             elif type(id) == unicode:
@@ -945,9 +945,9 @@ class BdbStore(SimpleStore):
         if cxn != None:
             data = cxn.get(id)
             if data:
-                if mType[-5:] == "Count" or mType[-8:] == "Position" or mType[-6:] in ("Amount", 'Offset'):
+                if mType.endswith(("Count", "Position", "Amount", "Offset")):#mType[-5:] == "Count" or mType[-8:] == "Position" or mType[-6:] in ("Amount", 'Offset'):
                     data = long(data)
-                elif mType[-4:] == "Date":
+                elif mType.endswith("Date"):
                     data = dateparser.parse(data)
             return data       
         else:
