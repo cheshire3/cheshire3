@@ -1,6 +1,6 @@
 
 from cheshire3.configParser import C3Object
-from cheshire3.baseStore import SimpleStore
+from cheshire3.baseStore import SimpleStore, DeletedObject
 from cheshire3.baseObjects import Database
 from cheshire3.recordStore import SimpleRecordStore, BdbRecordStore
 from cheshire3.documentStore import SimpleDocumentStore
