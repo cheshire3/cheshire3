@@ -57,6 +57,8 @@ class SimpleLogger(Logger):
             self.lineCache.append(line)
         if (len(self.lineCache) > self.cacheLen):
             for l in self.lineCache:
+                if type(l) == unicode:
+                    l = l.encode('utf8')
                 self.fileh.write(l + "\n")
             if hasattr(self.fileh, 'flush'):
                 self.fileh.flush()
