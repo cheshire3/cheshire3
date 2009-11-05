@@ -208,7 +208,7 @@ class FileUtilPreParser(TypedPreParser):
 
         if mt == "text/plain":
             # we might be sgml, xml, text etc
-            res = getShellResult("file -b {0}".format(infn)
+            res = getShellResult("file -b {0}".format(infn))
             mt2 = res.strip()
             if mt2 == "exported SGML document text":
                 mt = "text/sgml"
