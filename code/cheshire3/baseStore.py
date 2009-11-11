@@ -955,6 +955,11 @@ class BdbStore(SimpleStore):
 
     def store_metadata(self, session, id, mType, value):
         cxn = self._openDb(session, mType)
+        if cxn == None:
+            self._initDb(session, mType)
+            self._verifyDb(session, mType)
+            cxn = self._openDb(session, mType)
+
         if cxn != None:
             if type(value) in (int, long, float):
                 value = str(value)

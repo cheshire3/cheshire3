@@ -112,6 +112,10 @@ class SimpleRecordStore(RecordStore):
         if e:
             md['expires'] = e
 
+        # Object metadata will overwrite generated (intentionally)
+        md2 = rec.metadata
+        md.update(md2)
+
         # Might raise ObjectAlreadyExistsException
         self.store_data(session, rec.id, data, metadata=md)
         # Now accumulate metadata
