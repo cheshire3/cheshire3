@@ -781,7 +781,6 @@ class BdbStore(SimpleStore):
             if dbp == None:
                 self._initDb(session, dbType)
                 dbp = self.get_path(session, dbType + 'Path')
-                print ' -- ' + dbp
             if os.path.exists(dbp) or dbType in self.storageTypes or (dbType[-7:] == 'Reverse' and dbType[:-7] in self.reverseMetadataTypes):
                 if self.switching and dbType in self.get_noSwitchTypes(session):
                     self.switching = False
