@@ -260,6 +260,13 @@ class SimpleStore(C3Object, SummaryObject):
             self._closeDb(session, t)
         for t in self.reverseMetadataTypes:
             self._closeDb(session, t + "Reverse")
+        for (t, cxn) in self.cxns.items():
+            if cxn != None:
+                try:
+                    cxn.close();
+                    self.cxns[t] = None
+                except:
+                    pass
 
     def generate_id(self, session):
         # generate a new unique identifier
@@ -770,8 +777,12 @@ class BdbStore(SimpleStore):
     def _openDb(self, session, dbType):
         cxn = self.cxns.get(dbType, None)
         if cxn == None:
-            if dbType in self.storageTypes or (dbType[-7:] == 'Reverse' and dbType[:-7] in self.reverseMetadataTypes):
+            dbp = self.get_path(session, dbType + 'Path')
+            if dbp == None:
+                self._initDb(session, dbType)
                 dbp = self.get_path(session, dbType + 'Path')
+                print ' -- ' + dbp
+            if os.path.exists(dbp) or dbType in self.storageTypes or (dbType[-7:] == 'Reverse' and dbType[:-7] in self.reverseMetadataTypes):
                 if self.switching and dbType in self.get_noSwitchTypes(session):
                     self.switching = False
                     cxn = self._open(session, dbp)
