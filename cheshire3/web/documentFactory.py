@@ -5,9 +5,12 @@ from cheshire3.document import StringDocument
 from cheshire3.bootstrap import BSParser
 from cheshire3.utils import elementType, getFirstData, flattenTexts
 
-from ZSI.client import Binding
-from PyZ3950 import zoom
-import SRW
+try:
+    from ZSI.client import Binding
+    from PyZ3950 import zoom
+    import SRW
+except:
+    pass
 
 import socket
 import re, os, cStringIO

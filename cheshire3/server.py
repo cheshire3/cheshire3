@@ -23,6 +23,11 @@ class SimpleServer(Server):
             topNode = dom
         C3Object.__init__(self, session, topNode, None)
 
+        # Add default logger to session
+        log = self.get_path(session, 'defaultLogger', None)
+        if log:
+            session.logger = log
+
         
     def _cacheDatabases(self, session):
         for dbid in self.databaseConfigs.keys():
