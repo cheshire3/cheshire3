@@ -162,6 +162,8 @@ class SimpleRecordStore(RecordStore):
         self.delete_data(session, id)
 
     def fetch_recordMetadata(self, session, id, mType):
+        if isinstance(id, Record):
+            id = id.id
         return self.fetch_metadata(session, id, mType)
 
     def _process_data(self, session, id, data, parser=None):
