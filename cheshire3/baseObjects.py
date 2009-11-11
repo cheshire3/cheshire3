@@ -603,6 +603,7 @@ class Record:
 
     wordCount = -1
     byteCount = -1
+    metadata = {}
 
     parent = ('', None, 0)
     processHistory = []

@@ -382,6 +382,7 @@ class DomRecord(Record):
         self.id = docId
         self.parent = ('','',-1)
         self.context = None
+        self.metadata = {}
         if wordCount:
             self.wordCount = wordCount
         else:
