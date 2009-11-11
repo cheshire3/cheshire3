@@ -5,6 +5,8 @@ from cheshire3.graph.record import GraphRecord
 from rdflib import StringInputSource, URIRef
 from rdflib import ConjunctiveGraph as Graph
 from pyRdfa import parseRDFa, Options
+from xml.dom import minidom
+import StringIO
 
 
 class RdfGraphParser(BaseParser):
@@ -27,7 +29,7 @@ class RdfaParser(BaseParser):
     options = None
 
     def __init__(self, session, config, parent):
-        SimpleParser.__init__(self, session, config, parent)
+        BaseParser.__init__(self, session, config, parent)
         rdfaOptions = Options(warnings=False)
         rdfaOptions.warning_graph = None
         self.options = rdfaOptions
@@ -35,7 +37,7 @@ class RdfaParser(BaseParser):
     def process_document(self, session, doc):
         data = doc.get_raw(session)
         uri = "not-sure-what-to-do-here"
-        root = minidom.parse(data)
+        root = minidom.parse(StringIO.StringIO(data))
         graph = parseRDFa(root, uri, options=self.options)
         rec = GraphRecord(graph)
         return rec
