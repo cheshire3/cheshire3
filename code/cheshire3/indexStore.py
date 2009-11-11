@@ -959,7 +959,7 @@ class BdbIndexStore(IndexStore):
             self._openVectors(session, index)
             tidcxn = self.termIdCxn.get(index, None)
         termid = "%012d" % termId
-        data = tidcxn.get(termId)
+        data = tidcxn.get(termid)
         if type(data) == tuple and data[0] == termid:
             data = data[1]
         if not data:
