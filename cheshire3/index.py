@@ -724,12 +724,12 @@ class ProximityIndex(SimpleIndex):
         try:
             val =  struct.pack(*params)
         except:
-            self.log_critical(session, "%s failed to pack: %r" % (self.id, params[:4]))
+            self.log_critical(session, "%s failed to pack: %r" % (self.id, params))
             raise
         return val
         
     def deserialize_term(self, session, data, nRecs=-1, prox=1):
-        fmt = 'L' * (len(data) / self.longStructSize)
+        fmt = 'l' * (len(data) / self.longStructSize)
         flat = struct.unpack(fmt, data)
         (termid, totalRecs, totalOccs) = flat[:3]
         idx = 3
