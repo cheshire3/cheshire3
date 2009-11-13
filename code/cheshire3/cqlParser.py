@@ -37,10 +37,11 @@ class Diagnostic(Exception):
     detils = ""
 
     def __str__(self):
-        return "%s [%s]: %s" % (self.uri, self.message, self.details)
+        return "{0.uri} [{0.message}]: {0.details}".format(self)
+        #return "%s [%s]: %s" % (self.uri, self.message, self.details)
 
     def __init__(self, code=10, message="Malformed Query", details=""):
-        self.uri = "info:srw/diagnostic/1/%d" % code
+        self.uri = "info:srw/diagnostic/1/{0}".format(code)
         self.code = code
         self.message=message
         self.details=details
@@ -659,17 +660,21 @@ class CQLParser:
         while (self.currentToken == ">"):
             # Strip off maps
             self.fetch_token()
+            identifier = []
             if self.nextToken == "=":
                 # Named map
                 name = self.currentToken
                 self.fetch_token() # = is current
                 self.fetch_token() # id is current
-                identifier = self.currentToken
-                self.fetch_token()
+                identifier.append(self.currentToken)
             else:
                 name = ""
-                identifier = self.currentToken
+                identifier.append(self.currentToken)
+            self.fetch_token()
+            while self.currentToken == '/' or identifier[-1] == '/': # URIs can have slashes, and may be unquoted (standard BNF checked - John)
+                identifier.append(self.currentToken)
                 self.fetch_token()
+            identifier = ''.join(identifier)
             if len(identifier) > 1 and identifier[0] == '"' and identifier[-1] == '"':
                 identifier = identifier[1:-1]
             prefs[name.lower()] = identifier
