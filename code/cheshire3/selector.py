@@ -1,5 +1,7 @@
 
 from cheshire3.baseObjects import Selector
+from cheshire3.record import LxmlRecord
+from cheshire3.exceptions import ConfigFileException
 from lxml import etree
 import time
 
@@ -134,3 +136,72 @@ class MetadataSelector(SimpleSelector):
                     raise ConfigFileException("Unknown metadata selector type: %s" % typ)
 
         return vals
+
+
+class XPathSelector(SimpleSelector):
+
+    def __init__(self, session, config, parent):
+        self.sources = []
+        SimpleSelector.__init__(self, session, config, parent)
+    
+    def process_record(self, session, record):
+        # Extract XPath and return values
+        vals = []
+        for src in self.sources:
+            # list of {}s
+            for xp in src:
+                if isinstance(record, LxmlRecord):
+                    vals.append(record.process_xpath(session, xp['string'], xp['maps']))
+                else:
+                    raise ValueError("Only LXML")
+                    # vals.append(record.process_xpath(session, xp['xpath'], xp['maps']))
+        return vals    
+    
+    
+
+class SpanXPathSelector(SimpleSelector):
+    u"""Selector that allows selection of a span between any two given xpaths - starts at first ends at second. Two xpaths must be supplied although
+    both can be the same in which case each node acts as a start and stop node. """
+    
+    def __init__(self, session, config, parent):
+        self.sources = []
+        SimpleSelector.__init__(self, session, config, parent)
+        
+    def process_record(self, session, record):
+        vals = []
+        try:
+            startTag = self.sources[0][0]['string']
+        except:
+            raise ConfigFileException('SpanXPathSelector: No start xpath specified')
+        try:
+            endTag = self.sources[0][1]['string']
+        except:
+            raise ConfigFileException('SpanXPathSelector: No end xpath specified')
+        tree = etree.fromstring(record.get_xml(session))
+        startNodes = tree.xpath(startTag)
+        if endTag != startTag:
+            endNodes = tree.xpath(endTag)
+        else:
+            endNodes = startNodes[:]
+        tuple = (None, None)
+        if startTag == endTag:
+            for elem in tree.iter():
+                if elem in startNodes:
+                    if tuple[0] == None:
+                        tuple = (elem, tuple[1])
+                    else :
+                        tuple = (tuple[0], elem)
+                        vals.append(tuple)
+                        tuple = (elem, None)
+        else:
+            for elem in tree.iter():
+                if elem in startNodes:
+                    tuple = (elem, tuple[1])
+                    
+                elif elem in endNodes and tuple[0] != None:
+                    tuple = (tuple[0], elem)
+                    vals.append(tuple)
+                    tuple = (None, None)       
+        return vals
+    
+    
