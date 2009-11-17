@@ -259,3 +259,53 @@ class TeiExtractor(SimpleExtractor):
         return {txt:{'text' : txt, 'occurences' : 1, 'proxLoc' : [lno]}}
 
 
+class SpanXPathExtractor(SimpleExtractor):
+    
+       
+    def process_xpathResult(self, session, data):
+        new = {}
+        root = None
+        for xp in data:
+            startNode = xp[0]
+            endNode = xp[1]
+            if root == None:
+                for n in startNode.iterancestors():
+                    root = n
+            inrange = False
+            text = []
+            extraSpaceNodes = []
+            for el in root.iter():
+                if el.tag in self.extraSpaceElems:
+                    iter = el.itersiblings()
+                    try:
+                        extraSpaceNodes.append(iter.next())
+                    except:
+                        pass
+                if el == startNode:
+                    inrange = True
+                    if el in extraSpaceNodes:
+                        text.append(' ')
+                    if el.text != None:
+                        text.append(el.text)
+                    if el.tail != None:
+                        text.append(el.tail)
+                elif el == endNode:
+                    inrange = False
+                    break
+                elif inrange == True:
+                    if el in extraSpaceNodes:
+                        text.append(' ')
+                    if el.text != None:
+                        text.append(el.text)
+            txt = ''.join(text)
+            # We MUST turn newlines into space or can't index
+            txt = txt.replace('\n', ' ')
+            txt = txt.replace('\r', ' ')
+            if self.strip:
+                txt = txt.strip()
+            if self.get_setting(session, 'prox', 0):
+                lno = self._getProxLocNode(session, xp[0])
+            else:
+                lno = -1
+            new = self._mergeHash(new, {txt : {'text' : txt, 'occurences' : 1, 'proxLoc' : [lno]}})  
+        return new
