@@ -964,6 +964,8 @@ class BdbStore(SimpleStore):
             return None
 
     def store_metadata(self, session, id, mType, value):
+        if value is None:
+            return
         cxn = self._openDb(session, mType)
         if cxn == None:
             self._initDb(session, mType)
