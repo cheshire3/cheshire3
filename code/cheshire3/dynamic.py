@@ -38,9 +38,11 @@ def importObject(session, objectType):
             try:
                 return importObject(session, "cheshire3.%s" % objectType)
             except: pass
-        if session.logger:
-            session.logger.log_critical(session, "Failed to import '%s'" % modName)
-        raise e
+        try:
+            raise e
+        finally:
+            try: session.logger.log_lvl(session, 50, "Module %s does not define class %s" % (modName, className))
+            except AttributeError: pass # most likely session == None or session.logger == None
 
     # now split and fetch bits
     mods = modName.split('.')
@@ -48,13 +50,15 @@ def importObject(session, objectType):
         try:
             m = getattr(m, mn)
         except AttributeError as e:
-            if objectType[:9] != "cheshire3":
+            if not objectType.startswith("cheshire3"):
                 try:
                     return importObject(session, "cheshire3.%s" % objectType)
                 except: pass
-            if session.logger:
-                session.logger.log_critical(session, "Failed to import %s during %s" % (m, modName))
-            raise e
+            try:
+                raise e
+            finally:
+                try: session.logger.log_lvl(session, 50, "Module %s does not define class %s" % (modName, className))
+                except AttributeError: pass # most likely session == None or session.logger == None
 
     try:
         parentClass = getattr(m, className)
@@ -63,9 +67,12 @@ def importObject(session, objectType):
             try:
                 return importObject(session, "cheshire3.%s" % objectType)
             except: pass
-        if session.logger:
-            session.logger.log_critical(session, "Module %s does not define class %s" % (modName, className))
-        raise e
+        try:
+            raise e
+        finally:
+            try: session.logger.log_lvl(session, 50, "Module %s does not define class %s" % (modName, className))
+            except AttributeError: pass # most likely session == None or session.logger == None
+            
     return parentClass
 
 
@@ -75,6 +82,8 @@ def buildObject(session, objectType, args):
     try:
         return parentClass(session, *args)    
     except:
-        try: session.logger.log_lvl(session, 50, "Failed to create '%s' type of object" % (parentClass))
-        except AttributeError: pass # most likely session == None or session.logger == None
-        raise
+        try:
+            raise
+        finally:
+            try: session.logger.log_lvl(session, 50, "Failed to create object of type: '{0}'".format(parentClass.__name__))
+            except AttributeError: pass # most likely session == None or session.logger == None
