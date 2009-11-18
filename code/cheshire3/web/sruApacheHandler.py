@@ -11,6 +11,7 @@ from cheshire3.baseObjects import Session
 from cheshire3.utils import flattenTexts
 from cheshire3 import cqlParser
 from cheshire3 import internal
+from cheshire3 import exceptions as c3errors
 
 cheshirePath = os.environ.get('C3HOME', '/home/cheshire')
 
@@ -290,9 +291,22 @@ class reqHandler:
             else:
                 maximumRecords = 1
         ttl = opts.get('resultSetTTL', 0)
-        rsn = q.getResultSetId()
 
-        rs = db.search(session, q)        
+        try:
+            rsn = q.getResultSetId()
+        except c3errors.ConfigFileException as e:
+            d = self.diagnostic(10, msg='Query syntax error.')
+            if e.reason == "Zeerex does not have default context set.":
+                d.message = 'Query syntax error. Database has no default context set for indexes. You must supply a context set for each index.'
+            raise d    
+
+        try:
+            rs = db.search(session, q)
+        except c3errors.ObjectDoesNotExistException as e:
+            raise self.diagnostic(16, msg='Unsupported index', details=e.reason)
+        except c3errors.QueryException as e:
+            raise self.diagnostic(24, msg='Unsupported combination of relation and term', details=e.reason)
+                    
         session.currentResultSet = rs
         result.append(elemFac.numberOfRecords(str(len(rs))))
 
