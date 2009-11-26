@@ -282,7 +282,7 @@ class PostgresStore(SimpleStore):
         else:
             id = str(id)
         self._openContainer(session)
-        query = "SELECT %s FROM %s WHERE identifier = %s;" % (mType, self.table, id)
+        query = "SELECT %s FROM %s WHERE identifier = '%s';" % (mType, self.table, id)
         res = self._query(query)
         try:
             data = res.dictresult()[0][mtype]
