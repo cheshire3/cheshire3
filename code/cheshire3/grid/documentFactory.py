@@ -1,5 +1,5 @@
 
-from cheshire3.documentFactory import MultipleDocumentStream, FileDocumentStream
+from cheshire3.documentFactory import RemoteDocumentStream, MultipleDocumentStream, FileDocumentStream
 from cheshire3.document import StringDocument
 from cheshire3.exceptions import ConfigFileException
 from cheshire3.grid.irods_utils import icatValToPy
@@ -51,16 +51,16 @@ class IrodsFileDocumentStream(IrodsStream, FileDocumentStream):
         doc = StringDocument(self.stream.read(), filename=self.stream.getName())
         # attach any iRODS metadata
         umd = self.stream.getUserMetadata()
-	md = {}
+        md = {}
         for x in umd:
             md[x[0]] = icatValToPy(x[1], x[2])
-	if md:
+        if len(md):
             doc.metadata['iRODS'] = md
         if cache == 0:
             yield doc
         elif cache == 2:
             self.documents = [doc]
-    
+
 
 
 class IrodsDirectoryDocumentStream(IrodsStream, MultipleDocumentStream):
@@ -116,6 +116,12 @@ class IrodsDirectoryDocumentStream(IrodsStream, MultipleDocumentStream):
 
             for x in range(upColls):
                 c.upCollection()
+
+
+class SrbDocumentStream(RemoteDocumentStream, MultipleDocumentStream):
+    # SRB://user.domain:pass@host:port/path/to/object?DEFAULTRESOURCE=res
+    pass
+
 
 streamHash = {"idir" : IrodsDirectoryDocumentStream
              ,"ifile": IrodsFileDocumentStream
