@@ -1,3 +1,3 @@
 
-__all__ = ['mpiProtocolHandler', 'pvmProtocolHandler', 'srbDocStream', 'srbIndex', 'srbStore']
+__all__ = ['documentFactory', 'irodsStore', 'mpiProtocolHandler', 'pvmProtocolHandler', 'srbIndex', 'srbStore', 'user']
 
