@@ -25,44 +25,69 @@
 	<!--#config errmsg="<div id="navbar"/>" -->
 	<!--#include virtual="/navbar.ssi" -->
 
-	<div class="fieldset">
+        <div class="fieldset">
             <span class="legend">Description</span>
             <p>
                 Normally a simple wrapper around an XML parser, these objects can be viewed as Record Factories.  
                 They take a Document containing some XML and produce the equivalent Record.
             </p>
-	</div>
+        </div>
 
         <div class="fieldset">
-            <span class="legend">Implementations</span>
+            <span class="legend">Base Implementations</span>
+            <p><em>Module</em>: <strong>cheshire3.parser</strong></p>
+            
             <ul>
-                <li><b>parser.SaxParser</b><br/>
-                Default SAX2 expat based parser</li>
-                <li><b>parser.MinidomParser</b><br/>
-                Python standard library's Minidom parser</li>
-                <li><b>parser.FtParser</b><br/>
-                Fourthought's nonvalidating DOM parser</li>
-                <li><b>parser.LibxmlSaxParser</b><br/>
-                Libxml2 Sax parser</li>
-                <li><b>parser.DTDParser</b><br/>
-                Libxml2 DTD validating parser</li>
-                <li><b>parser.RelaxNGParser</b><br/>
-                Libxml2 RelaxNG validating parser</li>
-                <li><b>parser.LibxmlParser</b><br/>
-                Libxml2 DOM parser</li>
-                <li><b>parser.XmlRecordStoreParser</b><br/>
-                Parser to create SAX records from the default record store implementation</li>
+                <li><b>MinidomParser</b><br/>
+                Python standard library's Minidom parser - creates MinidomRecorda</li>
+                
+                <li><b>SaxParser</b><br/>
+                Default SAX based parser - creates SaxRecords</li>
+                
+                <li><b>StoredSaxParser</b><br/>
+                Parser to create SAX records from a serialization in a recordStore - creates SaxRecords</li>
+                
+                <li><b>LxmlParser</b><br/>
+                Libxml2 DOM parser - creates LxmlRecords</li>
+                
+                <li><b>LxmlHtmlParser</b><br/>
+                Libxml2 DOM parser for HTML (i.e. tolerates imperfectly formed XML e.g. unclosed &lt;br&gt;) - creates LxmlRecords</li>
+                
+                <li><b>PassThroughParser</b><br/>
+                Parser to simply copy the data from a document (e.g. list of sax events or a DOM tree) into an appropriate record object.</li>
+                
+                <li><b>MarcParser</b><br/>
+                Parser for MARC data - creates MarcRecords
+                </li>
+                
+            </ul>
+        </div>
+        
+        <div class="fieldset">
+            <span class="legend">Sub-package Implementations</span>
+            <p><em>Sub-package</em>: <strong>graph</strong><br/>
+               <em>Module</em>: <strong>cheshire3.graph.parser</strong>
+            </p>
+            <ul>
+                <li><strong>RdfGraphParser</strong><br/>
+                  RDF serialization parser - creates GraphRecords.<br/>
+                  Parser must be configured with appropriate format setting, currently supports : 
+                  <ul><li>xml</li><li>trix</li><li>nt</li><li>n3</li><li>rdfa</li></ul>
+                </li>
+                <li><strong>RdfaParser</strong><br/>
+                  RDFa serialization parser that uses pyRdfa - creates GraphRecords.<br/>
+                </li>
             </ul>
         </div>
 
-	<div class="fieldset">
+        <div class="fieldset">
             <span class="legend">API</span>
             <table border="1" cellpadding="3" cellspacing="0" width="100%">
                 <tr><th>Function</th><th>Parameters</th><th>Returns</th><th>Description</th></tr>
                 <tr><td>__init__</td><td>config, parent</td><td>&nbsp;</td><td> </td></tr>
                 <tr><td>process_document</td><td>session, document</td><td>Record</td><td>Return a record after parsing from an XML document</td></tr>
             </table>
-	</div>
+        </div>
 
     </body>
 </html>

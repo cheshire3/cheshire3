@@ -35,31 +35,74 @@
         </div>
 
         <div class="fieldset">
-            <span class="legend">Implementations</span>
+            <span class="legend">Base Implementations</span>
+            <p><em>Module</em>: <strong>cheshire3.transformer</strong></p>
             <ul>
-                <li><b>transformer.XsltTransformer</b><br/>
-                Using a configured XSL stylesheet, transform the record into new XML using Fourthought's processor</li>
-                <li><b>transformer.LibxsltTransformer</b><br/>
-                Using a configured stylesheet, transform the record into new XML using libxml2's processor</li>
-                <li><b>transformer.GRS1Transformer</b><br/>
-                Given a record, step through it and turn it into the equivalent GRS1 tree for Z39.50</li>
-                <li><b>transformer.ChainTransformer</b><br/>
-                Given a record, pass it through any number of configured objects to end up with a document.</li>
-                <li><b>transformer.XmlRecordStoreTransformer</b><br/>
-                Transform a record into a string to store in a RecordStore</li>
-                <li><b>transformer.ClusterExtractionTransformer</b><br/>
-                Extract the configured information to cluster and store it locally for later consumption with a documentGroup. Return an empty record.</li>
+                <li><strong>XmlTransformer</strong><br/>
+                    Transforms the Record into raw XML form. Similar to record.get_xml(session) but returns a Document rather than a string.
+                </li>
+                
+                <li><strong>SaxTransformer</strong><br/>
+                    Returns a Document containing a serialized version of the raw SAX events.
+                </li>
+                
+                <li><strong>LxmlXsltTransformer</strong><br/>
+                    Using a configured stylesheet, transform the record into new XML using the Python binding for libxml2's processor.
+                </li>
+                
+                <!-- NotImplemented ...yet -->
+<!--                <li><strong>LxmlPositionQueryTermHighlightingTransformer</strong><br/>-->
+<!--                    Uses word position from Record's resultSetItem's proximity information to highlight query term matches.-->
+<!--                        <em>Note: this only works when the Record has been retrieved as the result of searching a ProximityIndex , otherwise returns same as XmlTransformer</em> -->
+<!--                </li>-->
+
+                <li><strong>LxmlOffsetQueryTermHighlightingTransformer</strong><br/>
+                    Uses character offsets from Record's resultSetItem's proximity information to highlight query term matches.<br/>
+                    <em>Note: this only works when the Record has been retrieved as the result of searching a ProximityIndex, otherwise returns same as XmlTransformer</em>
+                </li>
+                
+                <li><strong>MarcTransformer</strong><br/>
+                    Converts Records in marc21xml to MARC.
+                </li>
+                
+                <li><strong>WorkflowTransformer</strong>
+                    Uses a Workflow to transform the Record into a Document. This allows a multiple transformers to be chained together in places where it is only possible to configure a single transformer (e.g. inTransformer setting on a RecordStore.)
+                </li>
+                
             </ul>
         </div>
 
-	<div class="fieldset">
+        <div class="fieldset">
+            <span class="legend">Sub-package Implementations</span>
+            
+            <p><em>Sub-package</em>: <strong>graph</strong><br/>
+                <em>Module</em>: <strong>cheshire3.graph.transformer</strong>
+            </p>
+            <ul>
+                <li><strong>RdfXmlTransformer</strong><br/>
+                    Given a GraphRecord, serialize it.
+                    Must be configured with appropriate format setting, currently supports : 
+                  <ul><li>xml</li><li>trix</li><li>nt</li><li>n3</li><li>rdfa</li></ul>
+                </li>
+            </ul>
+            <p><em>Sub-package</em>: <strong>web</strong><br/>
+                <em>Module</em>: <strong>cheshire3.web.transformer</strong>
+            </p>
+            <ul>
+                <li><strong>GRS1Transformer</strong><br/>
+                    Given a record, step through it and turn it into the equivalent GRS1 tree for Z39.50
+                </li>
+            </ul>
+        </div>
+
+        <div class="fieldset">
             <span class="legend">API</span>
             <table border="1" cellpadding="3" cellspacing="0" width="100%">
-		<tr><th>Function</th><th>Parameters</th><th>Returns</th><th>Description</th></tr>
+		        <tr><th>Function</th><th>Parameters</th><th>Returns</th><th>Description</th></tr>
                 <tr><td>__init__</td><td>config, parent</td><td>&nbsp;</td><td> </td></tr>
-                <tr><td>process_record</td><td>session, record</td><td>Document</td><td>Return a document after some transformation of the record</td></tr>
+                <tr><td>process_record</td><td>session, record</td><td>Document</td><td>Return a Document after some transformation of the Record</td></tr>
             </table>
-	</div>
+        </div>
 
     </body>
 </html>
