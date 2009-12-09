@@ -17,7 +17,7 @@
                     <img src="http://www.cheshire3.org/gfx/slant_grey.gif" alt=""/>
 		</td>
 		<td align="center">
-                    <h2>Cheshire3 Objects:  Parser</h2>
+                    <h1>Cheshire3 Objects:  Parser</h1>
 		</td>
             </tr>
 	</table>
@@ -26,7 +26,7 @@
 	<!--#include virtual="/navbar.ssi" -->
 
         <div class="fieldset">
-            <span class="legend">Description</span>
+            <h2 class="legend">Description</h2>
             <p>
                 Normally a simple wrapper around an XML parser, these objects can be viewed as Record Factories.  
                 They take a Document containing some XML and produce the equivalent Record.
@@ -34,18 +34,44 @@
         </div>
 
         <div class="fieldset">
-            <span class="legend">Base Implementations</span>
+            <h2 class="legend">Implementations</h2>
+            <p>The following implementations are pre-configured and ready to use.<br/>
+                They may be used out-of-the-box in configurations for <a href="object_workflow.html">Workflows</a>, or in code by getting the object from a <a href="object_server.html">Server</a>.
+            </p>
+            <ul>
+                <li><strong>defaultParser</strong><br/>
+                    A Parser that uses Python's standard XML Library Minidom parser - creates MinidomRecords.
+                </li>
+                <li><strong>SaxParser</strong><br/>
+                    A Parser to create SaxRecords.
+                </li>
+                <li><strong>NsSaxParser</strong><br/>
+                    A Parser to create SaxRecords, dealing with namespaces.
+                </li>
+                <li><strong>defaultRecordStoreParser</strong><br/>
+                    A Parser to create SaxRecords from the serialization stored in a recordStore.
+                </li>
+                <li><b>LxmlParser</b><br/>
+                    Libxml2 DOM parser - creates LxmlRecords
+                </li>
+                <li><b>LxmlHtmlParser</b><br/>
+                    Libxml2 DOM parser for HTML (i.e. tolerates imperfectly formed XML e.g. unclosed &lt;br&gt;) - creates LxmlRecords
+                </li>
+            </ul>
+        </div>
+        
+        <div class="fieldset">
+            <span class="legend">API</span>
             <p><em>Module</em>: <strong>cheshire3.parser</strong></p>
-            
             <ul>
                 <li><b>MinidomParser</b><br/>
-                Python standard library's Minidom parser - creates MinidomRecorda</li>
+                Python standard library's Minidom parser - creates MinidomRecords</li>
                 
                 <li><b>SaxParser</b><br/>
                 Default SAX based parser - creates SaxRecords</li>
                 
                 <li><b>StoredSaxParser</b><br/>
-                Parser to create SAX records from a serialization in a recordStore - creates SaxRecords</li>
+                Creates SaxRecords from a serialization in a recordStore</li>
                 
                 <li><b>LxmlParser</b><br/>
                 Libxml2 DOM parser - creates LxmlRecords</li>
@@ -59,12 +85,16 @@
                 <li><b>MarcParser</b><br/>
                 Parser for MARC data - creates MarcRecords
                 </li>
-                
             </ul>
-        </div>
-        
-        <div class="fieldset">
-            <span class="legend">Sub-package Implementations</span>
+            <em>Methods</em>:
+            <table border="1" cellpadding="3" cellspacing="0" width="100%">
+                <tr><th>Function</th><th>Parameters</th><th>Returns</th><th>Description</th></tr>
+                <tr><td>__init__</td><td>config, parent</td><td>&nbsp;</td><td> </td></tr>
+                <tr><td>process_document</td><td>session, document</td><td>Record</td><td>Return a record after parsing from an XML document</td></tr>
+            </table>
+            
+            <h3>Sub-Packages</h3>
+            
             <p><em>Sub-package</em>: <strong>graph</strong><br/>
                <em>Module</em>: <strong>cheshire3.graph.parser</strong>
             </p>
@@ -78,15 +108,6 @@
                   RDFa serialization parser that uses pyRdfa - creates GraphRecords.<br/>
                 </li>
             </ul>
-        </div>
-
-        <div class="fieldset">
-            <span class="legend">API</span>
-            <table border="1" cellpadding="3" cellspacing="0" width="100%">
-                <tr><th>Function</th><th>Parameters</th><th>Returns</th><th>Description</th></tr>
-                <tr><td>__init__</td><td>config, parent</td><td>&nbsp;</td><td> </td></tr>
-                <tr><td>process_document</td><td>session, document</td><td>Record</td><td>Return a record after parsing from an XML document</td></tr>
-            </table>
         </div>
 
     </body>

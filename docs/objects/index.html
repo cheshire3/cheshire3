@@ -136,11 +136,26 @@
         </div>      
         
         <div class="fieldset">
+            <span class="legend"><a href="object_selector.html">Selector</a></span>
+            <p>
+                A simple wrapper around an XPath or other means of selecting data from a parsed structure in a <a href="object_record.html">Record</a>.  
+            </p>
+        </div>
+        
+        <div class="fieldset">
             <span class="legend"><a href="object_extractor.html">Extractor</a></span>
             <p>
                 An interface to extract data of a certain format from the results of evaluating an XPath expression on a Record.  
             </p>
-        </div>      
+        </div>
+        
+        <div class="fieldset">
+            <span class="legend"><a href="object_tokenizer.html">Tokenizer</a></span>
+            <p>
+                Takes a string of language and processes it to produce an ordered list of tokens.
+                For example, to turn a string into keywords.  
+            </p>
+        </div>
 
         <div class="fieldset">
             <span class="legend"><a href="object_normalizer.html">Normalizer</a></span>
@@ -148,6 +163,14 @@
                 An interface to turn raw data from one form into another. 
                 Each normalizer does one atomic operation and may be strung together in chains with other objects to create the required end result.
                 For example, to turn a string into its lowercase form, or to turn a string or numerals into a number.
+            </p>
+        </div>
+        
+        <div class="fieldset">
+            <span class="legend"><a href="object_tokenMerger.html">TokenMerger</a></span>
+            <p>
+                Takes an ordered list of tokens (i.e. as produced by a Tokenizer) and merges them into a hash.
+                This might involve merging multiple tokens per key, while maintaining frequency, proximity information etc.
             </p>
         </div>
 

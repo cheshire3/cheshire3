@@ -7,25 +7,25 @@
     </head>
     <body>
         <a name="top"></a>
-	<table cellpadding="0" cellspacing="0" class="maintitle">
-            <tr>
-		<td class="cheshirelogo">
-                    <img src="http://www.cheshire3.org/gfx/c3_white.gif" alt=" c h e s h i r e  |  3 "/>
-		</td>
-		<td>
-                    <img src="http://www.cheshire3.org/gfx/slant_grey.gif" alt=""/>
-		</td>
-		<td align="center">
-			<h2>Cheshire3 Objects:  Extractor</h2>
-		</td>
-            </tr>
-	</table>
+        <table cellpadding="0" cellspacing="0" class="maintitle">
+          <tr>
+            <td class="cheshirelogo">
+                <img src="http://www.cheshire3.org/gfx/c3_white.gif" alt=" c h e s h i r e  |  3 "/>
+			</td>
+			<td>
+                <img src="http://www.cheshire3.org/gfx/slant_grey.gif" alt=""/>
+			</td>
+			<td align="center">
+                <h1>Cheshire3 Objects:  Extractor</h1>
+            </td>
+          </tr>
+        </table>
 
 	<!--#config errmsg="<div id="navbar"/>" -->
 	<!--#include virtual="/navbar.ssi" -->
 
         <div class="fieldset">
-            <span class="legend">Description</span>
+            <h2 class="legend">Description</h2>
             <p>
                 An Extractor is a processing object called by an Index with the value of an evaluated XPath expression or with a string. 
                 Example normalizers might extract keywords from an element or the entire contents thereof as a single string. 
@@ -34,31 +34,70 @@
         </div>
 
         <div class="fieldset">
-            <span class="legend">Implementations</span>
+            <h2 class="legend">Implementations</h2>
+            <p>The following implementations are pre-configured and ready to use by getting the object from a <a href="object_server.html">Server</a>.
+                They may be used out-of-the-box in configurations for <a href="object_index.html">Indexes</a>, <a href="object_workflow.html">Workflows</a> etc.
+            </p>
+            
             <ul>
-                <li><b>extractor.SimpleExtractor</b><br/>
-                Extracts the exact text from the data given to it
-                <li><b>extractor.KeywordExtractor</b><br/>
-                Extracts keywords and their frequency from the data
-                <li><b>extractor.DateExtractor</b><br/>
-                Extracts dates from from the data given
-                <li><b>extractor.ProximityExtractor</b><br/>
-                Extracts the keywords, their frequency and location from the data
-                <li><b>extractor.ExactProximityExtractor</b><br/>
-                Extracts the exact text and location from the data for use with parent element level proximity
+                
+                <li><strong>SimpleExtractor</strong><br/>
+                    Extracts the exact text from the data given to it.<br/>
+                    <em>HINT</em>: if you want to extract keywords rather than the exact text, you should use this first then the next step is to use a <a href="object_tokenizer.html">Tokenizer</a>.
+                </li>
+                
+                <li><strong>ProxExtractor</strong><br/>
+                    Extracts the exact text from the data given to it, and maintains the location of each piece of text within the source record.
+                </li>
+                
+                <li><strong>TeiExtractor</strong><br/>
+                    Extracts text encoded in <abbr title="Text Encoding Initiative">TEI</abbr> from the data given to it.
+                </li>
+                
             </ul>
         </div>
-
+        
         <div class="fieldset">
-            <span class="legend">API</span>
+            <h2 class="legend">API</h2>
+            <p><em>Module</em>: <strong>cheshire3.extractor</strong><br/>
+            <em>Classes</em>:
+            </p>
+            <ul>
+                <li><strong>SimpleExtractor</strong><br/>
+                    Base Extractor class. Extracts the exact text from the data given to it.<br/>
+                </li>
+                
+                <li><strong>TeiExtractor</strong><br/>
+                    Extracts text encoded in <abbr title="Text Encoding Initiative">TEI</abbr> from the data given to it.
+                </li>
+                
+                <li><strong>SpanXPathExtractor</strong><br/>
+                    Extracts the exact text between a pair of XPaths, e.g. milestone tags. This can only be used on the result of a SpanXPathSelector.
+                </li>
+            </ul>
+            <p><em>Methods</em>:</p>
             <table border="1" cellpadding="3" cellspacing="0" width="100%">
                 <tr><th>Function</th><th>Parameters</th><th>Returns</th><th>Description</th></tr>
                 <tr><td>__init__</td><td>config, parent</td><td>&nbsp;</td><td> </td></tr>
-                <tr><td>process_string</td><td>session, string</td><td>hash</td><td>Process a raw string, eg from an attribute value</td></tr>
+                <tr><td>process_string</td><td>session, string</td><td>hash</td><td>Process a raw string, e.g. from an attribute value</td></tr>
                 <tr><td>process_node</td><td>session, domNode</td><td>hash</td><td>Process a DOM node</td></tr>
                 <tr><td>process_eventList</td><td>session, list of SAX events</td><td>hash</td><td>Process a list of SAX events</td></tr>
-
+                <tr><td>process_xpathResult</td><td>session, xpathResult</td><td>hash</td><td>Process the result returned by a configured XPath Selector object (historically Cheshire3 only dealt with XPath selectors, hence the name.) Convenience function to wrap the other process_* functions and do type checking.</td></tr>
             </table>
+            
+            <h3>Sub-Packages</h3>
+            
+            <p>
+                <em>Sub-Package</em>: <strong>graph</strong><br/>
+                <em>Module</em>: <strong>cheshire3.graph.extractor</strong><br/>
+                <em>Classes</em>:
+            </p>
+            <ul>
+                <li><strong>RdfExtractor</strong><br/>
+                    Extracts text from a node of an RDF graph (i.e. the result of a SparqlSelector on a GraphRecord.)
+                </li>
+            </ul>
+            
         </div>
 
     </body>

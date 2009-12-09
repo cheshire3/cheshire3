@@ -16,7 +16,7 @@
                     <img src="http://www.cheshire3.org/gfx/slant_grey.gif" alt=""/>
                 </td>
                 <td align="center">
-                    <h2>Cheshire3 Objects:  Workflow</h2>
+                    <h1>Cheshire3 Objects:  Workflow</h1>
                 </td>
             </tr>
         </table>
@@ -25,7 +25,7 @@
 	<!--#include virtual="/navbar.ssi" -->
 
         <div class="fieldset">
-            <span class="legend">Description</span>
+            <h2 class="legend">Description</h2>
             <p>
                 A workflow is similar to the process chain concept of an index, but behaves at a more global level.
                 It will allow the configuration of a workflow using Cheshire3 objects and simple code to be defined and executed for input objects.
@@ -45,7 +45,7 @@
         </div>
         
         <div class="fieldset">
-            <span class="legend">Configuration</span>
+            <h2 class="legend">Configuration</h2>
             <p>Further documentation is available on configuring Cheshire3 workflows:</p>
             <ul>
                 <li><a href="../build/build_workflow.html">Workflow Configuration</a> -- A tutorial on configuring workflows, with illustrative examples.</li>
@@ -55,22 +55,50 @@
         </div>
 
         <div class="fieldset">
-            <span class="legend">Implementations</span>
-                <ul>
-                    <li>
-                        <b>workflow.SimpleWorkflow</b><br/>
-                        A basic workflow implementation
-                    </li>
-                    <li>
-                        <b>workflow.CachingWorkflow</b><br/>
-                        Slightly faster workflow implementation that caches the objects it uses.
-                        workflow.load_cache(session, newDatabaseObject) must be called if the workflow is to be used in another database.
-                    </li>
-                </ul>
+            <h2 class="legend">Implementations</h2>
+            <p>The following implementations are pre-configured and ready to use.<br/>
+                They may be used out-of-the-box in configurations for other Workflows, or in code by getting the object from a <a href="object_server.html">Server</a>.<br/>
+                It is also possible to over-ride any or all of these Workflows for a specific application (e.g. by adding additional PreParsers to the PreParserWorkflow) in your database config.
+            </p>
+            <ul>
+                <li><strong>buildIndexWorkflow</strong><br/>
+                    Workflow to process a loaded DocumentFactory.
+			        Before beginning the recordStore and database are prepared for accepting new records. 
+			        Each Document is passed to buildIndexSingleWorkflow in turn.
+			        Afterwards, the recordStore and created indexes are committed to disk.
+                </li>
+                <li><strong>buildIndexSingleWorkflow</strong><br/>
+                    Workflow to take a Document, pass each through PreParserWorkflow.
+			        The resulting Document is Parsed with a SaxParser.
+			        The resulting SaxRecord is stored in the recordStore and then indexed.
+                </li>
+                <li><strong>PreParserWorkflow</strong><br/>
+                    Workflow to take a Document, and process it using SgmlPreParser. Returns the resulting Document.
+                </li>
+            </ul>
+            
         </div>
 
 	<div class="fieldset">
-            <span class="legend">API</span>
+            <h2 class="legend">API</h2>
+            <p>
+                <em>Module</em>: <strong>cheshire3.workflow</strong><br/>
+                <em>Classes</em>:
+            </p>                
+            <ul>
+                <li>
+                    <b>workflow.SimpleWorkflow</b><br/>
+                    A basic workflow implementation
+                </li>
+                <li>
+                    <b>workflow.CachingWorkflow</b><br/>
+                    Slightly faster workflow implementation that caches the objects it uses.
+                    workflow.load_cache(session, newDatabaseObject) must be called if the workflow is to be used in another database.
+                </li>
+            </ul>
+            <p>
+                <em>Methods</em>:
+            </p>
             <table border="1" cellpadding="3" cellspacing="0" width="100%">
               	<tr><th>Function</th><th>Parameters</th><th>Returns</th><th>Description</th></tr>
                 <tr><td>__init__</td><td>domNode, parentObject</td><td>&nbsp;</td><td>The constructer takes a DOM tree containing the configuration of the index and the object which the database should consider as its parent, normally a database.</td></tr>
