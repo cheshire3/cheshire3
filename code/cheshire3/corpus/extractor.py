@@ -4,10 +4,95 @@ from cheshire3.extractor import SimpleExtractor
 import re, types, string, copy
 
 
+class SpanXPathTaggedTermExtractor(SimpleExtractor):
+    
+    """Each term has been tagged in XML already (using the corpus transformer), extract information."""
+    _possibleSettings = {"pos" : {'docs' : "do you want to extract part of speech (should be in attribute p)? 1|0"},
+                         "stem" : {'docs' : "do you want to extract stem (should be in attribute s)? 1|0"},
+                         "offset" : {'docs' : "do you want to extract offset (should be in attribute o)? 1|0"}
+                         }
+    
+    #NB does not implement extraSpaceElements option but rather puts spaces between every tagged term.
+    
+    def __init__(self, session, config, parent):
+        SimpleExtractor.__init__(self, session, config, parent)
+        self.pos = self.get_setting(session, 'pos', 0)
+        self.stem = self.get_setting(session, 'stem', 0)
+        self.offset = self.get_setting(session, 'offset', 0)
+        
+        
+    def _getProxLocNode(self, session, node):
+        try:
+            return int(node.attrib.get('eid'))
+        except:
+            return 0
+        
+        
+    def process_xpathResult(self, session, data):
+        new = {}
+        root = None
+        for xp in data:
+            lastOffset = 10000000000
+            totalOffset = 0
+            thisOffset = 0
+            lastLen = 0
+            startNode = xp[0]
+            endNode = xp[1]
+            if root == None:
+                for n in startNode.iterancestors():
+                    root = n
+            inrange = False
+            text = []
+            for el in root.iter():
+                bits = {}
+                if el.tag != 'txt':
+                    if el == startNode:
+                        inrange = True
+                    elif el == endNode:
+                        inrange = False
+                        break
+                    elif inrange == True and el.tag == 'w':                        
+                        if el.text != None:
+                            attr = el.attrib
+                            bits['text'] = el.text
+                            if self.pos:
+                                bits['pos'] = attr.get('p', '??')
+                            if self.stem:
+                                bits['stem'] = attr.get('s', el.text)
+                            if self.offset:
+                                o = int(attr.get('o', '-1'))           
+                                if o < lastOffset + lastLen:               
+                                    totalOffset += thisOffset
+                                    thisOffset = len(el.xpath('../../txt/text()')[0]) + 1
+                                lastLen = len(el.text)
+                                lastOffset = o
+                                o += totalOffset
+                            
+                                bits['offset'] = o 
+                                
+                        output = [bits['text']]
+                        if self.pos:
+                            output.append('/%s' % bits['pos'])      
+                        if self.stem:
+                            output.append('/%s' % bits['stem'])
+                        if self.offset:
+                            output.append('/%s' % bits['offset'])
+                        text.append(''.join(output))
+                
+            txt = ' '.join(text)    
+            
+            if self.get_setting(session, 'prox', 0):
+                lno = self._getProxLocNode(session, startNode)
+            else:
+                lno = -1
+            new = self._mergeHash(new, {txt : {'text' : txt, 'occurences' : 1, 'proxLoc' : [lno]}})                                 
+        return new        
+    
+    
 
 
 class TaggedTermExtractor(SimpleExtractor):
-    """Each term has been tagged in XML already, extract information."""
+    """Each term has been tagged in XML already (using the corpus transformer), extract information."""
     
     _possibleSettings = {"pos" : {'docs' : "do you want to extract part of speech (should be in attribute p)? 1|0"},
                          "stem" : {'docs' : "do you want to extract stem (should be in attribute s)? 1|0"},
@@ -59,8 +144,7 @@ class TaggedTermExtractor(SimpleExtractor):
                 output.append('/%s' % bits['stem'])
             if self.offset:
                 output.append('/%s' % bits['offset'])
-            texts.append(''.join(output))
-                
+            texts.append(''.join(output))     
         return ' '.join(texts)
 
         
