@@ -166,38 +166,47 @@ class SpanXPathSelector(SimpleSelector):
     def __init__(self, session, config, parent):
         self.sources = []
         SimpleSelector.__init__(self, session, config, parent)
+        if len(self.sources[0]) != 2:
+            raise ConfigFileException('SpanXPathSelector: Two Xpaths must be specified')
+            return
+
         
     def process_record(self, session, record):
         vals = []
-        try:
-            startTag = self.sources[0][0]['string']
-        except:
-            raise ConfigFileException('SpanXPathSelector: No start xpath specified')
-        try:
-            endTag = self.sources[0][1]['string']
-        except:
-            raise ConfigFileException('SpanXPathSelector: No end xpath specified')
+        startPath = self.sources[0][0]['string']
+        endPath = self.sources[0][1]['string']
         tree = etree.fromstring(record.get_xml(session))
-        startNodes = tree.xpath(startTag)
-        if endTag != startTag:
-            endNodes = tree.xpath(endTag)
+        #get all the start nodes
+        startNodes = tree.xpath(startPath)
+        #get all the end nodes or copy the start nodes if the paths are the same
+        if endPath != startPath:
+            endNodes = tree.xpath(endPath)
         else:
             endNodes = startNodes[:]
+        
         tuple = (None, None)
-        if startTag == endTag:
+        #if statement deals with cases where start path and end path are the same
+        if startPath == endPath:
             for elem in tree.iter():
+                # if we hit a node from the start node list
                 if elem in startNodes:
+                    # if we don't have a start node in our tuple put this one in the start node
                     if tuple[0] == None:
                         tuple = (elem, tuple[1])
+                    # if we do have a start node add this as the end node, start a new tuple and add this also as the start node of the next tuple
                     else :
                         tuple = (tuple[0], elem)
                         vals.append(tuple)
                         tuple = (elem, None)
+        #else statement deals with cases where start path and end path are different
         else:
             for elem in tree.iter():
+                #if we hit a node from the start node list put it in first position of the tuple 
+                #NB this will mean that the shortest span is always selected as if another start node is hit before an end node it will overwrite the first one
                 if elem in startNodes:
                     tuple = (elem, tuple[1])
-                    
+                #if we hit an end node and we already have a start node in our tuple add the end node append the tuple to the list and start a new one
+                #NB this works slightly differently from the previous SAX version as that treated the end of the record as an end tag this does not
                 elif elem in endNodes and tuple[0] != None:
                     tuple = (tuple[0], elem)
                     vals.append(tuple)
