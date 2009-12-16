@@ -3,5 +3,3 @@ __package__ = "formats"
 
 __all__ = ['preParser', 'documentFactory']
 
-import cheshire3.formats.documentFactory
-import cheshire3.formats.preParser
