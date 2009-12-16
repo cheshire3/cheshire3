@@ -37,6 +37,11 @@ ParagraphStyle.fontSize = 10
 
 
 class ReportLabAccumulatingStream(AccumulatingStream):
+    
+    def __init__(self, session, stream, format, tagName=None, codec=None, factory=None ):
+              
+        self.data = []
+        AccumulatingStream.__init__(self, session, stream, format, tagName, codec, factory)
 
     def accumulate(self, session, stream, format, tagName=None, codec=None, factory=None ):
         doc = StringDocument(stream.get_xml(session))#get rec into doc
@@ -219,5 +224,6 @@ class ReportLabDocumentFactory(AccumulatingDocumentFactory):
         os.remove('/tmp/temp.pdf')
         yield doc
     
-ReportLabDocumentFactory.register_stream('reportlab', ReportLabAccTransformerStream)    
+ReportLabDocumentFactory.register_stream('reportlabTxr', ReportLabAccTransformerStream)    
+ReportLabDocumentFactory.register_stream('reportlab', ReportLabAccumulatingStream)
     
