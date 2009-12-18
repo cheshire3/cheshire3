@@ -3,6 +3,12 @@ from cheshire3.transformer import Transformer
 from cheshire3.graph.record import GraphRecord
 from cheshire3.document import StringDocument
 
+
+#load json extensions to rdflib
+from rdflib import plugin, syntax
+plugin.register('json', syntax.serializers.Serializer, 'cheshire3.graph.JsonSerializer', 'JsonSerializer')
+plugin.register('pretty-json', syntax.serializers.Serializer, 'cheshire3.graph.JsonSerializer', 'PrettyJsonSerializer')
+
 class RdfXmlTransformer(Transformer):
     # take GraphRecord and serialize to doc
 
