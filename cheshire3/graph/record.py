@@ -7,6 +7,7 @@ class GraphRecord(LxmlRecord):
     graph = None
 
     def __init__(self, data, xml="", docId=None, wordCount=0, byteCount=0):
+        self.dom = None
         self.graph = data
         self.xml = xml
         self.id = docId
@@ -20,7 +21,7 @@ class GraphRecord(LxmlRecord):
         return self.graph
     
     def process_xpath(self, session, q, map={}):
-        if not self.dom:
+        if self.dom is not None:
             self.get_xml(session)
         try:
             return LxmlRecord.process_xpath(self, session, q, map)
