@@ -29,7 +29,10 @@ class GraphRecord(LxmlRecord):
             return self.process_sparql(session, q, map)
             
     def get_xml(self, session):
-        data = self.graph.serialize(format='pretty-xml')
+        if self.xml:
+            data = self.xml
+        else:
+            data = self.graph.serialize(format='pretty-xml')
         if not self.dom:
             try:
                 et = etree.XML(data)
