@@ -1,5 +1,5 @@
 
-from cheshire3.documentFactory import RemoteDocumentStream, MultipleDocumentStream, FileDocumentStream
+from cheshire3.documentFactory import MultipleDocumentStream, FileDocumentStream
 from cheshire3.document import StringDocument
 from cheshire3.exceptions import ConfigFileException
 from cheshire3.grid.irods_utils import icatValToPy
@@ -118,7 +118,7 @@ class IrodsDirectoryDocumentStream(IrodsStream, MultipleDocumentStream):
                 c.upCollection()
 
 
-class SrbDocumentStream(RemoteDocumentStream, MultipleDocumentStream):
+class SrbDocumentStream(MultipleDocumentStream):
     # SRB://user.domain:pass@host:port/path/to/object?DEFAULTRESOURCE=res
     pass
 
