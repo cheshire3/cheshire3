@@ -49,6 +49,7 @@ class BaseDocumentStream:
         self.stream = self.open_stream(stream)
 
     def open_stream(self, stream):
+        u"""Perform any operations needed before the data stream can be read."""
         if hasattr(stream, 'read') and hasattr(stream, 'seek'):
             # is a stream
             self.streamLocation = "UNKNOWN"
@@ -97,14 +98,16 @@ class BaseDocumentStream:
 
 
 class FileDocumentStream(BaseDocumentStream):
+    u"""Reads in a single file."""
+
     def find_documents(self, session, cache=0):
-        # just read in single file
         if cache == 0:
             yield StringDocument(self.stream.read(), filename=self.streamLocation)
         elif cache == 2:
             self.documents = [StringDocument(self.stream.read(), filename=self.streamLocation)]
 
 class TermHashDocumentStream(BaseDocumentStream):
+    u"""Given data consisting of a hash of terms, treat each term as a Document."""
 
     def open_stream(self, stream):
         # is a hash...
@@ -171,7 +174,7 @@ class XmlDocumentStream(BaseDocumentStream):
 
         while True:
             ol = len(line)
-            # if 10000 bytes of garbage between docs, then will exit
+            # if self.maxGarbageBytes (deault 10000) bytes of garbage between docs, then will exit
             if self.tagName or ol < self.maxGarbageBytes:
                 line += self.stream.read(1024)
             else:
@@ -321,6 +324,8 @@ class MultipleDocumentStream(BaseDocumentStream):
                 
         mimetype = mimetypes.guess_type(name, 0)
         if (mimetype[0] in ['text/sgml', 'text/xml', 'application/sgml', 'application/xml']):
+            if mimetype[1] == 'gzip':
+                raise NotImplementedError('XML files compressed using gzip are not yet supported. You could try using zip.')
             trip = ('stream', XmlDocumentStream, 'xml')
         elif (mimetype[0] == 'application/x-tar'):
             trip = ('stream', TarDocumentStream, 'tar')
@@ -403,6 +408,7 @@ class DirectoryDocumentStream(MultipleDocumentStream):
 
 
 class TarDocumentStream(MultipleDocumentStream):
+    u"""Unpacks a tar file."""
 
     def open_stream(self, stream):
         if self.format in ['tar.gz', 'tgz']:
@@ -441,6 +447,7 @@ class TarDocumentStream(MultipleDocumentStream):
 
 
 class ZipDocumentStream(DirectoryDocumentStream):
+    u"""Unzips a ZIP file."""
     def open_stream(self, stream):
         if hasattr(stream, 'read') or os.path.exists(stream):
             return zipfile.ZipFile(stream, mode="r")
@@ -463,6 +470,7 @@ class ZipDocumentStream(DirectoryDocumentStream):
 # RarDocStream
 
 class LocateDocumentStream(DirectoryDocumentStream):
+    u"""Find files whose name matches the data argument to 'load'."""
     def find_documents(self, session, cache=0):
         fl = getShellResult("locate %s | grep %s$" % (self.stream, self.stream))
         docs = fl.split('\n')
@@ -472,7 +480,7 @@ class LocateDocumentStream(DirectoryDocumentStream):
 
 
 class ClusterDocumentStream(BaseDocumentStream):
-    # Take a raw cluster file, create documents from it.
+    u"""Takes a raw cluster file, create documents from it."""
 
     def open_stream(self, stream):
         # stream must be the filename
@@ -482,6 +490,8 @@ class ClusterDocumentStream(BaseDocumentStream):
         else:
             # FIXME: API: Required None for session to get_path()
             dfp = self.factory.get_path(None, 'defaultPath')
+            # TODO: testme
+            #dfp = self.factory.get_path(self.factory.loadSession, 'defaultPath') ?
             abspath = os.path.join(dfp, stream)
             if os.path.exists(abspath):
                 self.streamLocation = abspath
@@ -555,7 +565,7 @@ class ClusterDocumentStream(BaseDocumentStream):
 
 
 class ComponentDocumentStream(BaseDocumentStream):
-    # Accept a record, and componentize
+    u"""Accepts a record, and componentize."""
     sources = []
 
     def __init__(self, session, stream, format, tagName=None, codec=None, factory=None ):
@@ -706,13 +716,13 @@ class SimpleDocumentFactory(DocumentFactory):
                 elif os.path.isdir(data):
                     format = 'dir'
             else:
-                if data[:6] == "ftp://":
+                if data.startswith("ftp://"):
                     format = 'ftp'
-                elif data[:6] == "srb://":
+                elif data.startswith("srb://"):
                     format = 'srb'
-                elif data[:6] == "irods://":
+                elif data.startswith("irods://", "rods://"):
                     format = 'irods'
-                elif data[:7] == "http://" or data[:8] == "https://":
+                elif data.startswith("http://", "https://"):
                     if hasattr(data, '_formatter_parser'): # rdf URIRef
                         data = str(data)
                     format = "http"
@@ -880,7 +890,8 @@ class AccVectorTransformerStream(AccumulatingStream):
 
 
 class AccumulatingDocumentFactory(SimpleDocumentFactory):
-    """ Will accumulate data across multiple .load() calls to produce 1 or more documents
+    """ Will accumulate data across multiple .load() calls to produce 1 or more documents.
+    
     Just call load() repeatedly before fetching document(s)
     """
 
