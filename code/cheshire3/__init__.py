@@ -18,18 +18,18 @@ home = os.environ.get("C3HOME")
 __name__ = "cheshire3"
 __package__ = "cheshire3"
 
-__all__ = ['database', 'documentFactory', 'document', 'exceptions',
-           'documentStore', 'extractor', 'index', 'indexStore', 'logger',
-           'normalizer', 'objectStore', 'parser', 'preParser',
-           'protocolMap', 'record', 'recordStore', 'resultSet', 'resultSetStore',
-           'server', 'sqlite', 'tokenizer', 'tokenMerger', 'transformer', 'user',
-           'workflow', 'xpathProcessor']
+__all__ = ['cqlParser', 'database', 'document', 'documentFactory', 'documentStore',
+           'exceptions', 'extractor', 'index', 'indexStore', 'internal', 'logger', 
+           'normalizer', 'objectStore', 'parser', 'permissionsHandler', 'preParser', 'protocolMap', 
+           'queryFactory', 'queryStore', 'record', 'recordStore', 'resultSet', 'resultSetStore',
+           'selector', 'server', 'session', 'tokenizer', 'tokenMerger', 'transformer', 'user',
+           'utils', 'workflow', 'xpathProcessor']
 
 
 import cheshire3.internal
 # sps = cheshire3.internal.get_subpackages()
 
-sps= ['web']
+sps= ['web', 'formats']
 
 for sp in sps:
     # call import for on init hooks
