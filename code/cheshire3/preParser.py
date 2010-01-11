@@ -160,7 +160,7 @@ class CmdLinePreParser(TypedPreParser):
                     try:
                         result = fh.read()
                     except:
-                        raise ExternalSystemException('Error from command: %s' % (cmd))
+                        raise ExternalSystemException('Error from command: {0} : {1}'.format(cmd, result))
                     else:
                         fh.close()
                 finally:
@@ -545,12 +545,13 @@ class GunzipPreParser(PreParser):
         return StringDocument(data, self.id, doc.processHistory, parent=doc.parent, filename=doc.filename)
 
 
-class BzipPreParser(PreParser):
+class Bzip2PreParser(PreParser):
+    """Unzip a bz2 zipped document."""
     def process_document(self, session, doc):
-        buffer = StringIO.StringIO(doc.get_raw(session))
-        zfile = bz2.BZ2File(mode = 'rb', fileobj=buffer)
-        data = zfile.read()
+        bzdata = doc.get_raw(session)
+        data = bz2.decompress(bzdata)
         return StringDocument(data, self.id, doc.processHistory, parent=doc.parent, filename=doc.filename)
+
 
 class B64EncodePreParser(PreParser):
     """ Encode document in Base64 """
