@@ -34,6 +34,7 @@ class IrodsStream(object):
         
 
 class IrodsFileDocumentStream(IrodsStream, FileDocumentStream):
+    u"""DocumentStream to load a Document from a file in iRODS."""
 
     def __init__(self, session, stream, format, tagName=None, codec=None, factory=None ):
         
@@ -62,9 +63,8 @@ class IrodsFileDocumentStream(IrodsStream, FileDocumentStream):
             self.documents = [doc]
 
 
-
 class IrodsDirectoryDocumentStream(IrodsStream, MultipleDocumentStream):
-
+    u"""DocumentStream to load Documents from a directory/collection in iRODS."""
 
     def __init__(self, session, stream, format, tagName=None, codec=None, factory=None ):
 
@@ -118,12 +118,80 @@ class IrodsDirectoryDocumentStream(IrodsStream, MultipleDocumentStream):
                 c.upCollection()
 
 
+class IrodsConsumingFileDocumentStream(IrodsFileDocumentStream):
+    u"""DocumentStream to load a Document from a file in iRODS and delete the file afterwards. USE WITH EXTREME CAUTION!"""
+
+    def find_documents(self, session, cache=0):
+	# read in single file
+        doc = StringDocument(self.stream.read(), filename=self.stream.getName())
+        # attach any iRODS metadata
+        umd = self.stream.getUserMetadata()
+	md = {}
+        for x in umd:
+            md[x[0]] = icatValToPy(x[1], x[2])
+	if md:
+            doc.metadata['iRODS'] = md
+        # delete the file
+        self.stream.close()
+        self.stream.delete()
+        if cache == 0:
+            yield doc
+        elif cache == 2:
+            self.documents = [doc]
+
+
+class IrodsConsumingDirectoryDocumentStream(IrodsDirectoryDocumentStream):
+    u"""DocumentStream to load Documents from a directory/collection in iRODS consuming (deleting) the files as it does so. USE WITH EXTREME CAUTION!"""
+
+    def find_documents(self, session, cache=0):
+        # given a location in irods, go there and descend looking for files
+        c = self.coll
+        files = c.getObjects()
+        files.sort()
+        for i, f in enumerate(self._processFiles(session, [x[0] for x in files])):
+            md = {}
+            for x in irods.getFileUserMetadata(self.cxn, '{0}/{1}'.format(c.getCollName(), f.filename)):
+                md[x[0]] = icatValToPy(x[1], x[2])
+            if len(md):
+                f.metadata['iRODS'] = md
+            c.delete(files[i][0], files[i][1]) # delete the file on its resource
+            yield f
+
+        dirs = c.getSubCollections()
+        while dirs:
+            d = dirs.pop(0)
+            upColls = 0
+            for dx in d.split('/'):
+                c.openCollection(dx)
+                upColls += 1
+
+            files = c.getObjects()
+            files.sort()
+            for i, f in enumerate(self._processFiles(session, [x[0] for x in files])):
+                md = {}
+                for x in irods.getFileUserMetadata(self.cxn, '{0}/{1}'.format(c.getCollName(), f.filename)):
+                    md[x[0]] = icatValToPy(x[1], x[2])
+                if len(md):
+                    f.metadata['iRODS'] = md
+                c.delete(files[i][0], files[i][1]) # delete the file on its resource
+                yield f
+
+            ndirs = c.getSubCollections()
+            
+            dirs.extend(["%s/%s" % (d, x) for x in ndirs])
+
+            for x in range(upColls):
+                c.upCollection()
+
+
 class SrbDocumentStream(MultipleDocumentStream):
     # SRB://user.domain:pass@host:port/path/to/object?DEFAULTRESOURCE=res
     pass
 
 
-streamHash = {"idir" : IrodsDirectoryDocumentStream
-             ,"ifile": IrodsFileDocumentStream
+streamHash = {"ifile": IrodsFileDocumentStream
+             ,"idir" : IrodsDirectoryDocumentStream
+             ,"ifile-": IrodsConsumingFileDocumentStream
+             ,"idir-": IrodsConsumingDirectoryDocumentStream
              }
 
