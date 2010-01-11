@@ -255,7 +255,7 @@ class IrodsStore(SimpleStore):
         return self.coll.getLenObjects()
 
     def delete_data(self, session, id):
-        # delete data stored against id
+        """ Delete data stored against id. """
         if (self.idNormalizer != None):
             id = self.idNormalizer.process_string(session, id)
         elif type(id) == unicode:
@@ -299,7 +299,7 @@ class IrodsStore(SimpleStore):
         return None
 
     def fetch_data(self, session, id):
-        # return data stored against id
+        """ Fetch and return data stored against id. """
         if (self.idNormalizer != None):
             id = self.idNormalizer.process_string(session, id)
         elif type(id) == unicode:
@@ -400,6 +400,7 @@ class IrodsStore(SimpleStore):
         return None
 
     def replicate_data(self, session, id, location):
+        """ Replicate data object across known iRODS Storage Resources. """
 
         if not self.resourceHash.has_key(location):
             raise ObjectDoesNotExistException('Unknown Storage Resource: %s' % location)
@@ -436,7 +437,7 @@ class IrodsStore(SimpleStore):
         return None
 
     def fetch_metadata(self, session, id, mType):
-        # open irodsFile and get metadata from it
+        """ Open irodsFile and get metadata from it. """
 
         if (self.idNormalizer != None):
             id = self.idNormalizer.process_string(session, id)
@@ -463,19 +464,20 @@ class IrodsStore(SimpleStore):
             id = id.replace('/', '--')
 
         collPath = self.coll.getCollName()
+        # this is much more efficient than getting the file as it's simply interacting with iCAT
         umd = irods.getFileUserMetadata(self.cxn, '{0}/{1}'.format(collPath, id))
 
-        #if self.resource:
-        #    f = self.coll.open(id, rescName=self.resource)
-        #else:
-        #    f = self.coll.open(id)
-	
-	#if not f:
-	#    for x in range(upwards):
-        #        self.coll.upCollection()
-        #    return None
-	#umd = f.getUserMetadata()
-	#f.close()
+#        if self.resource:
+#            f = self.coll.open(id, rescName=self.resource)
+#        else:
+#            f = self.coll.open(id)
+#	
+#        if not f:
+#            for x in range(upwards):
+#                self.coll.upCollection()
+#                return None
+#        umd = f.getUserMetadata()
+#        f.close()
 
         val = None
         for x in umd:
@@ -489,7 +491,7 @@ class IrodsStore(SimpleStore):
 
         
     def store_metadata(self, session, id, mType, value):
-        # store value for mType metadata against id
+        """ Store value for mType metadata against id. """
 
         if (self.idNormalizer != None):
             id = self.idNormalizer.process_string(session, id)
@@ -499,7 +501,7 @@ class IrodsStore(SimpleStore):
             id = str(id)
 
         self._open(session)
-	upwards = 0
+        upwards = 0
         if id.find('/') > -1 and self.allowStoreSubDirs:
             idp = id.split('/')
             id = idp.pop() # file is final part
@@ -514,29 +516,29 @@ class IrodsStore(SimpleStore):
         else:
             id = id.replace('/', '--')
 
-	collPath = self.coll.getCollName()
-	irods.addFileUserMetadata(self.cxn, '{0}/{1}'.format(collPath, id), mType, *pyValToIcat(value))
+        collPath = self.coll.getCollName()
+        # this is much more efficient than getting the file as it's simply interacting with iCAT
+        irods.addFileUserMetadata(self.cxn, '{0}/{1}'.format(collPath, id), mType, *pyValToIcat(value))
 
-#	if self.resource:
-#            f = self.coll.open(id, rescName=self.resource)
-#        else:
-#            f = self.coll.open(id)
-
-#	if not f:
-#	    for x in range(upwards):
-#		self.coll.upCollection()
-#	    return None
-            
+#        if self.resource:
+#                f = self.coll.open(id, rescName=self.resource)
+#            else:
+#                f = self.coll.open(id)
+#
+#        if not f:
+#            for x in range(upwards):
+#        	self.coll.upCollection()
+#            return None
+#
 #        f.addUserMetadata(mType, *pyValToIcat(value))
 #        f.close()
 
-	for x in range(upwards):
+        for x in range(upwards):
             self.coll.upCollection()
 
     
     def clean(self, session):
-        # delete expired data objects
-        # self.cxn.query('select data_name from bla where expire < now')
+        """ Delete expired data objects. """
         now = time.time()
         now = pyValToIcat(now)[0]
         matches = self._queryMetadata(session, 'expires', '<', now)
@@ -545,7 +547,7 @@ class IrodsStore(SimpleStore):
         return None
 
     def clear(self, session):
-        # delete all objects
+        """ Delete all objects. """
         self._open(session)
         for o in self.coll.getObjects():
             self.coll.delete(o[0], o[1])
@@ -556,7 +558,9 @@ class IrodsStore(SimpleStore):
         return None
             
     def flush(self, session):
-        # ensure all data is flushed to disk... don't think there's an equivalent
+        """ Ensure all data is flushed to disk.
+        
+        Don't think there's an equivalent for iRODS."""
         return None
 
 
@@ -760,7 +764,7 @@ class IrodsIndexStore(BdbIndexStore):
         self.cxn = None
         self.env = None
 
-	self.host = self.get_setting(session, 'irodsHost', '')
+        self.host = self.get_setting(session, 'irodsHost', '')
         self.port = self.get_setting(session, 'irodsPort', 0)
         self.user = self.get_setting(session, 'irodsUser', '')
         self.zone = self.get_setting(session, 'irodsZone', '')
@@ -783,7 +787,7 @@ class IrodsIndexStore(BdbIndexStore):
             user = self.user if self.user else myEnv.getRodsUserName()
             zone = self.zone if self.zone else myEnv.getRodsZone()
          
-	    conn, errMsg = irods.rcConnect(host, port, user, zone) 
+            conn, errMsg = irods.rcConnect(host, port, user, zone) 
             if self.passwd:
                 status = irods.clientLoginWithPassword(conn, self.passwd)
             else:
