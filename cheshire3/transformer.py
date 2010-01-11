@@ -5,7 +5,7 @@ from cheshire3.document import StringDocument
 from cheshire3.utils import nonTextToken
 from cheshire3.marc_utils import MARC
 
-import os.path, time, re
+import os.path, time, re, bz2
 
 
 class FilepathTransformer(Transformer):
@@ -17,10 +17,19 @@ class FilepathTransformer(Transformer):
 
 # Simplest transformation ...
 class XmlTransformer(Transformer):
-    """ Return the raw XML string of the record """
+    """ Return a Document containing the raw XML string of the record """
     def process_record(self,session, rec):
         return StringDocument(rec.get_xml(session))
 
+
+class Bzip2XmlTransformer(Transformer):
+    """Return a Document containing the raw XML string of the record, compressed using the bzip2 algorithm."""
+    
+    def process_record(self, session, rec):
+        data = rec.get_xml(session)
+        bzdata = bz2.compress(data)
+        return StringDocument(bzdata, self.id)
+    
 
 class SaxTransformer(Transformer):
     def process_record(self, session, rec):
