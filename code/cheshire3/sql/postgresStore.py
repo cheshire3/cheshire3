@@ -337,20 +337,17 @@ class PostgresStore(SimpleStore):
             oid = obj.id
             if (self.idNormalizer):
                 oid = self.idNormalizer.process_string(session, oid)                
-            values.append(oid)
+            values.append(repr(oid))
         for (name, value) in kw.iteritems():
             fields.append(name)
-            values.append(value)
+            if isinstance(value, basestring) and value.find("'") > -1:
+                values.append("E'{0}'".format(value.replace("'", r"\'")))
+            else:
+                values.append(repr(value))
 
-#        fstrs = []
-#        valstrs = []
-#        for x in range(len(fields)):
-#            fstrs.append(fields[x])
-#            valstrs.append(repr(values[x]))
-
-        query = "INSERT INTO %s_%s (%s) VALUES (%s);" % (self.table, relation, ', '.join(fields), ', '.join(map(repr, values)))
+        query = "INSERT INTO %s_%s (%s) VALUES (%s);" % (self.table, relation, ', '.join(fields), ', '.join(values))
         self._query(query)
-
+        
 
     # Also NOT API
     def unlink(self, session, relation, *args, **kw):
