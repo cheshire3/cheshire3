@@ -237,8 +237,9 @@ class PostgresStore(SimpleStore):
 
         try:
             self._query(query)
-        except:
+        except pg.ProgrammingError:
             # Uhhh...
+            print query
             raise
         return None
 
@@ -287,6 +288,8 @@ class PostgresStore(SimpleStore):
         try:
             data = res.dictresult()[0][mtype]
         except:
+            if mtype.endswith(("Count", "Position", "Amount", "Offset")):
+                return 0
             return None
         return data
 
