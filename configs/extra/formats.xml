@@ -11,7 +11,7 @@
         </paths>
         <options>
             <setting type="outMimeType">application/pdf</setting>
-            <setting type="dependencyCommandLine">-headless -accept="socket,port=8100;urp;"</setting>
+            <setting type="dependencyCommandLine">-headless -accept="socket,host=localhost,port=8100;urp;"</setting>
             <setting type="commandLine">~/cheshire3/code/DocumentConverter.py %INDOC% %OUTDOC%</setting>
         </options>
     </subConfig>
