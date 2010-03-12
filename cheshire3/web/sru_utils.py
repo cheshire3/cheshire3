@@ -175,6 +175,7 @@ def fetch_data(myUrl, tries=1, timeout=20):
     oldtimeout = socket.getdefaulttimeout()
     socket.setdefaulttimeout(timeout)
     req = urllib2.Request(url=myUrl)
+    data = None
     for x in range(tries):
         try:
             f = urllib2.urlopen(req)
@@ -188,10 +189,10 @@ def fetch_data(myUrl, tries=1, timeout=20):
         else:
             data = f.read()
             f.close()
-            return data
-        
+            break
+
     socket.setdefaulttimeout(oldtimeout)
-    return None
+    return data
 
 
 objectifier = objectify.makeparser(remove_blank_text=False)
