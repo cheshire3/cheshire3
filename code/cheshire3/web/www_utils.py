@@ -89,6 +89,31 @@ def generate_cqlQuery(form):
 #- end generateCqlQuery()
 
 
+def parse_url(url):
+    u"""Parse a URL to split it into its component parts."""
+    bits = urlparse.urlsplit(url)
+    transport = bits[0]
+    uphp = bits[1].split('@')
+    user = ''
+    passwd = ''
+    if len(uphp) == 2:
+        (user, passwd) = uphp[0].split(':')
+        uphp.pop(0)
+    hp = uphp[0].split(':')
+    host = hp[0]
+    if len(hp) == 2:
+        port = int(hp[1])
+    else:
+        # require subclass to default
+        port = 0
+    # now cwd to the directory, check if last chunk is dir or file
+    (dirname,filename) = os.path.split(bits[2])
+    # params = map(lambda x: x.split('='), bits[3].split('&'))
+    params = [x.split('=') for x in bits[3].split('&')]
+    params = dict(params)
+    anchor = bits[4]
+    return (transport, user, passwd, host, port, dirname, filename, params, anchor)
+
 cgiReplacements = {
 #'%': '%25',
 '+': '%2B',
@@ -152,10 +177,11 @@ def cgi_decode(txt):
 
 #- end cgi_decode
 
-rawSgmlReplacements = {
-    '<': '&lt;',
-    '>': '&gt;'
-    }
+rawSgmlReplacements = {'<': '&lt;'
+                      ,'>': '&gt;'
+                      ,"'": '&apos;'
+                      ,'"': '&quot;'
+                      }
 
 def html_encode(txt):
     global rawSgmlReplacements
@@ -195,6 +221,10 @@ def write_file(fileName, txt):
 
 
 class FileLogger:
+    u"""DEPRECATED: A quick and dirty transaction logger that isn't actually a Cheshire3 object and doesn't match the API.
+    
+    Please use cheshire3.web.logger.TransactionLogger instead.
+    """
     st = None
     llt = None
     fp = None
