@@ -9,6 +9,8 @@ from cheshire3.baseStore import SimpleStore
 from cheshire3.exceptions import *
 from cheshire3.utils import elementType, getFirstData, nonTextToken, flattenTexts
 
+# shouldn't really be here, but haven't had time to investigate yet...
+from cheshire3.resultSet import SimpleResultSetItem
 
 class PostgresIter(object):
     """Iterator for Cheshire3 PostgresStores."""
