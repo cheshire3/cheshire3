@@ -29,7 +29,7 @@ class SimpleLogger(Logger):
             if (not os.path.isabs(fp)):
                 dfp = self.get_path(session, 'defaultPath')
                 fp = os.path.join(dfp, fp)
-            self.fileh = file(fp, 'a')
+            self.fileh = open(fp, 'a')
         self.cacheLen = self.get_setting(session, 'cacheLength', 0)
         self.minLevel = self.get_setting(session, 'minLevel', 0)
         self.defaultLevel = self.get_default(session, 'level', 0)
@@ -77,7 +77,11 @@ class SimpleLogger(Logger):
             ln.append("%s=%s" % (k, self._myRepr(kw[k])))
         atxt = ','.join(ln)
         line.append(atxt)
-        line.append(")")
+        try:
+            line.append(") by user : {0}".format(session.user.username))
+        except AttributeError:
+            # no user
+            line.append(")")
         line = ''.join(line)
         self.log_lvl(session, self.defaultLevel, line)
 
@@ -95,8 +99,8 @@ class FunctionLogger(SimpleLogger):
 
     def __init__(self, session, config, parent):
         # default to caching or ...will... BE... REALLY... SLOW...
-        self.cacheLen = 1000
         SimpleLogger.__init__(self, session, config, parent)
+        self.cacheLen = self.get_setting(session, 'cacheLength', 1000) # still give config ability to over-ride but increase default
 
 
 class LoggingLogger(SimpleLogger):
@@ -117,3 +121,90 @@ class LoggingLogger(SimpleLogger):
     def _logLine(self, lvl, msg, *args, **kw):
         # pass through
         self.logger.log(lvl, msg, *args, **kw)
+
+
+class DateTimeFileLogger(SimpleLogger):
+    """ Logger to write date time rotating log files. """
+    
+    _possibleSettings = {'createSubDirs' : {'docs' :'Should a sub-directory be used for this log', 'type' : int, 'options' : "0|1"}
+                        ,'dateTimeLevel' : {'docs' : 'What level of separation should be used when logging. If createSubDir is set, sub-directories will be created to this level, otherwise separation will be by filename. e.g. separate sub-directory / file for year, month, day etc. ', 'type' : str, 'options' : "year|month|day|hour|minute"}
+                        }
+    
+    dateTimeFormats = ["%Y", "%m", "%d","%H", "%M"]
+    
+    def __init__(self, session, config, parent):
+        Logger.__init__(self, session, config, parent)
+        # generic Logger settings
+        self.cacheLen = self.get_setting(session, 'cacheLength', 100) # default to caching 100 lines per log file when writing in iRODS
+        self.minLevel = self.get_setting(session, 'minLevel', 0)
+        self.defaultLevel = self.get_default(session, 'level', 0)
+        # rotating bits
+        self.createSubDirs = self.get_setting(session, 'createSubDirs', 1)
+        dtlvl = self.get_setting(session, 'dateTimeLevel', '').lower()
+        dtlvls = self._possibleSettings['dateTimeLevel']['options'].split('|')
+        if not dtlvl in dtlvls:
+            raise ConfigFileException("Unrecognized value for 'dateTimeLevel' setting")
+        
+        self.dateTimeLevel = dtlvls.index(dtlvl)+1
+        self.lastLogTime = time.gmtime()
+        self._open(session)
+        
+    def __del__(self):
+        self._close()
+        
+    def __exit__(self):
+        self._close()
+
+    def _open(self, session):
+        # we don't actually want to open a file until there's something to log - just find log base path
+        fp = self.get_path(session, 'filePath', self.id)
+        if (not os.path.isabs(fp)):
+            dfp = self.get_path(session, 'defaultPath')
+            fp = os.path.join(dfp, fp)
+        self.logBasePath = fp
+
+    def _close(self):
+        # flush any remaining log lines
+        self._flush()
+        
+    def _getLogFile(self):
+        fnbits = [self.logBasePath]
+        for dtlvl in range(self.dateTimeLevel):
+            dtb = time.strftime(self.dateTimeFormats[dtlvl], self.lastLogTime)
+            fnbits.append(dtb)
+        if self.createSubDirs:
+            try: os.makedirs(os.path.join(*fnbits[:-1])) # create necessary directory structure
+            except OSError: pass
+            fn = os.path.join(*fnbits) 
+        else:
+            fn = '-'.join(fnbits)
+        return open(fn + '.log', 'a')
+    
+    def _flush(self):
+        """ Flush log lines to file. """
+        if not len(self.lineCache):
+            return
+        
+        fileh = self._getLogFile()
+        try:
+            for l in self.lineCache:
+                if type(l) == unicode:
+                    l = l.encode('utf8')
+                fileh.write(l + "\n")
+        finally:
+            fileh.close()
+        self.lineCache = []
+        
+    def _logLine(self, lvl, line, *args, **kw):
+
+        # templating here etc
+        now = time.gmtime()
+        if (now[:self.dateTimeLevel]) > self.lastLogTime[:self.dateTimeLevel]:
+            self._flush()
+        # set last log time to correct level
+        self.lastLogTime = now
+        lvlstr = ['NOTSET', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'][min(int(lvl/10), 5)]
+        line = "[%s] %s: %s" % (time.strftime("%Y-%m-%d %H:%M:%S", now), lvlstr, line)
+        self.lineCache.append(line)
+        if (len(self.lineCache) >= self.cacheLen):
+            self._flush()
