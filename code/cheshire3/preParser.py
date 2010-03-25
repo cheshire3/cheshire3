@@ -5,8 +5,8 @@ from cheshire3.marc_utils import MARC
 from cheshire3.utils import getShellResult
 from cheshire3.exceptions import ConfigFileException, ExternalSystemException
 
-import re, time, gzip, string, binascii, cStringIO as StringIO
-import bz2, os, time, glob
+import re, time, string, binascii, cStringIO as StringIO
+import os, time, glob
 import httplib, mimetypes, tempfile, hashlib
 from xml.sax.saxutils import escape
 from warnings import warn
@@ -507,50 +507,74 @@ class UnpicklePreParser(PreParser):
         string = pickle.loads(data)
         return StringDocument(string, self.id, doc.processHistory, mimeType='text/pickle', parent=doc.parent, filename=doc.filename)
 
-
-class GzipPreParser(PreParser):
-    """ Gzip a not-gzipped document """
-    inMimeType = ""
-    outMimeType = ""
-
-    def __init__(self, session, config, parent):
-        PreParser.__init__(self, session, config, parent)
-        self.compressLevel = self.get_setting(session, "compressLevel", 1)
+try:
+    import gzip
+except ImportError:
+    # Gracefully degrade functionality
     
-    def process_document(self, session, doc):
-        outDoc = StringIO.StringIO()
-        zfile = gzip.GzipFile(mode = 'wb', fileobj=outDoc, compresslevel=self.compressLevel)
-        zfile.write(doc.get_raw(session))
-        zfile.close()
-        l = outDoc.tell()
-        outDoc.seek(0)
-        data = outDoc.read(l)
-        outDoc.close()
-        return StringDocument(data, self.id, doc.processHistory, parent=doc.parent, filename=doc.filename)
+    class GzipPreParser(PreParser):
+        """ Gzip a not-gzipped document """
+        def __init__(self, session, config, parent):
+            raise NotImplementedError('Compression by gzip is not supported due to a missing library in your operation system.')
+        
+    class GunzipPreParser(PreParser):
+        """ Gunzip a gzipped document """
+        def __init__(self, session, config, parent):
+            raise NotImplementedError('Compression by gzip is not supported due to a missing library in your operation system.')
+        
+else:
+    class GzipPreParser(PreParser):
+        """ Gzip a not-gzipped document """
+        inMimeType = ""
+        outMimeType = ""
+    
+        def __init__(self, session, config, parent):
+            PreParser.__init__(self, session, config, parent)
+            self.compressLevel = self.get_setting(session, "compressLevel", 1)
+        
+        def process_document(self, session, doc):
+            outDoc = StringIO.StringIO()
+            zfile = gzip.GzipFile(mode = 'wb', fileobj=outDoc, compresslevel=self.compressLevel)
+            zfile.write(doc.get_raw(session))
+            zfile.close()
+            l = outDoc.tell()
+            outDoc.seek(0)
+            data = outDoc.read(l)
+            outDoc.close()
+            return StringDocument(data, self.id, doc.processHistory, parent=doc.parent, filename=doc.filename)
 
     
-class GunzipPreParser(PreParser):
-    """ Gunzip a gzipped document """
-    inMimeType = ""
-    outMimeType = ""
+    class GunzipPreParser(PreParser):
+        """ Gunzip a gzipped document """
+        inMimeType = ""
+        outMimeType = ""
+    
+        def process_document(self, session, doc):
+            buff = StringIO.StringIO(doc.get_raw(session))
+            zfile = gzip.GzipFile(mode = 'rb', fileobj=buff)
+            data = zfile.read()
+            zfile.close()
+            buff.close()
+            del zfile
+            del buff
+            return StringDocument(data, self.id, doc.processHistory, parent=doc.parent, filename=doc.filename)
 
-    def process_document(self, session, doc):
-        buff = StringIO.StringIO(doc.get_raw(session))
-        zfile = gzip.GzipFile(mode = 'rb', fileobj=buff)
-        data = zfile.read()
-        zfile.close()
-        buff.close()
-        del zfile
-        del buff
-        return StringDocument(data, self.id, doc.processHistory, parent=doc.parent, filename=doc.filename)
-
-
-class Bzip2PreParser(PreParser):
-    """Unzip a bz2 zipped document."""
-    def process_document(self, session, doc):
-        bzdata = doc.get_raw(session)
-        data = bz2.decompress(bzdata)
-        return StringDocument(data, self.id, doc.processHistory, parent=doc.parent, filename=doc.filename)
+try:
+    import bz2
+except ImportError:
+    # Gracefully degrade functionality
+    
+    class Bzip2PreParser(PreParser):
+        def __init__(self, session, config, parent):
+            raise NotImplementedError('Decompression by bzip2 is not supported due to a missing library in your operation system.')
+        
+else:
+    class Bzip2PreParser(PreParser):
+        """Unzip a bz2 zipped document."""
+        def process_document(self, session, doc):
+            bzdata = doc.get_raw(session)
+            data = bz2.decompress(bzdata)
+            return StringDocument(data, self.id, doc.processHistory, parent=doc.parent, filename=doc.filename)
 
 
 class B64EncodePreParser(PreParser):
