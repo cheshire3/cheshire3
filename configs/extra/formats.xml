@@ -12,9 +12,52 @@
         <options>
             <setting type="outMimeType">application/pdf</setting>
             <setting type="dependencyCommandLine">-headless -accept="socket,host=localhost,port=8100;urp;"</setting>
-            <setting type="commandLine">~/cheshire3/code/DocumentConverter.py %INDOC% %OUTDOC%</setting>
+            <setting type="commandLine">/home/shaman/cheshire3/code/DocumentConverter.py %INDOC% %OUTDOC%</setting>
         </options>
     </subConfig>
+
+     <subConfig type="preParser" id="OpenOfficeToOdtPreParser">
+        <objectType>cheshire3.formats.preParser.DependentCmdLinePreParser</objectType>
+        <docs>PreParser to start OpenOffice service, then convert documents to Open Document Text Format.</docs>
+        <paths>
+            <path type="dependencyExecutable">soffice</path>
+            <path type="executable">python</path>
+            <path type="executablePath">/opt/openoffice.org3/program</path>
+        </paths>
+        <options>
+            <setting type="outMimeType">application/vnd.oasis.opendocument.text</setting>
+            <setting type="dependencyCommandLine">-headless -accept="socket,port=8100;urp;"</setting>
+            <setting type="commandLine">/home/shaman/cheshire3/code/DocumentConverter.py %INDOC% %OUTDOC%</setting>
+        </options>
+    </subConfig>
+
+    <subConfig type="workflow" id="msOfficeDocWorkflow">
+        <objectType>cheshire3.workflow.CachingWorkflow</objectType>
+        <workflow>
+            <!-- input type:  document -->
+            <object type="preParser" ref="OpenOfficeToPdfPreParser"/>
+            <object type="workflow" ref="pdfDocWorkflow"/>
+        </workflow>
+    </subConfig>
+    
+    <subConfig type="workflow" id="pdfDocWorkflow">
+        <objectType>cheshire3.workflow.CachingWorkflow</objectType>
+        <workflow>
+            <!-- input type:  document -->
+            <object type="preParser" ref="PdfXmlPreParser"/>
+        </workflow>
+    </subConfig>
+
+    <subConfig type="preParser" id="mimeTypeMagicXhtmlPreParser">
+            <objectType>cheshire3.preParser.MagicRedirectPreParser</objectType>
+            <hash>
+                <object mimeType="application/msword" ref="msOfficeDocWorkflow"/>
+		<object mimeType="application/vnd.ms-word" ref="msOfficeDocWorkflow"/>
+                <object mimeType="application/vnd.ms-excel" ref="msOfficeDocWorkflow"/>
+                <object mimeType="application/vnd.ms-powerpoint" ref="msOfficeDocWorkflow"/>
+                <object mimeType="application/pdf" ref="pdfDocWorkflow"/>
+            </hash>
+        </subConfig>
     
     <!-- Metadata Discovery PreParsers -->
 
@@ -78,7 +121,7 @@
         <docs>PreParser that uses The National Archives' DROID software for format identification and inserts its findings into document.metadata. REQUIRES Java!</docs>
         <paths>
             <path type="executable">java -jar droid.jar</path>
-            <path type="workingPath">/home/cheshire/install/DROID 3.0</path>
+            <path type="workingPath">/home/shaman/install/DROID 3.0</path>
         </paths>
         <options>
             <setting type="outMimeType">text/xml</setting>
@@ -128,11 +171,11 @@
         <docs>PreParser that uses the JHOVE for format identification and inserts its findings into document.metadata. REQUIRES Java!</docs>
         <paths>
             <path type="executable">jhove</path>
-            <path type="executablePath">/home/cheshire/install/jhove</path>
+            <path type="executablePath">/home/shaman/install/jhove</path>
         </paths>
         <options>
             <setting type="outMimeType">text/xml</setting>
-            <setting type="commandLine">-c ~/install/jhove/conf/jhove.conf -h XML %INDOC%</setting>
+            <setting type="commandLine">-c /home/shaman/install/jhove/conf/jhove.conf -h XML %INDOC%</setting>
         </options>
         <source id="softwareVersion">
         	<xpath xmlns:j="http://hul.harvard.edu/ois/xml/ns/jhove">/j:jhove/@release</xpath>
