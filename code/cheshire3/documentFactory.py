@@ -720,9 +720,9 @@ class SimpleDocumentFactory(DocumentFactory):
                     format = 'ftp'
                 elif data.startswith("srb://"):
                     format = 'srb'
-                elif data.startswith("irods://", "rods://"):
+                elif data.startswith(("irods://", "rods://")):
                     format = 'irods'
-                elif data.startswith("http://", "https://"):
+                elif data.startswith(("http://", "https://")):
                     if hasattr(data, '_formatter_parser'): # rdf URIRef
                         data = str(data)
                     format = "http"
