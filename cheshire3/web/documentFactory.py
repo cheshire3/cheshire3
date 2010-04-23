@@ -1,6 +1,6 @@
 
 from cheshire3.documentFactory import BaseDocumentStream, AccumulatingStream
-from cheshire3.documentFactory import MultipleDocumentStream
+from cheshire3.documentFactory import MultipleDocumentStream, XmlDocumentStream, TarDocumentStream, ZipDocumentStream, MarcDocumentStream
 from cheshire3.document import StringDocument
 from cheshire3.bootstrap import BSParser
 from cheshire3.utils import elementType, getFirstData, flattenTexts
