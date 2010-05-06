@@ -25,7 +25,7 @@ class GraphRecord(LxmlRecord):
             self.get_xml(session)
         try:
             return LxmlRecord.process_xpath(self, session, q, map)
-        except:
+        except etree.XPathEvalError:
             return self.process_sparql(session, q, map)
             
     def get_xml(self, session):
