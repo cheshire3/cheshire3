@@ -21,7 +21,7 @@ class GraphRecord(LxmlRecord):
         return self.graph
     
     def process_xpath(self, session, q, map={}):
-        if self.dom is not None:
+        if self.dom is None:
             self.get_xml(session)
         try:
             return LxmlRecord.process_xpath(self, session, q, map)
