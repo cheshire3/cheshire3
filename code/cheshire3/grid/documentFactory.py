@@ -52,6 +52,8 @@ class IrodsFileDocumentStream(IrodsStream, FileDocumentStream):
         doc = StringDocument(self.stream.read(), filename=self.stream.getName())
         # attach any iRODS metadata
         umd = self.stream.getUserMetadata()
+	self.stream.close()
+	self.cxn.disconnect()
         md = {}
         for x in umd:
             md[x[0]] = icatValToPy(x[1], x[2])
@@ -111,9 +113,7 @@ class IrodsDirectoryDocumentStream(IrodsStream, MultipleDocumentStream):
                 yield f
 
             ndirs = c.getSubCollections()
-            
             dirs.extend(["%s/%s" % (d, x) for x in ndirs])
-
             for x in range(upColls):
                 c.upCollection()
 
@@ -134,6 +134,7 @@ class IrodsConsumingFileDocumentStream(IrodsFileDocumentStream):
         # delete the file
         self.stream.close()
         self.stream.delete()
+        self.cxn.disconnect()
         if cache == 0:
             yield doc
         elif cache == 2:
