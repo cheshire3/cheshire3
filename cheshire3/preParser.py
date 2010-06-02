@@ -194,8 +194,7 @@ class FileUtilPreParser(TypedPreParser):
         fh.write(doc.get_raw(session))
         fh.close()
         cmd = cmd.replace("%INDOC%", infn)
-        getShellResult(cmd)
-
+        res = getShellResult(cmd)
         mt = res.strip()
 
         if mt.find(';') > -1:
