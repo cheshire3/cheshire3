@@ -13,6 +13,10 @@ class GraphRecord(LxmlRecord):
         self.id = docId
         self.parent = ('','',-1)
         self.context = None
+        if wordCount:
+            self.wordCount = wordCount
+        self.byteCount = byteCount
+            
 
     def process_sparql(self, session, q, map={}):
         return self.graph.query(q, initNs=map)
