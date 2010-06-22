@@ -126,10 +126,10 @@ class IrodsConsumingFileDocumentStream(IrodsFileDocumentStream):
         doc = StringDocument(self.stream.read(), filename=self.stream.getName())
         # attach any iRODS metadata
         umd = self.stream.getUserMetadata()
-	md = {}
+        md = {}
         for x in umd:
             md[x[0]] = icatValToPy(x[1], x[2])
-	if md:
+        if md:
             doc.metadata['iRODS'] = md
         # delete the file
         self.stream.close()
