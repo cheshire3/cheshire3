@@ -1,4 +1,14 @@
 
+import sys
+import os
+import time
+import datetime
+import dateutil
+import irods
+import irods_error
+
+import bsddb as bdb
+
 from cheshire3.configParser import C3Object
 from cheshire3.baseStore import SimpleStore, DeletedObject
 from cheshire3.baseObjects import Database
@@ -6,22 +16,46 @@ from cheshire3.recordStore import SimpleRecordStore, BdbRecordStore
 from cheshire3.documentStore import SimpleDocumentStore
 from cheshire3.objectStore import SimpleObjectStore
 from cheshire3.resultSetStore import SimpleResultSetStore
-
 from cheshire3.documentFactory import MultipleDocumentStream
-
 from cheshire3.exceptions import ObjectAlreadyExistsException, ObjectDoesNotExistException, ConfigFileException
-
-
 from cheshire3.indexStore import BdbIndexStore
 from cheshire3.baseStore import SwitchingBdbConnection
 from cheshire3.grid.irods_utils import icatValToPy, pyValToIcat
 
-import bsddb as bdb
 
-
-import irods, irods_error
-import time, datetime, dateutil
-import sys, os
+def irodsCollectionIterator(coll):
+    """Generator to yield ids and data from files in a collection and its sub-collections."""
+    for subcoll in coll.getSubCollections():
+        coll.openCollection(subcoll)
+        for filename, data in irodsCollectionIterator(coll):
+            yield (subcoll + '/' + filename, data)
+        coll.upCollection()
+        
+    for dataObj in coll.getObjects():
+        # cannot use with statement as IrodsFile objects do not have an __exit__ method...yet
+        fh = coll.open(dataObj[0], "r", dataObj[1])
+        data = fh.read()
+        fh.close()
+        yield (dataObj[0], data)
+        
+        
+def irodsStoreIterator(session, store):
+    """Generator to yield data from an IrodsStore."""
+    for id, data in irodsCollectionIterator(store.coll):
+        # de-normalize id
+        if store.outIdNormalizer is not None:
+            id = store.outIdNormalizer.process_string(session, id)
+        if not store.allowStoreSubDirs:
+            id = id.replace('--', '/')
+        # check for DeletedObject
+        if data and data[:44] == "\0http://www.cheshire3.org/ns/status/DELETED:":
+            data = DeletedObject(self, id, data[41:])
+        # update expires
+        if data and store.expires:
+            expires = store.generate_expires(session)
+            store.store_metadata(session, id, 'expires', expires)
+        # check for data outWorkflow
+        yield (id, data)
 
     
 class IrodsStore(SimpleStore):
@@ -88,6 +122,8 @@ class IrodsStore(SimpleStore):
         self.allowStoreSubDirs = self.get_setting(session, 'allowStoreSubDirs', 1)
         self._open(session)
 
+    def __iter__(self):
+        return irodsStoreIterator(self.session, self)
 
     def get_metadataTypes(self, session):
         return {'totalItems' : long,
@@ -566,26 +602,52 @@ class IrodsStore(SimpleStore):
 
 # hooray for multiple inheritance!
 
+def irodsDataObjStoreIterator(session, store):
+    """Generator to yield data objects (Records/Documents) from an IrodsStore."""
+    for id, data in irodsStoreIterator(session, store):
+        obj = store._process_data(session, id, data)
+        yield obj
+
+
 class IrodsRecordStore(SimpleRecordStore, IrodsStore):
     def __init__(self, session, config, parent):
         IrodsStore.__init__(self, session, config, parent)
         SimpleRecordStore.__init__(self, session, config, parent)
+        
+    def __iter__(self):
+        return irodsDataObjStoreIterator(self.session, self)
+    
 
 class IrodsDocumentStore(SimpleDocumentStore, IrodsStore):
     def __init__(self, session, config, parent):
         IrodsStore.__init__(self, session, config, parent)
         SimpleDocumentStore.__init__(self, session, config, parent)
         
+    def __iter__(self):
+        return irodsDataObjStoreIterator(self.session, self)
+
+
+def irodsObjectStoreIterator(session, store):
+    """Generator to yield Objects (e.g. Users) from an IrodsStore."""
+    for id, data in irodsStoreIterator(session, store):
+        rec = store._process_data(session, id, data)
+        obj = store._processRecord(session, id, rec)
+        yield obj
+
+        
 class IrodsObjectStore(SimpleObjectStore, IrodsStore):
     def __init__(self, session, config, parent):
         IrodsStore.__init__(self, session, config, parent)
         SimpleObjectStore.__init__(self, session, config, parent)
+        
+    def __iter__(self):
+        return irodsObjectStoreIterator(self.session, self)
+
 
 class IrodsResultSetStore(SimpleResultSetStore, IrodsStore):
     def __init__(self, session, config, parent):
         IrodsStore.__init__(self, session, config, parent)
         SimpleResultSetStore.__init__(self, session, config, parent)
-
 
 #-------------------------------
 
