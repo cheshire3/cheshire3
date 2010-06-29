@@ -137,6 +137,14 @@ class LxmlQueryTermHighlightingTransformer(Transformer):
                 
         self.breakElements = self.get_setting(session, 'breakElementsList', '').split(' ')
         
+    def _insertHighlightElement(self, element, located, start, end):
+        text = getattr(element, located)
+        setattr(element, located, text[:start])
+        hel = etree.Element(self.highlightTag)
+        hel.attrib.update(self.attrs)
+        hel.text = text[start:end]
+        hel.tail = text[end:]
+        return hel
 
 class LxmlPositionQueryTermHighlightingTransformer(LxmlQueryTermHighlightingTransformer):
     """Use word position from Record's resultSetItem's proximity information to highlight query term matches.
@@ -155,8 +163,6 @@ class LxmlOffsetQueryTermHighlightingTransformer(LxmlQueryTermHighlightingTransf
         try:
             # try to get database's own version of RegexpFindOffsetTokenizer in case config is non-default
             db = session.server.get_object(session, session.database)
-            self.wordRe = db.get_object(session, 'RegexpFindOffsetTokenizer').regexp
-            del db
         except:
             self.wordRe = re.compile(u"""
               (?xu)                                            #verbose, unicode
@@ -175,23 +181,26 @@ class LxmlOffsetQueryTermHighlightingTransformer(LxmlQueryTermHighlightingTransf
                |(?:[hH]allowe'en|[mM]a'am|[Ii]'m|[fF]o'c's'le|[eE]'en|[sS]'pose)
                |[\w+]+                                         #basic words, including +
               )""")
+        else:
+            self.wordRe = db.get_object(session, 'RegexpFindOffsetTokenizer').regexp
         
-    
     def process_record(self, session, rec):
         recDom = rec.get_dom(session)
         if (rec.resultSetItem is not None) and (rec.resultSetItem.proxInfo is not None) and (len(rec.resultSetItem.proxInfo) > 0):
             # munge proxInfo into more useable form
             proxInfo = rec.resultSetItem.proxInfo
             proxInfo2 = set()
-            for pig in proxInfo:                               # for each group of proxInfo (i.e. from each query clause)
-                for pi in pig:                                 # for each item of proxInfo: [nodeIdx, wordIdx, offset, termId(?)] NB termId from spoke indexes so useless to us :( 
-                    proxInfo2.add('%d %d' % (pi[0], pi[2]))    # values must be strings for sets to work
-
-            
+            # for each group of proxInfo (i.e. from each query clause)
+            for pig in proxInfo:
+                # for each item of proxInfo: [nodeIdx, wordIdx, offset, termId(?)] NB termId from spoke indexes so useless to us :(
+                for pi in pig:
+                    # values must be strings for sets to work
+                    proxInfo2.add('%d %d' % (pi[0], pi[2]))
             proxInfo = [map(int, pis.split(' ')) for pis in proxInfo2]
             nodeIdxs = []
             wordOffsets = []
-            for x in sorted(proxInfo, reverse=True):            # sort proxInfo so that nodeIdxs are sorted descending (so that offsets don't get upset when modifying text)
+            # sort proxInfo so that nodeIdxs are sorted descending (so that offsets don't get upset when modifying text)
+            for x in sorted(proxInfo, reverse=True):
                 nodeIdxs.append(x[0])
                 wordOffsets.append(x[1])
 
@@ -203,62 +212,60 @@ class LxmlOffsetQueryTermHighlightingTransformer(LxmlQueryTermHighlightingTransf
                     break
                 if x in nodeIdxs:
                     xps[x] = tree.getpath(n)
-            
+            xpathfn = recDom.xpath
             for ni, offset in zip(nodeIdxs, wordOffsets):
-                wordCount = 0
-                if not ni in xps:
-                    continue # no XPath - must be below dsc
-                
-                el = recDom.xpath(xps[ni])[0]
+                try:
+                    xp = xps[ni]
+                except KeyError:
+                    continue # no XPath
+                el = xpathfn(xps[ni])[0]
                 located = None
-                for ci, c in enumerate(el.iter(tag=etree.Element)): #ignore comments processing instructions etc.
+                for ci, c in enumerate(el.iter()): # ignore comments processing instructions etc.
                     if c.text:
                         text = c.text
                         if len(c.text) > offset:
                             start = offset
-                            try: end = self.wordRe.search(text, start).end()
-                            except: pass # well I still haven't found, what I'm looking for!
+                            try:
+                                end = self.wordRe.search(text, start).end()
+                            except:
+                                pass # well I still... haven't found... what I'm looking for!
                             else:
-                                if end == -1:
-                                    end = len(text)
                                 located = 'text'
-                                hel = etree.Element(self.highlightTag)
-                                hel.attrib.update(self.attrs)
-                                if c.tag == hel.tag and c.attrib == hel.attrib:
-                                    break
-                                c.text = text[:start]
-                                hel.text = text[start:end]
-                                hel.tail = text[end:]
-                                c.insert(0, hel)
+                                if not (c.tag == self.highlightTag):
+                                    hel = self._insertHighlightElement(c, located, start, end)
+                                    try:
+                                        c.insert(0, hel)
+                                    except TypeError:
+                                        # immutable element (comment!?)
+                                        break
                                 break
                         else:
                             # adjust offset accordingly
                             offset -= len(text)
-                        
                     if c != el and c.tail and located is None:
                         text = c.tail
                         if len(c.tail) > offset:
                             start = offset
-                            try: end = self.wordRe.search(text, start).end()
-                            except: pass # well I still haven't found, what I'm looking for!
+                            try:
+                                end = self.wordRe.search(text, start).end()
+                            except:
+                                pass # well I still haven't found, what I'm looking for!
                             else:
                                 if end == -1:
                                     end = len(text)
                                 located = 'tail'
-                                hel = etree.Element(self.highlightTag)
-                                hel.attrib.update(self.attrs)
-                                if c.tag == hel.tag and c.attrib == hel.attrib:
-                                    break
-                                c.tail = text[:start]
-                                hel.text = text[start:end]
-                                hel.tail = text[end:]
-                                p = c.getparent()
-                                p.insert(ci, hel)
+                                if not (c.tag == self.highlightTag):
+                                    hel = self._insertHighlightElement(c, located, start, end)
+                                    p = c.getparent()
+                                    try:
+                                        p.insert(ci, hel)
+                                    except TypeError:
+                                        # immutable element (comment!?)
+                                        break
                                 break
                         else:
                             # adjust offset accordingly
                             offset -= len(text)
-        
         return StringDocument(etree.tostring(recDom))
 
 
