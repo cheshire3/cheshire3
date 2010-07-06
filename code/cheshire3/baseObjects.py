@@ -236,8 +236,9 @@ class Extractor(C3Object):
         raise(NotImplementedError)
 
 class Tokenizer(C3Object):
-    # take a string of language, return ordered list of tokens
-    # string is actually in hash, as per output from Extractor
+    u"""A Tokenizer takes a string of language and processes it to produce an ordered list of tokens.
+    
+    String is commonly in hash, as per output from Extractor"""
 
     def process_string(self, session, data):
         raise NotImplementedError
@@ -245,8 +246,8 @@ class Tokenizer(C3Object):
         raise NotImplementedError
 
 class TokenMerger(C3Object):
-    # take an ordered list of tokens, merge into a hash
-    # Maybe combining multiple tokens per key
+    u"""A TokenMerger takes an ordered list of tokens (i.e. as produced by a Tokenizer) and merges them into a hash.
+    This might involve merging multiple tokens per key, while maintaining frequency, proximity information etc."""
 
     def process_string(self, session, data):
         raise NotImplementedError
