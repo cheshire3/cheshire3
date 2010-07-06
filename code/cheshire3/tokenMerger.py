@@ -87,9 +87,12 @@ class OffsetProximityTokenMerger(ProximityTokenMerger):
         
 
 class SequenceRangeTokenMerger(SimpleTokenMerger):
-    # assume that we've tokenized a single value into pairs,
-    #   which need to be concatenated into ranges.
-
+    """Merges tokens into a range for use in RangeIndexes.
+    
+    assumes that we've tokenized a single value into pairs,
+    which need to be concatenated into ranges.
+    """
+    
     def process_hash(self, session, data):
         new = {}
         for d, val in data.iteritems():
@@ -98,7 +101,7 @@ class SequenceRangeTokenMerger(SimpleTokenMerger):
                 try:
                     newkey = "%s\t%s" % (l[x], l[x+1])
                 except IndexError:
-                    newkey = "%s\t " % (l[x])
+                    newkey = "{0}\t{0}".format(l[x])
                 if newkey in new:
                     new[newkey]['occurences'] += 1
                 else:
@@ -109,16 +112,12 @@ class SequenceRangeTokenMerger(SimpleTokenMerger):
 
 
 class MinMaxRangeTokenMerger(SimpleTokenMerger):
-    """ Extracts a range for use in RangeIndexes """
+    """Merges tokens into a range for use in RangeIndexes """
     
     def process_hash(self, session, data):
-        # TODO: decide whether to accept more/less than 2 terms
-        # e.g. a b c --> a c OR a b OR a b, b c 
-        # John implements 1st option...
         keys = data.keys()
         if (not len(keys)):
             return {}
-        
         startK = str(min(keys))
         endK = str(max(keys))
         newK = '%s\t%s' % (startK, endK)
@@ -156,7 +155,7 @@ class ReconstructTokenMerger(SimpleTokenMerger):
         kw = {}
         for (k, val) in data.iteritems():
             pl = 'charOffsets' in val
-            # XXX FIX ME for faked offsets
+            # FIXME: XXX for faked offsets 
             pl = 0
             currLen = 0
             new = []
