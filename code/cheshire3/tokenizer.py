@@ -16,6 +16,7 @@ import tokenize, StringIO, keyword
 
 
 class SimpleTokenizer(Tokenizer):
+    
     _possibleSettings = {'char' : {'docs' : 'character to split with, or empty for default of whitespace'}}
 
     def __init__(self, session, config, parent):
@@ -50,6 +51,7 @@ class OffsetTokenizer(Tokenizer):
 
 
 class RegexpSubTokenizer(SimpleTokenizer):
+    u"""A Tokenizer that replaces regular expression matches in the data with a configurable character (defaults to whitespace), then splits the result at whitespace.."""
     # pre = self.get_setting(session, 'regexp', u"((?<!\s)'|[-.,]((?=\s)|$)|(^|(?<=\s))[-.,']|[\".,'-][\".,'-]|[~`!@+=\#\&\^*()\[\]{}\\\|\":;<>?/\u2026\u2013\u2014\u2018\u2019\u201c\u201d])")
 
     _possibleSettings = {'regexp' : {'docs' : ''},
@@ -62,13 +64,12 @@ class RegexpSubTokenizer(SimpleTokenizer):
         self.char = self.get_setting(session, 'char', ' ')
 
     def process_string(self, session, data):
-        # kill unwanted characters
-        txt = self.regexp.sub(self.char, data)
-        return txt.split()
+        txt = self.regexp.sub(self.char, data)  # kill unwanted characters
+        return txt.split()                      # split at whitespace
 
 
 class RegexpSplitTokenizer(SimpleTokenizer):
-    """A tokenizer that simply splits at the regex matches."""
+    """A Tokenizer that simply splits at the regex matches."""
      
     _possibleSettings = {'regexp' : {'docs' : 'Regular expression used to split string'}}
      
@@ -93,17 +94,18 @@ class RegexpFindTokenizer(SimpleTokenizer):
     #  --- IMO should be indexed with leading '
     #  --- eg 'phone == phone
     # 
-    # l'il ? y'all ?  XXX Should come up with better solution
+    # XXX: Should come up with better solution
+    # l'il ? y'all ?  
     # 
 
-    # XXX Decide what to do with 8am 8:00am 1.2M $1.2 $1.2M
+    # XXX: Decide what to do with 8am 8:00am 1.2M $1.2 $1.2M
     # As related to 8 am, 8:00 am, 1.2 Million, $ 1.2, $1.2 Million
     # vs $1200000 vs $ 1200000 vs four million dollars
 
     # Require acronyms to have at least TWO letters Eg U.S not just J.
 
-    _possibleSettings = {'regexp' : {'docs' : ''},
-                         'gaps' : {'docs' : '', 'type' : int, 'options' : "0|1"}
+    _possibleSettings = {'regexp' : {'docs' : 'Regular expression'},
+                         'gaps' : {'docs' : 'Does the regular expression specify the gaps between desired tokens. Defaults to 0 i.e. No, it specifies tokens to keep', 'type' : int, 'options' : "0|1"}
                          }
 
     def __init__(self, session, config, parent):
@@ -131,7 +133,7 @@ class RegexpFindTokenizer(SimpleTokenizer):
 
     def process_string(self, session, data):
         if self.gaps:
-            return [tok for tok in self._regexp.split(text) if tok]
+            return [tok for tok in self.regexp.split(text) if tok]
         else:
             return self.regexp.findall(data)
 
@@ -166,7 +168,7 @@ class RegexpFindPunctuationOffsetTokenizer(RegexpFindOffsetTokenizer):
         return (tokens, positions)
 
 
-# XXX This should be in TextMining, and NLTK should auto install
+# XXX: This should be in TextMining, and NLTK should auto install
 try:
     import nltk
     class PunktWordTokenizer(SimpleTokenizer):
