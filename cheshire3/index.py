@@ -1,7 +1,7 @@
 
 from cheshire3.baseObjects import Index, Document, Session
 from cheshire3.configParser import C3Object
-from cheshire3.utils import elementType, getFirstData, flattenTexts
+from cheshire3.utils import elementType, getFirstData, flattenTexts, vectorSimilarity
 from cheshire3.exceptions import ConfigFileException, QueryException, C3ObjectTypeError
 from cheshire3.record import SaxRecord, DomRecord
 from cheshire3.resultSet import SimpleResultSet, SimpleResultSetItem
@@ -221,12 +221,13 @@ class SimpleIndex(Index):
         self.astxRe = re.compile(r'(?<!\\)\*')
 
         Index.__init__(self, session, config, parent)
+        
         lss = self.get_setting(session, 'longSize')
         if lss:
             self.longStructSize = int(lss)
         else:
-            self.longStructSize = len(struct.pack('L', 1))
-            
+            #self.longStructSize = len(struct.pack('L', 1))
+            self.longStructSize = struct.calcsize('l')
         
         self.recordStoreSizes = self.get_setting(session, 'recordStoreSizes', 0)
         # We need a Store object
@@ -266,7 +267,6 @@ class SimpleIndex(Index):
             term = term[:-1]
         return term + '$'
 
-
     def _processRecord(self, session, record, source):
         (xpath, process, preprocess) = source
         if preprocess:
@@ -280,7 +280,6 @@ class SimpleIndex(Index):
         else:
             processed = process.process(session, record)
         return processed
-
 
     def extract_data(self, session, rec):
         processed = self._processRecord(session, rec, self.sources[u'data'][0])
@@ -362,7 +361,6 @@ class SimpleIndex(Index):
         for s in stores:
             s.begin_indexing(session, self)
 
-
     def commit_indexing(self, session):
         p = self.permissionHandlers.get('info:srw/operation/2/index', None)
         if p:
@@ -377,7 +375,6 @@ class SimpleIndex(Index):
             stores.append(istore)
         for s in stores:
             s.commit_indexing(session, self)
-
 
     def search(self, session, clause, db):
         # Final destination. Process Term.
@@ -405,7 +402,20 @@ class SimpleIndex(Index):
                     rel.value = pm.defaultRelation
                 except AttributeError:
                     pass
-            
+                
+        # while we're looking at the query, check if we should do blind relevance feedback on this clause
+        feedback = 0
+        for m in rel.modifiers:
+            m.type.parent = clause
+            m.type.resolvePrefix()
+            if (m.type.prefixURI.startswith('info:srw/cql-context-set/2/relevance')):
+                if m.type.value == "feedback":
+                    try:
+                        feedback = int(m.value)
+                    except ValueError:
+                        feedback = 1
+        
+        construct_resultSet = self.construct_resultSet
         if (rel.value in ['any', 'all', '=', 'exact', 'window'] and (rel.prefix == 'cql' or rel.prefixURI == 'info:srw/cql-context-set/1/cql-v1.1')):
             for k, qHash in res.iteritems():
                 if k[0] == '^': k = k[1:]      
@@ -441,7 +451,7 @@ class SimpleIndex(Index):
                         pass
                             
                     try:
-                        maskResultSets = [self.construct_resultSet(session, t[1], qHash) for t in termList]
+                        maskResultSets = [construct_resultSet(session, t[1], qHash) for t in termList]
                         maskBase = maskBase.combine(session, maskResultSets, maskClause, db)
                         maskBase.queryTerm = qHash['text']
                         try:
@@ -458,7 +468,7 @@ class SimpleIndex(Index):
                     pass
                 else:
                     term = store.fetch_term(session, self, k)
-                    s = self.construct_resultSet(session, term, qHash)
+                    s = construct_resultSet(session, term, qHash)
                     matches.append(s)
         elif (clause.relation.value in ['>=', '>', '<', '<=']):
             if (len(res) != 1):
@@ -466,13 +476,13 @@ class SimpleIndex(Index):
             else:
                 termList = store.fetch_termList(session, self, res.keys()[0], 0, clause.relation.value)
                 for t in termList:
-                    matches.append(self.construct_resultSet(session, t[1]))
+                    matches.append(construct_resultSet(session, t[1]))
         elif (clause.relation.value == "within"):
             if (len(res) != 2):
                 raise QueryException('%s "%s"' % (clause.relation.toCQL(), clause.term.value), 24)
             else:
                 termList = store.fetch_termList(session, self, res.keys()[0], end=res.keys()[1])
-                matches.extend([self.construct_resultSet(session, t[1]) for t in termList])
+                matches.extend([construct_resultSet(session, t[1]) for t in termList])
 
         else:
             raise QueryException('%s "%s"' % (clause.relation.toCQL(), clause.term.value), 24)
@@ -487,6 +497,10 @@ class SimpleIndex(Index):
                 # can't do prox!
                 clause.relation.value = "all"
             rs = base.combine(session, matches, clause, db)
+                
+            if len(rs) and feedback:
+                rs = self._blindFeedback(session, rs, clause, db)
+                
             return rs
 
     def scan(self, session, clause, nTerms, direction=">=", summary=1):
@@ -521,7 +535,6 @@ class SimpleIndex(Index):
         # list of (term, occs)
         return tList
 
-
     def facets(self, session, resultSet, nTerms=0):
         """ Return a list of terms from this index which occur within the records in resultSet.
         
@@ -555,24 +568,109 @@ class SimpleIndex(Index):
             # (term, (termId, nRecs, freq))
             terms.append((term.decode('utf-8'), (termId, recordFreqs[termId], termFreqs[termId])))        
         return terms
+
+    def searchByExamples(self, session, examples, clause, db, nTerms=20):
+        """ Identify most common terms in examples, create a new resultSet of results that contains any of these terms.
+        
+            examples  := iterable of example objects (e.g. ResultSet, list of Records) to be used to search the index (i.e. by identifying common terms)
+            clause    := CQL clause (if examples is a resultSet this would the query used to generate it) 
+            nTerms    := No. of most common (no. of records) terms to use to create new resultSet
+        """
+        base = self.resultSetClass(session, [], recordStore=self.recordStore)
+        base.recordStoreSizes = self.recordStoreSizes
+        base.index = self
+        try:
+            terms = [t[0] for t in self.facets(session, examples, nTerms)]
+        except:
+            raise ConfigFileException("Index {0.id} does not support searchByExample; requires vector setting.".format(self))
+        # construct a CQL clause for combining the resultSets from the discovered terms
+        # use modifiers from main clause so that we get scores from the same relevance algorithm combined the same way
+        exClause = cql.SearchClause(clause.index, cql.Relation("any", clause.relation.modifiers), cql.Term(" ".join(terms)))
+        construct_rs = self.construct_resultSet
+        store = self.indexStore
+        matches = [construct_rs(session, store.fetch_term(session, self, t), {'text': t, 'proxLoc': [-1], 'occurences': 1}) for t in terms]
+        self.log_debug(session, "searchByExamples ResultSets constructed")
+        
+        rs = base.combine(session, matches, exClause, db)
+        self.log_debug(session, "searchByExamples ResultSets combined")
+        return rs
     
+    def _blindFeedback(self, session, rs, clause, db, nRecs=0, nTerms=20):
+        """ Carry out blind/pseudo relevance feedback on the resultSet, merge and return.
+        
+            rs        := resultSet
+            clause    := CQL clause that generated rs
+            nRecs     := No. of top results to extract terms from
+            nTerms    := No. of top terms to use to expand query
+        """
+        if not rs.relevancy:
+            raise TypeError("Unable to carry out blind relevance feedback on a resultSet with no relevance information")
+        
+        if not nRecs:
+            nRecs = max(int(math.sqrt(len(rs))), 5)
+            
+        self.log_debug(session, "Feedback requested; top {0} Terms from top {1} of {2} Records".format(nTerms, nRecs, len(rs)))
+        # need to sort before slicing to get the 'good' results
+        # use the built-in sorted() to create a sorted iterable slice of top results without changing original
+        # (otherwise combining with new results will end up with duplicates) 
+        try:
+            fbrs = self.searchByExamples(session, sorted(rs, key=lambda x: x.weight)[:nRecs], clause, db, nTerms)
+        except ConfigFileException as e:
+            self.log_warning(session, "Unable to complete blind relevance feedback loop: " + e.reason)
+            return rs 
+        # both resultSets now have scores assigned, so need to combine them using a boolean
+        fooQ = cql.parse(">rel=info:srw/cql-context-set/2/relevance-1.1 {0} or/rel.combine=sum {1}".format(clause.toCQL(), fbrs.query.toCQL()))
+        base = self.resultSetClass(session, [], recordStore=self.recordStore)
+        base.recordStoreSizes = self.recordStoreSizes
+        base.index = self
+        return base.combine(session, [rs, fbrs], fooQ, db)
+    
+    def similarity(self, session, record1, record2):
+        """Calculate and return cosine similarity of vector representations of the two record arguments.
+        
+        >>> self.similarity(session, rec, rec)
+        1.0
+        """
+        if self.get_setting(session, 'vectors', 0):
+            # We can fetch stored vectors
+            vector1 = self.fetch_vector(session, record1)
+            vector2 = self.fetch_vector(session, record2)
+        else:
+            # we could regenerate on the fly...
+            raise NotImplementedError # ...but not yet
+
+        return vectorSimilarity(dict(vector1[2]), dict(vector2[2]))
     
     # Internal API for stores
 
     def serialize_term(self, session, termId, data, nRecs=0, nOccs=0):
+        """Return a string serialization representing the term for storage purposes.
+        
+        termId  := numeric ID of term being serialized
+        data    := list of longs
+        nRecs   := number of Records containing the term, if known
+        nOccs   := total occurrences of the term, if known
+        """
         # in: list of longs
         if not nRecs:
             nRecs = len(data) / 3
+        if not nOccs:
             nOccs = sum(data[2::3])
         fmt = 'lll' * (nRecs + 1)
         params = [fmt, termId, nRecs, nOccs] + data
         try:
             return struct.pack(*params)
         except:
-            self.log_critical(session, 'Error while serializing index terms.\nHINT: are you trying to put proximity information into a SimpleIndex?\n')
+            self.log_critical(session, 'Error while serializing index term.\nHINT: are you trying to put proximity information into a SimpleIndex?\n')
             raise
         
     def deserialize_term(self, session, data, nRecs=-1, prox=1):
+        """Return the internal representation of a term as recreated from a string serialization from storage.
+        
+        data  := string (usually retrieved from indexStore)
+        nRecs := number of Records to deserialize (all by default)
+        prox  := include proximity information 
+        """
         if nRecs == -1:
             fmt = 'lll' * (len(data) / (3 * self.longStructSize))
             return struct.unpack(fmt, data)
@@ -589,11 +687,11 @@ class SimpleIndex(Index):
     def merge_term(self, session, currentData, newData, op="replace", nRecs=0, nOccs=0):
         """Merge (add, replace or delete) newData into currentData and return the result.
         
-        currentData = output of deserialiseTerms
-        newData = flat list
-        op = replace, add, delete
-        nRecs = total records in newData
-        nOccs = total occurrences in newdata
+        currentData := output of deserialiseTerms
+        newData     := flat list
+        op          := replace || add || delete
+        nRecs       := total records in newData
+        nOccs       := total occurrences in newdata
         """
         
 
@@ -637,18 +735,29 @@ class SimpleIndex(Index):
         return merged
 
     def construct_resultSet(self, session, terms, queryHash={}):
+        """Create and return a ResultSet from the internal representations in terms."""
         # in: unpacked
         # out: resultSet
         l = len(terms)        
         ci = self.indexStore.construct_resultSetItem
 
         s = self.resultSetClass(session, [])
-        rsilist = []
-        for t in range(3,len(terms),3):
-            item = ci(session, terms[t], terms[t+1], terms[t+2])
-            item.resultSet = s
-            rsilist.append(item)
-        s.fromList(rsilist)
+#        rsilist = []
+#        for t in range(3,len(terms),3):
+#            item = ci(session, terms[t], terms[t+1], terms[t+2])
+#            item.resultSet = s
+#            rsilist.append(item)
+#            
+#        s.fromList(rsilist)
+        # filter out duplicates
+        rsis = {}
+        for t in range(3,len(terms),3):        
+            if terms[t] not in rsis:
+                item = ci(session, terms[t], terms[t+1], terms[t+2])
+                item.resultSet = s
+                rsis[item.id] = (t, item)
+            
+        s.fromList([r[1] for r in sorted(rsis.values())]) # keep them in order
         s.index = self
         if queryHash:
             s.queryTerm = queryHash['text']
@@ -706,9 +815,69 @@ class SimpleIndex(Index):
     def commit_centralIndexing(self, session, filename=""):
         return self.indexStore.commit_centralIndexing(session, self, filename)
     
+
+class SingleRecordStoreIndex(SimpleIndex):
+    """Even simpler Index implementation that assumes there is only 1 RecordStore.
+    
+    For single RecordStore cases this makes the index smaller and hence faster.
+    Also enables compatibility with basic (non-proximity) Cheshire 2 index files.
+    """
+    
+    def serialize_term(self, session, termId, data, nRecs=0, nOccs=0):
+        """Return a string serialization representing the term for storage purposes.
+        
+        termId  := numeric ID of term being serialized
+        data    := list of longs
+        nRecs   := number of Records containing the term, if known
+        nOccs   := total occurrences of the term, if known
+        """
+        # in: list of longs
+        if not nRecs:
+            nRecs = len(data) / 3
+        if not nOccs:
+            nOccs = sum(data[2::3])
+        # strip out RecordStore pointer
+        del data[1::3]
+        fmt = 'lll' + ('ll' * nRecs)
+        params = [fmt, termId, nRecs, nOccs] + data
+        try:
+            return struct.pack(*params)
+        except:
+            self.log_critical(session, 'Error while serializing index term.\nHINT: are you trying to put proximity information into a SimpleIndex?\n')
+            raise
+        
+    def deserialize_term(self, session, data, nRecs=-1, prox=1):
+        """Return the internal representation of a term as recreated from a string serialization from storage.
+        
+        data  := string (usually retrieved from indexStore)
+        nRecs := number of Records to deserialize (all by default)
+        prox  := include proximity information 
+        """
+        if nRecs == -1:
+            fmt = 'l' * (len(data) / self.longStructSize)
+            out = list(struct.unpack(fmt, data))
+        else:
+            fmt = "lll" + "ll" * nRecs
+            out =  list(struct.unpack(fmt, data[:(3 * self.longStructSize) + (nRecs * 2 * self.longStructSize)]))
+            
+        # insert assumed RecordStore pointers
+        for x in range(4, 3+(3*(len(out[3:])/2)), 3):
+            out.insert(x, 0)
+            
+        return out
+    
+    def calc_sectionOffsets(self, session, start, nRecs, dataLen=0):
+        #tid, recs, occs, (rec, freq)+
+        a = (self.longStructSize * 3) + (self.longStructSize *start * 2)
+        b = (self.longStructSize * 2 * nRecs)
+        return [(a,b)]
+        
         
 class ProximityIndex(SimpleIndex):
-    """ Need to use prox extractor """
+    """ An Index that can store element, word and character offset proximity information for entries enabling phrase, adjacency searches etc.
+    
+    Need to use an Extractor with prox setting and a ProximityTokenMerger
+    """
 
     canExtractSection = 0
     _possibleSettings = {'nProxInts' : {'docs' : "Number of integers per occurence in this index for proximity information, typically 2 (elementId, wordPosition) or 3 (elementId, wordPosition, byteOffset)", 'type' : int}}
@@ -1036,7 +1205,7 @@ class RangeIndex(SimpleIndex):
 
     def search(self, session, clause, db):
         # check if we can just use SimpleIndex.search
-        if (clause.relation.value not in ['encloses', 'within']):
+        if (clause.relation.value not in ['encloses', 'within', '>', '>=', '<', '<=']):
             return SimpleIndex.search(self, session, clause, db)
         else:
             p = self.permissionHandlers.get('info:srw/operation/2/search', None)
@@ -1063,15 +1232,27 @@ class RangeIndex(SimpleIndex):
             keys = res.keys()[0].split('\t', 1)
             startK = keys[0]
             endK = keys[1]
-            if clause.relation.value == 'encloses':
+            rel = clause.relation.value 
+            if rel in ['encloses', '<', '<=']:
                 # RangeExtractor should already return the range in ascending order
                 termList = store.fetch_termList(session, self, startK, relation='<')
-                termList = filter(lambda t: endK < t[0].split('\t', 1)[1], termList)
+                if rel == 'encloses':
+                    # list comprehension is easier to understand
+    #                termList = filter(lambda t: endK < t[0].split('\t', 1)[1], termList)
+                    termList = [t for t in termList if (t[0].split('\t', 1)[1] > endK)]
+                elif rel == '<':
+                    termList = [t for t in termList if (t[0].split('\t', 1)[1] < endK)]
+                elif rel == '<=':
+                    termList = [t for t in termList if (t[0].split('\t', 1)[1] <= endK)]
                 matches.extend([self.construct_resultSet(session, t[1]) for t in termList])
-            elif clause.relation.value == 'within':
+            elif rel == 'within':
                 termList = store.fetch_termList(session, self, startK, end=endK)
-                termList = filter(lambda t: endK > t[0].split('\t', 1)[1], termList)
+                # list comprehension is easier to understand
+#                termList = filter(lambda t: endK > t[0].split('\t', 1)[1], termList)
+                termList = [t for t in termList if (endK > t[0].split('\t', 1)[1])]
                 matches.extend([self.construct_resultSet(session, t[1]) for t in termList])
+            elif rel.startswith('>'):
+                termList = store.fetch_termList(session, self, endK, relation=rel)
             else:
                 # this just SHOULD NOT have happened!...
                 raise QueryException('%s "%s"' % (clause.relation.toCQL(), clause.term.value), 24)
@@ -1580,6 +1761,4 @@ class ClusterExtractionIndex(SimpleIndex):
 
     def delete_record(self, session, rec):
         pass
-    
-    
     
