@@ -134,7 +134,7 @@ def now():
     return time.strftime("%Y-%m-%dT%H:%M:%S")
 
 
-def dotProduct(self, vector1, vector2):
+def dotProduct(vector1, vector2):
     """Calculate  and return the dot product (inner product) of the two vectors (Python dict type).
     
     >>> dotProduct({1:1,2:2,3:3,4:4}, {2:2,3:3})
@@ -148,7 +148,7 @@ def dotProduct(self, vector1, vector2):
     return sum([v * b.get(k, 0) for k,v in a.iteritems()])
     
     
-def euclideanLength(self, vector):
+def euclideanLength(vector):
     """Calculate and return the Euclidean length of a vector (Python dict type).
     
     >>> euclideanLength({})
@@ -161,7 +161,7 @@ def euclideanLength(self, vector):
     return math.sqrt(sum(v**2 for v in vector.itervalues()))
 
 
-def vectorSimilarity(self, vector1, vector2):
+def vectorSimilarity(vector1, vector2):
     """Calculate and return cosine similarity of 2 vectors (Python dict type).
     
     Cosine similarity is the dot product (inner product) of the two vectors divided by the product of the Euclidean lengths of the two vectors.
