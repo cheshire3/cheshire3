@@ -134,6 +134,49 @@ def now():
     return time.strftime("%Y-%m-%dT%H:%M:%S")
 
 
+def dotProduct(self, vector1, vector2):
+    """Calculate  and return the dot product (inner product) of the two vectors (Python dict type).
+    
+    >>> dotProduct({1:1,2:2,3:3,4:4}, {2:2,3:3})
+    13
+    >>> dotProduct({1:1,2:2,3:3,4:4, {2:2.0,3:3.0})
+    13.0
+    """
+    # order doesn't affect result - just need to compare the two
+    # should be faster to iterate over shorter then search in longer dict
+    a,b = sorted([vector1, vector2], key=len)
+    return sum([v * b.get(k, 0) for k,v in a.iteritems()])
+    
+    
+def euclideanLength(self, vector):
+    """Calculate and return the Euclidean length of a vector (Python dict type).
+    
+    >>> euclideanLength({})
+    0.0
+    >>> euclideanLength({1:1})
+    1.0
+    >>> euclideanLength({1:1,2:2})
+    2.2360679774997898
+    """
+    return math.sqrt(sum(v**2 for v in vector.itervalues()))
+
+
+def vectorSimilarity(self, vector1, vector2):
+    """Calculate and return cosine similarity of 2 vectors (Python dict type).
+    
+    Cosine similarity is the dot product (inner product) of the two vectors divided by the product of the Euclidean lengths of the two vectors.
+    
+    >>> vectorSimilarity({1:1,2:2,3:3,4:4}, {2:2,3:3})
+    0.65828058860438332
+    >>> vectorSimilarity({1:1,2:2,3:3,4:4}, {2:2.0,3:3.0})
+    0.65828058860438332
+    """
+    dotprod = dotProduct(vector1, vector2)
+    # calculate Euclidean lengths
+    el1 = euclideanLength(vector1)
+    el2 = euclideanLength(vector2)
+    return float(dotprod) / (el1 * el2)
+
 
 # ------------- Bitfield ---------------
 
