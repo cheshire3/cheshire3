@@ -1,18 +1,19 @@
 
-from cheshire3.configParser import C3Object
-from cheshire3.baseObjects import Parser
-from cheshire3.record import SaxRecord, MinidomRecord
-from cheshire3.record import SaxContentHandler, LxmlRecord
-from cheshire3.utils import flattenTexts, elementType, nonTextToken
+import re
+import cStringIO
+import StringIO
 
-from xml.dom.minidom import parseString as domParseString
 from xml.sax import ContentHandler, make_parser, ErrorHandler
 from xml.sax import parseString as saxParseString
 from xml.sax import InputSource as SaxInput
 from xml.sax.saxutils import escape
+from xml.dom.minidom import parseString as domParseString
 
-import re
-import cStringIO, StringIO
+from cheshire3.configParser import C3Object
+from cheshire3.baseObjects import Parser
+from cheshire3.record import SaxRecord, SaxContentHandler, MinidomRecord
+from cheshire3.record import LxmlRecord
+from cheshire3.utils import flattenTexts, elementType, nonTextToken
 
 # utility function to update data on record from document
 
@@ -102,7 +103,6 @@ class SaxParser(BaseParser):
         return rec
 
 
-
 class StoredSaxParser(BaseParser):
 
     def process_document(self, session, doc):
@@ -118,28 +118,48 @@ class StoredSaxParser(BaseParser):
         rec.elementHash = elemHash
         return rec
 
+
 try:
     from lxml import etree
-
+except:
+    # Define empty classes
+    class LxmlParser(Parser):
+        pass
+else:
     class LxmlParser(BaseParser):
         """ lxml based Parser.  Creates LxmlRecords """
+        
+        _possibleSettings = {'validateDTD': {'docs': "Validate to DTD while parsing (if a DTD was referenced by the Document.)", 'type' : int, 'options' : "0|1"},
+                             'allowNetwork': {'docs': "Allow network access to look up external documents (DTDs etc.)", 'type' : int, 'options' : "0|1"}
+                             }
+        
+        def __init__(self, session, config, parent):
+            BaseParser.__init__(self, session ,config, parent)
+            dtdVal = bool(self.get_setting(session, 'validateDTD', 0))
+            noNetwork = not self.get_setting(session, 'allowNetwork', 0)
+            self.parser = etree.XMLParser(dtd_validation=dtdVal, no_network=noNetwork)
+        
         def process_document(self, session, doc):
-            # input must be stream
+            # input must be string or stream
             data = doc.get_raw(session)
             try:
-                et = etree.XML(data)
+                et = etree.parse(StringIO.StringIO(data), self.parser)
             except AssertionError:
                 data = data.decode('utf8')
-                et = etree.XML(data)
+                et = etree.parse(StringIO.StringIO(data), self.parser)
             rec = LxmlRecord(et)
             rec.byteCount = len(data)
             self._copyData(doc, rec)
             return rec
 
+
     class LxmlSchemaParser(Parser):
         pass
+    
+    
     class LxmlRelaxNGParser(Parser):
         pass
+
 
     class LxmlHtmlParser(BaseParser):
         """ lxml based parser for HTML documents """
@@ -155,11 +175,6 @@ try:
             rec.byteCount = len(data)
             self._copyData(doc, rec)
             return rec
-    
-except:
-    # Define empty classes
-    class LxmlParser(Parser):
-	pass
 
 
 class PassThroughParser(BaseParser):
