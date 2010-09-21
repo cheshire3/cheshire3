@@ -21,32 +21,52 @@ serv = SimpleServer(session, os.path.join(cheshirePath, 'cheshire3', 'configs', 
 
 configs = {}
 
+# determine the root URL of this handler
+
+for configitem in apache.config_tree():
+    if configitem[0] == "DocumentRoot":
+        docRoot = configitem[1].strip("\"'")
+handlerUrl = apache.get_handler_root().replace(docRoot, "")
+
+
 if len(serv.databaseConfigs) < 25:
+    # relatively few dbs - we can safely cache them
     serv._cacheDatabases(session)
     for db in serv.databases.itervalues():
         if db.get_setting(session, 'SRW') or db.get_setting(session, 'srw'):
             db._cacheProtocolMaps(session)
             map = db.protocolMaps.get('http://www.loc.gov/zing/srw/', None)
-            map2 = db.protocolMaps.get('http://www.loc.gov/zing/srw/update/', None)
-            configs[map.databaseUrl] = {'http://www.loc.gov/zing/srw/' : map,
-                                        'http://www.loc.gov/zing/srw/update/' : map2}
+            # check that there's a path and that it can actually be requested from this handler
+            if (map is not None) and \
+               (map.databaseUrl.startswith((handlerUrl + '/', handlerUrl[1:] + '/'))):
+                map2 = db.protocolMaps.get('http://www.loc.gov/zing/srw/update/', None)
+                configs[map.databaseUrl] = {'http://www.loc.gov/zing/srw/' : map,
+                                            'http://www.loc.gov/zing/srw/update/' : map2}
+            elif (map is not None):
+                apache.log_error("Database URL ({0}) does not match handler URL ({1}); will not handle database {{2}}".format(map.databaseUrl, handlerUrl, db.id), apache.APLOG_WARNING)
 else:
+    # too many dbs to cache in memory
     for dbid, conf in serv.databaseConfigs.iteritems():
         db = serv.get_object(session, dbid)
         session.database = dbid
         if db.get_setting(session, 'SRW') or db.get_setting(session, 'srw'):
             db._cacheProtocolMaps(session)
             pmap = db.protocolMaps.get('http://www.loc.gov/zing/srw/', None)
-            if pmap is not None:
-                configs[pmap.databaseUrl] = (dbid,    {'http://www.loc.gov/zing/srw/': pmap.id})
+            if (pmap is not None) and (pmap.databaseUrl.startswith((handlerUrl + '/', handlerUrl[1:] + '/'))):
+                configs[pmap.databaseUrl] = (dbid, {'http://www.loc.gov/zing/srw/': pmap.id})
                 pmap2 = db.protocolMaps.get('http://www.loc.gov/zing/srw/update/', None)
                 if pmap2 is not None:
-                    configs[pmap.databaseUrl][1]['http://www.loc.gov/zing/srw/update/'] = pmap2.id
-    
-        try: del serv.objects[dbid]
-        except KeyError: pass
-    
+                    configs[pmap.databaseUrl][1].update({'http://www.loc.gov/zing/srw/update/': pmap2.id})
+            elif (pmap is not None):
+                apache.log_error("Database URL ({0}) does not match handler URL ({1}); will not handle database {{2}}".format(pmap.databaseUrl, handlerUrl, dbid), apache.APLOG_WARNING)
+        # remove cached db object
+        try:
+            del serv.objects[dbid]
+        except KeyError:
+            pass
+
     del dbid, db, pmap, pmap2
+
     
 protocolMap ={
     'sru' : 'http://www.loc.gov/zing/srw/',
