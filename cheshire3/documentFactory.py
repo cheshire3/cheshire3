@@ -321,21 +321,27 @@ class MultipleDocumentStream(BaseDocumentStream):
             m = self.filterRe.search(name)
             if not m:
                 return None
-                
         mimetype = mimetypes.guess_type(name, 0)
         if (mimetype[0] in ['text/sgml', 'text/xml', 'application/sgml', 'application/xml']):
             if mimetype[1] == 'gzip':
                 raise NotImplementedError('XML files compressed using gzip are not yet supported. You could try using zip.')
             trip = ('stream', XmlDocumentStream, 'xml')
         elif (mimetype[0] == 'application/x-tar'):
-            trip = ('stream', TarDocumentStream, 'tar')
+            if mimetype[1] == 'gzip':
+                trip = ('stream', TarDocumentStream, 'tar.gz')
+            elif mimetype[1] == 'bzip2':
+                trip = ('stream', TarDocumentStream, 'tar.bz2')
+            else:
+                trip = ('stream', TarDocumentStream, 'tar')
         elif (mimetype[0] == 'application/zip'):
             trip = ('stream', ZipDocumentStream, 'zip')
         elif (mimetype[0] == 'application/marc'):
             trip = ('stream', MarcDocumentStream, 'marc')
         else:
-            trip = ('document', None, mimetype[0])
-
+            if self.tagName is not None:
+                trip = ('stream', XmlDocumentStream, 'xml')
+            else:
+                trip = ('document', None, mimetype[0])
         s = self._fetchStream(item)
         if trip[0] == 'stream':
             cls = trip[1]
@@ -387,6 +393,7 @@ class MultipleDocumentStream(BaseDocumentStream):
                     docs.append(obj)
         self.documents = docs
 
+
 class DirectoryDocumentStream(MultipleDocumentStream):
 
     def find_documents(self, session, cache=0):
@@ -417,7 +424,6 @@ class TarDocumentStream(MultipleDocumentStream):
             modeSuf = "bz2"
         else:
             modeSuf = ""
-
         if hasattr(stream, 'read'):
             return tarfile.open(fileobj=stream, mode="r|%s" % modeSuf)
         elif os.path.exists(stream):
@@ -435,6 +441,7 @@ class TarDocumentStream(MultipleDocumentStream):
 
     def _fetchStream(self, path):
         return self.stream.extractfile(path)
+    
     def _fetchName(self, item):
         return item.name
 
@@ -457,6 +464,7 @@ class ZipDocumentStream(DirectoryDocumentStream):
             
     def _fetchStream(self, path):
         return cStringIO.StringIO(self.stream.read(path))
+    
     def _fetchName(self, item):
         return item
 
