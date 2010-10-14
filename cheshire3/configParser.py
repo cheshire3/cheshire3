@@ -130,9 +130,11 @@ class C3Object(object):
 
 
     def _handleConfigNode(self, session, node):
+        """Handle config node when parsed as a DOM (4Suite/minidom/Domlette) - DEPRECATED."""
         pass
 
     def _handleLxmlConfigNode(self, session, node):
+        """Handle config node parsed by lxml.etree."""
         pass
 
     # Return parsed value (eg Int, Bool, String etc)
