@@ -86,6 +86,7 @@ class SimpleNormalizer(Normalizer):
                         
         return kw
 
+
 class DataExistsNormalizer(SimpleNormalizer):
     """ Return '1' if any data exists, otherwise '0' """
 
@@ -94,6 +95,7 @@ class DataExistsNormalizer(SimpleNormalizer):
             return "1"
         else:
             return "0"
+
 
 class TermExistsNormalizer(SimpleNormalizer):
     """ Un-stoplist anonymizing normalizer. Eg for use with data mining """
@@ -145,6 +147,7 @@ class CaseNormalizer(SimpleNormalizer):
     def process_string(self, session, data):
         return data.lower()
 
+
 class ReverseNormalizer(SimpleNormalizer):
     """ Reverse string (eg for left truncation) """
     def process_string(self, session, data):
@@ -161,6 +164,7 @@ class SpaceNormalizer(SimpleNormalizer):
         data = data.strip()
         data = self.whitespace.sub(' ', data)
         return data
+
 
 class ArticleNormalizer(SimpleNormalizer):
     """ Remove leading english articles (the, a, an) """
@@ -197,6 +201,7 @@ class NumericEntityNormalizer(SimpleNormalizer):
 
 # Non useful characters (Stripper)
 # self.asciiRe = re.compile('["%#@~!*{}]')
+
 
 class PointlessCharacterNormalizer(SimpleNormalizer):
     def process_string(self, session, data):
@@ -247,6 +252,7 @@ class RegexpNormalizer(SimpleNormalizer):
                 except:
                     raise
 
+
 class NamedRegexpNormalizer(RegexpNormalizer):
     """ As RegexpNormalizer, but allow named groups and reconstruction of token using a template and those groups. """
 
@@ -265,6 +271,7 @@ class NamedRegexpNormalizer(RegexpNormalizer):
                 return ""
         else:
             return ""
+
 
 class RegexpFilterNormalizer(SimpleNormalizer):
     
@@ -303,6 +310,7 @@ class PossessiveNormalizer(SimpleNormalizer):
         else:
             return data
 
+
 class IntNormalizer(SimpleNormalizer):
     """ Turn a string into an integer """
     def process_string(self, session, data):
@@ -310,7 +318,8 @@ class IntNormalizer(SimpleNormalizer):
             return long(data)
         except:
             return None
-        
+
+
 class StringIntNormalizer(SimpleNormalizer):
     """ Turn an integer into a 0 padded string, 12 chrs long """
     def process_string(self, session, data):
@@ -436,6 +445,7 @@ try:
                 data = unicode(data, 'utf-8')            
             return self.stemmer.stem([data])[0]
 
+
     class PhraseStemNormalizer(SimpleNormalizer):
         """ Use a Snowball stemmer to stem multiple words in a phrase (eg from PosPhraseNormalizer).
         Deprecated: Should instead use normalizer after tokenizer and before tokenMerger.
@@ -461,11 +471,13 @@ try:
             stemmed = self.stemmer.stem(wds)
             return ' '.join(stemmed)
 
+
 except ImportError:
 
     class StemNormalizer(SimpleNormalizer):
         def __init__(self, session, config, parent):
             raise(ConfigFileException('Stemmer library not available'))
+
 
     class PhraseStemNormalizer(SimpleNormalizer):
         def __init__(self, session, config, parent):
@@ -521,10 +533,38 @@ class DateStringNormalizer(SimpleNormalizer):
         # str() defaults to iso8601 format
         return str(data)   
 
+
 class DateYearNormalizer(SimpleNormalizer):
     """ Normalizes a date in ISO8601 format to simply a year - very crude, simply returns first 4 characters """
     def process_string(self, session, data):
         return data[:4]
+
+
+class IdToFilenameNormalizer(SimpleNormalizer):
+    """ Turn an id into a filename with appropriate extension(s).
+    
+    Extension to use is a configurable setting, defaults to .xml
+    """
+    
+    _possibleSettings = {'extension' : {'docs': "File extension (including leading period / stop) to append to given id to produce and appropriate filename. ", 'type': str, 'default': '.xml'}}
+    
+    def __init__(self, session, config, parent):
+        SimpleNormalizer.__init__(self, session, config, parent)
+        self.ext = self.get_setting(session, 'extension', '.xml')
+        
+    def process_string(self, session, data):
+        return str(data) + self.ext
+
+
+class FilenameToIdNormalizer(SimpleNormalizer):
+    """ Turn a filename into an id by stripping off the filename extension.
+    
+    Only strips off the final extension, including the period / stop.
+    """
+    
+    def process_string(self, session, data):
+        id, ext = os.path.splitext(data)
+        return id
 
 
 class RangeNormalizer(SimpleNormalizer):
@@ -587,7 +627,6 @@ class UnicodeCollationNormalizer(SimpleNormalizer):
 class DiacriticNormalizer(SimpleNormalizer):
     """ Slow implementation of Unicode 4.0 character decomposition. Eg that &amp;eacute; -> e """
     map = {}
-
 
     def __init__(self, session, config, parent):
         SimpleNormalizer.__init__(self, session, config, parent)
@@ -1147,5 +1186,4 @@ class DiacriticNormalizer(SimpleNormalizer):
             else:
                 d.append(c)
         return ''.join(d)
-        
 
