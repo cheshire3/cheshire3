@@ -104,6 +104,7 @@ class FunctionLogger(SimpleLogger):
 
 
 class LoggingLogger(SimpleLogger):
+    """Logger to use Python built-in logging module."""
 
     _possibleSettings = {'name' : {'docs' : "The name to call the logger in logging module. Defaults to root logger if not supplied."}}
 
@@ -124,7 +125,7 @@ class LoggingLogger(SimpleLogger):
 
 
 class DateTimeFileLogger(SimpleLogger):
-    """ Logger to write date time rotating log files. """
+    """Logger to write date time rotating log files. """
     
     _possibleSettings = {'createSubDirs' : {'docs' :'Should a sub-directory be used for this log', 'type' : int, 'options' : "0|1"}
                         ,'dateTimeLevel' : {'docs' : 'What level of separation should be used when logging. If createSubDir is set, sub-directories will be created to this level, otherwise separation will be by filename. e.g. separate sub-directory / file for year, month, day etc. ', 'type' : str, 'options' : "year|month|day|hour|minute"}
@@ -143,8 +144,7 @@ class DateTimeFileLogger(SimpleLogger):
         dtlvl = self.get_setting(session, 'dateTimeLevel', '').lower()
         dtlvls = self._possibleSettings['dateTimeLevel']['options'].split('|')
         if not dtlvl in dtlvls:
-            raise ConfigFileException("Unrecognized value for 'dateTimeLevel' setting")
-        
+            raise ConfigFileException("Unrecognized value for 'dateTimeLevel' setting")        
         self.dateTimeLevel = dtlvls.index(dtlvl)+1
         self.lastLogTime = time.gmtime()
         self._open(session)
@@ -196,7 +196,6 @@ class DateTimeFileLogger(SimpleLogger):
         self.lineCache = []
         
     def _logLine(self, lvl, line, *args, **kw):
-
         # templating here etc
         now = time.gmtime()
         if (now[:self.dateTimeLevel]) > self.lastLogTime[:self.dateTimeLevel]:
@@ -208,3 +207,19 @@ class DateTimeFileLogger(SimpleLogger):
         self.lineCache.append(line)
         if (len(self.lineCache) >= self.cacheLen):
             self._flush()
+
+
+class MultipleLogger(SimpleLogger):
+    """Logger to write messages across multiple loggers."""
+    
+    _possiblePaths = {'loggerList' : {'docs' : "Space separated list of Logger identifiers to log to."}}
+    
+    def __init__(self, session, config, parent):
+        Logger.__init__(self, session, config, parent)
+        loggerList = self.get_path(session, 'loggerList')
+        getObj = self.parent.get_object
+        self.loggers = [getObj(session, id) for id in loggerList.split(' ')]
+
+    def log_lvl(self, session, lvl, msg, *args, **kw):
+        for lgr in self.loggers:
+            lgr.log_lvl(session, lvl, msg, *args, **kw)
