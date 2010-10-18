@@ -277,6 +277,14 @@
 	  </options>
 	</subConfig>
 	
+	<subConfig type="tokenizer" id="FuzzyDateTokenizer">
+	  <objectType>cheshire3.tokenizer.DateTokenizer</objectType>
+	  <options>
+	  	<setting type="dayfirst">1</setting>
+	  	<setting type="fuzzy">1</setting>
+	  </options>
+	</subConfig>	
+	
 	<subConfig type="tokenizer" id="PreserveMaskingTokenizer">
 	  <objectType>cheshire3.tokenizer.RegexpSubTokenizer</objectType>
 	  <docs>A keyword tokenizer which doesn't split at CQL masking characters (^*?). Especially useful when tokenizing incoming queries.</docs>
@@ -405,6 +413,17 @@
 	<subConfig type="normalizer" id="DateYearNormalizer">
 	  <objectType>cheshire3.normalizer.DateYearNormalizer</objectType>
 	</subConfig>
+	<subConfig type="normalizer" id="IdToFilenameNormalizer">
+		<docs>Turn an id into a filename with .xml extension.</docs>
+		<objectType>cheshire3.normalizer.IdToFilenameNormalizer</objectType>
+		<options>
+			<setting type="extension">.xml</setting>
+		</options>
+	</subConfig>
+	<subConfig type="normalizer" id="FilenameToIdNormalizer">
+		<docs>Turn a filename into an id by stripping off the filename extension.</docs>
+		<objectType>cheshire3.normalizer.FilenameToIdNormalizer</objectType>
+	</subConfig>	
 	<subConfig type="normalizer" id="UcaNormalizer">
 	  <objectType>cheshire3.normalizer.UnicodeCollationNormalizer</objectType>
 	</subConfig>
