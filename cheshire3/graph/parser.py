@@ -1,6 +1,6 @@
 
 from cheshire3.parser import BaseParser
-from cheshire3.graph.record import GraphRecord
+from cheshire3.graph.record import GraphRecord, OreGraphRecord
 
 from rdflib import StringInputSource, URIRef
 from rdflib import ConjunctiveGraph as Graph
@@ -24,6 +24,34 @@ class RdfGraphParser(BaseParser):
             graph.parse(inpt)
         rec = GraphRecord(graph)
         return rec
+
+try:
+    from foresite import RdfLibParser
+except ImportError:
+    class OreRdfGraphParser(RdfGraphParser):
+        pass
+else:
+    class OreRdfGraphParser(RdfGraphParser):
+        
+        def __init__(self, session, config, parent=None):
+            super(OreRdfGraphParser, self).__init__(session, config, parent)
+            self.fsParser = RdfLibParser()
+        
+        def process_document(self, session, doc):
+            fmt = self.get_setting(session, 'format', '')
+            data = doc.get_raw(session)
+            graph = Graph()
+            inpt = StringInputSource(data)
+            if fmt:
+                graph.parse(inpt, fmt)
+            else:
+                graph.parse(inpt)
+            rec = OreGraphRecord(graph)
+            # drop into foresite to turn graph into ORE objects
+            rem = self.fsParser.process_graph(graph)
+            rec.aggregation = rem.aggregation
+            return rec
+    
 
 class RdfaParser(BaseParser):
     options = None
