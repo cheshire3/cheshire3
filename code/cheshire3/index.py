@@ -375,6 +375,10 @@ class SimpleIndex(Index):
             stores.append(istore)
         for s in stores:
             s.commit_indexing(session, self)
+            
+    def commit_parallelIndexing(self, session):
+        istore = self.get_path(session, 'indexStore')
+        istore.commit_parallelIndexing(session, self)
 
     def search(self, session, clause, db):
         # Final destination. Process Term.
@@ -416,7 +420,10 @@ class SimpleIndex(Index):
                         feedback = 1
         
         construct_resultSet = self.construct_resultSet
-        if (rel.value in ['any', 'all', '=', 'exact', 'window'] and (rel.prefix == 'cql' or rel.prefixURI == 'info:srw/cql-context-set/1/cql-v1.1')):
+        if (rel.value in ['any', 'all', '=', 'exact', 'window'] and 
+            (rel.prefix == 'cql' or 
+             rel.prefixURI == 'info:srw/cql-context-set/1/cql-v1.1'
+            )):
             for k, qHash in res.iteritems():
                 if k[0] == '^': k = k[1:]      
                 firstMask = self._locate_firstMask(k)
