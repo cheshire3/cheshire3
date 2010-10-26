@@ -427,14 +427,13 @@ class BdbIndexStore(IndexStore):
             raise ValueError("Failed to sort %s" % tempfile)
         if not index.get_setting(session, 'vectors'):
             os.remove(tempfile)
-        if hasattr(session, 'phase') and session.phase == 'commit_indexing1':
+        if (hasattr(session, 'task') and session.task) or \
+            (hasattr(session, 'phase') and session.phase == 'commit_indexing1'):
             return sorted
-
         # Original terms from data
         return self.commit_centralIndexing(session, index, sorted)
 
-    def merge_tempFiles(self, session, index):
-
+    def commit_parallelIndexing(self, session, index):
         sort = self.get_path(session, 'sortPath')
         temp = self.get_path(session, 'tempPath')
         dfp = self.get_path(session, 'defaultPath')
@@ -443,7 +442,7 @@ class BdbIndexStore(IndexStore):
         if (not os.path.exists(sort)):
             raise ConfigFileException("Sort executable for %s does not exist" % self.id)
         basename = self._generateFilename(index)
-        baseGlob = os.path.join(temp, "%sTask*SORT" % basename)
+        baseGlob = os.path.join(temp, "%s*SORT" % basename)
         sortFileList = glob.glob(baseGlob)
         sortFiles = " ".join(sortFileList)
         sorted = os.path.join(temp, "%s_SORT" % basename)
@@ -453,7 +452,7 @@ class BdbIndexStore(IndexStore):
             raise ValueError("Didn't sort %s" % index.id)
         for tsfn in sortFileList:
             os.remove(tsfn)
-        return sorted
+        return self.commit_centralIndexing(session, index, sorted)
 
     def commit_centralIndexing(self, session, index, filePath):
         p = self.permissionHandlers.get('info:srw/operation/2/index', None)
@@ -463,7 +462,6 @@ class BdbIndexStore(IndexStore):
             okay = p.hasPermission(session, session.user)
             if not okay:
                 raise PermissionException("Permission required to add to indexStore %s" % self.id)
-
         if not filePath:
             temp = self.get_path(session, 'tempPath')
             dfp = self.get_path(session, 'defaultPath')
@@ -1252,8 +1250,9 @@ class BdbIndexStore(IndexStore):
                 storeid = self.storeHashReverse[storeid]
             else:
                 # YYY: Error or metadata store?
-                self.storeHashReverse[storeid] = len(self.storeHash.keys())
-                self.storeHash[self.storeHashReverse[storeid]] = storeid
+                numeric_storeid = len(self.storeHash.keys())
+                self.storeHashReverse[storeid] = numeric_storeid
+                self.storeHash[numeric_storeid] = storeid
                 raise ConfigFileException("indexStore %s does not recognise recordStore: %s" % (self.id, storeid))
         
         docid = rec.id
@@ -1320,7 +1319,6 @@ class BdbIndexStore(IndexStore):
                     unpacked = unpacked[3:]
                 else:
                     # FIXME: This will screw up non vectorised indexes.
-
                     vecs = index.get_setting(session, "vectors")
                     tids = index.get_setting(session, "termIds")
                     tidcxn = None
