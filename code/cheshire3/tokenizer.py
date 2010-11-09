@@ -60,7 +60,9 @@ class RegexpSubTokenizer(SimpleTokenizer):
     def __init__(self, session, config, parent):
         SimpleTokenizer.__init__(self, session, config, parent)
         pre = self.get_setting(session, 'regexp', u"""([-.,'\")}\]]+((?=\s)|$)|(^|(?<=\s))[-.,']+|[`~!@+=\#\&\^*()\[\]{}\\\|\":;<>?/\u2026\u2013\u2014\u2018\u2019\u201c\u201d]|\.\.\.)""")
-        self.regexp = re.compile(pre)
+        # all strings should be treated as unicode internally
+        # this is default for lxml - primary Record implementation
+        self.regexp = re.compile(pre, re.UNICODE)
         self.char = self.get_setting(session, 'char', ' ')
 
     def process_string(self, session, data):
@@ -76,7 +78,7 @@ class RegexpSplitTokenizer(SimpleTokenizer):
     def __init__(self, session, config, parent):
         SimpleTokenizer.__init__(self, session, config, parent)
         pre = self.get_setting(session, 'regexp', u"""([-.,'\")}\]]+((?=\s)|$)|(^|(?<=\s))[-.,']+|[`~!@+=\#\&\^*()\[\]{}\\\|\":;<>?/\u2026\u2013\u2014\u2018\u2019\u201c\u201d]|\.\.\.)""")
-        self.regexp = re.compile(pre)
+        self.regexp = re.compile(pre, re.UNICODE)
 
     def process_string(self, session, data):
         return self.regexp.split(data)
@@ -128,7 +130,7 @@ class RegexpFindTokenizer(SimpleTokenizer):
            |[\w+]+                                         #basic words, including +
           )""")
 
-        self.regexp = re.compile(pre)
+        self.regexp = re.compile(pre, re.UNICODE)
         self.gaps = self.get_setting(session, 'gaps', 0)
 
     def process_string(self, session, data):
@@ -196,9 +198,9 @@ except:
 class SentenceTokenizer(SimpleTokenizer):
 
     def __init__(self, session, config, parent):
-        self.paraRe = re.compile('\n\n+')
-        self.sentenceRe = re.compile('.+?(?<!\.\.)[\.!?:]["\'\)]?(?=\s+|$)(?![a-z])')
-        self.abbrMashRe = re.compile('(^|\s)([^\s]+?\.[a-zA-Z]+|Prof|Dr|Sr|Mr|Mrs|Ms|Jr|Capt|Gen|Col|Sgt|[ivxjCcl]+|[A-Z])\.(\s|$)')
+        self.paraRe = re.compile('\n\n+', re.UNICODE)
+        self.sentenceRe = re.compile('.+?(?<!\.\.)[\.!?:]["\'\)]?(?=\s+|$)(?![a-z])', re.UNICODE)
+        self.abbrMashRe = re.compile('(^|\s)([^\s]+?\.[a-zA-Z]+|Prof|Dr|Sr|Mr|Mrs|Ms|Jr|Capt|Gen|Col|Sgt|[ivxjCcl]+|[A-Z])\.(\s|$)', re.UNICODE)
 
     def process_string(self, session, data):
         ps = self.paraRe.split(data)
@@ -238,12 +240,12 @@ class DateTokenizer(SimpleTokenizer):
         default = self.get_default(session, 'datetime')
         self.fuzzy = self.get_setting(session, 'fuzzy')
         self.dayfirst = self.get_setting(session, 'dayfirst')
-        self.normalisedDateRe = re.compile('(?<=\d)xx+')
+        self.normalisedDateRe = re.compile('(?<=\d)xx+', re.UNICODE)
         self.isoDateRe = re.compile('''
         ([0-2]\d\d\d)        # match any year up to 2999
         (0[1-9]|1[0-2]|xx)?      # match any month 01-12 or xx
         (0[1-9]|[1-2][0-9]|3[0-1]|xx)?  # match any date up to 01-31 or xx
-        ''', re.VERBOSE|re.IGNORECASE)
+        ''', re.VERBOSE|re.IGNORECASE|re.UNICODE)
         if default:
             self.default = dateparser.parse(default.encode('utf-8'), dayfirst=self.dayfirst, fuzzy=self.fuzzy)
         else:
