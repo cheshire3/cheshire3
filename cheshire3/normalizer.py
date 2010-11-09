@@ -158,7 +158,9 @@ class SpaceNormalizer(SimpleNormalizer):
     """ Reduce multiple whitespace to single space character """
     def __init__(self, session, config, parent):
         SimpleNormalizer.__init__(self, session, config, parent)
-        self.whitespace = re.compile("\s+")
+        # all strings should be treated as unicode internally
+        # this is default for lxml - primary Record implementation
+        self.whitespace = re.compile("\s+", re.UNICODE)
 
     def process_string(self, session, data):
         data = data.strip()
