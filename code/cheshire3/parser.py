@@ -120,12 +120,30 @@ class StoredSaxParser(BaseParser):
 
 
 try:
+    
     from lxml import etree
-except:
+    
+except ImportError:
+    
     # Define empty classes
     class LxmlParser(Parser):
+        """ lxml based Parser.  Creates LxmlRecords """
         pass
+    
+    class LxmlSchemaParser(Parser):
+        pass
+    
+    
+    class LxmlRelaxNGParser(Parser):
+        pass
+
+
+    class LxmlHtmlParser(BaseParser):
+        """ lxml based parser for HTML documents """
+        pass
+    
 else:
+    
     class LxmlParser(BaseParser):
         """ lxml based Parser.  Creates LxmlRecords """
         
