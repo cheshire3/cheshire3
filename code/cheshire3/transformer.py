@@ -192,7 +192,7 @@ class LxmlOffsetQueryTermHighlightingTransformer(LxmlQueryTermHighlightingTransf
             proxInfo2 = set()
             # for each group of proxInfo (i.e. from each query clause)
             for pig in proxInfo:
-                # for each item of proxInfo: [nodeIdx, wordIdx, offset, termId(?)] NB termId from spoke indexes so useless to us :(
+                # for each item of proxInfo: [nodeIdx, wordIdx, offset, termId(?)]
                 for pi in pig:
                     # values must be strings for sets to work
                     proxInfo2.add('%d %d' % (pi[0], pi[2]))
@@ -205,7 +205,10 @@ class LxmlOffsetQueryTermHighlightingTransformer(LxmlQueryTermHighlightingTransf
                 wordOffsets.append(x[1])
 
             xps = {}
-            tree = recDom.getroottree()
+            try:
+                tree = recDom.getroottree()
+            except AttributeError:
+                tree = recDom
             walker = recDom.getiterator()
             for x, n in enumerate(walker):
                 if n.tag in self.breakElements:
@@ -220,7 +223,7 @@ class LxmlOffsetQueryTermHighlightingTransformer(LxmlQueryTermHighlightingTransf
                     continue # no XPath
                 el = xpathfn(xps[ni])[0]
                 located = None
-                for ci, c in enumerate(el.iter()): # ignore comments processing instructions etc.
+                for ci, c in enumerate(el.iter()):
                     if c.text:
                         text = c.text
                         if len(c.text) > offset:
