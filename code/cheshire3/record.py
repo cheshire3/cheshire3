@@ -492,6 +492,12 @@ try:
                 self.sax = handler.currentText
                 self.sax.append("9 %r" % handler.elementHash)
             return self.sax
+        
+        def get_dom(self, session):
+            try:
+                return self.dom.getroot()
+            except AttributeError:
+                return self.dom
 
 except:
     class LxmlRecord(DomRecord):
@@ -1074,6 +1080,7 @@ class SaxRecord(Record):
 
 
 class MarcRecord(Record):
+    """For dealing with Library MARC Records."""
 
     def __init__(self, data, xml="", docId=0, wordCount=0, byteCount=0):
         txt = doc.get_raw(session)
