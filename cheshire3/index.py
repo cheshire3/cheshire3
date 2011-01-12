@@ -1212,7 +1212,7 @@ class RangeIndex(SimpleIndex):
 
     def search(self, session, clause, db):
         # check if we can just use SimpleIndex.search
-        if (clause.relation.value not in ['encloses', 'within', '>', '>=', '<', '<=']):
+        if (clause.relation.value not in ['encloses', 'overlaps', 'within', '>', '>=', '<', '<=', '>=<']):
             return SimpleIndex.search(self, session, clause, db)
         else:
             p = self.permissionHandlers.get('info:srw/operation/2/search', None)
@@ -1251,23 +1251,26 @@ class RangeIndex(SimpleIndex):
                     termList = [t for t in termList if (t[0].split('\t', 1)[1] < endK)]
                 elif rel == '<=':
                     termList = [t for t in termList if (t[0].split('\t', 1)[1] <= endK)]
-                matches.extend([self.construct_resultSet(session, t[1]) for t in termList])
             elif rel == 'within':
                 termList = store.fetch_termList(session, self, startK, end=endK)
                 # list comprehension is easier to understand
 #                termList = filter(lambda t: endK > t[0].split('\t', 1)[1], termList)
                 termList = [t for t in termList if (endK > t[0].split('\t', 1)[1])]
-                matches.extend([self.construct_resultSet(session, t[1]) for t in termList])
+            elif rel in ['overlaps', '>=<']:
+                # fetch all which start before the end point
+                termList = store.fetch_termList(session, self, endK, relation='<=')
+                # filter for only those that end after start point
+                termList = [t for t in termList if (startK <= t[0].split('\t', 1)[1])]
             elif rel.startswith('>'):
                 termList = store.fetch_termList(session, self, endK, relation=rel)
             else:
                 # this just SHOULD NOT have happened!...
                 raise QueryException('%s "%s"' % (clause.relation.toCQL(), clause.term.value), 24)
-    
+            matches.extend([self.construct_resultSet(session, t[1]) for t in termList])
             base = self.resultSetClass(session, [], recordStore=self.recordStore)
             base.recordStoreSizes = self.recordStoreSizes
             base.index = self
-            if not matches:
+            if not len(matches):
                 return base
             else:
                 rs = base.combine(session, matches, clause, db)
