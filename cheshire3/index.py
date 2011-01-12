@@ -1236,7 +1236,7 @@ class RangeIndex(SimpleIndex):
             if (len(res) != 1):
                 raise QueryException("%s %s" % (clause.relation.toCQL(), clause.term.value), 24)
 
-            keys = res.keys()[0].split('\t', 1)
+            keys = res.keys()[0].split('/', 1)
             startK = keys[0]
             endK = keys[1]
             rel = clause.relation.value 
@@ -1245,22 +1245,22 @@ class RangeIndex(SimpleIndex):
                 termList = store.fetch_termList(session, self, startK, relation='<')
                 if rel == 'encloses':
                     # list comprehension is easier to understand
-    #                termList = filter(lambda t: endK < t[0].split('\t', 1)[1], termList)
-                    termList = [t for t in termList if (t[0].split('\t', 1)[1] > endK)]
+    #                termList = filter(lambda t: endK < t[0].split('/', 1)[1], termList)
+                    termList = [t for t in termList if (t[0].split('/', 1)[1] > endK)]
                 elif rel == '<':
-                    termList = [t for t in termList if (t[0].split('\t', 1)[1] < endK)]
+                    termList = [t for t in termList if (t[0].split('/', 1)[1] < endK)]
                 elif rel == '<=':
-                    termList = [t for t in termList if (t[0].split('\t', 1)[1] <= endK)]
+                    termList = [t for t in termList if (t[0].split('/', 1)[1] <= endK)]
             elif rel == 'within':
                 termList = store.fetch_termList(session, self, startK, end=endK)
                 # list comprehension is easier to understand
-#                termList = filter(lambda t: endK > t[0].split('\t', 1)[1], termList)
-                termList = [t for t in termList if (endK > t[0].split('\t', 1)[1])]
+#                termList = filter(lambda t: endK > t[0].split('/', 1)[1], termList)
+                termList = [t for t in termList if (endK > t[0].split('/', 1)[1])]
             elif rel in ['overlaps', '>=<']:
                 # fetch all which start before the end point
                 termList = store.fetch_termList(session, self, endK, relation='<=')
                 # filter for only those that end after start point
-                termList = [t for t in termList if (startK <= t[0].split('\t', 1)[1])]
+                termList = [t for t in termList if (startK <= t[0].split('/', 1)[1])]
             elif rel.startswith('>'):
                 termList = store.fetch_termList(session, self, endK, relation=rel)
             else:

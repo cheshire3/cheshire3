@@ -89,8 +89,10 @@ class OffsetProximityTokenMerger(ProximityTokenMerger):
 class SequenceRangeTokenMerger(SimpleTokenMerger):
     """Merges tokens into a range for use in RangeIndexes.
     
-    assumes that we've tokenized a single value into pairs,
+    Assumes that we've tokenized a single value into pairs,
     which need to be concatenated into ranges.
+    
+    Uses a forward slash (/) as the interval designator after ISO 8601.  
     """
     
     def process_hash(self, session, data):
@@ -99,9 +101,9 @@ class SequenceRangeTokenMerger(SimpleTokenMerger):
             l = val['text']
             for x in range(0, len(l), 2):
                 try:
-                    newkey = "%s\t%s" % (l[x], l[x+1])
+                    newkey = "{0}/{1}".format(l[x], l[x+1])
                 except IndexError:
-                    newkey = "{0}\t{0}".format(l[x])
+                    newkey = "{0}/{0}".format(l[x])
                 if newkey in new:
                     new[newkey]['occurences'] += 1
                 else:
@@ -112,7 +114,10 @@ class SequenceRangeTokenMerger(SimpleTokenMerger):
 
 
 class MinMaxRangeTokenMerger(SimpleTokenMerger):
-    """Merges tokens into a range for use in RangeIndexes """
+    """Merges tokens into a range for use in RangeIndexes.
+    
+    Uses a forward slash (/) as the interval designator after ISO 8601.
+    """
     
     def process_hash(self, session, data):
         keys = data.keys()
@@ -120,13 +125,14 @@ class MinMaxRangeTokenMerger(SimpleTokenMerger):
             return {}
         startK = str(min(keys))
         endK = str(max(keys))
-        newK = '%s\t%s' % (startK, endK)
+        newK = '{0}/{1}'.format(startK, endK)
         val = data[startK]
         val['text'] = newK
         return {
                 newK: val
                 }
-               
+
+
 class NGramTokenMerger(SimpleTokenMerger):
 
     _possibleSettings = {'nValue' : {'docs' : '', 'type' : int}}
