@@ -2,6 +2,7 @@
 from cheshire3.baseObjects import Tokenizer
 
 from dateutil import parser as dateparser
+from datetime import timedelta
 import re
 
 # Python source code tokenizer from base libs
@@ -82,7 +83,6 @@ class RegexpSplitTokenizer(SimpleTokenizer):
 
     def process_string(self, session, data):
         return self.regexp.split(data)
-
 
 
 class RegexpFindTokenizer(SimpleTokenizer):
@@ -218,8 +218,6 @@ class SentenceTokenizer(SimpleTokenizer):
         return ns
 
 
-
-
 # trivial, but potentially useful
 class LineTokenizer(SimpleTokenizer):
     def process_string(self, session, data):
@@ -258,15 +256,20 @@ class DateTokenizer(SimpleTokenizer):
                 dateparts.append(mo.group(x))
         return '-'.join(dateparts)
     
-    def _tokenize(self, data):
-        # reconstruct data word by word and feed to parser?.
-        # Must be a better way to do this...,but for now...
+    def _tokenize(self, data, default=None):
+        if default is None:
+            default = self.default
+        # deconstruct data word by word and feed to parser until success.
+        # Must be a better way to do this..., but for now...
         tks = []
         wds = data.split()
         while (len(wds)):
             for x in range(len(wds), 0, -1):
+                txt = ' '.join(wds[:x]).encode('utf-8')
                 try:
-                    t = str(dateparser.parse(' '.join(wds[:x]).encode('utf-8'), default=self.default, dayfirst=self.dayfirst, fuzzy=self.fuzzy))
+                    t = dateparser.parse(txt, default=default, 
+                                         dayfirst=self.dayfirst, 
+                                         fuzzy=self.fuzzy).isoformat()
                 except:
                     continue
                 else:
@@ -275,24 +278,27 @@ class DateTokenizer(SimpleTokenizer):
             wds = wds[x:]
         return tks
 
-    
     def process_string(self, session, data):
-        # separate ISO date elements with - for better recognition by date parser
+        # convert ISO 8601 date elements to extended format (YYYY-MM-DD)
+        # for better recognition by date parser
         data = self.isoDateRe.sub(self._convertIsoDates, data)
         if len(data):
             # a range?
+            # use a new default, just under a year on for the end of the range
+            td = timedelta(days=364, hours=23, minutes=59, seconds=59, 
+                           microseconds=999999)
             if data.count('/') == 1:
                 bits = data.split('/')
-                tks = self._tokenize(bits[0]) + self._tokenize(bits[1])
+                tks = self._tokenize(bits[0]) + \
+                    self._tokenize(bits[1], self.default+td)
             elif data.count('-') == 1:
                 bits = data.split('-')
-                tks = self._tokenize(bits[0]) + self._tokenize(bits[1])
+                tks = self._tokenize(bits[0]) + \
+                    self._tokenize(bits[1], self.default+td)
             else:
                 tks = []
-                
             if len(tks):
                 return tks
-            
         return self._tokenize(data)
 
 
