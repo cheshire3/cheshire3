@@ -284,15 +284,16 @@ class DateTokenizer(SimpleTokenizer):
         data = self.isoDateRe.sub(self._convertIsoDates, data)
         if len(data):
             # a range?
-            # use a new default, just under a year on for the end of the range
-            td = timedelta(days=364, hours=23, minutes=59, seconds=59, 
-                           microseconds=999999)
+            bits = []
             if data.count('/') == 1:
                 bits = data.split('/')
-                tks = self._tokenize(bits[0]) + \
-                    self._tokenize(bits[1], self.default+td)
-            elif data.count('-') == 1:
+            # ISO allows YYYY-MM and YYYY-Www
+            elif data.count('-') == 1 and (data.find('-') < len(data) - 4):
                 bits = data.split('-')
+            if len(bits):
+                # use a new default, just under a year on for the end of the range
+                td = timedelta(days=364, hours=23, minutes=59, seconds=59, 
+                               microseconds=999999)
                 tks = self._tokenize(bits[0]) + \
                     self._tokenize(bits[1], self.default+td)
             else:
@@ -301,6 +302,39 @@ class DateTokenizer(SimpleTokenizer):
                 return tks
         return self._tokenize(data)
 
+
+class DateRangeTokenizer(DateTokenizer):
+    """Tokenizer to identify ranges of date tokens, and return only these.
+    
+    When a single date is provided, attempts to expand this into the  
+    largest possible range that the data could specify. e.g.
+    1902-04 means the whole of April 1902
+    >>> self.process_string(session, "1902-04")
+    ['1902-04-01T00:00:00', '1902-04-30T23:59:59.999999']
+    """
+        
+    def process_string(self, session, data):
+        # convert ISO 8601 date elements to extended format (YYYY-MM-DD)
+        # for better recognition by date parser
+        data = self.isoDateRe.sub(self._convertIsoDates, data)
+        self.log_debug(session, data)
+        # use a new default, just under a year on for the end of the range
+        td = timedelta(days=364, hours=23, minutes=59, seconds=59, 
+                       microseconds=999999)
+        midpoint = len(data)/2
+        if data[midpoint] in ['/', '-']:
+            startK = data[:midpoint]
+            endK = data[midpoint+1:]
+        elif data.count('/') == 1:
+            startK, endK = data.split('/')
+        # ISO allows YYYY-MM and YYYY-Www
+        elif data.count('-') == 1 and (data.find('-') < len(data) - 4):
+            startK, endK = data.split('-')
+        else:
+            startK = endK = data
+        self.log_debug(session, '{0} -> {1}'.format(startK, endK))
+        return self._tokenize(startK) + self._tokenize(endK, self.default+td)
+        
 
 class PythonTokenizer(OffsetTokenizer):
     """ Tokenize python source code into token/TYPE with offsets """
