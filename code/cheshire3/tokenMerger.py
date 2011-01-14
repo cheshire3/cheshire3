@@ -85,14 +85,24 @@ class OffsetProximityTokenMerger(ProximityTokenMerger):
                     x += 1
         return new
         
+        
+class RangeTokenMerger(SimpleTokenMerger):
+    
+    _possibleSettings = {'char' : {'docs' : 'Character to use as the interval designator. Defaults to forward slash (/) after ISO 8601.', 
+                                   'type': str
+                                   }
+                       }
+    
+    def __init__(self, session, config, parent):
+        SimpleTokenMerger.__init__(self, session, config, parent)
+        self.char = self.get_setting(session, 'char', '/')
 
-class SequenceRangeTokenMerger(SimpleTokenMerger):
+
+class SequenceRangeTokenMerger(RangeTokenMerger):
     """Merges tokens into a range for use in RangeIndexes.
     
     Assumes that we've tokenized a single value into pairs,
     which need to be concatenated into ranges.
-    
-    Uses a forward slash (/) as the interval designator after ISO 8601.  
     """
     
     def process_hash(self, session, data):
@@ -101,9 +111,10 @@ class SequenceRangeTokenMerger(SimpleTokenMerger):
             l = val['text']
             for x in range(0, len(l), 2):
                 try:
-                    newkey = "{0}/{1}".format(l[x], l[x+1])
+                    newkey = "{0}{1}{2}".format(l[x], self.char, l[x+1])
                 except IndexError:
-                    newkey = "{0}/{0}".format(l[x])
+                    # uneven number of points :/
+                    newkey = "{0}{1}{0}".format(l[x], self.char)
                 if newkey in new:
                     new[newkey]['occurences'] += 1
                 else:
@@ -113,7 +124,7 @@ class SequenceRangeTokenMerger(SimpleTokenMerger):
         return new
 
 
-class MinMaxRangeTokenMerger(SimpleTokenMerger):
+class MinMaxRangeTokenMerger(RangeTokenMerger):
     """Merges tokens into a range for use in RangeIndexes.
     
     Uses a forward slash (/) as the interval designator after ISO 8601.
@@ -125,12 +136,10 @@ class MinMaxRangeTokenMerger(SimpleTokenMerger):
             return {}
         startK = str(min(keys))
         endK = str(max(keys))
-        newK = '{0}/{1}'.format(startK, endK)
+        newK = '{0}{1}{2}'.format(startK, self.char, endK)
         val = data[startK]
         val['text'] = newK
-        return {
-                newK: val
-                }
+        return {newK: val}
 
 
 class NGramTokenMerger(SimpleTokenMerger):
