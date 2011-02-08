@@ -199,7 +199,7 @@ class LxmlOffsetQueryTermHighlightingTransformer(LxmlQueryTermHighlightingTransf
             proxInfo2 = set()
             # for each group of proxInfo (i.e. from each query clause)
             for pig in proxInfo:
-                # for each item of proxInfo: [nodeIdx, wordIdx, offset, termId(?)]
+                # for each item of proxInfo: [nodeIdx, wordIdx, offset, termId(?)] NB termId from spoke indexes so useless to us :(
                 for pi in pig:
                     # values must be strings for sets to work
                     proxInfo2.add('%d %d' % (pi[0], pi[2]))
@@ -212,10 +212,7 @@ class LxmlOffsetQueryTermHighlightingTransformer(LxmlQueryTermHighlightingTransf
                 wordOffsets.append(x[1])
 
             xps = {}
-            try:
-                tree = recDom.getroottree()
-            except AttributeError:
-                tree = recDom
+            tree = recDom.getroottree()
             walker = recDom.getiterator()
             for x, n in enumerate(walker):
                 if n.tag in self.breakElements:
@@ -230,7 +227,7 @@ class LxmlOffsetQueryTermHighlightingTransformer(LxmlQueryTermHighlightingTransf
                     continue # no XPath
                 el = xpathfn(xps[ni])[0]
                 located = None
-                for ci, c in enumerate(el.iter()):
+                for ci, c in enumerate(el.iter()): # ignore comments processing instructions etc.
                     if c.text:
                         text = c.text
                         if len(c.text) > offset:
@@ -277,6 +274,107 @@ class LxmlOffsetQueryTermHighlightingTransformer(LxmlQueryTermHighlightingTransf
                             # adjust offset accordingly
                             offset -= len(text)
         return StringDocument(etree.tostring(recDom))
+
+
+class TemplatedTransformer(Transformer):
+    """Transformer to insert the output of a Selector into a template string containing place-holders.
+    
+    Template can be specified directly in the configuration using the 
+    template setting (whitespace is respected), or in a file using the 
+    templatePath path. If the template is specified in the configuration, 
+    XML reserved characters (<, >, & etc.) must be escaped.
+    
+    This can be useful for Record types that are not easily transformed using
+    more standard mechanism (e.g. XSLT), a prime example being GraphRecords
+    
+    Example
+    
+    config:
+    
+    <subConfig type="transformer" id="myTemplatedTransformer">
+        <objectType>cheshire3.transformer.TemplatedTransformer</objectType>
+        <paths>
+            <object type="selector" ref="mySelector"/>
+            <object type="extractor" ref="SimpleExtractor"/>
+        </paths>
+        <options>
+            <setting type="template">
+                This is my document. The title is {0}. The author is {1}
+            </setting>
+        </options>
+    </subConfig>
+    
+    selector config:
+    
+    <subConfig type="selector" id="mySelector">
+        <objectType>cheshire3.selector.XpathSelector</objectType>
+        <source>
+            <location type="xpath">//title</location>
+            <location type="xpath">//author</location>
+        </source>
+    </subConfig>
+    
+    """
+    
+    _possiblePaths = {'selector': {'docs': "Selector to use to get data from the record."},
+                      'extractor': {'docs': "An Extractor to use on each data item returned by the Selector. The Extractor used must be able to handle the output from the Selector (e.g. A SPARQL Selector would require an RDF Extractor). Default is SimpleExtractor"},
+                      'templatePath': {'docs': "Path to the file containing the template for the output Document with place-holders for the selected data items."}
+                     }
+    
+    _possibleSettings = {'template': {'docs': "A string representing the template for the output Document with place-holders for selected data items."}}
+    
+    def __init__(self, session, config, parent):
+        Transformer.__init__(self, session, config, parent)
+        self.selector = self.get_path(session, 'selector')
+        self.extractor = self.get_path(session, 'extractor')
+        tmplPath = self.get_path(session, "templatePath")
+        if tmplPath is not None:
+            dfp = self.get_path(session, "defaultPath")
+            path = os.path.join(dfp, tmplPath)
+            with open(path, 'r') as fh:
+                self.template = unicode(fh.read()) 
+        else:
+            tmpl = self.get_setting(session, 'template')
+            self.template = unicode(tmpl)
+            
+    def process_record(self, session, rec):
+        process_eventList = self.extractor.process_eventList
+        process_string = self.extractor.process_string
+        process_node = self.extractor.process_node
+        data = self.selector.process_record(session, rec)
+        vals = []
+        for location in data:
+            vals2 = []
+            for match in location:
+                if (type(match) == types.ListType):
+                    # SAX event
+                    vals2.append(process_eventList(session, match).keys()[0])
+                elif (type(match) in types.StringTypes or type(match) in [int, long, float, bool]):
+                    # Attribute content or function result (e.g. count())
+                    vals2.append(process_string(session, match).keys()[0])
+                elif type(match) == types.TupleType:
+                    # RDF graph results (?)
+                    vals3 = [] 
+                    for item in match:
+                        if item is not None:
+                            vals3.append(process_node(session, item).keys()[0])
+                        else:
+                            vals3.append(None)
+                    vals2.append(vals3)
+                else:
+                    # DOM nodes
+                    vals2.append(process_node(session, match).keys()[0])
+            vals.append(vals2)
+        tmpl = self.template
+        try:
+            return StringDocument(tmpl.format(*vals))
+        except IndexError as e:
+            try:
+                session.logger.log_error(session, repr(vals))
+                session.logger.log_error(session, tmpl)
+            except AttributeError:
+                pass
+            raise ConfigFileException('Template contained a place-holder for which data was not selected by the selector.')
 
 
 class MarcTransformer(Transformer):
