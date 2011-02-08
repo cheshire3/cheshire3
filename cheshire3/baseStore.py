@@ -1,15 +1,17 @@
 
-from cheshire3.exceptions import *
-from cheshire3.configParser import C3Object
-from cheshire3.baseObjects import Session
-from cheshire3.utils import gen_uuid
-
-import os, time
+import os
+import time
 import hashlib
 import bsddb as bdb
 
 from dateutil import parser as dateparser
 import datetime, dateutil.tz
+
+from cheshire3.exceptions import *
+from cheshire3.configParser import C3Object
+from cheshire3.baseObjects import Session
+from cheshire3.utils import gen_uuid
+
 
 class DeletedObject(object):
     id = ""
@@ -289,36 +291,87 @@ class SimpleStore(C3Object, SummaryObject):
         self._closeAll(session)
         self.commit_metadata(session)
         return None
-
+    
+    def get_idChunkGenerator(self, session, taskManager=None):
+        """Generate chunks of ids from the store."""
+        # defaults
+        maxChunkSize = 1000
+        maxChunkByteCount = 2048000
+        maxChunkWordCount = maxChunkByteCount / 5
+        chunkBy = None
+        chunkThreshold = 1
+        total = self.get_dbSize(session)
+        if taskManager is not None:
+            maxChunkSize = taskManager.get_setting(session, 'maxChunkSize', maxChunkSize)
+            chunkBy = taskManager.get_setting(session, 'chunkBy', chunkBy)
+            if (chunkBy is not None) and chunkBy.isalpha():
+                # chunking based on metadata
+                cmax = 'maxChunk{0}'.format(chunkBy[0].upper() + chunkBy[1:])
+                chunkThreshold = taskManager.get_setting(session, 
+                                                           cmax,
+                                                           locals().get(cmax, chunkByThreshold)
+                                                           )
+            else:
+                # generic chunking
+                if (chunkBy is not None) and chunkBy.isdigit():
+                    # chunkBy is a number of preferred times to use each chunk
+                    nIters = int(chunkBy)
+                else:
+                    nIters = 1
+                nTasks = taskManager.nTasks
+                maxChunkSize = min(maxChunkSize, (total / (nIters * nTasks)))
+        
+        numericId = 0
+        iterator = self.__iter__()
+        idNormalizer = self.idNormalizer
+        outIdNormalizer = self.outIdNormalizer
+        while numericId < total:
+            chunk = []
+            chunkTotal = 0
+            while chunkTotal < chunkThreshold and len(chunk) < maxChunkSize and numericId < total:
+                # get real id and de-normalize if possible
+                id = iterator.nextData[0]
+                obj = iterator.next() # move iterator on
+                if outIdNormalizer:
+                    id = outIdNormalizer.process_string(session, id)
+                # chunkBy
+                if chunkBy is not None:
+                    b = self.fetch_metadata(session, id, chunkBy)
+                    chunkTotal += b
+                chunk.append(id)
+                numericId += 1
+            yield chunk
+                
     def delete_data(self, session, id):
-        # delete data stored against id
+        """Delete data stored against id."""
         raise NotImplementedError
 
     def fetch_data(self, session, id):
-        # return data stored against id
+        """Return data stored against id."""
         raise NotImplementedError
 
     def store_data(self, session, id, data, metadata):
+        """Store data against id."""
         raise NotImplementedError
 
     def fetch_metadata(self, session, id, mType):
-        # return mType metadata stored against id
+        """Return mType metadata stored against id."""
         raise NotImplementedError
 
     def store_metadata(self, session, id, mType, value):
-        # store value for mType metadata against id
+        """Store value for mType metadata against id."""
         raise NotImplementedError
     
     def clean(self, session):
-        # delete expired data objects
+        """Delete expired data objects."""
         raise NotImplementedError
 
     def clear(self, session):
-        # this would delete all the data out of self
+        """This would delete all the data out of self."""
         raise NotImplementedError
 
     def flush(self, session):
-        # ensure all data is flushed to disk
+        """Ensure all data is flushed to disk."""
         raise NotImplementedError
 
 
