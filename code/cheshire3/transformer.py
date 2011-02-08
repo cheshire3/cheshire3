@@ -1,11 +1,18 @@
 
+import os.path
+import types
+import time
+import re
+import bz2
+
+from lxml import etree
+
 from cheshire3.configParser import C3Object
 from cheshire3.baseObjects import Transformer, Record
 from cheshire3.document import StringDocument
 from cheshire3.utils import nonTextToken
 from cheshire3.marc_utils import MARC
-
-import os.path, time, re, bz2
+from cheshire3.exceptions import ConfigFileException
 
 
 class FilepathTransformer(Transformer):
@@ -14,6 +21,7 @@ class FilepathTransformer(Transformer):
         sax = ['1 identifier {}', '3 ' + str(rec.id), '2 identifier']
         data = nonTextToken.join(sax)
         return StringDocument(data)
+
 
 # Simplest transformation ...
 class XmlTransformer(Transformer):
@@ -58,7 +66,6 @@ class WorkflowTransformer(Transformer):
 
 # --- XSLT Transformers ---
 
-from lxml import etree
 
 def myTimeFn(dummy):
     # call as <xsl:value-of select="c3fn:now()"/>
@@ -325,6 +332,3 @@ class MarcTransformer(Transformer):
         marcObject = MARC()
         marcObject.fields = fields
         return StringDocument(marcObject.get_MARC())
-
-          
-
