@@ -1,8 +1,18 @@
 
-import os, mimetypes, tempfile, glob, re, time
+import os
+import mimetypes
+import tempfile
+import glob
+import re
+import time
+import subprocess
+import shlex
+import email
+
 from xml.sax.saxutils import escape
 from lxml import etree
 
+# Cheshire3 imports
 from cheshire3.record import LxmlRecord
 from cheshire3.baseObjects import PreParser
 from cheshire3.document import StringDocument
@@ -26,6 +36,9 @@ class DependentCmdLinePreParser(CmdLinePreParser):
     
     def __init__(self, session, config, parent):
         CmdLinePreParser.__init__(self, session, config, parent)
+        self._initDependency(session)
+        
+    def _initDependency(self, session):
         exe = self.get_path(session, 'dependencyExecutable', '')
         if not exe:
             raise ConfigFileException("Missing mandatory 'dependencyExecutable' path in %s" % self.id)
@@ -34,7 +47,7 @@ class DependentCmdLinePreParser(CmdLinePreParser):
             exe = os.path.join(tp, exe)
 
         cl = self.get_setting(session, 'dependencyCommandLine', '')
-        self.dependency = os.popen(exe + ' ' + cl)
+        self.dependency = subprocess.Popen([exe] + shlex.split(cl))
 
 
 class CmdLineMetadataDiscoveryPreParser(CmdLinePreParser):
@@ -71,7 +84,7 @@ class CmdLineMetadataDiscoveryPreParser(CmdLinePreParser):
         return res
         
     def process_document(self, session, doc):
-        """Pass the document to external executable, add results to document metadata."""
+        """Pass Document to executable, add results to document metadata."""
         cmd = self.cmd
         stdIn = cmd.find('%INDOC%') == -1
         stdOut = cmd.find('%OUTDOC%') == -1
@@ -112,7 +125,9 @@ class CmdLineMetadataDiscoveryPreParser(CmdLinePreParser):
             
         if stdIn:
             pipe = subprocess.Popen(cmd, bufsize=0, shell=True,
-                         stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                         stdin=subprocess.PIPE, 
+                         stdout=subprocess.PIPE, 
+                         stderr=subprocess.PIPE)
             pipe.stdin.write(doc.get_raw(session))
             pipe.stdin.close()
             result = pipe.stdout.read()
@@ -137,14 +152,11 @@ class CmdLineMetadataDiscoveryPreParser(CmdLinePreParser):
                 result = ofh.read()
                 ofh.close()
                 os.remove(outfn)
-                
             # strip input filename from result if present (this is a tempfile so the name is useless)
             if result.startswith(infn):
                 result = re.sub('^%s\s*[:-]?\s*' % (infn), '', result)
-
         if old:
             os.chdir(old)
-                
         try:
             doc.metadata[self.metadataType].update(self._processResult(session, result))
         except:
@@ -152,12 +164,39 @@ class CmdLineMetadataDiscoveryPreParser(CmdLinePreParser):
             
         if 'analysisDateTime' not in doc.metadata[self.metadataType]:
             doc.metadata[self.metadataType]['analysisDateTime'] = time.strftime('%Y-%m-%dT%H:%M:%S%Z')
-            
         return doc
+    
+
+class TxtParsingCmdLineMetadataDiscoveryPreParser(CmdLineMetadataDiscoveryPreParser):
+    """For external programs that return multi-line text output.
+    
+    Command Line PreParser to use an external program for metadata 
+    discovery, when output of the external program is colon separated 
+    key:value pairs in plain-text. Takes the output, parses it using a 
+    regular expression, and extracts metadata based on configured 
+    sources and populates Document metadata dictionary/hash.
+    """
+    
+    def __init__(self, session, config, parent):
+        CmdLineMetadataDiscoveryPreParser.__init__(self, session, config, parent)
+        self.lineRe = re.compile('^(.*?):\s+(.*)$', re.MULTILINE)
+    
+    def _processResult(self, session, data):
+        """Process result from external program."""
+        res = {}
+        for k,v in self.lineRe.findall(data):
+            res[k] = unicode(v, 'utf-8')
+        return res
         
         
 class XmlParsingCmdLineMetadataDiscoveryPreParser(CmdLineMetadataDiscoveryPreParser):
-    """Command Line PreParser to take the results of an external program given in XML, parse it, and extract metadata into a hash."""
+    """For external programs that return XML.
+    
+    Command Line PreParser to use an external program for metadata 
+    discovery, when output of the external program is XML. Takes the 
+    XML output, parses it, and extracts metadata based on configured 
+    sources and populates Document metadata dictionary/hash.
+    """
     
     def __init__(self, session, config, parent):
         self.sources = {}
@@ -210,19 +249,23 @@ class XmlParsingCmdLineMetadataDiscoveryPreParser(CmdLineMetadataDiscoveryPrePar
             self.sources[key] = {'source': (xp, process, preprocess), 'default': default}
             
     def _processResult(self, session, data):
-        """Process XML output from external program, process self.sources to create dictionary of metadata items."""
-        with open('/tmp/' + self.id, 'w') as fh:
-            fh.write(data)
+        """Parse XML to create and return dict of metadata items.
         
+        Parse XML output from external program.
+        Process parsed XML using self.sources.
+        Populate and return a dictionary of metadata items.
+        
+        """
         try:
             et = etree.fromstring(data)
         except AssertionError:
             data = data.decode('utf8')
             et = etree.fromstring(data)
         except etree.XMLSyntaxError:
-            print data
+            if session.logger is not None:
+                # log debug level
+                session.logger.log_lvl(session, 10, data)
             raise
-            
         record = LxmlRecord(et)
         record.byteCount = len(data)
         mddict = {}
@@ -248,11 +291,18 @@ class XmlParsingCmdLineMetadataDiscoveryPreParser(CmdLineMetadataDiscoveryPrePar
                 mddict[key] = src['default']
             
         return mddict
-        
+    
+    
+class DependentXmlParsingCmdLineMetadataDiscoveryPreParser(DependentCmdLinePreParser, XmlParsingCmdLineMetadataDiscoveryPreParser):
+    """XmlParsingCmdLineMetadataDiscoveryPreParser with a dependency."""
+    
+    def __init__(self, session, config, parent):
+        XmlParsingCmdLineMetadataDiscoveryPreParser.__init__(self, session, config, parent)
+        self._initDependency(session)
+    
 
-import email
-        
 class EmailToXmlPreParser(TypedPreParser):
+    """PreParser to process email data and output it as XML."""
     
     def _processHeaders(self, msg):
         out = ['<headers>']
@@ -260,7 +310,6 @@ class EmailToXmlPreParser(TypedPreParser):
             out.append('<%s>%s</%s>' % (k,escape(v),k))
         out.append('</headers>')
         return out
-    
     
     def _processPayload(self, msg):
         out = []
@@ -277,7 +326,6 @@ class EmailToXmlPreParser(TypedPreParser):
         else:
             out.extend(['<body mime-type="%s">' % (msg.get_content_type()), escape(msg.get_payload()), '</body>'])
         return out
-    
     
     def process_document(self, session, doc):
         data = doc.get_raw(session)
