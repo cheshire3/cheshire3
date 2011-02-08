@@ -44,7 +44,7 @@ class TaskManager:
     namedTasks = {}
 
     def __init__(self, session):
-	self.currentReceive = None
+        self.currentReceive = None
         self.ntasks = mpi.WORLD.size
         self.tid = mpi.rank
         self.session = session
@@ -65,7 +65,6 @@ class TaskManager:
                 # Strip self
                 del self.tasks[0]
                 self.idle.pop(0)
-
 
     def shutdown(self):
         for t in self.tasks.values():
@@ -171,7 +170,6 @@ class TaskManager:
         self.log("recv", msg) 
         return msg
 
-
     def irecv(self):
         # Receive a message from anywhere, create Message 
         # round robin irecvs
@@ -230,20 +228,19 @@ class TaskManager:
         for t in self.tasks.values():
             t.send(["NAMETASK", task.tid, name])
         
-
     def bcall(self, o, fn, *args, **kw):
         # Broadcast message to non removed tasks
-	tasks = self.tasks.values()
+        tasks = self.tasks.values()
         for t in tasks:
             t.call(o, fn, *args, **kw)
-	self.idle = []
-	return len(tasks)
+        self.idle = []
+        return len(tasks)
         
     def waitall(self):
         start = time.time()
         waiting = self.tasks.copy()
-	for t in self.idle:
-	    del waiting[t.tid]	
+        for t in self.idle:
+            del waiting[t.tid]	
         msgs = []
         while waiting:
             for t in waiting.values():
@@ -259,7 +256,7 @@ class TaskManager:
 
     def callOnEach(self, stack, function, *args, **kw):
         # Fill tasks
-	tasks = self.tasks.values()
+        tasks = self.tasks.values()
         for t in tasks:
             try:
                 what = stack.pop()
@@ -269,7 +266,7 @@ class TaskManager:
                 t.call(what, function, *args, **kw)
             else:
                 t.call(what, function, *args, **kw)
-	self.idle = []
+        self.idle = []
 
         while stack:
             try:
@@ -286,7 +283,7 @@ class TaskManager:
 
     def callForEach(self, stack, object, function, *args, **kw):
         # Put first *arg first (== session)
-	tasks = self.tasks.values()
+        tasks = self.tasks.values()
         for t in tasks:
             try:
                 what = stack.pop()
@@ -296,8 +293,7 @@ class TaskManager:
                 t.call(object, function, args[0], what, *args[1:], **kw)
             else:
                 t.call(object, function, what, **kw)
-	self.idle = []
-
+        self.idle = []
         while stack:
             try:
                 okay = self.recv() 
@@ -313,7 +309,6 @@ class TaskManager:
             else:
                 self.call(object, function, what, **kw)
         self.waitall()
-        
 
             
 class Task:
@@ -323,10 +318,10 @@ class Task:
     currentReceive = None
 
     def __init__(self, tid=-1, name="", debug=0, manager=None):
-	self.debug = 0
+        self.debug = 0
         self.currentSend = None
         self.currentReceive = None
-	self.manager=manager
+        self.manager=manager
         self.name = ""
         if tid > -1:
             self.tid = tid
@@ -363,19 +358,19 @@ class Task:
             session.server = svr
 
     def log(self, type, msg, to=None):
-	if self.manager:
-	    self.manager.log(type, msg, to)
-	elif self.debug:
-	    # Task object created outside normal scope
-	    fileh = file("debug_%s" % self.tid, 'a')
-	    fileh.write("type:%r msg:%r to:%r\n" % (type, msg, to))
-	    fileh.flush()
-	    fileh.close()
+        if self.manager:
+            self.manager.log(type, msg, to)
+        elif self.debug:
+            # Task object created outside normal scope
+            fileh = file("debug_%s" % self.tid, 'a')
+            fileh.write("type:%r msg:%r to:%r\n" % (type, msg, to))
+            fileh.flush()
+            fileh.close()
 
     def send(self, data, listen=0):
-	if self.manager:
+        if self.manager:
             self.manager.messagesSent[self.tid] += 1
-	self.log("send", data, self.tid)
+        self.log("send", data, self.tid)
         try:
             mpi.send(data, self.tid)
         except:
@@ -391,7 +386,6 @@ class Task:
                 print "Fail in send:"
                 print data
                 raise
-                
 
     def recv(self):
         # Read data from this specific task
@@ -410,7 +404,4 @@ class Task:
 	    return msg
         else:
             return 0
-
-
-
 
