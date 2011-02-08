@@ -30,7 +30,10 @@ class IrodsStream(object):
                 stream = stream[1:]
         colls = stream.split('/')
         for cln in colls:
-            c.openCollection(cln)
+            if cln in c.getSubCollections():
+                c.openCollection(cln)
+            else:
+                raise IOError("When opening {0}: {1} does not exists in collection {2}".format(stream, cln, c.getCollName()))
         
 
 class IrodsFileDocumentStream(IrodsStream, FileDocumentStream):
@@ -52,8 +55,8 @@ class IrodsFileDocumentStream(IrodsStream, FileDocumentStream):
         doc = StringDocument(self.stream.read(), filename=self.stream.getName())
         # attach any iRODS metadata
         umd = self.stream.getUserMetadata()
-	self.stream.close()
-	self.cxn.disconnect()
+        self.stream.close()
+        self.cxn.disconnect()
         md = {}
         for x in umd:
             md[x[0]] = icatValToPy(x[1], x[2])
