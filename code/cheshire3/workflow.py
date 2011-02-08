@@ -1,12 +1,14 @@
+import sys
+import traceback
+
+from types import MethodType
+from lxml import etree
 
 from cheshire3.baseObjects import Workflow, Server
 from cheshire3.configParser import C3Object
 from cheshire3.utils import elementType, flattenTexts
 from cheshire3.exceptions import C3Exception, ConfigFileException, ObjectDoesNotExistException
 
-from types import MethodType
-import traceback, sys
-from lxml import etree
 
 class WorkflowException(C3Exception):
     pass
@@ -46,8 +48,11 @@ class SimpleWorkflow(Workflow):
                        u'tokenizer' : 'process_hash'
                        }
         self.singleFunctions = [u'begin_indexing', u'commit_indexing',
-                                u'commit_metadata', u'begin_storing',
-                                u'commit_storing']
+                                u'begin_storing', u'commit_storing',
+                                u'begin_logging', u'commit_logging',
+                                u'commit_metadata', u'shutdown']
+        
+        self.singleInputFunctions = ['get_indexes', 'commit_parallelIndexing', 'get_idChunkGenerator']
 
         Workflow.__init__(self, session, config, parent)
         # Somewhere at the top there must be a server
@@ -56,11 +61,9 @@ class SimpleWorkflow(Workflow):
     def _handleLxmlConfigNode(self, session, node):
         if node.tag == 'workflow':
             code = ['def handler(self, session, input=None):']
-            code.append('    if session.database:')
-            code.append('        db = self.server.get_object(session, session.database)')
-            code.append('        self.database = db')
-            code.append('    else:')
-            code.append('        raise WorkflowException("No database")')
+            sub = self._handleLxmlGlobals(node)
+            for s in sub:
+                code.append("    " + s)
             sub = self._handleLxmlFlow(node)
             for s in sub:
                 code.append("    " + s)
@@ -75,11 +78,9 @@ class SimpleWorkflow(Workflow):
         if node.localName == "workflow":
             # Nummy. 
             code = ['def handler(self, session, input=None):']
-            code.append('    if session.database:')
-            code.append('        db = self.server.get_object(session, session.database)')
-            code.append('        self.database = db')
-            code.append('    else:')
-            code.append('        raise WorkflowException("No database")')
+            sub = self._handleGlobals(node)
+            for s in sub:
+                code.append("    " + s)
             sub = self._handleFlow(node)
             for s in sub:
                 code.append("    " + s)
@@ -88,6 +89,18 @@ class SimpleWorkflow(Workflow):
             exec(self.code)
             setattr(self, 'process', MethodType(locals()['handler'], self,
                                               self.__class__))
+            
+    def _handleLxmlGlobals(self, node):
+        return self._handleGlobals(node)
+    
+    def _handleGlobals(self, node):
+        code = []
+        code.append('if session.database:')
+        code.append('    db = self.server.get_object(session, session.database)')
+        code.append('    self.database = db')
+        code.append('else:')
+        code.append('    raise WorkflowException("No database")')        
+        return code
             
     def _handleFlow(self, node):
         code = []
@@ -139,7 +152,7 @@ class SimpleWorkflow(Workflow):
                 else:
                     try:
                         name = n.title()
-                        fn = self.getattr("_handle%s" % name)
+                        fn = getattr(self, "_handle%s" % name)
                         code.extend(fn(c))
                     except:
                         raise ConfigFileException("Unknown workflow element: %s" % n)
@@ -197,7 +210,7 @@ class SimpleWorkflow(Workflow):
             else:
                 try:
                     name = n.title()
-                    fn = self.getattr("_handleLxml%s" % name)
+                    fn = getattr(self, "_handleLxml%s" % name)
                     code.extend(fn(c))
                 except:
                     raise ConfigFileException("Unknown workflow element: %s" % n)
@@ -266,6 +279,8 @@ class SimpleWorkflow(Workflow):
 
         if (function in self.singleFunctions):
             code.append('object.%s(session)' % function)
+        elif function in self.singleInputFunctions:
+            code.append('input = object.%s(session)' % function)
         elif (typ == 'index' and function == 'store_terms'):
             code.append('object.store_terms(session, input, inRecord)')
         elif typ == 'documentFactory' and function == 'load' and input == None:
@@ -313,7 +328,10 @@ class SimpleWorkflow(Workflow):
             fname = "split%s" % self.splitN
             self.splitN += 1
         code = ['def %s(self, session, input):' % fname] 
-        code.append('    db = self.database')
+        
+        sub = self._handleLxmlGlobals(node)
+        for s in sub:
+            code.append('    ' + s)
 
         sub = self._handleLxmlFlow(node)
         for s in sub:
@@ -335,7 +353,9 @@ class SimpleWorkflow(Workflow):
             fname = "split%s" % self.splitN
             self.splitN += 1
         code = ['def %s(self, session, input):' % fname] 
-        code.append('    db = self.database')
+        sub = self._handleGlobals(node)
+        for s in sub:
+            code.append('    ' + s)
 
         sub = self._handleFlow(node)
         for s in sub:
@@ -396,43 +416,13 @@ class CachingWorkflow(SimpleWorkflow):
                 raise ObjectDoesNotExistException(o)
             self.objcache[o] = obj
 
+    def _handleGlobals(self, node):
+        code = SimpleWorkflow._handleGlobals(self, node)
+        code.extend(
+                    ["if not self.objcache:",
+                     "    self.load_cache(session, db)"])
+        return code 
 
-    def _handleConfigNode(self, session, node):
-        # <workflow>
-        if node.localName == "workflow":
-            # Nummy. 
-            code = ['def handler(self, session, input=None):']
-            code.extend(
-["    if not self.objcache:",
- "        db = session.server.get_object(session, session.database)",
- "        self.load_cache(session, db)"])
-            sub = self._handleFlow(node)
-            for s in sub:
-                code.append("    " + s)
-            code.append('    return input')
-            self.code =  "\n".join(code)
-            exec(self.code)
-            setattr(self, 'process', MethodType(locals()['handler'], self,
-                                              self.__class__))
-            
-    def _handleLxmlConfigNode(self, session, node):
-        # <workflow>
-        if node.tag == "workflow":
-            # Nummy. 
-            code = ['def handler(self, session, input=None):']
-            code.extend(
-["    if not self.objcache:",
- "        db = session.server.get_object(session, session.database)",
- "        self.load_cache(session, db)"])
-            sub = self._handleLxmlFlow(node)
-            for s in sub:
-                code.append("    " + s)
-            code.append('    return input')
-            self.code =  "\n".join(code)
-            exec(self.code)
-            setattr(self, 'process', MethodType(locals()['handler'], self,
-                                              self.__class__))
-            
     def _handleLog(self, node):
         text = flattenTexts(node)
         if text[0] != '"':
@@ -453,7 +443,6 @@ class CachingWorkflow(SimpleWorkflow):
         else:
             return ["%s.log(session, str(%s).strip())" % (obj, text)]
 
-
     def _handleLxmlLog(self, node):
         text = flattenTexts(node)
         if text[0] != '"':
@@ -472,7 +461,6 @@ class CachingWorkflow(SimpleWorkflow):
                 return ["%s.log_%s(session, str(%s).strip())" % (obj, lvl, text)]
         else:
             return ["%s.log(session, str(%s).strip())" % (obj, text)]
-
             
     def _handleObject(self, node):
         ref = node.getAttributeNS(None, 'ref')
@@ -512,6 +500,8 @@ class CachingWorkflow(SimpleWorkflow):
 
         if (function in self.singleFunctions):
             code.append('%s.%s(session)' % (o, function))
+        elif (function in self.singleInputFunctions):
+            code.append('input = %s.%s(session)' % (o, function))
         elif (typ == 'index' and function == 'store_terms'):
             code.append('%s.store_terms(session, input, inRecord)' % o)
         elif typ == 'documentFactory' and function == 'load' and input == None:
@@ -532,7 +522,6 @@ class CachingWorkflow(SimpleWorkflow):
             code.append('if result != None:')
             code.append('    input = result')            
         return code
-
 
     def _handleSplit(self, node):
         # <workflow>
@@ -573,4 +562,3 @@ class CachingWorkflow(SimpleWorkflow):
         setattr(self, fname, MethodType(locals()[fname], self,
                                         self.__class__))
         return fname
-
