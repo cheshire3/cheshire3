@@ -23,6 +23,7 @@ class IrodsStream(object):
         self.cxn = conn
         self.coll = c
 
+        instream = stream
         # check if abs path to home dir
         if stream.startswith(home):
             stream = stream[len(home):]
@@ -30,10 +31,9 @@ class IrodsStream(object):
                 stream = stream[1:]
         colls = stream.split('/')
         for cln in colls:
-            if cln in c.getSubCollections():
-                c.openCollection(cln)
-            else:
-                raise IOError("When opening {0}: {1} does not exists in collection {2}".format(stream, cln, c.getCollName()))
+            exit_status = c.openCollection(cln)
+            if exit_status < 0:
+                raise IOError("When opening {0}: {1} does not exists in collection {2}".format(instream, cln, c.getCollName()))
         
 
 class IrodsFileDocumentStream(IrodsStream, FileDocumentStream):
