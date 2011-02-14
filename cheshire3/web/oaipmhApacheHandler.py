@@ -160,7 +160,10 @@ class Cheshire3OaiServer:
                 #something went wrong :( - use the epoch
                 self.earliestDatestamp = datetime.datetime.utcfromtimestamp(0)
             else:
-                self.earliestDatestamp = datetime.datetime.strptime(datestamp, '%Y-%m-%d %H:%M:%S')
+                try:
+                    self.earliestDatestamp = datetime.datetime.strptime(datestamp, '%Y-%m-%dT%H:%M:%S')
+                except ValueError:
+                    self.earliestDatestamp = datetime.datetime.strptime(datestamp, '%Y-%m-%d %H:%M:%S')
         
         self.repositoryName = self.protocolMap.title
         self.protocolVersion = self.protocolMap.version
@@ -206,7 +209,10 @@ class Cheshire3OaiServer:
         idx = pm.resolveIndex(session, q)
         vector = idx.fetch_vector(session, rec)
         term = idx.fetch_termById(session, vector[2][0][0])
-        datestamp = datetime.datetime.strptime(term, '%Y-%m-%d %H:%M:%S')
+        try:
+            datestamp = datetime.datetime.strptime(term, '%Y-%m-%dT%H:%M:%S')
+        except ValueError:
+            datestamp = datetime.datetime.strptime(term, '%Y-%m-%d %H:%M:%S')
         return (Header(str(r.id), datestamp, [], None), rec, None)    
     
     def identify(self):
@@ -242,7 +248,10 @@ class Cheshire3OaiServer:
         until = until[:-1] + chr(ord(until[-1])+1)
         termList = idx.fetch_termList(session, from_, 0, '>=', end=until)
         # create list of datestamp, resultSet tuples
-        tuples = [(datetime.datetime.strptime(t[0], '%Y-%m-%d %H:%M:%S'), idx.construct_resultSet(session, t[1])) for t in termList]
+        try:
+            tuples = [(datetime.datetime.strptime(t[0], '%Y-%m-%dT%H:%M:%S'), idx.construct_resultSet(session, t[1])) for t in termList]
+        except ValueError:
+            tuples = [(datetime.datetime.strptime(t[0], '%Y-%m-%d %H:%M:%S'), idx.construct_resultSet(session, t[1])) for t in termList]
         return tuples
 
     def listIdentifiers(self, metadataPrefix, set=None, from_=None, until=None, cursor=0, batch_size=10):
