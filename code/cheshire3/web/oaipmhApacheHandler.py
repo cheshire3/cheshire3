@@ -44,12 +44,14 @@ lxmlParser = serv.get_object(session, 'LxmlParser')
 
 configs = {}
 dbs = {}
+
 serv._cacheDatabases(session)        
 for db in serv.databases.values():
     if db.get_setting(session, 'oai-pmh'):
         db._cacheProtocolMaps(session)
         map = db.protocolMaps.get('http://www.openarchives.org/OAI/2.0/OAI-PMH', None)
-        if map:
+        # check that there's a path and that it can actually be requested from this handler
+        if (map is not None):
             configs[map.databaseName] = map
             dbs[map.databaseName] = db
 
@@ -61,23 +63,23 @@ class Cheshire3OaiMetadataWriter:
         self.txr = txr
     
     def __call__(self, element, rec):
-        """ Apply any necessary transformation to a record, and appends resulting XML to the elementTree. """
+        """Apply any necessary transformation to a record, and appends resulting XML to the elementTree. """
         if self.txr:
-            doc = self.txr.process_record(session, rec) # use transformer obejct
+            # use transformer object
+            doc = self.txr.process_record(session, rec)
         else:
-            doc = StringDocument(rec.get_xml(session)) # make no assumptions about class of record
-
+            # make no assumptions about class of record
+            doc = StringDocument(rec.get_xml(session))
         lxmlRec = lxmlParser.process_document(session, doc)
         dom = lxmlRec.get_dom(session)
         return element.append(dom)
-      
     #= end OaiMetadataWriter ------------------------------------------------------
+
 
 class MinimalOaiServer(OaiServer):
     """A server that responds to messages by returning OAI-PMH compliant XML.
 
     Takes a server object complying with the OAIPMH interface.
-    
     Sub-classed only so that correct class of MinimalXMLTreeServer instantiated
     """
     
@@ -96,9 +98,12 @@ class MinimalXMLTreeServer(XMLTreeServer):
         self._metadata_registry = (metadata_registry or global_metadata_registry)
         self._nsmap = nsmap
 
+
 class MinimalResumptionServer(ResumptionServer):
-    """Handles resumption tokens etc.
-    More efficient than default implementations, as only contructs minimal resultSet needed for response."""
+    """A server object that handles resumption tokens etc.
+    
+    More efficient than default implementations, as only contructs minimal resultSet needed for response.
+    """
     
     def handleVerb(self, verb, kw):
         # fetch the method for the verb
@@ -110,7 +115,6 @@ class MinimalResumptionServer(ResumptionServer):
                 kw, cursor = decodeResumptionToken(kw['resumptionToken'])
             else:
                 cursor = 0
-
             kw['cursor'] = cursor
             end_batch = cursor + batch_size        
             # fetch only self._batch_size results
@@ -129,9 +133,7 @@ class MinimalResumptionServer(ResumptionServer):
             return result, resumptionToken
         else:
             result = method(**kw)
-
         return result
-    
 
 
 class Cheshire3OaiServer:
@@ -172,7 +174,6 @@ class Cheshire3OaiServer:
         self.granularity = "YYYY-MM-DDThh:mm:ssZ" # finest level of granularity
         self.compression = []        # Cheshire3 does not support compressions at this time
         self.metadataRegistry = OaiMetadataRegistry()
-    
     
     def getRecord(self, metadataPrefix, identifier):
         """Return a (header, metadata, about) tuple for the the record.
@@ -221,7 +222,12 @@ class Cheshire3OaiServer:
                         self.earliestDatestamp, self.deletedRecord, self.granularity, self.compression)
 
     def _listResults(self, metadataPrefix, set=None, from_=None, until=None):
-        """Return a list of (datestamp, resultSet) tuples, suitable for use by: listIdentifiers, listRecords."""
+        """Return a list of (datestamp, resultSet) tuples.
+        
+        Suitable for use by:
+            - listIdentifiers
+            - listRecords
+        """
         if until and until < self.earliestDatestamp:
             raise BadArgumentError('until argument value is earlier than earliestDatestamp.')
         if not from_:
@@ -231,7 +237,6 @@ class Cheshire3OaiServer:
             #(from_ < self.earliestDatestamp)
         if (until < from_):
             raise BadArgumentError('until argument value is earlier than from argument value.')
-        
         q = cqlparse('rec.lastModificationDate > "%s" and rec.lastModificationDate < "%s"' % (from_, until))
         # actually need datestamp values as well as results - interact with indexes directly for efficiency
         pm = self.db.get_path(session, 'protocolMap') # get CQL ProtocolMap
@@ -241,17 +246,18 @@ class Cheshire3OaiServer:
         for src in idx.sources[u'data']:
             res.update(src[1].process(session, [[str(from_)]]))
             res.update(src[1].process(session, [[str(until)]]))
-            
         from_ = min(res.keys())
         until = max(res.keys())
         # tweak until value to make it inclusive
         until = until[:-1] + chr(ord(until[-1])+1)
         termList = idx.fetch_termList(session, from_, 0, '>=', end=until)
         # create list of datestamp, resultSet tuples
-        try:
-            tuples = [(datetime.datetime.strptime(t[0], '%Y-%m-%dT%H:%M:%S'), idx.construct_resultSet(session, t[1])) for t in termList]
-        except ValueError:
-            tuples = [(datetime.datetime.strptime(t[0], '%Y-%m-%d %H:%M:%S'), idx.construct_resultSet(session, t[1])) for t in termList]
+        tuples = []
+        for t in termList:
+            try:
+                tuples.append((datetime.datetime.strptime(t[0], u'%Y-%m-%dT%H:%M:%S'), idx.construct_resultSet(session, t[1])))
+            except ValueError:
+                tuples.append((datetime.datetime.strptime(t[0], u'%Y-%m-%d %H:%M:%S'), idx.construct_resultSet(session, t[1])))
         return tuples
 
     def listIdentifiers(self, metadataPrefix, set=None, from_=None, until=None, cursor=0, batch_size=10):
@@ -269,7 +275,6 @@ class Cheshire3OaiServer:
         # Cheshire3 does not support sets
         if set:
             raise NoSetHierarchyError()
-        
         # get list of datestamp, resultSet tuples
         tuples = self._listResults(metadataPrefix, set, from_, until)
         # need to return iterable of header objects
@@ -281,12 +286,10 @@ class Cheshire3OaiServer:
                 if i < cursor:
                     i+=1
                     continue
-                
                 headers.append(Header(str(r.id), datestamp, [], None))
                 i+=1
                 if (len(headers) >= batch_size):
                     return headers
-                
         return headers
         
     def listMetadataFormats(self, identifier=None):
@@ -309,7 +312,6 @@ class Cheshire3OaiServer:
                 
             if not len(rs) or len(rs) > 1:
                 raise IdDoesNotExistError('%s records exist for identifier: %s' % (len(rs), identifier))
-            
         # all records should be available in the same formats in a Cheshire3 database
         mfs = []
         for prefix, ns in self.protocolMap.recordNamespaces.iteritems():
@@ -342,12 +344,10 @@ class Cheshire3OaiServer:
             txr = self.protocolMap.transformerHash.get(schemaId, None)
             mdw = Cheshire3OaiMetadataWriter(txr)
             self.metadataRegistry.registerWriter(metadataPrefix, mdw)
-        
         # get list of datestamp, resultSet tuples
         tuples = self._listResults(metadataPrefix, set, from_, until)
         # need to return iterable of (header, metadata, about) tuples
         # Header(identifier, datestamp, setspec, deleted) - identifier: string, datestamp: dtaetime.datetime instance, setspec: list, deleted: boolean?
-                
         records = []
         i = 0
         for (datestamp, rs) in tuples:
@@ -360,7 +360,6 @@ class Cheshire3OaiServer:
                 i+=1
                 if (len(records) == batch_size):
                     return records
-        
         return records
 
     def listSets(self, cursor=0, batch_size=10):
@@ -374,12 +373,12 @@ class Cheshire3OaiServer:
 
 
 class reqHandler:
+
     def send_xml(self, text, req, code=200):
         req.content_type = 'text/xml'
         req.content_length = len(text)
         req.send_http_header()
         req.write(text)
-        
         
     def dispatch(self, req):
         global configs, oaiDcReader, c3OaiServers
@@ -393,7 +392,6 @@ class reqHandler:
             store = FieldStorage(req)            
             for qp in store.list:
                 args[qp.name] = qp.value
-                            
             try:
                 oaixml = MinimalOaiServer(c3OaiServers[path], c3OaiServers[path].metadataRegistry)
             except KeyError:
@@ -409,16 +407,21 @@ class reqHandler:
                     xmlresp = oaixml.handleException(args, sys.exc_info())
             except C3Exception, e:
                 xmlresp = '<c3:error xmlns:c3="http://www.cheshire3.org/schemas/error" code="%s">%s</c3:error>' % (str(e.__class__).split('.')[-1], e.reason)
-
             self.send_xml(xmlresp, req)
         else:
             fullPath = os.path.join(apache.server_root(), 'htdocs', path)
             if os.path.exists(fullPath) and not os.path.isdir(fullPath):
                 req.sendfile(os.path.join(apache.server_root(), 'htdocs', path))
             else:
-                # TODO: send proper OAI error
-                dbps = ['<database>%s</database>' % dbp for dbp in configs.iterkeys()]
-                self.send_xml('<c3:error xmlns:c3="http://www.cheshire3.org/schemas/error">Incomplete baseURL, requires a database path from: <databases numberOfDatabases="%d">%s</databases></c3:error>' % (len(configs), ''.join(dbps)), req)
+                # TODO: send proper OAI error?
+                dbps = ['<c3:database>{0}</c3:database>'.format(dbp) for dbp in configs]
+                self.send_xml('''
+<c3:error xmlns:c3="http://www.cheshire3.org/schemas/error">
+    <c3:details>{0}</c3:details>
+    <c3:message>Incomplete or incorrect baseURL, requires a database path from:
+        <c3:databases>{1}</c3:databases>
+    </c3:message>
+</c3:error>'''.format(path, '\n\t'.join(dbps)), req)
                     
 #- end reqHandler -------------------------------------------------------------
     
@@ -440,5 +443,4 @@ def handler(req):
         cgitb.Hook(file = req).handle()                                            # give error info
     else:
         return apache.OK
-
 # Add AuthHandler here when necesary ------------------------------------------
