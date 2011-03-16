@@ -329,6 +329,8 @@ class DateRangeTokenizer(DateTokenizer):
         # convert ISO 8601 date elements to extended format (YYYY-MM-DD)
         # for better recognition by date parser
         data = self.isoDateRe.sub(self._convertIsoDates, data)
+        if not data:
+            return []
         # use a new default, just under a year on for the end of the range
         td = timedelta(days=364, hours=23, minutes=59, seconds=59, 
                        microseconds=999999)
