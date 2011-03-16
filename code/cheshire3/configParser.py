@@ -20,7 +20,7 @@ CONFIG_NS = "http://www.cheshire3.org/schemas/config/"
 from lxml import etree
 
 class CaselessDictionary(dict):
-    """ Uses lower case keys, but preserves keys as inserted."""
+    """ A dictionary that is case-insensitive when searching, but also preserves the keys as inserted. """
     def __init__(self, initval={}):
         if isinstance(initval, dict):
             for key, value in initval.iteritems():
@@ -69,7 +69,7 @@ class CaselessDictionary(dict):
     
 
 class C3Object(object):
-    """Base Class of Cheshire3 Object"""
+    """ Abstract Base Class for Cheshire3 Objects. """
     id = ""
     version = ""
     complexity = ""
