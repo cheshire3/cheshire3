@@ -1,5 +1,7 @@
 
+import urllib
 import datetime
+
 from lxml import etree
 
 from cheshire3.record import LxmlRecord
@@ -30,14 +32,12 @@ def headerFromLxmlElement(et):
 
 def getRecord(baseUrl, metadataPrefix, identifier):
     """Return (Header, metadata, about) tuple of record with specified identifier from the specified OAI-PMH server."""
-    reqUrlBits = [baseUrl
-                 , '?'
-                 , 'verb=GetRecord'
-                 ,'&metadataPrefix=' + metadataPrefix
-                 ,'&identifier=' + identifier
-                 ]
-
-    data = fetch_data(''.join(reqUrlBits))
+    args = {'verb': "GetRecord",
+            'metadataPrefix': metadataPrefix,
+            'identifier': identifier}
+    params = urllib.urlencode(args)
+    url = "{0}?{1}".format(baseUrl, params)
+    data = fetch_data(url)
     try:
         tree = etree.fromstring(data)
     except:
@@ -55,19 +55,18 @@ def getRecord(baseUrl, metadataPrefix, identifier):
 
 def listIdentifiers(baseUrl, metadataPrefix, set=None, from_=None, until=None, cursor=0, batch_size=10):
     """Return a list of Headers with the given parameters from the specified OAI-PMH server."""
-    reqUrlBits = [baseUrl
-                 , '?'
-                 , 'verb=ListIdentifiers'
-                 ,'&metadataPrefix=' + metadataPrefix
-                 ]
+    args = {'verb': "ListIdentifiers",
+            'metadataPrefix': metadataPrefix
+            }
     if set is not None:
-        reqUrlBits.append('&set=' + set)
+        args['set'] = set
     if from_ is not None:
-        reqUrlBits.append('&from=' + str(from_))
+        args['from'] = str(from_)
     if until is not None:
-        reqUrlBits.append('&until=' + str(until))
-        
-    data = fetch_data(''.join(reqUrlBits))
+        args['until'] = str(until)
+    params = urllib.urlencode(args)
+    url = "{0}?{1}".format(baseUrl, params)
+    data = fetch_data(url)
     headers = []
     while data is not None:
         try:
@@ -81,7 +80,7 @@ def listIdentifiers(baseUrl, metadataPrefix, set=None, from_=None, until=None, c
             
         resTok = tree.xpath('string(//oai:resumptionToken)', namespaces={'oai': NS_OAIPMH})
         if resTok:
-            data = fetch_data(''.join(reqUrlBits[0:3]) + '&resumptionToken=' + cgi_encode(resTok))
+            data = fetch_data(url + '&resumptionToken=' + cgi_encode(resTok))
         else:
             break
 
@@ -90,19 +89,18 @@ def listIdentifiers(baseUrl, metadataPrefix, set=None, from_=None, until=None, c
 
 def listRecords(baseUrl, metadataPrefix, set=None, from_=None, until=None, cursor=0, batch_size=10):
     """Return a list of (Header, metadata, about) tuples for records which match the given parameters from the specified OAI-PMH server."""
-    reqUrlBits = [baseUrl
-                 , '?'
-                 , 'verb=ListIdentifiers'
-                 ,'&metadataPrefix=' + metadataPrefix
-                 ]
+    args = {'verb': "ListRecords",
+            'metadataPrefix': metadataPrefix
+            }
     if set is not None:
-        reqUrlBits.append('&set=' + set)
+        args['set'] = set
     if from_ is not None:
-        reqUrlBits.append('&from=' + str(from_))
+        args['from'] = str(from_)
     if until is not None:
-        reqUrlBits.append('&until=' + str(until))
-        
-    data = fetch_data(''.join(reqUrlBits))
+        args['until'] = str(until)
+    params = urllib.urlencode(args)
+    url = "{0}?{1}".format(baseUrl, params)
+    data = fetch_data(url)
     records = []
     i = 0
     while (data is not None):
@@ -128,7 +126,7 @@ def listRecords(baseUrl, metadataPrefix, set=None, from_=None, until=None, curso
             
         resTok = tree.xpath('string(//oai:resumptionToken)', namespaces={'oai': NS_OAIPMH})
         if resTok:
-            data = fetch_data(''.join(reqUrlBits[0:3]) + '&resumptionToken=' + cgi_encode(resTok))
+            data = fetch_data(url + '&resumptionToken=' + cgi_encode(resTok))
         else:
             break
 
