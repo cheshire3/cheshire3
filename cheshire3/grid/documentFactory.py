@@ -30,10 +30,12 @@ class IrodsStream(object):
             if stream[0] == "/":
                 stream = stream[1:]
         colls = stream.split('/')
-        for cln in colls:
+        for i, cln in enumerate(colls):
             exit_status = c.openCollection(cln)
             if exit_status < 0:
-                raise IOError("When opening {0}: {1} does not exists in collection {2}".format(instream, cln, c.getCollName()))
+                if (i < len(colls) - 1) or \
+                    (cln not in [obj[0] for obj in c.getObjects()]):
+                    raise IOError("When opening {0}: {1} does not exists in collection {2}".format(instream, cln, c.getCollName()))
         
 
 class IrodsFileDocumentStream(IrodsStream, FileDocumentStream):
