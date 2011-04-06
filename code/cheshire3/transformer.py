@@ -225,7 +225,7 @@ class LxmlOffsetQueryTermHighlightingTransformer(LxmlQueryTermHighlightingTransf
                     xp = xps[ni]
                 except KeyError:
                     continue # no XPath
-                el = xpathfn(xps[ni])[0]
+                el = xpathfn(xp)[0]
                 located = None
                 for ci, c in enumerate(el.iter()): # ignore comments processing instructions etc.
                     if c.text:
@@ -265,7 +265,7 @@ class LxmlOffsetQueryTermHighlightingTransformer(LxmlQueryTermHighlightingTransf
                                     hel = self._insertHighlightElement(c, located, start, end)
                                     p = c.getparent()
                                     try:
-                                        p.insert(ci, hel)
+                                        p.insert(p.index(c)+1, hel)
                                     except TypeError:
                                         # immutable element (comment!?)
                                         break
