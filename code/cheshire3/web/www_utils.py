@@ -75,7 +75,7 @@ def generate_cqlQuery(form):
             if (len(subClauses)):
                 idxClauses.append('(%s)' % (subBool.join(subClauses)))
             
-        qClauses.append('(%s)' % (' or/relevant/proxinfo '.join(idxClauses)))
+        qClauses.append('(%s)' % (' or/rel.combine=sum/proxinfo '.join(idxClauses)))
         # if there's another clause and a corresponcding boolean
         try: qClauses.append(bools[i])
         except: break
