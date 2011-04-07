@@ -39,8 +39,9 @@ class FieldStorageQueryStream(QueryStream):
                 cont = cont.replace('"', '\\"')
                 
             for idx in idxs.split('||'):
+                raise ValueError
                 subClauses = []
-                if (rel[:3] == 'all'):
+                if (rel.startswith('all')):
                     subBool = ' and/relevant/proxinfo '
                 else:
                     subBool = ' or/relevant/proxinfo '
@@ -48,7 +49,8 @@ class FieldStorageQueryStream(QueryStream):
                 # in case they're trying to do phrase searching
                 if (rel.find('exact') != -1 or rel.find('=') != -1 or rel.find('/string') != -1):
                     # don't allow phrase searching for exact or /string searches
-                    pass # we already did quote escaping
+                    # we already did quote escaping
+                    pass 
                 else:
                     phrases = self.phraseRe.findall(cont)
                     for ph in phrases:
@@ -62,7 +64,7 @@ class FieldStorageQueryStream(QueryStream):
                 if (len(subClauses)):
                     idxClauses.append('({0})'.format(subBool.join(subClauses)))
                 
-            qClauses.append('({0})'.format(' or/relevant/proxinfo '.join(idxClauses)))
+            qClauses.append('({0})'.format(' or/rel.combine=sum/proxinfo '.join(idxClauses)))
             # if there's another clause and a corresponding boolean
             try:
                 qClauses.append(bools[i])
