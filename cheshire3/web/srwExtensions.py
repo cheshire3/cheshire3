@@ -82,7 +82,7 @@ def docidRecordHandler(session, val, resp, rec):
 
 def recordMetadataHandler(session, val, resp, rsi, rec):
     """ Put resultSetItem info into extraRecordData"""
-    mdBits = ['<rec:metaData xmlns:rec="http://srw.cheshire3.org/extension/2/record-1.1">']
+    mdBits = ['<rec:metaData xmlns:rec="info:srw/extension/2/record-1.1">']
     # ids may contain nasties - escape them
     mdBits.append('<rec:identifier>%s</rec:identifier>' % escape(unicode(rec.id, 'utf-8')))
     if rec.recordStore:
@@ -111,7 +111,7 @@ def resultSetSummaryHandler(session, val, resp, resultSet=[], db=None):
     if not len(resultSet):
         return
     
-    mdBits = ['<rs:resultSetData xmlns:rs="http://srw.cheshire3.org/extension/2/resultSet-1.1">']
+    mdBits = ['<rs:resultSetData xmlns:rs="info:srw/extension/2/resultSet-1.1">']
     if hasattr(resultSet[0], 'weight'):
         allids = [escape(r.id) for r in resultSet] # ids may contain nasties - escape them
         mdBits.append('<rs:ids>%r</rs:ids>' % allids)
@@ -150,7 +150,7 @@ def resultSetFacetsHandler(session, val, resp, resultSet=[], db=None):
     
     global namespaces, sruElemFac
     myNamespaces = namespaces.copy()
-    myNamespaces['fct'] = "http://srw.cheshire3.org/extension/2/facets-1.0"
+    myNamespaces['fct'] = "info:srw/extension/2/facets-1.0"
     
     pm = db.get_path(session, 'protocolMap')
     if not pm:
