@@ -1,8 +1,20 @@
+"""OAI-PMH server implementation to be run under mod_python.
 
-import sys, os, cgitb, time
-from mod_python import apache
-from mod_python.util import FieldStorage
+ Apache Config:
+<Directory /usr/local/apache2/htdocs/OAI/2.0>
+  SetHandler mod_python
+  PythonDebug On
+  PythonPath "['/home/cheshire/cheshire3/code', ...]+sys.path"
+  PythonHandler cheshire3.web.oaipmhApacheHandler
+</Directory>
+NB. SetHandler, not AddHandler.
 
+"""
+
+import sys
+import os
+import datetime
+import cgitb
 
 # import Some necessary Cheshire3 bits
 from cheshire3.server import SimpleServer
@@ -16,8 +28,6 @@ from cheshire3.web.oai_utils import *
 
 from PyZ3950 import SRWDiagnostics
 
-
-import datetime
 # import bits from oaipmh module
 import oaipmh.server
 from oaipmh.server import Server as OaiServer, XMLTreeServer, Resumption as ResumptionServer, decodeResumptionToken, encodeResumptionToken
@@ -25,20 +35,19 @@ from oaipmh.common import Header, Identify, getMethodForVerb
 from oaipmh.metadata import  MetadataRegistry as OaiMetadataRegistry, global_metadata_registry
 from oaipmh.error import *
 
-# Apache Config:
-#<Directory /usr/local/apache2/htdocs/OAI/2.0>
-#  SetHandler mod_python
-#  PythonDebug On
-#  PythonPath "['/home/cheshire/cheshire3/code', ...]+sys.path"
-#  PythonHandler oaipmhApacheHandler
-#</Directory>
-# NB. SetHandler, not AddHandler.
-
 # Cheshire3 architecture
 cheshirePath = os.environ.get('C3HOME', '/home/cheshire')
 
 session = Session()
-session.environment = "apache"
+
+try:
+    from mod_python import apache
+    from mod_python.util import FieldStorage
+except ImportError:
+    pass
+else:
+    session.environment = "apache"
+    
 serv = SimpleServer(session, os.path.join(cheshirePath, 'cheshire3', 'configs', 'serverConfig.xml'))
 lxmlParser = serv.get_object(session, 'LxmlParser')
 
@@ -435,7 +444,6 @@ h = reqHandler()
 
 def handler(req):
     # do stuff
-    st = time.time()
     try:
         h.dispatch(req)
     except:
