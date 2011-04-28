@@ -8,7 +8,7 @@ class SingleTransactionLogger(object):
     def __init__(self, remoteHost):
         self.startTime = time.time()
         self.lastLogTime = time.time()
-        self.logLines = ['Request received from {0}'.format(remoteHost)]
+        self.logLines = [remoteHost]
         
     def log(self, msg):
         now = time.time()
