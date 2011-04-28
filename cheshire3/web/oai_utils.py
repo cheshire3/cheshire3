@@ -1,4 +1,5 @@
 
+import sys
 import urllib
 import datetime
 
@@ -23,11 +24,12 @@ nsmap = {
     'dc': NS_DC
     }
 
+
 def headerFromLxmlElement(et):
-    id = et.xpath('string(//oai:identifier)', namespaces={'oai': NS_OAIPMH})
+    identifier = et.xpath('string(//oai:identifier)', namespaces={'oai': NS_OAIPMH})
     datestamp = et.xpath('string(//oai:datestamp)', namespaces={'oai': NS_OAIPMH})
     datestamp = datetime.datetime.strptime(datestamp, '%Y-%m-%dT%H:%M:%SZ')
-    return Header(id, datestamp, [], None)
+    return Header(identifier, datestamp, [], None)
 
 
 def getRecord(baseUrl, metadataPrefix, identifier):
@@ -41,10 +43,10 @@ def getRecord(baseUrl, metadataPrefix, identifier):
     try:
         tree = etree.fromstring(data)
     except:
-        print url
-        print data
+        sys.stderr.write(url + '\n')
+        sys.stderr.write(data + '\n')
+        sys.stderr.flush()
         raise
-
     hEl = tree.xpath('//oai:record[1]/oai:header', namespaces={'oai': NS_OAIPMH})[0]
     header = headerFromLxmlElement(hEl)
     recEl = tree.xpath('//oai:record[1]/oai:metadata/*', namespaces={'oai': NS_OAIPMH})[0]
@@ -72,18 +74,21 @@ def listIdentifiers(baseUrl, metadataPrefix, set=None, from_=None, until=None, c
         try:
             tree = etree.fromstring(data)
         except:
-            print url
-            print data
+            sys.stderr.write(url + '\n')
+            sys.stderr.write(data + '\n')
+            sys.stderr.flush()
             raise
         for h in tree.xpath('//oai:header', namespaces={'oai': NS_OAIPMH}):
             headers.append(headerFromLxmlElement(h))
             
         resTok = tree.xpath('string(//oai:resumptionToken)', namespaces={'oai': NS_OAIPMH})
         if resTok:
-            data = fetch_data(url + '&resumptionToken=' + cgi_encode(resTok))
+            params = urllib.urlencode({'verb': "ListIdentifiers",
+                                       'resumptionToken': resTok})
+            url = "{0}?{1}".format(baseUrl, params)
+            data = fetch_data(url)
         else:
             break
-
     return headers
 
 
