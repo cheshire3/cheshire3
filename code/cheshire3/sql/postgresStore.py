@@ -166,7 +166,7 @@ class PostgresStore(SimpleStore):
                 res = self._query(query)
 
     def _openContainer(self, session):
-        if self.cxn == None:
+        if self.cxn is None:
             self.cxn = pg.connect(self.database)
 
     def _closeContainer(self, session):
@@ -175,7 +175,9 @@ class PostgresStore(SimpleStore):
             del self.cxn
             self.cxn = None
 
-    def _query(self, query):           
+    def _query(self, query):
+        if self.cxn is None:
+            self.cxn = pg.connect(self.database)
         query = query.encode('utf-8')
         res = self.cxn.query(query)
         return res
