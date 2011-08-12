@@ -160,6 +160,7 @@ class ModifiableObject:
             if (str(m.type) == k or m.type.value == k):
                 return m
         return None
+      
         
 class Triple (PrefixableObject):
     "Object to represent a CQL triple"
@@ -197,18 +198,25 @@ class Triple (PrefixableObject):
         return ''.join(xml)
 
     def toCQL(self):
-        # XXX sortkeys???
         txt = []
         if (self.prefixes):
+            ptxt = []
             for p in self.prefixes.keys():
                 if (p <> ''):
-                    txt.append('>%s="%s"' % (p, self.prefixes[p]))
+                    ptxt.append('>%s="%s"' % (p, self.prefixes[p]))
                 else:
-                    txt.append('>"%s"' % (self.prefixes[p]))
-            prefs = ' '.join(txt)
-            return "(%s %s %s %s)" % (prefs, self.leftOperand.toCQL(), self.boolean.toCQL(), self.rightOperand.toCQL())
-        else:
-            return "(%s %s %s)" % (self.leftOperand.toCQL(), self.boolean.toCQL(), self.rightOperand.toCQL())
+                    ptxt.append('>"%s"' % (self.prefixes[p]))
+            prefs = ' '.join(ptxt)
+            txt.append(prefs)
+        txt.append(self.leftOperand.toCQL())
+        txt.append(self.boolean.toCQL())
+        txt.append(self.rightOperand.toCQL())
+        # Add sortKeys
+        if self.sortKeys:
+            txt.append("sortBy")
+            for sk in self.sortKeys:
+                txt.append(sk.toCQL())
+        return "({0})".format(" ".join(txt))
         
     def getResultSetId(self, top=None):
         if fullResultSetNameCheck == 0 or self.boolean.value in ['not', 'prox']:
@@ -239,7 +247,6 @@ class Triple (PrefixableObject):
                 return ""
         else:
             return rsList
-
 
 
 class SearchClause (PrefixableObject):
@@ -283,7 +290,6 @@ class SearchClause (PrefixableObject):
         return ''.join(xml)
 
     def toCQL(self):
-        # XXX sortkeys???
         text = []
         for p in self.prefixes.keys():
             if (p <> ''):
@@ -291,6 +297,11 @@ class SearchClause (PrefixableObject):
             else:
                 text.append('>"%s"' % (self.prefixes[p]))
         text.append('%s %s "%s"' % (self.index, self.relation.toCQL(), self.term.toCQL()))
+        # Add sortKeys
+        if self.sortKeys:
+            text.append("sortBy")
+            for sk in self.sortKeys:
+                txt.append(sk.toCQL())
         return ' '.join(text)
 
     def getResultSetId(self, top=None):
@@ -313,7 +324,6 @@ class Index(PrefixedObject, ModifiableObject):
             diag.details = self.value
             raise diag
         
-
     def toXCQL(self, depth=0):
         space = "  " * depth
         if (depth == 0):
@@ -330,7 +340,11 @@ class Index(PrefixedObject, ModifiableObject):
         return ''.join(xml)
 
     def toCQL(self):
-        return str(self)
+        txt = [str(self)]
+        for m in self.modifiers:
+            txt.append(m.toCQL())
+        return '/'.join(txt)
+
 
 class Relation(PrefixedObject, ModifiableObject):
     "Object to represent a CQL relation"
