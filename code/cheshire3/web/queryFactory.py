@@ -39,7 +39,6 @@ class FieldStorageQueryStream(QueryStream):
                 cont = cont.replace('"', '\\"')
                 
             for idx in idxs.split('||'):
-                raise ValueError
                 subClauses = []
                 if (rel.startswith('all')):
                     subBool = ' and/relevant/proxinfo '
