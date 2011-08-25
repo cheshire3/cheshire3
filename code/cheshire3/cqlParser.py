@@ -301,7 +301,7 @@ class SearchClause (PrefixableObject):
         if self.sortKeys:
             text.append("sortBy")
             for sk in self.sortKeys:
-                txt.append(sk.toCQL())
+                text.append(sk.toCQL())
         return ' '.join(text)
 
     def getResultSetId(self, top=None):
