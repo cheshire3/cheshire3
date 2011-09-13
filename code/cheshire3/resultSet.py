@@ -1,23 +1,26 @@
+import sys
+import types
+import math
+import operator
+import time
+import cStringIO as StringIO
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+    
+from itertools import combinations
+from xml.sax.saxutils import escape, unescape
+from lxml import etree
 
 from cheshire3.baseObjects import ResultSet, ResultSetItem, Index, Workflow
 from cheshire3.utils import SimpleBitfield
 from cheshire3 import cqlParser
 
-import math, types, sys
-import cStringIO as StringIO
-
-from xml.sax.saxutils import escape, unescape
 
 def ucescape(data):
     return unicode(escape(data), 'latin-1')
 
-try:
-    import cPickle as pickle
-except:
-    import pickle
-
-import time
-from lxml import etree
 
 srlz_typehash = {int : 'int', long : 'long', str : 'str', unicode : 'unicode',
                     bool : 'bool', type(None) : 'None', float : 'float'}
@@ -25,15 +28,18 @@ dsrlz_typehash = {}
 for k,v in srlz_typehash.iteritems():
     dsrlz_typehash[v] = k
 
+
 class RankedResultSet(ResultSet):
 
     def _sumWeights(self, items, n):
+        """Sum the values."""
         item = items[0]
         item.weight = sum([x.weight for x in items])
         return item
         #item.weight = sum([x.weight for x in items if (x.weight != 0.5)])
         
     def _meanWeights(self, items, n):
+        """Mean average the values."""
         item = items[0]
         item.weight = sum([x.weight for x in items])
         item.weight = item.weight / n
@@ -42,13 +48,14 @@ class RankedResultSet(ResultSet):
         #item.weight = sum(trueWeightedItems)
         #item.weight = item.weight / len(trueWeightedItems)
 
-
     def _normWeights(self, items, n):
+        """Normalize the values and average them."""
         for i in items:
             i.weight = i.weight * (i.resultSet.minWeight / i.resultSet.maxWeight)
         return self._meanWeights(items, n)
 
     def  _cmbzWeights(self, a, b):
+        """Normalise and rescale values."""
         a.weight = a.weight * (self.minWeight / self.maxWeight)
         if b:
             b.weight = b.weight * (self.minWeight / self.maxWeight)
@@ -57,6 +64,7 @@ class RankedResultSet(ResultSet):
             a.weight = a.weight / 2.0
 
     def _nprvWeights(self, a, b):
+        """Normalise values and privilege high ranked documents."""
         a.weight = a.weight * (self.minWeight / self.maxWeight)
         if b:
             b.weight = b.weight * (self.minWeight / self.maxWeight)
@@ -69,18 +77,18 @@ class RankedResultSet(ResultSet):
                 a.weight = a.weight  / 2.0
 
     def _pivotWeights(self, a, b):
-        # Determine which item is component set, and which item is from document set
-        # If the component's parent document's id is the same as the one in the
-        # full document list, then adjust
+        """Determine which item is component set, and which item is from document set
+        If the component's parent document's id is the same as the one in the
+        full document list, then adjust
 
-        # Normalise min/max as above
-        # Pivot default is 0.7, but allow override
-        # (Pivot * documentScore) + ((1-pivot) * componentScore)
+        Normalize min/max as above
+        Pivot default is 0.7, but allow override
+        (Pivot * documentScore) + ((1-pivot) * componentScore)
 
-        # If not in the list then just ((1-pivot) * componentScore)
-
-        pass
-
+        If not in the list then just ((1-pivot) * componentScore)
+        """
+        raise NotImplementedError
+    
     
 class SimpleResultSet(RankedResultSet):
     _list = []
@@ -120,7 +128,11 @@ class SimpleResultSet(RankedResultSet):
         self.id = id
         self.recordStore = recordStore
         
-        self.relevanceContextSets = {"info:srw/cql-context-set/2/relevance-1.0": 1.0, "info:srw/cql-context-set/2/relevance-1.1": 1.1}
+        self.relevanceContextSets = {
+        	"info:srw/cql-context-set/2/relevance-1.0": 1.0, 
+        	"info:srw/cql-context-set/2/relevance-1.1": 1.1, 
+        	"info:srw/cql-context-set/2/relevance-1.2": 1.2
+        }
         
         self.termid = -1
         self.totalOccs = 0
@@ -208,7 +220,10 @@ class SimpleResultSet(RankedResultSet):
                 except:
                     raise
             elif t in dsrlz_typehash:
-                val = dsrlz_typehash[t](txt)
+                if type(txt) == unicode:
+                    val = dsrlz_typehash[t](txt.encode('utf-8'))
+                else:
+                    val = dsrlz_typehash[t](txt)
             else:
                 val = txt
             return val
@@ -260,7 +275,7 @@ class SimpleResultSet(RankedResultSet):
             self.append(i)
 
     def _lrAssign(self, session, others, clause, cql, db):
-        """Assign Logarithmic Regression weights and merge items in resultSets in others into self in a single method."""
+        """Assign Logistic Regression weights and merge items in resultSets in others into self in a single method."""
         if (db):
             totalDocs = db.totalItems
             if totalDocs == 0:
@@ -401,7 +416,7 @@ class SimpleResultSet(RankedResultSet):
         return 1
 
     def _coriAssign(self, session, others, clause, cql, db):
-        """Assign CORI weighting to each items in each resultSet in others."""
+        """Assign CORI weighting to each item in each resultSet in others."""
         if (db):
             totalDocs = float(db.totalItems)
             avgSize = float(db.meanWordCount)
@@ -539,7 +554,6 @@ class SimpleResultSet(RankedResultSet):
                     recStore = db.get_object(session, item.recordStore)
                     recStores[item.recordStore] = recStore
                 size = recStore.fetch_recordMetadata(session, item.id, 'wordCount')
-                
                 if rsizes:
                     avgSize = recStore.meanWordCount
                     
@@ -555,13 +569,17 @@ class SimpleResultSet(RankedResultSet):
         return 0
     
     def combine(self, session, others, clause, db=None):
-
+        """Combine resultSets in others into self and return."""
         try:
             cql = clause.boolean
         except AttributeError:
             cql = clause.relation
+            
+        self.query = clause
 
-        # XXX To Configuration
+        all = cql.value in ['all', 'and', '=', 'prox', 'adj', 'window']
+
+        # XXX: To Configuration. How?
         relSets = self.relevanceContextSets
         cqlSets = ["info:srw/cql-context-set/1/cql-v1.1", "info:srw/cql-context-set/1/cql-v1.2"]
 
@@ -594,8 +612,6 @@ class SimpleResultSet(RankedResultSet):
                     break
 
         # sort result sets by length
-        all = cql.value in ['all', 'and', '=', 'prox', 'adj', 'window']                
-
         if not cql.value in ['not', 'prox']:
             others.sort(key=lambda x: len(x), reverse=not all)
 
@@ -606,7 +622,8 @@ class SimpleResultSet(RankedResultSet):
                 if (hasattr(self, fname)):
                     fn = getattr(self, fname)
                 else:
-                    raise NotImplementedError
+                    # we /could/ self inspect to sat what relevance algorithms are supported...
+                    raise NotImplementedError("Relevance algorithm '{0}' not implemented".format(algorithm))
                 finish = fn(session, others, clause, cql, db)
                 if finish:
                     return self
@@ -886,15 +903,18 @@ class SimpleResultSet(RankedResultSet):
         return self
 
     def order(self, session, spec, ascending=None, missing=None, case=None, accents=None):
-        # spec can be:  index, xpath, workflow, item attribute
-        # clause is a CQL clause with sort attributes on the relation
+        """Re-order based on the given specification (spec) and arguments.
+        
+        spec can be:  index, xpath, workflow, item attribute
+        clause is a CQL clause with sort attributes on the relation
 
-        # sort args:
-        #   missingHigh (1), missingLow (-1), missingOmit (0)
-        #   missingValue=(str) ascending=1/0
-        # Not handling yet:
-        #   case=1/0, accents=1/0
-        #   locale=VALUE, unicodeCollate[=VALUE]
+        sort args:
+          missingHigh (1), missingLow (-1), missingOmit (0)
+          missingValue=(str) ascending=1/0
+        Not handling yet:
+          case=1/0, accents=1/0
+          locale=VALUE, unicodeCollate[=VALUE]
+        """ 
 
         l = self._list
         if not l:
@@ -1017,10 +1037,21 @@ class SimpleResultSetItem(ResultSetItem):
             if val != deft:
                 if type(val) in [dict, list, tuple]:
                     if pickleOk:
-                        valstr = pickle.dumps(val)#, pickle.HIGHEST_PROTOCOL) # use later version of pickle protocol to deal with new-style classes, unicode etc.
-                        xml.append(u'<d n="%s" t="pickle">%s</d>' % (a, ucescape(valstr)))
+                        # use latest version of pickle protocol to deal with new-style classes, unicode etc.
+                        # valstr = pickle.dumps(val), pickle.HIGHEST_PROTOCOL)
+                        valstr = pickle.dumps(val)
+                        escaped_valstr =  ucescape(valstr)
+                        xml.append(u'<d n="{0}" t="pickle">{1}</d>'.format(a, 
+                                                                           escaped_valstr))
                 else:
-                    xml.append(u'<d n="%s" t="%s">%s</d>' % (a, srlz_typehash.get(type(val), ''), escape(unicode(val))))
+                    try:
+                        valstr = unicode(val, 'utf-8')
+                    except TypeError:
+                        valstr = unicode(val)
+                    escaped_valstr = escape(valstr)
+                    xml.append(u'<d n="{0}" t="{1}">{2}</d>'.format(a, 
+                                                                    srlz_typehash.get(type(val), ''), 
+                                                                    escaped_valstr))
         val = getattr(self, 'proxInfo')
         if val:
             # serialize to XML
