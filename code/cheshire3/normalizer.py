@@ -634,6 +634,9 @@ class DiacriticNormalizer(SimpleNormalizer):
         SimpleNormalizer.__init__(self, session, config, parent)
         # Decomposition as per Unicode 4.0 Data file
         self.map = {
+            u"\u00A7" : u"Section",
+            u"\u00A9" : u"(c)",
+            # Exhaustive accented alphabetical, diacrytics and ligatures
             u"\u00C0" : u"\u0041",
             u"\u00C1" : u"\u0041",
             u"\u00C2" : u"\u0041",
