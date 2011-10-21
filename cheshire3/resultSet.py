@@ -22,10 +22,16 @@ def ucescape(data):
     return unicode(escape(data), 'latin-1')
 
 
-srlz_typehash = {int : 'int', long : 'long', str : 'str', unicode : 'unicode',
-                    bool : 'bool', type(None) : 'None', float : 'float'}
+srlz_typehash = {int: 'int',
+                 long: 'long',
+                 str: 'str',
+                 unicode: 'unicode',
+                 bool: 'bool', 
+                 type(None): 'None', 
+                 float: 'float'}
+
 dsrlz_typehash = {}
-for k,v in srlz_typehash.iteritems():
+for k, v in srlz_typehash.iteritems():
     dsrlz_typehash[v] = k
 
 
@@ -220,7 +226,7 @@ class SimpleResultSet(RankedResultSet):
                 except:
                     raise
             elif t in dsrlz_typehash:
-                if type(txt) == unicode:
+                if type(txt) == unicode and t != 'unicode':
                     val = dsrlz_typehash[t](txt.encode('utf-8'))
                 else:
                     val = dsrlz_typehash[t](txt)
