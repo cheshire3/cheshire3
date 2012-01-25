@@ -85,6 +85,9 @@ class SimpleDatabase(SummaryObject, Database):
             pm = self.get_object(session, id)
             self.protocolMaps[pm.protocol] = pm
 
+    def get_indexes(self, session):
+        self._cacheIndexes(session)
+        return self.indexes.values()
 
     def add_record(self, session, rec):
         (storeid, id) = (rec.recordStore, rec.id)
