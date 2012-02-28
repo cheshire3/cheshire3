@@ -1,0 +1,20 @@
+
+<explain>
+  <serverInfo version="3"/>
+  <databaseInfo>
+    <implementation id="Cheshire3" version="0.7.1">
+      <title>Cheshire3 Z39.50 Server</title>
+    </implementation>
+  </databaseInfo>
+  <configInfo>
+    <setting type="messageSize">1024000</setting>
+    <setting type="maxMessageSize">1024000</setting>
+    <supports type="operation">search</supports>
+    <supports type="operation">present</supports>
+    <supports type="operation">delSet</supports>
+    <supports type="operation">scan</supports>
+    <supports type="operation">negotiation</supports>
+    <supports type="operation">sort</supports>
+    <supports type="resultSets"/>
+  </configInfo>
+</explain>

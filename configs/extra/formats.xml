@@ -1,0 +1,238 @@
+<config>
+  <subConfigs>
+    
+    <subConfig type="preParser" id="OpenOfficeToPdfPreParser">
+
+        <docs>PreParser to start OpenOffice service, then convert documents to PDF.</docs>
+
+        <objectType>cheshire3.formats.preParser.DependentCmdLinePreParser</objectType>
+        <paths>
+            <path type="dependencyExecutable">soffice</path>
+            <path type="executable">python</path>
+            <path type="executablePath">/opt/openoffice.org3/program</path>
+        </paths>
+        <options>
+            <setting type="outMimeType">application/pdf</setting>
+            <setting type="dependencyCommandLine">-headless -accept="socket,host=localhost,port=8100;urp;"</setting>
+            <setting type="commandLine">~/cheshire3/code/DocumentConverter.py %INDOC% %OUTDOC%</setting>
+        </options>
+    </subConfig>
+
+     <subConfig type="preParser" id="OpenOfficeToOdtPreParser">
+
+        <docs>PreParser to start OpenOffice service, then convert documents to Open Document Text Format.</docs>
+
+        <objectType>cheshire3.formats.preParser.DependentCmdLinePreParser</objectType>
+        <paths>
+            <path type="dependencyExecutable">soffice</path>
+            <path type="executable">python</path>
+            <path type="executablePath">/opt/openoffice.org3/program</path>
+        </paths>
+        <options>
+            <setting type="outMimeType">application/vnd.oasis.opendocument.text</setting>
+            <setting type="dependencyCommandLine">-headless -accept="socket,port=8100;urp;"</setting>
+            <setting type="commandLine">~/cheshire3/code/DocumentConverter.py %INDOC% %OUTDOC%</setting>
+        </options>
+    </subConfig>
+
+    <subConfig type="workflow" id="msOfficeDocWorkflow">
+        <objectType>cheshire3.workflow.CachingWorkflow</objectType>
+        <workflow>
+            <!-- input type:  document -->
+            <object type="preParser" ref="OpenOfficeToPdfPreParser"/>
+            <object type="workflow" ref="pdfDocWorkflow"/>
+        </workflow>
+    </subConfig>
+    
+    <subConfig type="workflow" id="pdfDocWorkflow">
+        <objectType>cheshire3.workflow.CachingWorkflow</objectType>
+        <workflow>
+            <!-- input type:  document -->
+            <object type="preParser" ref="PdfXmlPreParser"/>
+        </workflow>
+    </subConfig>
+
+    <subConfig type="preParser" id="mimeTypeMagicXhtmlPreParser">
+		<objectType>cheshire3.preParser.MagicRedirectPreParser</objectType>
+        <hash>
+			<object mimeType="application/msword" ref="msOfficeDocWorkflow"/>
+			<object mimeType="application/vnd.ms-word" ref="msOfficeDocWorkflow"/>
+			<object mimeType="application/vnd.ms-excel" ref="msOfficeDocWorkflow"/>
+			<object mimeType="application/vnd.ms-powerpoint" ref="msOfficeDocWorkflow"/>
+			<object mimeType="application/pdf" ref="pdfDocWorkflow"/>
+		</hash>
+	</subConfig>
+    
+    <!-- Metadata Discovery PreParsers -->
+
+    <subConfig type="preParser" id="UnixFileFormatMetadataDiscoveryPreParser">
+
+    	<docs>PreParser to use the UNIX file utility for format identification.</docs>
+
+		<objectType>cheshire3.formats.preParser.CmdLineMetadataDiscoveryPreParser</objectType>
+		<paths>
+        	<path type="executable">file</path>
+		</paths>
+		<options>
+	        <setting type="metadataSubType">format</setting>
+	        <setting type="commandLine">%INDOC%</setting>
+		</options>
+    </subConfig>
+    
+    <subConfig type="preParser" id="UnixFileMimeTypeMetadataDiscoveryPreParser">
+
+    	<docs>PreParser to use the UNIX file utility for format identification.</docs>
+
+		<objectType>cheshire3.formats.preParser.CmdLineMetadataDiscoveryPreParser</objectType>
+		<paths>
+	        <path type="executable">file</path>
+		</paths>
+		<options>
+        	<setting type="metadataSubType">mimeType</setting>
+        	<setting type="commandLine">--mime-type %INDOC%</setting>
+		</options>
+    </subConfig>
+    
+    <subConfig type="preParser" id="UnixFileMimeEncodingMetadataDiscoveryPreParser">
+
+    	<docs>PreParser to use the UNIX file utility for format identification.</docs>
+
+		<objectType>cheshire3.formats.preParser.CmdLineMetadataDiscoveryPreParser</objectType>
+		<paths>
+	        <path type="executable">file</path>
+		</paths>
+		<options>
+        	<setting type="metadataSubType">mimeEncoding</setting>
+        	<setting type="commandLine">--mime-encoding %INDOC%</setting>
+		</options>
+    </subConfig>
+    
+    <subConfig type="preParser" id="ClamVirusScanPreParser">
+
+    	<docs>PreParser to use the ClamAV to scan the document for viruses, adding the result of the scan to document metadata.</docs>
+
+		<objectType>cheshire3.formats.preParser.CmdLineMetadataDiscoveryPreParser</objectType>
+		<paths>
+        	<path type="executable">clamscan</path>
+		</paths>
+		<options>
+        	<setting type="commandLine">--stdout --no-summary %INDOC%</setting>
+			<setting type="metadataType">VirusScan</setting>
+		</options>
+    </subConfig>
+    
+    <subConfig type="workflow" id="ExactExtractorWorkflow">
+    	<objectType>cheshire3.workflow.CachingWorkflow</objectType>
+    	<workflow>
+    		<object type="extractor" ref="ProxExtractor" />
+    	</workflow>
+    </subConfig>
+    
+    <subConfig type="preParser" id="DroidMetadataDiscoveryPreParser">
+
+    	<docs>PreParser that uses The National Archives' DROID software for format identification and inserts its findings into document.metadata. REQUIRES Java!</docs>
+
+        <objectType>cheshire3.formats.preParser.XmlParsingCmdLineMetadataDiscoveryPreParser</objectType>
+        <paths>
+            <path type="executable">java -jar droid.jar</path>
+            <path type="workingPath">~/install/DROID 3.0</path>
+        </paths>
+        <options>
+            <setting type="outMimeType">text/xml</setting>
+            <setting type="metadataType">droid</setting>
+            <setting type="commandLine">-SDROID_SignatureFile_V13.xml -L%INDOC% -O%OUTDOC% -FXML</setting>
+        </options>
+        <source id="softwareVersion">
+            <xpath xmlns:tna="http://www.nationalarchives.gov.uk/pronom/FileCollection">/tna:FileCollection/tna:DROIDVersion</xpath>
+            <process ref="ExactExtractorWorkflow"/>
+        </source>
+        <source id="analysisDateTime">
+            <xpath xmlns:tna="http://www.nationalarchives.gov.uk/pronom/FileCollection">/tna:FileCollection/tna:DateCreated</xpath>
+            <process ref="ExactExtractorWorkflow"/>
+        </source>
+        <source id="certainty" default="Unknown">
+            <xpath xmlns:tna="http://www.nationalarchives.gov.uk/pronom/FileCollection">/tna:FileCollection/tna:IdentificationFile/@IdentQuality</xpath>
+            <process ref="ExactExtractorWorkflow"/>    
+        </source>
+        <source id="mimeType" default="Unknown">
+            <xpath xmlns:tna="http://www.nationalarchives.gov.uk/pronom/FileCollection">/tna:FileCollection/tna:IdentificationFile/tna:FileFormatHit/tna:MimeType</xpath>
+            <process ref="ExactExtractorWorkflow"/>
+        </source>
+        <source id="format" default="Unknown">
+            <xpath xmlns:tna="http://www.nationalarchives.gov.uk/pronom/FileCollection">/tna:FileCollection/tna:IdentificationFile/tna:FileFormatHit/tna:Name</xpath>
+            <process ref="ExactExtractorWorkflow"/>
+        </source>
+        <source id="version">
+            <xpath xmlns:tna="http://www.nationalarchives.gov.uk/pronom/FileCollection">/tna:FileCollection/tna:IdentificationFile/tna:FileFormatHit/tna:Version</xpath>
+            <process ref="ExactExtractorWorkflow"/>
+        </source>
+        <source id="puid">
+            <xpath xmlns:tna="http://www.nationalarchives.gov.uk/pronom/FileCollection">/tna:FileCollection/tna:IdentificationFile/tna:FileFormatHit/tna:PUID</xpath>
+            <process ref="ExactExtractorWorkflow"/>
+        </source>  
+        <source id="identStatus">
+            <xpath xmlns:tna="http://www.nationalarchives.gov.uk/pronom/FileCollection">/tna:FileCollection/tna:IdentificationFile/tna:FileFormatHit/tna:Status</xpath>
+            <process ref="ExactExtractorWorkflow"/>
+        </source>
+        <source id="warning">
+            <xpath xmlns:tna="http://www.nationalarchives.gov.uk/pronom/FileCollection">/tna:FileCollection/tna:IdentificationFile/tna:FileFormatHit/tna:IdentificationWarning</xpath>
+            <process ref="ExactExtractorWorkflow"/>
+        </source>
+    </subConfig>
+    
+    <subConfig type="preParser" id="JhoveMetadataDiscoveryPreParser">
+
+        <docs>PreParser that uses the JHOVE for format identification and inserts its findings into document.metadata. REQUIRES Java!</docs>
+
+        <objectType>cheshire3.formats.preParser.XmlParsingCmdLineMetadataDiscoveryPreParser</objectType>
+        <paths>
+            <path type="executable">jhove</path>
+            <path type="executablePath">~/install/jhove</path>
+        </paths>
+        <options>
+            <setting type="outMimeType">text/xml</setting>
+            <setting type="commandLine">-c ~/install/jhove/conf/jhove.conf -h XML %INDOC%</setting>
+        </options>
+        <source id="softwareVersion">
+        	<xpath xmlns:j="http://hul.harvard.edu/ois/xml/ns/jhove">/j:jhove/@release</xpath>
+        	<process ref="ExactExtractorWorkflow"/>
+        </source>
+        <source id="analysisDateTime">
+            <xpath xmlns:j="http://hul.harvard.edu/ois/xml/ns/jhove">/j:jhove/j:date</xpath>
+			<process ref="ExactExtractorWorkflow"/>
+        </source>
+        <source id="mimeType">
+            <xpath xmlns:j="http://hul.harvard.edu/ois/xml/ns/jhove">/j:jhove/j:repInfo/j:mimeType</xpath>
+            <process ref="ExactExtractorWorkflow"/>
+        </source>
+        <source id="byteSize">
+            <xpath xmlns:j="http://hul.harvard.edu/ois/xml/ns/jhove">/j:jhove/j:repInfo/j:size</xpath>
+            <process ref="ExactExtractorWorkflow"/>
+        </source>
+        <source id="format" default="Unknown">
+            <xpath xmlns:j="http://hul.harvard.edu/ois/xml/ns/jhove">/j:jhove/j:repInfo/j:format</xpath>
+            <process ref="ExactExtractorWorkflow"/>
+        </source>
+        <source id="version">
+            <xpath xmlns:j="http://hul.harvard.edu/ois/xml/ns/jhove">/j:jhove/j:repInfo/j:version</xpath>
+            <process ref="ExactExtractorWorkflow"/>
+        </source>
+        <source id="fileStatus">
+            <xpath xmlns:j="http://hul.harvard.edu/ois/xml/ns/jhove">/j:jhove/j:repInfo/j:status</xpath>
+            <process ref="ExactExtractorWorkflow"/>
+        </source>
+    </subConfig>
+    
+    <subConfig type="preParser" id="EmailToXmlPreParser">
+    	
+    	<docs>PreParser that parses email documents into and returns an XML representation.</docs>
+    
+    	<objectType>cheshire3.formats.preParser.EmailToXmlPreParser</objectType>
+    	<options>
+    		<setting type="outMimeType">application/xml</setting>
+    	</options>
+    </subConfig>
+    
+  </subConfigs>
+  
+</config>

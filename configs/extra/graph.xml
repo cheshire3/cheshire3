@@ -1,0 +1,37 @@
+<config>
+  <subConfigs>
+
+    <!-- Parsers -->
+    
+    <subConfig type="parser" id="RdfGraphParser">
+    	<docs>Parser to process RDF XML Documents, and return a GraphRecord.</docs>
+        <objectType>cheshire3.graph.parser.RdfGraphParser</objectType>
+    </subConfig>
+    
+    <subConfig type="parser" id="OreRdfGraphParser">
+    	<docs>Parser to process OAI-ORE (RDF XML) Documents, and return an OreGraphRecord, complete with aggregation.</docs>
+        <objectType>cheshire3.graph.parser.OreRdfGraphParser</objectType>
+    </subConfig>
+    
+    <!-- Extractors -->
+      
+	<subConfig type="extractor" id="RdfExtractor">
+  		<objectType>cheshire3.graph.extractor.RdfExtractor</objectType>
+  	</subConfig>
+  
+	<subConfig type="extractor" id="RdfProxExtractor">
+	  <objectType>cheshire3.graph.extractor.RdfExtractor</objectType>
+	  <options>
+	    <setting type="prox">1</setting>
+	    <setting type="reversable">1</setting>
+	  </options>
+	</subConfig>
+	
+	<!-- Transformers -->
+	
+	<subConfig type="transformer" id="RdfXmlTransformer">
+        <objectType>cheshire3.graph.transformer.RdfXmlTransformer</objectType>
+    </subConfig>
+        
+  </subConfigs>  
+</config>
