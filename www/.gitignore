@@ -1,0 +1,3 @@
+# Don't track user specific web applications
+!.gitignore
+*/
