@@ -14,6 +14,9 @@ from setuptools import setup, find_packages
 if sys.version_info < (2,6):
     warn("Python 2.6 or later required, some code may be incompatible with earlier versions.")
 
+# Determine python-dateutil version
+dateutilstr = 'python-dateutil == 1.5' if sys.version_info < (3,0) else 'python-dateutil >= 2.0'
+
 # Inspect to find current path
 setuppath = inspect.getfile(inspect.currentframe())
 setupdir = os.path.dirname(setuppath)
@@ -52,7 +55,7 @@ setup(
     include_package_data = True,
     exclude_package_data = {'': ['README.mdown']},
     requires=['lxml(>=2.1)', 'bsddb', 'dateutil'],
-    install_requires=['lxml >= 2.1', 'zopyx.txng3.ext == 3.3.1'],
+    install_requires=['lxml >= 2.1', dateutilstr, 'zopyx.txng3.ext == 3.3.1'],
     dependency_links = [
     	"http://labix.org/python-dateutil"
 	],
@@ -67,5 +70,5 @@ setup(
     url = "http://www.cheshire3.org/",
     download_url = 'http://www.cheshire3.org/download/{0}/src/{1}-{2}.tar.gz'.format(
     _version[:5], _name, _version)
-    )
-    
+)
+
