@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>Cheshire3 Objects: Cheshire3 Abstract Base Class</title>
+        <link rel="stylesheet" type="text/css" href="http://www.cheshire3.org/cheshire3.css"></link>
+    </head>
+    <body>
+        <a name="top"></a>
+        <table cellpadding="0" cellspacing="0" class="maintitle">
+            <tr>
+                <td class="cheshirelogo">
+                    <img src="http://www.cheshire3.org/gfx/c3_white.gif" alt=" c h e s h i r e  |  3 "/>
+				</td>
+				<td>
+                    <img src="http://www.cheshire3.org/gfx/slant_grey.gif" alt=""/>
+                </td>
+                <td align="center">
+                    <h1>Cheshire3 Objects:  Cheshire3 Abstract Base Class</h1>
+                </td>
+            </tr>
+        </table>
+
+		<!--#config errmsg="<div id="navbar"/>" -->
+		<!--#include virtual="/navbar.ssi" -->
+
+        <div class="fieldset">
+            <h2 class="legend">Description</h2>
+            <p>
+                Abstract Base Class for all configurable objects within the Cheshire3 framework.  
+                It is not the base class for Document, Record, ResultSet, or Query.
+            </p>
+        </div>
+
+        <div class="fieldset">
+            <h2 class="legend">Implementations</h2>
+            <p>There are no pre-configured out-of-the-box ready objects of this type.</p>
+        </div>
+
+        <div class="fieldset">
+            <h2 class="legend">API</h2>
+            <p>
+                <em>Module</em>: <strong>cheshire3.configParser</strong><br/>
+                <em>Classes</em>:
+            </p>
+            <ul>
+                <li><strong>CaselessDictionary</strong> extends dict type<br/>
+                    A dictionary that is case-insensitive when searching, but also preserves the keys as inserted.
+                </li>
+                <li><strong>C3Object</strong><br/>
+                    Abstract Base Class for Cheshire3 configurable objects.
+                </li>
+            </ul>
+            <p><em>C3Object Methods</em>:</p>
+            <table border="1" cellpadding="3" cellspacing="0" width="100%">
+                <tr><th>Function</th><th>Parameters</th><th>Returns</th><th>Description</th></tr>
+				<tr><td>__init__</td><td>xmlNode, parentObject</td><td>&nbsp;</td><td>The constructor for the base class takes the parsed XML DOM node from the configuration for the object.  It then steps through all of the information within the configuration and builds the object as described.</td></tr>
+				<tr><td>_handleConfigNode</td><td>xmlNode</td><td>&nbsp;</td><td>Handles configuration xml nodes which are object specific (for example 'source' for Index objects)</td></tr>
+				<tr><td>_verifyOption</td><td>type, value</td><td>value</td><td>Verify if an object specific configuration 'option' is valid. (for example that a file path exists) Also _verifySetting and _verifyDefault</td></tr>
+				<tr><td>get_setting</td><td>session, name</td><td>value</td><td>Return the value of the named setting for this object.  This may cascade up to the object's parent to find the value (for example index -&gt; database -&gt; server)</td></tr>
+				<tr><td>get_default</td><td>session, name</td><td>value</td><td>Return the value of the named default for this object as above. Cascades.</td></tr>
+				<tr><td>get_path</td><td>session, name</td><td>value</td><td>Return the value of the named path. Cascades.</td></tr>
+				<tr><td>get_object</td><td>session, id</td><td>object</td><td>Return the object identified by the given id, relative to this object.  (for example a database may override an identifier which is also valid at the server level). Cascades.</td></tr>
+				<tr><td>log_function</td><td>functionName</td><td>&nbsp;</td><td>Use this object's functionLogger to log calls to the named function.</td></tr>
+				<tr><td>unlog_function</td><td>functionName</td><td>&nbsp;</td><td>Stops the logging of the named function</td></tr>
+				<tr><td>auth_function</td><td>functionName</td><td>&nbsp;</td><td>Use a PermissionHandler object to authorise every call to the named function.  Configured as c3fn:<i>functionName</i>. </td></tr>
+				<tr><td>unauth_function</td><td>functionName</td><td>&nbsp;</td><td>Stops the authorization requirement of the named function</td></tr>
+            </table>
+	
+        </div>
+
+    </body>
+</html>

@@ -1,0 +1,780 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>postgres.PostgresStore</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <link rel="stylesheet" href="/cheshire3.css" type="text/css"/>
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body>
+<table width="100%" border=0 cellpadding=0 cellspacing=0 class="maintitle">
+<tr height="75">
+<td class="cheshirelogo" width="25%">
+<img src="/gfx/c3_white.gif">
+</td>
+<td width="10">
+<img src="/gfx/slant_grey.gif">
+</td>
+<td width="75%" align="center">
+<h2>Cheshire3 Object Model: Class PostgresStore
+</h2>
+</td></tr>
+</table>
+
+<div class="fieldset">
+<span class="legend"><a href="configParser-module.html">
+        <a href="postgres-module.html">Module&nbsp;postgres</a> ::
+        Class&nbsp;PostgresStore
+      </span>
+<p>
+
+
+<h2 class="class">Class PostgresStore
+<br/><span class="codelink"><a href="postgres-pysrc.html#PostgresStore">source&nbsp;code</a></span></h2>
+<b>Object Tree:</b><pre class="base-tree">
+           object --+        
+                    |        
+<a href="configParser.C3Object-class.html">configParser.C3Object</a> --+    
+                        |    
+    <a href="baseStore.SimpleStore-class.html">baseStore.SimpleStore</a> --+
+                            |
+                           <strong class="uidshort">PostgresStore</strong>
+</pre>
+
+<dl><dt>Known Subclasses:</dt>
+<dd>
+    <a href="postgres.PostgresIndexStore-class.html">PostgresIndexStore</a>,
+    <a href="postgres.PostgresRecordStore-class.html">PostgresRecordStore</a>,
+    <a href="postgres.PostgresResultSetStore-class.html">PostgresResultSetStore</a>
+</dd></dl>
+
+<hr />
+<!-- ==================== INSTANCE METHODS ==================== -->
+</div><div class="fieldset"><span class="legend">Instance Methods</span><p>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white"><tr>
+
+  <td>
+    <span class="sig"><a href="postgres.PostgresStore-class.html#__init__" class="sig-name">__init__</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">config</span>,
+        <span class="sig-arg">parent</span>)</span>
+    <br />The constructor for all Cheshire3 objects take the same arguments:
+      session:  A Session object topNode:  The &lt;config&gt; or 
+      &lt;subConfig&gt; domNode for the configuration parent:   The object 
+      that provides the scope for this object.
+  </td>
+</tr>
+<tr class="private">
+
+  <td>
+    <span class="sig"><a href="postgres.PostgresStore-class.html#_handleConfigNode" class="sig-name">_handleConfigNode</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">node</span>)</span>
+    
+  </td>
+</tr>
+<tr class="private">
+
+  <td>
+    <span class="sig"><a href="postgres.PostgresStore-class.html#_verifyDatabases" class="sig-name">_verifyDatabases</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>)</span>
+    
+  </td>
+</tr>
+<tr class="private">
+
+  <td>
+    <span class="sig"><a href="postgres.PostgresStore-class.html#_openContainer" class="sig-name">_openContainer</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>)</span>
+    
+  </td>
+</tr>
+<tr class="private">
+
+  <td>
+    <span class="sig"><a href="postgres.PostgresStore-class.html#_closeContainer" class="sig-name">_closeContainer</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="postgres.PostgresStore-class.html#query" class="sig-name">query</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">query</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="postgres.PostgresStore-class.html#begin_storing" class="sig-name">begin_storing</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="postgres.PostgresStore-class.html#commit_storing" class="sig-name">commit_storing</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="postgres.PostgresStore-class.html#generate_id" class="sig-name">generate_id</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="postgres.PostgresStore-class.html#store_data" class="sig-name">store_data</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">id</span>,
+        <span class="sig-arg">data</span>,
+        <span class="sig-arg">size</span>=<span class="sig-default">0</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="postgres.PostgresStore-class.html#verify_checkSum" class="sig-name">verify_checkSum</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">id</span>,
+        <span class="sig-arg">data</span>,
+        <span class="sig-arg">store</span>=<span class="sig-default">1</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="postgres.PostgresStore-class.html#store_checkSum" class="sig-name">store_checkSum</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">id</span>,
+        <span class="sig-arg">digest</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="postgres.PostgresStore-class.html#fetch_data" class="sig-name">fetch_data</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">id</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="postgres.PostgresStore-class.html#delete_item" class="sig-name">delete_item</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">id</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="postgres.PostgresStore-class.html#fetch_size" class="sig-name">fetch_size</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">id</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="postgres.PostgresStore-class.html#fetch_checksum" class="sig-name">fetch_checksum</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">id</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="postgres.PostgresStore-class.html#fetch_idList" class="sig-name">fetch_idList</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">numReq</span>=<span class="sig-default">-1</span>,
+        <span class="sig-arg">start</span>=<span class="sig-default">&quot;&quot;</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="postgres.PostgresStore-class.html#link" class="sig-name">link</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">relation</span>,
+        <span class="sig-arg">*args</span>,
+        <span class="sig-arg">**kw</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="postgres.PostgresStore-class.html#unlink" class="sig-name">unlink</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">relation</span>,
+        <span class="sig-arg">*args</span>,
+        <span class="sig-arg">**kw</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="postgres.PostgresStore-class.html#get_links" class="sig-name">get_links</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">relation</span>,
+        <span class="sig-arg">*args</span>,
+        <span class="sig-arg">**kw</span>)</span>
+    
+  </td>
+</tr>
+  <tr>
+    <td colspan="2">
+    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="configParser.C3Object-class.html">configParser.C3Object</a></code></span>:
+      <code><a href="configParser.C3Object-class.html#auth_function">auth_function</a></code>,
+      <code><a href="configParser.C3Object-class.html#get_config">get_config</a></code>,
+      <code><a href="configParser.C3Object-class.html#get_default">get_default</a></code>,
+      <code><a href="configParser.C3Object-class.html#get_object">get_object</a></code>,
+      <code><a href="configParser.C3Object-class.html#get_path">get_path</a></code>,
+      <code><a href="configParser.C3Object-class.html#get_setting">get_setting</a></code>,
+      <code><a href="configParser.C3Object-class.html#log_function">log_function</a></code>,
+      <code><a href="configParser.C3Object-class.html#unauth_function">unauth_function</a></code>,
+      <code><a href="configParser.C3Object-class.html#unlog_function">unlog_function</a></code>
+      </p>
+    <div class="private">    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="configParser.C3Object-class.html">configParser.C3Object</a></code></span> (private):
+      <code><a href="configParser.C3Object-class.html#_getDomFromFile">_getDomFromFile</a></code>,
+      <code><a href="configParser.C3Object-class.html#_parseIncludes">_parseIncludes</a></code>,
+      <code><a href="configParser.C3Object-class.html#_recurseSubConfigs">_recurseSubConfigs</a></code>,
+      <code><a href="configParser.C3Object-class.html#_verifyDefault">_verifyDefault</a></code>,
+      <code><a href="configParser.C3Object-class.html#_verifyOption">_verifyOption</a></code>,
+      <code><a href="configParser.C3Object-class.html#_verifySetting">_verifySetting</a></code>
+      </p></div>
+    <p class="varlist"><span class="varlist-header">Inherited from <code>object</code></span>:
+      <code>__delattr__</code>,
+      <code>__getattribute__</code>,
+      <code>__hash__</code>,
+      <code>__new__</code>,
+      <code>__reduce__</code>,
+      <code>__reduce_ex__</code>,
+      <code>__repr__</code>,
+      <code>__setattr__</code>,
+      <code>__str__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+
+<br />
+<!-- ==================== CLASS VARIABLES ==================== -->
+</div><div class="fieldset"><span class="legend">Class Variables</span><p>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white"><tr>
+  <td width="15%">
+    <strong><a href="postgres.PostgresStore-class.html#cxn">cxn</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="postgres.PostgresStore-class.html#relations">relations</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+  <tr>
+    <td colspan="2">
+    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="baseStore.SimpleStore-class.html">baseStore.SimpleStore</a></code></span>:
+      <code><a href="baseStore.SimpleStore-class.html#currentId">currentId</a></code>,
+      <code><a href="baseStore.SimpleStore-class.html#idNormalizer">idNormalizer</a></code>
+      </p>
+    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="configParser.C3Object-class.html">configParser.C3Object</a></code></span>:
+      <code><a href="configParser.C3Object-class.html#configStore">configStore</a></code>,
+      <code><a href="configParser.C3Object-class.html#defaults">defaults</a></code>,
+      <code><a href="configParser.C3Object-class.html#functionLogger">functionLogger</a></code>,
+      <code><a href="configParser.C3Object-class.html#id">id</a></code>,
+      <code><a href="configParser.C3Object-class.html#name">name</a></code>,
+      <code><a href="configParser.C3Object-class.html#objectType">objectType</a></code>,
+      <code><a href="configParser.C3Object-class.html#objects">objects</a></code>,
+      <code><a href="configParser.C3Object-class.html#parent">parent</a></code>,
+      <code><a href="configParser.C3Object-class.html#paths">paths</a></code>,
+      <code><a href="configParser.C3Object-class.html#permissionHandlers">permissionHandlers</a></code>,
+      <code><a href="configParser.C3Object-class.html#settings">settings</a></code>,
+      <code><a href="configParser.C3Object-class.html#subConfigs">subConfigs</a></code>,
+      <code><a href="configParser.C3Object-class.html#unresolvedObjects">unresolvedObjects</a></code>
+      </p>
+    <div class="private">    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="configParser.C3Object-class.html">configParser.C3Object</a></code></span> (private):
+      <code><a href="configParser.C3Object-class.html#_includeConfigStores">_includeConfigStores</a></code>,
+      <code><a href="configParser.C3Object-class.html#_objectRefs">_objectRefs</a></code>
+      </p></div>
+    <p class="varlist"><span class="varlist-header">Inherited from <code>object</code></span>:
+      <code>__class__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+
+<br />
+<!-- ==================== METHOD DETAILS ==================== --></div><div class="fieldset"><span class="legend">Method Details</span><p><a name="__init__"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">config</span>,
+        <span class="sig-arg">parent</span>)</span>
+    <br /><em class="fname">(Constructor)</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="postgres-pysrc.html#PostgresStore.__init__">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  The constructor for all Cheshire3 objects take the same arguments: 
+  session:  A Session object topNode:  The &lt;config&gt; or 
+  &lt;subConfig&gt; domNode for the configuration parent:   The object that
+  provides the scope for this object.
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="baseStore.SimpleStore-class.html#__init__">baseStore.SimpleStore.__init__</a>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="_handleConfigNode"></a>
+<div class="private">
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">_handleConfigNode</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">node</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="postgres-pysrc.html#PostgresStore._handleConfigNode">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="configParser.C3Object-class.html#_handleConfigNode">configParser.C3Object._handleConfigNode</a>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="_verifyDatabases"></a>
+<div class="private">
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">_verifyDatabases</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="postgres-pysrc.html#PostgresStore._verifyDatabases">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="baseStore.SimpleStore-class.html#_verifyDatabases">baseStore.SimpleStore._verifyDatabases</a>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="_openContainer"></a>
+<div class="private">
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">_openContainer</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="postgres-pysrc.html#PostgresStore._openContainer">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="_closeContainer"></a>
+<div class="private">
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">_closeContainer</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="postgres-pysrc.html#PostgresStore._closeContainer">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="query"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">query</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">query</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="postgres-pysrc.html#PostgresStore.query">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="begin_storing"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">begin_storing</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="postgres-pysrc.html#PostgresStore.begin_storing">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="commit_storing"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">commit_storing</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="postgres-pysrc.html#PostgresStore.commit_storing">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="generate_id"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">generate_id</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="postgres-pysrc.html#PostgresStore.generate_id">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="store_data"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">store_data</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">id</span>,
+        <span class="sig-arg">data</span>,
+        <span class="sig-arg">size</span>=<span class="sig-default">0</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="postgres-pysrc.html#PostgresStore.store_data">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="verify_checkSum"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">verify_checkSum</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">id</span>,
+        <span class="sig-arg">data</span>,
+        <span class="sig-arg">store</span>=<span class="sig-default">1</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="postgres-pysrc.html#PostgresStore.verify_checkSum">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="store_checkSum"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">store_checkSum</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">id</span>,
+        <span class="sig-arg">digest</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="postgres-pysrc.html#PostgresStore.store_checkSum">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="fetch_data"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">fetch_data</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">id</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="postgres-pysrc.html#PostgresStore.fetch_data">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="delete_item"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">delete_item</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">id</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="postgres-pysrc.html#PostgresStore.delete_item">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="fetch_size"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">fetch_size</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">id</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="postgres-pysrc.html#PostgresStore.fetch_size">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="fetch_checksum"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">fetch_checksum</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">id</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="postgres-pysrc.html#PostgresStore.fetch_checksum">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="fetch_idList"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">fetch_idList</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">numReq</span>=<span class="sig-default">-1</span>,
+        <span class="sig-arg">start</span>=<span class="sig-default">&quot;&quot;</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="postgres-pysrc.html#PostgresStore.fetch_idList">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="link"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">link</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">relation</span>,
+        <span class="sig-arg">*args</span>,
+        <span class="sig-arg">**kw</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="postgres-pysrc.html#PostgresStore.link">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="unlink"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">unlink</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">relation</span>,
+        <span class="sig-arg">*args</span>,
+        <span class="sig-arg">**kw</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="postgres-pysrc.html#PostgresStore.unlink">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="get_links"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">get_links</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">relation</span>,
+        <span class="sig-arg">*args</span>,
+        <span class="sig-arg">**kw</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="postgres-pysrc.html#PostgresStore.get_links">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<br />
+<!-- ==================== CLASS VARIABLE DETAILS ==================== --></div><div class="fieldset"><span class="legend">Class Variable Details</span><p><a name="cxn"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>cxn</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="None"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="relations"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>relations</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="{}"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+{}                                                                     
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<br />
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">Generated by Epydoc
+        3.0alpha2 on Wed Aug  9 18:09:59 2006</td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>

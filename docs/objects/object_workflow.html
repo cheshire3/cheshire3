@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>Cheshire3 Objects: Workflow</title>
+        <link rel="stylesheet" type="text/css" href="http://www.cheshire3.org/cheshire3.css"></link>
+    </head>
+    <body>
+        <a name="top"></a>
+        <table cellpadding="0" cellspacing="0" class="maintitle">
+            <tr>
+                <td class="cheshirelogo">
+                    <img src="http://www.cheshire3.org/gfx/c3_white.gif" alt=" c h e s h i r e  |  3 "/>
+                </td>
+                <td>
+                    <img src="http://www.cheshire3.org/gfx/slant_grey.gif" alt=""/>
+                </td>
+                <td align="center">
+                    <h1>Cheshire3 Objects:  Workflow</h1>
+                </td>
+            </tr>
+        </table>
+
+	<!--#config errmsg="<div id="navbar"/>" -->
+	<!--#include virtual="/navbar.ssi" -->
+
+        <div class="fieldset">
+            <h2 class="legend">Description</h2>
+            <p>
+                A workflow is similar to the process chain concept of an index, but behaves at a more global level.
+                It will allow the configuration of a workflow using Cheshire3 objects and simple code to be defined and executed for input objects.
+                For example, one might define a common workflow pattern of PreParsers, a Parser and then indexing routines in the XML configuration, and then run each document in a documentFactory through it.
+            </p>
+            <p>
+                This allows users who are not familiar with Python, but who are familiar with XML and the Cheshire3 design to implement tasks as required by changing only configuration files.  It thus also allows a user to configure personal workflows in a Cheshire3 system which they don't have permission to modify.
+            </p>
+            <p>Workflows have the following capabilities:</p>
+            <ul>
+                <li> Iterate through a documentGroup, resultSet or Store object</li>
+                <li> Check for error conditions</li>
+                <li> Call functions on Cheshire3 objects, including other Workflows</li>
+                <li> Log text to a Logger object</li>
+                <li> Break, Continue, Raise, and Return flow control</li>
+            </ul>
+        </div>
+        
+        <div class="fieldset">
+            <h2 class="legend">Configuration</h2>
+            <p>Further documentation is available on configuring Cheshire3 workflows:</p>
+            <ul>
+                <li><a href="../build/build_workflow.html">Workflow Configuration</a> -- A tutorial on configuring workflows, with illustrative examples.</li>
+                <li><a href="../config/config_workflow.html" >Cheshire3 Configuration: Workflows</a> -- Cheshire3 Configuration reference material on the tags used for workflow configuration.</li>
+            </ul>
+
+        </div>
+
+        <div class="fieldset">
+            <h2 class="legend">Implementations</h2>
+            <p>The following implementations are pre-configured and ready to use.<br/>
+                They may be used out-of-the-box in configurations for other Workflows, or in code by getting the object from a <a href="object_server.html">Server</a>.<br/>
+                It is also possible to over-ride any or all of these Workflows for a specific application (e.g. by adding additional PreParsers to the PreParserWorkflow) in your database config.
+            </p>
+            <ul>
+                <li><strong>buildIndexWorkflow</strong><br/>
+                    Workflow to process a loaded DocumentFactory.
+			        Before beginning the recordStore and database are prepared for accepting new records. 
+			        Each Document is passed to buildIndexSingleWorkflow in turn.
+			        Afterwards, the recordStore and created indexes are committed to disk.
+                </li>
+                <li><strong>buildIndexSingleWorkflow</strong><br/>
+                    Workflow to take a Document, pass each through PreParserWorkflow.
+			        The resulting Document is Parsed with a SaxParser.
+			        The resulting SaxRecord is stored in the recordStore and then indexed.
+                </li>
+                <li><strong>PreParserWorkflow</strong><br/>
+                    Workflow to take a Document, and process it using SgmlPreParser. Returns the resulting Document.
+                </li>
+            </ul>
+            
+        </div>
+
+	<div class="fieldset">
+            <h2 class="legend">API</h2>
+            <p>
+                <em>Module</em>: <strong>cheshire3.workflow</strong><br/>
+                <em>Classes</em>:
+            </p>                
+            <ul>
+                <li>
+                    <b>workflow.SimpleWorkflow</b><br/>
+                    A basic workflow implementation
+                </li>
+                <li>
+                    <b>workflow.CachingWorkflow</b><br/>
+                    Slightly faster workflow implementation that caches the objects it uses.
+                    workflow.load_cache(session, newDatabaseObject) must be called if the workflow is to be used in another database.
+                </li>
+            </ul>
+            <p>
+                <em>Methods</em>:
+            </p>
+            <table border="1" cellpadding="3" cellspacing="0" width="100%">
+              	<tr><th>Function</th><th>Parameters</th><th>Returns</th><th>Description</th></tr>
+                <tr><td>__init__</td><td>domNode, parentObject</td><td>&nbsp;</td><td>The constructer takes a DOM tree containing the configuration of the index and the object which the database should consider as its parent, normally a database.</td></tr>
+                <tr><td>process</td><td>session, object</td><td>object</td><td>Executes the code as constructed from the XML configuration on the given object.  The return value is the last object to be produced by the execution.</td></tr>
+            </table>
+	</div>
+
+    </body>
+</html>

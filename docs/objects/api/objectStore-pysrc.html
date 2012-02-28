@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>objectStore</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        Module&nbsp;objectStore
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript: void(0);" class="privatelink"
+    onclick="toggle_private();">hide private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="objectStore-pysrc.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<h2 class="py-src">Source Code for <a href="objectStore-module.html">Module objectStore</a></h2>
+<div class="py-src">
+<pre class="py-src">
+<span class="lineno"> 1</span>  <span class="py-line"> </span>
+<span class="lineno"> 2</span>  <span class="py-line"><span class="py-keyword">from</span> <a title="baseObjects" class="py-name" href="baseObjects-module.html">baseObjects</a> <span class="py-keyword">import</span> <a class="py-name" href="baseObjects.ObjectStore-class.html">ObjectStore</a> </span>
+<span class="lineno"> 3</span>  <span class="py-line"><span class="py-keyword">from</span> <a title="configParser" class="py-name" href="configParser-module.html">configParser</a> <span class="py-keyword">import</span> <a class="py-name" href="configParser.C3Object-class.html">C3Object</a> </span>
+<span class="lineno"> 4</span>  <span class="py-line"><span class="py-keyword">from</span> <span id="link-0" class="py-name"><a title="baseObjects.Database.recordStore
+baseObjects.Record.recordStore
+baseObjects.ResultSetItem.recordStore
+recordStore
+recordStore.MarcIter.recordStore
+recordStore.RemoteSlaveRecordStore.recordStore
+resultSet.ArrayResultSet.recordStore
+resultSet.BitmapResultSet.recordStore
+resultSet.SimpleResultSet.recordStore
+resultSet.SimpleResultSetItem.recordStore" class="py-name" href="#" onclick="doclink('link-0', 'recordStore', 'Variable baseObjects.Database.recordStore=baseObjects.Database-class.html#recordStore,Variable baseObjects.Record.recordStore=baseObjects.Record-class.html#recordStore,Variable baseObjects.ResultSetItem.recordStore=baseObjects.ResultSetItem-class.html#recordStore,Module recordStore=recordStore-module.html,Variable recordStore.MarcIter.recordStore=recordStore.MarcIter-class.html#recordStore,Variable recordStore.RemoteSlaveRecordStore.recordStore=recordStore.RemoteSlaveRecordStore-class.html#recordStore,Variable resultSet.ArrayResultSet.recordStore=resultSet.ArrayResultSet-class.html#recordStore,Variable resultSet.BitmapResultSet.recordStore=resultSet.BitmapResultSet-class.html#recordStore,Variable resultSet.SimpleResultSet.recordStore=resultSet.SimpleResultSet-class.html#recordStore,Variable resultSet.SimpleResultSetItem.recordStore=resultSet.SimpleResultSetItem-class.html#recordStore'); return false;">recordStore</a></span></span> <span class="py-keyword">import</span> <a class="py-name" href="recordStore.BdbRecordStore-class.html">BdbRecordStore</a> </span>
+<span class="lineno"> 5</span>  <span class="py-line"><span class="py-keyword">from</span> <a title="utils" class="py-name" href="utils-module.html">utils</a> <span class="py-keyword">import</span> <a class="py-name" href="utils-module.html#getFirstData">getFirstData</a><span class="py-op">,</span> <span id="link-1" class="py-name"><a title="indexStore.elementType
+textmining.elementType
+utils.elementType" class="py-name" href="#" onclick="doclink('link-1', 'elementType', 'Variable indexStore.elementType=indexStore-module.html#elementType,Variable textmining.elementType=textmining-module.html#elementType,Variable utils.elementType=utils-module.html#elementType'); return false;">elementType</a></span></span> </span>
+<span class="lineno"> 6</span>  <span class="py-line"><span class="py-keyword">import</span> <a class="py-name" href="dynamic-module.html">dynamic</a> </span>
+<span class="lineno"> 7</span>  <span class="py-line"><span class="py-keyword">from</span> <a title="c3errors" class="py-name" href="c3errors-module.html">c3errors</a> <span class="py-keyword">import</span> <a class="py-name" href="c3errors.ConfigFileException-class.html">ConfigFileException</a> </span>
+<span class="lineno"> 8</span>  <span class="py-line"> </span>
+<a name="BdbObjectStore"></a><div id="BdbObjectStore-def"><span class="lineno"> 9</span> <a class="pysrc-toggle" href="#" id="BdbObjectStore-toggle" onclick="toggle('BdbObjectStore'); return false;">-</a><span class="py-line"><span class="py-keyword">class</span> <a class="py-def-name" href="objectStore.BdbObjectStore-class.html">BdbObjectStore</a><span class="py-op">(</span><span class="py-base-class">BdbRecordStore</span><span class="py-op">,</span> <span class="py-base-class">ObjectStore</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="BdbObjectStore-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="BdbObjectStore-expanded"><span class="lineno">10</span>  <span class="py-line">    <span class="py-comment"># Store XML records in RecordStore</span> </span>
+<span class="lineno">11</span>  <span class="py-line"><span class="py-comment"></span>    <span class="py-comment"># Retrieve and instantiate    </span> </span>
+<span class="lineno">12</span>  <span class="py-line"><span class="py-comment"></span> </span>
+<span class="lineno">13</span>  <span class="py-line">    <span class="py-comment"># NB Use create_record() to store configurations</span> </span>
+<a name="BdbObjectStore.create_object"></a><div id="BdbObjectStore.create_object-def"><span class="lineno">14</span> <a class="pysrc-toggle" href="#" id="BdbObjectStore.create_object-toggle" onclick="toggle('BdbObjectStore.create_object'); return false;">-</a><span class="py-line"><span class="py-comment"></span>    <span class="py-keyword">def</span> <a class="py-def-name" href="objectStore.BdbObjectStore-class.html#create_object">create_object</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">session</span><span class="py-op">,</span> <span class="py-param">object</span><span class="py-op">=</span><span class="py-name">None</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="BdbObjectStore.create_object-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="BdbObjectStore.create_object-expanded"><span class="lineno">15</span>  <span class="py-line">        <span class="py-comment"># Need to implement object -&gt; config xml for all objects!</span> </span>
+<span class="lineno">16</span>  <span class="py-line"><span class="py-comment"></span>        <span class="py-comment"># Check doesn't exist, then call store_object</span> </span>
+<span class="lineno">17</span>  <span class="py-line"><span class="py-comment"></span>        <span class="py-keyword">raise</span><span class="py-op">(</span><span class="py-name">NotImplementedError</span><span class="py-op">)</span> </span>
+</div><span class="lineno">18</span>  <span class="py-line"> </span>
+<a name="BdbObjectStore.delete_object"></a><div id="BdbObjectStore.delete_object-def"><span class="lineno">19</span> <a class="pysrc-toggle" href="#" id="BdbObjectStore.delete_object-toggle" onclick="toggle('BdbObjectStore.delete_object'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="objectStore.BdbObjectStore-class.html#delete_object">delete_object</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">session</span><span class="py-op">,</span> <span class="py-param">id</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="BdbObjectStore.delete_object-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="BdbObjectStore.delete_object-expanded"><span class="lineno">20</span>  <span class="py-line">        <span class="py-keyword">return</span> <span class="py-name">self</span><span class="py-op">.</span><span id="link-2" class="py-name"><a title="baseObjects.Index.delete_record
+baseObjects.RecordStore.delete_record
+index.RecordIdentifierIndex.delete_record
+index.SimpleIndex.delete_record
+recordStore.SimpleRecordStore.delete_record" class="py-name" href="#" onclick="doclink('link-2', 'delete_record', 'Method baseObjects.Index.delete_record()=baseObjects.Index-class.html#delete_record,Method baseObjects.RecordStore.delete_record()=baseObjects.RecordStore-class.html#delete_record,Method index.RecordIdentifierIndex.delete_record()=index.RecordIdentifierIndex-class.html#delete_record,Method index.SimpleIndex.delete_record()=index.SimpleIndex-class.html#delete_record,Method recordStore.SimpleRecordStore.delete_record()=recordStore.SimpleRecordStore-class.html#delete_record'); return false;">delete_record</a></span></span><span class="py-op">(</span><a title="resultSet.DeserializationHandler.session" class="py-name" href="resultSet.DeserializationHandler-class.html#session">session</a><span class="py-op">,</span> <span id="link-3" class="py-name"><a title="baseObjects.Document.id
+baseObjects.ResultSet.id
+configParser.C3Object.id
+resultSet.BitmapResultSet.id
+resultSet.SimpleResultSet.id
+srboo.SrbConnection.id" class="py-name" href="#" onclick="doclink('link-3', 'id', 'Variable baseObjects.Document.id=baseObjects.Document-class.html#id,Variable baseObjects.ResultSet.id=baseObjects.ResultSet-class.html#id,Variable configParser.C3Object.id=configParser.C3Object-class.html#id,Variable resultSet.BitmapResultSet.id=resultSet.BitmapResultSet-class.html#id,Variable resultSet.SimpleResultSet.id=resultSet.SimpleResultSet-class.html#id,Variable srboo.SrbConnection.id=srboo.SrbConnection-class.html#id'); return false;">id</a></span></span><span class="py-op">)</span> </span>
+</div><span class="lineno">21</span>  <span class="py-line"> </span>
+<a name="BdbObjectStore.fetch_object"></a><div id="BdbObjectStore.fetch_object-def"><span class="lineno">22</span> <a class="pysrc-toggle" href="#" id="BdbObjectStore.fetch_object-toggle" onclick="toggle('BdbObjectStore.fetch_object'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="objectStore.BdbObjectStore-class.html#fetch_object">fetch_object</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">session</span><span class="py-op">,</span> <span class="py-param">id</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="BdbObjectStore.fetch_object-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="BdbObjectStore.fetch_object-expanded"><span class="lineno">23</span>  <span class="py-line">        <span class="py-name">rec</span> <span class="py-op">=</span> <span class="py-name">self</span><span class="py-op">.</span><span id="link-4" class="py-name"><a title="baseObjects.RecordStore.fetch_record
+recordStore.MarcRecordStore.fetch_record
+recordStore.ParsingRecordStore.fetch_record
+recordStore.RemoteSlaveRecordStore.fetch_record
+recordStore.SimpleRecordStore.fetch_record
+resultSet.SimpleResultSetItem.fetch_record" class="py-name" href="#" onclick="doclink('link-4', 'fetch_record', 'Method baseObjects.RecordStore.fetch_record()=baseObjects.RecordStore-class.html#fetch_record,Method recordStore.MarcRecordStore.fetch_record()=recordStore.MarcRecordStore-class.html#fetch_record,Method recordStore.ParsingRecordStore.fetch_record()=recordStore.ParsingRecordStore-class.html#fetch_record,Method recordStore.RemoteSlaveRecordStore.fetch_record()=recordStore.RemoteSlaveRecordStore-class.html#fetch_record,Method recordStore.SimpleRecordStore.fetch_record()=recordStore.SimpleRecordStore-class.html#fetch_record,Method resultSet.SimpleResultSetItem.fetch_record()=resultSet.SimpleResultSetItem-class.html#fetch_record'); return false;">fetch_record</a></span></span><span class="py-op">(</span><a title="resultSet.DeserializationHandler.session" class="py-name" href="resultSet.DeserializationHandler-class.html#session">session</a><span class="py-op">,</span> <span id="link-5" class="py-name"><a title="baseObjects.Document.id
+baseObjects.ResultSet.id
+configParser.C3Object.id
+resultSet.BitmapResultSet.id
+resultSet.SimpleResultSet.id
+srboo.SrbConnection.id" class="py-name" href="#" onclick="doclink('link-5', 'id', 'Variable baseObjects.Document.id=baseObjects.Document-class.html#id,Variable baseObjects.ResultSet.id=baseObjects.ResultSet-class.html#id,Variable configParser.C3Object.id=configParser.C3Object-class.html#id,Variable resultSet.BitmapResultSet.id=resultSet.BitmapResultSet-class.html#id,Variable resultSet.SimpleResultSet.id=resultSet.SimpleResultSet-class.html#id,Variable srboo.SrbConnection.id=srboo.SrbConnection-class.html#id'); return false;">id</a></span></span><span class="py-op">)</span> </span>
+<span class="lineno">24</span>  <span class="py-line">        <span class="py-keyword">if</span> <span class="py-op">(</span><span class="py-keyword">not</span> <span class="py-name">rec</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno">25</span>  <span class="py-line">            <span class="py-keyword">return</span> <span class="py-name">None</span> </span>
+<span class="lineno">26</span>  <span class="py-line"> </span>
+<span class="lineno">27</span>  <span class="py-line">        <span id="link-6" class="py-name"><a title="baseObjects.Record.dom
+bootstrap.BootstrapRecord.dom" class="py-name" href="#" onclick="doclink('link-6', 'dom', 'Variable baseObjects.Record.dom=baseObjects.Record-class.html#dom,Variable bootstrap.BootstrapRecord.dom=bootstrap.BootstrapRecord-class.html#dom'); return false;">dom</a></span></span> <span class="py-op">=</span> <span class="py-name">rec</span><span class="py-op">.</span><span id="link-7" class="py-name"><a title="baseObjects.Record.get_dom
+bootstrap.BootstrapRecord.get_dom
+record.DomRecord.get_dom
+record.MarcRecord.get_dom
+record.SaxRecord.get_dom" class="py-name" href="#" onclick="doclink('link-7', 'get_dom', 'Method baseObjects.Record.get_dom(session)=baseObjects.Record-class.html#get_dom,Method bootstrap.BootstrapRecord.get_dom(session)=bootstrap.BootstrapRecord-class.html#get_dom,Method record.DomRecord.get_dom(session)=record.DomRecord-class.html#get_dom,Method record.MarcRecord.get_dom(session)=record.MarcRecord-class.html#get_dom,Method record.SaxRecord.get_dom(session)=record.SaxRecord-class.html#get_dom'); return false;">get_dom</a></span></span><span class="py-op">(</span><span class="py-op">)</span> </span>
+<span class="lineno">28</span>  <span class="py-line">        <span class="py-keyword">for</span> <span class="py-name">d</span> <span class="py-keyword">in</span> <span id="link-8" class="py-name"><a title="baseObjects.Record.dom
+bootstrap.BootstrapRecord.dom" class="py-name" href="#" onclick="doclink('link-8', 'dom', 'Variable baseObjects.Record.dom=baseObjects.Record-class.html#dom,Variable bootstrap.BootstrapRecord.dom=bootstrap.BootstrapRecord-class.html#dom'); return false;">dom</a></span></span><span class="py-op">.</span><span class="py-name">childNodes</span><span class="py-op">:</span> </span>
+<span class="lineno">29</span>  <span class="py-line">            <span class="py-keyword">if</span> <span class="py-name">d</span><span class="py-op">.</span><span class="py-name">nodeType</span> <span class="py-op">==</span> <span id="link-9" class="py-name"><a title="indexStore.elementType
+textmining.elementType
+utils.elementType" class="py-name" href="#" onclick="doclink('link-9', 'elementType', 'Variable indexStore.elementType=indexStore-module.html#elementType,Variable textmining.elementType=textmining-module.html#elementType,Variable utils.elementType=utils-module.html#elementType'); return false;">elementType</a></span></span><span class="py-op">:</span> </span>
+<span class="lineno">30</span>  <span class="py-line">                <span class="py-name">topNode</span> <span class="py-op">=</span> <span class="py-name">d</span> </span>
+<span class="lineno">31</span>  <span class="py-line">                <span class="py-keyword">break</span> </span>
+<span class="lineno">32</span>  <span class="py-line">        <span class="py-comment"># Need to import stuff first, possibly</span> </span>
+<span class="lineno">33</span>  <span class="py-line"><span class="py-comment"></span>        <span class="py-keyword">for</span> <span class="py-name">child</span> <span class="py-keyword">in</span> <span class="py-name">topNode</span><span class="py-op">.</span><span class="py-name">childNodes</span><span class="py-op">:</span> </span>
+<span class="lineno">34</span>  <span class="py-line">            <span class="py-keyword">if</span> <span class="py-name">child</span><span class="py-op">.</span><span class="py-name">nodeType</span> <span class="py-op">==</span> <span id="link-10" class="py-name"><a title="indexStore.elementType
+textmining.elementType
+utils.elementType" class="py-name" href="#" onclick="doclink('link-10', 'elementType', 'Variable indexStore.elementType=indexStore-module.html#elementType,Variable textmining.elementType=textmining-module.html#elementType,Variable utils.elementType=utils-module.html#elementType'); return false;">elementType</a></span></span><span class="py-op">:</span> </span>
+<span class="lineno">35</span>  <span class="py-line">                <span class="py-keyword">if</span> <span class="py-op">(</span><span class="py-name">child</span><span class="py-op">.</span><span class="py-name">localName</span> <span class="py-op">==</span> <span class="py-string">"imports"</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno">36</span>  <span class="py-line">                    <span class="py-comment"># Do this now so we can reference</span> </span>
+<span class="lineno">37</span>  <span class="py-line"><span class="py-comment"></span>                    <span class="py-keyword">for</span> <span class="py-name">mod</span> <span class="py-keyword">in</span> <span class="py-name">child</span><span class="py-op">.</span><span class="py-name">childNodes</span><span class="py-op">:</span> </span>
+<span class="lineno">38</span>  <span class="py-line">                        <span class="py-keyword">if</span> <span class="py-name">mod</span><span class="py-op">.</span><span class="py-name">nodeType</span> <span class="py-op">==</span> <span id="link-11" class="py-name"><a title="indexStore.elementType
+textmining.elementType
+utils.elementType" class="py-name" href="#" onclick="doclink('link-11', 'elementType', 'Variable indexStore.elementType=indexStore-module.html#elementType,Variable textmining.elementType=textmining-module.html#elementType,Variable utils.elementType=utils-module.html#elementType'); return false;">elementType</a></span></span> <span class="py-keyword">and</span> <span class="py-name">mod</span><span class="py-op">.</span><span class="py-name">localName</span> <span class="py-op">==</span> <span class="py-string">"module"</span><span class="py-op">:</span> </span>
+<span class="lineno">39</span>  <span class="py-line">                            <span id="link-12" class="py-name"><a title="configParser.C3Object.name
+srboo.SrbFile.name" class="py-name" href="#" onclick="doclink('link-12', 'name', 'Variable configParser.C3Object.name=configParser.C3Object-class.html#name,Variable srboo.SrbFile.name=srboo.SrbFile-class.html#name'); return false;">name</a></span></span><span class="py-op">,</span> <a title="configParser.C3Object.objects" class="py-name" href="configParser.C3Object-class.html#objects">objects</a><span class="py-op">,</span> <span class="py-name">withname</span> <span class="py-op">=</span> <span class="py-op">(</span><span class="py-string">''</span><span class="py-op">,</span> <span class="py-op">[</span><span class="py-op">]</span><span class="py-op">,</span> <span class="py-name">None</span><span class="py-op">)</span> </span>
+<span class="lineno">40</span>  <span class="py-line">                            <span class="py-keyword">for</span> <span class="py-name">n</span> <span class="py-keyword">in</span> <span class="py-name">mod</span><span class="py-op">.</span><span class="py-name">childNodes</span><span class="py-op">:</span> </span>
+<span class="lineno">41</span>  <span class="py-line">                                <span class="py-keyword">if</span> <span class="py-op">(</span><span class="py-name">n</span><span class="py-op">.</span><span class="py-name">nodeType</span> <span class="py-op">==</span> <span id="link-13" class="py-name"><a title="indexStore.elementType
+textmining.elementType
+utils.elementType" class="py-name" href="#" onclick="doclink('link-13', 'elementType', 'Variable indexStore.elementType=indexStore-module.html#elementType,Variable textmining.elementType=textmining-module.html#elementType,Variable utils.elementType=utils-module.html#elementType'); return false;">elementType</a></span></span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno">42</span>  <span class="py-line">                                    <span class="py-keyword">if</span> <span class="py-op">(</span><span class="py-name">n</span><span class="py-op">.</span><span class="py-name">localName</span> <span class="py-op">==</span> <span class="py-string">'name'</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno">43</span>  <span class="py-line">                                        <span id="link-14" class="py-name"><a title="configParser.C3Object.name
+srboo.SrbFile.name" class="py-name" href="#" onclick="doclink('link-14', 'name', 'Variable configParser.C3Object.name=configParser.C3Object-class.html#name,Variable srboo.SrbFile.name=srboo.SrbFile-class.html#name'); return false;">name</a></span></span> <span class="py-op">=</span> <a title="utils.getFirstData" class="py-name" href="utils-module.html#getFirstData">getFirstData</a><span class="py-op">(</span><span class="py-name">n</span><span class="py-op">)</span> </span>
+<span class="lineno">44</span>  <span class="py-line">                                    <span class="py-keyword">elif</span> <span class="py-op">(</span><span class="py-name">n</span><span class="py-op">.</span><span class="py-name">localName</span> <span class="py-op">==</span> <span class="py-string">'object'</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno">45</span>  <span class="py-line">                                        <a title="configParser.C3Object.objects" class="py-name" href="configParser.C3Object-class.html#objects">objects</a><span class="py-op">.</span><a title="resultSet.SimpleResultSet.append" class="py-name" href="resultSet.SimpleResultSet-class.html#append">append</a><span class="py-op">(</span><a title="utils.getFirstData" class="py-name" href="utils-module.html#getFirstData">getFirstData</a><span class="py-op">(</span><span class="py-name">n</span><span class="py-op">)</span><span class="py-op">)</span> </span>
+<span class="lineno">46</span>  <span class="py-line">                                    <span class="py-keyword">elif</span> <span class="py-op">(</span><span class="py-name">n</span><span class="py-op">.</span><span class="py-name">localName</span> <span class="py-op">==</span> <span class="py-string">'withName'</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno">47</span>  <span class="py-line">                                        <span class="py-name">withname</span> <span class="py-op">=</span> <a title="utils.getFirstData" class="py-name" href="utils-module.html#getFirstData">getFirstData</a><span class="py-op">(</span><span class="py-name">n</span><span class="py-op">)</span> </span>
+<span class="lineno">48</span>  <span class="py-line">                            <span class="py-keyword">if</span> <span class="py-op">(</span><span id="link-15" class="py-name"><a title="configParser.C3Object.name
+srboo.SrbFile.name" class="py-name" href="#" onclick="doclink('link-15', 'name', 'Variable configParser.C3Object.name=configParser.C3Object-class.html#name,Variable srboo.SrbFile.name=srboo.SrbFile-class.html#name'); return false;">name</a></span></span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno">49</span>  <span class="py-line">                                <a title="dynamic" class="py-name" href="dynamic-module.html">dynamic</a><span class="py-op">.</span><a title="dynamic.globalImport" class="py-name" href="dynamic-module.html#globalImport">globalImport</a><span class="py-op">(</span><span id="link-16" class="py-name"><a title="configParser.C3Object.name
+srboo.SrbFile.name" class="py-name" href="#" onclick="doclink('link-16', 'name', 'Variable configParser.C3Object.name=configParser.C3Object-class.html#name,Variable srboo.SrbFile.name=srboo.SrbFile-class.html#name'); return false;">name</a></span></span><span class="py-op">,</span> <a title="configParser.C3Object.objects" class="py-name" href="configParser.C3Object-class.html#objects">objects</a><span class="py-op">,</span> <span class="py-name">withname</span><span class="py-op">)</span> </span>
+<span class="lineno">50</span>  <span class="py-line">                            <span class="py-keyword">else</span><span class="py-op">:</span> </span>
+<span class="lineno">51</span>  <span class="py-line">                                <span class="py-keyword">raise</span><span class="py-op">(</span><a title="c3errors.ConfigFileException" class="py-name" href="c3errors.ConfigFileException-class.html">ConfigFileException</a><span class="py-op">(</span><span class="py-string">'No name given for module to import in configFile for %s'</span> <span class="py-op">%</span> <span class="py-op">(</span><span class="py-name">self</span><span class="py-op">.</span><span id="link-17" class="py-name"><a title="baseObjects.Document.id
+baseObjects.ResultSet.id
+configParser.C3Object.id
+resultSet.BitmapResultSet.id
+resultSet.SimpleResultSet.id
+srboo.SrbConnection.id" class="py-name" href="#" onclick="doclink('link-17', 'id', 'Variable baseObjects.Document.id=baseObjects.Document-class.html#id,Variable baseObjects.ResultSet.id=baseObjects.ResultSet-class.html#id,Variable configParser.C3Object.id=configParser.C3Object-class.html#id,Variable resultSet.BitmapResultSet.id=resultSet.BitmapResultSet-class.html#id,Variable resultSet.SimpleResultSet.id=resultSet.SimpleResultSet-class.html#id,Variable srboo.SrbConnection.id=srboo.SrbConnection-class.html#id'); return false;">id</a></span></span><span class="py-op">)</span><span class="py-op">)</span><span class="py-op">)</span> </span>
+<span class="lineno">52</span>  <span class="py-line"> </span>
+<span class="lineno">53</span>  <span class="py-line">        <span class="py-name">object</span> <span class="py-op">=</span> <a title="dynamic" class="py-name" href="dynamic-module.html">dynamic</a><span class="py-op">.</span><a title="dynamic.makeObjectFromDom" class="py-name" href="dynamic-module.html#makeObjectFromDom">makeObjectFromDom</a><span class="py-op">(</span><a title="resultSet.DeserializationHandler.session" class="py-name" href="resultSet.DeserializationHandler-class.html#session">session</a><span class="py-op">,</span> <span class="py-name">topNode</span><span class="py-op">,</span> <span class="py-name">self</span><span class="py-op">)</span> </span>
+<span class="lineno">54</span>  <span class="py-line">        <span class="py-keyword">return</span> <span class="py-name">object</span> </span>
+</div><span class="lineno">55</span>  <span class="py-line"> </span>
+<a name="BdbObjectStore.fetch_objectList"></a><div id="BdbObjectStore.fetch_objectList-def"><span class="lineno">56</span> <a class="pysrc-toggle" href="#" id="BdbObjectStore.fetch_objectList-toggle" onclick="toggle('BdbObjectStore.fetch_objectList'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="objectStore.BdbObjectStore-class.html#fetch_objectList">fetch_objectList</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">session</span><span class="py-op">,</span> <span class="py-param">req</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="BdbObjectStore.fetch_objectList-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="BdbObjectStore.fetch_objectList-expanded"><span class="lineno">57</span>  <span class="py-line">        <span class="py-comment"># Scan like interface?</span> </span>
+<span class="lineno">58</span>  <span class="py-line"><span class="py-comment"></span>        <span class="py-keyword">raise</span><span class="py-op">(</span><span class="py-name">NotImplementedError</span><span class="py-op">)</span> </span>
+</div><span class="lineno">59</span>  <span class="py-line"> </span>
+<a name="BdbObjectStore.store_object"></a><div id="BdbObjectStore.store_object-def"><span class="lineno">60</span> <a class="pysrc-toggle" href="#" id="BdbObjectStore.store_object-toggle" onclick="toggle('BdbObjectStore.store_object'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="objectStore.BdbObjectStore-class.html#store_object">store_object</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">session</span><span class="py-op">,</span> <span class="py-param">object</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="BdbObjectStore.store_object-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="BdbObjectStore.store_object-expanded"><span class="lineno">61</span>  <span class="py-line">        <span class="py-keyword">raise</span><span class="py-op">(</span><span class="py-name">NotImplementedError</span><span class="py-op">)</span> </span>
+</div></div><span class="lineno">62</span>  <span class="py-line"> </span><script type="text/javascript">
+<!--
+expandto(location.href);
+// -->
+</script>
+</pre>
+</div>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">Generated by Epydoc
+        3.0alpha2 on Wed Aug  9 18:10:52 2006</td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>

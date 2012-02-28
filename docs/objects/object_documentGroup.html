@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+		<title>Cheshire3 Objects: DocumentGroup (obselete)</title>
+		<link rel="stylesheet" type="text/css" href="http://www.cheshire3.org/cheshire3.css"></link>
+    </head>
+
+    <body>
+
+        <table cellpadding="0" cellspacing="0" class="maintitle">
+            <tr>
+            <td class="cheshirelogo">
+                <img src="http://www.cheshire3.org/gfx/c3_white.gif" alt=" c h e s h i r e  |  3 "/>
+			</td>
+			<td>
+                <img src="http://www.cheshire3.org/gfx/slant_grey.gif" alt=""/>
+			</td>
+			<td align="center">
+                <h1>Cheshire3 Objects:  Document Group (OBSELETE)</h1>
+            </td>
+            </tr>
+        </table>
+
+		<!--#config errmsg="<div id="navbar"/>" -->
+		<!--#include virtual="/navbar.ssi" -->
+
+    	<div class="fieldset">
+            <h2 class="legend">Description</h2>
+            <p>DocumentGroups are now obselete, having been replaced by <a href="object_documentFactory.html">DocumentFactories</a>. The documentation is maintained for posterity (and possibly for those who still use it under the "if it ain't broke, don't fix it!" idiom) </p>
+            <p>
+                One or more Documents may be present in a DocumentGroup. 
+                This allows for users to upload a zip file of several documents and the system can process everything from there. 
+                Equally, a DocumentGroup might just be a single flat text file, an SQL database dump, or a search on a remote system.
+			</p>
+		</div>
+
+        <div class="fieldset">
+            <h2 class="legend">Implementations</h2>
+			<ul>
+    			<li><b>documentGroup.StringDocumentGroup</b><br/>
+                Given a string, find XML documents in it.
+	   		</li>
+			
+			<li><b>documentGroup.DirectoryDocumentGroup</b>
+			<br/>Given the path to a directory, crawl it looking for files which contain documents of a known type.</li>
+			
+			<li><b>documentGroup.FileDocumentGroup</b>
+			<br/>Given the path to a file, find XML documents in it and read them into memory.</li>
+			
+			<li><b>documentGroup.BigFileDocumentGroup</b>
+			<br/>Given the path to a file, find XML documents in it, but only retrieve them on request.</li>
+			
+			<li><b>documentGroup.TarDocumentGroup</b>
+			<br/>Given the data which makes up a tar file, extract the files from it as Documents.</li>
+			
+			<li><b>documentGroup.TarFileDocumentGroup</b>
+			<br/>Given a path to a tar file, extract the files from it as Documents.</li>
+			
+			<li><b>documentGroup.ZipDocumentGroup</b>
+			<br/>Given the data which makes up a zip file, extract the files from it as Documents.</li>
+			
+			<li><b>documentGroup.ZipFileDocumentGroup</b>
+			<br/>Given a path to a zip file, extract the files from it as Documents.</li>
+			
+			<li><b>documentGroup.ClusterFileDocumentGroup</b>
+			<br/>Given the path to a raw cluster data file, merge and create documents.</li>
+			
+			<li><b>documentGroup.MarcFileDocumentGroup</b>
+			<br/>Given the path to a file containing MARC records, extract them.</li>
+			
+			<li><b>documentGroup.BigMarcFileDocumentGroup</b>
+			<br/>Given the path to a file containing MARC records, locate them, but only read into memory as requested.</li>
+			
+			<li><b>documentGroup.Z3950SearchDocumentGroup</b>
+			<br/>Given a tuple of (Zoom Connection, Zoom Query), perform the search and then map the results to Documents.</li>
+			
+			<li><b>documentGroup.SRWSearchDocumentGroup</b>
+			<br/>Given a tuple of (URL, {args}) turn the arguments (ala SRU) into an SRW request, perform it, and map the results to Documents.</li>
+			
+			<li><b>documentGroup.OAIHarvestDocumentGroup</b>
+			<br/>Given a tuple of (URL, {args}) turn the arguments into the parameters for OAI, and harvest the records from the URL, mapping them to Documents.</li>
+			
+			
+			<li><b>documentGroup.GoogleSearchDocumentGroup</b>
+			<br/> Given a Google query, use the Google SOAP interface to search, fetch the actual files matched and map them to documents.</li>
+			
+			</ul>
+        </div>
+
+        <div class="fieldset">
+            <h2 class="legend">API</h2>
+            <table border="1" cellpadding="3" cellspacing="0" width="100%">
+			<tr><th>Function</th><th>Parameters</th><th>Returns</th><th>Description</th></tr>
+			<tr><td>__init__</td><td>data</td><td>&nbsp;</td><td>The constructer takes the data which should be used to construct the documentGroup from.  This is implementation dependant.</td></tr>
+			<tr><td>get_document</td><td>session, index</td><td>Document</td><td>Return the index'th document in the group</td></tr>
+			<tr><td>get_length</td><td>session</td><td>integer</td><td>Return the number of documents in the group</td></tr>
+			</table>
+		</div>
+
+    </body>
+</html>

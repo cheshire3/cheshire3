@@ -1,0 +1,214 @@
+
+0.6
+  * Started tracking changes as they're not so encompassing
+  * Fixed unNormalisable values bug
+  * Fixed single record indexing bug
+  * Namespace awareness in xpath indexing
+  * Fixed xpath issues with attributes, including configurable attribute hashing 
+  * Fixed Unicode awareness in indexStore (currently hardcoded to utf-8)
+  * Added configurable function logging
+  * Added choice of recordStoreParser (eg retrieval for indexing vs display)
+  * Many others
+
+0.7
+  * Added Workflow and Logger classes. (to be documented)
+  * Fixed StemNormaliser for TextIndexNG API
+  * Uncommented Date Extracter, added trivial DateStringNormaliser 
+  * Tried various other techniques for storing parsed SAX events.
+    Current method is overall the cheapest assuming that the events need to
+    be stored.  pickle is SLOW. repr() much faster.
+    Marginally faster to process lists vs strings, but MUCH slower to
+    store/load. 
+  * Added GroupPreParser class to turn Document into DocumentGroup
+  * PVM distributed processing. (Not yet distrib search)
+      + PVM recordstores, refactored indexing.  
+      + PvmTaskManager to handle distribution of processing
+      + Refactored ids vs objects everywhere
+  * Fixed SRW code. Started implementation of proposed SRW/Update.
+  * Fixed fetch_sortValue vs get_sortValue bug introduced in 0.6
+  * Changed normalisers to return a hash ala extracter. Eg:
+      'USA' -> {'united' : 1, 'states' : 1, 'of' : 1, 'america' : 1}
+  * Changed all term processing to use a hash.
+  * Removed irrelevant 'handle_' from function names
+  * Optimised a LOT of code for indexing process.
+  * MARC optimisation, including native XPath handler
+  * Totally refactored *Store implementations to be sane
+  * QueryStore implementation
+  * Keyword/ProximityNormaliser to allow Proximity on expanded strings  
+
+0.7.1
+  * Bug fixes:
+  *   Proximity data storing fixed.
+  *   Storing in non batch mode fixed.
+  *   Date extracter re-enabled
+  *   Several other minor fixes.
+  * Refactored SOAP handling.
+  * Permissions system added.
+  * Update handler added.
+
+0.7.5
+  * Bug fixes:
+  *    SRW handler fixed
+  *    Many others
+  * PostgreSQL record store implementation
+  * Probably many others
+
+
+0.7.6
+  * 050405:  Encode sortStore to utf-8
+  * Check for environment for digest cxn
+  * Indexstores not liking some unicode... ?
+
+0.8.0a1
+  * Character Entity Preparser upgrades thanks to John Harrison
+  * SRW Extension handling (+ debugged)       
+  * Refactored resultset merging to merge to new resultset       
+  * Fixed (though not verified algorithm) for relevance ranking
+  * Made Session mandatory param for all __init__ functions
+  * Fixed some digest/checkSum issues and recordStore weirdness
+  * MontyLingua Part of Speech normaliser/preParser/transformer
+  * Added NO_MMAP flag to BDB indexStore 
+  * Fixed last of camelCase API issues.  
+    *** indexRecord, addRecord and deleteRecord need fixing in scripts
+
+
+0.8.a2 -> 0.8.b1
+  * MPI support
+  * SRB support
+  * Refactored PVM support for merge with MPI style
+  * Various small bugs in indexing
+  
+0.8.1
+  * Fixed install script
+  * Fixed prox/adjacency
+  * Fixed relevance ranking (ish)
+  * CORI as default ranking
+  * // xpaths
+  * /foo xpath fix
+  * Reverted to \x00 as default separator
+  * OOo and MVD conversion servers
+
+[...]
+
+0.8.5
+  * ### numarray based index & resultset ###
+  * ... including properly fixed LR ranking
+  * ### Bitmap based index & resultset ###
+  * text() name() regexp() and starts-with() xpath
+  * Better MPI handling
+  * Tsujii Part of Speech handlers
+  * POS based normalisers (phrase finder, pos filtering)
+  * Keyword normaliser default regexp improved
+  * assignment in workflows
+  * New object type: xpathObject (wrapper round xpath)
+  * Fork/Split in workflows, plus normaliser, extracter, etc handling
+  * Caching workflow that looks up objects before running.
+  * change to log handling in workflows for variables
+  * record/document stores to keep track of number of items
+  * get_*size -> fetch_*size
+  * Slightly more efficient resultset sorting
+  * Slightly better resultset merging (eg not always a SimpleResultSet)
+  * change scan to send term not query to index
+  * Scan returns only summary data (much much faster)
+  * single term scan bug fix (would return entire index)
+  * allow 'reverseIndex' setting to enable right truncated searches
+  * bug in SimpleBitfield.lenTrueItems() and efficiency in trueItems()
+
+[...]
+
+0.9
+  * ### Just In Time object building ###
+  * ### SRB Index Store ###
+  * ### Added DB_RECNO flag to recordStores for performance
+    ... NB This is not backwards compatible!	
+  * Improved commit_indexing() slowness introduced in 0.8.5
+  * Changed new index functions to more comprehensible 'deserialiseTerms'
+  * Much easier to integrate new index types with indexStore	
+  * Auto run of Caching workflow cache loader
+  * Rewrote resultSetStore system (plus fixes)
+  * Fixed delete_record bugs
+  * GRS1 mapping transformer (ala C2 GRS format)
+  * Enju based text mining objects
+  * Many new util objects (eg htmlSmash, pdftohtml, spaceNormaliser)
+
+0.9.2
+  *** Removed documentGroup, now documentFactory/documentStream ***
+  * Consolodates all document creation into a single interface
+  * Z39.50 fixes
+  * Re-implemented result set merging
+  * Some minor API tweaks  
+  * session sent to _handleConfigNode
+  * some utils functions improved
+  * SAX-XPath handling improved
+  * Probably many others!
+
+0.9.3
+  *** PostgreSQL implementations for all IndexStore, ResultSetStore ***
+  * lxml integration. 1.2-1.5 times faster than default Sax implementation
+  * Several unicode related fixes
+  * many MANY documentFactory, documentStream fixes
+  * renamed tsujii to textmining
+  * trivial XmlTransformer
+  * ajaxApacheHandler for DSVG configurator
+  * More (api level) Documentation!
+  * indexStore.get_indexingPosition(session) --> where are we up to if crash
+  * BdbIter.jump(position) --> jump to given position
+  * config parsing now uses getAttributeNS(None, name) as 4Suite doesn't
+      implement getAttribute(name) ...
+  * ... for better configStore/objectStore support.   
+  * Indexes use (and autocreate) XPathObjects now ...
+  * ... which support schema checking ...
+  * ... as copied by parser.copy_data() from document ...
+  * ... as reported by DocumentFactory
+
+0.9.4(a,b,c)
+  *** GUI Workflow Configurator!
+  *** Wildcard support from John Harrison!
+  *** New metadata storage model (including fixes)
+  * Add configStore attribute to subConfig to record where config is found
+  * Add x and y attributes to all workflow subelements for GUI edit
+  * Bug fix from Yuri @ SIMS for very strange unicode error in pickle
+  * Bug fixes in textmining components
+  * Revamped preParsers for format imports (esp ps, pdf)
+  * Indexes use and autocreate workflow objects
+  * Accumulating DocumentStreams for data mining
+  * resultSet and index bug fixes
+  * documentStream fix to fix memory issue for Very Small xml docs
+  * moved grid code to new module
+  
+0.9.5
+  *** Integrated Data Mining!
+  *** GUI Object Configurator!
+  *** OAI support from John Harrison!
+  Documentation (!) and validation for paths/defaults/settings
+  Stores track deletions (option) and add metadata to objects
+  Iterable indexes
+  Fixes to Vectors, including support for multiple rec stores
+  ResultSetItem.docid --> resultSetItem.id
+  Fixes to multiple index type search
+  Wordnet support
+  FileSystemStore (uses byteCount, byteOffset and filename)  
+  ByteCount etc added to documents (xml only atm)
+  Fix to fetch_termList and first term check.
+  Fix to LxmlParser if doc has utf-8 text w/o encoding type
+  Many other fixes etc :)
+ 
+(0.9.6-8 non existent) 
+
+0.9.9
+  *** 1.0 Release Candidate   
+  OptimisingDatabase implementation 
+  	    (not significantly slower on any query, much faster on some)
+  Improved OAI support
+  Unindexing bugs fixed, faster vector-based implementation
+  Index merging bugs fixed and implementations for Array indexes
+  TermId db now uses 12 '0' padding for ids (StringIntNormaliser)
+  UnitTest database added
+  PreParsers maintain document metadata better	   
+
+0.9.10
+  *** More 1.0 Release Candidate
+  *** API CHANGES:
+      + Extracter now just extracts
+      + Tokenizer tokenizes
+      + TokenMerger merges tokens produced by Tokenizer

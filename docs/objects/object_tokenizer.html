@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>Cheshire3 Objects: Tokenizer</title>
+        <link rel="stylesheet" type="text/css" href="http://www.cheshire3.org/cheshire3.css"></link>
+    </head>
+    <body>
+        <a name="top"></a>
+	<table cellpadding="0" cellspacing="0" class="maintitle">
+            <tr>
+		<td class="cheshirelogo">
+                    <img src="http://www.cheshire3.org/gfx/c3_white.gif" alt=" c h e s h i r e  |  3 "/>
+		</td>
+		<td>
+                    <img src="http://www.cheshire3.org/gfx/slant_grey.gif" alt=""/>
+		</td>
+		<td align="center">
+			<h1>Cheshire3 Objects:  Tokenizer</h1>
+		</td>
+            </tr>
+	</table>
+
+	<!--#config errmsg="<div id="navbar"/>" -->
+	<!--#include virtual="/navbar.ssi" -->
+
+        <div class="fieldset">
+            <h2 class="legend">Description</h2>
+            <p>
+                A Tokenizer takes a string of language and processes it to produce an ordered list of tokens.
+            </p>
+        </div>
+
+        <div class="fieldset">
+            <h2 class="legend">Implementations</h2>
+            <p>The following implementations are pre-configured and ready to use.<br/>
+                They may be used out of the box in configurations for <a href="object_index.html">Indexes</a>, <a href="object_workflow.html">Workflows</a> etc.
+            </p>
+            
+            <ul>
+                <li><strong>SimpleTokenizer</strong><br/>
+                    A basic Tokenizer that splits the given data at whitespace.
+                </li>
+                
+                <li><strong>RegexpSubTokenizer</strong><br/>
+                    A Tokenizer that replaces regular expression matches in the data with a configurable character (defaults to whitespace), then splits the result at whitespace.
+                </li>
+                
+                <li><strong>RegexpSplitTokenizer</strong><br/>
+                    A Tokenizer that splits the data at matches of a regular expression. 
+                    Each match (e.g. punctuation) is preserved in the result as a separate token.
+                </li>
+                
+                <li><strong>RegexpFindTokenizer</strong><br/>
+                    A Tokenizer that uses a regular expression to finds tokens.
+                    Matches a large range commonly occurring tokens (e.g. simple words, email@addresses, £monetary $amounts, ti:me:s, percentages%, a.c.r.o.n.y.m.s., hyphen-ated and abbrev'd words etc.)
+                </li>
+                
+                <li><strong>RegexpFindOffsetTokenizer</strong><br/>
+                    A Tokenizer that uses a regular expression to finds tokens in the same way as RegexpFindTokenizer, but also maintains the character offset where token occurred within the data (useful for proximity searching within N characters and search term highlighting.)
+                </li>
+                
+                <li><strong>SentenceTokenizer</strong><br/>
+                    A Tokenizer to split data into sentences (i.e. splits at full-stops.)
+                </li>
+                
+                <li><strong>PythonTokenizer</strong><br/>
+                    A Tokenizer to split and annotate tokens in the Python programming language.
+                </li>
+                
+                <li><strong>DateTokenizer</strong><br/>
+                    A Tokenizer that finds date time tokens within the given data.
+                </li>
+                
+                <li><strong>PreserveMaskingTokenizer</strong><br/>
+                    A keyword Tokenizer based on RegexpSubTokenizer but which doesn't split at CQL masking characters (^*?). Especially useful when tokenizing incoming queries.
+                </li>
+                
+            </ul>
+        </div>
+        
+        <div class="fieldset">
+            <h2 class="legend">API</h2>
+            <p><em>Module</em>: <strong>cheshire3.tokenizer</strong><br/>
+            <em>Classes</em>:
+            </p>
+            <ul>
+                <li><strong>SimpleTokenizer</strong><br/>
+                    Splits the given data at all instances of a configurable string. Defaults to splitting on whitespace.
+                </li>
+                
+                <li><strong>OffsetTokenizer</strong><br/>
+                    Abstract base class for Tokenizers that maintain information about the location of each token as character offsets.
+                </li>
+                
+                <li><strong>RegexpSubTokenizer</strong><br/>
+                    Replaces regular expression matches in the data with a configurable character (defaults to whitespace), then splits the result at whitespace.
+                </li>
+                
+                <li><strong>RegexpSplitTokenizer</strong><br/>
+                    Splits the data at matches of a regular expression. 
+                    By default, each match (e.g. punctuation) is preserved in the result as a separate token.
+                </li>
+                
+                <li><strong>RegexpFindTokenizer</strong><br/>
+                    Returns all words that match the configured regex.
+                </li>
+                
+                <li><strong>RegexpFindOffsetTokenizer</strong><br/>
+                    Uses a regular expression to finds tokens in the same way as RegexpFindTokenizer, but also maintains the character offset where token occurred within the data.
+                </li>
+                
+                <li><strong>RegexpFindPunctuationOffsetTokenizer</strong>
+                    As RegexpFindOffsetTokenizer but does not include punctuation when calculating offsets.
+                </li>
+                
+                <li><strong>LineTokenizer</strong><br/>
+                    Splits the data at new line characters
+                </li>
+                
+                 <li><strong>SentenceTokenizer</strong><br/>
+                    Splits data into sentences (i.e. splits at full-stops.)
+                </li>
+                
+                <li><strong>PythonTokenizer</strong><br/>
+                    Splits and annotates tokens in the Python programming language.
+                </li>
+                
+                <li><strong>DateTokenizer</strong><br/>
+                    Finds date time tokens within the given data.
+                </li>
+            
+            </ul>
+            <p><em>Methods</em>:</p>
+            <table border="1" cellpadding="3" cellspacing="0" width="100%">
+                <tr><th>Function</th><th>Parameters</th><th>Returns</th><th>Description</th></tr>
+                <tr><td>__init__</td><td>config, parent</td><td>&nbsp;</td><td> </td></tr>
+                <tr><td>process_string</td><td>session, data</td><td>list</td><td>Process a raw string to produce an ordered list of tokens</td></tr>
+                <tr><td>process_hash</td><td>session, data</td><td>list</td><td>Process the text of each item in the hash to produce an ordered list of tokens for that hash entry.</td></tr>
+            </table>
+            
+            <h3>Sub-Packages</h3>
+            
+        </div>
+
+    </body>
+</html>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>Configuring PreParsers</title>
+        <link rel="stylesheet" type="text/css" href="http://www.cheshire3.org/cheshire3.css"></link>
+    </head>
+    <body>
+        <a name="top"></a>
+        <table cellpadding="0" cellspacing="0" class="maintitle">
+            <tr>
+                <td class="cheshirelogo">
+                    <img src="http://www.cheshire3.org/gfx/c3_white.gif" alt=" c h e s h i r e  |  3 "/>
+                </td>
+                <td>
+                    <img src="http://www.cheshire3.org/gfx/slant_grey.gif"/>
+                </td>
+                <td align="center">
+                    <h2>Configuring PreParsers</h2>
+                </td>
+            </tr>
+        </table>
+
+        <!--#config errmsg="<div id="navbar"/>" -->
+        <!--#include virtual="/navbar.ssi" -->
+
+        <div class="fieldset">
+            <span class="legend">Introduction</span>
+            <p>PreParsers are used to convert documents when they are being introduced to the system into a form in which they can be most easily processed.</p>
+            <p>They typically only do one thing, and as such do not have extensive configuration sections.</p>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">Example</span>
+            <p>Example preParser configurations:</p>
+            <pre>
+01 &lt;subConfig type="preParser" id="SgmlPreParser"&gt;
+02   &lt;objectType&gt;extractor.SgmlPreParser&lt;/objectType&gt;
+03   &lt;options&gt;
+04     &lt;setting type="emptyElements"&gt;lb ptr extptr hr&lt;setting&gt;
+05   &lt;/options&gt;
+06 &lt;/subConfig&gt;
+07
+08 &lt;subConfig type="preParser" id="CharacterEntityPreParser"&gt;
+09   &lt;objectType&gt;extractor.CharacterEntityPreParser&lt;/objectType&gt;
+10 &lt;/subConfig&gt;
+
+            </pre>	
+        </div>
+
+	<div class="fieldset">
+            <span class="legend">Explanation</span>
+            <p>
+        	There's obviously not much to say, as these objects only do one thing and don't have a lot of options or paths to set.  
+        	The first example is one of the only ones that does, and has a list of empty SGML elements to be converted to empty XML elements (eg &lt;hr&gt; -&gt; &lt;hr/&gt;)
+            </p>
+            <p>Some of the currently available PreParsers:</p>
+            <ul>
+                <li><b>SgmlPreParser:</b> Convert SGML into XML (lowercase element names, quote all attributes, fix empty tags).</li>
+                <li><b>PrintableOnlyPreParser:</b> Remove any non printable characters</li>
+                <li><b>PdfToTxtPreParser:</b> Convert PDF into raw text format using pdftotext utility</li>
+                <li><b>TxtToXmlPreParser:</b> Wrap raw text in some simple xml tags.</li>
+                <li><b>HtmlSmashPreParser:</b> Attempts to reduce HTML to its raw text.</li>
+                <li><b>RegexpSmashPreParser:</b> Either strip, replace or keep data which matches a given regular expression.
+                    'regexp' setting specifies the regular expression to match in the data.
+                    'char' setting specifies the character(s) to replace matches to the regular expression with (defaults to empty i.e. strip all matches).
+                    'keep' setting specifies that instead of replacing matches, only these should be kept.
+                </li>
+                <li><b>CharacterEntityPreParser:</b> Turn latin-1 entities into XML character entities. (eg &amp;ndash; -&gt; &amp;#8211;)</li>
+                <li><b>MarcToXmlPreParser:</b> Convert MARC records into MARCXML</li>
+                <li><b>MarcToSgmlPreParser:</b> Convert MARC records into MARCSGML (Cheshire2 format)</li>
+                <li><b>GzipPreParser:</b> Uncompress a gzipped file</li>
+                <li><b>BzipPreParser:</b> Uncompress a bzipped file</li>
+                <li><b>B64EncodePreParser, B64DecodePreParser:</b> Encode or Decode a file using base 64.</li>
+                <li><b>OpenOfficePreParser:</b> Use an OpenOffice server, turn any format that OOo recognises (.doc , .xls , .odt etc.) into OpenDocument XML.</li>
+            </ul>
+	</div>
+
+    </body>
+</html>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>Cheshire3 Objects: RecordStore</title>
+        <link rel="stylesheet" type="text/css" href="http://www.cheshire3.org/cheshire3.css"></link>
+    </head>
+    <body>
+        <a name="top"></a>
+	<table cellpadding="0" cellspacing="0" class="maintitle">
+            <tr>
+                <td class="cheshirelogo">
+                    <img src="http://www.cheshire3.org/gfx/c3_white.gif" alt=" c h e s h i r e  |  3 "/>
+                </td>
+                <td>
+                    <img src="http://www.cheshire3.org/gfx/slant_grey.gif" alt=""/>
+                </td>
+                <td align="center">
+                    <h2>Cheshire3 Objects:  Record Store</h2>
+                </td>
+            </tr>
+	</table>
+
+	<!--#config errmsg="<div id="navbar"/>" -->
+	<!--#include virtual="/navbar.ssi" -->
+
+        <div class="fieldset">
+            <span class="legend">Description</span>
+            <p>
+                A persistent storage mechanism for Records. 
+                It allows such operations as create, update, fetch and delete. 
+                It also allows fast retrieval of the record's size for use with computing relevance ranking.
+            </p>
+        </div>
+        
+        <div class="fieldset">
+            <span class="legend">Implementations</span>
+            <ul>
+                <li><b>recordStore.FileSystemRecordStore</b><br/>
+                Stores records in the file system</li>
+                <li><b>recordStore.BdbRecordStore</b><br/>
+                The recommended implementation, it stores records in BerkeleyDB stores.</li>
+                <li><b>recordStore.ParsingRecordStore</b><br/>
+                This store references unparsed data, parses it on demand and returns it. Useful for large databases of small objects</li>
+            </ul>
+        </div>
+
+	<div class="fieldset">
+            <span class="legend">API</span>
+            <table border="1" cellpadding="3" cellspacing="0" width="100%">
+                <tr><th>Function</th><th>Parameters</th><th>Returns</th><th>Description</th></tr>
+                <tr><td>__init__</td><td>config, parent</td><td>&nbsp;</td><td> </td></tr>
+                <tr><td>create_record</td><td>session, record</td><td>id</td><td>Create a new record with a new identifier</td></tr>
+                <tr><td>delete_record</td><td>session, id</td><td>&nbsp;</td><td>Delete the record with the given identifier</td></tr>
+                <tr><td>fetch_record</td><td>session, id</td><td>Record</td><td>Return the record with the given identifier</td></tr>
+                <tr><td>fetch_recordMetadata</td><td>session, id, type</td><td>String</td><td>Return metadata of the given type (e.g. wordCount, byteCount) for the record with the given identifier</td></tr>
+                <tr><td>store_record</td><td>session, record</td><td>record</td><td>Store an existing record</td></tr>
+                <!--<tr><td>get_recordSize</td><td>session, id</td><td>int</td><td>Return the 'size' of a record (number of words)</td></tr>-->
+                <tr><td>close</td><td>session</td><td>&nbsp;</td><td>Ensure data is commited to disk</td></tr>
+            </table>
+	</div>
+
+    </body>
+</html>

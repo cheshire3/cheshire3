@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>z3950_utils</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        Module&nbsp;z3950_utils
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript: void(0);" class="privatelink"
+    onclick="toggle_private();">hide private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="z3950_utils-pysrc.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<h2 class="py-src">Source Code for <a href="z3950_utils-module.html">Module z3950_utils</a></h2>
+<div class="py-src">
+<pre class="py-src">
+<span class="lineno"> 1</span>  <span class="py-line"> </span>
+<span class="lineno"> 2</span>  <span class="py-line"><span class="py-keyword">from</span> <span class="py-name">PyZ3950</span> <span class="py-keyword">import</span> <span class="py-name">asn1</span> </span>
+<span class="lineno"> 3</span>  <span class="py-line"><span class="py-keyword">from</span> <span class="py-name">PyZ3950</span><span class="py-op">.</span><span class="py-name">oids</span> <span class="py-keyword">import</span> <span class="py-op">*</span> </span>
+<span class="lineno"> 4</span>  <span class="py-line"><span class="py-keyword">from</span> <span class="py-name">PyZ3950</span><span class="py-op">.</span><span class="py-name">z3950_2001</span> <span class="py-keyword">import</span> <span class="py-op">*</span> </span>
+<span class="lineno"> 5</span>  <span class="py-line"><span class="py-keyword">from</span> <span class="py-name">PyZ3950</span><span class="py-op">.</span><span class="py-name">zdefs</span> <span class="py-keyword">import</span> <span class="py-op">*</span> </span>
+<span class="lineno"> 6</span>  <span class="py-line"> </span>
+<a name="negotiateCharSet"></a><div id="negotiateCharSet-def"><span class="lineno"> 7</span> <a class="pysrc-toggle" href="#" id="negotiateCharSet-toggle" onclick="toggle('negotiateCharSet'); return false;">-</a><span class="py-line"><span class="py-keyword">def</span> <a class="py-def-name" href="z3950_utils-module.html#negotiateCharSet">negotiateCharSet</a><span class="py-op">(</span><span class="py-param">req</span><span class="py-op">,</span> <span class="py-param">resp</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="negotiateCharSet-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="negotiateCharSet-expanded"><span class="lineno"> 8</span>  <span class="py-line">    <span id="link-0" class="py-name"><a title="configParser.C3Object.name
+srboo.SrbFile.name" class="py-name" href="#" onclick="doclink('link-0', 'name', 'Variable configParser.C3Object.name=configParser.C3Object-class.html#name,Variable srboo.SrbFile.name=srboo.SrbFile-class.html#name'); return false;">name</a></span></span> <span class="py-op">=</span> <span class="py-name">None</span> </span>
+<span class="lineno"> 9</span>  <span class="py-line">    <span class="py-keyword">if</span> <span class="py-name">hasattr</span> <span class="py-op">(</span><span class="py-name">req</span><span class="py-op">,</span> <span class="py-string">'otherInfo'</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno">10</span>  <span class="py-line">        <span class="py-keyword">for</span> <span class="py-name">oi</span> <span class="py-keyword">in</span> <span class="py-name">req</span><span class="py-op">.</span><span class="py-name">otherInfo</span><span class="py-op">:</span> </span>
+<span class="lineno">11</span>  <span class="py-line">            <span class="py-op">(</span><span class="py-name">typ</span><span class="py-op">,</span> <span class="py-name">val</span><span class="py-op">)</span> <span class="py-op">=</span>  <span class="py-name">oi</span><span class="py-op">.</span><span class="py-name">information</span> </span>
+<span class="lineno">12</span>  <span class="py-line">            <span class="py-keyword">if</span> <span class="py-op">(</span><span class="py-name">typ</span> <span class="py-op">==</span> <span class="py-string">'externallyDefinedInfo'</span> <span class="py-keyword">and</span> <span class="py-name">val</span><span class="py-op">.</span><span class="py-name">direct_reference</span> <span class="py-op">==</span> <span class="py-name">Z3950_NEG_CHARSET3_ov</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno">13</span>  <span class="py-line">                <span class="py-op">(</span><span class="py-name">typ</span><span class="py-op">,</span> <span class="py-name">val</span><span class="py-op">)</span> <span class="py-op">=</span> <span class="py-name">val</span><span class="py-op">.</span><span class="py-name">encoding</span> </span>
+<span class="lineno">14</span>  <span class="py-line">                <span class="py-keyword">if</span> <span class="py-name">typ</span> <span class="py-op">==</span> <span class="py-string">'single-ASN1-type'</span><span class="py-op">:</span> </span>
+<span class="lineno">15</span>  <span class="py-line">                    <span class="py-op">(</span><span id="link-1" class="py-name"><a title="configParser.C3Object.name
+srboo.SrbFile.name" class="py-name" href="#" onclick="doclink('link-1', 'name', 'Variable configParser.C3Object.name=configParser.C3Object-class.html#name,Variable srboo.SrbFile.name=srboo.SrbFile-class.html#name'); return false;">name</a></span></span><span class="py-op">,</span> <span class="py-name">tresp</span><span class="py-op">)</span> <span class="py-op">=</span> <span class="py-name">make_target_resp</span><span class="py-op">(</span><span class="py-name">val</span><span class="py-op">)</span> </span>
+<span class="lineno">16</span>  <span class="py-line">                    <span class="py-name">set_charset</span> <span class="py-op">(</span><span class="py-name">resp</span><span class="py-op">,</span> <span class="py-name">tresp</span><span class="py-op">,</span> <span class="py-number">1</span><span class="py-op">)</span> </span>
+<span class="lineno">17</span>  <span class="py-line">    <span class="py-keyword">return</span> <span class="py-op">(</span><span id="link-2" class="py-name"><a title="configParser.C3Object.name
+srboo.SrbFile.name" class="py-name" href="#" onclick="doclink('link-2', 'name', 'Variable configParser.C3Object.name=configParser.C3Object-class.html#name,Variable srboo.SrbFile.name=srboo.SrbFile-class.html#name'); return false;">name</a></span></span><span class="py-op">,</span> <span class="py-name">resp</span><span class="py-op">)</span> </span>
+</div><span class="lineno">18</span>  <span class="py-line"> </span>
+<span class="lineno">19</span>  <span class="py-line"> </span>
+<a name="decodeExtendedServices"></a><div id="decodeExtendedServices-def"><span class="lineno">20</span> <a class="pysrc-toggle" href="#" id="decodeExtendedServices-toggle" onclick="toggle('decodeExtendedServices'); return false;">-</a><span class="py-line"><span class="py-keyword">def</span> <a class="py-def-name" href="z3950_utils-module.html#decodeExtendedServices">decodeExtendedServices</a><span class="py-op">(</span><span class="py-param">req</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="decodeExtendedServices-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="decodeExtendedServices-expanded"><span class="lineno">21</span>  <span class="py-line">    <span class="py-comment"># This stuff is page 61 and 227 for the ASN1</span> </span>
+<span class="lineno">22</span>  <span class="py-line"><span class="py-comment"></span>    <span class="py-comment"># function: 1 create, 2 delete, 3 modify</span> </span>
+<span class="lineno">23</span>  <span class="py-line"><span class="py-comment"></span>    <span class="py-comment"># waitAction: 1 wait, 2 waitIfPossible, 3 dontWait, 4 dontReturnPackage</span> </span>
+<span class="lineno">24</span>  <span class="py-line"><span class="py-comment"></span> </span>
+<span class="lineno">25</span>  <span class="py-line">    <span class="py-name">esoids</span> <span class="py-op">=</span> <span class="py-name">oids</span><span class="py-op">[</span><span class="py-string">'Z3950'</span><span class="py-op">]</span><span class="py-op">[</span><span class="py-string">'ES'</span><span class="py-op">]</span> </span>
+<span class="lineno">26</span>  <span class="py-line">    <span class="py-name">tsp</span> <span class="py-op">=</span> <span class="py-name">req</span><span class="py-op">.</span><span class="py-name">taskSpecificParameters</span> </span>
+<span class="lineno">27</span>  <span class="py-line">    <span class="py-name">package</span> <span class="py-op">=</span> <span class="py-name">req</span><span class="py-op">.</span><span class="py-name">packageType</span> </span>
+<span class="lineno">28</span>  <span class="py-line"> </span>
+<span class="lineno">29</span>  <span class="py-line">    <span class="py-keyword">if</span> <span class="py-op">(</span><span class="py-name">req</span><span class="py-op">.</span><span class="py-name">packageType</span> <span class="py-op">==</span> <span class="py-name">esoids</span><span class="py-op">[</span><span class="py-string">'PERSISTRS'</span><span class="py-op">]</span><span class="py-op">[</span><span class="py-string">'oid'</span><span class="py-op">]</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno">30</span>  <span class="py-line">        <span class="py-keyword">pass</span> </span>
+</div><span class="lineno">31</span>  <span class="py-line"> </span><script type="text/javascript">
+<!--
+expandto(location.href);
+// -->
+</script>
+</pre>
+</div>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">Generated by Epydoc
+        3.0alpha2 on Wed Aug  9 18:10:02 2006</td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>

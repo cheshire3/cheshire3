@@ -1,0 +1,979 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>extractor</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        Module&nbsp;extractor
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript: void(0);" class="privatelink"
+    onclick="toggle_private();">hide private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="extractor-pysrc.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<h2 class="py-src">Source Code for <a href="extractor-module.html">Module extractor</a></h2>
+<div class="py-src">
+<pre class="py-src">
+<span class="lineno">  1</span>  <span class="py-line"> </span>
+<span class="lineno">  2</span>  <span class="py-line"><span class="py-keyword">import</span> <span class="py-name">re</span> </span>
+<span class="lineno">  3</span>  <span class="py-line"><span class="py-keyword">from</span> <a title="configParser" class="py-name" href="configParser-module.html">configParser</a> <span class="py-keyword">import</span> <a class="py-name" href="configParser.C3Object-class.html">C3Object</a> </span>
+<span class="lineno">  4</span>  <span class="py-line"><span class="py-keyword">from</span> <a title="baseObjects" class="py-name" href="baseObjects-module.html">baseObjects</a> <span class="py-keyword">import</span> <a class="py-name" href="baseObjects.Extractor-class.html">Extractor</a> </span>
+<span class="lineno">  5</span>  <span class="py-line"><span class="py-keyword">from</span> <a title="utils" class="py-name" href="utils-module.html">utils</a> <span class="py-keyword">import</span> <a class="py-name" href="utils-module.html#flattenTexts">flattenTexts</a> </span>
+<span class="lineno">  6</span>  <span class="py-line"><span class="py-keyword">from</span> <span class="py-name">dateutil</span> <span class="py-keyword">import</span> <a title="parser" class="py-name" href="parser-module.html">parser</a> </span>
+<span class="lineno">  7</span>  <span class="py-line"><span class="py-keyword">import</span> <a title="textmining.tmNormalizer.PosTypeNormalizer.types" class="py-name" href="textmining.tmNormalizer.PosTypeNormalizer-class.html#types">types</a> </span>
+<span class="lineno">  8</span>  <span class="py-line"> </span>
+<a name="SimpleExtractor"></a><div id="SimpleExtractor-def"><span class="lineno">  9</span> <a class="pysrc-toggle" href="#" id="SimpleExtractor-toggle" onclick="toggle('SimpleExtractor'); return false;">-</a><span class="py-line"><span class="py-keyword">class</span> <a class="py-def-name" href="extractor.SimpleExtractor-class.html">SimpleExtractor</a><span class="py-op">(</span><span class="py-base-class">Extractor</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="SimpleExtractor-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="SimpleExtractor-expanded"><span class="lineno"> 10</span>  <span class="py-line">    <span class="py-docstring">""" Base extractor. Extracts exact text """</span> </span>
+<span class="lineno"> 11</span>  <span class="py-line"> </span>
+<a name="SimpleExtractor.__init__"></a><div id="SimpleExtractor.__init__-def"><span class="lineno"> 12</span> <a class="pysrc-toggle" href="#" id="SimpleExtractor.__init__-toggle" onclick="toggle('SimpleExtractor.__init__'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="extractor.SimpleExtractor-class.html#__init__">__init__</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">session</span><span class="py-op">,</span> <span class="py-param">config</span><span class="py-op">,</span> <span class="py-param">parent</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="SimpleExtractor.__init__-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="SimpleExtractor.__init__-expanded"><span class="lineno"> 13</span>  <span class="py-line">        <a title="baseObjects.Extractor" class="py-name" href="baseObjects.Extractor-class.html">Extractor</a><span class="py-op">.</span><span id="link-0" class="py-name"><a title="GoogleSearch_services.GoogleSearchBindingSOAP.__init__
+GoogleSearch_services.doGetCachedPage.__init__
+GoogleSearch_services.doGetCachedPageResponse.__init__
+GoogleSearch_services.doGetCachedPageResponseWrapper.__init__
+GoogleSearch_services.doGetCachedPageWrapper.__init__
+GoogleSearch_services.doGoogleSearch.__init__
+GoogleSearch_services.doGoogleSearchResponse.__init__
+GoogleSearch_services.doGoogleSearchResponseWrapper.__init__
+GoogleSearch_services.doGoogleSearchWrapper.__init__
+GoogleSearch_services.doSpellingSuggestion.__init__
+GoogleSearch_services.doSpellingSuggestionResponse.__init__
+GoogleSearch_services.doSpellingSuggestionResponseWrapper.__init__
+GoogleSearch_services.doSpellingSuggestionWrapper.__init__
+GoogleSearch_services_types.urn_GoogleSearch.DirectoryCategoryArray_Def.__init__
+GoogleSearch_services_types.urn_GoogleSearch.DirectoryCategory_Def.__init__
+GoogleSearch_services_types.urn_GoogleSearch.GoogleSearchResult_Def.__init__
+GoogleSearch_services_types.urn_GoogleSearch.ResultElementArray_Def.__init__
+GoogleSearch_services_types.urn_GoogleSearch.ResultElement_Def.__init__
+baseObjects.Document.__init__
+baseObjects.Record.__init__
+baseObjects.Server.__init__
+baseStore.BdbIter.__init__
+baseStore.SimpleStore.__init__
+baseStore.SrbBdbCombineStore.__init__
+baseStore.SrbStore.__init__
+bootstrap.BootstrapDocument.__init__
+bootstrap.BootstrapRecord.__init__
+bootstrap.BootstrapSession.__init__
+c3errors.C3Exception.__init__
+configParser.C3Object.__init__
+database.SimpleDatabase.__init__
+document.StringDocument.__init__
+documentFactory.BaseDocumentFactory.__init__
+documentFactory.BaseDocumentStream.__init__
+documentFactory.ComponentDocumentFactory.__init__
+documentFactory.ComponentDocumentStream.__init__
+documentFactory.GoogleDocumentStream.__init__
+documentFactory.HttpDocumentStream.__init__
+documentFactory.MultipleDocumentStream.__init__
+documentFactory.OaiDocumentStream.__init__
+documentFactory.UrllibUnicodeFileThing.__init__
+documentFactory.XmlDocumentStream.__init__
+documentStore.BdbDocumentStore.__init__
+documentStore.CachingSrbDocumentStore.__init__
+documentStore.SimpleDocumentStore.__init__
+documentStore.SrbDocumentStore.__init__
+extractor.DateExtractor.__init__
+extractor.KeywordExtractor.__init__
+extractor.SimpleExtractor.__init__
+index.ArrayIndex.__init__
+index.BitmapIndex.__init__
+index.ClusterExtractionIndex.__init__
+index.SimpleIndex.__init__
+indexStore.BdbIndexStore.__init__
+indexStore.SrbBdbIndexStore.__init__
+logger.FunctionLogger.__init__
+logger.SimpleLogger.__init__
+multivalent.MultivalentClient.__init__
+multivalent.MultivalentPreParser.__init__
+normalizer.KeywordNormalizer.__init__
+normalizer.NumericEntityNormalizer.__init__
+normalizer.PhraseStemNormalizer.__init__
+normalizer.RegexpNormalizer.__init__
+normalizer.SimpleNormalizer.__init__
+normalizer.SpaceNormalizer.__init__
+normalizer.StemNormalizer.__init__
+normalizer.StoplistNormalizer.__init__
+normalizer.TermExistsNormalizer.__init__
+parser.FtParser.__init__
+parser.FtSaxParser.__init__
+parser.SaxParser.__init__
+parser.XmlRecordStoreParser.__init__
+permissionHandler.PermissionHandler.__init__
+postgres.PostgresDocumentFactory.__init__
+postgres.PostgresDocumentStream.__init__
+postgres.PostgresIndexStore.__init__
+postgres.PostgresRecordStore.__init__
+postgres.PostgresResultSetStore.__init__
+postgres.PostgresStore.__init__
+preParser.AmpPreParser.__init__
+preParser.CharacterEntityPreParser.__init__
+preParser.HtmlSmashPreParser.__init__
+preParser.HtmlTidyPreParser.__init__
+preParser.NormalizerPreParser.__init__
+preParser.PdfToTxtPreParser.__init__
+preParser.PrintableOnlyPreParser.__init__
+preParser.RegexpSmashPreParser.__init__
+preParser.SgmlPreParser.__init__
+protocolMap.C3WepProtocolMap.__init__
+protocolMap.CQLProtocolMap.__init__
+protocolMap.UpdateProtocolMap.__init__
+protocolMap.Z3950ProtocolMap.__init__
+protocolMap.ZeerexProtocolMap.__init__
+record.DomRecord.__init__
+record.MarcRecord.__init__
+record.SaxContentHandler.__init__
+record.SaxRecord.__init__
+recordStore.BdbRecordStore.__init__
+recordStore.CachingSrbRecordStore.__init__
+recordStore.CachingSrbRemoteWriteRecordStore.__init__
+recordStore.MarcIter.__init__
+recordStore.ParsingRecordStore.__init__
+recordStore.PostgresRecordStore.__init__
+recordStore.RemoteSlaveRecordStore.__init__
+recordStore.SimpleRecordStore.__init__
+recordStore.SrbRecordStore.__init__
+resultSet.ArrayResultSet.__init__
+resultSet.BitmapResultSet.__init__
+resultSet.SimpleResultSet.__init__
+resultSet.SimpleResultSetItem.__init__
+resultSetStore.BdbResultSetStore.__init__
+resultSetStore.BdbResultSetStore2.__init__
+resultSetStore.SimpleResultSetStore.__init__
+server.SimpleServer.__init__
+srboo.SrbConnection.__init__
+srboo.SrbException.__init__
+srboo.SrbFile.__init__
+textmining.TsujiiC3.EnjuObject.__init__
+textmining.TsujiiC3.GeniaObject.__init__
+textmining.TsujiiC3.SimpleTokenizer.__init__
+textmining.TsujiiC3.TsujiiObject.__init__
+textmining.tmNormalizer.EnjuNormalizer.__init__
+textmining.tmNormalizer.ExactGeniaNormalizer.__init__
+textmining.tmNormalizer.GeniaNormalizer.__init__
+textmining.tmNormalizer.GeniaTextNormalizer.__init__
+textmining.tmNormalizer.PosKeywordNormalizer.__init__
+textmining.tmNormalizer.PosPhraseNormalizer.__init__
+textmining.tmNormalizer.PosTypeNormalizer.__init__
+textmining.tmNormalizer.TsujiiPosNormalizer.__init__
+textmining.tmNormalizer.UnparsedGeniaNormalizer.__init__
+textmining.tmPreParser.EnjuTextPreParser.__init__
+textmining.tmPreParser.GeniaTextPreParser.__init__
+textmining.tmPreParser.TsujiiChunkerPreParser.__init__
+textmining.tmPreParser.TsujiiTextPosPreParser.__init__
+textmining.tmPreParser.TsujiiXMLPosPreParser.__init__
+textmining.tmTransformer.TsujiiTextPosTransformer.__init__
+textmining.tmTransformer.TsujiiXPathTransformer.__init__
+transformer.CSVTransformer.__init__
+transformer.GrsMapTransformer.__init__
+transformer.LxmlXsltTransformer.__init__
+transformer.XsltTransformer.__init__
+utils.SimpleBitfield.__init__
+workflow.CachingWorkflow.__init__
+workflow.SimpleWorkflow.__init__
+xpathProcessor.SimpleXPathProcessor.__init__" class="py-name" href="#" onclick="doclink('link-0', '__init__', 'Method GoogleSearch_services.GoogleSearchBindingSOAP.__init__()=GoogleSearch_services.GoogleSearchBindingSOAP-class.html#__init__,Method GoogleSearch_services.doGetCachedPage.__init__()=GoogleSearch_services.doGetCachedPage-class.html#__init__,Method GoogleSearch_services.doGetCachedPageResponse.__init__()=GoogleSearch_services.doGetCachedPageResponse-class.html#__init__,Method GoogleSearch_services.doGetCachedPageResponseWrapper.__init__()=GoogleSearch_services.doGetCachedPageResponseWrapper-class.html#__init__,Method GoogleSearch_services.doGetCachedPageWrapper.__init__()=GoogleSearch_services.doGetCachedPageWrapper-class.html#__init__,Method GoogleSearch_services.doGoogleSearch.__init__()=GoogleSearch_services.doGoogleSearch-class.html#__init__,Method GoogleSearch_services.doGoogleSearchResponse.__init__()=GoogleSearch_services.doGoogleSearchResponse-class.html#__init__,Method GoogleSearch_services.doGoogleSearchResponseWrapper.__init__()=GoogleSearch_services.doGoogleSearchResponseWrapper-class.html#__init__,Method GoogleSearch_services.doGoogleSearchWrapper.__init__()=GoogleSearch_services.doGoogleSearchWrapper-class.html#__init__,Method GoogleSearch_services.doSpellingSuggestion.__init__()=GoogleSearch_services.doSpellingSuggestion-class.html#__init__,Method GoogleSearch_services.doSpellingSuggestionResponse.__init__()=GoogleSearch_services.doSpellingSuggestionResponse-class.html#__init__,Method GoogleSearch_services.doSpellingSuggestionResponseWrapper.__init__()=GoogleSearch_services.doSpellingSuggestionResponseWrapper-class.html#__init__,Method GoogleSearch_services.doSpellingSuggestionWrapper.__init__()=GoogleSearch_services.doSpellingSuggestionWrapper-class.html#__init__,Method GoogleSearch_services_types.urn_GoogleSearch.DirectoryCategoryArray_Def.__init__()=GoogleSearch_services_types.urn_GoogleSearch.DirectoryCategoryArray_Def-class.html#__init__,Method GoogleSearch_services_types.urn_GoogleSearch.DirectoryCategory_Def.__init__()=GoogleSearch_services_types.urn_GoogleSearch.DirectoryCategory_Def-class.html#__init__,Method GoogleSearch_services_types.urn_GoogleSearch.GoogleSearchResult_Def.__init__()=GoogleSearch_services_types.urn_GoogleSearch.GoogleSearchResult_Def-class.html#__init__,Method GoogleSearch_services_types.urn_GoogleSearch.ResultElementArray_Def.__init__()=GoogleSearch_services_types.urn_GoogleSearch.ResultElementArray_Def-class.html#__init__,Method GoogleSearch_services_types.urn_GoogleSearch.ResultElement_Def.__init__()=GoogleSearch_services_types.urn_GoogleSearch.ResultElement_Def-class.html#__init__,Method baseObjects.Document.__init__()=baseObjects.Document-class.html#__init__,Method baseObjects.Record.__init__()=baseObjects.Record-class.html#__init__,Method baseObjects.Server.__init__()=baseObjects.Server-class.html#__init__,Method baseStore.BdbIter.__init__()=baseStore.BdbIter-class.html#__init__,Method baseStore.SimpleStore.__init__()=baseStore.SimpleStore-class.html#__init__,Method baseStore.SrbBdbCombineStore.__init__()=baseStore.SrbBdbCombineStore-class.html#__init__,Method baseStore.SrbStore.__init__()=baseStore.SrbStore-class.html#__init__,Method bootstrap.BootstrapDocument.__init__()=bootstrap.BootstrapDocument-class.html#__init__,Method bootstrap.BootstrapRecord.__init__()=bootstrap.BootstrapRecord-class.html#__init__,Method bootstrap.BootstrapSession.__init__()=bootstrap.BootstrapSession-class.html#__init__,Method c3errors.C3Exception.__init__()=c3errors.C3Exception-class.html#__init__,Method configParser.C3Object.__init__()=configParser.C3Object-class.html#__init__,Method database.SimpleDatabase.__init__()=database.SimpleDatabase-class.html#__init__,Method document.StringDocument.__init__()=document.StringDocument-class.html#__init__,Method documentFactory.BaseDocumentFactory.__init__()=documentFactory.BaseDocumentFactory-class.html#__init__,Method documentFactory.BaseDocumentStream.__init__()=documentFactory.BaseDocumentStream-class.html#__init__,Method documentFactory.ComponentDocumentFactory.__init__()=documentFactory.ComponentDocumentFactory-class.html#__init__,Method documentFactory.ComponentDocumentStream.__init__()=documentFactory.ComponentDocumentStream-class.html#__init__,Method documentFactory.GoogleDocumentStream.__init__()=documentFactory.GoogleDocumentStream-class.html#__init__,Method documentFactory.HttpDocumentStream.__init__()=documentFactory.HttpDocumentStream-class.html#__init__,Method documentFactory.MultipleDocumentStream.__init__()=documentFactory.MultipleDocumentStream-class.html#__init__,Method documentFactory.OaiDocumentStream.__init__()=documentFactory.OaiDocumentStream-class.html#__init__,Method documentFactory.UrllibUnicodeFileThing.__init__()=documentFactory.UrllibUnicodeFileThing-class.html#__init__,Method documentFactory.XmlDocumentStream.__init__()=documentFactory.XmlDocumentStream-class.html#__init__,Method documentStore.BdbDocumentStore.__init__()=documentStore.BdbDocumentStore-class.html#__init__,Method documentStore.CachingSrbDocumentStore.__init__()=documentStore.CachingSrbDocumentStore-class.html#__init__,Method documentStore.SimpleDocumentStore.__init__()=documentStore.SimpleDocumentStore-class.html#__init__,Method documentStore.SrbDocumentStore.__init__()=documentStore.SrbDocumentStore-class.html#__init__,Method DateExtractor.__init__()=extractor.DateExtractor-class.html#__init__,Method KeywordExtractor.__init__()=extractor.KeywordExtractor-class.html#__init__,Method __init__()=extractor.SimpleExtractor-class.html#__init__,Method index.ArrayIndex.__init__()=index.ArrayIndex-class.html#__init__,Method index.BitmapIndex.__init__()=index.BitmapIndex-class.html#__init__,Method index.ClusterExtractionIndex.__init__()=index.ClusterExtractionIndex-class.html#__init__,Method index.SimpleIndex.__init__()=index.SimpleIndex-class.html#__init__,Method indexStore.BdbIndexStore.__init__()=indexStore.BdbIndexStore-class.html#__init__,Method indexStore.SrbBdbIndexStore.__init__()=indexStore.SrbBdbIndexStore-class.html#__init__,Method logger.FunctionLogger.__init__()=logger.FunctionLogger-class.html#__init__,Method logger.SimpleLogger.__init__()=logger.SimpleLogger-class.html#__init__,Method multivalent.MultivalentClient.__init__()=multivalent.MultivalentClient-class.html#__init__,Method multivalent.MultivalentPreParser.__init__()=multivalent.MultivalentPreParser-class.html#__init__,Method normalizer.KeywordNormalizer.__init__()=normalizer.KeywordNormalizer-class.html#__init__,Method normalizer.NumericEntityNormalizer.__init__()=normalizer.NumericEntityNormalizer-class.html#__init__,Method normalizer.PhraseStemNormalizer.__init__()=normalizer.PhraseStemNormalizer-class.html#__init__,Method normalizer.RegexpNormalizer.__init__()=normalizer.RegexpNormalizer-class.html#__init__,Method normalizer.SimpleNormalizer.__init__()=normalizer.SimpleNormalizer-class.html#__init__,Method normalizer.SpaceNormalizer.__init__()=normalizer.SpaceNormalizer-class.html#__init__,Method normalizer.StemNormalizer.__init__()=normalizer.StemNormalizer-class.html#__init__,Method normalizer.StoplistNormalizer.__init__()=normalizer.StoplistNormalizer-class.html#__init__,Method normalizer.TermExistsNormalizer.__init__()=normalizer.TermExistsNormalizer-class.html#__init__,Method parser.FtParser.__init__()=parser.FtParser-class.html#__init__,Method parser.FtSaxParser.__init__()=parser.FtSaxParser-class.html#__init__,Method parser.SaxParser.__init__()=parser.SaxParser-class.html#__init__,Method parser.XmlRecordStoreParser.__init__()=parser.XmlRecordStoreParser-class.html#__init__,Method permissionHandler.PermissionHandler.__init__()=permissionHandler.PermissionHandler-class.html#__init__,Method postgres.PostgresDocumentFactory.__init__()=postgres.PostgresDocumentFactory-class.html#__init__,Method postgres.PostgresDocumentStream.__init__()=postgres.PostgresDocumentStream-class.html#__init__,Method postgres.PostgresIndexStore.__init__()=postgres.PostgresIndexStore-class.html#__init__,Method postgres.PostgresRecordStore.__init__()=postgres.PostgresRecordStore-class.html#__init__,Method postgres.PostgresResultSetStore.__init__()=postgres.PostgresResultSetStore-class.html#__init__,Method postgres.PostgresStore.__init__()=postgres.PostgresStore-class.html#__init__,Method preParser.AmpPreParser.__init__()=preParser.AmpPreParser-class.html#__init__,Method preParser.CharacterEntityPreParser.__init__()=preParser.CharacterEntityPreParser-class.html#__init__,Method preParser.HtmlSmashPreParser.__init__()=preParser.HtmlSmashPreParser-class.html#__init__,Method preParser.HtmlTidyPreParser.__init__()=preParser.HtmlTidyPreParser-class.html#__init__,Method preParser.NormalizerPreParser.__init__()=preParser.NormalizerPreParser-class.html#__init__,Method preParser.PdfToTxtPreParser.__init__()=preParser.PdfToTxtPreParser-class.html#__init__,Method preParser.PrintableOnlyPreParser.__init__()=preParser.PrintableOnlyPreParser-class.html#__init__,Method preParser.RegexpSmashPreParser.__init__()=preParser.RegexpSmashPreParser-class.html#__init__,Method preParser.SgmlPreParser.__init__()=preParser.SgmlPreParser-class.html#__init__,Method protocolMap.C3WepProtocolMap.__init__()=protocolMap.C3WepProtocolMap-class.html#__init__,Method protocolMap.CQLProtocolMap.__init__()=protocolMap.CQLProtocolMap-class.html#__init__,Method protocolMap.UpdateProtocolMap.__init__()=protocolMap.UpdateProtocolMap-class.html#__init__,Method protocolMap.Z3950ProtocolMap.__init__()=protocolMap.Z3950ProtocolMap-class.html#__init__,Method protocolMap.ZeerexProtocolMap.__init__()=protocolMap.ZeerexProtocolMap-class.html#__init__,Method record.DomRecord.__init__()=record.DomRecord-class.html#__init__,Method record.MarcRecord.__init__()=record.MarcRecord-class.html#__init__,Method record.SaxContentHandler.__init__()=record.SaxContentHandler-class.html#__init__,Method record.SaxRecord.__init__()=record.SaxRecord-class.html#__init__,Method recordStore.BdbRecordStore.__init__()=recordStore.BdbRecordStore-class.html#__init__,Method recordStore.CachingSrbRecordStore.__init__()=recordStore.CachingSrbRecordStore-class.html#__init__,Method recordStore.CachingSrbRemoteWriteRecordStore.__init__()=recordStore.CachingSrbRemoteWriteRecordStore-class.html#__init__,Method recordStore.MarcIter.__init__()=recordStore.MarcIter-class.html#__init__,Method recordStore.ParsingRecordStore.__init__()=recordStore.ParsingRecordStore-class.html#__init__,Method recordStore.PostgresRecordStore.__init__()=recordStore.PostgresRecordStore-class.html#__init__,Method recordStore.RemoteSlaveRecordStore.__init__()=recordStore.RemoteSlaveRecordStore-class.html#__init__,Method recordStore.SimpleRecordStore.__init__()=recordStore.SimpleRecordStore-class.html#__init__,Method recordStore.SrbRecordStore.__init__()=recordStore.SrbRecordStore-class.html#__init__,Method resultSet.ArrayResultSet.__init__()=resultSet.ArrayResultSet-class.html#__init__,Method resultSet.BitmapResultSet.__init__()=resultSet.BitmapResultSet-class.html#__init__,Method resultSet.SimpleResultSet.__init__()=resultSet.SimpleResultSet-class.html#__init__,Method resultSet.SimpleResultSetItem.__init__()=resultSet.SimpleResultSetItem-class.html#__init__,Method resultSetStore.BdbResultSetStore.__init__()=resultSetStore.BdbResultSetStore-class.html#__init__,Method resultSetStore.BdbResultSetStore2.__init__()=resultSetStore.BdbResultSetStore2-class.html#__init__,Method resultSetStore.SimpleResultSetStore.__init__()=resultSetStore.SimpleResultSetStore-class.html#__init__,Method server.SimpleServer.__init__()=server.SimpleServer-class.html#__init__,Method srboo.SrbConnection.__init__()=srboo.SrbConnection-class.html#__init__,Method srboo.SrbException.__init__()=srboo.SrbException-class.html#__init__,Method srboo.SrbFile.__init__()=srboo.SrbFile-class.html#__init__,Method textmining.TsujiiC3.EnjuObject.__init__()=textmining.TsujiiC3.EnjuObject-class.html#__init__,Method textmining.TsujiiC3.GeniaObject.__init__()=textmining.TsujiiC3.GeniaObject-class.html#__init__,Method textmining.TsujiiC3.SimpleTokenizer.__init__()=textmining.TsujiiC3.SimpleTokenizer-class.html#__init__,Method textmining.TsujiiC3.TsujiiObject.__init__()=textmining.TsujiiC3.TsujiiObject-class.html#__init__,Method textmining.tmNormalizer.EnjuNormalizer.__init__()=textmining.tmNormalizer.EnjuNormalizer-class.html#__init__,Method textmining.tmNormalizer.ExactGeniaNormalizer.__init__()=textmining.tmNormalizer.ExactGeniaNormalizer-class.html#__init__,Method textmining.tmNormalizer.GeniaNormalizer.__init__()=textmining.tmNormalizer.GeniaNormalizer-class.html#__init__,Method textmining.tmNormalizer.GeniaTextNormalizer.__init__()=textmining.tmNormalizer.GeniaTextNormalizer-class.html#__init__,Method textmining.tmNormalizer.PosKeywordNormalizer.__init__()=textmining.tmNormalizer.PosKeywordNormalizer-class.html#__init__,Method textmining.tmNormalizer.PosPhraseNormalizer.__init__()=textmining.tmNormalizer.PosPhraseNormalizer-class.html#__init__,Method textmining.tmNormalizer.PosTypeNormalizer.__init__()=textmining.tmNormalizer.PosTypeNormalizer-class.html#__init__,Method textmining.tmNormalizer.TsujiiPosNormalizer.__init__()=textmining.tmNormalizer.TsujiiPosNormalizer-class.html#__init__,Method textmining.tmNormalizer.UnparsedGeniaNormalizer.__init__()=textmining.tmNormalizer.UnparsedGeniaNormalizer-class.html#__init__,Method textmining.tmPreParser.EnjuTextPreParser.__init__()=textmining.tmPreParser.EnjuTextPreParser-class.html#__init__,Method textmining.tmPreParser.GeniaTextPreParser.__init__()=textmining.tmPreParser.GeniaTextPreParser-class.html#__init__,Method textmining.tmPreParser.TsujiiChunkerPreParser.__init__()=textmining.tmPreParser.TsujiiChunkerPreParser-class.html#__init__,Method textmining.tmPreParser.TsujiiTextPosPreParser.__init__()=textmining.tmPreParser.TsujiiTextPosPreParser-class.html#__init__,Method textmining.tmPreParser.TsujiiXMLPosPreParser.__init__()=textmining.tmPreParser.TsujiiXMLPosPreParser-class.html#__init__,Method textmining.tmTransformer.TsujiiTextPosTransformer.__init__()=textmining.tmTransformer.TsujiiTextPosTransformer-class.html#__init__,Method textmining.tmTransformer.TsujiiXPathTransformer.__init__()=textmining.tmTransformer.TsujiiXPathTransformer-class.html#__init__,Method transformer.CSVTransformer.__init__()=transformer.CSVTransformer-class.html#__init__,Method transformer.GrsMapTransformer.__init__()=transformer.GrsMapTransformer-class.html#__init__,Method transformer.LxmlXsltTransformer.__init__()=transformer.LxmlXsltTransformer-class.html#__init__,Method transformer.XsltTransformer.__init__()=transformer.XsltTransformer-class.html#__init__,Method utils.SimpleBitfield.__init__()=utils.SimpleBitfield-class.html#__init__,Method workflow.CachingWorkflow.__init__()=workflow.CachingWorkflow-class.html#__init__,Method workflow.SimpleWorkflow.__init__()=workflow.SimpleWorkflow-class.html#__init__,Method xpathProcessor.SimpleXPathProcessor.__init__()=xpathProcessor.SimpleXPathProcessor-class.html#__init__'); return false;">__init__</a></span></span><span class="py-op">(</span><span class="py-name">self</span><span class="py-op">,</span> <a title="resultSet.DeserializationHandler.session" class="py-name" href="resultSet.DeserializationHandler-class.html#session">session</a><span class="py-op">,</span> <span class="py-name">config</span><span class="py-op">,</span> <span id="link-1" class="py-name"><a title="baseObjects.Document.parent
+baseObjects.Record.parent
+configParser.C3Object.parent" class="py-name" href="#" onclick="doclink('link-1', 'parent', 'Variable baseObjects.Document.parent=baseObjects.Document-class.html#parent,Variable baseObjects.Record.parent=baseObjects.Record-class.html#parent,Variable configParser.C3Object.parent=configParser.C3Object-class.html#parent'); return false;">parent</a></span></span><span class="py-op">)</span> </span>
+<span class="lineno"> 14</span>  <span class="py-line">        <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">spaceRe</span> <span class="py-op">=</span> <span class="py-name">re</span><span class="py-op">.</span><span class="py-name">compile</span><span class="py-op">(</span><span class="py-string">'\s+'</span><span class="py-op">)</span> </span>
+</div><span class="lineno"> 15</span>  <span class="py-line"> </span>
+<a name="SimpleExtractor.process_string"></a><div id="SimpleExtractor.process_string-def"><span class="lineno"> 16</span> <a class="pysrc-toggle" href="#" id="SimpleExtractor.process_string-toggle" onclick="toggle('SimpleExtractor.process_string'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="extractor.SimpleExtractor-class.html#process_string">process_string</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">session</span><span class="py-op">,</span> <span class="py-param">data</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="SimpleExtractor.process_string-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="SimpleExtractor.process_string-expanded"><span class="lineno"> 17</span>  <span class="py-line">        <span class="py-comment"># Accept just text and extract bits from it.</span> </span>
+<span class="lineno"> 18</span>  <span class="py-line"><span class="py-comment"></span>        <span class="py-keyword">return</span> <span class="py-op">{</span><span class="py-name">data</span><span class="py-op">:</span> <span class="py-op">{</span><span class="py-string">'text'</span> <span class="py-op">:</span> <span class="py-name">data</span><span class="py-op">,</span> <span class="py-string">'occurences'</span> <span class="py-op">:</span> <span class="py-number">1</span><span class="py-op">}</span><span class="py-op">}</span> </span>
+</div><span class="lineno"> 19</span>  <span class="py-line"> </span>
+<a name="SimpleExtractor.process_node"></a><div id="SimpleExtractor.process_node-def"><span class="lineno"> 20</span> <a class="pysrc-toggle" href="#" id="SimpleExtractor.process_node-toggle" onclick="toggle('SimpleExtractor.process_node'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="extractor.SimpleExtractor-class.html#process_node">process_node</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">session</span><span class="py-op">,</span> <span class="py-param">data</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="SimpleExtractor.process_node-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="SimpleExtractor.process_node-expanded"><span class="lineno"> 21</span>  <span class="py-line">        <span class="py-comment"># Walk a DOM structure and extract</span> </span>
+<span class="lineno"> 22</span>  <span class="py-line"><span class="py-comment"></span>        <a title="bootstrap.BootstrapDocument.txt" class="py-name" href="bootstrap.BootstrapDocument-class.html#txt">txt</a> <span class="py-op">=</span> <a title="utils.flattenTexts" class="py-name" href="utils-module.html#flattenTexts">flattenTexts</a><span class="py-op">(</span><span class="py-name">data</span><span class="py-op">)</span> </span>
+<span class="lineno"> 23</span>  <span class="py-line">        <a title="bootstrap.BootstrapDocument.txt" class="py-name" href="bootstrap.BootstrapDocument-class.html#txt">txt</a> <span class="py-op">=</span> <a title="bootstrap.BootstrapDocument.txt" class="py-name" href="bootstrap.BootstrapDocument-class.html#txt">txt</a><span class="py-op">.</span><span class="py-name">replace</span><span class="py-op">(</span><span class="py-string">'\n'</span><span class="py-op">,</span> <span class="py-string">' '</span><span class="py-op">)</span> </span>
+<span class="lineno"> 24</span>  <span class="py-line">        <a title="bootstrap.BootstrapDocument.txt" class="py-name" href="bootstrap.BootstrapDocument-class.html#txt">txt</a> <span class="py-op">=</span> <a title="bootstrap.BootstrapDocument.txt" class="py-name" href="bootstrap.BootstrapDocument-class.html#txt">txt</a><span class="py-op">.</span><span class="py-name">strip</span><span class="py-op">(</span><span class="py-op">)</span> </span>
+<span class="lineno"> 25</span>  <span class="py-line">        <span class="py-keyword">return</span> <span class="py-op">{</span><a title="bootstrap.BootstrapDocument.txt" class="py-name" href="bootstrap.BootstrapDocument-class.html#txt">txt</a> <span class="py-op">:</span> <span class="py-op">{</span><span class="py-string">'text'</span> <span class="py-op">:</span> <a title="bootstrap.BootstrapDocument.txt" class="py-name" href="bootstrap.BootstrapDocument-class.html#txt">txt</a><span class="py-op">,</span> <span class="py-string">'occurences'</span> <span class="py-op">:</span> <span class="py-number">1</span><span class="py-op">}</span><span class="py-op">}</span> </span>
+</div><span class="lineno"> 26</span>  <span class="py-line"> </span>
+<a name="SimpleExtractor.process_eventList"></a><div id="SimpleExtractor.process_eventList-def"><span class="lineno"> 27</span> <a class="pysrc-toggle" href="#" id="SimpleExtractor.process_eventList-toggle" onclick="toggle('SimpleExtractor.process_eventList'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="extractor.SimpleExtractor-class.html#process_eventList">process_eventList</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">session</span><span class="py-op">,</span> <span class="py-param">data</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="SimpleExtractor.process_eventList-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="SimpleExtractor.process_eventList-expanded"><span class="lineno"> 28</span>  <span class="py-line">        <span class="py-comment"># Step through a SAX event list and extract</span> </span>
+<span class="lineno"> 29</span>  <span class="py-line"><span class="py-comment"></span>        <a title="bootstrap.BootstrapDocument.txt" class="py-name" href="bootstrap.BootstrapDocument-class.html#txt">txt</a> <span class="py-op">=</span> <span class="py-op">[</span><span class="py-op">]</span> </span>
+<span class="lineno"> 30</span>  <span class="py-line">        <span class="py-keyword">for</span> <span class="py-name">e</span> <span class="py-keyword">in</span> <span class="py-name">data</span><span class="py-op">:</span> </span>
+<span class="lineno"> 31</span>  <span class="py-line">            <span class="py-keyword">if</span> <span class="py-op">(</span><span class="py-name">e</span><span class="py-op">[</span><span class="py-number">0</span><span class="py-op">]</span> <span class="py-op">==</span> <span class="py-string">"3"</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno"> 32</span>  <span class="py-line">                <span class="py-keyword">if</span> <span class="py-op">(</span><span class="py-name">len</span><span class="py-op">(</span><a title="bootstrap.BootstrapDocument.txt" class="py-name" href="bootstrap.BootstrapDocument-class.html#txt">txt</a><span class="py-op">)</span> <span class="py-keyword">and</span> <a title="bootstrap.BootstrapDocument.txt" class="py-name" href="bootstrap.BootstrapDocument-class.html#txt">txt</a><span class="py-op">[</span><span class="py-op">-</span><span class="py-number">1</span><span class="py-op">]</span><span class="py-op">[</span><span class="py-op">-</span><span class="py-number">1</span><span class="py-op">]</span> <span class="py-op">!=</span> <span class="py-string">' '</span> <span class="py-keyword">and</span> <span class="py-name">e</span><span class="py-op">[</span><span class="py-number">2</span><span class="py-op">]</span><span class="py-op">.</span><span class="py-name">isalnum</span><span class="py-op">(</span><span class="py-op">)</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno"> 33</span>  <span class="py-line">                    <a title="bootstrap.BootstrapDocument.txt" class="py-name" href="bootstrap.BootstrapDocument-class.html#txt">txt</a><span class="py-op">.</span><a title="resultSet.SimpleResultSet.append" class="py-name" href="resultSet.SimpleResultSet-class.html#append">append</a><span class="py-op">(</span><span class="py-string">' '</span><span class="py-op">)</span> </span>
+<span class="lineno"> 34</span>  <span class="py-line">                <a title="bootstrap.BootstrapDocument.txt" class="py-name" href="bootstrap.BootstrapDocument-class.html#txt">txt</a><span class="py-op">.</span><a title="resultSet.SimpleResultSet.append" class="py-name" href="resultSet.SimpleResultSet-class.html#append">append</a><span class="py-op">(</span><span class="py-name">e</span><span class="py-op">[</span><span class="py-number">2</span><span class="py-op">:</span><span class="py-op">]</span><span class="py-op">)</span> </span>
+<span class="lineno"> 35</span>  <span class="py-line">        <a title="bootstrap.BootstrapDocument.txt" class="py-name" href="bootstrap.BootstrapDocument-class.html#txt">txt</a> <span class="py-op">=</span> <span class="py-string">''</span><span class="py-op">.</span><span class="py-name">join</span><span class="py-op">(</span><a title="bootstrap.BootstrapDocument.txt" class="py-name" href="bootstrap.BootstrapDocument-class.html#txt">txt</a><span class="py-op">)</span> </span>
+<span class="lineno"> 36</span>  <span class="py-line">        <a title="bootstrap.BootstrapDocument.txt" class="py-name" href="bootstrap.BootstrapDocument-class.html#txt">txt</a> <span class="py-op">=</span> <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">spaceRe</span><span class="py-op">.</span><span class="py-name">sub</span><span class="py-op">(</span><span class="py-string">' '</span><span class="py-op">,</span> <a title="bootstrap.BootstrapDocument.txt" class="py-name" href="bootstrap.BootstrapDocument-class.html#txt">txt</a><span class="py-op">)</span> </span>
+<span class="lineno"> 37</span>  <span class="py-line">        <span class="py-keyword">return</span> <span class="py-op">{</span><a title="bootstrap.BootstrapDocument.txt" class="py-name" href="bootstrap.BootstrapDocument-class.html#txt">txt</a><span class="py-op">:</span><span class="py-op">{</span><span class="py-string">'text'</span> <span class="py-op">:</span> <a title="bootstrap.BootstrapDocument.txt" class="py-name" href="bootstrap.BootstrapDocument-class.html#txt">txt</a><span class="py-op">,</span> <span class="py-string">'occurences'</span> <span class="py-op">:</span> <span class="py-number">1</span><span class="py-op">}</span><span class="py-op">}</span> </span>
+</div><span class="lineno"> 38</span>  <span class="py-line"> </span>
+<a name="SimpleExtractor._mergeHash"></a><div id="SimpleExtractor._mergeHash-def"><span class="lineno"> 39</span> <a class="pysrc-toggle" href="#" id="SimpleExtractor._mergeHash-toggle" onclick="toggle('SimpleExtractor._mergeHash'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="extractor.SimpleExtractor-class.html#_mergeHash">_mergeHash</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">a</span><span class="py-op">,</span> <span class="py-param">b</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="SimpleExtractor._mergeHash-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="SimpleExtractor._mergeHash-expanded"><span class="lineno"> 40</span>  <span class="py-line">        <span class="py-keyword">if</span> <span class="py-keyword">not</span> <span class="py-name">a</span><span class="py-op">:</span> </span>
+<span class="lineno"> 41</span>  <span class="py-line">            <span class="py-keyword">return</span> <span class="py-name">b</span> </span>
+<span class="lineno"> 42</span>  <span class="py-line">        <span class="py-keyword">if</span> <span class="py-keyword">not</span> <span class="py-name">b</span><span class="py-op">:</span> </span>
+<span class="lineno"> 43</span>  <span class="py-line">            <span class="py-keyword">return</span> <span class="py-name">a</span> </span>
+<span class="lineno"> 44</span>  <span class="py-line">        <span class="py-keyword">for</span> <span class="py-name">k</span> <span class="py-keyword">in</span> <span class="py-name">b</span><span class="py-op">.</span><span class="py-name">keys</span><span class="py-op">(</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno"> 45</span>  <span class="py-line">            <span class="py-keyword">try</span><span class="py-op">:</span> </span>
+<span class="lineno"> 46</span>  <span class="py-line">                <span class="py-name">a</span><span class="py-op">[</span><span class="py-name">k</span><span class="py-op">]</span><span class="py-op">[</span><span class="py-string">'occurences'</span><span class="py-op">]</span> <span class="py-op">+=</span> <span class="py-name">b</span><span class="py-op">[</span><span class="py-name">k</span><span class="py-op">]</span><span class="py-op">[</span><span class="py-string">'occurences'</span><span class="py-op">]</span> </span>
+<span class="lineno"> 47</span>  <span class="py-line">                <span class="py-keyword">try</span><span class="py-op">:</span> </span>
+<span class="lineno"> 48</span>  <span class="py-line">                    <span class="py-name">a</span><span class="py-op">[</span><span class="py-name">k</span><span class="py-op">]</span><span class="py-op">[</span><span class="py-string">'positions'</span><span class="py-op">]</span><span class="py-op">.</span><a title="resultSet.SimpleResultSet.extend" class="py-name" href="resultSet.SimpleResultSet-class.html#extend">extend</a><span class="py-op">(</span><span class="py-name">b</span><span class="py-op">[</span><span class="py-name">k</span><span class="py-op">]</span><span class="py-op">[</span><span class="py-string">'positions'</span><span class="py-op">]</span><span class="py-op">)</span> </span>
+<span class="lineno"> 49</span>  <span class="py-line">                <span class="py-keyword">except</span><span class="py-op">:</span> </span>
+<span class="lineno"> 50</span>  <span class="py-line">                    <span class="py-comment"># Non prox</span> </span>
+<span class="lineno"> 51</span>  <span class="py-line"><span class="py-comment"></span>                    <span class="py-keyword">pass</span> </span>
+<span class="lineno"> 52</span>  <span class="py-line">            <span class="py-keyword">except</span><span class="py-op">:</span> </span>
+<span class="lineno"> 53</span>  <span class="py-line">                <span class="py-name">a</span><span class="py-op">[</span><span class="py-name">k</span><span class="py-op">]</span> <span class="py-op">=</span> <span class="py-name">b</span><span class="py-op">[</span><span class="py-name">k</span><span class="py-op">]</span> </span>
+<span class="lineno"> 54</span>  <span class="py-line">        <span class="py-keyword">return</span> <span class="py-name">a</span> </span>
+</div><span class="lineno"> 55</span>  <span class="py-line"> </span>
+<a name="SimpleExtractor.process_xpathResult"></a><div id="SimpleExtractor.process_xpathResult-def"><span class="lineno"> 56</span> <a class="pysrc-toggle" href="#" id="SimpleExtractor.process_xpathResult-toggle" onclick="toggle('SimpleExtractor.process_xpathResult'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="extractor.SimpleExtractor-class.html#process_xpathResult">process_xpathResult</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">session</span><span class="py-op">,</span> <span class="py-param">data</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="SimpleExtractor.process_xpathResult-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="SimpleExtractor.process_xpathResult-expanded"><span class="lineno"> 57</span>  <span class="py-line">        <span class="py-name">new</span> <span class="py-op">=</span> <span class="py-op">{</span><span class="py-op">}</span> </span>
+<span class="lineno"> 58</span>  <span class="py-line">        <span class="py-keyword">for</span> <span class="py-name">xp</span> <span class="py-keyword">in</span> <span class="py-name">data</span><span class="py-op">:</span> </span>
+<span class="lineno"> 59</span>  <span class="py-line">            <span class="py-keyword">for</span> <span class="py-name">d</span> <span class="py-keyword">in</span> <span class="py-name">xp</span><span class="py-op">:</span> </span>
+<span class="lineno"> 60</span>  <span class="py-line">                <span class="py-keyword">if</span> <span class="py-op">(</span><span id="link-2" class="py-name"><a title="GoogleSearch_services_types.urn_GoogleSearch.DirectoryCategory_Def.type
+GoogleSearch_services_types.urn_GoogleSearch.GoogleSearchResult_Def.type
+GoogleSearch_services_types.urn_GoogleSearch.ResultElement_Def.type" class="py-name" href="#" onclick="doclink('link-2', 'type', 'Variable GoogleSearch_services_types.urn_GoogleSearch.DirectoryCategory_Def.type=GoogleSearch_services_types.urn_GoogleSearch.DirectoryCategory_Def-class.html#type,Variable GoogleSearch_services_types.urn_GoogleSearch.GoogleSearchResult_Def.type=GoogleSearch_services_types.urn_GoogleSearch.GoogleSearchResult_Def-class.html#type,Variable GoogleSearch_services_types.urn_GoogleSearch.ResultElement_Def.type=GoogleSearch_services_types.urn_GoogleSearch.ResultElement_Def-class.html#type'); return false;">type</a></span></span><span class="py-op">(</span><span class="py-name">d</span><span class="py-op">)</span> <span class="py-op">==</span> <a title="textmining.tmNormalizer.PosTypeNormalizer.types" class="py-name" href="textmining.tmNormalizer.PosTypeNormalizer-class.html#types">types</a><span class="py-op">.</span><span class="py-name">ListType</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno"> 61</span>  <span class="py-line">                    <span class="py-comment"># SAX event</span> </span>
+<span class="lineno"> 62</span>  <span class="py-line"><span class="py-comment"></span>                    <span class="py-name">new</span> <span class="py-op">=</span> <span class="py-name">self</span><span class="py-op">.</span><span id="link-3" class="py-name"><a title="extractor.SimpleExtractor._mergeHash
+index.SimpleIndex._mergeHash" class="py-name" href="#" onclick="doclink('link-3', '_mergeHash', 'Method extractor.SimpleExtractor._mergeHash()=extractor.SimpleExtractor-class.html#_mergeHash,Method index.SimpleIndex._mergeHash()=index.SimpleIndex-class.html#_mergeHash'); return false;">_mergeHash</a></span></span><span class="py-op">(</span><span class="py-name">new</span><span class="py-op">,</span> <span class="py-name">self</span><span class="py-op">.</span><span id="link-4" class="py-name"><a title="baseObjects.Extractor.process_eventList
+extractor.DateExtractor.process_eventList
+extractor.ExactProximityExtractor.process_eventList
+extractor.KeywordExtractor.process_eventList
+extractor.ProximityExtractor.process_eventList
+extractor.SimpleExtractor.process_eventList" class="py-name" href="#" onclick="doclink('link-4', 'process_eventList', 'Method baseObjects.Extractor.process_eventList()=baseObjects.Extractor-class.html#process_eventList,Method extractor.DateExtractor.process_eventList()=extractor.DateExtractor-class.html#process_eventList,Method extractor.ExactProximityExtractor.process_eventList()=extractor.ExactProximityExtractor-class.html#process_eventList,Method extractor.KeywordExtractor.process_eventList()=extractor.KeywordExtractor-class.html#process_eventList,Method extractor.ProximityExtractor.process_eventList()=extractor.ProximityExtractor-class.html#process_eventList,Method extractor.SimpleExtractor.process_eventList()=extractor.SimpleExtractor-class.html#process_eventList'); return false;">process_eventList</a></span></span><span class="py-op">(</span><a title="resultSet.DeserializationHandler.session" class="py-name" href="resultSet.DeserializationHandler-class.html#session">session</a><span class="py-op">,</span> <span class="py-name">d</span><span class="py-op">)</span><span class="py-op">)</span> </span>
+<span class="lineno"> 63</span>  <span class="py-line">                <span class="py-keyword">elif</span> <span class="py-op">(</span><span id="link-5" class="py-name"><a title="GoogleSearch_services_types.urn_GoogleSearch.DirectoryCategory_Def.type
+GoogleSearch_services_types.urn_GoogleSearch.GoogleSearchResult_Def.type
+GoogleSearch_services_types.urn_GoogleSearch.ResultElement_Def.type" class="py-name" href="#" onclick="doclink('link-5', 'type', 'Variable GoogleSearch_services_types.urn_GoogleSearch.DirectoryCategory_Def.type=GoogleSearch_services_types.urn_GoogleSearch.DirectoryCategory_Def-class.html#type,Variable GoogleSearch_services_types.urn_GoogleSearch.GoogleSearchResult_Def.type=GoogleSearch_services_types.urn_GoogleSearch.GoogleSearchResult_Def-class.html#type,Variable GoogleSearch_services_types.urn_GoogleSearch.ResultElement_Def.type=GoogleSearch_services_types.urn_GoogleSearch.ResultElement_Def-class.html#type'); return false;">type</a></span></span><span class="py-op">(</span><span class="py-name">d</span><span class="py-op">)</span> <span class="py-keyword">in</span> <a title="textmining.tmNormalizer.PosTypeNormalizer.types" class="py-name" href="textmining.tmNormalizer.PosTypeNormalizer-class.html#types">types</a><span class="py-op">.</span><span class="py-name">StringTypes</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno"> 64</span>  <span class="py-line">                    <span class="py-comment"># Attribute content</span> </span>
+<span class="lineno"> 65</span>  <span class="py-line"><span class="py-comment"></span>                    <span class="py-name">new</span> <span class="py-op">=</span> <span class="py-name">self</span><span class="py-op">.</span><span id="link-6" class="py-name"><a title="extractor.SimpleExtractor._mergeHash
+index.SimpleIndex._mergeHash" class="py-name" href="#" onclick="doclink('link-6', '_mergeHash', 'Method extractor.SimpleExtractor._mergeHash()=extractor.SimpleExtractor-class.html#_mergeHash,Method index.SimpleIndex._mergeHash()=index.SimpleIndex-class.html#_mergeHash'); return false;">_mergeHash</a></span></span><span class="py-op">(</span><span class="py-name">new</span><span class="py-op">,</span> <span class="py-name">self</span><span class="py-op">.</span><span id="link-7" class="py-name"><a title="baseObjects.Extractor.process_string
+baseObjects.Normalizer.process_string
+extractor.DateExtractor.process_string
+extractor.ExactProximityExtractor.process_string
+extractor.KeywordExtractor.process_string
+extractor.ProximityExtractor.process_string
+extractor.SimpleExtractor.process_string
+normalizer.ArticleNormalizer.process_string
+normalizer.CaseNormalizer.process_string
+normalizer.DataExistsNormalizer.process_string
+normalizer.DateStringNormalizer.process_string
+normalizer.DiacriticNormalizer.process_string
+normalizer.ExactExpansionNormalizer.process_string
+normalizer.IntNormalizer.process_string
+normalizer.KeywordNormalizer.process_string
+normalizer.NumericEntityNormalizer.process_string
+normalizer.PhraseStemNormalizer.process_string
+normalizer.PossessiveNormalizer.process_string
+normalizer.RegexpNormalizer.process_string
+normalizer.ReverseNormalizer.process_string
+normalizer.SimpleNormalizer.process_string
+normalizer.SpaceNormalizer.process_string
+normalizer.StemNormalizer.process_string
+normalizer.StoplistNormalizer.process_string
+normalizer.StringIntNormalizer.process_string
+normalizer.TermExistsNormalizer.process_string
+normalizer.WordExpansionNormalizer.process_string
+queryFactory.SimpleQueryFactory.process_string
+textmining.tmNormalizer.EnjuNormalizer.process_string
+textmining.tmNormalizer.ExactGeniaNormalizer.process_string
+textmining.tmNormalizer.GeniaNormalizer.process_string
+textmining.tmNormalizer.GeniaTextNormalizer.process_string
+textmining.tmNormalizer.PosKeywordNormalizer.process_string
+textmining.tmNormalizer.PosPhraseNormalizer.process_string
+textmining.tmNormalizer.PosTypeNormalizer.process_string
+textmining.tmNormalizer.TsujiiPosNormalizer.process_string
+textmining.tmNormalizer.UnparsedGeniaNormalizer.process_string" class="py-name" href="#" onclick="doclink('link-7', 'process_string', 'Method baseObjects.Extractor.process_string()=baseObjects.Extractor-class.html#process_string,Method baseObjects.Normalizer.process_string()=baseObjects.Normalizer-class.html#process_string,Method extractor.DateExtractor.process_string()=extractor.DateExtractor-class.html#process_string,Method extractor.ExactProximityExtractor.process_string()=extractor.ExactProximityExtractor-class.html#process_string,Method extractor.KeywordExtractor.process_string()=extractor.KeywordExtractor-class.html#process_string,Method extractor.ProximityExtractor.process_string()=extractor.ProximityExtractor-class.html#process_string,Method extractor.SimpleExtractor.process_string()=extractor.SimpleExtractor-class.html#process_string,Method normalizer.ArticleNormalizer.process_string()=normalizer.ArticleNormalizer-class.html#process_string,Method normalizer.CaseNormalizer.process_string()=normalizer.CaseNormalizer-class.html#process_string,Method normalizer.DataExistsNormalizer.process_string()=normalizer.DataExistsNormalizer-class.html#process_string,Method normalizer.DateStringNormalizer.process_string()=normalizer.DateStringNormalizer-class.html#process_string,Method normalizer.DiacriticNormalizer.process_string()=normalizer.DiacriticNormalizer-class.html#process_string,Method normalizer.ExactExpansionNormalizer.process_string()=normalizer.ExactExpansionNormalizer-class.html#process_string,Method normalizer.IntNormalizer.process_string()=normalizer.IntNormalizer-class.html#process_string,Method normalizer.KeywordNormalizer.process_string()=normalizer.KeywordNormalizer-class.html#process_string,Method normalizer.NumericEntityNormalizer.process_string()=normalizer.NumericEntityNormalizer-class.html#process_string,Method normalizer.PhraseStemNormalizer.process_string()=normalizer.PhraseStemNormalizer-class.html#process_string,Method normalizer.PossessiveNormalizer.process_string()=normalizer.PossessiveNormalizer-class.html#process_string,Method normalizer.RegexpNormalizer.process_string()=normalizer.RegexpNormalizer-class.html#process_string,Method normalizer.ReverseNormalizer.process_string()=normalizer.ReverseNormalizer-class.html#process_string,Method normalizer.SimpleNormalizer.process_string()=normalizer.SimpleNormalizer-class.html#process_string,Method normalizer.SpaceNormalizer.process_string()=normalizer.SpaceNormalizer-class.html#process_string,Method normalizer.StemNormalizer.process_string()=normalizer.StemNormalizer-class.html#process_string,Method normalizer.StoplistNormalizer.process_string()=normalizer.StoplistNormalizer-class.html#process_string,Method normalizer.StringIntNormalizer.process_string()=normalizer.StringIntNormalizer-class.html#process_string,Method normalizer.TermExistsNormalizer.process_string()=normalizer.TermExistsNormalizer-class.html#process_string,Method normalizer.WordExpansionNormalizer.process_string()=normalizer.WordExpansionNormalizer-class.html#process_string,Method queryFactory.SimpleQueryFactory.process_string()=queryFactory.SimpleQueryFactory-class.html#process_string,Method textmining.tmNormalizer.EnjuNormalizer.process_string()=textmining.tmNormalizer.EnjuNormalizer-class.html#process_string,Method textmining.tmNormalizer.ExactGeniaNormalizer.process_string()=textmining.tmNormalizer.ExactGeniaNormalizer-class.html#process_string,Method textmining.tmNormalizer.GeniaNormalizer.process_string()=textmining.tmNormalizer.GeniaNormalizer-class.html#process_string,Method textmining.tmNormalizer.GeniaTextNormalizer.process_string()=textmining.tmNormalizer.GeniaTextNormalizer-class.html#process_string,Method textmining.tmNormalizer.PosKeywordNormalizer.process_string()=textmining.tmNormalizer.PosKeywordNormalizer-class.html#process_string,Method textmining.tmNormalizer.PosPhraseNormalizer.process_string()=textmining.tmNormalizer.PosPhraseNormalizer-class.html#process_string,Method textmining.tmNormalizer.PosTypeNormalizer.process_string()=textmining.tmNormalizer.PosTypeNormalizer-class.html#process_string,Method textmining.tmNormalizer.TsujiiPosNormalizer.process_string()=textmining.tmNormalizer.TsujiiPosNormalizer-class.html#process_string,Method textmining.tmNormalizer.UnparsedGeniaNormalizer.process_string()=textmining.tmNormalizer.UnparsedGeniaNormalizer-class.html#process_string'); return false;">process_string</a></span></span><span class="py-op">(</span><a title="resultSet.DeserializationHandler.session" class="py-name" href="resultSet.DeserializationHandler-class.html#session">session</a><span class="py-op">,</span> <span class="py-name">d</span><span class="py-op">)</span><span class="py-op">)</span> </span>
+<span class="lineno"> 66</span>  <span class="py-line">                <span class="py-keyword">else</span><span class="py-op">:</span> </span>
+<span class="lineno"> 67</span>  <span class="py-line">                    <span class="py-comment"># DOM nodes</span> </span>
+<span class="lineno"> 68</span>  <span class="py-line"><span class="py-comment"></span>                    <span class="py-name">new</span> <span class="py-op">=</span> <span class="py-name">self</span><span class="py-op">.</span><span id="link-8" class="py-name"><a title="extractor.SimpleExtractor._mergeHash
+index.SimpleIndex._mergeHash" class="py-name" href="#" onclick="doclink('link-8', '_mergeHash', 'Method extractor.SimpleExtractor._mergeHash()=extractor.SimpleExtractor-class.html#_mergeHash,Method index.SimpleIndex._mergeHash()=index.SimpleIndex-class.html#_mergeHash'); return false;">_mergeHash</a></span></span><span class="py-op">(</span><span class="py-name">new</span><span class="py-op">,</span> <span class="py-name">self</span><span class="py-op">.</span><span id="link-9" class="py-name"><a title="baseObjects.Extractor.process_node
+extractor.DateExtractor.process_node
+extractor.ExactProximityExtractor.process_node
+extractor.KeywordExtractor.process_node
+extractor.ProximityExtractor.process_node
+extractor.SimpleExtractor.process_node" class="py-name" href="#" onclick="doclink('link-9', 'process_node', 'Method baseObjects.Extractor.process_node()=baseObjects.Extractor-class.html#process_node,Method extractor.DateExtractor.process_node()=extractor.DateExtractor-class.html#process_node,Method extractor.ExactProximityExtractor.process_node()=extractor.ExactProximityExtractor-class.html#process_node,Method extractor.KeywordExtractor.process_node()=extractor.KeywordExtractor-class.html#process_node,Method extractor.ProximityExtractor.process_node()=extractor.ProximityExtractor-class.html#process_node,Method extractor.SimpleExtractor.process_node()=extractor.SimpleExtractor-class.html#process_node'); return false;">process_node</a></span></span><span class="py-op">(</span><a title="resultSet.DeserializationHandler.session" class="py-name" href="resultSet.DeserializationHandler-class.html#session">session</a><span class="py-op">,</span> <span class="py-name">d</span><span class="py-op">)</span><span class="py-op">)</span> </span>
+<span class="lineno"> 69</span>  <span class="py-line">        <span class="py-keyword">return</span> <span class="py-name">new</span> </span>
+</div></div><span class="lineno"> 70</span>  <span class="py-line"> </span>
+<span class="lineno"> 71</span>  <span class="py-line"> </span>
+<a name="KeywordExtractor"></a><div id="KeywordExtractor-def"><span class="lineno"> 72</span> <a class="pysrc-toggle" href="#" id="KeywordExtractor-toggle" onclick="toggle('KeywordExtractor'); return false;">-</a><span class="py-line"><span class="py-keyword">class</span> <a class="py-def-name" href="extractor.KeywordExtractor-class.html">KeywordExtractor</a><span class="py-op">(</span><span class="py-base-class">SimpleExtractor</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="KeywordExtractor-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="KeywordExtractor-expanded"><span class="lineno"> 73</span>  <span class="py-line">    <span class="py-comment"># Word consituent: a-zA-Z0-9 $%</span> </span>
+<span class="lineno"> 74</span>  <span class="py-line"><span class="py-comment"></span>    <span class="py-docstring">""" Extracts keywords from the text """</span> </span>
+<span class="lineno"> 75</span>  <span class="py-line">     </span>
+<a name="KeywordExtractor.__init__"></a><div id="KeywordExtractor.__init__-def"><span class="lineno"> 76</span> <a class="pysrc-toggle" href="#" id="KeywordExtractor.__init__-toggle" onclick="toggle('KeywordExtractor.__init__'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="extractor.KeywordExtractor-class.html#__init__">__init__</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">session</span><span class="py-op">,</span> <span class="py-param">parser</span><span class="py-op">,</span> <span class="py-param">config</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="KeywordExtractor.__init__-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="KeywordExtractor.__init__-expanded"><span class="lineno"> 77</span>  <span class="py-line">        <a title="extractor.SimpleExtractor" class="py-name" href="extractor.SimpleExtractor-class.html">SimpleExtractor</a><span class="py-op">.</span><span id="link-10" class="py-name"><a title="GoogleSearch_services.GoogleSearchBindingSOAP.__init__
+GoogleSearch_services.doGetCachedPage.__init__
+GoogleSearch_services.doGetCachedPageResponse.__init__
+GoogleSearch_services.doGetCachedPageResponseWrapper.__init__
+GoogleSearch_services.doGetCachedPageWrapper.__init__
+GoogleSearch_services.doGoogleSearch.__init__
+GoogleSearch_services.doGoogleSearchResponse.__init__
+GoogleSearch_services.doGoogleSearchResponseWrapper.__init__
+GoogleSearch_services.doGoogleSearchWrapper.__init__
+GoogleSearch_services.doSpellingSuggestion.__init__
+GoogleSearch_services.doSpellingSuggestionResponse.__init__
+GoogleSearch_services.doSpellingSuggestionResponseWrapper.__init__
+GoogleSearch_services.doSpellingSuggestionWrapper.__init__
+GoogleSearch_services_types.urn_GoogleSearch.DirectoryCategoryArray_Def.__init__
+GoogleSearch_services_types.urn_GoogleSearch.DirectoryCategory_Def.__init__
+GoogleSearch_services_types.urn_GoogleSearch.GoogleSearchResult_Def.__init__
+GoogleSearch_services_types.urn_GoogleSearch.ResultElementArray_Def.__init__
+GoogleSearch_services_types.urn_GoogleSearch.ResultElement_Def.__init__
+baseObjects.Document.__init__
+baseObjects.Record.__init__
+baseObjects.Server.__init__
+baseStore.BdbIter.__init__
+baseStore.SimpleStore.__init__
+baseStore.SrbBdbCombineStore.__init__
+baseStore.SrbStore.__init__
+bootstrap.BootstrapDocument.__init__
+bootstrap.BootstrapRecord.__init__
+bootstrap.BootstrapSession.__init__
+c3errors.C3Exception.__init__
+configParser.C3Object.__init__
+database.SimpleDatabase.__init__
+document.StringDocument.__init__
+documentFactory.BaseDocumentFactory.__init__
+documentFactory.BaseDocumentStream.__init__
+documentFactory.ComponentDocumentFactory.__init__
+documentFactory.ComponentDocumentStream.__init__
+documentFactory.GoogleDocumentStream.__init__
+documentFactory.HttpDocumentStream.__init__
+documentFactory.MultipleDocumentStream.__init__
+documentFactory.OaiDocumentStream.__init__
+documentFactory.UrllibUnicodeFileThing.__init__
+documentFactory.XmlDocumentStream.__init__
+documentStore.BdbDocumentStore.__init__
+documentStore.CachingSrbDocumentStore.__init__
+documentStore.SimpleDocumentStore.__init__
+documentStore.SrbDocumentStore.__init__
+extractor.DateExtractor.__init__
+extractor.KeywordExtractor.__init__
+extractor.SimpleExtractor.__init__
+index.ArrayIndex.__init__
+index.BitmapIndex.__init__
+index.ClusterExtractionIndex.__init__
+index.SimpleIndex.__init__
+indexStore.BdbIndexStore.__init__
+indexStore.SrbBdbIndexStore.__init__
+logger.FunctionLogger.__init__
+logger.SimpleLogger.__init__
+multivalent.MultivalentClient.__init__
+multivalent.MultivalentPreParser.__init__
+normalizer.KeywordNormalizer.__init__
+normalizer.NumericEntityNormalizer.__init__
+normalizer.PhraseStemNormalizer.__init__
+normalizer.RegexpNormalizer.__init__
+normalizer.SimpleNormalizer.__init__
+normalizer.SpaceNormalizer.__init__
+normalizer.StemNormalizer.__init__
+normalizer.StoplistNormalizer.__init__
+normalizer.TermExistsNormalizer.__init__
+parser.FtParser.__init__
+parser.FtSaxParser.__init__
+parser.SaxParser.__init__
+parser.XmlRecordStoreParser.__init__
+permissionHandler.PermissionHandler.__init__
+postgres.PostgresDocumentFactory.__init__
+postgres.PostgresDocumentStream.__init__
+postgres.PostgresIndexStore.__init__
+postgres.PostgresRecordStore.__init__
+postgres.PostgresResultSetStore.__init__
+postgres.PostgresStore.__init__
+preParser.AmpPreParser.__init__
+preParser.CharacterEntityPreParser.__init__
+preParser.HtmlSmashPreParser.__init__
+preParser.HtmlTidyPreParser.__init__
+preParser.NormalizerPreParser.__init__
+preParser.PdfToTxtPreParser.__init__
+preParser.PrintableOnlyPreParser.__init__
+preParser.RegexpSmashPreParser.__init__
+preParser.SgmlPreParser.__init__
+protocolMap.C3WepProtocolMap.__init__
+protocolMap.CQLProtocolMap.__init__
+protocolMap.UpdateProtocolMap.__init__
+protocolMap.Z3950ProtocolMap.__init__
+protocolMap.ZeerexProtocolMap.__init__
+record.DomRecord.__init__
+record.MarcRecord.__init__
+record.SaxContentHandler.__init__
+record.SaxRecord.__init__
+recordStore.BdbRecordStore.__init__
+recordStore.CachingSrbRecordStore.__init__
+recordStore.CachingSrbRemoteWriteRecordStore.__init__
+recordStore.MarcIter.__init__
+recordStore.ParsingRecordStore.__init__
+recordStore.PostgresRecordStore.__init__
+recordStore.RemoteSlaveRecordStore.__init__
+recordStore.SimpleRecordStore.__init__
+recordStore.SrbRecordStore.__init__
+resultSet.ArrayResultSet.__init__
+resultSet.BitmapResultSet.__init__
+resultSet.SimpleResultSet.__init__
+resultSet.SimpleResultSetItem.__init__
+resultSetStore.BdbResultSetStore.__init__
+resultSetStore.BdbResultSetStore2.__init__
+resultSetStore.SimpleResultSetStore.__init__
+server.SimpleServer.__init__
+srboo.SrbConnection.__init__
+srboo.SrbException.__init__
+srboo.SrbFile.__init__
+textmining.TsujiiC3.EnjuObject.__init__
+textmining.TsujiiC3.GeniaObject.__init__
+textmining.TsujiiC3.SimpleTokenizer.__init__
+textmining.TsujiiC3.TsujiiObject.__init__
+textmining.tmNormalizer.EnjuNormalizer.__init__
+textmining.tmNormalizer.ExactGeniaNormalizer.__init__
+textmining.tmNormalizer.GeniaNormalizer.__init__
+textmining.tmNormalizer.GeniaTextNormalizer.__init__
+textmining.tmNormalizer.PosKeywordNormalizer.__init__
+textmining.tmNormalizer.PosPhraseNormalizer.__init__
+textmining.tmNormalizer.PosTypeNormalizer.__init__
+textmining.tmNormalizer.TsujiiPosNormalizer.__init__
+textmining.tmNormalizer.UnparsedGeniaNormalizer.__init__
+textmining.tmPreParser.EnjuTextPreParser.__init__
+textmining.tmPreParser.GeniaTextPreParser.__init__
+textmining.tmPreParser.TsujiiChunkerPreParser.__init__
+textmining.tmPreParser.TsujiiTextPosPreParser.__init__
+textmining.tmPreParser.TsujiiXMLPosPreParser.__init__
+textmining.tmTransformer.TsujiiTextPosTransformer.__init__
+textmining.tmTransformer.TsujiiXPathTransformer.__init__
+transformer.CSVTransformer.__init__
+transformer.GrsMapTransformer.__init__
+transformer.LxmlXsltTransformer.__init__
+transformer.XsltTransformer.__init__
+utils.SimpleBitfield.__init__
+workflow.CachingWorkflow.__init__
+workflow.SimpleWorkflow.__init__
+xpathProcessor.SimpleXPathProcessor.__init__" class="py-name" href="#" onclick="doclink('link-10', '__init__', 'Method GoogleSearch_services.GoogleSearchBindingSOAP.__init__()=GoogleSearch_services.GoogleSearchBindingSOAP-class.html#__init__,Method GoogleSearch_services.doGetCachedPage.__init__()=GoogleSearch_services.doGetCachedPage-class.html#__init__,Method GoogleSearch_services.doGetCachedPageResponse.__init__()=GoogleSearch_services.doGetCachedPageResponse-class.html#__init__,Method GoogleSearch_services.doGetCachedPageResponseWrapper.__init__()=GoogleSearch_services.doGetCachedPageResponseWrapper-class.html#__init__,Method GoogleSearch_services.doGetCachedPageWrapper.__init__()=GoogleSearch_services.doGetCachedPageWrapper-class.html#__init__,Method GoogleSearch_services.doGoogleSearch.__init__()=GoogleSearch_services.doGoogleSearch-class.html#__init__,Method GoogleSearch_services.doGoogleSearchResponse.__init__()=GoogleSearch_services.doGoogleSearchResponse-class.html#__init__,Method GoogleSearch_services.doGoogleSearchResponseWrapper.__init__()=GoogleSearch_services.doGoogleSearchResponseWrapper-class.html#__init__,Method GoogleSearch_services.doGoogleSearchWrapper.__init__()=GoogleSearch_services.doGoogleSearchWrapper-class.html#__init__,Method GoogleSearch_services.doSpellingSuggestion.__init__()=GoogleSearch_services.doSpellingSuggestion-class.html#__init__,Method GoogleSearch_services.doSpellingSuggestionResponse.__init__()=GoogleSearch_services.doSpellingSuggestionResponse-class.html#__init__,Method GoogleSearch_services.doSpellingSuggestionResponseWrapper.__init__()=GoogleSearch_services.doSpellingSuggestionResponseWrapper-class.html#__init__,Method GoogleSearch_services.doSpellingSuggestionWrapper.__init__()=GoogleSearch_services.doSpellingSuggestionWrapper-class.html#__init__,Method GoogleSearch_services_types.urn_GoogleSearch.DirectoryCategoryArray_Def.__init__()=GoogleSearch_services_types.urn_GoogleSearch.DirectoryCategoryArray_Def-class.html#__init__,Method GoogleSearch_services_types.urn_GoogleSearch.DirectoryCategory_Def.__init__()=GoogleSearch_services_types.urn_GoogleSearch.DirectoryCategory_Def-class.html#__init__,Method GoogleSearch_services_types.urn_GoogleSearch.GoogleSearchResult_Def.__init__()=GoogleSearch_services_types.urn_GoogleSearch.GoogleSearchResult_Def-class.html#__init__,Method GoogleSearch_services_types.urn_GoogleSearch.ResultElementArray_Def.__init__()=GoogleSearch_services_types.urn_GoogleSearch.ResultElementArray_Def-class.html#__init__,Method GoogleSearch_services_types.urn_GoogleSearch.ResultElement_Def.__init__()=GoogleSearch_services_types.urn_GoogleSearch.ResultElement_Def-class.html#__init__,Method baseObjects.Document.__init__()=baseObjects.Document-class.html#__init__,Method baseObjects.Record.__init__()=baseObjects.Record-class.html#__init__,Method baseObjects.Server.__init__()=baseObjects.Server-class.html#__init__,Method baseStore.BdbIter.__init__()=baseStore.BdbIter-class.html#__init__,Method baseStore.SimpleStore.__init__()=baseStore.SimpleStore-class.html#__init__,Method baseStore.SrbBdbCombineStore.__init__()=baseStore.SrbBdbCombineStore-class.html#__init__,Method baseStore.SrbStore.__init__()=baseStore.SrbStore-class.html#__init__,Method bootstrap.BootstrapDocument.__init__()=bootstrap.BootstrapDocument-class.html#__init__,Method bootstrap.BootstrapRecord.__init__()=bootstrap.BootstrapRecord-class.html#__init__,Method bootstrap.BootstrapSession.__init__()=bootstrap.BootstrapSession-class.html#__init__,Method c3errors.C3Exception.__init__()=c3errors.C3Exception-class.html#__init__,Method configParser.C3Object.__init__()=configParser.C3Object-class.html#__init__,Method database.SimpleDatabase.__init__()=database.SimpleDatabase-class.html#__init__,Method document.StringDocument.__init__()=document.StringDocument-class.html#__init__,Method documentFactory.BaseDocumentFactory.__init__()=documentFactory.BaseDocumentFactory-class.html#__init__,Method documentFactory.BaseDocumentStream.__init__()=documentFactory.BaseDocumentStream-class.html#__init__,Method documentFactory.ComponentDocumentFactory.__init__()=documentFactory.ComponentDocumentFactory-class.html#__init__,Method documentFactory.ComponentDocumentStream.__init__()=documentFactory.ComponentDocumentStream-class.html#__init__,Method documentFactory.GoogleDocumentStream.__init__()=documentFactory.GoogleDocumentStream-class.html#__init__,Method documentFactory.HttpDocumentStream.__init__()=documentFactory.HttpDocumentStream-class.html#__init__,Method documentFactory.MultipleDocumentStream.__init__()=documentFactory.MultipleDocumentStream-class.html#__init__,Method documentFactory.OaiDocumentStream.__init__()=documentFactory.OaiDocumentStream-class.html#__init__,Method documentFactory.UrllibUnicodeFileThing.__init__()=documentFactory.UrllibUnicodeFileThing-class.html#__init__,Method documentFactory.XmlDocumentStream.__init__()=documentFactory.XmlDocumentStream-class.html#__init__,Method documentStore.BdbDocumentStore.__init__()=documentStore.BdbDocumentStore-class.html#__init__,Method documentStore.CachingSrbDocumentStore.__init__()=documentStore.CachingSrbDocumentStore-class.html#__init__,Method documentStore.SimpleDocumentStore.__init__()=documentStore.SimpleDocumentStore-class.html#__init__,Method documentStore.SrbDocumentStore.__init__()=documentStore.SrbDocumentStore-class.html#__init__,Method DateExtractor.__init__()=extractor.DateExtractor-class.html#__init__,Method __init__()=extractor.KeywordExtractor-class.html#__init__,Method SimpleExtractor.__init__()=extractor.SimpleExtractor-class.html#__init__,Method index.ArrayIndex.__init__()=index.ArrayIndex-class.html#__init__,Method index.BitmapIndex.__init__()=index.BitmapIndex-class.html#__init__,Method index.ClusterExtractionIndex.__init__()=index.ClusterExtractionIndex-class.html#__init__,Method index.SimpleIndex.__init__()=index.SimpleIndex-class.html#__init__,Method indexStore.BdbIndexStore.__init__()=indexStore.BdbIndexStore-class.html#__init__,Method indexStore.SrbBdbIndexStore.__init__()=indexStore.SrbBdbIndexStore-class.html#__init__,Method logger.FunctionLogger.__init__()=logger.FunctionLogger-class.html#__init__,Method logger.SimpleLogger.__init__()=logger.SimpleLogger-class.html#__init__,Method multivalent.MultivalentClient.__init__()=multivalent.MultivalentClient-class.html#__init__,Method multivalent.MultivalentPreParser.__init__()=multivalent.MultivalentPreParser-class.html#__init__,Method normalizer.KeywordNormalizer.__init__()=normalizer.KeywordNormalizer-class.html#__init__,Method normalizer.NumericEntityNormalizer.__init__()=normalizer.NumericEntityNormalizer-class.html#__init__,Method normalizer.PhraseStemNormalizer.__init__()=normalizer.PhraseStemNormalizer-class.html#__init__,Method normalizer.RegexpNormalizer.__init__()=normalizer.RegexpNormalizer-class.html#__init__,Method normalizer.SimpleNormalizer.__init__()=normalizer.SimpleNormalizer-class.html#__init__,Method normalizer.SpaceNormalizer.__init__()=normalizer.SpaceNormalizer-class.html#__init__,Method normalizer.StemNormalizer.__init__()=normalizer.StemNormalizer-class.html#__init__,Method normalizer.StoplistNormalizer.__init__()=normalizer.StoplistNormalizer-class.html#__init__,Method normalizer.TermExistsNormalizer.__init__()=normalizer.TermExistsNormalizer-class.html#__init__,Method parser.FtParser.__init__()=parser.FtParser-class.html#__init__,Method parser.FtSaxParser.__init__()=parser.FtSaxParser-class.html#__init__,Method parser.SaxParser.__init__()=parser.SaxParser-class.html#__init__,Method parser.XmlRecordStoreParser.__init__()=parser.XmlRecordStoreParser-class.html#__init__,Method permissionHandler.PermissionHandler.__init__()=permissionHandler.PermissionHandler-class.html#__init__,Method postgres.PostgresDocumentFactory.__init__()=postgres.PostgresDocumentFactory-class.html#__init__,Method postgres.PostgresDocumentStream.__init__()=postgres.PostgresDocumentStream-class.html#__init__,Method postgres.PostgresIndexStore.__init__()=postgres.PostgresIndexStore-class.html#__init__,Method postgres.PostgresRecordStore.__init__()=postgres.PostgresRecordStore-class.html#__init__,Method postgres.PostgresResultSetStore.__init__()=postgres.PostgresResultSetStore-class.html#__init__,Method postgres.PostgresStore.__init__()=postgres.PostgresStore-class.html#__init__,Method preParser.AmpPreParser.__init__()=preParser.AmpPreParser-class.html#__init__,Method preParser.CharacterEntityPreParser.__init__()=preParser.CharacterEntityPreParser-class.html#__init__,Method preParser.HtmlSmashPreParser.__init__()=preParser.HtmlSmashPreParser-class.html#__init__,Method preParser.HtmlTidyPreParser.__init__()=preParser.HtmlTidyPreParser-class.html#__init__,Method preParser.NormalizerPreParser.__init__()=preParser.NormalizerPreParser-class.html#__init__,Method preParser.PdfToTxtPreParser.__init__()=preParser.PdfToTxtPreParser-class.html#__init__,Method preParser.PrintableOnlyPreParser.__init__()=preParser.PrintableOnlyPreParser-class.html#__init__,Method preParser.RegexpSmashPreParser.__init__()=preParser.RegexpSmashPreParser-class.html#__init__,Method preParser.SgmlPreParser.__init__()=preParser.SgmlPreParser-class.html#__init__,Method protocolMap.C3WepProtocolMap.__init__()=protocolMap.C3WepProtocolMap-class.html#__init__,Method protocolMap.CQLProtocolMap.__init__()=protocolMap.CQLProtocolMap-class.html#__init__,Method protocolMap.UpdateProtocolMap.__init__()=protocolMap.UpdateProtocolMap-class.html#__init__,Method protocolMap.Z3950ProtocolMap.__init__()=protocolMap.Z3950ProtocolMap-class.html#__init__,Method protocolMap.ZeerexProtocolMap.__init__()=protocolMap.ZeerexProtocolMap-class.html#__init__,Method record.DomRecord.__init__()=record.DomRecord-class.html#__init__,Method record.MarcRecord.__init__()=record.MarcRecord-class.html#__init__,Method record.SaxContentHandler.__init__()=record.SaxContentHandler-class.html#__init__,Method record.SaxRecord.__init__()=record.SaxRecord-class.html#__init__,Method recordStore.BdbRecordStore.__init__()=recordStore.BdbRecordStore-class.html#__init__,Method recordStore.CachingSrbRecordStore.__init__()=recordStore.CachingSrbRecordStore-class.html#__init__,Method recordStore.CachingSrbRemoteWriteRecordStore.__init__()=recordStore.CachingSrbRemoteWriteRecordStore-class.html#__init__,Method recordStore.MarcIter.__init__()=recordStore.MarcIter-class.html#__init__,Method recordStore.ParsingRecordStore.__init__()=recordStore.ParsingRecordStore-class.html#__init__,Method recordStore.PostgresRecordStore.__init__()=recordStore.PostgresRecordStore-class.html#__init__,Method recordStore.RemoteSlaveRecordStore.__init__()=recordStore.RemoteSlaveRecordStore-class.html#__init__,Method recordStore.SimpleRecordStore.__init__()=recordStore.SimpleRecordStore-class.html#__init__,Method recordStore.SrbRecordStore.__init__()=recordStore.SrbRecordStore-class.html#__init__,Method resultSet.ArrayResultSet.__init__()=resultSet.ArrayResultSet-class.html#__init__,Method resultSet.BitmapResultSet.__init__()=resultSet.BitmapResultSet-class.html#__init__,Method resultSet.SimpleResultSet.__init__()=resultSet.SimpleResultSet-class.html#__init__,Method resultSet.SimpleResultSetItem.__init__()=resultSet.SimpleResultSetItem-class.html#__init__,Method resultSetStore.BdbResultSetStore.__init__()=resultSetStore.BdbResultSetStore-class.html#__init__,Method resultSetStore.BdbResultSetStore2.__init__()=resultSetStore.BdbResultSetStore2-class.html#__init__,Method resultSetStore.SimpleResultSetStore.__init__()=resultSetStore.SimpleResultSetStore-class.html#__init__,Method server.SimpleServer.__init__()=server.SimpleServer-class.html#__init__,Method srboo.SrbConnection.__init__()=srboo.SrbConnection-class.html#__init__,Method srboo.SrbException.__init__()=srboo.SrbException-class.html#__init__,Method srboo.SrbFile.__init__()=srboo.SrbFile-class.html#__init__,Method textmining.TsujiiC3.EnjuObject.__init__()=textmining.TsujiiC3.EnjuObject-class.html#__init__,Method textmining.TsujiiC3.GeniaObject.__init__()=textmining.TsujiiC3.GeniaObject-class.html#__init__,Method textmining.TsujiiC3.SimpleTokenizer.__init__()=textmining.TsujiiC3.SimpleTokenizer-class.html#__init__,Method textmining.TsujiiC3.TsujiiObject.__init__()=textmining.TsujiiC3.TsujiiObject-class.html#__init__,Method textmining.tmNormalizer.EnjuNormalizer.__init__()=textmining.tmNormalizer.EnjuNormalizer-class.html#__init__,Method textmining.tmNormalizer.ExactGeniaNormalizer.__init__()=textmining.tmNormalizer.ExactGeniaNormalizer-class.html#__init__,Method textmining.tmNormalizer.GeniaNormalizer.__init__()=textmining.tmNormalizer.GeniaNormalizer-class.html#__init__,Method textmining.tmNormalizer.GeniaTextNormalizer.__init__()=textmining.tmNormalizer.GeniaTextNormalizer-class.html#__init__,Method textmining.tmNormalizer.PosKeywordNormalizer.__init__()=textmining.tmNormalizer.PosKeywordNormalizer-class.html#__init__,Method textmining.tmNormalizer.PosPhraseNormalizer.__init__()=textmining.tmNormalizer.PosPhraseNormalizer-class.html#__init__,Method textmining.tmNormalizer.PosTypeNormalizer.__init__()=textmining.tmNormalizer.PosTypeNormalizer-class.html#__init__,Method textmining.tmNormalizer.TsujiiPosNormalizer.__init__()=textmining.tmNormalizer.TsujiiPosNormalizer-class.html#__init__,Method textmining.tmNormalizer.UnparsedGeniaNormalizer.__init__()=textmining.tmNormalizer.UnparsedGeniaNormalizer-class.html#__init__,Method textmining.tmPreParser.EnjuTextPreParser.__init__()=textmining.tmPreParser.EnjuTextPreParser-class.html#__init__,Method textmining.tmPreParser.GeniaTextPreParser.__init__()=textmining.tmPreParser.GeniaTextPreParser-class.html#__init__,Method textmining.tmPreParser.TsujiiChunkerPreParser.__init__()=textmining.tmPreParser.TsujiiChunkerPreParser-class.html#__init__,Method textmining.tmPreParser.TsujiiTextPosPreParser.__init__()=textmining.tmPreParser.TsujiiTextPosPreParser-class.html#__init__,Method textmining.tmPreParser.TsujiiXMLPosPreParser.__init__()=textmining.tmPreParser.TsujiiXMLPosPreParser-class.html#__init__,Method textmining.tmTransformer.TsujiiTextPosTransformer.__init__()=textmining.tmTransformer.TsujiiTextPosTransformer-class.html#__init__,Method textmining.tmTransformer.TsujiiXPathTransformer.__init__()=textmining.tmTransformer.TsujiiXPathTransformer-class.html#__init__,Method transformer.CSVTransformer.__init__()=transformer.CSVTransformer-class.html#__init__,Method transformer.GrsMapTransformer.__init__()=transformer.GrsMapTransformer-class.html#__init__,Method transformer.LxmlXsltTransformer.__init__()=transformer.LxmlXsltTransformer-class.html#__init__,Method transformer.XsltTransformer.__init__()=transformer.XsltTransformer-class.html#__init__,Method utils.SimpleBitfield.__init__()=utils.SimpleBitfield-class.html#__init__,Method workflow.CachingWorkflow.__init__()=workflow.CachingWorkflow-class.html#__init__,Method workflow.SimpleWorkflow.__init__()=workflow.SimpleWorkflow-class.html#__init__,Method xpathProcessor.SimpleXPathProcessor.__init__()=xpathProcessor.SimpleXPathProcessor-class.html#__init__'); return false;">__init__</a></span></span><span class="py-op">(</span><span class="py-name">self</span><span class="py-op">,</span> <a title="resultSet.DeserializationHandler.session" class="py-name" href="resultSet.DeserializationHandler-class.html#session">session</a><span class="py-op">,</span> <a title="parser" class="py-name" href="parser-module.html">parser</a><span class="py-op">,</span> <span class="py-name">config</span><span class="py-op">)</span> </span>
+<span class="lineno"> 78</span>  <span class="py-line">        <span class="py-comment"># compiled regex is MUCH faster than interpreted loop</span> </span>
+<span class="lineno"> 79</span>  <span class="py-line"><span class="py-comment"></span>        <span class="py-name">pre</span> <span class="py-op">=</span> <span class="py-name">self</span><span class="py-op">.</span><a title="configParser.C3Object.get_setting" class="py-name" href="configParser.C3Object-class.html#get_setting">get_setting</a><span class="py-op">(</span><a title="resultSet.DeserializationHandler.session" class="py-name" href="resultSet.DeserializationHandler-class.html#session">session</a><span class="py-op">,</span> <span class="py-string">'regexp'</span><span class="py-op">,</span> <span class="py-string">"((?&lt;!\s)'|[-.,]((?=\s)|$)|(^|(?&lt;=\s))[-.,']|[.,'-][.,'-]|[~`!@+=\#\&amp;\^*()\[\]{}\\\|\":;&lt;&gt;?/])"</span><span class="py-op">)</span> </span>
+<span class="lineno"> 80</span>  <span class="py-line">        <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">punctuationRe</span> <span class="py-op">=</span> <span class="py-name">re</span><span class="py-op">.</span><span class="py-name">compile</span><span class="py-op">(</span><span class="py-name">pre</span><span class="py-op">)</span> </span>
+</div><span class="lineno"> 81</span>  <span class="py-line"> </span>
+<a name="KeywordExtractor._keywordify"></a><div id="KeywordExtractor._keywordify-def"><span class="lineno"> 82</span> <a class="pysrc-toggle" href="#" id="KeywordExtractor._keywordify-toggle" onclick="toggle('KeywordExtractor._keywordify'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="extractor.KeywordExtractor-class.html#_keywordify">_keywordify</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">session</span><span class="py-op">,</span> <span class="py-param">data</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="KeywordExtractor._keywordify-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="KeywordExtractor._keywordify-expanded"><span class="lineno"> 83</span>  <span class="py-line">        <span class="py-name">kw</span> <span class="py-op">=</span> <span class="py-op">{</span><span class="py-op">}</span> </span>
+<span class="lineno"> 84</span>  <span class="py-line">        <span class="py-name">reSub</span> <span class="py-op">=</span> <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">punctuationRe</span><span class="py-op">.</span><span class="py-name">sub</span> </span>
+<span class="lineno"> 85</span>  <span class="py-line">        <span class="py-name">has</span> <span class="py-op">=</span> <span class="py-name">kw</span><span class="py-op">.</span><span class="py-name">has_key</span> </span>
+<span class="lineno"> 86</span>  <span class="py-line">        <span class="py-keyword">for</span> <span class="py-name">d</span> <span class="py-keyword">in</span> <span class="py-name">data</span><span class="py-op">.</span><span class="py-name">keys</span><span class="py-op">(</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno"> 87</span>  <span class="py-line">            <span class="py-keyword">if</span> <span class="py-name">d</span><span class="py-op">:</span> </span>
+<span class="lineno"> 88</span>  <span class="py-line">                <span class="py-name">s</span> <span class="py-op">=</span> <span class="py-name">reSub</span><span class="py-op">(</span><span class="py-string">' '</span><span class="py-op">,</span> <span class="py-name">d</span><span class="py-op">)</span> </span>
+<span class="lineno"> 89</span>  <span class="py-line">                <span class="py-keyword">for</span> <span class="py-name">t</span> <span class="py-keyword">in</span> <span class="py-name">s</span><span class="py-op">.</span><span class="py-name">split</span><span class="py-op">(</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno"> 90</span>  <span class="py-line">                    <span class="py-keyword">if</span> <span class="py-name">has</span><span class="py-op">(</span><span class="py-name">t</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno"> 91</span>  <span class="py-line">                        <span class="py-name">kw</span><span class="py-op">[</span><span class="py-name">t</span><span class="py-op">]</span><span class="py-op">[</span><span class="py-string">'occurences'</span><span class="py-op">]</span> <span class="py-op">+=</span> <span class="py-number">1</span> </span>
+<span class="lineno"> 92</span>  <span class="py-line">                    <span class="py-keyword">else</span><span class="py-op">:</span> </span>
+<span class="lineno"> 93</span>  <span class="py-line">                        <span class="py-name">kw</span><span class="py-op">[</span><span class="py-name">t</span><span class="py-op">]</span> <span class="py-op">=</span> <span class="py-op">{</span><span class="py-string">'text'</span> <span class="py-op">:</span> <span class="py-name">t</span><span class="py-op">,</span> <span class="py-string">'occurences'</span> <span class="py-op">:</span> <span class="py-number">1</span><span class="py-op">}</span> </span>
+<span class="lineno"> 94</span>  <span class="py-line">        <span class="py-keyword">return</span> <span class="py-name">kw</span> </span>
+</div><span class="lineno"> 95</span>  <span class="py-line"> </span>
+<a name="KeywordExtractor.process_string"></a><div id="KeywordExtractor.process_string-def"><span class="lineno"> 96</span> <a class="pysrc-toggle" href="#" id="KeywordExtractor.process_string-toggle" onclick="toggle('KeywordExtractor.process_string'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="extractor.KeywordExtractor-class.html#process_string">process_string</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">session</span><span class="py-op">,</span> <span class="py-param">data</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="KeywordExtractor.process_string-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="KeywordExtractor.process_string-expanded"><span class="lineno"> 97</span>  <span class="py-line">        <span class="py-name">data</span> <span class="py-op">=</span> <a title="extractor.SimpleExtractor" class="py-name" href="extractor.SimpleExtractor-class.html">SimpleExtractor</a><span class="py-op">.</span><span id="link-11" class="py-name"><a title="baseObjects.Extractor.process_string
+baseObjects.Normalizer.process_string
+extractor.DateExtractor.process_string
+extractor.ExactProximityExtractor.process_string
+extractor.KeywordExtractor.process_string
+extractor.ProximityExtractor.process_string
+extractor.SimpleExtractor.process_string
+normalizer.ArticleNormalizer.process_string
+normalizer.CaseNormalizer.process_string
+normalizer.DataExistsNormalizer.process_string
+normalizer.DateStringNormalizer.process_string
+normalizer.DiacriticNormalizer.process_string
+normalizer.ExactExpansionNormalizer.process_string
+normalizer.IntNormalizer.process_string
+normalizer.KeywordNormalizer.process_string
+normalizer.NumericEntityNormalizer.process_string
+normalizer.PhraseStemNormalizer.process_string
+normalizer.PossessiveNormalizer.process_string
+normalizer.RegexpNormalizer.process_string
+normalizer.ReverseNormalizer.process_string
+normalizer.SimpleNormalizer.process_string
+normalizer.SpaceNormalizer.process_string
+normalizer.StemNormalizer.process_string
+normalizer.StoplistNormalizer.process_string
+normalizer.StringIntNormalizer.process_string
+normalizer.TermExistsNormalizer.process_string
+normalizer.WordExpansionNormalizer.process_string
+queryFactory.SimpleQueryFactory.process_string
+textmining.tmNormalizer.EnjuNormalizer.process_string
+textmining.tmNormalizer.ExactGeniaNormalizer.process_string
+textmining.tmNormalizer.GeniaNormalizer.process_string
+textmining.tmNormalizer.GeniaTextNormalizer.process_string
+textmining.tmNormalizer.PosKeywordNormalizer.process_string
+textmining.tmNormalizer.PosPhraseNormalizer.process_string
+textmining.tmNormalizer.PosTypeNormalizer.process_string
+textmining.tmNormalizer.TsujiiPosNormalizer.process_string
+textmining.tmNormalizer.UnparsedGeniaNormalizer.process_string" class="py-name" href="#" onclick="doclink('link-11', 'process_string', 'Method baseObjects.Extractor.process_string()=baseObjects.Extractor-class.html#process_string,Method baseObjects.Normalizer.process_string()=baseObjects.Normalizer-class.html#process_string,Method DateExtractor.process_string()=extractor.DateExtractor-class.html#process_string,Method ExactProximityExtractor.process_string()=extractor.ExactProximityExtractor-class.html#process_string,Method process_string()=extractor.KeywordExtractor-class.html#process_string,Method ProximityExtractor.process_string()=extractor.ProximityExtractor-class.html#process_string,Method SimpleExtractor.process_string()=extractor.SimpleExtractor-class.html#process_string,Method normalizer.ArticleNormalizer.process_string()=normalizer.ArticleNormalizer-class.html#process_string,Method normalizer.CaseNormalizer.process_string()=normalizer.CaseNormalizer-class.html#process_string,Method normalizer.DataExistsNormalizer.process_string()=normalizer.DataExistsNormalizer-class.html#process_string,Method normalizer.DateStringNormalizer.process_string()=normalizer.DateStringNormalizer-class.html#process_string,Method normalizer.DiacriticNormalizer.process_string()=normalizer.DiacriticNormalizer-class.html#process_string,Method normalizer.ExactExpansionNormalizer.process_string()=normalizer.ExactExpansionNormalizer-class.html#process_string,Method normalizer.IntNormalizer.process_string()=normalizer.IntNormalizer-class.html#process_string,Method normalizer.KeywordNormalizer.process_string()=normalizer.KeywordNormalizer-class.html#process_string,Method normalizer.NumericEntityNormalizer.process_string()=normalizer.NumericEntityNormalizer-class.html#process_string,Method normalizer.PhraseStemNormalizer.process_string()=normalizer.PhraseStemNormalizer-class.html#process_string,Method normalizer.PossessiveNormalizer.process_string()=normalizer.PossessiveNormalizer-class.html#process_string,Method normalizer.RegexpNormalizer.process_string()=normalizer.RegexpNormalizer-class.html#process_string,Method normalizer.ReverseNormalizer.process_string()=normalizer.ReverseNormalizer-class.html#process_string,Method normalizer.SimpleNormalizer.process_string()=normalizer.SimpleNormalizer-class.html#process_string,Method normalizer.SpaceNormalizer.process_string()=normalizer.SpaceNormalizer-class.html#process_string,Method normalizer.StemNormalizer.process_string()=normalizer.StemNormalizer-class.html#process_string,Method normalizer.StoplistNormalizer.process_string()=normalizer.StoplistNormalizer-class.html#process_string,Method normalizer.StringIntNormalizer.process_string()=normalizer.StringIntNormalizer-class.html#process_string,Method normalizer.TermExistsNormalizer.process_string()=normalizer.TermExistsNormalizer-class.html#process_string,Method normalizer.WordExpansionNormalizer.process_string()=normalizer.WordExpansionNormalizer-class.html#process_string,Method queryFactory.SimpleQueryFactory.process_string()=queryFactory.SimpleQueryFactory-class.html#process_string,Method textmining.tmNormalizer.EnjuNormalizer.process_string()=textmining.tmNormalizer.EnjuNormalizer-class.html#process_string,Method textmining.tmNormalizer.ExactGeniaNormalizer.process_string()=textmining.tmNormalizer.ExactGeniaNormalizer-class.html#process_string,Method textmining.tmNormalizer.GeniaNormalizer.process_string()=textmining.tmNormalizer.GeniaNormalizer-class.html#process_string,Method textmining.tmNormalizer.GeniaTextNormalizer.process_string()=textmining.tmNormalizer.GeniaTextNormalizer-class.html#process_string,Method textmining.tmNormalizer.PosKeywordNormalizer.process_string()=textmining.tmNormalizer.PosKeywordNormalizer-class.html#process_string,Method textmining.tmNormalizer.PosPhraseNormalizer.process_string()=textmining.tmNormalizer.PosPhraseNormalizer-class.html#process_string,Method textmining.tmNormalizer.PosTypeNormalizer.process_string()=textmining.tmNormalizer.PosTypeNormalizer-class.html#process_string,Method textmining.tmNormalizer.TsujiiPosNormalizer.process_string()=textmining.tmNormalizer.TsujiiPosNormalizer-class.html#process_string,Method textmining.tmNormalizer.UnparsedGeniaNormalizer.process_string()=textmining.tmNormalizer.UnparsedGeniaNormalizer-class.html#process_string'); return false;">process_string</a></span></span><span class="py-op">(</span><span class="py-name">self</span><span class="py-op">,</span> <a title="resultSet.DeserializationHandler.session" class="py-name" href="resultSet.DeserializationHandler-class.html#session">session</a><span class="py-op">,</span> <span class="py-name">data</span><span class="py-op">)</span> </span>
+<span class="lineno"> 98</span>  <span class="py-line">        <span class="py-keyword">return</span> <span class="py-name">self</span><span class="py-op">.</span><a title="extractor.KeywordExtractor._keywordify" class="py-name" href="extractor.KeywordExtractor-class.html#_keywordify">_keywordify</a><span class="py-op">(</span><a title="resultSet.DeserializationHandler.session" class="py-name" href="resultSet.DeserializationHandler-class.html#session">session</a><span class="py-op">,</span> <span class="py-name">data</span><span class="py-op">)</span> </span>
+</div><a name="KeywordExtractor.process_node"></a><div id="KeywordExtractor.process_node-def"><span class="lineno"> 99</span> <a class="pysrc-toggle" href="#" id="KeywordExtractor.process_node-toggle" onclick="toggle('KeywordExtractor.process_node'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="extractor.KeywordExtractor-class.html#process_node">process_node</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">session</span><span class="py-op">,</span> <span class="py-param">data</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="KeywordExtractor.process_node-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="KeywordExtractor.process_node-expanded"><span class="lineno">100</span>  <span class="py-line">        <span class="py-name">data</span> <span class="py-op">=</span> <a title="extractor.SimpleExtractor" class="py-name" href="extractor.SimpleExtractor-class.html">SimpleExtractor</a><span class="py-op">.</span><span id="link-12" class="py-name"><a title="baseObjects.Extractor.process_node
+extractor.DateExtractor.process_node
+extractor.ExactProximityExtractor.process_node
+extractor.KeywordExtractor.process_node
+extractor.ProximityExtractor.process_node
+extractor.SimpleExtractor.process_node" class="py-name" href="#" onclick="doclink('link-12', 'process_node', 'Method baseObjects.Extractor.process_node()=baseObjects.Extractor-class.html#process_node,Method DateExtractor.process_node()=extractor.DateExtractor-class.html#process_node,Method ExactProximityExtractor.process_node()=extractor.ExactProximityExtractor-class.html#process_node,Method process_node()=extractor.KeywordExtractor-class.html#process_node,Method ProximityExtractor.process_node()=extractor.ProximityExtractor-class.html#process_node,Method SimpleExtractor.process_node()=extractor.SimpleExtractor-class.html#process_node'); return false;">process_node</a></span></span><span class="py-op">(</span><span class="py-name">self</span><span class="py-op">,</span> <a title="resultSet.DeserializationHandler.session" class="py-name" href="resultSet.DeserializationHandler-class.html#session">session</a><span class="py-op">,</span> <span class="py-name">data</span><span class="py-op">)</span> </span>
+<span class="lineno">101</span>  <span class="py-line">        <span class="py-keyword">return</span> <span class="py-name">self</span><span class="py-op">.</span><a title="extractor.KeywordExtractor._keywordify" class="py-name" href="extractor.KeywordExtractor-class.html#_keywordify">_keywordify</a><span class="py-op">(</span><a title="resultSet.DeserializationHandler.session" class="py-name" href="resultSet.DeserializationHandler-class.html#session">session</a><span class="py-op">,</span> <span class="py-name">data</span><span class="py-op">)</span> </span>
+</div><a name="KeywordExtractor.process_eventList"></a><div id="KeywordExtractor.process_eventList-def"><span class="lineno">102</span> <a class="pysrc-toggle" href="#" id="KeywordExtractor.process_eventList-toggle" onclick="toggle('KeywordExtractor.process_eventList'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="extractor.KeywordExtractor-class.html#process_eventList">process_eventList</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">session</span><span class="py-op">,</span> <span class="py-param">data</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="KeywordExtractor.process_eventList-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="KeywordExtractor.process_eventList-expanded"><span class="lineno">103</span>  <span class="py-line">        <span class="py-name">data</span> <span class="py-op">=</span> <a title="extractor.SimpleExtractor" class="py-name" href="extractor.SimpleExtractor-class.html">SimpleExtractor</a><span class="py-op">.</span><span id="link-13" class="py-name"><a title="baseObjects.Extractor.process_eventList
+extractor.DateExtractor.process_eventList
+extractor.ExactProximityExtractor.process_eventList
+extractor.KeywordExtractor.process_eventList
+extractor.ProximityExtractor.process_eventList
+extractor.SimpleExtractor.process_eventList" class="py-name" href="#" onclick="doclink('link-13', 'process_eventList', 'Method baseObjects.Extractor.process_eventList()=baseObjects.Extractor-class.html#process_eventList,Method DateExtractor.process_eventList()=extractor.DateExtractor-class.html#process_eventList,Method ExactProximityExtractor.process_eventList()=extractor.ExactProximityExtractor-class.html#process_eventList,Method process_eventList()=extractor.KeywordExtractor-class.html#process_eventList,Method ProximityExtractor.process_eventList()=extractor.ProximityExtractor-class.html#process_eventList,Method SimpleExtractor.process_eventList()=extractor.SimpleExtractor-class.html#process_eventList'); return false;">process_eventList</a></span></span><span class="py-op">(</span><span class="py-name">self</span><span class="py-op">,</span> <a title="resultSet.DeserializationHandler.session" class="py-name" href="resultSet.DeserializationHandler-class.html#session">session</a><span class="py-op">,</span> <span class="py-name">data</span><span class="py-op">)</span> </span>
+<span class="lineno">104</span>  <span class="py-line">        <span class="py-keyword">return</span> <span class="py-name">self</span><span class="py-op">.</span><a title="extractor.KeywordExtractor._keywordify" class="py-name" href="extractor.KeywordExtractor-class.html#_keywordify">_keywordify</a><span class="py-op">(</span><a title="resultSet.DeserializationHandler.session" class="py-name" href="resultSet.DeserializationHandler-class.html#session">session</a><span class="py-op">,</span> <span class="py-name">data</span><span class="py-op">)</span> </span>
+</div></div><span class="lineno">105</span>  <span class="py-line"> </span>
+<span class="lineno">106</span>  <span class="py-line"> </span>
+<a name="DateExtractor"></a><div id="DateExtractor-def"><span class="lineno">107</span> <a class="pysrc-toggle" href="#" id="DateExtractor-toggle" onclick="toggle('DateExtractor'); return false;">-</a><span class="py-line"><span class="py-keyword">class</span> <a class="py-def-name" href="extractor.DateExtractor-class.html">DateExtractor</a><span class="py-op">(</span><span class="py-base-class">SimpleExtractor</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="DateExtractor-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="DateExtractor-expanded"><span class="lineno">108</span>  <span class="py-line">    <span class="py-docstring">""" Extracts a single date. Multiple dates, ranges not yet implemented """</span> </span>
+<span class="lineno">109</span>  <span class="py-line"> </span>
+<a name="DateExtractor.__init__"></a><div id="DateExtractor.__init__-def"><span class="lineno">110</span> <a class="pysrc-toggle" href="#" id="DateExtractor.__init__-toggle" onclick="toggle('DateExtractor.__init__'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="extractor.DateExtractor-class.html#__init__">__init__</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">session</span><span class="py-op">,</span> <span class="py-param">config</span><span class="py-op">,</span> <span class="py-param">parent</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="DateExtractor.__init__-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="DateExtractor.__init__-expanded"><span class="lineno">111</span>  <span class="py-line">        <a title="extractor.SimpleExtractor" class="py-name" href="extractor.SimpleExtractor-class.html">SimpleExtractor</a><span class="py-op">.</span><span id="link-14" class="py-name"><a title="GoogleSearch_services.GoogleSearchBindingSOAP.__init__
+GoogleSearch_services.doGetCachedPage.__init__
+GoogleSearch_services.doGetCachedPageResponse.__init__
+GoogleSearch_services.doGetCachedPageResponseWrapper.__init__
+GoogleSearch_services.doGetCachedPageWrapper.__init__
+GoogleSearch_services.doGoogleSearch.__init__
+GoogleSearch_services.doGoogleSearchResponse.__init__
+GoogleSearch_services.doGoogleSearchResponseWrapper.__init__
+GoogleSearch_services.doGoogleSearchWrapper.__init__
+GoogleSearch_services.doSpellingSuggestion.__init__
+GoogleSearch_services.doSpellingSuggestionResponse.__init__
+GoogleSearch_services.doSpellingSuggestionResponseWrapper.__init__
+GoogleSearch_services.doSpellingSuggestionWrapper.__init__
+GoogleSearch_services_types.urn_GoogleSearch.DirectoryCategoryArray_Def.__init__
+GoogleSearch_services_types.urn_GoogleSearch.DirectoryCategory_Def.__init__
+GoogleSearch_services_types.urn_GoogleSearch.GoogleSearchResult_Def.__init__
+GoogleSearch_services_types.urn_GoogleSearch.ResultElementArray_Def.__init__
+GoogleSearch_services_types.urn_GoogleSearch.ResultElement_Def.__init__
+baseObjects.Document.__init__
+baseObjects.Record.__init__
+baseObjects.Server.__init__
+baseStore.BdbIter.__init__
+baseStore.SimpleStore.__init__
+baseStore.SrbBdbCombineStore.__init__
+baseStore.SrbStore.__init__
+bootstrap.BootstrapDocument.__init__
+bootstrap.BootstrapRecord.__init__
+bootstrap.BootstrapSession.__init__
+c3errors.C3Exception.__init__
+configParser.C3Object.__init__
+database.SimpleDatabase.__init__
+document.StringDocument.__init__
+documentFactory.BaseDocumentFactory.__init__
+documentFactory.BaseDocumentStream.__init__
+documentFactory.ComponentDocumentFactory.__init__
+documentFactory.ComponentDocumentStream.__init__
+documentFactory.GoogleDocumentStream.__init__
+documentFactory.HttpDocumentStream.__init__
+documentFactory.MultipleDocumentStream.__init__
+documentFactory.OaiDocumentStream.__init__
+documentFactory.UrllibUnicodeFileThing.__init__
+documentFactory.XmlDocumentStream.__init__
+documentStore.BdbDocumentStore.__init__
+documentStore.CachingSrbDocumentStore.__init__
+documentStore.SimpleDocumentStore.__init__
+documentStore.SrbDocumentStore.__init__
+extractor.DateExtractor.__init__
+extractor.KeywordExtractor.__init__
+extractor.SimpleExtractor.__init__
+index.ArrayIndex.__init__
+index.BitmapIndex.__init__
+index.ClusterExtractionIndex.__init__
+index.SimpleIndex.__init__
+indexStore.BdbIndexStore.__init__
+indexStore.SrbBdbIndexStore.__init__
+logger.FunctionLogger.__init__
+logger.SimpleLogger.__init__
+multivalent.MultivalentClient.__init__
+multivalent.MultivalentPreParser.__init__
+normalizer.KeywordNormalizer.__init__
+normalizer.NumericEntityNormalizer.__init__
+normalizer.PhraseStemNormalizer.__init__
+normalizer.RegexpNormalizer.__init__
+normalizer.SimpleNormalizer.__init__
+normalizer.SpaceNormalizer.__init__
+normalizer.StemNormalizer.__init__
+normalizer.StoplistNormalizer.__init__
+normalizer.TermExistsNormalizer.__init__
+parser.FtParser.__init__
+parser.FtSaxParser.__init__
+parser.SaxParser.__init__
+parser.XmlRecordStoreParser.__init__
+permissionHandler.PermissionHandler.__init__
+postgres.PostgresDocumentFactory.__init__
+postgres.PostgresDocumentStream.__init__
+postgres.PostgresIndexStore.__init__
+postgres.PostgresRecordStore.__init__
+postgres.PostgresResultSetStore.__init__
+postgres.PostgresStore.__init__
+preParser.AmpPreParser.__init__
+preParser.CharacterEntityPreParser.__init__
+preParser.HtmlSmashPreParser.__init__
+preParser.HtmlTidyPreParser.__init__
+preParser.NormalizerPreParser.__init__
+preParser.PdfToTxtPreParser.__init__
+preParser.PrintableOnlyPreParser.__init__
+preParser.RegexpSmashPreParser.__init__
+preParser.SgmlPreParser.__init__
+protocolMap.C3WepProtocolMap.__init__
+protocolMap.CQLProtocolMap.__init__
+protocolMap.UpdateProtocolMap.__init__
+protocolMap.Z3950ProtocolMap.__init__
+protocolMap.ZeerexProtocolMap.__init__
+record.DomRecord.__init__
+record.MarcRecord.__init__
+record.SaxContentHandler.__init__
+record.SaxRecord.__init__
+recordStore.BdbRecordStore.__init__
+recordStore.CachingSrbRecordStore.__init__
+recordStore.CachingSrbRemoteWriteRecordStore.__init__
+recordStore.MarcIter.__init__
+recordStore.ParsingRecordStore.__init__
+recordStore.PostgresRecordStore.__init__
+recordStore.RemoteSlaveRecordStore.__init__
+recordStore.SimpleRecordStore.__init__
+recordStore.SrbRecordStore.__init__
+resultSet.ArrayResultSet.__init__
+resultSet.BitmapResultSet.__init__
+resultSet.SimpleResultSet.__init__
+resultSet.SimpleResultSetItem.__init__
+resultSetStore.BdbResultSetStore.__init__
+resultSetStore.BdbResultSetStore2.__init__
+resultSetStore.SimpleResultSetStore.__init__
+server.SimpleServer.__init__
+srboo.SrbConnection.__init__
+srboo.SrbException.__init__
+srboo.SrbFile.__init__
+textmining.TsujiiC3.EnjuObject.__init__
+textmining.TsujiiC3.GeniaObject.__init__
+textmining.TsujiiC3.SimpleTokenizer.__init__
+textmining.TsujiiC3.TsujiiObject.__init__
+textmining.tmNormalizer.EnjuNormalizer.__init__
+textmining.tmNormalizer.ExactGeniaNormalizer.__init__
+textmining.tmNormalizer.GeniaNormalizer.__init__
+textmining.tmNormalizer.GeniaTextNormalizer.__init__
+textmining.tmNormalizer.PosKeywordNormalizer.__init__
+textmining.tmNormalizer.PosPhraseNormalizer.__init__
+textmining.tmNormalizer.PosTypeNormalizer.__init__
+textmining.tmNormalizer.TsujiiPosNormalizer.__init__
+textmining.tmNormalizer.UnparsedGeniaNormalizer.__init__
+textmining.tmPreParser.EnjuTextPreParser.__init__
+textmining.tmPreParser.GeniaTextPreParser.__init__
+textmining.tmPreParser.TsujiiChunkerPreParser.__init__
+textmining.tmPreParser.TsujiiTextPosPreParser.__init__
+textmining.tmPreParser.TsujiiXMLPosPreParser.__init__
+textmining.tmTransformer.TsujiiTextPosTransformer.__init__
+textmining.tmTransformer.TsujiiXPathTransformer.__init__
+transformer.CSVTransformer.__init__
+transformer.GrsMapTransformer.__init__
+transformer.LxmlXsltTransformer.__init__
+transformer.XsltTransformer.__init__
+utils.SimpleBitfield.__init__
+workflow.CachingWorkflow.__init__
+workflow.SimpleWorkflow.__init__
+xpathProcessor.SimpleXPathProcessor.__init__" class="py-name" href="#" onclick="doclink('link-14', '__init__', 'Method GoogleSearch_services.GoogleSearchBindingSOAP.__init__()=GoogleSearch_services.GoogleSearchBindingSOAP-class.html#__init__,Method GoogleSearch_services.doGetCachedPage.__init__()=GoogleSearch_services.doGetCachedPage-class.html#__init__,Method GoogleSearch_services.doGetCachedPageResponse.__init__()=GoogleSearch_services.doGetCachedPageResponse-class.html#__init__,Method GoogleSearch_services.doGetCachedPageResponseWrapper.__init__()=GoogleSearch_services.doGetCachedPageResponseWrapper-class.html#__init__,Method GoogleSearch_services.doGetCachedPageWrapper.__init__()=GoogleSearch_services.doGetCachedPageWrapper-class.html#__init__,Method GoogleSearch_services.doGoogleSearch.__init__()=GoogleSearch_services.doGoogleSearch-class.html#__init__,Method GoogleSearch_services.doGoogleSearchResponse.__init__()=GoogleSearch_services.doGoogleSearchResponse-class.html#__init__,Method GoogleSearch_services.doGoogleSearchResponseWrapper.__init__()=GoogleSearch_services.doGoogleSearchResponseWrapper-class.html#__init__,Method GoogleSearch_services.doGoogleSearchWrapper.__init__()=GoogleSearch_services.doGoogleSearchWrapper-class.html#__init__,Method GoogleSearch_services.doSpellingSuggestion.__init__()=GoogleSearch_services.doSpellingSuggestion-class.html#__init__,Method GoogleSearch_services.doSpellingSuggestionResponse.__init__()=GoogleSearch_services.doSpellingSuggestionResponse-class.html#__init__,Method GoogleSearch_services.doSpellingSuggestionResponseWrapper.__init__()=GoogleSearch_services.doSpellingSuggestionResponseWrapper-class.html#__init__,Method GoogleSearch_services.doSpellingSuggestionWrapper.__init__()=GoogleSearch_services.doSpellingSuggestionWrapper-class.html#__init__,Method GoogleSearch_services_types.urn_GoogleSearch.DirectoryCategoryArray_Def.__init__()=GoogleSearch_services_types.urn_GoogleSearch.DirectoryCategoryArray_Def-class.html#__init__,Method GoogleSearch_services_types.urn_GoogleSearch.DirectoryCategory_Def.__init__()=GoogleSearch_services_types.urn_GoogleSearch.DirectoryCategory_Def-class.html#__init__,Method GoogleSearch_services_types.urn_GoogleSearch.GoogleSearchResult_Def.__init__()=GoogleSearch_services_types.urn_GoogleSearch.GoogleSearchResult_Def-class.html#__init__,Method GoogleSearch_services_types.urn_GoogleSearch.ResultElementArray_Def.__init__()=GoogleSearch_services_types.urn_GoogleSearch.ResultElementArray_Def-class.html#__init__,Method GoogleSearch_services_types.urn_GoogleSearch.ResultElement_Def.__init__()=GoogleSearch_services_types.urn_GoogleSearch.ResultElement_Def-class.html#__init__,Method baseObjects.Document.__init__()=baseObjects.Document-class.html#__init__,Method baseObjects.Record.__init__()=baseObjects.Record-class.html#__init__,Method baseObjects.Server.__init__()=baseObjects.Server-class.html#__init__,Method baseStore.BdbIter.__init__()=baseStore.BdbIter-class.html#__init__,Method baseStore.SimpleStore.__init__()=baseStore.SimpleStore-class.html#__init__,Method baseStore.SrbBdbCombineStore.__init__()=baseStore.SrbBdbCombineStore-class.html#__init__,Method baseStore.SrbStore.__init__()=baseStore.SrbStore-class.html#__init__,Method bootstrap.BootstrapDocument.__init__()=bootstrap.BootstrapDocument-class.html#__init__,Method bootstrap.BootstrapRecord.__init__()=bootstrap.BootstrapRecord-class.html#__init__,Method bootstrap.BootstrapSession.__init__()=bootstrap.BootstrapSession-class.html#__init__,Method c3errors.C3Exception.__init__()=c3errors.C3Exception-class.html#__init__,Method configParser.C3Object.__init__()=configParser.C3Object-class.html#__init__,Method database.SimpleDatabase.__init__()=database.SimpleDatabase-class.html#__init__,Method document.StringDocument.__init__()=document.StringDocument-class.html#__init__,Method documentFactory.BaseDocumentFactory.__init__()=documentFactory.BaseDocumentFactory-class.html#__init__,Method documentFactory.BaseDocumentStream.__init__()=documentFactory.BaseDocumentStream-class.html#__init__,Method documentFactory.ComponentDocumentFactory.__init__()=documentFactory.ComponentDocumentFactory-class.html#__init__,Method documentFactory.ComponentDocumentStream.__init__()=documentFactory.ComponentDocumentStream-class.html#__init__,Method documentFactory.GoogleDocumentStream.__init__()=documentFactory.GoogleDocumentStream-class.html#__init__,Method documentFactory.HttpDocumentStream.__init__()=documentFactory.HttpDocumentStream-class.html#__init__,Method documentFactory.MultipleDocumentStream.__init__()=documentFactory.MultipleDocumentStream-class.html#__init__,Method documentFactory.OaiDocumentStream.__init__()=documentFactory.OaiDocumentStream-class.html#__init__,Method documentFactory.UrllibUnicodeFileThing.__init__()=documentFactory.UrllibUnicodeFileThing-class.html#__init__,Method documentFactory.XmlDocumentStream.__init__()=documentFactory.XmlDocumentStream-class.html#__init__,Method documentStore.BdbDocumentStore.__init__()=documentStore.BdbDocumentStore-class.html#__init__,Method documentStore.CachingSrbDocumentStore.__init__()=documentStore.CachingSrbDocumentStore-class.html#__init__,Method documentStore.SimpleDocumentStore.__init__()=documentStore.SimpleDocumentStore-class.html#__init__,Method documentStore.SrbDocumentStore.__init__()=documentStore.SrbDocumentStore-class.html#__init__,Method __init__()=extractor.DateExtractor-class.html#__init__,Method KeywordExtractor.__init__()=extractor.KeywordExtractor-class.html#__init__,Method SimpleExtractor.__init__()=extractor.SimpleExtractor-class.html#__init__,Method index.ArrayIndex.__init__()=index.ArrayIndex-class.html#__init__,Method index.BitmapIndex.__init__()=index.BitmapIndex-class.html#__init__,Method index.ClusterExtractionIndex.__init__()=index.ClusterExtractionIndex-class.html#__init__,Method index.SimpleIndex.__init__()=index.SimpleIndex-class.html#__init__,Method indexStore.BdbIndexStore.__init__()=indexStore.BdbIndexStore-class.html#__init__,Method indexStore.SrbBdbIndexStore.__init__()=indexStore.SrbBdbIndexStore-class.html#__init__,Method logger.FunctionLogger.__init__()=logger.FunctionLogger-class.html#__init__,Method logger.SimpleLogger.__init__()=logger.SimpleLogger-class.html#__init__,Method multivalent.MultivalentClient.__init__()=multivalent.MultivalentClient-class.html#__init__,Method multivalent.MultivalentPreParser.__init__()=multivalent.MultivalentPreParser-class.html#__init__,Method normalizer.KeywordNormalizer.__init__()=normalizer.KeywordNormalizer-class.html#__init__,Method normalizer.NumericEntityNormalizer.__init__()=normalizer.NumericEntityNormalizer-class.html#__init__,Method normalizer.PhraseStemNormalizer.__init__()=normalizer.PhraseStemNormalizer-class.html#__init__,Method normalizer.RegexpNormalizer.__init__()=normalizer.RegexpNormalizer-class.html#__init__,Method normalizer.SimpleNormalizer.__init__()=normalizer.SimpleNormalizer-class.html#__init__,Method normalizer.SpaceNormalizer.__init__()=normalizer.SpaceNormalizer-class.html#__init__,Method normalizer.StemNormalizer.__init__()=normalizer.StemNormalizer-class.html#__init__,Method normalizer.StoplistNormalizer.__init__()=normalizer.StoplistNormalizer-class.html#__init__,Method normalizer.TermExistsNormalizer.__init__()=normalizer.TermExistsNormalizer-class.html#__init__,Method parser.FtParser.__init__()=parser.FtParser-class.html#__init__,Method parser.FtSaxParser.__init__()=parser.FtSaxParser-class.html#__init__,Method parser.SaxParser.__init__()=parser.SaxParser-class.html#__init__,Method parser.XmlRecordStoreParser.__init__()=parser.XmlRecordStoreParser-class.html#__init__,Method permissionHandler.PermissionHandler.__init__()=permissionHandler.PermissionHandler-class.html#__init__,Method postgres.PostgresDocumentFactory.__init__()=postgres.PostgresDocumentFactory-class.html#__init__,Method postgres.PostgresDocumentStream.__init__()=postgres.PostgresDocumentStream-class.html#__init__,Method postgres.PostgresIndexStore.__init__()=postgres.PostgresIndexStore-class.html#__init__,Method postgres.PostgresRecordStore.__init__()=postgres.PostgresRecordStore-class.html#__init__,Method postgres.PostgresResultSetStore.__init__()=postgres.PostgresResultSetStore-class.html#__init__,Method postgres.PostgresStore.__init__()=postgres.PostgresStore-class.html#__init__,Method preParser.AmpPreParser.__init__()=preParser.AmpPreParser-class.html#__init__,Method preParser.CharacterEntityPreParser.__init__()=preParser.CharacterEntityPreParser-class.html#__init__,Method preParser.HtmlSmashPreParser.__init__()=preParser.HtmlSmashPreParser-class.html#__init__,Method preParser.HtmlTidyPreParser.__init__()=preParser.HtmlTidyPreParser-class.html#__init__,Method preParser.NormalizerPreParser.__init__()=preParser.NormalizerPreParser-class.html#__init__,Method preParser.PdfToTxtPreParser.__init__()=preParser.PdfToTxtPreParser-class.html#__init__,Method preParser.PrintableOnlyPreParser.__init__()=preParser.PrintableOnlyPreParser-class.html#__init__,Method preParser.RegexpSmashPreParser.__init__()=preParser.RegexpSmashPreParser-class.html#__init__,Method preParser.SgmlPreParser.__init__()=preParser.SgmlPreParser-class.html#__init__,Method protocolMap.C3WepProtocolMap.__init__()=protocolMap.C3WepProtocolMap-class.html#__init__,Method protocolMap.CQLProtocolMap.__init__()=protocolMap.CQLProtocolMap-class.html#__init__,Method protocolMap.UpdateProtocolMap.__init__()=protocolMap.UpdateProtocolMap-class.html#__init__,Method protocolMap.Z3950ProtocolMap.__init__()=protocolMap.Z3950ProtocolMap-class.html#__init__,Method protocolMap.ZeerexProtocolMap.__init__()=protocolMap.ZeerexProtocolMap-class.html#__init__,Method record.DomRecord.__init__()=record.DomRecord-class.html#__init__,Method record.MarcRecord.__init__()=record.MarcRecord-class.html#__init__,Method record.SaxContentHandler.__init__()=record.SaxContentHandler-class.html#__init__,Method record.SaxRecord.__init__()=record.SaxRecord-class.html#__init__,Method recordStore.BdbRecordStore.__init__()=recordStore.BdbRecordStore-class.html#__init__,Method recordStore.CachingSrbRecordStore.__init__()=recordStore.CachingSrbRecordStore-class.html#__init__,Method recordStore.CachingSrbRemoteWriteRecordStore.__init__()=recordStore.CachingSrbRemoteWriteRecordStore-class.html#__init__,Method recordStore.MarcIter.__init__()=recordStore.MarcIter-class.html#__init__,Method recordStore.ParsingRecordStore.__init__()=recordStore.ParsingRecordStore-class.html#__init__,Method recordStore.PostgresRecordStore.__init__()=recordStore.PostgresRecordStore-class.html#__init__,Method recordStore.RemoteSlaveRecordStore.__init__()=recordStore.RemoteSlaveRecordStore-class.html#__init__,Method recordStore.SimpleRecordStore.__init__()=recordStore.SimpleRecordStore-class.html#__init__,Method recordStore.SrbRecordStore.__init__()=recordStore.SrbRecordStore-class.html#__init__,Method resultSet.ArrayResultSet.__init__()=resultSet.ArrayResultSet-class.html#__init__,Method resultSet.BitmapResultSet.__init__()=resultSet.BitmapResultSet-class.html#__init__,Method resultSet.SimpleResultSet.__init__()=resultSet.SimpleResultSet-class.html#__init__,Method resultSet.SimpleResultSetItem.__init__()=resultSet.SimpleResultSetItem-class.html#__init__,Method resultSetStore.BdbResultSetStore.__init__()=resultSetStore.BdbResultSetStore-class.html#__init__,Method resultSetStore.BdbResultSetStore2.__init__()=resultSetStore.BdbResultSetStore2-class.html#__init__,Method resultSetStore.SimpleResultSetStore.__init__()=resultSetStore.SimpleResultSetStore-class.html#__init__,Method server.SimpleServer.__init__()=server.SimpleServer-class.html#__init__,Method srboo.SrbConnection.__init__()=srboo.SrbConnection-class.html#__init__,Method srboo.SrbException.__init__()=srboo.SrbException-class.html#__init__,Method srboo.SrbFile.__init__()=srboo.SrbFile-class.html#__init__,Method textmining.TsujiiC3.EnjuObject.__init__()=textmining.TsujiiC3.EnjuObject-class.html#__init__,Method textmining.TsujiiC3.GeniaObject.__init__()=textmining.TsujiiC3.GeniaObject-class.html#__init__,Method textmining.TsujiiC3.SimpleTokenizer.__init__()=textmining.TsujiiC3.SimpleTokenizer-class.html#__init__,Method textmining.TsujiiC3.TsujiiObject.__init__()=textmining.TsujiiC3.TsujiiObject-class.html#__init__,Method textmining.tmNormalizer.EnjuNormalizer.__init__()=textmining.tmNormalizer.EnjuNormalizer-class.html#__init__,Method textmining.tmNormalizer.ExactGeniaNormalizer.__init__()=textmining.tmNormalizer.ExactGeniaNormalizer-class.html#__init__,Method textmining.tmNormalizer.GeniaNormalizer.__init__()=textmining.tmNormalizer.GeniaNormalizer-class.html#__init__,Method textmining.tmNormalizer.GeniaTextNormalizer.__init__()=textmining.tmNormalizer.GeniaTextNormalizer-class.html#__init__,Method textmining.tmNormalizer.PosKeywordNormalizer.__init__()=textmining.tmNormalizer.PosKeywordNormalizer-class.html#__init__,Method textmining.tmNormalizer.PosPhraseNormalizer.__init__()=textmining.tmNormalizer.PosPhraseNormalizer-class.html#__init__,Method textmining.tmNormalizer.PosTypeNormalizer.__init__()=textmining.tmNormalizer.PosTypeNormalizer-class.html#__init__,Method textmining.tmNormalizer.TsujiiPosNormalizer.__init__()=textmining.tmNormalizer.TsujiiPosNormalizer-class.html#__init__,Method textmining.tmNormalizer.UnparsedGeniaNormalizer.__init__()=textmining.tmNormalizer.UnparsedGeniaNormalizer-class.html#__init__,Method textmining.tmPreParser.EnjuTextPreParser.__init__()=textmining.tmPreParser.EnjuTextPreParser-class.html#__init__,Method textmining.tmPreParser.GeniaTextPreParser.__init__()=textmining.tmPreParser.GeniaTextPreParser-class.html#__init__,Method textmining.tmPreParser.TsujiiChunkerPreParser.__init__()=textmining.tmPreParser.TsujiiChunkerPreParser-class.html#__init__,Method textmining.tmPreParser.TsujiiTextPosPreParser.__init__()=textmining.tmPreParser.TsujiiTextPosPreParser-class.html#__init__,Method textmining.tmPreParser.TsujiiXMLPosPreParser.__init__()=textmining.tmPreParser.TsujiiXMLPosPreParser-class.html#__init__,Method textmining.tmTransformer.TsujiiTextPosTransformer.__init__()=textmining.tmTransformer.TsujiiTextPosTransformer-class.html#__init__,Method textmining.tmTransformer.TsujiiXPathTransformer.__init__()=textmining.tmTransformer.TsujiiXPathTransformer-class.html#__init__,Method transformer.CSVTransformer.__init__()=transformer.CSVTransformer-class.html#__init__,Method transformer.GrsMapTransformer.__init__()=transformer.GrsMapTransformer-class.html#__init__,Method transformer.LxmlXsltTransformer.__init__()=transformer.LxmlXsltTransformer-class.html#__init__,Method transformer.XsltTransformer.__init__()=transformer.XsltTransformer-class.html#__init__,Method utils.SimpleBitfield.__init__()=utils.SimpleBitfield-class.html#__init__,Method workflow.CachingWorkflow.__init__()=workflow.CachingWorkflow-class.html#__init__,Method workflow.SimpleWorkflow.__init__()=workflow.SimpleWorkflow-class.html#__init__,Method xpathProcessor.SimpleXPathProcessor.__init__()=xpathProcessor.SimpleXPathProcessor-class.html#__init__'); return false;">__init__</a></span></span><span class="py-op">(</span><span class="py-name">self</span><span class="py-op">,</span> <a title="resultSet.DeserializationHandler.session" class="py-name" href="resultSet.DeserializationHandler-class.html#session">session</a><span class="py-op">,</span> <span class="py-name">config</span><span class="py-op">,</span> <span id="link-15" class="py-name"><a title="baseObjects.Document.parent
+baseObjects.Record.parent
+configParser.C3Object.parent" class="py-name" href="#" onclick="doclink('link-15', 'parent', 'Variable baseObjects.Document.parent=baseObjects.Document-class.html#parent,Variable baseObjects.Record.parent=baseObjects.Record-class.html#parent,Variable configParser.C3Object.parent=configParser.C3Object-class.html#parent'); return false;">parent</a></span></span><span class="py-op">)</span> </span>
+<span class="lineno">112</span>  <span class="py-line">        <span class="py-name">default</span> <span class="py-op">=</span> <span class="py-name">self</span><span class="py-op">.</span><a title="configParser.C3Object.get_default" class="py-name" href="configParser.C3Object-class.html#get_default">get_default</a><span class="py-op">(</span><span class="py-name">None</span><span class="py-op">,</span> <span class="py-string">'datetime'</span><span class="py-op">)</span> </span>
+<span class="lineno">113</span>  <span class="py-line">        <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">fuzzy</span> <span class="py-op">=</span> <span class="py-name">self</span><span class="py-op">.</span><a title="configParser.C3Object.get_setting" class="py-name" href="configParser.C3Object-class.html#get_setting">get_setting</a><span class="py-op">(</span><span class="py-name">None</span><span class="py-op">,</span> <span class="py-string">'fuzzy'</span><span class="py-op">)</span> </span>
+<span class="lineno">114</span>  <span class="py-line">        <span class="py-keyword">if</span> <span class="py-name">default</span><span class="py-op">:</span> </span>
+<span class="lineno">115</span>  <span class="py-line">            <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">default</span> <span class="py-op">=</span> <a title="parser" class="py-name" href="parser-module.html">parser</a><span class="py-op">.</span><span class="py-name">parse</span><span class="py-op">(</span><span class="py-name">default</span><span class="py-op">.</span><span class="py-name">encode</span><span class="py-op">(</span><span class="py-string">'utf-8'</span><span class="py-op">)</span><span class="py-op">,</span> <span class="py-name">fuzzy</span><span class="py-op">=</span><span class="py-name">self</span><span class="py-op">.</span><span class="py-name">fuzzy</span><span class="py-op">)</span> </span>
+<span class="lineno">116</span>  <span class="py-line">        <span class="py-keyword">else</span><span class="py-op">:</span> </span>
+<span class="lineno">117</span>  <span class="py-line">            <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">default</span> <span class="py-op">=</span> <a title="parser" class="py-name" href="parser-module.html">parser</a><span class="py-op">.</span><span class="py-name">parse</span><span class="py-op">(</span><span class="py-string">'now'</span><span class="py-op">,</span> <span class="py-name">fuzzy</span><span class="py-op">=</span><span class="py-name">True</span><span class="py-op">)</span> </span>
+</div><span class="lineno">118</span>  <span class="py-line"> </span>
+<span class="lineno">119</span>  <span class="py-line"> </span>
+<a name="DateExtractor._datify"></a><div id="DateExtractor._datify-def"><span class="lineno">120</span> <a class="pysrc-toggle" href="#" id="DateExtractor._datify-toggle" onclick="toggle('DateExtractor._datify'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="extractor.DateExtractor-class.html#_datify">_datify</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">session</span><span class="py-op">,</span> <span class="py-param">data</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="DateExtractor._datify-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="DateExtractor._datify-expanded"><span class="lineno">121</span>  <span class="py-line">        <span class="py-name">data</span> <span class="py-op">=</span> <span class="py-name">data</span><span class="py-op">.</span><span class="py-name">keys</span><span class="py-op">(</span><span class="py-op">)</span><span class="py-op">[</span><span class="py-number">0</span><span class="py-op">]</span> </span>
+<span class="lineno">122</span>  <span class="py-line">        <span class="py-keyword">try</span><span class="py-op">:</span> </span>
+<span class="lineno">123</span>  <span class="py-line">            <span class="py-comment"># This will only find 1 date.</span> </span>
+<span class="lineno">124</span>  <span class="py-line"><span class="py-comment"></span>            <span class="py-name">d</span> <span class="py-op">=</span> <span class="py-name">str</span><span class="py-op">(</span><a title="parser" class="py-name" href="parser-module.html">parser</a><span class="py-op">.</span><span class="py-name">parse</span><span class="py-op">(</span><span class="py-name">data</span><span class="py-op">.</span><span class="py-name">encode</span><span class="py-op">(</span><span class="py-string">'utf-8'</span><span class="py-op">)</span><span class="py-op">,</span> <span class="py-name">fuzzy</span><span class="py-op">=</span><span class="py-name">self</span><span class="py-op">.</span><span class="py-name">fuzzy</span><span class="py-op">,</span> <span class="py-name">default</span> <span class="py-op">=</span> <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">default</span><span class="py-op">)</span><span class="py-op">)</span> </span>
+<span class="lineno">125</span>  <span class="py-line">            <span class="py-keyword">return</span> <span class="py-op">{</span><span class="py-name">d</span><span class="py-op">:</span><span class="py-op">{</span><span class="py-string">'text'</span> <span class="py-op">:</span> <span class="py-name">d</span><span class="py-op">,</span> <span class="py-string">'occurences'</span> <span class="py-op">:</span> <span class="py-number">1</span><span class="py-op">}</span><span class="py-op">}</span> </span>
+<span class="lineno">126</span>  <span class="py-line">        <span class="py-keyword">except</span><span class="py-op">:</span> </span>
+<span class="lineno">127</span>  <span class="py-line">            <span class="py-name">wds</span> <span class="py-op">=</span> <span class="py-name">data</span><span class="py-op">.</span><span class="py-name">split</span><span class="py-op">(</span><span class="py-op">)</span> </span>
+<span class="lineno">128</span>  <span class="py-line">            <span class="py-comment"># reconstruct data word by word and feed to parser?.</span> </span>
+<span class="lineno">129</span>  <span class="py-line"><span class="py-comment"></span>            <span class="py-comment"># Must be a better way to do this</span> </span>
+<span class="lineno">130</span>  <span class="py-line"><span class="py-comment"></span>            <span class="py-keyword">return</span> <span class="py-op">{</span><span class="py-op">}</span> </span>
+</div><span class="lineno">131</span>  <span class="py-line">  </span>
+<a name="DateExtractor.process_string"></a><div id="DateExtractor.process_string-def"><span class="lineno">132</span> <a class="pysrc-toggle" href="#" id="DateExtractor.process_string-toggle" onclick="toggle('DateExtractor.process_string'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="extractor.DateExtractor-class.html#process_string">process_string</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">session</span><span class="py-op">,</span> <span class="py-param">data</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="DateExtractor.process_string-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="DateExtractor.process_string-expanded"><span class="lineno">133</span>  <span class="py-line">        <span class="py-name">data</span> <span class="py-op">=</span> <a title="extractor.SimpleExtractor" class="py-name" href="extractor.SimpleExtractor-class.html">SimpleExtractor</a><span class="py-op">.</span><span id="link-16" class="py-name"><a title="baseObjects.Extractor.process_string
+baseObjects.Normalizer.process_string
+extractor.DateExtractor.process_string
+extractor.ExactProximityExtractor.process_string
+extractor.KeywordExtractor.process_string
+extractor.ProximityExtractor.process_string
+extractor.SimpleExtractor.process_string
+normalizer.ArticleNormalizer.process_string
+normalizer.CaseNormalizer.process_string
+normalizer.DataExistsNormalizer.process_string
+normalizer.DateStringNormalizer.process_string
+normalizer.DiacriticNormalizer.process_string
+normalizer.ExactExpansionNormalizer.process_string
+normalizer.IntNormalizer.process_string
+normalizer.KeywordNormalizer.process_string
+normalizer.NumericEntityNormalizer.process_string
+normalizer.PhraseStemNormalizer.process_string
+normalizer.PossessiveNormalizer.process_string
+normalizer.RegexpNormalizer.process_string
+normalizer.ReverseNormalizer.process_string
+normalizer.SimpleNormalizer.process_string
+normalizer.SpaceNormalizer.process_string
+normalizer.StemNormalizer.process_string
+normalizer.StoplistNormalizer.process_string
+normalizer.StringIntNormalizer.process_string
+normalizer.TermExistsNormalizer.process_string
+normalizer.WordExpansionNormalizer.process_string
+queryFactory.SimpleQueryFactory.process_string
+textmining.tmNormalizer.EnjuNormalizer.process_string
+textmining.tmNormalizer.ExactGeniaNormalizer.process_string
+textmining.tmNormalizer.GeniaNormalizer.process_string
+textmining.tmNormalizer.GeniaTextNormalizer.process_string
+textmining.tmNormalizer.PosKeywordNormalizer.process_string
+textmining.tmNormalizer.PosPhraseNormalizer.process_string
+textmining.tmNormalizer.PosTypeNormalizer.process_string
+textmining.tmNormalizer.TsujiiPosNormalizer.process_string
+textmining.tmNormalizer.UnparsedGeniaNormalizer.process_string" class="py-name" href="#" onclick="doclink('link-16', 'process_string', 'Method baseObjects.Extractor.process_string()=baseObjects.Extractor-class.html#process_string,Method baseObjects.Normalizer.process_string()=baseObjects.Normalizer-class.html#process_string,Method process_string()=extractor.DateExtractor-class.html#process_string,Method ExactProximityExtractor.process_string()=extractor.ExactProximityExtractor-class.html#process_string,Method KeywordExtractor.process_string()=extractor.KeywordExtractor-class.html#process_string,Method ProximityExtractor.process_string()=extractor.ProximityExtractor-class.html#process_string,Method SimpleExtractor.process_string()=extractor.SimpleExtractor-class.html#process_string,Method normalizer.ArticleNormalizer.process_string()=normalizer.ArticleNormalizer-class.html#process_string,Method normalizer.CaseNormalizer.process_string()=normalizer.CaseNormalizer-class.html#process_string,Method normalizer.DataExistsNormalizer.process_string()=normalizer.DataExistsNormalizer-class.html#process_string,Method normalizer.DateStringNormalizer.process_string()=normalizer.DateStringNormalizer-class.html#process_string,Method normalizer.DiacriticNormalizer.process_string()=normalizer.DiacriticNormalizer-class.html#process_string,Method normalizer.ExactExpansionNormalizer.process_string()=normalizer.ExactExpansionNormalizer-class.html#process_string,Method normalizer.IntNormalizer.process_string()=normalizer.IntNormalizer-class.html#process_string,Method normalizer.KeywordNormalizer.process_string()=normalizer.KeywordNormalizer-class.html#process_string,Method normalizer.NumericEntityNormalizer.process_string()=normalizer.NumericEntityNormalizer-class.html#process_string,Method normalizer.PhraseStemNormalizer.process_string()=normalizer.PhraseStemNormalizer-class.html#process_string,Method normalizer.PossessiveNormalizer.process_string()=normalizer.PossessiveNormalizer-class.html#process_string,Method normalizer.RegexpNormalizer.process_string()=normalizer.RegexpNormalizer-class.html#process_string,Method normalizer.ReverseNormalizer.process_string()=normalizer.ReverseNormalizer-class.html#process_string,Method normalizer.SimpleNormalizer.process_string()=normalizer.SimpleNormalizer-class.html#process_string,Method normalizer.SpaceNormalizer.process_string()=normalizer.SpaceNormalizer-class.html#process_string,Method normalizer.StemNormalizer.process_string()=normalizer.StemNormalizer-class.html#process_string,Method normalizer.StoplistNormalizer.process_string()=normalizer.StoplistNormalizer-class.html#process_string,Method normalizer.StringIntNormalizer.process_string()=normalizer.StringIntNormalizer-class.html#process_string,Method normalizer.TermExistsNormalizer.process_string()=normalizer.TermExistsNormalizer-class.html#process_string,Method normalizer.WordExpansionNormalizer.process_string()=normalizer.WordExpansionNormalizer-class.html#process_string,Method queryFactory.SimpleQueryFactory.process_string()=queryFactory.SimpleQueryFactory-class.html#process_string,Method textmining.tmNormalizer.EnjuNormalizer.process_string()=textmining.tmNormalizer.EnjuNormalizer-class.html#process_string,Method textmining.tmNormalizer.ExactGeniaNormalizer.process_string()=textmining.tmNormalizer.ExactGeniaNormalizer-class.html#process_string,Method textmining.tmNormalizer.GeniaNormalizer.process_string()=textmining.tmNormalizer.GeniaNormalizer-class.html#process_string,Method textmining.tmNormalizer.GeniaTextNormalizer.process_string()=textmining.tmNormalizer.GeniaTextNormalizer-class.html#process_string,Method textmining.tmNormalizer.PosKeywordNormalizer.process_string()=textmining.tmNormalizer.PosKeywordNormalizer-class.html#process_string,Method textmining.tmNormalizer.PosPhraseNormalizer.process_string()=textmining.tmNormalizer.PosPhraseNormalizer-class.html#process_string,Method textmining.tmNormalizer.PosTypeNormalizer.process_string()=textmining.tmNormalizer.PosTypeNormalizer-class.html#process_string,Method textmining.tmNormalizer.TsujiiPosNormalizer.process_string()=textmining.tmNormalizer.TsujiiPosNormalizer-class.html#process_string,Method textmining.tmNormalizer.UnparsedGeniaNormalizer.process_string()=textmining.tmNormalizer.UnparsedGeniaNormalizer-class.html#process_string'); return false;">process_string</a></span></span><span class="py-op">(</span><span class="py-name">self</span><span class="py-op">,</span> <a title="resultSet.DeserializationHandler.session" class="py-name" href="resultSet.DeserializationHandler-class.html#session">session</a><span class="py-op">,</span> <span class="py-name">data</span><span class="py-op">)</span> </span>
+<span class="lineno">134</span>  <span class="py-line">        <span class="py-keyword">return</span> <span class="py-name">self</span><span class="py-op">.</span><a title="extractor.DateExtractor._datify" class="py-name" href="extractor.DateExtractor-class.html#_datify">_datify</a><span class="py-op">(</span><a title="resultSet.DeserializationHandler.session" class="py-name" href="resultSet.DeserializationHandler-class.html#session">session</a><span class="py-op">,</span> <span class="py-name">data</span><span class="py-op">)</span> </span>
+</div><a name="DateExtractor.process_node"></a><div id="DateExtractor.process_node-def"><span class="lineno">135</span> <a class="pysrc-toggle" href="#" id="DateExtractor.process_node-toggle" onclick="toggle('DateExtractor.process_node'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="extractor.DateExtractor-class.html#process_node">process_node</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">session</span><span class="py-op">,</span> <span class="py-param">data</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="DateExtractor.process_node-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="DateExtractor.process_node-expanded"><span class="lineno">136</span>  <span class="py-line">        <span class="py-name">data</span> <span class="py-op">=</span> <a title="extractor.SimpleExtractor" class="py-name" href="extractor.SimpleExtractor-class.html">SimpleExtractor</a><span class="py-op">.</span><span id="link-17" class="py-name"><a title="baseObjects.Extractor.process_node
+extractor.DateExtractor.process_node
+extractor.ExactProximityExtractor.process_node
+extractor.KeywordExtractor.process_node
+extractor.ProximityExtractor.process_node
+extractor.SimpleExtractor.process_node" class="py-name" href="#" onclick="doclink('link-17', 'process_node', 'Method baseObjects.Extractor.process_node()=baseObjects.Extractor-class.html#process_node,Method process_node()=extractor.DateExtractor-class.html#process_node,Method ExactProximityExtractor.process_node()=extractor.ExactProximityExtractor-class.html#process_node,Method KeywordExtractor.process_node()=extractor.KeywordExtractor-class.html#process_node,Method ProximityExtractor.process_node()=extractor.ProximityExtractor-class.html#process_node,Method SimpleExtractor.process_node()=extractor.SimpleExtractor-class.html#process_node'); return false;">process_node</a></span></span><span class="py-op">(</span><span class="py-name">self</span><span class="py-op">,</span> <a title="resultSet.DeserializationHandler.session" class="py-name" href="resultSet.DeserializationHandler-class.html#session">session</a><span class="py-op">,</span> <span class="py-name">data</span><span class="py-op">)</span> </span>
+<span class="lineno">137</span>  <span class="py-line">        <span class="py-keyword">return</span> <span class="py-name">self</span><span class="py-op">.</span><a title="extractor.DateExtractor._datify" class="py-name" href="extractor.DateExtractor-class.html#_datify">_datify</a><span class="py-op">(</span><a title="resultSet.DeserializationHandler.session" class="py-name" href="resultSet.DeserializationHandler-class.html#session">session</a><span class="py-op">,</span> <span class="py-name">data</span><span class="py-op">)</span> </span>
+</div><a name="DateExtractor.process_eventList"></a><div id="DateExtractor.process_eventList-def"><span class="lineno">138</span> <a class="pysrc-toggle" href="#" id="DateExtractor.process_eventList-toggle" onclick="toggle('DateExtractor.process_eventList'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="extractor.DateExtractor-class.html#process_eventList">process_eventList</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">session</span><span class="py-op">,</span> <span class="py-param">data</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="DateExtractor.process_eventList-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="DateExtractor.process_eventList-expanded"><span class="lineno">139</span>  <span class="py-line">        <span class="py-name">data</span> <span class="py-op">=</span> <a title="extractor.SimpleExtractor" class="py-name" href="extractor.SimpleExtractor-class.html">SimpleExtractor</a><span class="py-op">.</span><span id="link-18" class="py-name"><a title="baseObjects.Extractor.process_eventList
+extractor.DateExtractor.process_eventList
+extractor.ExactProximityExtractor.process_eventList
+extractor.KeywordExtractor.process_eventList
+extractor.ProximityExtractor.process_eventList
+extractor.SimpleExtractor.process_eventList" class="py-name" href="#" onclick="doclink('link-18', 'process_eventList', 'Method baseObjects.Extractor.process_eventList()=baseObjects.Extractor-class.html#process_eventList,Method process_eventList()=extractor.DateExtractor-class.html#process_eventList,Method ExactProximityExtractor.process_eventList()=extractor.ExactProximityExtractor-class.html#process_eventList,Method KeywordExtractor.process_eventList()=extractor.KeywordExtractor-class.html#process_eventList,Method ProximityExtractor.process_eventList()=extractor.ProximityExtractor-class.html#process_eventList,Method SimpleExtractor.process_eventList()=extractor.SimpleExtractor-class.html#process_eventList'); return false;">process_eventList</a></span></span><span class="py-op">(</span><span class="py-name">self</span><span class="py-op">,</span> <a title="resultSet.DeserializationHandler.session" class="py-name" href="resultSet.DeserializationHandler-class.html#session">session</a><span class="py-op">,</span> <span class="py-name">data</span><span class="py-op">)</span> </span>
+<span class="lineno">140</span>  <span class="py-line">        <span class="py-keyword">return</span> <span class="py-name">self</span><span class="py-op">.</span><a title="extractor.DateExtractor._datify" class="py-name" href="extractor.DateExtractor-class.html#_datify">_datify</a><span class="py-op">(</span><a title="resultSet.DeserializationHandler.session" class="py-name" href="resultSet.DeserializationHandler-class.html#session">session</a><span class="py-op">,</span> <span class="py-name">data</span><span class="py-op">)</span> </span>
+</div></div><span class="lineno">141</span>  <span class="py-line">     </span>
+<span class="lineno">142</span>  <span class="py-line"> </span>
+<a name="ProximityExtractor"></a><div id="ProximityExtractor-def"><span class="lineno">143</span> <a class="pysrc-toggle" href="#" id="ProximityExtractor-toggle" onclick="toggle('ProximityExtractor'); return false;">-</a><span class="py-line"><span class="py-keyword">class</span> <a class="py-def-name" href="extractor.ProximityExtractor-class.html">ProximityExtractor</a><span class="py-op">(</span><span class="py-base-class">KeywordExtractor</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="ProximityExtractor-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="ProximityExtractor-expanded"><span class="lineno">144</span>  <span class="py-line">    <span class="py-docstring">""" Extract keywords and maintain information for proximity searches """</span> </span>
+<span class="lineno">145</span>  <span class="py-line"> </span>
+<span class="lineno">146</span>  <span class="py-line"> </span>
+<a name="ProximityExtractor.process_string"></a><div id="ProximityExtractor.process_string-def"><span class="lineno">147</span> <a class="pysrc-toggle" href="#" id="ProximityExtractor.process_string-toggle" onclick="toggle('ProximityExtractor.process_string'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="extractor.ProximityExtractor-class.html#process_string">process_string</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">session</span><span class="py-op">,</span> <span class="py-param">data</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="ProximityExtractor.process_string-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="ProximityExtractor.process_string-expanded"><span class="lineno">148</span>  <span class="py-line">        <span class="py-name">kw</span> <span class="py-op">=</span> <span class="py-op">{</span><span class="py-op">}</span> </span>
+<span class="lineno">149</span>  <span class="py-line">        <span class="py-name">w</span> <span class="py-op">=</span> <span class="py-number">0</span> </span>
+<span class="lineno">150</span>  <span class="py-line">        <span class="py-name">hash</span> <span class="py-op">=</span> <span class="py-op">{</span><span class="py-name">data</span><span class="py-op">:</span> <span class="py-op">{</span><span class="py-string">'text'</span> <span class="py-op">:</span> <span class="py-name">data</span><span class="py-op">,</span> <span class="py-string">'occurences'</span> <span class="py-op">:</span> <span class="py-number">1</span><span class="py-op">}</span><span class="py-op">}</span> </span>
+<span class="lineno">151</span>  <span class="py-line">        <span class="py-comment"># Now keywordify with Prox</span> </span>
+<span class="lineno">152</span>  <span class="py-line"><span class="py-comment"></span>        <span class="py-name">reSub</span> <span class="py-op">=</span> <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">punctuationRe</span><span class="py-op">.</span><span class="py-name">sub</span> </span>
+<span class="lineno">153</span>  <span class="py-line">        <span class="py-name">has</span> <span class="py-op">=</span> <span class="py-name">kw</span><span class="py-op">.</span><span class="py-name">has_key</span> </span>
+<span class="lineno">154</span>  <span class="py-line"> </span>
+<span class="lineno">155</span>  <span class="py-line">        <span class="py-keyword">for</span> <span class="py-name">d</span> <span class="py-keyword">in</span> <span class="py-name">hash</span><span class="py-op">.</span><span class="py-name">keys</span><span class="py-op">(</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno">156</span>  <span class="py-line">            <span class="py-keyword">if</span> <span class="py-name">d</span><span class="py-op">:</span> </span>
+<span class="lineno">157</span>  <span class="py-line">                <span class="py-name">s</span> <span class="py-op">=</span> <span class="py-name">reSub</span><span class="py-op">(</span><span class="py-string">' '</span><span class="py-op">,</span> <span class="py-name">d</span><span class="py-op">)</span> </span>
+<span class="lineno">158</span>  <span class="py-line">                <span class="py-keyword">for</span> <span class="py-name">wd</span> <span class="py-keyword">in</span> <span class="py-name">s</span><span class="py-op">.</span><span class="py-name">split</span><span class="py-op">(</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno">159</span>  <span class="py-line">                    <span class="py-keyword">if</span> <span class="py-name">has</span><span class="py-op">(</span><span class="py-name">wd</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno">160</span>  <span class="py-line">                        <span class="py-name">kw</span><span class="py-op">[</span><span class="py-name">wd</span><span class="py-op">]</span><span class="py-op">[</span><span class="py-string">'occurences'</span><span class="py-op">]</span> <span class="py-op">+=</span> <span class="py-number">1</span> </span>
+<span class="lineno">161</span>  <span class="py-line">                        <span class="py-name">kw</span><span class="py-op">[</span><span class="py-name">wd</span><span class="py-op">]</span><span class="py-op">[</span><span class="py-string">'positions'</span><span class="py-op">]</span><span class="py-op">.</span><a title="resultSet.SimpleResultSet.extend" class="py-name" href="resultSet.SimpleResultSet-class.html#extend">extend</a><span class="py-op">(</span><span class="py-op">[</span><span class="py-op">-</span><span class="py-number">1</span><span class="py-op">,</span> <span class="py-name">w</span><span class="py-op">]</span><span class="py-op">)</span> </span>
+<span class="lineno">162</span>  <span class="py-line">                    <span class="py-keyword">else</span><span class="py-op">:</span> </span>
+<span class="lineno">163</span>  <span class="py-line">                        <span class="py-name">kw</span><span class="py-op">[</span><span class="py-name">wd</span><span class="py-op">]</span> <span class="py-op">=</span> <span class="py-op">{</span><span class="py-string">'text'</span> <span class="py-op">:</span> <span class="py-name">wd</span><span class="py-op">,</span> <span class="py-string">'occurences'</span> <span class="py-op">:</span> <span class="py-number">1</span><span class="py-op">,</span> <span class="py-string">'positions'</span> <span class="py-op">:</span> <span class="py-op">[</span><span class="py-op">-</span><span class="py-number">1</span><span class="py-op">,</span> <span class="py-name">w</span><span class="py-op">]</span><span class="py-op">}</span> </span>
+<span class="lineno">164</span>  <span class="py-line">                    <span class="py-name">w</span> <span class="py-op">+=</span> <span class="py-number">1</span> </span>
+<span class="lineno">165</span>  <span class="py-line">        <span class="py-keyword">return</span> <span class="py-name">kw</span> </span>
+</div><span class="lineno">166</span>  <span class="py-line"> </span>
+<span class="lineno">167</span>  <span class="py-line"> </span>
+<a name="ProximityExtractor.process_node"></a><div id="ProximityExtractor.process_node-def"><span class="lineno">168</span> <a class="pysrc-toggle" href="#" id="ProximityExtractor.process_node-toggle" onclick="toggle('ProximityExtractor.process_node'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="extractor.ProximityExtractor-class.html#process_node">process_node</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">session</span><span class="py-op">,</span> <span class="py-param">data</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="ProximityExtractor.process_node-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="ProximityExtractor.process_node-expanded"><span class="lineno">169</span>  <span class="py-line">        <span class="py-comment"># need unique integer for this node.</span> </span>
+<span class="lineno">170</span>  <span class="py-line"><span class="py-comment"></span>        <span class="py-comment"># generate full path to node, and hash()</span> </span>
+<span class="lineno">171</span>  <span class="py-line"><span class="py-comment"></span>        <span class="py-comment"># UGLY!</span> </span>
+<span class="lineno">172</span>  <span class="py-line"><span class="py-comment"></span>        <span class="py-name">path</span> <span class="py-op">=</span> <span class="py-op">[</span><span class="py-op">]</span> </span>
+<span class="lineno">173</span>  <span class="py-line">        <span class="py-name">node</span> <span class="py-op">=</span> <span class="py-name">data</span> </span>
+<span class="lineno">174</span>  <span class="py-line">        <span class="py-keyword">while</span> <span class="py-name">True</span><span class="py-op">:</span> </span>
+<span class="lineno">175</span>  <span class="py-line">            <span id="link-19" class="py-name"><a title="baseObjects.Document.parent
+baseObjects.Record.parent
+configParser.C3Object.parent" class="py-name" href="#" onclick="doclink('link-19', 'parent', 'Variable baseObjects.Document.parent=baseObjects.Document-class.html#parent,Variable baseObjects.Record.parent=baseObjects.Record-class.html#parent,Variable configParser.C3Object.parent=configParser.C3Object-class.html#parent'); return false;">parent</a></span></span> <span class="py-op">=</span> <span class="py-name">node</span><span class="py-op">.</span><span class="py-name">getparent</span><span class="py-op">(</span><span class="py-op">)</span> </span>
+<span class="lineno">176</span>  <span class="py-line">            <span class="py-keyword">if</span> <span class="py-keyword">not</span> <span id="link-20" class="py-name"><a title="baseObjects.Document.parent
+baseObjects.Record.parent
+configParser.C3Object.parent" class="py-name" href="#" onclick="doclink('link-20', 'parent', 'Variable baseObjects.Document.parent=baseObjects.Document-class.html#parent,Variable baseObjects.Record.parent=baseObjects.Record-class.html#parent,Variable configParser.C3Object.parent=configParser.C3Object-class.html#parent'); return false;">parent</a></span></span><span class="py-op">:</span> </span>
+<span class="lineno">177</span>  <span class="py-line">                <span class="py-keyword">break</span> </span>
+<span class="lineno">178</span>  <span class="py-line">            <span class="py-name">kids</span> <span class="py-op">=</span> <span id="link-21" class="py-name"><a title="baseObjects.Document.parent
+baseObjects.Record.parent
+configParser.C3Object.parent" class="py-name" href="#" onclick="doclink('link-21', 'parent', 'Variable baseObjects.Document.parent=baseObjects.Document-class.html#parent,Variable baseObjects.Record.parent=baseObjects.Record-class.html#parent,Variable configParser.C3Object.parent=configParser.C3Object-class.html#parent'); return false;">parent</a></span></span><span class="py-op">.</span><span class="py-name">getchildren</span><span class="py-op">(</span><span class="py-op">)</span> </span>
+<span class="lineno">179</span>  <span class="py-line">            <span class="py-name">idx</span> <span class="py-op">=</span> <span class="py-name">kids</span><span class="py-op">.</span><span id="link-22" class="py-name"><a title="baseObjects.ResultSet.index
+index
+resultSet.BitmapResultSet.index
+resultSet.SimpleResultSet.index" class="py-name" href="#" onclick="doclink('link-22', 'index', 'Variable baseObjects.ResultSet.index=baseObjects.ResultSet-class.html#index,Module index=index-module.html,Variable resultSet.BitmapResultSet.index=resultSet.BitmapResultSet-class.html#index,Variable resultSet.SimpleResultSet.index=resultSet.SimpleResultSet-class.html#index'); return false;">index</a></span></span><span class="py-op">(</span><span class="py-name">node</span><span class="py-op">)</span> </span>
+<span class="lineno">180</span>  <span class="py-line">            <span class="py-name">path</span><span class="py-op">.</span><a title="resultSet.SimpleResultSet.append" class="py-name" href="resultSet.SimpleResultSet-class.html#append">append</a><span class="py-op">(</span><span class="py-name">idx</span><span class="py-op">)</span> </span>
+<span class="lineno">181</span>  <span class="py-line">            <span class="py-name">node</span> <span class="py-op">=</span> <span id="link-23" class="py-name"><a title="baseObjects.Document.parent
+baseObjects.Record.parent
+configParser.C3Object.parent" class="py-name" href="#" onclick="doclink('link-23', 'parent', 'Variable baseObjects.Document.parent=baseObjects.Document-class.html#parent,Variable baseObjects.Record.parent=baseObjects.Record-class.html#parent,Variable configParser.C3Object.parent=configParser.C3Object-class.html#parent'); return false;">parent</a></span></span><span class="py-op">;</span> </span>
+<span class="lineno">182</span>  <span class="py-line">        <span class="py-name">pstr</span><span class="py-op">=</span> <span class="py-string">'/'</span><span class="py-op">.</span><span class="py-name">join</span><span class="py-op">(</span><span id="link-24" class="py-name"><a title="normalizer.DiacriticNormalizer.map
+normalizer.ExactExpansionNormalizer.map
+normalizer.WordExpansionNormalizer.map" class="py-name" href="#" onclick="doclink('link-24', 'map', 'Variable normalizer.DiacriticNormalizer.map=normalizer.DiacriticNormalizer-class.html#map,Variable normalizer.ExactExpansionNormalizer.map=normalizer.ExactExpansionNormalizer-class.html#map,Variable normalizer.WordExpansionNormalizer.map=normalizer.WordExpansionNormalizer-class.html#map'); return false;">map</a></span></span><span class="py-op">(</span><span class="py-name">str</span><span class="py-op">,</span><span class="py-name">path</span><span class="py-op">)</span><span class="py-op">)</span> </span>
+<span class="lineno">183</span>  <span class="py-line">        <span class="py-name">lno</span> <span class="py-op">=</span> <span class="py-name">abs</span><span class="py-op">(</span><span class="py-name">hash</span><span class="py-op">(</span><span class="py-name">pstr</span><span class="py-op">)</span><span class="py-op">)</span> </span>
+<span class="lineno">184</span>  <span class="py-line">        <span class="py-name">w</span> <span class="py-op">=</span> <span class="py-number">0</span> </span>
+<span class="lineno">185</span>  <span class="py-line"> </span>
+<span class="lineno">186</span>  <span class="py-line">        <span class="py-name">kwhash</span> <span class="py-op">=</span> <a title="extractor.SimpleExtractor" class="py-name" href="extractor.SimpleExtractor-class.html">SimpleExtractor</a><span class="py-op">.</span><span id="link-25" class="py-name"><a title="baseObjects.Extractor.process_node
+extractor.DateExtractor.process_node
+extractor.ExactProximityExtractor.process_node
+extractor.KeywordExtractor.process_node
+extractor.ProximityExtractor.process_node
+extractor.SimpleExtractor.process_node" class="py-name" href="#" onclick="doclink('link-25', 'process_node', 'Method baseObjects.Extractor.process_node()=baseObjects.Extractor-class.html#process_node,Method DateExtractor.process_node()=extractor.DateExtractor-class.html#process_node,Method ExactProximityExtractor.process_node()=extractor.ExactProximityExtractor-class.html#process_node,Method KeywordExtractor.process_node()=extractor.KeywordExtractor-class.html#process_node,Method process_node()=extractor.ProximityExtractor-class.html#process_node,Method SimpleExtractor.process_node()=extractor.SimpleExtractor-class.html#process_node'); return false;">process_node</a></span></span><span class="py-op">(</span><span class="py-name">self</span><span class="py-op">,</span> <a title="resultSet.DeserializationHandler.session" class="py-name" href="resultSet.DeserializationHandler-class.html#session">session</a><span class="py-op">,</span> <span class="py-name">data</span><span class="py-op">)</span> </span>
+<span class="lineno">187</span>  <span class="py-line">        <span class="py-comment"># Now keywordify with Prox</span> </span>
+<span class="lineno">188</span>  <span class="py-line"><span class="py-comment"></span>        <span class="py-name">kw</span> <span class="py-op">=</span> <span class="py-op">{</span><span class="py-op">}</span> </span>
+<span class="lineno">189</span>  <span class="py-line">        <span class="py-name">reSub</span> <span class="py-op">=</span> <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">punctuationRe</span><span class="py-op">.</span><span class="py-name">sub</span> </span>
+<span class="lineno">190</span>  <span class="py-line">        <span class="py-keyword">for</span> <span class="py-name">d</span> <span class="py-keyword">in</span> <span class="py-name">kwhash</span><span class="py-op">.</span><span class="py-name">keys</span><span class="py-op">(</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno">191</span>  <span class="py-line">            <span class="py-keyword">if</span> <span class="py-name">d</span><span class="py-op">:</span> </span>
+<span class="lineno">192</span>  <span class="py-line">                <span class="py-name">s</span> <span class="py-op">=</span> <span class="py-name">reSub</span><span class="py-op">(</span><span class="py-string">' '</span><span class="py-op">,</span> <span class="py-name">d</span><span class="py-op">)</span> </span>
+<span class="lineno">193</span>  <span class="py-line">                <span class="py-keyword">for</span> <span class="py-name">wd</span> <span class="py-keyword">in</span> <span class="py-name">s</span><span class="py-op">.</span><span class="py-name">split</span><span class="py-op">(</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno">194</span>  <span class="py-line">                    <span class="py-keyword">try</span><span class="py-op">:</span> </span>
+<span class="lineno">195</span>  <span class="py-line">                        <span class="py-name">kw</span><span class="py-op">[</span><span class="py-name">wd</span><span class="py-op">]</span><span class="py-op">[</span><span class="py-string">'occurences'</span><span class="py-op">]</span> <span class="py-op">+=</span> <span class="py-number">1</span> </span>
+<span class="lineno">196</span>  <span class="py-line">                        <span class="py-name">kw</span><span class="py-op">[</span><span class="py-name">wd</span><span class="py-op">]</span><span class="py-op">[</span><span class="py-string">'positions'</span><span class="py-op">]</span><span class="py-op">.</span><a title="resultSet.SimpleResultSet.extend" class="py-name" href="resultSet.SimpleResultSet-class.html#extend">extend</a><span class="py-op">(</span><span class="py-op">[</span><span class="py-name">lno</span><span class="py-op">,</span> <span class="py-name">w</span><span class="py-op">]</span><span class="py-op">)</span> </span>
+<span class="lineno">197</span>  <span class="py-line">                    <span class="py-keyword">except</span><span class="py-op">:</span> </span>
+<span class="lineno">198</span>  <span class="py-line">                        <span class="py-name">kw</span><span class="py-op">[</span><span class="py-name">wd</span><span class="py-op">]</span> <span class="py-op">=</span> <span class="py-op">{</span><span class="py-string">'text'</span> <span class="py-op">:</span> <span class="py-name">wd</span><span class="py-op">,</span> <span class="py-string">'occurences'</span> <span class="py-op">:</span> <span class="py-number">1</span><span class="py-op">,</span> <span class="py-string">'positions'</span> <span class="py-op">:</span> <span class="py-op">[</span><span class="py-name">lno</span><span class="py-op">,</span> <span class="py-name">w</span><span class="py-op">]</span><span class="py-op">}</span> </span>
+<span class="lineno">199</span>  <span class="py-line">                    <span class="py-name">w</span> <span class="py-op">+=</span> <span class="py-number">1</span> </span>
+<span class="lineno">200</span>  <span class="py-line">        <span class="py-keyword">return</span> <span class="py-name">kw</span> </span>
+</div><span class="lineno">201</span>  <span class="py-line"> </span>
+<a name="ProximityExtractor.process_eventList"></a><div id="ProximityExtractor.process_eventList-def"><span class="lineno">202</span> <a class="pysrc-toggle" href="#" id="ProximityExtractor.process_eventList-toggle" onclick="toggle('ProximityExtractor.process_eventList'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="extractor.ProximityExtractor-class.html#process_eventList">process_eventList</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">session</span><span class="py-op">,</span> <span class="py-param">data</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="ProximityExtractor.process_eventList-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="ProximityExtractor.process_eventList-expanded"><span class="lineno">203</span>  <span class="py-line">        <span class="py-comment"># Treat parent element as line, not indexed element</span> </span>
+<span class="lineno">204</span>  <span class="py-line"><span class="py-comment"></span>        <span class="py-comment"># EG map in  &lt;map&gt;&lt;attrType&gt;1&lt;/attrType&gt;&lt;attrVal&gt;4&lt;/attrVal&gt;&lt;/map&gt;</span> </span>
+<span class="lineno">205</span>  <span class="py-line"><span class="py-comment"></span>        <span class="py-comment"># For attrType or attrVal</span> </span>
+<span class="lineno">206</span>  <span class="py-line"><span class="py-comment"></span> </span>
+<span class="lineno">207</span>  <span class="py-line">        <span class="py-keyword">if</span> <span class="py-op">(</span><span class="py-name">self</span><span class="py-op">.</span><a title="configParser.C3Object.get_setting" class="py-name" href="configParser.C3Object-class.html#get_setting">get_setting</a><span class="py-op">(</span><a title="resultSet.DeserializationHandler.session" class="py-name" href="resultSet.DeserializationHandler-class.html#session">session</a><span class="py-op">,</span> <span class="py-string">'parent'</span><span class="py-op">)</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno">208</span>  <span class="py-line">            <span class="py-name">lno</span> <span class="py-op">=</span> <span class="py-name">int</span><span class="py-op">(</span><span class="py-name">data</span><span class="py-op">[</span><span class="py-number">0</span><span class="py-op">]</span><span class="py-op">.</span><span class="py-name">split</span><span class="py-op">(</span><span class="py-op">)</span><span class="py-op">[</span><span class="py-op">-</span><span class="py-number">3</span><span class="py-op">]</span><span class="py-op">)</span> </span>
+<span class="lineno">209</span>  <span class="py-line">        <span class="py-keyword">else</span><span class="py-op">:</span> </span>
+<span class="lineno">210</span>  <span class="py-line">            <span class="py-name">lno</span> <span class="py-op">=</span> <span class="py-name">int</span><span class="py-op">(</span><span class="py-name">data</span><span class="py-op">[</span><span class="py-op">-</span><span class="py-number">1</span><span class="py-op">]</span><span class="py-op">.</span><span class="py-name">split</span><span class="py-op">(</span><span class="py-op">)</span><span class="py-op">[</span><span class="py-op">-</span><span class="py-number">1</span><span class="py-op">]</span><span class="py-op">)</span> </span>
+<span class="lineno">211</span>  <span class="py-line">        <span class="py-name">w</span> <span class="py-op">=</span> <span class="py-number">0</span> </span>
+<span class="lineno">212</span>  <span class="py-line"> </span>
+<span class="lineno">213</span>  <span class="py-line">        <span class="py-name">hash</span> <span class="py-op">=</span> <a title="extractor.SimpleExtractor" class="py-name" href="extractor.SimpleExtractor-class.html">SimpleExtractor</a><span class="py-op">.</span><span id="link-26" class="py-name"><a title="baseObjects.Extractor.process_eventList
+extractor.DateExtractor.process_eventList
+extractor.ExactProximityExtractor.process_eventList
+extractor.KeywordExtractor.process_eventList
+extractor.ProximityExtractor.process_eventList
+extractor.SimpleExtractor.process_eventList" class="py-name" href="#" onclick="doclink('link-26', 'process_eventList', 'Method baseObjects.Extractor.process_eventList()=baseObjects.Extractor-class.html#process_eventList,Method DateExtractor.process_eventList()=extractor.DateExtractor-class.html#process_eventList,Method ExactProximityExtractor.process_eventList()=extractor.ExactProximityExtractor-class.html#process_eventList,Method KeywordExtractor.process_eventList()=extractor.KeywordExtractor-class.html#process_eventList,Method process_eventList()=extractor.ProximityExtractor-class.html#process_eventList,Method SimpleExtractor.process_eventList()=extractor.SimpleExtractor-class.html#process_eventList'); return false;">process_eventList</a></span></span><span class="py-op">(</span><span class="py-name">self</span><span class="py-op">,</span> <a title="resultSet.DeserializationHandler.session" class="py-name" href="resultSet.DeserializationHandler-class.html#session">session</a><span class="py-op">,</span> <span class="py-name">data</span><span class="py-op">)</span> </span>
+<span class="lineno">214</span>  <span class="py-line">        <span class="py-comment"># Now keywordify with Prox</span> </span>
+<span class="lineno">215</span>  <span class="py-line"><span class="py-comment"></span>        <span class="py-name">kw</span> <span class="py-op">=</span> <span class="py-op">{</span><span class="py-op">}</span> </span>
+<span class="lineno">216</span>  <span class="py-line">        <span class="py-name">reSub</span> <span class="py-op">=</span> <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">punctuationRe</span><span class="py-op">.</span><span class="py-name">sub</span> </span>
+<span class="lineno">217</span>  <span class="py-line">        <span class="py-name">has</span> <span class="py-op">=</span> <span class="py-name">kw</span><span class="py-op">.</span><span class="py-name">has_key</span> </span>
+<span class="lineno">218</span>  <span class="py-line">        <span class="py-keyword">for</span> <span class="py-name">d</span> <span class="py-keyword">in</span> <span class="py-name">hash</span><span class="py-op">.</span><span class="py-name">keys</span><span class="py-op">(</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno">219</span>  <span class="py-line">            <span class="py-keyword">if</span> <span class="py-name">d</span><span class="py-op">:</span> </span>
+<span class="lineno">220</span>  <span class="py-line">                <span class="py-name">s</span> <span class="py-op">=</span> <span class="py-name">reSub</span><span class="py-op">(</span><span class="py-string">' '</span><span class="py-op">,</span> <span class="py-name">d</span><span class="py-op">)</span> </span>
+<span class="lineno">221</span>  <span class="py-line">                <span class="py-keyword">for</span> <span class="py-name">wd</span> <span class="py-keyword">in</span> <span class="py-name">s</span><span class="py-op">.</span><span class="py-name">split</span><span class="py-op">(</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno">222</span>  <span class="py-line">                    <span class="py-keyword">try</span><span class="py-op">:</span> </span>
+<span class="lineno">223</span>  <span class="py-line">                        <span class="py-name">kw</span><span class="py-op">[</span><span class="py-name">wd</span><span class="py-op">]</span><span class="py-op">[</span><span class="py-string">'occurences'</span><span class="py-op">]</span> <span class="py-op">+=</span> <span class="py-number">1</span> </span>
+<span class="lineno">224</span>  <span class="py-line">                        <span class="py-name">kw</span><span class="py-op">[</span><span class="py-name">wd</span><span class="py-op">]</span><span class="py-op">[</span><span class="py-string">'positions'</span><span class="py-op">]</span><span class="py-op">.</span><a title="resultSet.SimpleResultSet.extend" class="py-name" href="resultSet.SimpleResultSet-class.html#extend">extend</a><span class="py-op">(</span><span class="py-op">[</span><span class="py-name">lno</span><span class="py-op">,</span> <span class="py-name">w</span><span class="py-op">]</span><span class="py-op">)</span> </span>
+<span class="lineno">225</span>  <span class="py-line">                    <span class="py-keyword">except</span><span class="py-op">:</span> </span>
+<span class="lineno">226</span>  <span class="py-line">                        <span class="py-name">kw</span><span class="py-op">[</span><span class="py-name">wd</span><span class="py-op">]</span> <span class="py-op">=</span> <span class="py-op">{</span><span class="py-string">'text'</span> <span class="py-op">:</span> <span class="py-name">wd</span><span class="py-op">,</span> <span class="py-string">'occurences'</span> <span class="py-op">:</span> <span class="py-number">1</span><span class="py-op">,</span> <span class="py-string">'positions'</span> <span class="py-op">:</span> <span class="py-op">[</span><span class="py-name">lno</span><span class="py-op">,</span> <span class="py-name">w</span><span class="py-op">]</span><span class="py-op">}</span> </span>
+<span class="lineno">227</span>  <span class="py-line">                    <span class="py-name">w</span> <span class="py-op">+=</span> <span class="py-number">1</span> </span>
+<span class="lineno">228</span>  <span class="py-line">        <span class="py-keyword">return</span> <span class="py-name">kw</span> </span>
+</div></div><span class="lineno">229</span>  <span class="py-line"> </span>
+<span class="lineno">230</span>  <span class="py-line"><span class="py-comment"># Useful for element proximity, or for pre-keywording normalisation</span> </span>
+<span class="lineno">231</span>  <span class="py-line"><span class="py-comment"></span> </span>
+<a name="ExactProximityExtractor"></a><div id="ExactProximityExtractor-def"><span class="lineno">232</span> <a class="pysrc-toggle" href="#" id="ExactProximityExtractor-toggle" onclick="toggle('ExactProximityExtractor'); return false;">-</a><span class="py-line"><span class="py-keyword">class</span> <a class="py-def-name" href="extractor.ExactProximityExtractor-class.html">ExactProximityExtractor</a><span class="py-op">(</span><span class="py-base-class">ProximityExtractor</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="ExactProximityExtractor-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="ExactProximityExtractor-expanded"><span class="lineno">233</span>  <span class="py-line">    <span class="py-docstring">""" Extract exact text with proximity information.  For example, to check nestedness/adjacency of elements """</span> </span>
+<span class="lineno">234</span>  <span class="py-line"> </span>
+<span class="lineno">235</span>  <span class="py-line">    <span class="py-comment"># XXX Not sure if this is actually useful?</span> </span>
+<a name="ExactProximityExtractor.process_string"></a><div id="ExactProximityExtractor.process_string-def"><span class="lineno">236</span> <a class="pysrc-toggle" href="#" id="ExactProximityExtractor.process_string-toggle" onclick="toggle('ExactProximityExtractor.process_string'); return false;">-</a><span class="py-line"><span class="py-comment"></span>    <span class="py-keyword">def</span> <a class="py-def-name" href="extractor.ExactProximityExtractor-class.html#process_string">process_string</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">session</span><span class="py-op">,</span> <span class="py-param">data</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="ExactProximityExtractor.process_string-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="ExactProximityExtractor.process_string-expanded"><span class="lineno">237</span>  <span class="py-line">        <span class="py-keyword">return</span> <span class="py-op">{</span><span class="py-name">data</span> <span class="py-op">:</span> <span class="py-op">{</span><span class="py-string">'text'</span> <span class="py-op">:</span> <span class="py-name">data</span><span class="py-op">,</span> </span>
+<span class="lineno">238</span>  <span class="py-line">                        <span class="py-string">'positions'</span> <span class="py-op">:</span> <span class="py-op">[</span><span class="py-number">0</span><span class="py-op">,</span> <span class="py-number">0</span><span class="py-op">]</span><span class="py-op">,</span> </span>
+<span class="lineno">239</span>  <span class="py-line">                        <span class="py-string">'occurences'</span> <span class="py-op">:</span> <span class="py-number">1</span> </span>
+<span class="lineno">240</span>  <span class="py-line">                        <span class="py-op">}</span> </span>
+<span class="lineno">241</span>  <span class="py-line">                <span class="py-op">}</span> </span>
+</div><span class="lineno">242</span>  <span class="py-line"> </span>
+<a name="ExactProximityExtractor.process_node"></a><div id="ExactProximityExtractor.process_node-def"><span class="lineno">243</span> <a class="pysrc-toggle" href="#" id="ExactProximityExtractor.process_node-toggle" onclick="toggle('ExactProximityExtractor.process_node'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="extractor.ExactProximityExtractor-class.html#process_node">process_node</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">session</span><span class="py-op">,</span> <span class="py-param">data</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="ExactProximityExtractor.process_node-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="ExactProximityExtractor.process_node-expanded"><span class="lineno">244</span>  <span class="py-line">        <span class="py-keyword">raise</span> <span class="py-name">NotImplementedError</span> </span>
+</div><span class="lineno">245</span>  <span class="py-line"> </span>
+<a name="ExactProximityExtractor.process_eventList"></a><div id="ExactProximityExtractor.process_eventList-def"><span class="lineno">246</span> <a class="pysrc-toggle" href="#" id="ExactProximityExtractor.process_eventList-toggle" onclick="toggle('ExactProximityExtractor.process_eventList'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="extractor.ExactProximityExtractor-class.html#process_eventList">process_eventList</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">session</span><span class="py-op">,</span> <span class="py-param">data</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="ExactProximityExtractor.process_eventList-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="ExactProximityExtractor.process_eventList-expanded"><span class="lineno">247</span>  <span class="py-line">        <span class="py-comment"># Treat parent element as line, not indexed element</span> </span>
+<span class="lineno">248</span>  <span class="py-line"><span class="py-comment"></span>        <span class="py-comment"># EG map in  &lt;map&gt;&lt;attrType&gt;1&lt;/attrType&gt;&lt;attrVal&gt;4&lt;/attrVal&gt;&lt;/map&gt;</span> </span>
+<span class="lineno">249</span>  <span class="py-line"><span class="py-comment"></span>        <span class="py-comment"># For attrType or attrVal</span> </span>
+<span class="lineno">250</span>  <span class="py-line"><span class="py-comment"></span>        <span id="link-27" class="py-name"><a title="baseObjects.Document.parent
+baseObjects.Record.parent
+configParser.C3Object.parent" class="py-name" href="#" onclick="doclink('link-27', 'parent', 'Variable baseObjects.Document.parent=baseObjects.Document-class.html#parent,Variable baseObjects.Record.parent=baseObjects.Record-class.html#parent,Variable configParser.C3Object.parent=configParser.C3Object-class.html#parent'); return false;">parent</a></span></span> <span class="py-op">=</span> <span class="py-name">self</span><span class="py-op">.</span><a title="configParser.C3Object.get_setting" class="py-name" href="configParser.C3Object-class.html#get_setting">get_setting</a><span class="py-op">(</span><a title="resultSet.DeserializationHandler.session" class="py-name" href="resultSet.DeserializationHandler-class.html#session">session</a><span class="py-op">,</span> <span class="py-string">'parent'</span><span class="py-op">)</span> </span>
+<span class="lineno">251</span>  <span class="py-line">        <span class="py-keyword">if</span> <span class="py-op">(</span><span id="link-28" class="py-name"><a title="baseObjects.Document.parent
+baseObjects.Record.parent
+configParser.C3Object.parent" class="py-name" href="#" onclick="doclink('link-28', 'parent', 'Variable baseObjects.Document.parent=baseObjects.Document-class.html#parent,Variable baseObjects.Record.parent=baseObjects.Record-class.html#parent,Variable configParser.C3Object.parent=configParser.C3Object-class.html#parent'); return false;">parent</a></span></span> <span class="py-op">&lt;&gt;</span> <span class="py-name">None</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno">252</span>  <span class="py-line">            <span class="py-name">lno</span> <span class="py-op">=</span> <span class="py-name">int</span><span class="py-op">(</span><span class="py-name">data</span><span class="py-op">[</span><span class="py-number">0</span><span class="py-op">]</span><span class="py-op">.</span><span class="py-name">split</span><span class="py-op">(</span><span class="py-op">)</span><span class="py-op">[</span><span class="py-op">-</span><span class="py-number">3</span><span class="py-op">]</span><span class="py-op">)</span> </span>
+<span class="lineno">253</span>  <span class="py-line">        <span class="py-keyword">else</span><span class="py-op">:</span> </span>
+<span class="lineno">254</span>  <span class="py-line">            <span class="py-name">lno</span> <span class="py-op">=</span> <span class="py-name">int</span><span class="py-op">(</span><span class="py-name">data</span><span class="py-op">[</span><span class="py-op">-</span><span class="py-number">1</span><span class="py-op">]</span><span class="py-op">.</span><span class="py-name">split</span><span class="py-op">(</span><span class="py-op">)</span><span class="py-op">[</span><span class="py-op">-</span><span class="py-number">1</span><span class="py-op">]</span><span class="py-op">)</span> </span>
+<span class="lineno">255</span>  <span class="py-line"> </span>
+<span class="lineno">256</span>  <span class="py-line">        <span class="py-name">kw</span> <span class="py-op">=</span> <span class="py-op">{</span><span class="py-op">}</span> </span>
+<span class="lineno">257</span>  <span class="py-line">        <span class="py-name">txtList</span> <span class="py-op">=</span> <span class="py-op">[</span><span class="py-op">]</span> </span>
+<span class="lineno">258</span>  <span class="py-line">        <span class="py-keyword">for</span> <span class="py-name">e</span> <span class="py-keyword">in</span> <span class="py-name">data</span><span class="py-op">:</span> </span>
+<span class="lineno">259</span>  <span class="py-line">            <span class="py-keyword">if</span> <span class="py-op">(</span><span class="py-name">e</span><span class="py-op">[</span><span class="py-number">0</span><span class="py-op">]</span> <span class="py-op">==</span> <span class="py-string">"3"</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno">260</span>  <span class="py-line">                <span class="py-name">txtList</span><span class="py-op">.</span><a title="resultSet.SimpleResultSet.append" class="py-name" href="resultSet.SimpleResultSet-class.html#append">append</a><span class="py-op">(</span><span class="py-name">e</span><span class="py-op">[</span><span class="py-number">2</span><span class="py-op">:</span><span class="py-op">]</span><span class="py-op">)</span> </span>
+<span class="lineno">261</span>  <span class="py-line">        <a title="bootstrap.BootstrapDocument.txt" class="py-name" href="bootstrap.BootstrapDocument-class.html#txt">txt</a> <span class="py-op">=</span> <span class="py-string">''</span><span class="py-op">.</span><span class="py-name">join</span><span class="py-op">(</span><span class="py-name">txtList</span><span class="py-op">)</span> </span>
+<span class="lineno">262</span>  <span class="py-line">        <span class="py-keyword">return</span> <span class="py-op">{</span><a title="bootstrap.BootstrapDocument.txt" class="py-name" href="bootstrap.BootstrapDocument-class.html#txt">txt</a> <span class="py-op">:</span> <span class="py-op">{</span><span class="py-string">'text'</span> <span class="py-op">:</span> <a title="bootstrap.BootstrapDocument.txt" class="py-name" href="bootstrap.BootstrapDocument-class.html#txt">txt</a><span class="py-op">,</span> </span>
+<span class="lineno">263</span>  <span class="py-line">                       <span class="py-string">'positions'</span> <span class="py-op">:</span> <span class="py-op">[</span><span class="py-name">lno</span><span class="py-op">,</span> <span class="py-number">0</span><span class="py-op">]</span><span class="py-op">,</span> </span>
+<span class="lineno">264</span>  <span class="py-line">                       <span class="py-string">'occurences'</span> <span class="py-op">:</span> <span class="py-number">1</span> </span>
+<span class="lineno">265</span>  <span class="py-line">                       <span class="py-op">}</span> </span>
+<span class="lineno">266</span>  <span class="py-line">                <span class="py-op">}</span> </span>
+</div></div><span class="lineno">267</span>  <span class="py-line"> </span><script type="text/javascript">
+<!--
+expandto(location.href);
+// -->
+</script>
+</pre>
+</div>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">Generated by Epydoc
+        3.0alpha2 on Wed Aug  9 18:10:21 2006</td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>

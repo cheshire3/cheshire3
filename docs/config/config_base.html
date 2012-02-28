@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>Cheshire3 Configuration: Common References</title>
+        <link rel="stylesheet" type="text/css" href="http://www.cheshire3.org/cheshire3.css"></link>
+    </head>
+    <body>
+        <a name="top"></a>
+        <table cellpadding="0" cellspacing="0" class="maintitle">
+            <tr height="75">
+                <td class="cheshirelogo">
+                    <img src="http://www.cheshire3.org/gfx/c3_white.gif" alt=" c h e s h i r e  |  3 "/>
+                </td>
+                <td>
+                    <img src="http://www.cheshire3.org/gfx/slant_grey.gif" alt=""/>
+                </td>
+                <td align="center">
+                    <h2>Cheshire3 Configuration: Common References</h2>
+                </td>
+            </tr>
+        </table>
+
+        <!--#config errmsg="<div id="navbar"/>" -->
+	<!--#include virtual="/navbar.ssi" -->
+
+        <div class="fieldset">
+            <span class="legend">Introduction</span>
+            <p>
+                Below are the commonly required or used paths, objects and settings for the configuration files.
+            </p>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">Paths</span>
+            <p>
+            <ul>
+                <li>
+                    <b>defaultPath</b><br/>
+                    A default path to be prepended to all other paths in the object and below
+                </li>
+                <li>
+                    <b>metadataPath</b><br/>
+                    Used to point to a database file or directory for metadata concerning the object
+                </li>
+                <li>
+                    <b>databasePath</b><br/>
+                    Used in store objects to point to a database file or directory
+                </li>
+                <li>
+                    <b>tempPath</b><br/>
+                    For when temporary file(s) are required.
+                </li>
+                <li>
+                    <b>schemaPath</b><br/>
+                    Used in Parsers to point to a validation document (eg xsd, dtd, rng)
+                </li>
+                <li>
+                    <b>xsltPath</b><br/>
+                    Used in XsltTransformers to point to the XSLT document to use.
+                </li>
+                <li>
+                    <b>sortPath</b><br/>
+                    Used in IndexStores to refer to the local 'sort' utility
+                </li>
+            </ul>
+        </div>
+
+        <!-- Just-In-Time building means this is no longer necessary -->
+<!--        <div class="fieldset">-->
+<!--            <span class="legend">Objects</span>-->
+<!--            <ul>-->
+<!--                <li>-->
+<!--                    <b><i>object type</i></b><br/>-->
+<!--                    Common required objects are recordStore on database, functionLogger. anywhere,-->
+<!--                </li> -->
+<!--                <li>-->
+<!--                    <b>onIndexRecord</b><br/>-->
+<!--                    A transformer to call when a record is being indexed.  For example to extract cluster information.-->
+<!--                </li>-->
+<!--                <li>-->
+<!--                    <b>inTransformer</b><br/>-->
+<!--                    A transformer to use before storing a record in a recordStore, eg to turn it into a storable string.-->
+<!--                </li>-->
+<!--                <li>-->
+<!--                    <b>outParser</b><br/>-->
+<!--                    A parser to turn the data extracted from the store back into the record.-->
+<!--                </li>-->
+<!--                <li>-->
+<!--                    <b>idNormalizer</b><br/>-->
+<!--                    A normalizer to turn record ids into a form suitable for using as keys in the database.-->
+<!--                    -->
+<!---->
+<!--</ul>-->
+<!--</p>-->
+<!--</div>-->
+
+        <div class="fieldset">
+            <span class="legend">Settings</span>
+            <ul>
+                <li>
+                    <b>log</b><br/>
+                    This contains a space separated list of function names to log on invocation.  The functionLogger object referenced in paths will be used to do this.
+                </li>
+                <li>
+                    <b>digest</b><br/>
+                    Used in recordStores to name a digest algorithm to determine if a record is already present in the store.  Currently supported are 'sha' and 'md5'.
+                </li>
+            </ul>
+        </div>
+
+    </body>
+</html>

@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>Configuring Extractors, Tokenizers, TokenMergers and Normalizers</title>
+        <link rel="stylesheet" type="text/css" href="http://www.cheshire3.org/cheshire3.css"></link>
+    </head>
+    <body>
+        <a name="top"></a>
+        <table cellpadding="0" cellspacing="0" class="maintitle">
+            <tr>
+                <td class="cheshirelogo">
+                    <img src="http://www.cheshire3.org/gfx/c3_white.gif" alt=" c h e s h i r e  |  3 "/>
+                </td>
+                <td>
+                    <img src="http://www.cheshire3.org/gfx/slant_grey.gif"/>
+                </td>
+                <td align="center">
+                    <h2>Configuring Extractors, Tokenizers, TokenMergers and Normalizers</h2>
+                </td>
+            </tr>
+        </table>
+
+        <!--#config errmsg="<div id="navbar"/>" -->
+        <!--#include virtual="/navbar.ssi" -->
+
+        <div class="fieldset">
+            <span class="legend">Introduction</span>
+            <p>
+                Extractors locate and extract data from either a string, a DOM node tree, or a list of SAX events. 
+                An Extractor must be the first object in an index's process workflow.
+                Tokenizers may then be used to split the data. If a Tokenizer is used, then it must be followed by a TokenMerger.
+                Normalizers may then used to process those terms into a standard form for storing in an index.
+            </p>
+            <p>
+                Unless you're using a new extractor or normalizer class, they should all be built by the default server configuration, but for completeness we'll go through the configuration below.
+            </p>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">Example: Extractors</span>
+            <p>Example extractor configurations:</p>
+            <pre>
+01 &lt;subConfig type="extractor" id="SimpleExtractor"&gt;
+02   &lt;objectType&gt;extractor.SimpleExtractor&lt;/objectType&gt;
+03 &lt;/subConfig&gt;
+04
+05 &lt;subConfig type="extractor" id="ProxExtractor"&lt;
+06   &lt;objectType&gt;extractor.SimpleExtractor&lt;/objectType&gt;
+07   &lt;options&gt;
+08     &lt;setting type="prox"&gt;1&lt;/setting&gt;
+09     &lt;setting type="reversable"&gt;1&lt;/setting&gt;
+10   &lt;/options&gt;
+11 &lt;/subConfig&gt;
+
+            </pre>						
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">Explanation: Extractors</span>
+            <p>
+                There's obviously not much to say about the first subConfig for SimpleExtractor.
+                It just does one thing and doesn't have any paths or settings to set.
+            </p>
+            <p>
+                The second subConfig, for ProxExtractor is a little more complex.
+                Firstly at line 8, it has the setting "prox", to tell the extractor to maintain which element in the record the data was extracted from.
+                This is important if you want to be able to conduct proximity, adjacency or phrase searches on the data extracted later.
+                The second setting, "reversable" on line 9, tells the extractor to maintain this location information in such a way that we can use it to identify where the data originally came from later on
+                If this setting is not set, or is set to 0, the location will be maintained in such a way that it is only possible to tell if two pieces of data were extracted from the same element.  
+            </p>
+            <p>
+                Some of the currently available extractors:
+            </p>
+            <ul>
+                <li><b>SimpleExtractor</b> Extract the data exactly as it appears, but without any XML tags. Whether or not leading/trailing whitespace should be kept or stripped it configurable.</li>
+                <li><b>TeiExtractor</b> Extract text, respecting processing instructions specified by <abbr title="Text Encoding Initiative">TEI</abbr> tags, without any XML tags.</li>
+                <li><b>TaggedTermExtractor</b> Each term has already been tagged in XML. Extract the terms and information from the XML tags. (Often used on the results of <abbr title="Natural Language Processing">NLP</abbr> tasks)</li>
+                <li><b>TemplateTermExtractor</b> Each term has already been tagged in XML. Extract the terms and information from the XML tags. What, and where to extract the information from in configurable. (Often used on the results of <abbr title="Natural Language Processing">NLP</abbr> tasks)</li>
+            <!--
+                 
+                <li><b>ExactExtractor:</b>  Extract the data exactly as it appears, but without any XML tags.</li>
+                <li><b>KeywordExtractor:</b>  Extract keywords from the data.</li>
+                <li><b>ProximityExtractor:</b>  Extract keywords from the data, maintaining their relative location.  Must be used with a ProximityIndex.</li>
+                <li><b>DateExtractor:</b>  Extracts a single date from the data. (Future version will extract multiple dates)</li>
+                <li><b>ExactProximityExtractor:</b>  Extract the data exactly, but with proximity maintained for the element, rather than between words in the data.</li>
+                <li><b>ParentProximityExtractor:</b> Extract the data as keywords, but maintain the proximity information relative to the parent element.</li>
+                <li><b>ExactParentProximityExtractor:</b> Extract the data exactly, maintaining the proximity information relative to the parent element.</li>
+             -->
+            </ul>
+        </div>
+        
+        <div class="fieldset">
+            <span class="legend">Example: Tokenizers</span>
+            <p>[ Coming soon ]</p>
+        </div>
+        
+        <div class="fieldset">
+            <span class="legend">Explanation: Tokenizers</span>
+            <p>Some of the currently available tokenizers:</p>
+            <ul>
+                <li><b>SimpleTokenizer:</b> Splits data into tokens at all occurences of the string specified in 'char' setting, defaults to splitting at all whitespace.</li> 
+                <li><b>RegexpSubTokenizer:</b> Carries out a regular expression substitution, replacing a pattern specified in 'regexp' setting (default supplied, covers many common word delimiters, but too complex to repeat here), with string specified in 'char' setting (defaults to single whitespace), before splitting at whitespace.</li>
+                <li><b>RegexpFindTokenizer:</b> Uses a complex regular expression to identify common language tokens (eg  regular words, hyphenated words, acronyms, email addresses, URLs, gene alleles, o'clock, O'Reilly, don't, I'll, monetary amounts, percentages). The Regular expression to use to identify words is configurable in the 'regexp' setting - but such configuration is not advisable!</li>
+                <li><b>RegexpFindOffsetTokenizer:</b> As above, but also maintains the character position in the string where each token began.</li>
+                <li><b>RegexpFindPunctuationOffsetTokenizer:</b> As above, but with punctuation characters subtracted from the offset.</li>
+                <li><b>SuppliedOffsetTokenizer:</b> Splits data at whitespace, and maintains precalculated characters offsets. Often used on the results of <abbr title="Natural Language Processing">NLP</abbr> Tools. Offsets must be supplied in the form: This/0 is/5 my/8 sentence./11</li>
+                <li><b>SentenceTokenizer:</b> Uses a regular expression (not configurable) to identify senteces, ignoring puctuation within commonly occuring abbreviations.</li>
+                <li><b>LineTokenizer:</b> Splits the data at newline characters</li>
+                <li><b>DateTokenizer:</b> Identifies any temporal date / time strings within the data and returns only these. The 'dayfirst' setting can be used to specify whether to assume UK or US conventions in ambiguous cases: 0 = US style, month first (default), 1 = UK style.</li>                
+                <li><b>PythonTokenizer:</b> Used to tokenize Python source code into token/type, maintains character offsets.</li>
+            </ul>
+            
+        </div>
+        
+        <div class="fieldset">
+            <span class="legend">Example: TokenMergers</span>
+            <p>[ Coming soon ]</p>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">Explanation: TokenMergers</span>            
+            <p>Some of the currently available tokenMergers:</p>
+            <ul>
+                <li><b>SimpleTokenMerger:</b> Simplest case: merges identical tokens into a single index entry, taking care of number of occurences and location (at XML element level only). All other TokenMergers inherit these abilities.</li>
+                <li><b>ProximityTokenMerger:</b> As SimpleTokenMerger, but additionally takes care of the position of tokens within the tokenized data.</li>
+                <li><b>OffsetProximityTokenMerger:</b> As ProximityTokenMerger, but additionally takes care of character offset of tokens within tokenized data.</li>
+                <li><b>SequenceRangeTokenMerger:</b> Takes pairs of tokens and joins them into a range to treat as an index entry. This can be useful for numbers or dates (e.g. 1,2,2,3,5,6 --&gt; 1-2, 2-3, 5-6)</li>
+                <li><b>MinMaxRangeTokenMerger:</b> Takes a number of tokens and finds the minimum and maximum to use the extents of a range to treat as an index entry (e.g. 1,2,2,3,5,6 --&gt; 1-6).</li>
+                <li><b>NGramTokenMerger:</b> Joins adjacent tokens into a single index entry. 'nValue' setting specifies the number of adjacent terms to join, the default is 2 (e.g. 'this', 'is', 'my', 'sentence' --&gt; 'this is', 'is my', 'my sentence'). This can be particularly useful in linguistic analysis.</li>
+                <li><b>ReconstructTokenMerger:</b> [ Coming soon ]</li>
+            </ul>
+
+        </div>
+        
+        <div class="fieldset">
+            <span class="legend">Example: Normalizers</span>
+            <p>Example normalizer configurations:</p>
+            <pre>
+01 &lt;subConfig type="normalizer" id="CaseNormalizer"&gt;
+02   &lt;objectType&gt;normalizer.CaseNormalizer&lt;/objectType&gt;
+03 &lt;/subConfig&gt;
+04
+05 &lt;subConfig type="normalizer" id="StoplistNormalizer"&gt;
+06   &lt;objectType&gt;normalizer.StoplistNormalizer&lt;/objectType&gt;
+07   &lt;paths&gt;
+08     &lt;path type="stoplist"&gt;stopwords.txt&lt;/path&gt;
+09   &lt;/paths&gt;
+10 &lt;/subConfig&gt;
+        
+            </pre>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">Explanation: Normalizers</span>            
+            <p>
+                Nomalizers usually just do one pre-defined job, so there aren't many options or paths to set.
+            </p>
+            <p>
+                The second example (lines 5-10) is a rare exception.
+                This is a StoplistNormalizer, and requires a path of type 'stoplist' (line 7).
+                The stoplist file should have one word per line.
+                The normalizer will remove all occurences of these words from the data.
+            </p>
+            <p>Some of the currently available normalizers:</p>
+            <ul>
+                <li><b>CaseNormalizer:</b>  Convert the term to lower case (eg Fish and Chips -&gt; fish and chips)</li>
+                <li><b>PossessiveNormalizer:</b> Remove trailing possessive from the term (eg squirrel's -&gt; squirrel, princesses' -&gt; princesses)</li>
+                <li><b>ArticleNormalizer:</b> Remove leading definite or indefinite article (the fish -&gt; fish)</li>
+                <li><b>PrintableNormalizer:</b> Remove any non-printable characters</li>
+                <li><b>StripperNormalizer:</b> Remove printable punctuation characters:  " % # @ ~ ! * { }</li>
+                <li><b>StoplistNormalizer:</b> Remove words from a given stoplist, given in a path of type 'stoplist' (&lt;path type="stoplist"&gt;stoplist.txt&lt;/path&gt;)  The stoplist file should have one word per line.</li>
+                <li><del><b>DateStringNormalizer:</b> Convert a Date object extracted by DateExtractor into an ISO8601 formatted string.</del> <br/>
+                    DEPRECATED in favour of DateTokenizer. </li>
+                <li><b>DiacriticNormalizer:</b> Remove all diacritics from characters. (eg &eacute; -&gt; e)</li>
+                <li><b>IntNormalizer:</b> Convert a string into an integer (eg '2' -&gt; 2)</li>
+                <li><b>StringIntNormalizer:</b> Convert an integer into a 0 padded string (eg 2 -&gt; '000000000002')</li>
+                <li><b>EnglishStemNormalizer:</b> Convert an English word into a stemmed form, according to the Porter2 algorithm.  (eg Fairy -&gt; fairi)  You must have run the possessive normalizer before running this normalizer for it to work properly.</li>
+                <li><b>KeywordNormalizer:</b> Convert an exact extracted string into keywords.</li>
+                <li><b>ProximityNormalizer:</b> Convert an exact extracted string into keywords maintaining proximity information.</li>
+                <li><b>ExactExpansionNormalizer:</b> Sample implementation of an acronym and contraction expanding normalizer. Eg 'XML' -&gt; 'Extensible Markup Language'</li>
+                <li><b>WordExpansionNormalizer:</b> Sample implementation of an acronym expander when dealing with words rather than exact strings.  Eg 'XML' -&gt; 'Extensible', 'Markup', 'Language'</li>
+            </ul>
+
+        </div>
+
+    </body>
+</html>

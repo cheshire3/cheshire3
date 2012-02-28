@@ -1,0 +1,338 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>Web Interfaces</title>
+        <link rel="stylesheet" type="text/css" href="http://www.cheshire3.org/cheshire3.css"></link>
+    </head>
+    <body>
+        <a name="top"></a>
+	<table cellpadding="0" cellspacing="0" class="maintitle">
+            <tr>
+		<td class="cheshirelogo">
+                    <img src="http://www.cheshire3.org/gfx/c3_white.gif" alt=" c h e s h i r e  |  3 "/>
+		</td>
+		<td>
+                    <img src="http://www.cheshire3.org/gfx/slant_grey.gif" alt=""/>
+		</td>
+		<td align="center">
+                    <h2>Web Interfaces</h2>
+		</td>
+            </tr>
+	</table>
+
+	<!--#config errmsg="<div id="navbar"/>" -->
+	<!--#include virtual="/navbar.ssi" -->
+
+	<div class="fieldset">
+            <span class="legend">Introduction</span>
+            <p>
+		Assuming that you've read and digested the previous search example, you're probably wanting to put up some sort of fancy web interface to all your data. 
+		While we can't help out with the XML to HTML stylesheet or the actual web design for your site, below is a simplified and annotated copy of the <a href="http://www.cardsnotwords.com/">Cards, Not Words</a> main handling functions.
+            </p>
+	</div>
+
+	<div class="fieldset">
+            <span class="legend">Initialisation (01-17)</span>
+            <pre>
+01 from mod_python import apache, Cookie
+02 from mod_python.util import FieldStorage
+03 import sys, traceback, os, cgitb, time, urllib, crypt
+04 from server import SimpleServer
+05 from PyZ3950 import CQLParser
+06 from baseObject import Session
+07 os.chdir("/home/cheshire/cheshire3/code")
+
+08 session = Session()
+09 serv = SimpleServer(session, '/home/cheshire/cheshire3/configs/serverConfig.xml')
+10 l5r = serv.get_object(session, 'db_l5r')
+11 titleIdx = l5r.get_object(session, 'l5r-idx-1')
+12 recStore = l5r.get_object(session, 'l5rRecordStore')
+13 cardTxr = l5r.get_object(session, 'l5rHtmlTxr')
+14 singleTxr = l5r.get_object(session, 'l5rSingleTxr')
+15 cartTxr = l5r.get_object(session, 'l5rCartTxr')
+16 rsetStore = l5r.get_object(session, 'defaultResultSetStore')
+17 authStore = serv.get_object(session, 'defaultAuthStore')
+            </pre>
+            <p>
+                Most importantly, we need to import the linking code from mod_python (line 1). 
+                From then on, this is similar to the sort of code that you'll see in any handler, we import the server implementation, create the server and find various useful objects within the framework.
+            </p>
+	</div>
+
+	<div class="fieldset">
+            <span class="legend">Query Construction  (18-43)</span>
+            <pre>
+18 class CNWHandler:
+19     templatePath = "/home/cheshire/cheshire3/cnw/html/template.ssi"
+20     def generate_query(self, form):
+21         if (form.has_key('query')  and form['query'].value):
+22             return urllib.unquote(form['query'].value)
+23         if (form.has_key('bool')):
+24             bool = form['bool'].value
+25         else:
+26             bool = 'and'
+27         n = 1
+28         cql = []
+29         while (form.has_key('idx%d' % n)):
+30             try:
+31                 term = form['term%d' % n].value
+32             except:
+33                 n += 1
+34                 continue
+35             if (term):
+36                 idx = form['idx%d' % n].value
+37                 rel = form['rel%d' % n].value
+39                 if (cql):
+40                     cql.append(bool)
+41                 cql.append(' %s %s "%s" ' % (idx, rel, term))
+42             n += 1
+43         return ''.join(cql)
+            </pre>
+            <p>
+                In line 18 we start a class definition. 
+                This is going to define the sort of object used to handle the generic web interface. 
+                It has one member property, the path to a template file which we'll use at the end to provide a consistent look and feel across the entire site.
+            </p>
+            <p>
+                As the query will most likely come in from an HTML form, we need to create the equivalent CQL search and this is what generate_query() does above. 
+		First it checks to see if there's a 'query' parameter and it's been filled out (21). 
+		If so, then unhexify it (turn all the %20s into spaces, for example) and send it straight back (22) -- the user has been kind enough to give us CQL directly. 
+		Otherwise we need to process the rest of the form.
+            </p>
+            <p>
+                If the form has a 'bool' field, then we'll use it (24) between each of the clauses in the CQL, otherwise we'll just default to 'and' (26). 
+		Then we step through the form looking for fields that start with 'idx' and end in a number (29). 
+		These are the names of the indexes to use. 
+		If the input element for that index has been filled out (31) we'll use it for the term, otherwise we just step back to the beginning and look for the next index (34).
+            </p>
+            <p>
+		If the term has been given we construct the index relation term searchClause for CQL (41) from the values given in the form (36-37) and if this is the second or subsequent clause (39) we'll also add in the boolean (40). 
+		At the end we join it all together and return it.
+            </p>
+        </div>
+
+	<div class="fieldset">
+            <span class="legend">Display  (44-87)</span>
+            <pre>
+44     def generateCart(self, rset):
+45         global titleIdx, recStore, cartTxr
+46         rset.order(session, titleIdx)
+47         cards = []
+48         for item in rset:
+49             rec = recStore.fetch_record(session, item.docid)
+50             htmldoc = cartTxr.process_record(session, rec)
+51             html = htmldoc.get_raw(session)
+52             cards.append(html)
+53         cards.append('&lt;tr&gt;&lt;td align="right"&gt;&lt;a href="viewCart.html"&gt;Show Cart --&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;')
+54         cards = ''.join(cards)
+55         text = '&lt;tr&gt;&lt;td class="headCell" colspan="2"&gt;Cart:&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;%s&lt;/td&gt;&lt;/tr&gt;' % cards
+56         return text
+57
+58     def display_searchList(self, cql, start=0):
+59         global l5r, titleIdx, recStore, singleTxr
+60         try:
+61             tree = CQLParser.parse(cql)
+62         except:
+63             return ("Search Error", "&lt;p&gt;Could not parse your query. Please try again.")
+64         try:
+65             rs = l5r.search(session, tree)
+66         except Exception, err:
+67             return ("Search Error", "&lt;p&gt;Could not process your query. Please try again.&lt;br&gt;Error: %s" % err)  
+68         rs.order(session, titleIdx)
+69         d = ['&lt;table width="95%" align="center" class="cardListTable" cellspacing=0 cellpadding=1&gt;'
+              &lt;tr&gt;&lt;th&gt;Card Name&lt;/th&gt;&lt;th width="8%"&gt;Stock&lt;/th&gt;&lt;th width="8%"&gt;Price&lt;/th&gt;&lt;th width="8%"&gt;Add&lt;/th&gt;&lt;/tr&gt;']
+70         end = start +  min(len(rs) - start, 25)
+71         while (x &lt; len(rs) and x &lt; end):
+72             rec = recStore.fetch_record(session, rs[x].docid)
+73             htmldoc = singleTxr.process_record(session, rec)
+74             html = htmldoc.get_raw(session)
+75             d.append(html)
+76         d.append("&lt;/table&gt;")
+77         txt = ''.join(d)
+78         t = "Cards %d-%d/%d" % (start+1, min(end, len(rs)), len(rs))
+79         return (t, txt)
+80 
+81     def display_card(self, rec, path):
+82         global cardTxr
+83         htmldoc = cardTxr.process_record(session, rec)
+84         html = htmldoc.get_raw(session)
+85         (title,html) = html.split('||')
+86         href = path + "?c=%d&amp;addToCart=%d" % (rec.id, rec.id)
+87         return (title, "&lt;table&gt;%s&lt;/table&gt;" % html)
+            </pre>
+            <p>
+            	This section has three functions, generateCart(), display_searchList() and display_card(), but they all serve the same purpose -- to display the records in an appropriate format. 
+            	The generateCart() function creates a simple display of name, price and number of entries to display for a user's shopping cart, the display_searchList() function does the same but with more information for a list of matched records, and display_card() shows the entire text of the record.
+            </p>
+            <p>
+            	In generateCart, first we specifically allow global references (45) to the various objects that were identified in the first invocation of the script. 
+            	The function is given a ResultSet object, so we sort that by the title index next to produce a more usefully ordered list (46). 
+            	In the following block, we step through each entry in the result set, fetch the record (49), turn it into the appropriate format for display (50) and then add that to our list of entries. 
+            	Then we put a bit of HTML wrapping (53-55) around the text we've generated and return it.
+            </p>
+            <p>
+            	Display_searchList starts off much the same, except that it's given a CQL query to execute. 
+            	First we try to parse the query into tree form (61), and if we can't we return a brief error message (63). 
+            	Then we try to run the search (65) and again an error message if that fails (67). 
+            	Now we have the result set, and the same thing happens. 
+            	We order it by the title of the card (68), create some wrapping (69), step through the result set and get an HTML display for it (71-75), put it all together and return it (79).
+            </p>
+            <p>
+            	The last function here, display_card, is even simpler. 
+            	It's given the record to display, it processes it into HTML (83) adds some wrapping and returns the data.
+            </p>
+        </div>
+
+	<div class="fieldset">
+            <span class="legend">HTTP handling  (88-155)</span>
+            <pre>
+88      def send_html(self, text, req, code=200):
+89          req.content_type = 'text/html'
+90          req.content_length = len(text)
+91          req.send_http_header()
+92          req.write(text)
+93
+94      def handle(self, req):
+95          global rsetStore, recStore
+96          path = req.uri[1:]
+97          form = FieldStorage(req)
+98          f = file(self.templatePath)
+99          tmpl = f.read()
+100         f.close()
+101         tmpl = tmpl.replace('\n', '')
+102
+103         cks = Cookie.get_cookies(req)
+104         if cks.has_key('cnwCart'):
+105             cart = cks['cnwCart']
+106             rsid = cart.value
+107             try:
+108                 cartRSet = rsetStore.fetch_resultSet(session, rsid)
+109             except:
+110                 cartRSet = None
+111             if (cartRSet == None):
+112                 cartRSet = resultSet.SimpleResultSet(session)
+113                 rsid = rsetStore.create_resultSet(session, cartRSet)
+114                 cart = Cookie.Cookie('cnwCart', rsid)
+115         else:
+116             cartRSet = resultSet.SimpleResultSet(session, [])
+117             rsid = rsetStore.create_resultSet(session, cartRSet)
+118             rsetStore.commit_storing(session)
+119             cart = Cookie.Cookie('cnwCart', rsid)
+120         Cookie.add_cookie(req, cart)
+121        
+122         if (path == "card.html"):
+123             if (form.has_key('c')):
+124                 id = form['c'].value
+125                 rs = l5r.get_object(session, "l5rRecordStore")
+126                 rec = rs.fetch_record(session, id)
+127                 (t, d) = self.display_card(rec, req.uri)
+128             else:
+129                 (t,d) = ("Error", "&lt;p&gt;You must give a card id to display&lt;/p&gt;")
+130         elif (path =="list.html"):
+131             if (form.has_key('start')):
+132                 start = int(form['start'].value)
+133             else:
+134                 start = 0
+135             cql = self.generate_query(form)
+136             (t, d) = self.display_searchList(cql, start=start, url=path)
+137         else:
+138             if (os.path.exists(path)):
+139                 f = file(path)
+140                 d = f.read()
+141                 f.close()
+142                 stuff = d.split("\n", 1)
+143                 if (len(stuff) == 1):
+144                     t = "Cards, Not Words"
+145                 else:
+146                     (t, d) = stuff
+147             else:
+148                 t = "Page Not Found"
+149                 d = "&lt;p&gt;Could not find your requested page: '%s'&lt;/p&gt;&lt;p&gt;Please try again.&lt;/p&gt;" % path
+150 
+151         cart = self.generateCart(cartRSet)
+152         tmpl = tmpl.replace("%CONTENT%", d)
+153         tmpl = tmpl.replace("%CONTENTTITLE%", t)
+154         tmpl = tmpl.replace("%CARTINCLUDE%", cart)
+155         self.send_html(tmpl, req)
+            </pre>
+            <p>
+		While most of the work as far as display is done in the previous section, we still need to handle the HTTP side of things a bit more to get the right bits and pieces to those routines. 
+                Here we have a quick function to return the HTML back to the browser, and the function called to handle the Apache request.
+            </p>
+            <p>
+		Send_html() simply sets up the request object and then sends the HTML back to the browser. 
+                It sets the content_type (89), the length (90), sends the HTTP headers (91) and the HTML (92). Easy.
+            </p>
+            <p>
+		First we cut off the leading '/' from the URI so we can from now on treat it as a path on disk (96) and create an object to handle any form data in the request (97). 
+                So that our HTML template is always current, we read it in every time (98-101).
+            </p>
+            <p>
+		Once that initial processing is out of the way, we do some Cookie tricks. 
+                We use a cookie called 'cnwCart' to store a ResultSet identifier to use as a shopping cart. 
+                If it exists already (104), we try to fetch the result set from storage (108). 
+                If that fails (eg the result set has expired), then we create a new one and set a Cookie to record the new identifier (112-114). 
+                If there's no shopping cart cookie, then we create one (116-119).  Line 120 then adds the cookie to be sent back to the browser.
+            </p>
+            <p>
+		Lines 122-129 handle the dynamic page used to display a single card (record), 130-136 display a list of matching titles, and 137 through to 149 handles everything else (static pages and 404 errors). 
+                First the single card. 
+                We check to see if the request has the card id (123), otherwise we give an error message (129). 
+                If the request is okay, then we fetch the record from the recordStore (126) and call the display_card() function discussed previously.<br/>
+		For card lists, we check to see the start position in the result set, defaulting to 0 (131-134), generate the query (135) and use the display code above to render the list (136).<br/>
+		Otherwise it's just a static page, so we check to see if it exists (138) otherwise return a 404 style error (147-149). 
+                If it does exist, we read it in, treating the first line as the title in the template.
+            </p>
+            <p>
+		Finally we generate the shopping cart HTML (151), do some replaces in the template (152-154) and send the HTML back to the browser (155). 
+                Phew! :)
+            </p>
+	</div>
+
+	<div class="fieldset">
+            <span class="legend">Apache Binding  (156-173)</span>
+            <pre>
+156 def handler(req):
+157     os.chdir("/home/cheshire/cheshire3/www/cnw/html")
+158     cnwhandler = CNWHandler()        
+159     try:
+160         cnwhandler.handle(req)
+161     except:
+162         req.content_type = "text/html"
+163         cgitb.Hook(file = req).handle()
+164     return apache.OK
+165 
+166 def authenhandler(req):
+167     pw = req.get_basic_auth_pw()
+168     user = req.user
+169     u = authStore.fetch_object(session, user)
+170     if (u and u.password == crypt.crypt(pw, pw[:2])):
+171         return apache.OK
+172     else:
+173         return apache.HTTP_UNAUTHORIZED
+            </pre>
+            <p>
+            	We also need some standard functions for the mod_python apache handler to call. 
+            	The first, handler(), processes all incoming requests. 
+            	It moves to the appropriate base directory where the HTML is kept (157) and creates an object to handle the request (158). 
+            	It then tells the object to process it (160), and if it errors, it uses the stock Python cgi traceback display code (163).  
+            </p>
+            <p>
+            	To allow for an administration interface, we have an authentication handler. 
+            	All this needs to do is return whether or not the user is authorised (171) or not (173). 
+            	To do this, it checks the password given to apache (167) against the password on the user object from a Cheshire3  userStore (169).
+            </p>
+            <p>
+            	And that's it :)  A web site handled by Cheshire3.
+            </p>
+	</div>
+
+	<div class="fieldset">
+            <span class="legend">Complete Example</span>
+            <p>
+                You can find the full example code, with all the extra bits and pieces omitted for sanity above, in the Cheshire3 distribution.
+            </p>
+	</div>
+
+    </body>
+</html>

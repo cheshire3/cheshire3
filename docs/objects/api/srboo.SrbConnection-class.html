@@ -1,0 +1,698 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>srboo.SrbConnection</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <link rel="stylesheet" href="/cheshire3.css" type="text/css"/>
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body>
+<table width="100%" border=0 cellpadding=0 cellspacing=0 class="maintitle">
+<tr height="75">
+<td class="cheshirelogo" width="25%">
+<img src="/gfx/c3_white.gif">
+</td>
+<td width="10">
+<img src="/gfx/slant_grey.gif">
+</td>
+<td width="75%" align="center">
+<h2>Cheshire3 Object Model: Class SrbConnection
+</h2>
+</td></tr>
+</table>
+
+<div class="fieldset">
+<span class="legend"><a href="configParser-module.html">
+        <a href="srboo-module.html">Module&nbsp;srboo</a> ::
+        Class&nbsp;SrbConnection
+      </span>
+<p>
+
+
+<h2 class="class">Class SrbConnection
+<br/><span class="codelink"><a href="srboo-pysrc.html#SrbConnection">source&nbsp;code</a></span></h2>
+<b>Object Tree:</b><pre class="base-tree">
+object --+
+         |
+        <strong class="uidshort">SrbConnection</strong>
+</pre>
+
+<hr />
+<!-- ==================== INSTANCE METHODS ==================== -->
+</div><div class="fieldset"><span class="legend">Instance Methods</span><p>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white"><tr>
+
+  <td>
+    <span class="sig"><a href="srboo.SrbConnection-class.html#__init__" class="sig-name">__init__</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">host</span>,
+        <span class="sig-arg">port</span>,
+        <span class="sig-arg">domain</span>,
+        <span class="sig-arg">auth</span>=<span class="sig-default">&quot;ENCRYPT1&quot;</span>,
+        <span class="sig-arg">user</span>=<span class="sig-default">&quot;&quot;</span>,
+        <span class="sig-arg">passwd</span>=<span class="sig-default">&quot;&quot;</span>,
+        <span class="sig-arg">dn</span>=<span class="sig-default">&quot;&quot;</span>)</span>
+    <br />x.__init__(...) initializes x; see x.__class__.__doc__ for 
+      signature
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="srboo.SrbConnection-class.html#disconnect" class="sig-name">disconnect</a>(<span class="sig-arg">self</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="srboo.SrbConnection-class.html#open" class="sig-name">open</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">name</span>,
+        <span class="sig-arg">flag</span>=<span class="sig-default">'w'</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="srboo.SrbConnection-class.html#create" class="sig-name">create</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">name</span>,
+        <span class="sig-arg">size</span>=<span class="sig-default">-1</span>,
+        <span class="sig-arg">type</span>=<span class="sig-default">&quot;generic&quot;</span>,
+        <span class="sig-arg">resource</span>=<span class="sig-default">&quot;&quot;</span>,
+        <span class="sig-arg">path</span>=<span class="sig-default">&quot;&quot;</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="srboo.SrbConnection-class.html#create_collection" class="sig-name">create_collection</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">name</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="srboo.SrbConnection-class.html#up_collection" class="sig-name">up_collection</a>(<span class="sig-arg">self</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="srboo.SrbConnection-class.html#open_collection" class="sig-name">open_collection</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">name</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="srboo.SrbConnection-class.html#delete_collection" class="sig-name">delete_collection</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">recursive</span>=<span class="sig-default">0</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="srboo.SrbConnection-class.html#n_subcollections" class="sig-name">n_subcollections</a>(<span class="sig-arg">self</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="srboo.SrbConnection-class.html#n_objects" class="sig-name">n_objects</a>(<span class="sig-arg">self</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="srboo.SrbConnection-class.html#object_metadata" class="sig-name">object_metadata</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">idx</span>,
+        <span class="sig-arg">type</span>=<span class="sig-default">'name'</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="srboo.SrbConnection-class.html#collection_name" class="sig-name">collection_name</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">idx</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="srboo.SrbConnection-class.html#walk_names" class="sig-name">walk_names</a>(<span class="sig-arg">self</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="srboo.SrbConnection-class.html#walk" class="sig-name">walk</a>(<span class="sig-arg">self</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="srboo.SrbConnection-class.html#rmrf" class="sig-name">rmrf</a>(<span class="sig-arg">self</span>)</span>
+    
+  </td>
+</tr>
+  <tr>
+    <td colspan="2">
+    <p class="varlist"><span class="varlist-header">Inherited from <code>object</code></span>:
+      <code>__delattr__</code>,
+      <code>__getattribute__</code>,
+      <code>__hash__</code>,
+      <code>__new__</code>,
+      <code>__reduce__</code>,
+      <code>__reduce_ex__</code>,
+      <code>__repr__</code>,
+      <code>__setattr__</code>,
+      <code>__str__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+
+<br />
+<!-- ==================== CLASS VARIABLES ==================== -->
+</div><div class="fieldset"><span class="legend">Class Variables</span><p>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white"><tr>
+  <td width="15%">
+    <strong><a href="srboo.SrbConnection-class.html#id">id</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="srboo.SrbConnection-class.html#collection">collection</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="srboo.SrbConnection-class.html#resource">resource</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="srboo.SrbConnection-class.html#host">host</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="srboo.SrbConnection-class.html#port">port</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="srboo.SrbConnection-class.html#domain">domain</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="srboo.SrbConnection-class.html#auth">auth</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="srboo.SrbConnection-class.html#user">user</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="srboo.SrbConnection-class.html#passwd">passwd</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="srboo.SrbConnection-class.html#dn">dn</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+  <tr>
+    <td colspan="2">
+    <p class="varlist"><span class="varlist-header">Inherited from <code>object</code></span>:
+      <code>__class__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+
+<br />
+<!-- ==================== METHOD DETAILS ==================== --></div><div class="fieldset"><span class="legend">Method Details</span><p><a name="__init__"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">host</span>,
+        <span class="sig-arg">port</span>,
+        <span class="sig-arg">domain</span>,
+        <span class="sig-arg">auth</span>=<span class="sig-default">&quot;ENCRYPT1&quot;</span>,
+        <span class="sig-arg">user</span>=<span class="sig-default">&quot;&quot;</span>,
+        <span class="sig-arg">passwd</span>=<span class="sig-default">&quot;&quot;</span>,
+        <span class="sig-arg">dn</span>=<span class="sig-default">&quot;&quot;</span>)</span>
+    <br /><em class="fname">(Constructor)</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="srboo-pysrc.html#SrbConnection.__init__">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  x.__init__(...) initializes x; see x.__class__.__doc__ for 
+  signature
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      object.__init__
+        <dd><em class="note">(inherited documentation)</em></dd>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="disconnect"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">disconnect</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="srboo-pysrc.html#SrbConnection.disconnect">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="open"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">open</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">name</span>,
+        <span class="sig-arg">flag</span>=<span class="sig-default">'w'</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="srboo-pysrc.html#SrbConnection.open">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="create"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">create</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">name</span>,
+        <span class="sig-arg">size</span>=<span class="sig-default">-1</span>,
+        <span class="sig-arg">type</span>=<span class="sig-default">&quot;generic&quot;</span>,
+        <span class="sig-arg">resource</span>=<span class="sig-default">&quot;&quot;</span>,
+        <span class="sig-arg">path</span>=<span class="sig-default">&quot;&quot;</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="srboo-pysrc.html#SrbConnection.create">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="create_collection"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">create_collection</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">name</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="srboo-pysrc.html#SrbConnection.create_collection">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="up_collection"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">up_collection</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="srboo-pysrc.html#SrbConnection.up_collection">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="open_collection"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">open_collection</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">name</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="srboo-pysrc.html#SrbConnection.open_collection">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="delete_collection"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">delete_collection</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">recursive</span>=<span class="sig-default">0</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="srboo-pysrc.html#SrbConnection.delete_collection">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="n_subcollections"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">n_subcollections</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="srboo-pysrc.html#SrbConnection.n_subcollections">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="n_objects"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">n_objects</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="srboo-pysrc.html#SrbConnection.n_objects">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="object_metadata"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">object_metadata</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">idx</span>,
+        <span class="sig-arg">type</span>=<span class="sig-default">'name'</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="srboo-pysrc.html#SrbConnection.object_metadata">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="collection_name"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">collection_name</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">idx</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="srboo-pysrc.html#SrbConnection.collection_name">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="walk_names"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">walk_names</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="srboo-pysrc.html#SrbConnection.walk_names">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="walk"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">walk</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="srboo-pysrc.html#SrbConnection.walk">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="rmrf"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">rmrf</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="srboo-pysrc.html#SrbConnection.rmrf">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<br />
+<!-- ==================== CLASS VARIABLE DETAILS ==================== --></div><div class="fieldset"><span class="legend">Class Variable Details</span><p><a name="id"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>id</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="-1"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+-1                                                                     
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="collection"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>collection</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="&quot;&quot;"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&quot;&quot;                                                                     
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="resource"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>resource</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="&quot;&quot;"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&quot;&quot;                                                                     
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="host"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>host</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="&quot;&quot;"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&quot;&quot;                                                                     
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="port"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>port</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="&quot;&quot;"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&quot;&quot;                                                                     
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="domain"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>domain</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="&quot;&quot;"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&quot;&quot;                                                                     
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="auth"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>auth</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="&quot;&quot;"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&quot;&quot;                                                                     
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="user"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>user</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="&quot;&quot;"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&quot;&quot;                                                                     
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="passwd"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>passwd</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="&quot;&quot;"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&quot;&quot;                                                                     
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="dn"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>dn</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="&quot;&quot;"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&quot;&quot;                                                                     
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<br />
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">Generated by Epydoc
+        3.0alpha2 on Wed Aug  9 18:10:00 2006</td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>

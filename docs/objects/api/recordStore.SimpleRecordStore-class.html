@@ -1,0 +1,521 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>recordStore.SimpleRecordStore</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <link rel="stylesheet" href="/cheshire3.css" type="text/css"/>
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body>
+<table width="100%" border=0 cellpadding=0 cellspacing=0 class="maintitle">
+<tr height="75">
+<td class="cheshirelogo" width="25%">
+<img src="/gfx/c3_white.gif">
+</td>
+<td width="10">
+<img src="/gfx/slant_grey.gif">
+</td>
+<td width="75%" align="center">
+<h2>Cheshire3 Object Model: Class SimpleRecordStore
+</h2>
+</td></tr>
+</table>
+
+<div class="fieldset">
+<span class="legend"><a href="configParser-module.html">
+        <a href="recordStore-module.html">Module&nbsp;recordStore</a> ::
+        Class&nbsp;SimpleRecordStore
+      </span>
+<p>
+
+
+<h2 class="class">Class SimpleRecordStore
+<br/><span class="codelink"><a href="recordStore-pysrc.html#SimpleRecordStore">source&nbsp;code</a></span></h2>
+<b>Object Tree:</b><pre class="base-tree">
+           object --+            
+                    |            
+<a href="configParser.C3Object-class.html">configParser.C3Object</a> --+        
+                        |        
+              <a href="baseObjects.ObjectStore-class.html">ObjectStore</a> --+    
+                            |    
+      <a href="baseObjects.RecordStore-class.html">baseObjects.RecordStore</a> --+
+                                |
+                               <strong class="uidshort">SimpleRecordStore</strong>
+</pre>
+
+<dl><dt>Known Subclasses:</dt>
+<dd>
+    <a href="recordStore.BdbRecordStore-class.html">BdbRecordStore</a>,
+    <a href="postgres.PostgresRecordStore-class.html">postgres.PostgresRecordStore</a>,
+    <a href="recordStore.ParsingRecordStore-class.html">ParsingRecordStore</a>,
+    <a href="recordStore.RemoteSlaveRecordStore-class.html">RemoteSlaveRecordStore</a>
+</dd></dl>
+
+<hr />
+<!-- ==================== INSTANCE METHODS ==================== -->
+</div><div class="fieldset"><span class="legend">Instance Methods</span><p>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white"><tr>
+
+  <td>
+    <span class="sig"><a href="recordStore.SimpleRecordStore-class.html#__init__" class="sig-name">__init__</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">node</span>,
+        <span class="sig-arg">parent</span>)</span>
+    <br />The constructor for all Cheshire3 objects take the same arguments:
+      session:  A Session object topNode:  The &lt;config&gt; or 
+      &lt;subConfig&gt; domNode for the configuration parent:   The object 
+      that provides the scope for this object.
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="recordStore.SimpleRecordStore-class.html#create_record" class="sig-name">create_record</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">record</span>=<span class="sig-default">None</span>)</span>
+    <br />Create a record and assign it a new identifier.
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="recordStore.SimpleRecordStore-class.html#replace_record" class="sig-name">replace_record</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">record</span>)</span>
+    <br />Permissions checking hook for store_record if the record does not 
+      already exist.
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="recordStore.SimpleRecordStore-class.html#store_record" class="sig-name">store_record</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">record</span>)</span>
+    <br />Store an existing record.
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="recordStore.SimpleRecordStore-class.html#fetch_record" class="sig-name">fetch_record</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">id</span>,
+        <span class="sig-arg">parser</span>=<span class="sig-default">None</span>)</span>
+    <br />Return the record with the given identifier.
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="recordStore.SimpleRecordStore-class.html#delete_record" class="sig-name">delete_record</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">id</span>)</span>
+    <br />Delete the record with the given identifier from storage.
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="recordStore.SimpleRecordStore-class.html#fetch_recordSize" class="sig-name">fetch_recordSize</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">id</span>)</span>
+    <br />Return the size of the record, according to its metadata.
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="recordStore.SimpleRecordStore-class.html#fetch_recordChecksum" class="sig-name">fetch_recordChecksum</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">id</span>,
+        <span class="sig-arg">parser</span>=<span class="sig-default">None</span>)</span>
+    <br />Return a checksum for the record, if one is available.
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="recordStore.SimpleRecordStore-class.html#process_data" class="sig-name">process_data</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">id</span>,
+        <span class="sig-arg">data</span>,
+        <span class="sig-arg">parser</span>=<span class="sig-default">None</span>)</span>
+    
+  </td>
+</tr>
+  <tr>
+    <td colspan="2">
+    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="baseObjects.ObjectStore-class.html">baseObjects.ObjectStore</a></code></span>:
+      <code><a href="baseObjects.ObjectStore-class.html#create_object">create_object</a></code>,
+      <code><a href="baseObjects.ObjectStore-class.html#delete_object">delete_object</a></code>,
+      <code><a href="baseObjects.ObjectStore-class.html#fetch_object">fetch_object</a></code>,
+      <code><a href="baseObjects.ObjectStore-class.html#store_object">store_object</a></code>
+      </p>
+    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="configParser.C3Object-class.html">configParser.C3Object</a></code></span>:
+      <code><a href="configParser.C3Object-class.html#auth_function">auth_function</a></code>,
+      <code><a href="configParser.C3Object-class.html#get_config">get_config</a></code>,
+      <code><a href="configParser.C3Object-class.html#get_default">get_default</a></code>,
+      <code><a href="configParser.C3Object-class.html#get_object">get_object</a></code>,
+      <code><a href="configParser.C3Object-class.html#get_path">get_path</a></code>,
+      <code><a href="configParser.C3Object-class.html#get_setting">get_setting</a></code>,
+      <code><a href="configParser.C3Object-class.html#log_function">log_function</a></code>,
+      <code><a href="configParser.C3Object-class.html#unauth_function">unauth_function</a></code>,
+      <code><a href="configParser.C3Object-class.html#unlog_function">unlog_function</a></code>
+      </p>
+    <div class="private">    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="configParser.C3Object-class.html">configParser.C3Object</a></code></span> (private):
+      <code><a href="configParser.C3Object-class.html#_getDomFromFile">_getDomFromFile</a></code>,
+      <code><a href="configParser.C3Object-class.html#_handleConfigNode">_handleConfigNode</a></code>,
+      <code><a href="configParser.C3Object-class.html#_parseIncludes">_parseIncludes</a></code>,
+      <code><a href="configParser.C3Object-class.html#_recurseSubConfigs">_recurseSubConfigs</a></code>,
+      <code><a href="configParser.C3Object-class.html#_verifyDefault">_verifyDefault</a></code>,
+      <code><a href="configParser.C3Object-class.html#_verifyOption">_verifyOption</a></code>,
+      <code><a href="configParser.C3Object-class.html#_verifySetting">_verifySetting</a></code>
+      </p></div>
+    <p class="varlist"><span class="varlist-header">Inherited from <code>object</code></span>:
+      <code>__delattr__</code>,
+      <code>__getattribute__</code>,
+      <code>__hash__</code>,
+      <code>__new__</code>,
+      <code>__reduce__</code>,
+      <code>__reduce_ex__</code>,
+      <code>__repr__</code>,
+      <code>__setattr__</code>,
+      <code>__str__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+
+<br />
+<!-- ==================== CLASS VARIABLES ==================== -->
+</div><div class="fieldset"><span class="legend">Class Variables</span><p>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white"><tr>
+  <td width="15%">
+    <strong><a href="recordStore.SimpleRecordStore-class.html#inTransformer">inTransformer</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="recordStore.SimpleRecordStore-class.html#outParser">outParser</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="recordStore.SimpleRecordStore-class.html#idNormalizer">idNormalizer</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+  <tr>
+    <td colspan="2">
+    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="configParser.C3Object-class.html">configParser.C3Object</a></code></span>:
+      <code><a href="configParser.C3Object-class.html#configStore">configStore</a></code>,
+      <code><a href="configParser.C3Object-class.html#defaults">defaults</a></code>,
+      <code><a href="configParser.C3Object-class.html#functionLogger">functionLogger</a></code>,
+      <code><a href="configParser.C3Object-class.html#id">id</a></code>,
+      <code><a href="configParser.C3Object-class.html#name">name</a></code>,
+      <code><a href="configParser.C3Object-class.html#objectType">objectType</a></code>,
+      <code><a href="configParser.C3Object-class.html#objects">objects</a></code>,
+      <code><a href="configParser.C3Object-class.html#parent">parent</a></code>,
+      <code><a href="configParser.C3Object-class.html#paths">paths</a></code>,
+      <code><a href="configParser.C3Object-class.html#permissionHandlers">permissionHandlers</a></code>,
+      <code><a href="configParser.C3Object-class.html#settings">settings</a></code>,
+      <code><a href="configParser.C3Object-class.html#subConfigs">subConfigs</a></code>,
+      <code><a href="configParser.C3Object-class.html#unresolvedObjects">unresolvedObjects</a></code>
+      </p>
+    <div class="private">    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="configParser.C3Object-class.html">configParser.C3Object</a></code></span> (private):
+      <code><a href="configParser.C3Object-class.html#_includeConfigStores">_includeConfigStores</a></code>,
+      <code><a href="configParser.C3Object-class.html#_objectRefs">_objectRefs</a></code>
+      </p></div>
+    <p class="varlist"><span class="varlist-header">Inherited from <code>object</code></span>:
+      <code>__class__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+
+<br />
+<!-- ==================== METHOD DETAILS ==================== --></div><div class="fieldset"><span class="legend">Method Details</span><p><a name="__init__"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">node</span>,
+        <span class="sig-arg">parent</span>)</span>
+    <br /><em class="fname">(Constructor)</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="recordStore-pysrc.html#SimpleRecordStore.__init__">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  The constructor for all Cheshire3 objects take the same arguments: 
+  session:  A Session object topNode:  The &lt;config&gt; or 
+  &lt;subConfig&gt; domNode for the configuration parent:   The object that
+  provides the scope for this object.
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="configParser.C3Object-class.html#__init__">configParser.C3Object.__init__</a>
+        <dd><em class="note">(inherited documentation)</em></dd>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="create_record"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">create_record</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">record</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="recordStore-pysrc.html#SimpleRecordStore.create_record">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Create a record and assign it a new identifier.
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="baseObjects.RecordStore-class.html#create_record">baseObjects.RecordStore.create_record</a>
+        <dd><em class="note">(inherited documentation)</em></dd>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="replace_record"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">replace_record</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">record</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="recordStore-pysrc.html#SimpleRecordStore.replace_record">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Permissions checking hook for store_record if the record does not 
+  already exist.
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="baseObjects.RecordStore-class.html#replace_record">baseObjects.RecordStore.replace_record</a>
+        <dd><em class="note">(inherited documentation)</em></dd>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="store_record"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">store_record</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">record</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="recordStore-pysrc.html#SimpleRecordStore.store_record">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Store an existing record. It must already have an identifier assigned 
+  to it.
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="baseObjects.RecordStore-class.html#store_record">baseObjects.RecordStore.store_record</a>
+        <dd><em class="note">(inherited documentation)</em></dd>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="fetch_record"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">fetch_record</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">id</span>,
+        <span class="sig-arg">parser</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="recordStore-pysrc.html#SimpleRecordStore.fetch_record">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Return the record with the given identifier.
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="baseObjects.RecordStore-class.html#fetch_record">baseObjects.RecordStore.fetch_record</a>
+        <dd><em class="note">(inherited documentation)</em></dd>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="delete_record"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">delete_record</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">id</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="recordStore-pysrc.html#SimpleRecordStore.delete_record">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Delete the record with the given identifier from storage.
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="baseObjects.RecordStore-class.html#delete_record">baseObjects.RecordStore.delete_record</a>
+        <dd><em class="note">(inherited documentation)</em></dd>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="fetch_recordSize"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">fetch_recordSize</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">id</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="recordStore-pysrc.html#SimpleRecordStore.fetch_recordSize">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Return the size of the record, according to its metadata.
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="baseObjects.RecordStore-class.html#fetch_recordSize">baseObjects.RecordStore.fetch_recordSize</a>
+        <dd><em class="note">(inherited documentation)</em></dd>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="fetch_recordChecksum"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">fetch_recordChecksum</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">id</span>,
+        <span class="sig-arg">parser</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="recordStore-pysrc.html#SimpleRecordStore.fetch_recordChecksum">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Return a checksum for the record, if one is available.
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="baseObjects.RecordStore-class.html#fetch_recordChecksum">baseObjects.RecordStore.fetch_recordChecksum</a>
+        <dd><em class="note">(inherited documentation)</em></dd>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="process_data"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">process_data</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">id</span>,
+        <span class="sig-arg">data</span>,
+        <span class="sig-arg">parser</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="recordStore-pysrc.html#SimpleRecordStore.process_data">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<br />
+<!-- ==================== CLASS VARIABLE DETAILS ==================== --></div><div class="fieldset"><span class="legend">Class Variable Details</span><p><a name="inTransformer"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>inTransformer</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="None"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="outParser"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>outParser</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="None"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="idNormalizer"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>idNormalizer</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="None"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<br />
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">Generated by Epydoc
+        3.0alpha2 on Wed Aug  9 18:10:00 2006</td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>

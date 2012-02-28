@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>permissionHandler</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        Module&nbsp;permissionHandler
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript: void(0);" class="privatelink"
+    onclick="toggle_private();">hide private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="permissionHandler-pysrc.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<h2 class="py-src">Source Code for <a href="permissionHandler-module.html">Module permissionHandler</a></h2>
+<div class="py-src">
+<pre class="py-src">
+<span class="lineno"> 1</span>  <span class="py-line"> </span>
+<span class="lineno"> 2</span>  <span class="py-line"><span class="py-keyword">from</span> <a title="utils" class="py-name" href="utils-module.html">utils</a> <span class="py-keyword">import</span> <span id="link-0" class="py-name"><a title="indexStore.elementType
+textmining.elementType
+utils.elementType" class="py-name" href="#" onclick="doclink('link-0', 'elementType', 'Variable indexStore.elementType=indexStore-module.html#elementType,Variable textmining.elementType=textmining-module.html#elementType,Variable utils.elementType=utils-module.html#elementType'); return false;">elementType</a></span></span><span class="py-op">,</span> <a class="py-name" href="utils-module.html#getFirstData">getFirstData</a> </span>
+<span class="lineno"> 3</span>  <span class="py-line"><span class="py-keyword">from</span> <a title="textmining.tmNormalizer.PosTypeNormalizer.types" class="py-name" href="textmining.tmNormalizer.PosTypeNormalizer-class.html#types">types</a> <span class="py-keyword">import</span> <span class="py-name">MethodType</span> </span>
+<span class="lineno"> 4</span>  <span class="py-line"> </span>
+<span class="lineno"> 5</span>  <span class="py-line"> </span>
+<a name="PermissionHandler"></a><div id="PermissionHandler-def"><span class="lineno"> 6</span> <a class="pysrc-toggle" href="#" id="PermissionHandler-toggle" onclick="toggle('PermissionHandler'); return false;">-</a><span class="py-line"><span class="py-keyword">class</span> <a class="py-def-name" href="permissionHandler.PermissionHandler-class.html">PermissionHandler</a><span class="py-op">:</span> </span>
+</div><div id="PermissionHandler-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="PermissionHandler-expanded"><span class="lineno"> 7</span>  <span class="py-line">    <span class="py-comment"># Write ourselves some code to run to check permissions.</span> </span>
+<span class="lineno"> 8</span>  <span class="py-line"><span class="py-comment"></span> </span>
+<span class="lineno"> 9</span>  <span class="py-line">    <a class="py-name" href="permissionHandler.PermissionHandler-class.html#actionIdentifier">actionIdentifier</a> <span class="py-op">=</span> <span class="py-string">""</span> </span>
+<span class="lineno">10</span>  <span class="py-line">    <a class="py-name" href="permissionHandler.PermissionHandler-class.html#codeText">codeText</a> <span class="py-op">=</span> <span class="py-op">[</span><span class="py-op">]</span> </span>
+<span class="lineno">11</span>  <span class="py-line">    <a class="py-name" href="permissionHandler.PermissionHandler-class.html#hasPermission">hasPermission</a> <span class="py-op">=</span> <span class="py-name">None</span> </span>
+<span class="lineno">12</span>  <span class="py-line"> </span>
+<a name="PermissionHandler.__init__"></a><div id="PermissionHandler.__init__-def"><span class="lineno">13</span> <a class="pysrc-toggle" href="#" id="PermissionHandler.__init__-toggle" onclick="toggle('PermissionHandler.__init__'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="permissionHandler.PermissionHandler-class.html#__init__">__init__</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">node</span><span class="py-op">,</span> <span class="py-param">parent</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="PermissionHandler.__init__-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="PermissionHandler.__init__-expanded"><span class="lineno">14</span>  <span class="py-line">        <span class="py-name">self</span><span class="py-op">.</span><span id="link-1" class="py-name"><a title="baseObjects.Document.parent
+baseObjects.Record.parent
+configParser.C3Object.parent" class="py-name" href="#" onclick="doclink('link-1', 'parent', 'Variable baseObjects.Document.parent=baseObjects.Document-class.html#parent,Variable baseObjects.Record.parent=baseObjects.Record-class.html#parent,Variable configParser.C3Object.parent=configParser.C3Object-class.html#parent'); return false;">parent</a></span></span> <span class="py-op">=</span> <span id="link-2" class="py-name"><a title="baseObjects.Document.parent
+baseObjects.Record.parent
+configParser.C3Object.parent" class="py-name" href="#" onclick="doclink('link-2', 'parent', 'Variable baseObjects.Document.parent=baseObjects.Document-class.html#parent,Variable baseObjects.Record.parent=baseObjects.Record-class.html#parent,Variable configParser.C3Object.parent=configParser.C3Object-class.html#parent'); return false;">parent</a></span></span> </span>
+<span class="lineno">15</span>  <span class="py-line">        <span class="py-name">self</span><span class="py-op">.</span><a title="permissionHandler.PermissionHandler._walkNode" class="py-name" href="permissionHandler.PermissionHandler-class.html#_walkNode">_walkNode</a><span class="py-op">(</span><span class="py-name">node</span><span class="py-op">)</span> </span>
+</div><span class="lineno">16</span>  <span class="py-line"> </span>
+<a name="PermissionHandler._walkNode"></a><div id="PermissionHandler._walkNode-def"><span class="lineno">17</span> <a class="pysrc-toggle" href="#" id="PermissionHandler._walkNode-toggle" onclick="toggle('PermissionHandler._walkNode'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="permissionHandler.PermissionHandler-class.html#_walkNode">_walkNode</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">node</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="PermissionHandler._walkNode-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="PermissionHandler._walkNode-expanded"><span class="lineno">18</span>  <span class="py-line"> </span>
+<span class="lineno">19</span>  <span class="py-line">        <span class="py-keyword">if</span> <span class="py-name">node</span><span class="py-op">.</span><span class="py-name">localName</span> <span class="py-op">==</span> <span class="py-string">"action"</span><span class="py-op">:</span> </span>
+<span class="lineno">20</span>  <span class="py-line">            <span class="py-comment"># top node</span> </span>
+<span class="lineno">21</span>  <span class="py-line"><span class="py-comment"></span>            <span class="py-name">self</span><span class="py-op">.</span><a title="permissionHandler.PermissionHandler.actionIdentifier" class="py-name" href="permissionHandler.PermissionHandler-class.html#actionIdentifier">actionIdentifier</a> <span class="py-op">=</span> <span class="py-name">node</span><span class="py-op">.</span><span class="py-name">getAttributeNS</span><span class="py-op">(</span><span class="py-name">None</span><span class="py-op">,</span> <span class="py-string">'identifier'</span><span class="py-op">)</span> </span>
+<span class="lineno">22</span>  <span class="py-line">            <span class="py-keyword">if</span> <span class="py-keyword">not</span> <span class="py-name">self</span><span class="py-op">.</span><a title="permissionHandler.PermissionHandler.actionIdentifier" class="py-name" href="permissionHandler.PermissionHandler-class.html#actionIdentifier">actionIdentifier</a><span class="py-op">:</span> </span>
+<span class="lineno">23</span>  <span class="py-line">                <span class="py-keyword">raise</span> <a title="c3errors.ConfigFileException" class="py-name" href="c3errors.ConfigFileException-class.html">ConfigFileException</a><span class="py-op">(</span><span class="py-string">"No action identifier"</span><span class="py-op">)</span> </span>
+<span class="lineno">24</span>  <span class="py-line">            <span class="py-name">self</span><span class="py-op">.</span><span id="link-3" class="py-name"><a title="baseObjects.Workflow.code
+workflow.CachingWorkflow.code
+workflow.SimpleWorkflow.code" class="py-name" href="#" onclick="doclink('link-3', 'code', 'Variable baseObjects.Workflow.code=baseObjects.Workflow-class.html#code,Variable workflow.CachingWorkflow.code=workflow.CachingWorkflow-class.html#code,Variable workflow.SimpleWorkflow.code=workflow.SimpleWorkflow-class.html#code'); return false;">code</a></span></span> <span class="py-op">=</span> <span class="py-op">[</span><span class="py-string">"  if "</span><span class="py-op">]</span> </span>
+<span class="lineno">25</span>  <span class="py-line">            <span class="py-keyword">for</span> <span class="py-name">c</span> <span class="py-keyword">in</span> <span class="py-name">node</span><span class="py-op">.</span><span class="py-name">childNodes</span><span class="py-op">:</span> </span>
+<span class="lineno">26</span>  <span class="py-line">                <span class="py-keyword">if</span> <span class="py-name">c</span><span class="py-op">.</span><span class="py-name">nodeType</span> <span class="py-op">==</span> <span id="link-4" class="py-name"><a title="indexStore.elementType
+textmining.elementType
+utils.elementType" class="py-name" href="#" onclick="doclink('link-4', 'elementType', 'Variable indexStore.elementType=indexStore-module.html#elementType,Variable textmining.elementType=textmining-module.html#elementType,Variable utils.elementType=utils-module.html#elementType'); return false;">elementType</a></span></span><span class="py-op">:</span> </span>
+<span class="lineno">27</span>  <span class="py-line">                    <span class="py-name">self</span><span class="py-op">.</span><a title="permissionHandler.PermissionHandler._walkNode" class="py-name" href="permissionHandler.PermissionHandler-class.html#_walkNode">_walkNode</a><span class="py-op">(</span><span class="py-name">c</span><span class="py-op">)</span> </span>
+<span class="lineno">28</span>  <span class="py-line">            <span class="py-name">self</span><span class="py-op">.</span><span id="link-5" class="py-name"><a title="baseObjects.Workflow.code
+workflow.CachingWorkflow.code
+workflow.SimpleWorkflow.code" class="py-name" href="#" onclick="doclink('link-5', 'code', 'Variable baseObjects.Workflow.code=baseObjects.Workflow-class.html#code,Variable workflow.CachingWorkflow.code=workflow.CachingWorkflow-class.html#code,Variable workflow.SimpleWorkflow.code=workflow.SimpleWorkflow-class.html#code'); return false;">code</a></span></span><span class="py-op">.</span><a title="resultSet.SimpleResultSet.append" class="py-name" href="resultSet.SimpleResultSet-class.html#append">append</a><span class="py-op">(</span><span class="py-string">":"</span><span class="py-op">)</span> </span>
+<span class="lineno">29</span>  <span class="py-line">            <span class="py-name">cstring</span> <span class="py-op">=</span> <span class="py-string">" "</span><span class="py-op">.</span><span class="py-name">join</span><span class="py-op">(</span><span class="py-name">self</span><span class="py-op">.</span><span id="link-6" class="py-name"><a title="baseObjects.Workflow.code
+workflow.CachingWorkflow.code
+workflow.SimpleWorkflow.code" class="py-name" href="#" onclick="doclink('link-6', 'code', 'Variable baseObjects.Workflow.code=baseObjects.Workflow-class.html#code,Variable workflow.CachingWorkflow.code=workflow.CachingWorkflow-class.html#code,Variable workflow.SimpleWorkflow.code=workflow.SimpleWorkflow-class.html#code'); return false;">code</a></span></span><span class="py-op">)</span> </span>
+<span class="lineno">30</span>  <span class="py-line">            <span class="py-name">fncode</span> <span class="py-op">=</span> <span class="py-string">"def handler(self, session, user):\n"</span> <span class="py-op">+</span> <span class="py-name">cstring</span> <span class="py-op">+</span> <span class="py-string">"\n    return True;\n  else:\n    return False"</span> </span>
+<span class="lineno">31</span>  <span class="py-line">            <span class="py-keyword">exec</span> <span class="py-name">fncode</span> </span>
+<span class="lineno">32</span>  <span class="py-line">            <span class="py-name">setattr</span><span class="py-op">(</span><span class="py-name">self</span><span class="py-op">,</span> <span class="py-string">'hasPermission'</span><span class="py-op">,</span> <span class="py-name">MethodType</span><span class="py-op">(</span><span class="py-name">locals</span><span class="py-op">(</span><span class="py-op">)</span><span class="py-op">[</span><span class="py-string">'handler'</span><span class="py-op">]</span><span class="py-op">,</span> <span class="py-name">self</span><span class="py-op">,</span> <span class="py-name">self</span><span class="py-op">.</span><span class="py-name">__class__</span><span class="py-op">)</span><span class="py-op">)</span> </span>
+<span class="lineno">33</span>  <span class="py-line">        <span class="py-keyword">elif</span> <span class="py-name">node</span><span class="py-op">.</span><span class="py-name">localName</span> <span class="py-keyword">in</span> <span class="py-op">[</span><span class="py-string">"all"</span><span class="py-op">,</span> <span class="py-string">"any"</span><span class="py-op">]</span><span class="py-op">:</span> </span>
+<span class="lineno">34</span>  <span class="py-line">            <span class="py-keyword">if</span> <span class="py-name">node</span><span class="py-op">.</span><span class="py-name">localName</span> <span class="py-op">==</span> <span class="py-string">"all"</span><span class="py-op">:</span> </span>
+<span class="lineno">35</span>  <span class="py-line">                <span class="py-name">bool</span> <span class="py-op">=</span> <span class="py-string">"and"</span> </span>
+<span class="lineno">36</span>  <span class="py-line">            <span class="py-keyword">else</span><span class="py-op">:</span> </span>
+<span class="lineno">37</span>  <span class="py-line">                <span class="py-name">bool</span> <span class="py-op">=</span> <span class="py-string">"or"</span> </span>
+<span class="lineno">38</span>  <span class="py-line">            <span class="py-name">self</span><span class="py-op">.</span><span id="link-7" class="py-name"><a title="baseObjects.Workflow.code
+workflow.CachingWorkflow.code
+workflow.SimpleWorkflow.code" class="py-name" href="#" onclick="doclink('link-7', 'code', 'Variable baseObjects.Workflow.code=baseObjects.Workflow-class.html#code,Variable workflow.CachingWorkflow.code=workflow.CachingWorkflow-class.html#code,Variable workflow.SimpleWorkflow.code=workflow.SimpleWorkflow-class.html#code'); return false;">code</a></span></span><span class="py-op">.</span><a title="resultSet.SimpleResultSet.append" class="py-name" href="resultSet.SimpleResultSet-class.html#append">append</a><span class="py-op">(</span><span class="py-string">"("</span><span class="py-op">)</span> </span>
+<span class="lineno">39</span>  <span class="py-line">            <span class="py-keyword">for</span> <span class="py-name">c</span> <span class="py-keyword">in</span> <span class="py-name">node</span><span class="py-op">.</span><span class="py-name">childNodes</span><span class="py-op">:</span> </span>
+<span class="lineno">40</span>  <span class="py-line">                <span class="py-keyword">if</span> <span class="py-name">c</span><span class="py-op">.</span><span class="py-name">nodeType</span> <span class="py-op">==</span> <span id="link-8" class="py-name"><a title="indexStore.elementType
+textmining.elementType
+utils.elementType" class="py-name" href="#" onclick="doclink('link-8', 'elementType', 'Variable indexStore.elementType=indexStore-module.html#elementType,Variable textmining.elementType=textmining-module.html#elementType,Variable utils.elementType=utils-module.html#elementType'); return false;">elementType</a></span></span><span class="py-op">:</span> </span>
+<span class="lineno">41</span>  <span class="py-line">                    <span class="py-name">self</span><span class="py-op">.</span><a title="permissionHandler.PermissionHandler._walkNode" class="py-name" href="permissionHandler.PermissionHandler-class.html#_walkNode">_walkNode</a><span class="py-op">(</span><span class="py-name">c</span><span class="py-op">)</span>                 </span>
+<span class="lineno">42</span>  <span class="py-line">                    <span class="py-name">self</span><span class="py-op">.</span><span id="link-9" class="py-name"><a title="baseObjects.Workflow.code
+workflow.CachingWorkflow.code
+workflow.SimpleWorkflow.code" class="py-name" href="#" onclick="doclink('link-9', 'code', 'Variable baseObjects.Workflow.code=baseObjects.Workflow-class.html#code,Variable workflow.CachingWorkflow.code=workflow.CachingWorkflow-class.html#code,Variable workflow.SimpleWorkflow.code=workflow.SimpleWorkflow-class.html#code'); return false;">code</a></span></span><span class="py-op">.</span><a title="resultSet.SimpleResultSet.append" class="py-name" href="resultSet.SimpleResultSet-class.html#append">append</a><span class="py-op">(</span><span class="py-name">bool</span><span class="py-op">)</span> </span>
+<span class="lineno">43</span>  <span class="py-line">            <span class="py-name">self</span><span class="py-op">.</span><span id="link-10" class="py-name"><a title="baseObjects.Workflow.code
+workflow.CachingWorkflow.code
+workflow.SimpleWorkflow.code" class="py-name" href="#" onclick="doclink('link-10', 'code', 'Variable baseObjects.Workflow.code=baseObjects.Workflow-class.html#code,Variable workflow.CachingWorkflow.code=workflow.CachingWorkflow-class.html#code,Variable workflow.SimpleWorkflow.code=workflow.SimpleWorkflow-class.html#code'); return false;">code</a></span></span><span class="py-op">.</span><span class="py-name">pop</span><span class="py-op">(</span><span class="py-op">)</span> </span>
+<span class="lineno">44</span>  <span class="py-line">            <span class="py-name">self</span><span class="py-op">.</span><span id="link-11" class="py-name"><a title="baseObjects.Workflow.code
+workflow.CachingWorkflow.code
+workflow.SimpleWorkflow.code" class="py-name" href="#" onclick="doclink('link-11', 'code', 'Variable baseObjects.Workflow.code=baseObjects.Workflow-class.html#code,Variable workflow.CachingWorkflow.code=workflow.CachingWorkflow-class.html#code,Variable workflow.SimpleWorkflow.code=workflow.SimpleWorkflow-class.html#code'); return false;">code</a></span></span><span class="py-op">.</span><a title="resultSet.SimpleResultSet.append" class="py-name" href="resultSet.SimpleResultSet-class.html#append">append</a><span class="py-op">(</span><span class="py-string">")"</span><span class="py-op">)</span> </span>
+<span class="lineno">45</span>  <span class="py-line">        <span class="py-keyword">elif</span> <span class="py-name">node</span><span class="py-op">.</span><span class="py-name">localName</span> <span class="py-op">==</span> <span class="py-string">"flag"</span><span class="py-op">:</span> </span>
+<span class="lineno">46</span>  <span class="py-line">            <span class="py-name">f</span> <span class="py-op">=</span> <a title="utils.getFirstData" class="py-name" href="utils-module.html#getFirstData">getFirstData</a><span class="py-op">(</span><span class="py-name">node</span><span class="py-op">)</span> </span>
+<span class="lineno">47</span>  <span class="py-line">            <span class="py-name">self</span><span class="py-op">.</span><span id="link-12" class="py-name"><a title="baseObjects.Workflow.code
+workflow.CachingWorkflow.code
+workflow.SimpleWorkflow.code" class="py-name" href="#" onclick="doclink('link-12', 'code', 'Variable baseObjects.Workflow.code=baseObjects.Workflow-class.html#code,Variable workflow.CachingWorkflow.code=workflow.CachingWorkflow-class.html#code,Variable workflow.SimpleWorkflow.code=workflow.SimpleWorkflow-class.html#code'); return false;">code</a></span></span><span class="py-op">.</span><a title="resultSet.SimpleResultSet.append" class="py-name" href="resultSet.SimpleResultSet-class.html#append">append</a><span class="py-op">(</span><span class="py-string">"user.hasFlag(session, \"%s\", object)"</span> <span class="py-op">%</span> <span class="py-name">f</span><span class="py-op">)</span> </span>
+<span class="lineno">48</span>  <span class="py-line">        <span class="py-keyword">elif</span> <span class="py-name">node</span><span class="py-op">.</span><span class="py-name">localName</span> <span class="py-op">==</span> <span class="py-string">"environment"</span><span class="py-op">:</span> </span>
+<span class="lineno">49</span>  <span class="py-line">            <span class="py-name">e</span> <span class="py-op">=</span> <a title="utils.getFirstData" class="py-name" href="utils-module.html#getFirstData">getFirstData</a><span class="py-op">(</span><span class="py-name">node</span><span class="py-op">)</span> </span>
+<span class="lineno">50</span>  <span class="py-line">            <span class="py-name">self</span><span class="py-op">.</span><span id="link-13" class="py-name"><a title="baseObjects.Workflow.code
+workflow.CachingWorkflow.code
+workflow.SimpleWorkflow.code" class="py-name" href="#" onclick="doclink('link-13', 'code', 'Variable baseObjects.Workflow.code=baseObjects.Workflow-class.html#code,Variable workflow.CachingWorkflow.code=workflow.CachingWorkflow-class.html#code,Variable workflow.SimpleWorkflow.code=workflow.SimpleWorkflow-class.html#code'); return false;">code</a></span></span><span class="py-op">.</span><a title="resultSet.SimpleResultSet.append" class="py-name" href="resultSet.SimpleResultSet-class.html#append">append</a><span class="py-op">(</span><span class="py-string">"session.environment == \"%s\""</span> <span class="py-op">%</span> <span class="py-name">e</span><span class="py-op">)</span> </span>
+<span class="lineno">51</span>  <span class="py-line">        <span class="py-keyword">elif</span> <span class="py-name">node</span><span class="py-op">.</span><span class="py-name">localName</span> <span class="py-op">==</span> <span class="py-string">"hostmask"</span><span class="py-op">:</span> </span>
+<span class="lineno">52</span>  <span class="py-line">            <span class="py-name">e</span> <span class="py-op">=</span> <a title="utils.getFirstData" class="py-name" href="utils-module.html#getFirstData">getFirstData</a><span class="py-op">(</span><span class="py-name">node</span><span class="py-op">)</span> </span>
+<span class="lineno">53</span>  <span class="py-line">            <span class="py-name">self</span><span class="py-op">.</span><span id="link-14" class="py-name"><a title="baseObjects.Workflow.code
+workflow.CachingWorkflow.code
+workflow.SimpleWorkflow.code" class="py-name" href="#" onclick="doclink('link-14', 'code', 'Variable baseObjects.Workflow.code=baseObjects.Workflow-class.html#code,Variable workflow.CachingWorkflow.code=workflow.CachingWorkflow-class.html#code,Variable workflow.SimpleWorkflow.code=workflow.SimpleWorkflow-class.html#code'); return false;">code</a></span></span><span class="py-op">.</span><a title="resultSet.SimpleResultSet.append" class="py-name" href="resultSet.SimpleResultSet-class.html#append">append</a><span class="py-op">(</span><span class="py-string">"user.connectedFrom(session, \"%s\")"</span> <span class="py-op">%</span> <span class="py-name">e</span><span class="py-op">)</span> </span>
+</div></div><span class="lineno">54</span>  <span class="py-line"> </span><script type="text/javascript">
+<!--
+expandto(location.href);
+// -->
+</script>
+</pre>
+</div>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">Generated by Epydoc
+        3.0alpha2 on Wed Aug  9 18:10:46 2006</td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>

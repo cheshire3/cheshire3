@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>Cheshire3 Documentation</title>
+        <link rel="stylesheet" type="text/css" href="http://www.cheshire3.org/cheshire3.css"></link>
+    </head>
+    <body>
+        <a name="top"></a>
+        <table cellpadding="0" cellspacing="0" class="maintitle">
+            <tr>
+                <td class="cheshirelogo">
+                    <img src="http://www.cheshire3.org/gfx/c3_white.gif" alt=" c h e s h i r e  |  3 "/>
+                </td>
+                <td>
+                    <img src="http://www.cheshire3.org/gfx/slant_grey.gif" alt=""/>
+                </td>
+                <td align="center">
+                    <h2>Cheshire3 Documentation</h2>
+                </td>
+            </tr>
+        </table>
+
+	<!--#config errmsg="<div id="navbar"/>" -->
+  	<!--#include virtual="/navbar.ssi" -->
+
+	<div class="fieldset">
+            <span class="legend">Introduction</span>
+            <p>
+            	Welcome to the Cheshire3 Information Framework.  Below is everything that you should need to install, configure, 
+            	understand and develop solutions using Cheshire3.  If not, let us know and we'll try to add it.
+            </p>
+	</div>
+
+	<div class="fieldset">
+            <span class="legend">Capabilities</span>
+            What Cheshire3 can do: 
+            <ul>
+                <li>Create a database of your documents, and put a search engine on top.</li>
+                <li>Index the full text of those documents, and allow you to set up your own indexes of specific fields within structured documents.</li>
+                <li>Set up these indexes to extract and normalize the data exactly the way you need (e.g. make an index of people's names as keywords, strip off possissive apostrophes, treat all names as lowercase)</li>
+                <li>Search the indexes you've set up to quickly find the document you want. When searching indexes the search terms are treated the same way as the data, so a user doesn't need to know what normalization you've applied, they'll just get the correct results!</li>
+                <li>Advanced boolean search logic ('AND', 'OR', 'NOT') as well as proximity, phrase and range searching (e.g. for date/time periods).</li>
+                <li>Return shared 'facets' of your search results to indicate ways in which a search could be refined.</li>
+                <li>Scan through all terms in an index, just like reading the index in a book.</li>
+                <li>Add international standard webservice APIs to your database</li>
+                <li>Use an existing Relation Database Management Systems as a source of documents.</li>
+            	<li>[More Coming]</li>
+            </ul>
+	</div>
+
+	<div class="fieldset">
+	   <span class="legend">Installation</span>
+            <ul>
+                <li><a href="install.html">How to Install Cheshire3</a></li>
+                <li><a href="troubleshooting.html">Troubleshooting</a></li>
+            </ul>
+	</div>
+
+	<div class="fieldset">
+            <span class="legend">Building Databases</span>
+            <ul>
+                <li><a href="build/index.html">Configuring and Building a Database</a></li>
+            </ul>
+	</div>
+
+	<div class="fieldset">
+            <span class="legend">Interface Development</span>
+                <ul>
+                    <li><a href="script/script_search.html">Search and Display example</a></li>
+                    <li><a href="script/script_apache.html">Apache web interface example</a> (long)</li>
+                </ul>
+	</div>
+
+	<div class="fieldset">
+            <span class="legend">Development Details</span>
+            <ul>
+                <li><a href="config/index.html">Configuration of Cheshire3</a></li>
+                <li><a href="objects/index.html">Cheshire3 Object Model</a></li>
+            </ul>
+	</div>
+
+    </body>
+</html>

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>Cheshire3 Objects: Record</title>
+        <link rel="stylesheet" type="text/css" href="http://www.cheshire3.org/cheshire3.css"></link>
+    </head>
+    <body>
+        <a name="top"></a>
+	<table width="100%" border=0 cellpadding=0 cellspacing=0 class="maintitle">
+	   <tr>
+	       <td class="cheshirelogo" width="25%">
+	           <img src="http://www.cheshire3.org/gfx/c3_white.gif" alt=" c h e s h i r e  |  3 "/>
+	       </td>
+	       <td>
+	           <img src="http://www.cheshire3.org/gfx/slant_grey.gif" alt=""/>
+	       </td>
+	       <td align="center">
+	           <h2>Cheshire3 Objects:  Record</h2>
+	       </td>
+	   </tr>
+	</table>
+
+	<!--#config errmsg="<div id="navbar"/>" -->
+	<!--#include virtual="/navbar.ssi" -->
+
+        <div class="fieldset">
+            <span class="legend">Description</span>
+            <p>
+                Records in the system are stored in an XML form. 
+                Attached to the record is various configurable metadata, such as the time it was inserted into the database and by which user. 
+                Records are stored in a RecordStore database and retrieved via a persistent and unique document identifier. 
+                The record data may be retrieved as a list of SAX events, as regularised XML or as a DOM tree.
+            </p>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">Implementations</span>
+            <ul>
+                <li><b>MinidomRecord</b><br/>
+                    A DOM based record using the Python Minidom binding
+                </li>
+                <li><b>LxmlRecord</b><br/>
+                    A DOM based record using a Python binding to the libxml2 library
+                </li>
+                <li><b>SaxRecord</b><br/>
+                    A SAX based record
+                </li>
+                <li><b>MarcRecord</b><br/>
+                    A MARC (common library catalogue format) record.
+                </li>
+            </ul>
+        </div>
+        
+        <div class="fieldset">
+            <span class="legend">API</span>
+            <p>
+                <em>Module</em>: <strong>cheshire3.record</strong><br/>
+                <em>Classes</em>:
+            </p>
+            <ul>
+                <li><b>MinidomRecord</b><br/>
+                    A DOM based record using the Python Minidom binding
+                </li>
+                <li><b>LxmlRecord</b><br/>
+                    A DOM based record using a Python binding to the libxml2 library
+                </li>
+                <li><b>SaxRecord</b><br/>
+                    A SAX based record
+                </li>
+                <li><b>MarcRecord</b><br/>
+                    A MARC (common library catalogue format) record.
+                </li>
+            </ul>
+            <em>Methods</em>:
+            <table border="1" cellpadding="3" cellspacing="0" width="100%">
+                <tr><th>Function</th><th>Parameters</th><th>Returns</th><th>Description</th></tr>
+				<tr><td>__init__</td><td>data, ?xml, ?docid</td><td>&nbsp;</td><td>The constructer takes the data which should be used to construct the record.  This is implementation dependant, eg a DOM node or a list of SAX events.. It also optionally may take the raw XML which was parsed, and a document identifier.</td></tr>
+				<tr><td>get_xml</td><td>session</td><td>string</td><td>Return the raw XML for the record</td></tr>
+				<tr><td>get_dom</td><td>session</td><td>domNode</td><td>Return the dom document node for the record</td></tr>
+				<tr><td>get_sax</td><td>session</td><td>list of saxEvents</td><td>Return the sax events for the record (list of strings)</td></tr>
+				<tr><td>process_xpath</td><td>session, XPath</td><td>data</td><td>Given an XPath, process it and return the results. The XPath may be parsed ( tuple of object and internal format) or a string. Returned data type will depend on the XPath, but will commonly be a list of either DOM nodes or strings.</td></tr>
+            </table>
+            
+            <h3>Sub-Packages</h3>
+            
+            <p><em>Sub-package</em>: <strong>graph</strong><br/>
+               <em>Module</em>: <strong>cheshire3.graph.record</strong>
+            </p>
+            <ul>
+                <li><b>GraphRecord</b><br/>
+                    RDF Graph based record.
+                </li>
+                <li><b>OreGraphRecord</b><br/>
+                    RDF Graph based record specifically for dealing with <abbr title="Open Archives Initiative">OAI</abbr>-<abbr title="Object Re-use and Exchange">ORE</abbr> aggregations.
+                </li>
+            </ul>
+        </div>
+
+    </body>
+</html>

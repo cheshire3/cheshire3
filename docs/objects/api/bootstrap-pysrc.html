@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>bootstrap</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        Module&nbsp;bootstrap
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript: void(0);" class="privatelink"
+    onclick="toggle_private();">hide private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="bootstrap-pysrc.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<h2 class="py-src">Source Code for <a href="bootstrap-module.html">Module bootstrap</a></h2>
+<div class="py-src">
+<pre class="py-src">
+<span class="lineno"> 1</span>  <span class="py-line"> </span>
+<span class="lineno"> 2</span>  <span class="py-line"><span class="py-comment"># We need some objects that don't need configuring in order to bootstrap</span> </span>
+<span class="lineno"> 3</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># Eg:  Need a parser to parser the configuration files for parsers!</span> </span>
+<span class="lineno"> 4</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># (Also to avoid import errors in Python)</span> </span>
+<span class="lineno"> 5</span>  <span class="py-line"><span class="py-comment"></span> </span>
+<span class="lineno"> 6</span>  <span class="py-line"><span class="py-keyword">from</span> <span id="link-0" class="py-name"><a title="baseObjects.Record.xml
+bootstrap.BootstrapRecord.xml
+record.SaxToXmlHandler.xml" class="py-name" href="#" onclick="doclink('link-0', 'xml', 'Variable baseObjects.Record.xml=baseObjects.Record-class.html#xml,Variable BootstrapRecord.xml=bootstrap.BootstrapRecord-class.html#xml,Variable record.SaxToXmlHandler.xml=record.SaxToXmlHandler-class.html#xml'); return false;">xml</a></span></span><span class="py-op">.</span><span id="link-1" class="py-name"><a title="baseObjects.Record.dom
+bootstrap.BootstrapRecord.dom" class="py-name" href="#" onclick="doclink('link-1', 'dom', 'Variable baseObjects.Record.dom=baseObjects.Record-class.html#dom,Variable BootstrapRecord.dom=bootstrap.BootstrapRecord-class.html#dom'); return false;">dom</a></span></span><span class="py-op">.</span><span class="py-name">minidom</span> <span class="py-keyword">import</span> <span class="py-name">parseString</span> </span>
+<span class="lineno"> 7</span>  <span class="py-line"> </span>
+<a name="BootstrapParser"></a><div id="BootstrapParser-def"><span class="lineno"> 8</span> <a class="pysrc-toggle" href="#" id="BootstrapParser-toggle" onclick="toggle('BootstrapParser'); return false;">-</a><span class="py-line"><span class="py-keyword">class</span> <a class="py-def-name" href="bootstrap.BootstrapParser-class.html">BootstrapParser</a><span class="py-op">:</span> </span>
+</div><div id="BootstrapParser-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="BootstrapParser-expanded"><span class="lineno"> 9</span>  <span class="py-line"> </span>
+<a name="BootstrapParser.process_document"></a><div id="BootstrapParser.process_document-def"><span class="lineno">10</span> <a class="pysrc-toggle" href="#" id="BootstrapParser.process_document-toggle" onclick="toggle('BootstrapParser.process_document'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="bootstrap.BootstrapParser-class.html#process_document">process_document</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">session</span><span class="py-op">,</span> <span class="py-param">doc</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="BootstrapParser.process_document-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="BootstrapParser.process_document-expanded"><span class="lineno">11</span>  <span class="py-line">        <span id="link-2" class="py-name"><a title="baseObjects.Record.xml
+bootstrap.BootstrapRecord.xml
+record.SaxToXmlHandler.xml" class="py-name" href="#" onclick="doclink('link-2', 'xml', 'Variable baseObjects.Record.xml=baseObjects.Record-class.html#xml,Variable BootstrapRecord.xml=bootstrap.BootstrapRecord-class.html#xml,Variable record.SaxToXmlHandler.xml=record.SaxToXmlHandler-class.html#xml'); return false;">xml</a></span></span> <span class="py-op">=</span> <span class="py-name">doc</span><span class="py-op">.</span><span id="link-3" class="py-name"><a title="baseObjects.Document.get_raw
+bootstrap.BootstrapDocument.get_raw
+document.StringDocument.get_raw
+record.SaxToXmlHandler.get_raw" class="py-name" href="#" onclick="doclink('link-3', 'get_raw', 'Method baseObjects.Document.get_raw(session)=baseObjects.Document-class.html#get_raw,Method BootstrapDocument.get_raw(session)=bootstrap.BootstrapDocument-class.html#get_raw,Method document.StringDocument.get_raw(session)=document.StringDocument-class.html#get_raw,Method record.SaxToXmlHandler.get_raw(session)=record.SaxToXmlHandler-class.html#get_raw'); return false;">get_raw</a></span></span><span class="py-op">(</span><span class="py-op">)</span> </span>
+<span class="lineno">12</span>  <span class="py-line">        <span id="link-4" class="py-name"><a title="baseObjects.Record.dom
+bootstrap.BootstrapRecord.dom" class="py-name" href="#" onclick="doclink('link-4', 'dom', 'Variable baseObjects.Record.dom=baseObjects.Record-class.html#dom,Variable BootstrapRecord.dom=bootstrap.BootstrapRecord-class.html#dom'); return false;">dom</a></span></span> <span class="py-op">=</span> <span class="py-name">parseString</span><span class="py-op">(</span><span id="link-5" class="py-name"><a title="baseObjects.Record.xml
+bootstrap.BootstrapRecord.xml
+record.SaxToXmlHandler.xml" class="py-name" href="#" onclick="doclink('link-5', 'xml', 'Variable baseObjects.Record.xml=baseObjects.Record-class.html#xml,Variable BootstrapRecord.xml=bootstrap.BootstrapRecord-class.html#xml,Variable record.SaxToXmlHandler.xml=record.SaxToXmlHandler-class.html#xml'); return false;">xml</a></span></span><span class="py-op">)</span> </span>
+<span class="lineno">13</span>  <span class="py-line">        <span class="py-name">rec</span> <span class="py-op">=</span> <a title="bootstrap.BootstrapRecord" class="py-name" href="bootstrap.BootstrapRecord-class.html">BootstrapRecord</a><span class="py-op">(</span><span id="link-6" class="py-name"><a title="baseObjects.Record.dom
+bootstrap.BootstrapRecord.dom" class="py-name" href="#" onclick="doclink('link-6', 'dom', 'Variable baseObjects.Record.dom=baseObjects.Record-class.html#dom,Variable BootstrapRecord.dom=bootstrap.BootstrapRecord-class.html#dom'); return false;">dom</a></span></span><span class="py-op">,</span> <span id="link-7" class="py-name"><a title="baseObjects.Record.xml
+bootstrap.BootstrapRecord.xml
+record.SaxToXmlHandler.xml" class="py-name" href="#" onclick="doclink('link-7', 'xml', 'Variable baseObjects.Record.xml=baseObjects.Record-class.html#xml,Variable BootstrapRecord.xml=bootstrap.BootstrapRecord-class.html#xml,Variable record.SaxToXmlHandler.xml=record.SaxToXmlHandler-class.html#xml'); return false;">xml</a></span></span><span class="py-op">)</span> </span>
+<span class="lineno">14</span>  <span class="py-line">        <span class="py-keyword">return</span> <span class="py-name">rec</span> </span>
+</div></div><span class="lineno">15</span>  <span class="py-line"> </span>
+<a name="BootstrapRecord"></a><div id="BootstrapRecord-def"><span class="lineno">16</span> <a class="pysrc-toggle" href="#" id="BootstrapRecord-toggle" onclick="toggle('BootstrapRecord'); return false;">-</a><span class="py-line"><span class="py-keyword">class</span> <a class="py-def-name" href="bootstrap.BootstrapRecord-class.html">BootstrapRecord</a><span class="py-op">:</span> </span>
+</div><div id="BootstrapRecord-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="BootstrapRecord-expanded"><span class="lineno">17</span>  <span class="py-line">    <a class="py-name" href="bootstrap.BootstrapRecord-class.html#xml">xml</a> <span class="py-op">=</span> <span class="py-string">""</span> </span>
+<span class="lineno">18</span>  <span class="py-line">    <a class="py-name" href="bootstrap.BootstrapRecord-class.html#dom">dom</a> <span class="py-op">=</span> <span class="py-name">None</span> </span>
+<span class="lineno">19</span>  <span class="py-line"> </span>
+<span class="lineno">20</span>  <span class="py-line"> </span>
+<a name="BootstrapRecord.__init__"></a><div id="BootstrapRecord.__init__-def"><span class="lineno">21</span> <a class="pysrc-toggle" href="#" id="BootstrapRecord.__init__-toggle" onclick="toggle('BootstrapRecord.__init__'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="bootstrap.BootstrapRecord-class.html#__init__">__init__</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">dom</span><span class="py-op">,</span> <span class="py-param">xml</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="BootstrapRecord.__init__-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="BootstrapRecord.__init__-expanded"><span class="lineno">22</span>  <span class="py-line">        <span class="py-name">self</span><span class="py-op">.</span><span id="link-8" class="py-name"><a title="baseObjects.Record.dom
+bootstrap.BootstrapRecord.dom" class="py-name" href="#" onclick="doclink('link-8', 'dom', 'Variable baseObjects.Record.dom=baseObjects.Record-class.html#dom,Variable dom=bootstrap.BootstrapRecord-class.html#dom'); return false;">dom</a></span></span> <span class="py-op">=</span> <span id="link-9" class="py-name"><a title="baseObjects.Record.dom
+bootstrap.BootstrapRecord.dom" class="py-name" href="#" onclick="doclink('link-9', 'dom', 'Variable baseObjects.Record.dom=baseObjects.Record-class.html#dom,Variable dom=bootstrap.BootstrapRecord-class.html#dom'); return false;">dom</a></span></span> </span>
+<span class="lineno">23</span>  <span class="py-line">        <span class="py-name">self</span><span class="py-op">.</span><span id="link-10" class="py-name"><a title="baseObjects.Record.xml
+bootstrap.BootstrapRecord.xml
+record.SaxToXmlHandler.xml" class="py-name" href="#" onclick="doclink('link-10', 'xml', 'Variable baseObjects.Record.xml=baseObjects.Record-class.html#xml,Variable xml=bootstrap.BootstrapRecord-class.html#xml,Variable record.SaxToXmlHandler.xml=record.SaxToXmlHandler-class.html#xml'); return false;">xml</a></span></span> <span class="py-op">=</span> <span id="link-11" class="py-name"><a title="baseObjects.Record.xml
+bootstrap.BootstrapRecord.xml
+record.SaxToXmlHandler.xml" class="py-name" href="#" onclick="doclink('link-11', 'xml', 'Variable baseObjects.Record.xml=baseObjects.Record-class.html#xml,Variable xml=bootstrap.BootstrapRecord-class.html#xml,Variable record.SaxToXmlHandler.xml=record.SaxToXmlHandler-class.html#xml'); return false;">xml</a></span></span> </span>
+</div><span class="lineno">24</span>  <span class="py-line"> </span>
+<a name="BootstrapRecord.get_dom"></a><div id="BootstrapRecord.get_dom-def"><span class="lineno">25</span> <a class="pysrc-toggle" href="#" id="BootstrapRecord.get_dom-toggle" onclick="toggle('BootstrapRecord.get_dom'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="bootstrap.BootstrapRecord-class.html#get_dom">get_dom</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="BootstrapRecord.get_dom-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="BootstrapRecord.get_dom-expanded"><span class="lineno">26</span>  <span class="py-line">        <span class="py-keyword">return</span> <span class="py-name">self</span><span class="py-op">.</span><span id="link-12" class="py-name"><a title="baseObjects.Record.dom
+bootstrap.BootstrapRecord.dom" class="py-name" href="#" onclick="doclink('link-12', 'dom', 'Variable baseObjects.Record.dom=baseObjects.Record-class.html#dom,Variable dom=bootstrap.BootstrapRecord-class.html#dom'); return false;">dom</a></span></span> </span>
+</div><span class="lineno">27</span>  <span class="py-line"> </span>
+<a name="BootstrapRecord.get_xml"></a><div id="BootstrapRecord.get_xml-def"><span class="lineno">28</span> <a class="pysrc-toggle" href="#" id="BootstrapRecord.get_xml-toggle" onclick="toggle('BootstrapRecord.get_xml'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="bootstrap.BootstrapRecord-class.html#get_xml">get_xml</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="BootstrapRecord.get_xml-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="BootstrapRecord.get_xml-expanded"><span class="lineno">29</span>  <span class="py-line">        <span class="py-keyword">return</span> <span class="py-name">self</span><span class="py-op">.</span><span id="link-13" class="py-name"><a title="baseObjects.Record.xml
+bootstrap.BootstrapRecord.xml
+record.SaxToXmlHandler.xml" class="py-name" href="#" onclick="doclink('link-13', 'xml', 'Variable baseObjects.Record.xml=baseObjects.Record-class.html#xml,Variable xml=bootstrap.BootstrapRecord-class.html#xml,Variable record.SaxToXmlHandler.xml=record.SaxToXmlHandler-class.html#xml'); return false;">xml</a></span></span> </span>
+</div><span class="lineno">30</span>  <span class="py-line"> </span>
+<a name="BootstrapRecord.get_sax"></a><div id="BootstrapRecord.get_sax-def"><span class="lineno">31</span> <a class="pysrc-toggle" href="#" id="BootstrapRecord.get_sax-toggle" onclick="toggle('BootstrapRecord.get_sax'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="bootstrap.BootstrapRecord-class.html#get_sax">get_sax</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="BootstrapRecord.get_sax-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="BootstrapRecord.get_sax-expanded"><span class="lineno">32</span>  <span class="py-line">        <span class="py-keyword">raise</span><span class="py-op">(</span><span class="py-name">NotImplementedError</span><span class="py-op">)</span> </span>
+</div></div><span class="lineno">33</span>  <span class="py-line"> </span>
+<a name="BootstrapDocument"></a><div id="BootstrapDocument-def"><span class="lineno">34</span> <a class="pysrc-toggle" href="#" id="BootstrapDocument-toggle" onclick="toggle('BootstrapDocument'); return false;">-</a><span class="py-line"><span class="py-keyword">class</span> <a class="py-def-name" href="bootstrap.BootstrapDocument-class.html">BootstrapDocument</a><span class="py-op">:</span> </span>
+</div><div id="BootstrapDocument-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="BootstrapDocument-expanded"><span class="lineno">35</span>  <span class="py-line">    <a class="py-name" href="bootstrap.BootstrapDocument-class.html#handle">handle</a> <span class="py-op">=</span> <span class="py-name">None</span> </span>
+<span class="lineno">36</span>  <span class="py-line">    <a class="py-name" href="bootstrap.BootstrapDocument-class.html#txt">txt</a> <span class="py-op">=</span> <span class="py-string">""</span> </span>
+<span class="lineno">37</span>  <span class="py-line"> </span>
+<a name="BootstrapDocument.__init__"></a><div id="BootstrapDocument.__init__-def"><span class="lineno">38</span> <a class="pysrc-toggle" href="#" id="BootstrapDocument.__init__-toggle" onclick="toggle('BootstrapDocument.__init__'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="bootstrap.BootstrapDocument-class.html#__init__">__init__</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">fileHandle</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="BootstrapDocument.__init__-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="BootstrapDocument.__init__-expanded"><span class="lineno">39</span>  <span class="py-line">        <span class="py-comment"># This means we have hanging file handles, but less memory usage...</span> </span>
+<span class="lineno">40</span>  <span class="py-line"><span class="py-comment"></span>        <span class="py-name">self</span><span class="py-op">.</span><a title="bootstrap.BootstrapDocument.handle" class="py-name" href="bootstrap.BootstrapDocument-class.html#handle">handle</a> <span class="py-op">=</span> <span class="py-name">fileHandle</span> </span>
+</div><span class="lineno">41</span>  <span class="py-line"> </span>
+<a name="BootstrapDocument.get_raw"></a><div id="BootstrapDocument.get_raw-def"><span class="lineno">42</span> <a class="pysrc-toggle" href="#" id="BootstrapDocument.get_raw-toggle" onclick="toggle('BootstrapDocument.get_raw'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="bootstrap.BootstrapDocument-class.html#get_raw">get_raw</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="BootstrapDocument.get_raw-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="BootstrapDocument.get_raw-expanded"><span class="lineno">43</span>  <span class="py-line">        <span class="py-keyword">if</span> <span class="py-op">(</span><span class="py-name">self</span><span class="py-op">.</span><a title="bootstrap.BootstrapDocument.txt" class="py-name" href="bootstrap.BootstrapDocument-class.html#txt">txt</a><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno">44</span>  <span class="py-line">            <span class="py-keyword">return</span> <span class="py-name">self</span><span class="py-op">.</span><a title="bootstrap.BootstrapDocument.txt" class="py-name" href="bootstrap.BootstrapDocument-class.html#txt">txt</a> </span>
+<span class="lineno">45</span>  <span class="py-line">        <span class="py-keyword">elif</span> <span class="py-op">(</span><span class="py-name">self</span><span class="py-op">.</span><a title="bootstrap.BootstrapDocument.handle" class="py-name" href="bootstrap.BootstrapDocument-class.html#handle">handle</a> <span class="py-op">&lt;&gt;</span> <span class="py-name">None</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+<span class="lineno">46</span>  <span class="py-line">            <span class="py-name">self</span><span class="py-op">.</span><a title="bootstrap.BootstrapDocument.txt" class="py-name" href="bootstrap.BootstrapDocument-class.html#txt">txt</a> <span class="py-op">=</span>  <span class="py-name">self</span><span class="py-op">.</span><a title="bootstrap.BootstrapDocument.handle" class="py-name" href="bootstrap.BootstrapDocument-class.html#handle">handle</a><span class="py-op">.</span><span id="link-14" class="py-name"><a title="documentFactory.UrllibUnicodeFileThing.read
+srboo.SrbFile.read" class="py-name" href="#" onclick="doclink('link-14', 'read', 'Method documentFactory.UrllibUnicodeFileThing.read()=documentFactory.UrllibUnicodeFileThing-class.html#read,Method srboo.SrbFile.read()=srboo.SrbFile-class.html#read'); return false;">read</a></span></span><span class="py-op">(</span><span class="py-op">)</span> </span>
+<span class="lineno">47</span>  <span class="py-line">            <span class="py-name">self</span><span class="py-op">.</span><a title="bootstrap.BootstrapDocument.handle" class="py-name" href="bootstrap.BootstrapDocument-class.html#handle">handle</a><span class="py-op">.</span><a title="srboo.SrbFile.close" class="py-name" href="srboo.SrbFile-class.html#close">close</a><span class="py-op">(</span><span class="py-op">)</span> </span>
+<span class="lineno">48</span>  <span class="py-line">            <span class="py-keyword">return</span> <span class="py-name">self</span><span class="py-op">.</span><a title="bootstrap.BootstrapDocument.txt" class="py-name" href="bootstrap.BootstrapDocument-class.html#txt">txt</a> </span>
+<span class="lineno">49</span>  <span class="py-line">        <span class="py-keyword">else</span><span class="py-op">:</span> </span>
+<span class="lineno">50</span>  <span class="py-line">            <span class="py-keyword">return</span> <span class="py-name">None</span> </span>
+</div></div><span class="lineno">51</span>  <span class="py-line"> </span>
+<span class="lineno">52</span>  <span class="py-line"><span class="py-comment"># admin that can do anything</span> </span>
+<a name="BootstrapUser"></a><div id="BootstrapUser-def"><span class="lineno">53</span> <a class="pysrc-toggle" href="#" id="BootstrapUser-toggle" onclick="toggle('BootstrapUser'); return false;">-</a><span class="py-line"><span class="py-comment"></span><span class="py-keyword">class</span> <a class="py-def-name" href="bootstrap.BootstrapUser-class.html">BootstrapUser</a><span class="py-op">:</span> </span>
+</div><div id="BootstrapUser-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="BootstrapUser-expanded"><span class="lineno">54</span>  <span class="py-line">    <a class="py-name" href="bootstrap.BootstrapUser-class.html#username">username</a> <span class="py-op">=</span> <span class="py-string">"admin"</span> </span>
+<span class="lineno">55</span>  <span class="py-line">    <a class="py-name" href="bootstrap.BootstrapUser-class.html#password">password</a> <span class="py-op">=</span> <span class="py-string">""</span> </span>
+<span class="lineno">56</span>  <span class="py-line">    <a class="py-name" href="bootstrap.BootstrapUser-class.html#flags">flags</a> <span class="py-op">=</span> <span class="py-op">{</span><span class="py-string">''</span> <span class="py-op">:</span> <span class="py-string">'c3r:administrator'</span><span class="py-op">}</span> </span>
+<span class="lineno">57</span>  <span class="py-line"> </span>
+<a name="BootstrapUser.hasFlag"></a><div id="BootstrapUser.hasFlag-def"><span class="lineno">58</span> <a class="pysrc-toggle" href="#" id="BootstrapUser.hasFlag-toggle" onclick="toggle('BootstrapUser.hasFlag'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="bootstrap.BootstrapUser-class.html#hasFlag">hasFlag</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">session</span><span class="py-op">,</span> <span class="py-param">flag</span><span class="py-op">,</span> <span class="py-param">object</span><span class="py-op">=</span><span class="py-string">""</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="BootstrapUser.hasFlag-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="BootstrapUser.hasFlag-expanded"><span class="lineno">59</span>  <span class="py-line">        <span class="py-keyword">return</span> <span class="py-name">True</span> </span>
+</div></div><span class="lineno">60</span>  <span class="py-line">     </span>
+<a name="BootstrapSession"></a><div id="BootstrapSession-def"><span class="lineno">61</span> <a class="pysrc-toggle" href="#" id="BootstrapSession-toggle" onclick="toggle('BootstrapSession'); return false;">-</a><span class="py-line"><span class="py-keyword">class</span> <a class="py-def-name" href="bootstrap.BootstrapSession-class.html">BootstrapSession</a><span class="py-op">:</span> </span>
+</div><div id="BootstrapSession-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="BootstrapSession-expanded"><span class="lineno">62</span>  <span class="py-line">    <a class="py-name" href="bootstrap.BootstrapSession-class.html#user">user</a> <span class="py-op">=</span> <span class="py-name">None</span> </span>
+<span class="lineno">63</span>  <span class="py-line">    <a class="py-name" href="bootstrap.BootstrapSession-class.html#inHandler">inHandler</a> <span class="py-op">=</span> <span class="py-name">None</span> </span>
+<span class="lineno">64</span>  <span class="py-line">    <a class="py-name" href="bootstrap.BootstrapSession-class.html#outHandler">outHandler</a> <span class="py-op">=</span> <span class="py-name">None</span> </span>
+<a name="BootstrapSession.__init__"></a><div id="BootstrapSession.__init__-def"><span class="lineno">65</span> <a class="pysrc-toggle" href="#" id="BootstrapSession.__init__-toggle" onclick="toggle('BootstrapSession.__init__'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="bootstrap.BootstrapSession-class.html#__init__">__init__</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="BootstrapSession.__init__-collapsed" style="display:none;" pad="++" indent="++++++++"></div><div id="BootstrapSession.__init__-expanded"><span class="lineno">66</span>  <span class="py-line">        <span class="py-name">self</span><span class="py-op">.</span><span id="link-15" class="py-name"><a title="baseObjects.Session.user
+baseStore.SrbStore.user
+bootstrap.BootstrapSession.user
+indexStore.SrbBdbIndexStore.user
+srboo.SrbConnection.user
+user" class="py-name" href="#" onclick="doclink('link-15', 'user', 'Variable baseObjects.Session.user=baseObjects.Session-class.html#user,Variable baseStore.SrbStore.user=baseStore.SrbStore-class.html#user,Variable user=bootstrap.BootstrapSession-class.html#user,Variable indexStore.SrbBdbIndexStore.user=indexStore.SrbBdbIndexStore-class.html#user,Variable srboo.SrbConnection.user=srboo.SrbConnection-class.html#user,Module user=user-module.html'); return false;">user</a></span></span> <span class="py-op">=</span> <a title="bootstrap.BootstrapUser" class="py-name" href="bootstrap.BootstrapUser-class.html">BootstrapUser</a><span class="py-op">(</span><span class="py-op">)</span> </span>
+</div></div><span class="lineno">67</span>  <span class="py-line">         </span>
+<span class="lineno">68</span>  <span class="py-line"><a class="py-name" href="bootstrap-module.html#BSParser">BSParser</a> <span class="py-op">=</span> <a class="py-name" href="bootstrap.BootstrapParser-class.html">BootstrapParser</a><span class="py-op">(</span><span class="py-op">)</span> </span>
+<span class="lineno">69</span>  <span class="py-line"><a class="py-name" href="bootstrap-module.html#BSSession">BSSession</a> <span class="py-op">=</span> <a class="py-name" href="bootstrap.BootstrapSession-class.html">BootstrapSession</a><span class="py-op">(</span><span class="py-op">)</span> </span>
+<span class="lineno">70</span>  <span class="py-line"> </span><script type="text/javascript">
+<!--
+expandto(location.href);
+// -->
+</script>
+</pre>
+</div>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">Generated by Epydoc
+        3.0alpha2 on Wed Aug  9 18:10:03 2006</td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>

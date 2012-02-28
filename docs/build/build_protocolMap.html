@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>Configuring CQL Protocol Maps</title>
+        <link rel="stylesheet" type="text/css" href="http://www.cheshire3.org/cheshire3.css"></link>
+    </head>
+    <body>
+        <a name="top"></a>
+        <table cellpadding="0" cellspacing="0" class="maintitle">
+            <tr>
+                <td class="cheshirelogo">
+                    <img src="http://www.cheshire3.org/gfx/c3_white.gif" alt=" c h e s h i r e  |  3 "/>
+                </td>
+                <td>
+                    <img src="http://www.cheshire3.org/gfx/slant_grey.gif" alt=""/>
+                </td>
+                <td align="center">
+                    <h2>Configuring CQL Protocol Maps</h2>
+                </td>
+            </tr>
+        </table>
+
+        <!--#config errmsg="<div id="navbar"/>" -->
+        <!--#include virtual="/navbar.ssi" -->
+
+        <div class="fieldset">
+            <span class="legend">Introduction</span>
+            <p>
+                Once we have all of our processing set up, we then need to create a map from our objects to a query language. 
+                The default implemented language used internally by Cheshire3 is <a href="http://www.loc.gov/cql/">CQL</a>, the Common Query Language. 
+                CQL has indexes which are almost directly mappable onto Cheshire3 indexes, but they can be modified by relations to treat them as exact string matches or keyword matching, or further modified with relation modifiers to specify things such as to use stemming or not.
+            </p>
+            <p>
+                We specify the mapping between CQL indexes and Cheshire3 indexes using a <a href="http://explain.z3950.org/">ZeeRex</a> record. 
+                This record is then used for the Explain response for SRW. 
+                To include the information about the objects used internally, we have to extend the schema with a 'c3' namespace.
+            </p>
+            <p>
+                The links above have full documentation on the query language and the ZeeRex record schema, so if you want more information, please follow through to their home pages.
+            </p>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">Example</span>
+            <p>Example protocol map configuration:</p>
+            <pre>
+01 &lt;subConfig type="protocolMap" id="CQLProtocolMap"&gt;
+02   &lt;objectType&gt;protocolMap.CQLProtocolMap&lt;/objectType&gt;
+03   &lt;paths&gt;
+04     &lt;path type="zeerexPath"&gt;zeerex_srw.xml&lt;/path&gt;
+05   &lt;/paths&gt;
+06 &lt;/subConfig&gt;
+
+            </pre>
+            <p>And a sample (minimal) ZeeRex file to go with it:</p>
+            <pre>
+01 &lt;explain xmlns="http://explain.z3950.org/dtd/2.0/" <span style="color: red;">xmlns:c3="http://www.cheshire3.org/schemas/explain/"</span>&gt;
+02   &lt;serverInfo protocol="srw/u" version="1.1" transport="http"&gt;
+03     &lt;host&gt;myhostname.mydomain.com&lt;/host&gt;
+04     &lt;port&gt;8080&lt;/port&gt;
+05     &lt;database&gt;services/databasename&lt;/database&gt;
+06   &lt;/serverInfo&gt;
+07   &lt;indexInfo&gt;
+08     &lt;set identifier="info:srw/cql-context-set/1/dc-v1.1" name="dc"/&gt;
+09     &lt;index <span style="color:red;">c3:index="title-idx"</span>&gt;
+10       &lt;title&gt;Title&lt;/title&gt;
+11       &lt;map&gt;&lt;name set="dc"&gt;title&lt;/name&gt;&lt;/map&gt;
+12       &lt;configInfo&gt;
+13         &lt;supports type="relationModifier" <span style="color:red;">c3:index="titleword-idx"</span>&gt;word&lt;/supports&gt;
+14         &lt;supports type="relationModifier" <span style="color:red;">c3:index="titlewordstem-idx"</span>&gt;stem&lt;/supports&gt;
+15       &lt;/configInfo&gt;
+16     &lt;/index&gt;
+17   &lt;/indexInfo&gt;
+18   &lt;schemaInfo&gt;
+19     &lt;schema identifier="info:srw/schema/1/dc-v1.1" name="dc" <span style="color:red;">c3:transformer="dublinCoreTransformer"</span>&gt;
+20       &lt;title&gt;Simple Dublin Core&lt;/title&gt;
+21     &lt;/schema&gt;
+22   &lt;/schemaInfo&gt;
+23 &lt;/explain&gt;
+            </pre>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">Explanation</span>
+            <p>
+                The mapping object itself is quite simple. 
+                It has an identifier and objectType like all other objects, and then one path called 'zeerexPath'. 
+                This should point to a ZeeRex xml file to be processed which includes the mapping information.
+            </p>
+            <p>
+                Setting up the ZeeRex file is easiest done by copying an existing record and modifying it. 
+                Some quick pointers first:
+            </p>
+            <ul>
+                <li>You can find the context sets for the <i>set</i> elements <a href="http://www.loc.gov/standards/sru/resources/context-sets.html">here</a></li>
+                <li>You can find the indexes linked in the context set references from the above page. If none of the indexes have the right semantics, then you're perfectly at liberty to make up your own context set.</li>
+                <li>The identifiers for common record schemas are <a href="http://www.loc.gov/standards/sru/resources/schemas.html">here</a>.  Again if your record schema isn't present, then you can make up your own identifier.</li>
+            </ul>
+            <p>
+                In line 1 of the ZeeRex file, please note the namespace definition. 
+                This is then carried through for the rest of the file to distinguish Cheshire3 information from the basic ZeeRex.
+            </p>
+            <p>
+                If you are going to enable the SRW/U service, then you should correct the host, port and database name in lines 3 through 5. 
+                In particular, you should be careful that the path in the <i>database</i> tag matches with the location that Apache is listening for SRW/U requests.
+            </p>
+            <p>
+                The most important mapping to take place in the file is from CQL index names and relations to Cheshire3 index objects. 
+                First of all you need to define a short name for the context set that the index is part of. 
+                For example, the dublin core context set has the identifier 'info:srw/cql-context-set/1/dc-v1.1', but we call it 'dc' for short. 
+                This is done in the <i>set</i> element, such as at line 8.
+            </p>
+            <p>
+                Once all of the sets you're going to be using have been defined, you can then define indexes. 
+                Each index is just one semantic concept, not split by word, string, stem or other such normalisation. 
+                The primary index is given in a 'c3:index' attribute on the <i>index</i> element, as at line 9. 
+                Then there is a human readable title, and in line 10 a map. 
+                The short name for the context set is given in a 'set' attribute, and the contents of the <i>name</i> element is the name of the index, in this case 'title'. 
+                This makes the index available as 'dc.title' in CQL.
+            </p>
+            <p>
+                The configInfo section for the index then allows us to map to different objects based on the type of relation or relation modifiers used. 
+                Line 13 maps word queries to the 'titleword-idx' instead of the default 'title-idx'. 
+                Line 14 maps stemmed queries to 'titlewordstem-idx'.
+            </p>
+            <p>
+                Finally in line 19, note that we have a transformer object. 
+                This is the transformer to turn the record in the recordStore into the schema which is being published, in this case simple dublin core.
+            </p>
+            <p>
+                Please note that even if you do not define any indexes in the ZeeRex file, you can still use CQL queries to search. 
+                Any index is available via c3.<i>index name</i>. 
+                For example we could search the exact title index with 'c3.title-idx' instead of the 'dc.title' mapping above. 
+                For this to work, the object identifier must be all lower case characters.
+            </p>
+        </div>
+
+    </body>
+</html>

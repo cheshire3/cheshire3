@@ -1,0 +1,690 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>record.SaxContentHandler</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <link rel="stylesheet" href="/cheshire3.css" type="text/css"/>
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body>
+<table width="100%" border=0 cellpadding=0 cellspacing=0 class="maintitle">
+<tr height="75">
+<td class="cheshirelogo" width="25%">
+<img src="/gfx/c3_white.gif">
+</td>
+<td width="10">
+<img src="/gfx/slant_grey.gif">
+</td>
+<td width="75%" align="center">
+<h2>Cheshire3 Object Model: Class SaxContentHandler
+</h2>
+</td></tr>
+</table>
+
+<div class="fieldset">
+<span class="legend"><a href="configParser-module.html">
+        <a href="record-module.html">Module&nbsp;record</a> ::
+        Class&nbsp;SaxContentHandler
+      </span>
+<p>
+
+
+<h2 class="class">Class SaxContentHandler
+<br/><span class="codelink"><a href="record-pysrc.html#SaxContentHandler">source&nbsp;code</a></span></h2>
+<b>Object Tree:</b><pre class="base-tree">
+xml.sax.handler.ContentHandler --+
+                                 |
+                                <strong class="uidshort">SaxContentHandler</strong>
+</pre>
+
+<hr />
+<!-- ==================== INSTANCE METHODS ==================== -->
+</div><div class="fieldset"><span class="legend">Instance Methods</span><p>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white"><tr>
+
+  <td>
+    <span class="sig"><a href="record.SaxContentHandler-class.html#__init__" class="sig-name">__init__</a>(<span class="sig-arg">self</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="record.SaxContentHandler-class.html#reinit" class="sig-name">reinit</a>(<span class="sig-arg">self</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="record.SaxContentHandler-class.html#startPrefixMapping" class="sig-name">startPrefixMapping</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">pfx</span>,
+        <span class="sig-arg">uri</span>)</span>
+    <br />Begin the scope of a prefix-URI Namespace mapping.
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="record.SaxContentHandler-class.html#startElement" class="sig-name">startElement</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">name</span>,
+        <span class="sig-arg">attrs</span>)</span>
+    <br />Signals the start of an element in non-namespace mode.
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="record.SaxContentHandler-class.html#endElement" class="sig-name">endElement</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">name</span>)</span>
+    <br />Signals the end of an element in non-namespace mode.
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="record.SaxContentHandler-class.html#startElementNS" class="sig-name">startElementNS</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">name</span>,
+        <span class="sig-arg">qname</span>,
+        <span class="sig-arg">attrs</span>)</span>
+    <br />Signals the start of an element in namespace mode.
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="record.SaxContentHandler-class.html#endElementNS" class="sig-name">endElementNS</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">name</span>,
+        <span class="sig-arg">qname</span>)</span>
+    <br />Signals the end of an element in namespace mode.
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="record.SaxContentHandler-class.html#characters" class="sig-name">characters</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">text</span>,
+        <span class="sig-arg">start</span>=<span class="sig-default">0</span>,
+        <span class="sig-arg">length</span>=<span class="sig-default">-1</span>)</span>
+    <br />Receive notification of character data.
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="record.SaxContentHandler-class.html#ignorableWhitespace" class="sig-name">ignorableWhitespace</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">ws</span>)</span>
+    <br />Receive notification of ignorable whitespace in element 
+      content.
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="record.SaxContentHandler-class.html#processingInstruction" class="sig-name">processingInstruction</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">target</span>,
+        <span class="sig-arg">data</span>)</span>
+    <br />Receive notification of a processing instruction.
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="record.SaxContentHandler-class.html#skippedEntity" class="sig-name">skippedEntity</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">name</span>)</span>
+    <br />Receive notification of a skipped entity.
+  </td>
+</tr>
+  <tr>
+    <td colspan="2">
+    <p class="varlist"><span class="varlist-header">Inherited from <code>xml.sax.handler.ContentHandler</code></span>:
+      <code>endDocument</code>,
+      <code>endPrefixMapping</code>,
+      <code>setDocumentLocator</code>,
+      <code>startDocument</code>
+      </p>
+    </td>
+  </tr>
+</table>
+
+<br />
+<!-- ==================== CLASS VARIABLES ==================== -->
+</div><div class="fieldset"><span class="legend">Class Variables</span><p>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white"><tr>
+  <td width="15%">
+    <strong><a href="record.SaxContentHandler-class.html#currentText">currentText</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="record.SaxContentHandler-class.html#currentPath">currentPath</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="record.SaxContentHandler-class.html#pathLines">pathLines</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="record.SaxContentHandler-class.html#currentLine">currentLine</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="record.SaxContentHandler-class.html#recordSize">recordSize</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="record.SaxContentHandler-class.html#elementHash">elementHash</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="record.SaxContentHandler-class.html#namespaces">namespaces</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="record.SaxContentHandler-class.html#hashAttributesNames">hashAttributesNames</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="record.SaxContentHandler-class.html#hashAttributes">hashAttributes</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="record.SaxContentHandler-class.html#stripWS">stripWS</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="record.SaxContentHandler-class.html#saveElementIndexes">saveElementIndexes</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+</table>
+
+<br />
+<!-- ==================== METHOD DETAILS ==================== --></div><div class="fieldset"><span class="legend">Method Details</span><p><a name="__init__"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>)</span>
+    <br /><em class="fname">(Constructor)</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="record-pysrc.html#SaxContentHandler.__init__">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      xml.sax.handler.ContentHandler.__init__
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="reinit"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">reinit</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="record-pysrc.html#SaxContentHandler.reinit">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="startPrefixMapping"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">startPrefixMapping</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">pfx</span>,
+        <span class="sig-arg">uri</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="record-pysrc.html#SaxContentHandler.startPrefixMapping">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  <p>Begin the scope of a prefix-URI Namespace mapping.</p>
+  <p>The information from this event is not necessary for normal Namespace 
+  processing: the SAX XML reader will automatically replace prefixes for 
+  element and attribute names when the 
+  http://xml.org/sax/features/namespaces feature is true (the default).</p>
+  <p>There are cases, however, when applications need to use prefixes in 
+  character data or in attribute values, where they cannot safely be 
+  expanded automatically; the start/endPrefixMapping event supplies the 
+  information to the application to expand prefixes in those contexts 
+  itself, if necessary.</p>
+  Note that start/endPrefixMapping events are not guaranteed to be 
+  properly nested relative to each-other: all startPrefixMapping events 
+  will occur before the corresponding startElement event, and all 
+  endPrefixMapping events will occur after the corresponding endElement 
+  event, but their order is not guaranteed.
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      xml.sax.handler.ContentHandler.startPrefixMapping
+        <dd><em class="note">(inherited documentation)</em></dd>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="startElement"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">startElement</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">name</span>,
+        <span class="sig-arg">attrs</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="record-pysrc.html#SaxContentHandler.startElement">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  <p>Signals the start of an element in non-namespace mode.</p>
+  The name parameter contains the raw XML 1.0 name of the element type 
+  as a string and the attrs parameter holds an instance of the Attributes 
+  class containing the attributes of the element.
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      xml.sax.handler.ContentHandler.startElement
+        <dd><em class="note">(inherited documentation)</em></dd>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="endElement"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">endElement</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">name</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="record-pysrc.html#SaxContentHandler.endElement">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  <p>Signals the end of an element in non-namespace mode.</p>
+  The name parameter contains the name of the element type, just as with
+  the startElement event.
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      xml.sax.handler.ContentHandler.endElement
+        <dd><em class="note">(inherited documentation)</em></dd>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="startElementNS"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">startElementNS</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">name</span>,
+        <span class="sig-arg">qname</span>,
+        <span class="sig-arg">attrs</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="record-pysrc.html#SaxContentHandler.startElementNS">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  <p>Signals the start of an element in namespace mode.</p>
+  <p>The name parameter contains the name of the element type as a (uri, 
+  localname) tuple, the qname parameter the raw XML 1.0 name used in the 
+  source document, and the attrs parameter holds an instance of the 
+  Attributes class containing the attributes of the element.</p>
+  The uri part of the name tuple is None for elements which have no 
+  namespace.
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      xml.sax.handler.ContentHandler.startElementNS
+        <dd><em class="note">(inherited documentation)</em></dd>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="endElementNS"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">endElementNS</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">name</span>,
+        <span class="sig-arg">qname</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="record-pysrc.html#SaxContentHandler.endElementNS">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  <p>Signals the end of an element in namespace mode.</p>
+  The name parameter contains the name of the element type, just as with
+  the startElementNS event.
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      xml.sax.handler.ContentHandler.endElementNS
+        <dd><em class="note">(inherited documentation)</em></dd>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="characters"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">characters</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">text</span>,
+        <span class="sig-arg">start</span>=<span class="sig-default">0</span>,
+        <span class="sig-arg">length</span>=<span class="sig-default">-1</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="record-pysrc.html#SaxContentHandler.characters">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  <p>Receive notification of character data.</p>
+  The Parser will call this method to report each chunk of character 
+  data. SAX parsers may return all contiguous character data in a single 
+  chunk, or they may split it into several chunks; however, all of the 
+  characters in any single event must come from the same external entity so
+  that the Locator provides useful information.
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      xml.sax.handler.ContentHandler.characters
+        <dd><em class="note">(inherited documentation)</em></dd>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="ignorableWhitespace"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">ignorableWhitespace</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">ws</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="record-pysrc.html#SaxContentHandler.ignorableWhitespace">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  <p>Receive notification of ignorable whitespace in element content.</p>
+  <p>Validating Parsers must use this method to report each chunk of 
+  ignorable whitespace (see the W3C XML 1.0 recommendation, section 2.10): 
+  non-validating parsers may also use this method if they are capable of 
+  parsing and using content models.</p>
+  SAX parsers may return all contiguous whitespace in a single chunk, or
+  they may split it into several chunks; however, all of the characters in 
+  any single event must come from the same external entity, so that the 
+  Locator provides useful information.
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      xml.sax.handler.ContentHandler.ignorableWhitespace
+        <dd><em class="note">(inherited documentation)</em></dd>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="processingInstruction"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">processingInstruction</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">target</span>,
+        <span class="sig-arg">data</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="record-pysrc.html#SaxContentHandler.processingInstruction">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  <p>Receive notification of a processing instruction.</p>
+  <p>The Parser will invoke this method once for each processing 
+  instruction found: note that processing instructions may occur before or 
+  after the main document element.</p>
+  A SAX parser should never report an XML declaration (XML 1.0, section 
+  2.8) or a text declaration (XML 1.0, section 4.3.1) using this 
+  method.
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      xml.sax.handler.ContentHandler.processingInstruction
+        <dd><em class="note">(inherited documentation)</em></dd>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="skippedEntity"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">skippedEntity</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">name</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="record-pysrc.html#SaxContentHandler.skippedEntity">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  <p>Receive notification of a skipped entity.</p>
+  The Parser will invoke this method once for each entity skipped. 
+  Non-validating processors may skip entities if they have not seen the 
+  declarations (because, for example, the entity was declared in an 
+  external DTD subset). All processors may skip external entities, 
+  depending on the values of the 
+  http://xml.org/sax/features/external-general-entities and the 
+  http://xml.org/sax/features/external-parameter-entities properties.
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      xml.sax.handler.ContentHandler.skippedEntity
+        <dd><em class="note">(inherited documentation)</em></dd>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<br />
+<!-- ==================== CLASS VARIABLE DETAILS ==================== --></div><div class="fieldset"><span class="legend">Class Variable Details</span><p><a name="currentText"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>currentText</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="[]"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+[]                                                                     
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="currentPath"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>currentPath</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="[]"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+[]                                                                     
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="pathLines"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>pathLines</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="[]"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+[]                                                                     
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="currentLine"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>currentLine</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="-1"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+-1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="recordSize"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>recordSize</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="0"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="elementHash"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>elementHash</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="{}"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+{}                                                                     
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="namespaces"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>namespaces</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="[]"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+[]                                                                     
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="hashAttributesNames"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>hashAttributesNames</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="{}"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+{}                                                                     
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="hashAttributes"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>hashAttributes</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="[]"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+[]                                                                     
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="stripWS"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>stripWS</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="0"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="saveElementIndexes"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>saveElementIndexes</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="1"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<br />
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">Generated by Epydoc
+        3.0alpha2 on Wed Aug  9 18:09:59 2006</td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>

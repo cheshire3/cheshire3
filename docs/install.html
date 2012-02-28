@@ -1,0 +1,425 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>Cheshire3 Installation</title>
+        <link rel="stylesheet" type="text/css" href="http://www.cheshire3.org/cheshire3.css"></link>
+    </head>
+    <body>
+        <a name="top"></a>
+        <table cellpadding="0" cellspacing="0" class="maintitle">
+            <tr>
+                <td class="cheshirelogo">
+            	   <img src="http://www.cheshire3.org/gfx/c3_white.gif" alt="c h e s h i r e  |  3"/>
+                </td>
+                <td>
+                    <img src="http://www.cheshire3.org/gfx/slant_grey.gif" alt=""/>
+                </td>
+                <td align="center">
+                    <h2>Cheshire3 Installation</h2>
+                </td>
+            </tr>
+        </table>
+
+	<!--#config errmsg="<div id="navbar"/>" -->
+	<!--#include virtual="/navbar.ssi" -->
+	
+	<div class="fieldset">
+            <span class="legend">Introduction</span>
+            <p>
+                The following instructions will hopefully walk you through installing Cheshire3 and its prerequisites from scratch under Linux (or any Unix). 
+                If you have troubles at any stage, feel free to contact us.
+            </p>
+	</div>
+
+	<div class="fieldset">
+            <span class="legend">Easy Install</span>
+            <p>
+                This is the easy, preferred, method for installing Cheshire3.
+            </p>
+            <ol>
+                <li>Download the latest version of the software from <a href="http://www.cheshire3.org/download/latest/">http://www.cheshire3.org/download/latest</a>.  This includes one or more packages and a shell script, build.sh, which will compile everything for you.</li>
+                <li>Put all of the packages you want to install and build.sh in the directory you want to use as the home directory for Cheshire3.  It is recommended to make a new user called 'cheshire' and running it in the user's home directory.  If you cannot run it as a new user, then putting it in $HOME/cheshire3/ is the recommended location.</li>
+                <li>Run build.sh, go and have a coffee for 20 minutes while everything compiles.</li>
+                <li>Come back, and follow the instructions on your screen.  Normally this involves adding the 'export' commands to your shell's init file (for example ~/.bashrc) and possibly changing the web server's configuration.</li>
+                <li>Proceed to database configuration :)</li>
+            </ol>
+	</div>
+
+	<div class="fieldset">
+            <span class="legend">Install by Hand</span>
+            <p>
+            	These are the requirements for Cheshire3, if you want to install everything by hand.
+            </p>
+            <p>
+            	The links below are for if you want to check if there's a more recent version than the one we have in our build packages.  Note that these will not have been tested, won't necessarily be supported, but might have useful bug fixes.
+            </p>
+            <table border="1" cellpadding="2" cellspacing="0" width="100%">
+		<tr><th>Minimum</th><th>Current</th><th>Location</th><th width="15%">Note</th></tr>
+		<tr><td>expat 1.95.8</td><td>1.95.8</td><td><a href="http://sourceforge.net/projects/expat/">http://sourceforge.net/projects/expat/</a></td><td>(see note)</td></tr>
+		<tr><td>BerkeleyDB 4.0</td><td>4.4.20</td><td><a href="http://www.sleepycat.com/">http://www.sleepycat.com/</a></td><td>&nbsp;</td></tr>
+		<tr><td>Python 2.3.0</td><td>2.4.3</td><td><a href="http://www.python.org/">http://www.python.org/</a></td><td>&nbsp;</td></tr>
+		<tr><td>4Suite 1.0a3-cvs</td><td>1.0b3</td><td><a href="http://sourceforge.net/projects/foursuite/">http://sourceforge.net/projects/foursuite/</a></td><td>&nbsp;</td></tr>
+		<tr><td>ZSI 1.5-cvs</td><td>1.7</td><td><a href="http://sourceforge.net/projects/pywebsvcs/">http://sourceforge.net/projects/pywebsvcs/</a></td><td>2.0 not supported</td></tr>
+		<tr><td>PyZ3950</td><td>2.06</td><td><a href="http://www.panix.com/~asl2/software/PyZ3950/">http://www.panix.com/~asl2/software/PyZ3950/</a></td><td>&nbsp;</td></tr>
+		<tr><td>python-dateutil 0.9</td><td>1.1</td><td><a href="http://labix.org/python-dateutil">http://labix.org/python-dateutil</a></td><td>&nbsp;</td></tr>
+		<tr><td>SRW 1.1</td><td>1.1-3</td><td><a href="http://srw.cheshire3.org/downloads/">http://srw.cheshire3.org/downloads/</a></td><td>&nbsp;</td></tr>
+		<tr><td>libxml2 2.6.10</td><td>2.6.26</td><td><a href="http://www.xmlsoft.org/">http://www.xmlsoft.org/</a></td><td>&nbsp;</td></tr>
+		<tr><td>libxslt 1.1.8</td><td>1.1.17</td><td><a href="http://www.xmlsoft.org/">http://www.xmlsoft.org/</a></td><td>&nbsp;</td></tr>
+		<tr><td>lxml 1.0.1</td><td>1.0.3</td><td><a href="http://codespeak.net/lxml/">http://codespeak.net/lxml/</a></td><td>&nbsp;</td></tr>
+		<tr><td>numarray 1.5.1</td><td>1.5.1</td><td><a href="http://www.stsci.edu/resources/software_hardware/numarray">http://www.stsci.edu/resources/software_hardware/numarray</a></td><td>&nbsp;</td></tr>
+		<tr><td>TextIndexNG 2.1</td><td>3.1.9</td><td><a href="http://www.zopyx.com/OpenSource/TextIndexNG">http://www.zopyx.com/OpenSource/TextIndexNG</a></td><td>&nbsp;</td></tr>
+                <tr><td>apache 2.0.42</td><td>2.0.58</td><td><a href="http://httpd.apache.org/">http://httpd.apache.org/</a></td><td>&nbsp;</td></tr>
+                <tr><td>mod_python 3.1.0</td><td>3.2.10</td><td><a href="http://www.modpython.org/">http://www.modpython.org/</a></td><td>&nbsp;</td></tr>
+                <tr><td>Cheshire3 0.9</td><td>0.9.9</td><td><a href="http://www.cheshire3.org/">http://www.cheshire3.org/</a></td><td>&nbsp;</td></tr> 
+            </table>
+
+        </div>
+
+
+	<div class="fieldset">
+            <span class="legend">Installing</span>
+            <p>
+                To ensure that you have the most recent version of these instructions, it is suggested that you also follow along in the build.sh script.
+            </p>
+            <p>
+                Below is a set of instructions to install all of the requirements in user space, rather than globally.  If you want to install globally omit the --prefix from the configurations.  The example location is '/home/cheshire/install' and the source is being decompressed in /home/cheshire/build
+            </p>
+            <p>
+                Before embarking on the process below, you'll need to have a C compiler (we strongly recommend GCC) and make utility installed along with the appropriate libraries. 
+                You probably already do but just in case, these utilities can often be found under 'Development Tools' in package management applications provided in *nix distributions. 
+            </p>
+            <p>
+                If you don't install everything in one session, you'll need to ensure that
+                the environment variables are reset:
+            </p>
+            <blockquote>
+		<code>
+			export CPPFLAGS=-I/home/cheshire/install/include <br/>
+			export LDFLAGS=-L/home/cheshire/install/lib <br/>
+			export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/cheshire/install/lib <br/>
+		</code>
+            </blockquote>
+            <ol>
+                <li>
+                    <b>Install Expat</b>
+                        <p>
+                            Expat is the XML parser library that everything links to, so you'll need to install this first. 
+                            Libxml2 is an alternative parser, but you'll need expat regardless as it's linked by Apache, Python and 4Suite.
+                        </p>
+                        <blockquote>
+                            <code>
+                            ./configure --prefix=/home/cheshire/install 
+                            <br/>make 
+                            <br/>make install
+                            </code>
+                        </blockquote>
+                        <p>
+                            Python 2.4+ and 4Suite 1.0a4+ both include expat version 1.95.8. 
+                            Previously the included versions were different and this could cause problems running under Apache.
+                            The 'minimum' versions have now been updated to these, but if you want to hack in the same version of expat to Python/4Suite or not run under Apache, then previous versions will be okay.
+                            You do not need to install this package if it is already present on your system. Most *nix distributions include Expat. 
+                            Check that the version installed is 1.95.8, if not you probably want to install 1.95.8 globally rather than local to cheshire.
+                        </p>
+                </li>
+                <li>
+                    <b>Install BerkeleyDB</b>
+                    <p>
+			BerkeleyDB is a very fast transactional database system. 
+			It's used by such giants as Ebay, Amazon and IBM. 
+			For the purposes of Cheshire3, it is 10+ times faster than a relational database used for the same job. 
+			It's used by all of the Store interfaces (indexes, records, configurations and other objects).
+                    </p>
+                    <blockquote>
+                    	<code>
+                    	cd build_unix
+                    	<br/>../dist/configure --prefix=/home/cheshire/install
+                    	<br/>make
+                    	<br/>make install
+                    	</code>
+                    </blockquote>
+                    <p>BerkeleyDB is generally present in most Linux systems.  If there is a version 4 or greater, then this is unnecessary.</p>
+                </li>
+                <li>
+                    <b>Install Python</b>
+                    <p>
+			Python is the language that all of the main operational functions are written in, as opposed to the raw number crunching which is mostly done by C libraries. 
+			It's easy to understand and maintain, enabling developers to get right into the nitty gritty if desired, but without significant sacrifices to performance.
+                    </p>
+                    <p>
+			MacOSX note:  use --enable-framework in the configure to build as a framework.
+                    </p>
+                    <blockquote>
+			<code>
+			./configure --prefix=/home/cheshire/install
+			<br/>make
+			<br/>make install
+			</code>
+                    </blockquote>
+                </li>
+	
+	<li>
+		<b>Install 4Suite</b>
+		<p> 
+			4Suite is the best XML processing library available at the current time for Python. 
+			We use it for XPath and XSLT processing, as well as most DOM creation. 
+			See libxml2 for an alternative, but currently it does not support SAX2 under Python, nor does it produce unicode objects, just strings.
+		</p>
+		<blockquote>
+			<code>
+			python ./setup.py build
+			<br/>python ./setup.py install
+			</code>
+		</blockquote>
+	</li>
+	
+	<li>
+		<b>Install ZSI</b>
+		<p>ZSI is the best Python SOAP toolkit. The most recent version (1.5) comes with a WSDL compiler, however it's not yet quite up to SRW.</p>
+		<p>
+			The most recent version of ZSI either requires PyXML to be installed (which is not otherwise required for Cheshire3, and can conflict with 4Suite which is a better package) or to use the CVS version. 
+			The CVS version is available in the Cheshire3 FTP site.
+		</p>
+		<blockquote>
+			<code>
+			python ./setup.py build
+			<br/>python ./setup.py install</code>
+		</blockquote>
+	</li>
+	
+	<li>
+		<b>Install TextIndexNG</b> (Optional)
+		<p>
+			TextIndexNG includes a wrapper around the Snowball stemming language. 
+			It provides interfaces to stemmers which reduce a word down to its lexical stem, eg 'princesses' to 'princess' or 'understanding' to 'understand'. 
+			TextIndexNG comes with a lot of other code, which is also installed, but not used. 
+			The author of the package was approached regarding splitting out the stemming library, but was not amenable to the suggestion.
+		</p>
+		<blockquote>
+			<code> python ./setup.py install</code>
+		</blockquote>
+	</li>
+	
+	<li>
+		<b>Install PyZ3950</b>
+		<p>
+			This package is required even if you don't want to enable Z39.50 interfaces as it contains the CQL libraries used in all C3 queries. 
+			It's also used by the Z3950SearchDocumentStream as a Z client.
+		</p>
+		<p>
+			You may need to install lex and yacc by hand first, as these are required to build the ASN.1 compiler. 
+		</p>
+		<blockquote>
+			<code>
+			cp lex.py yacc.py /home/cheshire/install/lib/python2.4/site-packages/
+			<br/>python ./setup.py install
+			</code>
+		</blockquote>
+	</li>
+	
+	<li>
+		<b>Install SRW</b> (Optional)
+		<p>
+			This very small package contains the stubs for ZSI as well as a quick SRW demo client in python. 
+			If you're not going to enable an SRW/U interface, or the SRWSearchDocumentStream, you can omit it.
+		</p>
+		<blockquote>
+			<code>
+			python ./setup.py install
+			</code>
+		</blockquote>
+	</li>
+	
+	<li>
+		<b>Install DateUtils</b> (Optional)
+		<p>The DateUtils code provides an excellent free text date parser (though doesn't currently handle multiple dates in the same block of text)</p>
+		<blockquote>
+			<code>
+			python ./setup.py install
+			</code>
+		</blockquote>
+	</li>
+	
+	<li>
+		<b>Install libxml2</b> (Optional)
+		<p>
+                    This library is faster than expat and comes with its own XPath and XSLT implementations.
+                    It's not required if you don't feel like it, but it does parse XML really fast!</p>
+                    <blockquote>
+			<code>
+                            ./configure --prefix=/home/cheshire/install --with-python
+                            <br/>make
+                            <br/>make install
+                            <br/>cd python
+                            <br/>python ./setup.py install
+			</code>
+                    </blockquote>
+	</li>
+	
+	<li>
+		<b>Install libxslt</b> (Optional)
+		<p>A companion library to libxml2 to process XSLT.</p>
+		<blockquote>
+                    <code>
+			./configure --prefix=/home/cheshire/install --with-python
+			<br/>make
+			<br/>make install
+                    </code>
+		</blockquote>
+	</li>
+
+	<li>
+		<b>Install Apache</b> (Optional)
+		<p>
+			Try to make sure that it links the version of expat you just installed by checking the output of configure to see whereabouts it's linking. 
+			Apache is only required if you want to have a remote interface to the Cheshire3 databases, eg by SRW/U, OAI or Z39.50. 
+			However using regular CGI calls rather than mod_python (below) handlers will be much slower as the infrastructure takes a second or so to configure and instantiate.
+		</p>
+                <blockquote>
+                    <code>
+			export CPPFLAGS=-I/home/cheshire/install/include
+			<br/>export LDFLAGS=-L/home/cheshire/install/lib
+			<br/>export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/cheshire/install/lib
+			<br/>./configure --prefix=/home/cheshire/install --enable-mods=all 
+			  --with-berkeley-db=/home/cheshire/install --enable-suexec
+			<br/>make
+			<br/>make install
+                    </code>
+		</blockquote>
+		<p>
+			Apache is also generally present in most systems, however you must ensure that it is run with the right environment variable so that it will link against the libraries that have been installed. 
+			Also, you'll need to ensure that the user which Apache is run as has read (and potentially write) access to the databases which the index and record data is maintained in.
+		</p>
+	</li>
+	
+	<li>
+		<b>Install mod_python</b> (Optional)
+		<p>	
+			If you haven't installed Apache, you can skip this section. 
+			Mod_python allows Apache to run python code internally to handle connections and requests. 
+			Each apache thread gets its own python interpreter which is only started once and left running. 
+			This means that the Cheshire3 architecture only needs to be built once, rather than per invocation.
+		</p>
+		<blockquote>
+		<code>
+			./configure --prefix=/home/cheshire/install --with-python=/home/cheshire/install/bin/python2.4 --with-apxs=/home/cheshire/install/bin/apxs
+			<br/>make
+			<br/>make install
+		</code>
+		</blockquote>
+	</li>
+
+	<li>
+		<b>Install PVM</b> (Optional)
+		<p>
+			The Parallel Virtual Machine library is a very fast, low transaction cost parallelization system. 
+			It lets you run processes on multiple machines and compiles for multiple platforms. 
+			As Python and hence Cheshire3 will run on multiple platforms without any additional effort this means that you can build a completely heterogeneous cluster without any difficulties.
+		</p>
+		<blockquote>
+		[Coming]
+		</blockquote>
+	</li>
+
+	<li>
+		<b>Install PyPVM</b> (Required if PVM is installed)
+		<p>This is the Python wrapper around the PVM library.</p>
+		<blockquote>
+		[Coming]
+		</blockquote>
+	</li>
+
+	<li>
+		<p>If you run into issues with the 'sort' utility breaking, check you have the latest version of textutils installed.</p>
+		<blockquote>
+		<code>
+			./configure --prefix=/home/cheshire/install
+			<br/>make
+			<br/>make install
+		</code>
+		</blockquote>
+	</li>
+	</ol>
+</div>
+
+        <div class="fieldset">
+            <span class="legend">Configuration</span>
+                <ol>
+                    <li>
+                        <p>Environment variables required if you have installed this as a local user.</p>
+                        <blockquote>
+                            <code>
+                                export LD_LIBRARY_PATH=/home/cheshire/install/lib <br/>
+                                export LD_RUN_PATH=/home/cheshire/install/lib
+                            </code>
+                        </blockquote>
+                        <p>
+                            Also ensure that Apache is run with these environment variables (envvars / envvars-std files with httpd binary)
+                        </p>
+                    </li>
+	
+                    <li>
+                        <b>Configure Apache.</b>  
+                        <ul>
+                            <li>The standard configuration is typically sufficient to start with.
+                                Add:
+                                <blockquote>
+                                    <code>
+                                        Include conf/cheshire3.conf
+                                    </code>
+                                </blockquote>
+                            </li>
+                            <li>
+                                <p>And then in cheshire3.conf:</p>
+			 <blockquote>
+			<pre>
+			<code>
+# Load mod_python
+LoadModule python_module modules/mod_python.so
+
+# SRW/U interface at /srw/dbname
+&lt;Directory /home/cheshire/install/htdocs/srw&gt;
+  SetHandler mod_python
+  PythonDebug On
+  PythonPath "['/home/cheshire/cheshire3/code']+sys.path"
+  PythonHandler srwApacheHandler
+&lt;/Directory&gt;
+
+# Z3950 interface on 2100
+Listen 2100
+&lt;VirtualHost *:2100&gt;
+      PythonPath "['/home/cheshire/cheshire3/code']+sys.path"
+      PythonConnectionHandler zApacheHandler
+      PythonDebug On
+&lt;/VirtualHost&gt;
+			</code>
+			</pre>
+			</blockquote>
+		</li>
+                    </ul>
+                </li>
+                <li>
+                    <b>Configure Cheshire3</b>
+                    <p>See further <a href="config.html">documentation</a>.</p>
+                </li>
+            </ol>
+	</div>
+
+	<div class="fieldset">
+            <span class="legend">Troubleshooting</span>
+            <p>
+            	If you get strange errors from mod_python under Linux, first trying restarting Apache.
+            	If this fails with a <code>No space left on device</code> error when there obviously
+            	is space, then you've hit the semaphore problem.
+            	<br/> The fix is:
+            </p>
+            <blockquote>
+                <code>echo "512     32000   32      512" &gt; /proc/sys/kernel/sem</code>
+            </blockquote>
+            <p>Or see:</p>
+            <a href="http://clarens.sourceforge.net/index.php?docs+faq">http://clarens.sourceforge.net/index.php?docs+faq</a>
+
+	</div>
+
+    </body>
+</html>

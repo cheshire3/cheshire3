@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>record.LxmlRecord</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <link rel="stylesheet" href="/cheshire3.css" type="text/css"/>
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body>
+<table width="100%" border=0 cellpadding=0 cellspacing=0 class="maintitle">
+<tr height="75">
+<td class="cheshirelogo" width="25%">
+<img src="/gfx/c3_white.gif">
+</td>
+<td width="10">
+<img src="/gfx/slant_grey.gif">
+</td>
+<td width="75%" align="center">
+<h2>Cheshire3 Object Model: Class LxmlRecord
+</h2>
+</td></tr>
+</table>
+
+<div class="fieldset">
+<span class="legend"><a href="configParser-module.html">
+        <a href="record-module.html">Module&nbsp;record</a> ::
+        Class&nbsp;LxmlRecord
+      </span>
+<p>
+
+
+<h2 class="class">Class LxmlRecord
+<br/><span class="codelink"><a href="record-pysrc.html#LxmlRecord">source&nbsp;code</a></span></h2>
+<b>Object Tree:</b><pre class="base-tree">
+<a href="baseObjects.Record-class.html">baseObjects.Record</a> --+    
+                     |    
+             <a href="record.DomRecord-class.html">DomRecord</a> --+
+                         |
+                        <strong class="uidshort">LxmlRecord</strong>
+</pre>
+
+<hr />
+<!-- ==================== INSTANCE METHODS ==================== -->
+</div><div class="fieldset"><span class="legend">Instance Methods</span><p>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white"><tr>
+
+  <td>
+    <span class="sig"><a href="record.LxmlRecord-class.html#__repr__" class="sig-name">__repr__</a>(<span class="sig-arg">self</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="record.LxmlRecord-class.html#get_sax" class="sig-name">get_sax</a>(<span class="sig-arg">self</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="record.LxmlRecord-class.html#get_xml" class="sig-name">get_xml</a>(<span class="sig-arg">self</span>)</span>
+    <br />Return the XML for the record as a serialised string.
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="record.LxmlRecord-class.html#process_xpath" class="sig-name">process_xpath</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">xpath</span>,
+        <span class="sig-arg">maps</span>=<span class="sig-default">{}</span>)</span>
+    <br />Process the given xpath (either string or compiled), perhaps with 
+      some supplied namespace mappings.
+  </td>
+</tr>
+  <tr>
+    <td colspan="2">
+    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="record.DomRecord-class.html">DomRecord</a></code></span>:
+      <code><a href="record.DomRecord-class.html#__init__">__init__</a></code>,
+      <code><a href="record.DomRecord-class.html#get_dom">get_dom</a></code>
+      </p>
+    <div class="private">    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="record.DomRecord-class.html">DomRecord</a></code></span> (private):
+      <code><a href="record.DomRecord-class.html#_walk">_walk</a></code>
+      </p></div>
+    </td>
+  </tr>
+</table>
+
+<br />
+<!-- ==================== CLASS VARIABLES ==================== -->
+</div><div class="fieldset"><span class="legend">Class Variables</span><p>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">  <tr>
+    <td colspan="2">
+    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="record.DomRecord-class.html">DomRecord</a></code></span>:
+      <code><a href="record.DomRecord-class.html#context">context</a></code>,
+      <code><a href="record.DomRecord-class.html#size">size</a></code>
+      </p>
+    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="baseObjects.Record-class.html">baseObjects.Record</a></code></span>:
+      <code><a href="baseObjects.Record-class.html#baseUri">baseUri</a></code>,
+      <code><a href="baseObjects.Record-class.html#dom">dom</a></code>,
+      <code><a href="baseObjects.Record-class.html#elementHash">elementHash</a></code>,
+      <code><a href="baseObjects.Record-class.html#history">history</a></code>,
+      <code><a href="baseObjects.Record-class.html#parent">parent</a></code>,
+      <code><a href="baseObjects.Record-class.html#processHistory">processHistory</a></code>,
+      <code><a href="baseObjects.Record-class.html#recordStore">recordStore</a></code>,
+      <code><a href="baseObjects.Record-class.html#resultSetItem">resultSetItem</a></code>,
+      <code><a href="baseObjects.Record-class.html#rights">rights</a></code>,
+      <code><a href="baseObjects.Record-class.html#sax">sax</a></code>,
+      <code><a href="baseObjects.Record-class.html#schema">schema</a></code>,
+      <code><a href="baseObjects.Record-class.html#schemaType">schemaType</a></code>,
+      <code><a href="baseObjects.Record-class.html#status">status</a></code>,
+      <code><a href="baseObjects.Record-class.html#xml">xml</a></code>
+      </p>
+    </td>
+  </tr>
+</table>
+
+<br />
+<!-- ==================== METHOD DETAILS ==================== --></div><div class="fieldset"><span class="legend">Method Details</span><p><a name="__repr__"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">__repr__</span>(<span class="sig-arg">self</span>)</span>
+    <br /><em class="fname">(Representation operator)</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="record-pysrc.html#LxmlRecord.__repr__">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="get_sax"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">get_sax</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="record-pysrc.html#LxmlRecord.get_sax">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="record.DomRecord-class.html#get_sax">DomRecord.get_sax</a>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="get_xml"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">get_xml</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="record-pysrc.html#LxmlRecord.get_xml">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Return the XML for the record as a serialised string.
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="baseObjects.Record-class.html#get_xml">baseObjects.Record.get_xml</a>
+        <dd><em class="note">(inherited documentation)</em></dd>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="process_xpath"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">process_xpath</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">xpath</span>,
+        <span class="sig-arg">maps</span>=<span class="sig-default">{}</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="record-pysrc.html#LxmlRecord.process_xpath">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  Process the given xpath (either string or compiled), perhaps with some
+  supplied namespace mappings.
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="baseObjects.Record-class.html#process_xpath">baseObjects.Record.process_xpath</a>
+        <dd><em class="note">(inherited documentation)</em></dd>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<br />
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">Generated by Epydoc
+        3.0alpha2 on Wed Aug  9 18:09:59 2006</td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>

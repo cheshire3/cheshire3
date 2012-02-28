@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>srwExtensions</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        Module&nbsp;srwExtensions
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript: void(0);" class="privatelink"
+    onclick="toggle_private();">hide private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="srwExtensions-pysrc.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<h2 class="py-src">Source Code for <a href="srwExtensions-module.html">Module srwExtensions</a></h2>
+<div class="py-src">
+<pre class="py-src">
+<span class="lineno"> 1</span>  <span class="py-line"> </span>
+<span class="lineno"> 2</span>  <span class="py-line"><span class="py-comment"># All extension functions for SRW should be imported into this space</span> </span>
+<span class="lineno"> 3</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># even if they're defined elsewhere.</span> </span>
+<span class="lineno"> 4</span>  <span class="py-line"><span class="py-comment"></span> </span>
+<span class="lineno"> 5</span>  <span class="py-line"><span class="py-comment"># Functions should modify extra*Data in place.</span> </span>
+<span class="lineno"> 6</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># Add DOM node for serialization by ZSI. </span> </span>
+<span class="lineno"> 7</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># Fr'ex:</span> </span>
+<span class="lineno"> 8</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># object.extraFooData.append(r.fromString('&lt;a:b c="d"&gt;e&lt;/a:b&gt;'))</span> </span>
+<span class="lineno"> 9</span>  <span class="py-line"><span class="py-comment"></span> </span>
+<span class="lineno">10</span>  <span class="py-line"><span class="py-comment"># Configuration in SRW ZeeRex file should look like:</span> </span>
+<span class="lineno">11</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment">#</span> </span>
+<span class="lineno">12</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment">#  &lt;zeerex:supports type="extension"</span> </span>
+<span class="lineno">13</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment">#                   c3:type="record"</span> </span>
+<span class="lineno">14</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment">#                   c3:function="docidRecordHandler"</span> </span>
+<span class="lineno">15</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment">#                   c3:sruName="x-info2-docid"</span> </span>
+<span class="lineno">16</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment">#                   c3:sruFunction="docidRequestXform"&gt;</span> </span>
+<span class="lineno">17</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment">#     info:srw/extensions/2/docid-v1.0 docid</span> </span>
+<span class="lineno">18</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment">#  &lt;/zeerex:/supports&gt;</span> </span>
+<span class="lineno">19</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># </span> </span>
+<span class="lineno">20</span>  <span class="py-line"><span class="py-comment"></span><span class="py-comment"># Where c3:type is one of: record, term, search, scan, explain, response</span> </span>
+<span class="lineno">21</span>  <span class="py-line"><span class="py-comment"></span> </span>
+<span class="lineno">22</span>  <span class="py-line"><span class="py-comment"># Useful tools:</span> </span>
+<span class="lineno">23</span>  <span class="py-line"><span class="py-comment"></span><span class="py-keyword">from</span> <span id="link-0" class="py-name"><a title="baseObjects.Record.xml
+bootstrap.BootstrapRecord.xml
+record.SaxToXmlHandler.xml" class="py-name" href="#" onclick="doclink('link-0', 'xml', 'Variable baseObjects.Record.xml=baseObjects.Record-class.html#xml,Variable bootstrap.BootstrapRecord.xml=bootstrap.BootstrapRecord-class.html#xml,Variable record.SaxToXmlHandler.xml=record.SaxToXmlHandler-class.html#xml'); return false;">xml</a></span></span><span class="py-op">.</span><a title="baseObjects.Record.sax" class="py-name" href="baseObjects.Record-class.html#sax">sax</a><span class="py-op">.</span><span class="py-name">saxutils</span> <span class="py-keyword">import</span> <span class="py-name">escape</span> </span>
+<span class="lineno">24</span>  <span class="py-line"><span class="py-keyword">from</span> <a title="utils" class="py-name" href="utils-module.html">utils</a> <span class="py-keyword">import</span> <a class="py-name" href="utils.reader-class.html">reader</a> </span>
+<span class="lineno">25</span>  <span class="py-line"><a class="py-name" href="srwExtensions-module.html#r">r</a> <span class="py-op">=</span> <a class="py-name" href="utils.reader-class.html">reader</a><span class="py-op">(</span><span class="py-op">)</span> </span>
+<span class="lineno">26</span>  <span class="py-line"> </span>
+<span class="lineno">27</span>  <span class="py-line"><span class="py-comment"># Simple SRU-&gt;SRW transformation</span> </span>
+<span class="lineno">28</span>  <span class="py-line"><span class="py-comment"></span> </span>
+<a name="simpleRequestXform"></a><div id="simpleRequestXform-def"><span class="lineno">29</span> <a class="pysrc-toggle" href="#" id="simpleRequestXform-toggle" onclick="toggle('simpleRequestXform'); return false;">-</a><span class="py-line"><span class="py-keyword">def</span> <a class="py-def-name" href="srwExtensions-module.html#simpleRequestXform">simpleRequestXform</a><span class="py-op">(</span><span class="py-param">item</span><span class="py-op">,</span> <span class="py-param">config</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="simpleRequestXform-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="simpleRequestXform-expanded"><span class="lineno">30</span>  <span class="py-line">    <span class="py-name">data</span> <span class="py-op">=</span> <span class="py-name">config</span><span class="py-op">.</span><span class="py-name">sruExtensionMap</span><span class="py-op">.</span><span class="py-name">get</span><span class="py-op">(</span><a title="resultSet.DeserializationHandler.item" class="py-name" href="resultSet.DeserializationHandler-class.html#item">item</a><span class="py-op">[</span><span class="py-number">0</span><span class="py-op">]</span><span class="py-op">,</span> <span class="py-name">None</span><span class="py-op">)</span> </span>
+<span class="lineno">31</span>  <span class="py-line">    <span class="py-keyword">if</span> <span class="py-name">data</span><span class="py-op">:</span> </span>
+<span class="lineno">32</span>  <span class="py-line">        <span id="link-1" class="py-name"><a title="baseObjects.Record.xml
+bootstrap.BootstrapRecord.xml
+record.SaxToXmlHandler.xml" class="py-name" href="#" onclick="doclink('link-1', 'xml', 'Variable baseObjects.Record.xml=baseObjects.Record-class.html#xml,Variable bootstrap.BootstrapRecord.xml=bootstrap.BootstrapRecord-class.html#xml,Variable record.SaxToXmlHandler.xml=record.SaxToXmlHandler-class.html#xml'); return false;">xml</a></span></span> <span class="py-op">=</span> <span class="py-string">'&lt;ns1:%s xmlns:ns1="%s"&gt;%s&lt;/ns1:%s&gt;'</span> <span class="py-op">%</span> <span class="py-op">(</span><span class="py-name">data</span><span class="py-op">[</span><span class="py-number">1</span><span class="py-op">]</span><span class="py-op">,</span> <span class="py-name">data</span><span class="py-op">[</span><span class="py-number">0</span><span class="py-op">]</span><span class="py-op">,</span> <a title="resultSet.DeserializationHandler.item" class="py-name" href="resultSet.DeserializationHandler-class.html#item">item</a><span class="py-op">[</span><span class="py-number">1</span><span class="py-op">]</span><span class="py-op">,</span> <span class="py-name">data</span><span class="py-op">[</span><span class="py-number">1</span><span class="py-op">]</span><span class="py-op">)</span> </span>
+<span class="lineno">33</span>  <span class="py-line">        <span class="py-name">val</span> <span class="py-op">=</span> <a title="srwExtensions.r" class="py-name" href="srwExtensions-module.html#r">r</a><span class="py-op">.</span><a title="utils.reader.fromString" class="py-name" href="utils.reader-class.html#fromString">fromString</a><span class="py-op">(</span><span id="link-2" class="py-name"><a title="baseObjects.Record.xml
+bootstrap.BootstrapRecord.xml
+record.SaxToXmlHandler.xml" class="py-name" href="#" onclick="doclink('link-2', 'xml', 'Variable baseObjects.Record.xml=baseObjects.Record-class.html#xml,Variable bootstrap.BootstrapRecord.xml=bootstrap.BootstrapRecord-class.html#xml,Variable record.SaxToXmlHandler.xml=record.SaxToXmlHandler-class.html#xml'); return false;">xml</a></span></span><span class="py-op">)</span> </span>
+<span class="lineno">34</span>  <span class="py-line">        <span class="py-keyword">return</span> <span class="py-name">val</span> </span>
+<span class="lineno">35</span>  <span class="py-line">    <span class="py-keyword">return</span> <span class="py-name">None</span> </span>
+</div><span class="lineno">36</span>  <span class="py-line"> </span>
+<span class="lineno">37</span>  <span class="py-line"><span class="py-comment"># Extension Handler Functions:</span> </span>
+<span class="lineno">38</span>  <span class="py-line"><span class="py-comment"></span> </span>
+<a name="implementationResponseHandler"></a><div id="implementationResponseHandler-def"><span class="lineno">39</span> <a class="pysrc-toggle" href="#" id="implementationResponseHandler-toggle" onclick="toggle('implementationResponseHandler'); return false;">-</a><span class="py-line"><span class="py-keyword">def</span> <a class="py-def-name" href="srwExtensions-module.html#implementationResponseHandler">implementationResponseHandler</a><span class="py-op">(</span><span class="py-param">req</span><span class="py-op">,</span> <span class="py-param">resp</span><span class="py-op">,</span> <span class="py-param">other</span><span class="py-op">=</span><span class="py-name">None</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="implementationResponseHandler-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="implementationResponseHandler-expanded"><span class="lineno">40</span>  <span class="py-line">    <span class="py-comment"># Put our implementation id into the response</span> </span>
+<span class="lineno">41</span>  <span class="py-line"><span class="py-comment"></span>    <span class="py-comment"># Stored in ZeeRex, so on config object</span> </span>
+<span class="lineno">42</span>  <span class="py-line"><span class="py-comment"></span>    <span class="py-comment"># XXX Make dynamic</span> </span>
+<span class="lineno">43</span>  <span class="py-line"><span class="py-comment"></span>    <a title="bootstrap.BootstrapDocument.txt" class="py-name" href="bootstrap.BootstrapDocument-class.html#txt">txt</a> <span class="py-op">=</span> <span class="py-string">"""</span> </span>
+<span class="lineno">44</span>  <span class="py-line"><span class="py-string">    &lt;ident:serverInfo xmlns:ident="info:srw/extensions/1/ident-v1.0"&gt;</span> </span>
+<span class="lineno">45</span>  <span class="py-line"><span class="py-string">      &lt;ident:institution&gt;University of Liverpool&lt;/ident:institution&gt;</span> </span>
+<span class="lineno">46</span>  <span class="py-line"><span class="py-string">      &lt;ident:vendor&gt;Cheshire3 Project&lt;/ident:vendor&gt;</span> </span>
+<span class="lineno">47</span>  <span class="py-line"><span class="py-string">      &lt;ident:application&gt;Cheshire3 SRW Server&lt;/ident:application&gt;</span> </span>
+<span class="lineno">48</span>  <span class="py-line"><span class="py-string">      &lt;ident:version&gt;0.7.9&lt;/ident:version&gt;</span> </span>
+<span class="lineno">49</span>  <span class="py-line"><span class="py-string">    &lt;/ident:serverInfo&gt;</span> </span>
+<span class="lineno">50</span>  <span class="py-line"><span class="py-string">    """</span> </span>
+<span class="lineno">51</span>  <span class="py-line">    <span class="py-name">resp</span><span class="py-op">.</span><span class="py-name">extraResponseData</span><span class="py-op">.</span><a title="resultSet.SimpleResultSet.append" class="py-name" href="resultSet.SimpleResultSet-class.html#append">append</a><span class="py-op">(</span><a title="srwExtensions.r" class="py-name" href="srwExtensions-module.html#r">r</a><span class="py-op">.</span><a title="utils.reader.fromString" class="py-name" href="utils.reader-class.html#fromString">fromString</a><span class="py-op">(</span><a title="bootstrap.BootstrapDocument.txt" class="py-name" href="bootstrap.BootstrapDocument-class.html#txt">txt</a><span class="py-op">)</span><span class="py-op">)</span> </span>
+</div><span class="lineno">52</span>  <span class="py-line"> </span>
+<a name="docidRecordHandler"></a><div id="docidRecordHandler-def"><span class="lineno">53</span> <a class="pysrc-toggle" href="#" id="docidRecordHandler-toggle" onclick="toggle('docidRecordHandler'); return false;">-</a><span class="py-line"><span class="py-keyword">def</span> <a class="py-def-name" href="srwExtensions-module.html#docidRecordHandler">docidRecordHandler</a><span class="py-op">(</span><span class="py-param">req</span><span class="py-op">,</span> <span class="py-param">ro</span><span class="py-op">,</span> <span class="py-param">other</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="docidRecordHandler-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="docidRecordHandler-expanded"><span class="lineno">54</span>  <span class="py-line">    <span class="py-comment"># Put the record identifier into extraRecordData</span> </span>
+<span class="lineno">55</span>  <span class="py-line"><span class="py-comment"></span>    <a title="bootstrap.BootstrapDocument.txt" class="py-name" href="bootstrap.BootstrapDocument-class.html#txt">txt</a> <span class="py-op">=</span> <span class="py-string">'&lt;docid:recordIdentifier xmlns:docid="info:srw/extensions/2/docid-v1.0"&gt;%s&lt;/docid:recordIdentifier&gt;'</span> <span class="py-op">%</span> <span class="py-name">escape</span><span class="py-op">(</span><span class="py-name">str</span><span class="py-op">(</span><span class="py-name">other</span><span class="py-op">)</span><span class="py-op">)</span> </span>
+<span class="lineno">56</span>  <span class="py-line">    <span class="py-name">ro</span><span class="py-op">.</span><span class="py-name">extraRecordData</span><span class="py-op">.</span><a title="resultSet.SimpleResultSet.append" class="py-name" href="resultSet.SimpleResultSet-class.html#append">append</a><span class="py-op">(</span><a title="srwExtensions.r" class="py-name" href="srwExtensions-module.html#r">r</a><span class="py-op">.</span><a title="utils.reader.fromString" class="py-name" href="utils.reader-class.html#fromString">fromString</a><span class="py-op">(</span><a title="bootstrap.BootstrapDocument.txt" class="py-name" href="bootstrap.BootstrapDocument-class.html#txt">txt</a><span class="py-op">)</span><span class="py-op">)</span> </span>
+</div><span class="lineno">57</span>  <span class="py-line"> </span><script type="text/javascript">
+<!--
+expandto(location.href);
+// -->
+</script>
+</pre>
+</div>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">Generated by Epydoc
+        3.0alpha2 on Wed Aug  9 18:10:59 2006</td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>

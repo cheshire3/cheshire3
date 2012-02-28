@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>textmining.tmDocumentFactory</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="textmining-module.html">Package&nbsp;textmining</a> ::
+        Module&nbsp;tmDocumentFactory
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript: void(0);" class="privatelink"
+    onclick="toggle_private();">hide private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="textmining.tmDocumentFactory-pysrc.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<h2 class="py-src">Source Code for <a href="textmining.tmDocumentFactory-module.html">Module textmining.tmDocumentFactory</a></h2>
+<div class="py-src">
+<pre class="py-src">
+<span class="lineno">  1</span>  <span class="py-line"> </span>
+<span class="lineno">  2</span>  <span class="py-line"><span class="py-keyword">from</span> <a title="documentFactory" class="py-name" href="documentFactory-module.html">documentFactory</a> <span class="py-keyword">import</span> <a class="py-name" href="documentFactory.BaseDocumentStream-class.html">BaseDocumentStream</a> </span>
+<span class="lineno">  3</span>  <span class="py-line"><span class="py-keyword">from</span> <span id="link-0" class="py-name"><a title="document
+record.SaxToDomHandler.document" class="py-name" href="#" onclick="doclink('link-0', 'document', 'Module document=document-module.html,Variable record.SaxToDomHandler.document=record.SaxToDomHandler-class.html#document'); return false;">document</a></span></span> <span class="py-keyword">import</span> <a class="py-name" href="document.StringDocument-class.html">StringDocument</a> </span>
+<span class="lineno">  4</span>  <span class="py-line"> </span>
+<span class="lineno">  5</span>  <span class="py-line"><span class="py-keyword">import</span> <span class="py-name">os</span><span class="py-op">,</span> <span class="py-name">re</span> </span>
+<span class="lineno">  6</span>  <span class="py-line"> </span>
+<a name="EnjuRecordDocumentStream"></a><div id="EnjuRecordDocumentStream-def"><span class="lineno">  7</span> <a class="pysrc-toggle" href="#" id="EnjuRecordDocumentStream-toggle" onclick="toggle('EnjuRecordDocumentStream'); return false;">-</a><span class="py-line"><span class="py-keyword">class</span> <a class="py-def-name" href="textmining.tmDocumentFactory.EnjuRecordDocumentStream-class.html">EnjuRecordDocumentStream</a><span class="py-op">(</span><span class="py-base-class">BaseDocumentStream</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="EnjuRecordDocumentStream-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="EnjuRecordDocumentStream-expanded"><span class="lineno">  8</span>  <span class="py-line"> </span>
+<a name="EnjuRecordDocumentStream.open_stream"></a><div id="EnjuRecordDocumentStream.open_stream-def"><span class="lineno">  9</span> <a class="pysrc-toggle" href="#" id="EnjuRecordDocumentStream.open_stream-toggle" onclick="toggle('EnjuRecordDocumentStream.open_stream'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="textmining.tmDocumentFactory.EnjuRecordDocumentStream-class.html#open_stream">open_stream</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">stream</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="EnjuRecordDocumentStream.open_stream-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="EnjuRecordDocumentStream.open_stream-expanded"><span class="lineno"> 10</span>  <span class="py-line">        <span class="py-comment"># stream here will be a record in Enju XML schema</span> </span>
+<span class="lineno"> 11</span>  <span class="py-line"><span class="py-comment"></span>        <span class="py-name">self</span><span class="py-op">.</span><a title="documentFactory.BaseDocumentStream.streamLocation" class="py-name" href="documentFactory.BaseDocumentStream-class.html#streamLocation">streamLocation</a> <span class="py-op">=</span> <a title="documentFactory.BaseDocumentStream.stream" class="py-name" href="documentFactory.BaseDocumentStream-class.html#stream">stream</a><span class="py-op">.</span><span id="link-1" class="py-name"><a title="baseObjects.Document.id
+baseObjects.ResultSet.id
+configParser.C3Object.id
+resultSet.BitmapResultSet.id
+resultSet.SimpleResultSet.id
+srboo.SrbConnection.id" class="py-name" href="#" onclick="doclink('link-1', 'id', 'Variable baseObjects.Document.id=baseObjects.Document-class.html#id,Variable baseObjects.ResultSet.id=baseObjects.ResultSet-class.html#id,Variable configParser.C3Object.id=configParser.C3Object-class.html#id,Variable resultSet.BitmapResultSet.id=resultSet.BitmapResultSet-class.html#id,Variable resultSet.SimpleResultSet.id=resultSet.SimpleResultSet-class.html#id,Variable srboo.SrbConnection.id=srboo.SrbConnection-class.html#id'); return false;">id</a></span></span> </span>
+<span class="lineno"> 12</span>  <span class="py-line">        <span class="py-keyword">return</span> <a title="documentFactory.BaseDocumentStream.stream" class="py-name" href="documentFactory.BaseDocumentStream-class.html#stream">stream</a> </span>
+</div><span class="lineno"> 13</span>  <span class="py-line"> </span>
+<a name="EnjuRecordDocumentStream.find_documents"></a><div id="EnjuRecordDocumentStream.find_documents-def"><span class="lineno"> 14</span> <a class="pysrc-toggle" href="#" id="EnjuRecordDocumentStream.find_documents-toggle" onclick="toggle('EnjuRecordDocumentStream.find_documents'); return false;">-</a><span class="py-line">    <span class="py-keyword">def</span> <a class="py-def-name" href="textmining.tmDocumentFactory.EnjuRecordDocumentStream-class.html#find_documents">find_documents</a><span class="py-op">(</span><span class="py-param">self</span><span class="py-op">,</span> <span class="py-param">session</span><span class="py-op">,</span> <span class="py-param">cache</span><span class="py-op">=</span><span class="py-number">0</span><span class="py-op">)</span><span class="py-op">:</span> </span>
+</div><div id="EnjuRecordDocumentStream.find_documents-collapsed" style="display:none;" pad="+++" indent="++++++++"></div><div id="EnjuRecordDocumentStream.find_documents-expanded"><span class="lineno"> 15</span>  <span class="py-line"> </span>
+<span class="lineno"> 16</span>  <span class="py-line">        <span class="py-comment"># Find verbs, one verb per document</span> </span>
+<span class="lineno"> 17</span>  <span class="py-line"><span class="py-comment"></span>        <span class="py-name">vs</span> <span class="py-op">=</span> <span class="py-name">rec</span><span class="py-op">.</span><span id="link-2" class="py-name"><a title="baseObjects.Record.process_xpath
+record.FtDomRecord.process_xpath
+record.LxmlRecord.process_xpath
+record.MarcRecord.process_xpath
+record.MinidomRecord.process_xpath
+record.SaxRecord.process_xpath" class="py-name" href="#" onclick="doclink('link-2', 'process_xpath', 'Method baseObjects.Record.process_xpath(session)=baseObjects.Record-class.html#process_xpath,Method record.FtDomRecord.process_xpath(session)=record.FtDomRecord-class.html#process_xpath,Method record.LxmlRecord.process_xpath(session)=record.LxmlRecord-class.html#process_xpath,Method record.MarcRecord.process_xpath(session)=record.MarcRecord-class.html#process_xpath,Method record.MinidomRecord.process_xpath(session)=record.MinidomRecord-class.html#process_xpath,Method record.SaxRecord.process_xpath(session)=record.SaxRecord-class.html#process_xpath'); return false;">process_xpath</a></span></span><span class="py-op">(</span><span class="py-string">'phrase[@cat="VP"]/word'</span><span class="py-op">)</span>    </span>
+<span class="lineno"> 18</span>  <span class="py-line">        <span class="py-name">docs</span> <span class="py-op">=</span> <span class="py-op">[</span><span class="py-op">]</span> </span>
+<span class="lineno"> 19</span>  <span class="py-line">        <span class="py-name">processed</span> <span class="py-op">=</span> <span class="py-op">[</span><span class="py-op">]</span> </span>
+<span class="lineno"> 20</span>  <span class="py-line">        <span class="py-keyword">for</span> <span class="py-name">v</span> <span class="py-keyword">in</span> <span class="py-name">vs</span><span class="py-op">:</span> </span>
+<span class="lineno"> 21</span>  <span class="py-line">            <span class="py-comment"># Find word, and arg1, arg2</span> </span>
+<span class="lineno"> 22</span>  <span class="py-line"><span class="py-comment"></span>            <span class="py-op">(</span><span id="link-3" class="py-name"><a title="configParser.C3Object.name
+srboo.SrbFile.name" class="py-name" href="#" onclick="doclink('link-3', 'name', 'Variable configParser.C3Object.name=configParser.C3Object-class.html#name,Variable srboo.SrbFile.name=srboo.SrbFile-class.html#name'); return false;">name</a></span></span><span class="py-op">,</span> <span class="py-name">attrs</span><span class="py-op">)</span> <span class="py-op">=</span> <span class="py-name">rec</span><span class="py-op">.</span><a title="record.SaxRecord._convert_elem" class="py-name" href="record.SaxRecord-class.html#_convert_elem">_convert_elem</a><span class="py-op">(</span><span class="py-name">v</span><span class="py-op">[</span><span class="py-number">0</span><span class="py-op">]</span><span class="py-op">)</span> </span>
+<span class="lineno"> 23</span>  <span class="py-line">            <span class="py-name">prepstr</span> <span class="py-op">=</span> <span class="py-string">""</span> </span>
+<span class="lineno"> 24</span>  <span class="py-line">            <span class="py-name">iobjstr</span> <span class="py-op">=</span> <span class="py-string">""</span> </span>
+<span class="lineno"> 25</span>  <span class="py-line">            <span class="py-name">arg1</span> <span class="py-op">=</span> <span class="py-name">attrs</span><span class="py-op">[</span><span class="py-string">u'arg1'</span><span class="py-op">]</span> </span>
+<span class="lineno"> 26</span>  <span class="py-line">            <span class="py-name">vtxt</span> <span class="py-op">=</span> <span class="py-name">v</span><span class="py-op">[</span><span class="py-number">1</span><span class="py-op">]</span><span class="py-op">[</span><span class="py-number">2</span><span class="py-op">:</span><span class="py-op">]</span> </span>
+<span class="lineno"> 27</span>  <span class="py-line">            <span class="py-name">vid</span> <span class="py-op">=</span> <span class="py-name">attrs</span><span class="py-op">[</span><span class="py-string">'id'</span><span class="py-op">]</span> </span>
+<span class="lineno"> 28</span>  <span class="py-line">            <span class="py-keyword">if</span> <span class="py-name">vid</span> <span class="py-keyword">in</span> <span class="py-name">processed</span><span class="py-op">:</span> </span>
+<span class="lineno"> 29</span>  <span class="py-line">                <span class="py-keyword">continue</span> </span>
+<span class="lineno"> 30</span>  <span class="py-line">            <span class="py-name">verb</span> <span class="py-op">=</span> <span class="py-op">[</span><span class="py-string">'&lt;verb&gt;'</span><span class="py-op">,</span> <span class="py-string">'&lt;w pos="%s" base="%s"&gt;%s&lt;/w&gt;'</span> <span class="py-op">%</span> <span class="py-op">(</span><span class="py-name">attrs</span><span class="py-op">[</span><span class="py-string">'pos'</span><span class="py-op">]</span><span class="py-op">,</span> <span class="py-name">attrs</span><span class="py-op">[</span><span class="py-string">'base'</span><span class="py-op">]</span><span class="py-op">,</span> <span class="py-name">vtxt</span><span class="py-op">)</span><span class="py-op">]</span> </span>
+<span class="lineno"> 31</span>  <span class="py-line">            <span class="py-name">el1</span> <span class="py-op">=</span> <span class="py-name">rec</span><span class="py-op">.</span><span id="link-4" class="py-name"><a title="baseObjects.Record.process_xpath
+record.FtDomRecord.process_xpath
+record.LxmlRecord.process_xpath
+record.MarcRecord.process_xpath
+record.MinidomRecord.process_xpath
+record.SaxRecord.process_xpath" class="py-name" href="#" onclick="doclink('link-4', 'process_xpath', 'Method baseObjects.Record.process_xpath(session)=baseObjects.Record-class.html#process_xpath,Method record.FtDomRecord.process_xpath(session)=record.FtDomRecord-class.html#process_xpath,Method record.LxmlRecord.process_xpath(session)=record.LxmlRecord-class.html#process_xpath,Method record.MarcRecord.process_xpath(session)=record.MarcRecord-class.html#process_xpath,Method record.MinidomRecord.process_xpath(session)=record.MinidomRecord-class.html#process_xpath,Method record.SaxRecord.process_xpath(session)=record.SaxRecord-class.html#process_xpath'); return false;">process_xpath</a></span></span><span class="py-op">(</span><span class="py-string">'phrase[@id="%s"]/descendant::word'</span> <span class="py-op">%</span> <span class="py-name">arg1</span><span class="py-op">)</span> </span>
+<span class="lineno"> 32</span>  <span class="py-line">            <a title="bootstrap.BootstrapDocument.txt" class="py-name" href="bootstrap.BootstrapDocument-class.html#txt">txt</a> <span class="py-op">=</span> <span class="py-op">[</span><span class="py-string">'&lt;subject&gt;'</span><span class="py-op">]</span> </span>
+<span class="lineno"> 33</span>  <span class="py-line">            <span class="py-keyword">for</span> <span class="py-name">w</span> <span class="py-keyword">in</span> <span class="py-name">el1</span><span class="py-op">:</span> </span>
+<span class="lineno"> 34</span>  <span class="py-line">                <span class="py-op">(</span><span id="link-5" class="py-name"><a title="configParser.C3Object.name
+srboo.SrbFile.name" class="py-name" href="#" onclick="doclink('link-5', 'name', 'Variable configParser.C3Object.name=configParser.C3Object-class.html#name,Variable srboo.SrbFile.name=srboo.SrbFile-class.html#name'); return false;">name</a></span></span><span class="py-op">,</span> <span class="py-name">nattrs</span><span class="py-op">)</span> <span class="py-op">=</span> <span class="py-name">rec</span><span class="py-op">.</span><a title="record.SaxRecord._convert_elem" class="py-name" href="record.SaxRecord-class.html#_convert_elem">_convert_elem</a><span class="py-op">(</span><span class="py-name">w</span><span class="py-op">[</span><span class="py-number">0</span><span class="py-op">]</span><span class="py-op">)</span> </span>
+<span class="lineno"> 35</span>  <span class="py-line">                <a title="bootstrap.BootstrapDocument.txt" class="py-name" href="bootstrap.BootstrapDocument-class.html#txt">txt</a><span class="py-op">.</span><a title="resultSet.SimpleResultSet.append" class="py-name" href="resultSet.SimpleResultSet-class.html#append">append</a><span class="py-op">(</span><span class="py-string">'&lt;w pos="%s"&gt;%s&lt;/w&gt;'</span> <span class="py-op">%</span> <span class="py-op">(</span><span class="py-name">nattrs</span><span class="py-op">[</span><span class="py-string">'pos'</span><span class="py-op">]</span><span class="py-op">,</span> <span class="py-name">w</span><span class="py-op">[</span><span class="py-number">1</span><span class="py-op">]</span><span class="py-op">[</span><span class="py-number">2</span><span class="py-op">:</span><span class="py-op">]</span><span class="py-op">)</span><span class="py-op">)</span> </span>
+<span class="lineno"> 36</span>  <span class="py-line">            <a title="bootstrap.BootstrapDocument.txt" class="py-name" href="bootstrap.BootstrapDocument-class.html#txt">txt</a><span class="py-op">.</span><a title="resultSet.SimpleResultSet.append" class="py-name" href="resultSet.SimpleResultSet-class.html#append">append</a><span class="py-op">(</span><span class="py-string">"&lt;/subject&gt;"</span><span class="py-op">)</span> </span>
+<span class="lineno"> 37</span>  <span class="py-line">            <span class="py-name">subj</span> <span class="py-op">=</span> <span class="py-string">' '</span><span class="py-op">.</span><span class="py-name">join</span><span class="py-op">(</span><a title="bootstrap.BootstrapDocument.txt" class="py-name" href="bootstrap.BootstrapDocument-class.html#txt">txt</a><span class="py-op">)</span> </span>
+<span class="lineno"> 38</span>  <span class="py-line"> </span>
+<span class="lineno"> 39</span>  <span class="py-line">            <span class="py-keyword">try</span><span class="py-op">:</span> </span>
+<span class="lineno"> 40</span>  <span class="py-line">                <span class="py-name">arg2</span> <span class="py-op">=</span> <span class="py-name">attrs</span><span class="py-op">[</span><span class="py-string">u'arg2'</span><span class="py-op">]</span> </span>
+<span class="lineno"> 41</span>  <span class="py-line">                <span class="py-comment"># arg2 might be more verb</span> </span>
+<span class="lineno"> 42</span>  <span class="py-line"><span class="py-comment"></span>                <span class="py-comment"># eg 'will -&gt; be -&gt; treating'</span> </span>
+<span class="lineno"> 43</span>  <span class="py-line"><span class="py-comment"></span>                <span class="py-name">el2</span> <span class="py-op">=</span> <span class="py-name">rec</span><span class="py-op">.</span><span id="link-6" class="py-name"><a title="baseObjects.Record.process_xpath
+record.FtDomRecord.process_xpath
+record.LxmlRecord.process_xpath
+record.MarcRecord.process_xpath
+record.MinidomRecord.process_xpath
+record.SaxRecord.process_xpath" class="py-name" href="#" onclick="doclink('link-6', 'process_xpath', 'Method baseObjects.Record.process_xpath(session)=baseObjects.Record-class.html#process_xpath,Method record.FtDomRecord.process_xpath(session)=record.FtDomRecord-class.html#process_xpath,Method record.LxmlRecord.process_xpath(session)=record.LxmlRecord-class.html#process_xpath,Method record.MarcRecord.process_xpath(session)=record.MarcRecord-class.html#process_xpath,Method record.MinidomRecord.process_xpath(session)=record.MinidomRecord-class.html#process_xpath,Method record.SaxRecord.process_xpath(session)=record.SaxRecord-class.html#process_xpath'); return false;">process_xpath</a></span></span><span class="py-op">(</span><span class="py-string">'phrase[@id="%s"]'</span> <span class="py-op">%</span> <span class="py-name">arg2</span><span class="py-op">)</span> </span>
+<span class="lineno"> 44</span>  <span class="py-line">                <span class="py-op">(</span><span id="link-7" class="py-name"><a title="configParser.C3Object.name
+srboo.SrbFile.name" class="py-name" href="#" onclick="doclink('link-7', 'name', 'Variable configParser.C3Object.name=configParser.C3Object-class.html#name,Variable srboo.SrbFile.name=srboo.SrbFile-class.html#name'); return false;">name</a></span></span><span class="py-op">,</span> <span class="py-name">nattrs</span><span class="py-op">)</span> <span class="py-op">=</span> <span class="py-name">rec</span><span class="py-op">.</span><a title="record.SaxRecord._convert_elem" class="py-name" href="record.SaxRecord-class.html#_convert_elem">_convert_elem</a><span class="py-op">(</span><span class="py-name">el2</span><span class="py-op">[</span><span class="py-number">0</span><span class="py-op">]</span><span class="py-op">[</span><span class="py-number">0</span><span class="py-op">]</span><span class="py-op">)</span> </span>
+<span class="lineno"> 45</span>  <span class="py-line">                <span class="py-name">nid</span> <span class="py-op">=</span> <span class="py-name">nattrs</span><span class="py-op">[</span><span class="py-string">'id'</span><span class="py-op">]</span> </span>
+<span class="lineno"> 46</span>  <span class="py-line">                <span class="py-keyword">while</span> <span class="py-name">nattrs</span><span class="py-op">[</span><span class="py-string">u'cat'</span><span class="py-op">]</span> <span class="py-op">==</span> <span class="py-string">"VP"</span><span class="py-op">:</span> </span>
+<span class="lineno"> 47</span>  <span class="py-line">                    <span class="py-name">allv</span> <span class="py-op">=</span> <span class="py-name">rec</span><span class="py-op">.</span><span id="link-8" class="py-name"><a title="baseObjects.Record.process_xpath
+record.FtDomRecord.process_xpath
+record.LxmlRecord.process_xpath
+record.MarcRecord.process_xpath
+record.MinidomRecord.process_xpath
+record.SaxRecord.process_xpath" class="py-name" href="#" onclick="doclink('link-8', 'process_xpath', 'Method baseObjects.Record.process_xpath(session)=baseObjects.Record-class.html#process_xpath,Method record.FtDomRecord.process_xpath(session)=record.FtDomRecord-class.html#process_xpath,Method record.LxmlRecord.process_xpath(session)=record.LxmlRecord-class.html#process_xpath,Method record.MarcRecord.process_xpath(session)=record.MarcRecord-class.html#process_xpath,Method record.MinidomRecord.process_xpath(session)=record.MinidomRecord-class.html#process_xpath,Method record.SaxRecord.process_xpath(session)=record.SaxRecord-class.html#process_xpath'); return false;">process_xpath</a></span></span><span class="py-op">(</span><span class="py-string">'phrase[@id="%s"]/descendant::word'</span> <span class="py-op">%</span> <span class="py-name">nid</span><span class="py-op">)</span> </span>
+<span class="lineno"> 48</span>  <span class="py-line">                    <span class="py-op">(</span><span id="link-9" class="py-name"><a title="configParser.C3Object.name
+srboo.SrbFile.name" class="py-name" href="#" onclick="doclink('link-9', 'name', 'Variable configParser.C3Object.name=configParser.C3Object-class.html#name,Variable srboo.SrbFile.name=srboo.SrbFile-class.html#name'); return false;">name</a></span></span><span class="py-op">,</span> <span class="py-name">avattrs</span><span class="py-op">)</span> <span class="py-op">=</span> <span class="py-name">rec</span><span class="py-op">.</span><a title="record.SaxRecord._convert_elem" class="py-name" href="record.SaxRecord-class.html#_convert_elem">_convert_elem</a><span class="py-op">(</span><span class="py-name">allv</span><span class="py-op">[</span><span class="py-number">0</span><span class="py-op">]</span><span class="py-op">[</span><span class="py-number">0</span><span class="py-op">]</span><span class="py-op">)</span> </span>
+<span class="lineno"> 49</span>  <span class="py-line">                    <span class="py-name">verb</span><span class="py-op">.</span><a title="resultSet.SimpleResultSet.append" class="py-name" href="resultSet.SimpleResultSet-class.html#append">append</a><span class="py-op">(</span><span class="py-string">'&lt;w pos="%s" base="%s"&gt;%s&lt;/w&gt;'</span> <span class="py-op">%</span> <span class="py-op">(</span><span class="py-name">avattrs</span><span class="py-op">[</span><span class="py-string">'pos'</span><span class="py-op">]</span><span class="py-op">,</span> <span class="py-name">avattrs</span><span class="py-op">[</span><span class="py-string">'base'</span><span class="py-op">]</span><span class="py-op">,</span> <span class="py-name">allv</span><span class="py-op">[</span><span class="py-number">0</span><span class="py-op">]</span><span class="py-op">[</span><span class="py-number">1</span><span class="py-op">]</span><span class="py-op">[</span><span class="py-number">2</span><span class="py-op">:</span><span class="py-op">]</span><span class="py-op">)</span><span class="py-op">)</span> </span>
+<span class="lineno"> 50</span>  <span class="py-line">                    <span class="py-name">processed</span><span class="py-op">.</span><a title="resultSet.SimpleResultSet.append" class="py-name" href="resultSet.SimpleResultSet-class.html#append">append</a><span class="py-op">(</span><span class="py-name">avattrs</span><span class="py-op">[</span><span class="py-string">'id'</span><span class="py-op">]</span><span class="py-op">)</span> </span>
+<span class="lineno"> 51</span>  <span class="py-line">                    <span class="py-name">avarg2</span> <span class="py-op">=</span> <span class="py-name">avattrs</span><span class="py-op">[</span><span class="py-string">'arg2'</span><span class="py-op">]</span> </span>
+<span class="lineno"> 52</span>  <span class="py-line">                    <span class="py-keyword">if</span> <span class="py-name">avarg2</span> <span class="py-op">==</span> <span class="py-name">arg1</span><span class="py-op">:</span> </span>
+<span class="lineno"> 53</span>  <span class="py-line">                        <span class="py-name">avarg2</span> <span class="py-op">=</span> <span class="py-name">avattrs</span><span class="py-op">[</span><span class="py-string">'arg1'</span><span class="py-op">]</span> </span>
+<span class="lineno"> 54</span>  <span class="py-line">                        <span class="py-keyword">if</span> <span class="py-name">avarg2</span> <span class="py-op">==</span> <span class="py-string">'-1'</span><span class="py-op">:</span> </span>
+<span class="lineno"> 55</span>  <span class="py-line">                            <span class="py-comment"># no arg2, fall back</span> </span>
+<span class="lineno"> 56</span>  <span class="py-line"><span class="py-comment"></span>                            <span class="py-keyword">break</span> </span>
+<span class="lineno"> 57</span>  <span class="py-line">                    <span class="py-name">el2</span> <span class="py-op">=</span> <span class="py-name">rec</span><span class="py-op">.</span><span id="link-10" class="py-name"><a title="baseObjects.Record.process_xpath
+record.FtDomRecord.process_xpath
+record.LxmlRecord.process_xpath
+record.MarcRecord.process_xpath
+record.MinidomRecord.process_xpath
+record.SaxRecord.process_xpath" class="py-name" href="#" onclick="doclink('link-10', 'process_xpath', 'Method baseObjects.Record.process_xpath(session)=baseObjects.Record-class.html#process_xpath,Method record.FtDomRecord.process_xpath(session)=record.FtDomRecord-class.html#process_xpath,Method record.LxmlRecord.process_xpath(session)=record.LxmlRecord-class.html#process_xpath,Method record.MarcRecord.process_xpath(session)=record.MarcRecord-class.html#process_xpath,Method record.MinidomRecord.process_xpath(session)=record.MinidomRecord-class.html#process_xpath,Method record.SaxRecord.process_xpath(session)=record.SaxRecord-class.html#process_xpath'); return false;">process_xpath</a></span></span><span class="py-op">(</span><span class="py-string">'phrase[@id="%s"]'</span> <span class="py-op">%</span> <span class="py-name">avarg2</span> <span class="py-op">)</span> </span>
+<span class="lineno"> 58</span>  <span class="py-line">                    <span class="py-op">(</span><span id="link-11" class="py-name"><a title="configParser.C3Object.name
+srboo.SrbFile.name" class="py-name" href="#" onclick="doclink('link-11', 'name', 'Variable configParser.C3Object.name=configParser.C3Object-class.html#name,Variable srboo.SrbFile.name=srboo.SrbFile-class.html#name'); return false;">name</a></span></span><span class="py-op">,</span> <span class="py-name">nattrs</span><span class="py-op">)</span> <span class="py-op">=</span> <span class="py-name">rec</span><span class="py-op">.</span><a title="record.SaxRecord._convert_elem" class="py-name" href="record.SaxRecord-class.html#_convert_elem">_convert_elem</a><span class="py-op">(</span><span class="py-name">el2</span><span class="py-op">[</span><span class="py-number">0</span><span class="py-op">]</span><span class="py-op">[</span><span class="py-number">0</span><span class="py-op">]</span><span class="py-op">)</span> </span>
+<span class="lineno"> 59</span>  <span class="py-line">                    <span class="py-name">nid</span> <span class="py-op">=</span> <span class="py-name">nattrs</span><span class="py-op">[</span><span class="py-string">'id'</span><span class="py-op">]</span> </span>
+<span class="lineno"> 60</span>  <span class="py-line">                     </span>
+<span class="lineno"> 61</span>  <span class="py-line">                <span class="py-name">el2</span> <span class="py-op">=</span> <span class="py-name">rec</span><span class="py-op">.</span><span id="link-12" class="py-name"><a title="baseObjects.Record.process_xpath
+record.FtDomRecord.process_xpath
+record.LxmlRecord.process_xpath
+record.MarcRecord.process_xpath
+record.MinidomRecord.process_xpath
+record.SaxRecord.process_xpath" class="py-name" href="#" onclick="doclink('link-12', 'process_xpath', 'Method baseObjects.Record.process_xpath(session)=baseObjects.Record-class.html#process_xpath,Method record.FtDomRecord.process_xpath(session)=record.FtDomRecord-class.html#process_xpath,Method record.LxmlRecord.process_xpath(session)=record.LxmlRecord-class.html#process_xpath,Method record.MarcRecord.process_xpath(session)=record.MarcRecord-class.html#process_xpath,Method record.MinidomRecord.process_xpath(session)=record.MinidomRecord-class.html#process_xpath,Method record.SaxRecord.process_xpath(session)=record.SaxRecord-class.html#process_xpath'); return false;">process_xpath</a></span></span><span class="py-op">(</span><span class="py-string">'phrase[@id="%s"]/descendant::word'</span> <span class="py-op">%</span> <span class="py-name">nid</span><span class="py-op">)</span> </span>
+<span class="lineno"> 62</span>  <span class="py-line">                <a title="bootstrap.BootstrapDocument.txt" class="py-name" href="bootstrap.BootstrapDocument-class.html#txt">txt</a> <span class="py-op">=</span> <span class="py-op">[</span><span class="py-string">'&lt;object&gt;'</span><span class="py-op">]</span> </span>
+<span class="lineno"> 63</span>  <span class="py-line">                <span class="py-keyword">for</span> <span class="py-name">w</span> <span class="py-keyword">in</span> <span class="py-name">el2</span><span class="py-op">:</span> </span>
+<span class="lineno"> 64</span>  <span class="py-line">                    <span class="py-op">(</span><span id="link-13" class="py-name"><a title="configParser.C3Object.name
+srboo.SrbFile.name" class="py-name" href="#" onclick="doclink('link-13', 'name', 'Variable configParser.C3Object.name=configParser.C3Object-class.html#name,Variable srboo.SrbFile.name=srboo.SrbFile-class.html#name'); return false;">name</a></span></span><span class="py-op">,</span> <span class="py-name">nattrs</span><span class="py-op">)</span> <span class="py-op">=</span> <span class="py-name">rec</span><span class="py-op">.</span><a title="record.SaxRecord._convert_elem" class="py-name" href="record.SaxRecord-class.html#_convert_elem">_convert_elem</a><span class="py-op">(</span><span class="py-name">w</span><span class="py-op">[</span><span class="py-number">0</span><span class="py-op">]</span><span class="py-op">)</span> </span>
+<span class="lineno"> 65</span>  <span class="py-line">                    <a title="bootstrap.BootstrapDocument.txt" class="py-name" href="bootstrap.BootstrapDocument-class.html#txt">txt</a><span class="py-op">.</span><a title="resultSet.SimpleResultSet.append" class="py-name" href="resultSet.SimpleResultSet-class.html#append">append</a><span class="py-op">(</span><span class="py-string">'&lt;w pos="%s"&gt;%s&lt;/w&gt;'</span> <span class="py-op">%</span> <span class="py-op">(</span><span class="py-name">nattrs</span><span class="py-op">[</span><span class="py-string">'pos'</span><span class="py-op">]</span><span class="py-op">,</span> <span class="py-name">w</span><span class="py-op">[</span><span class="py-number">1</span><span class="py-op">]</span><span class="py-op">[</span><span class="py-number">2</span><span class="py-op">:</span><span class="py-op">]</span><span class="py-op">)</span><span class="py-op">)</span> </span>
+<span class="lineno"> 66</span>  <span class="py-line">                <a title="bootstrap.BootstrapDocument.txt" class="py-name" href="bootstrap.BootstrapDocument-class.html#txt">txt</a><span class="py-op">.</span><a title="resultSet.SimpleResultSet.append" class="py-name" href="resultSet.SimpleResultSet-class.html#append">append</a><span class="py-op">(</span><span class="py-string">"&lt;/object&gt;"</span><span class="py-op">)</span> </span>
+<span class="lineno"> 67</span>  <span class="py-line">                <span class="py-name">obj</span> <span class="py-op">=</span> <span class="py-string">' '</span><span class="py-op">.</span><span class="py-name">join</span><span class="py-op">(</span><a title="bootstrap.BootstrapDocument.txt" class="py-name" href="bootstrap.BootstrapDocument-class.html#txt">txt</a><span class="py-op">)</span> </span>
+<span class="lineno"> 68</span>  <span class="py-line">            <span class="py-keyword">except</span> <span class="py-name">KeyError</span><span class="py-op">:</span> </span>
+<span class="lineno"> 69</span>  <span class="py-line">                <span class="py-name">obj</span> <span class="py-op">=</span> <span class="py-string">"&lt;object/&gt;"</span> </span>
+<span class="lineno"> 70</span>  <span class="py-line">            <span class="py-comment"># Try for Prep + Iobjstr</span> </span>
+<span class="lineno"> 71</span>  <span class="py-line"><span class="py-comment"></span>            <span class="py-name">ppxp</span> <span class="py-op">=</span> <span class="py-name">rec</span><span class="py-op">.</span><span id="link-14" class="py-name"><a title="baseObjects.Record.process_xpath
+record.FtDomRecord.process_xpath
+record.LxmlRecord.process_xpath
+record.MarcRecord.process_xpath
+record.MinidomRecord.process_xpath
+record.SaxRecord.process_xpath" class="py-name" href="#" onclick="doclink('link-14', 'process_xpath', 'Method baseObjects.Record.process_xpath(session)=baseObjects.Record-class.html#process_xpath,Method record.FtDomRecord.process_xpath(session)=record.FtDomRecord-class.html#process_xpath,Method record.LxmlRecord.process_xpath(session)=record.LxmlRecord-class.html#process_xpath,Method record.MarcRecord.process_xpath(session)=record.MarcRecord-class.html#process_xpath,Method record.MinidomRecord.process_xpath(session)=record.MinidomRecord-class.html#process_xpath,Method record.SaxRecord.process_xpath(session)=record.SaxRecord-class.html#process_xpath'); return false;">process_xpath</a></span></span><span class="py-op">(</span><span class="py-string">"word[@arg1='%s']"</span> <span class="py-op">%</span> <span class="py-op">(</span><span class="py-name">int</span><span class="py-op">(</span><span class="py-name">vid</span><span class="py-op">)</span> <span class="py-op">-</span><span class="py-number">1</span><span class="py-op">)</span><span class="py-op">)</span> </span>
+<span class="lineno"> 72</span>  <span class="py-line">            <span class="py-keyword">if</span> <span class="py-name">ppxp</span><span class="py-op">:</span> </span>
+<span class="lineno"> 73</span>  <span class="py-line">                <span class="py-op">(</span><span id="link-15" class="py-name"><a title="configParser.C3Object.name
+srboo.SrbFile.name" class="py-name" href="#" onclick="doclink('link-15', 'name', 'Variable configParser.C3Object.name=configParser.C3Object-class.html#name,Variable srboo.SrbFile.name=srboo.SrbFile-class.html#name'); return false;">name</a></span></span><span class="py-op">,</span> <span class="py-name">attrs</span><span class="py-op">)</span> <span class="py-op">=</span> <span class="py-name">rec</span><span class="py-op">.</span><a title="record.SaxRecord._convert_elem" class="py-name" href="record.SaxRecord-class.html#_convert_elem">_convert_elem</a><span class="py-op">(</span><span class="py-name">ppxp</span><span class="py-op">[</span><span class="py-number">0</span><span class="py-op">]</span><span class="py-op">[</span><span class="py-number">0</span><span class="py-op">]</span><span class="py-op">)</span> </span>
+<span class="lineno"> 74</span>  <span class="py-line">                <span class="py-name">ptag</span> <span class="py-op">=</span> <span class="py-string">'&lt;w pos="%s"&gt;%s&lt;/w&gt;'</span> <span class="py-op">%</span> <span class="py-op">(</span><span class="py-name">attrs</span><span class="py-op">[</span><span class="py-string">'pos'</span><span class="py-op">]</span><span class="py-op">,</span> <span class="py-name">ppxp</span><span class="py-op">[</span><span class="py-number">0</span><span class="py-op">]</span><span class="py-op">[</span><span class="py-number">1</span><span class="py-op">]</span><span class="py-op">[</span><span class="py-number">2</span><span class="py-op">:</span><span class="py-op">]</span><span class="py-op">)</span> </span>
+<span class="lineno"> 75</span>  <span class="py-line">                <span class="py-name">prepstr</span> <span class="py-op">=</span> <span class="py-string">"&lt;prep&gt;%s&lt;/prep&gt;\n"</span> <span class="py-op">%</span> <span class="py-name">ptag</span> </span>
+<span class="lineno"> 76</span>  <span class="py-line">                <span class="py-keyword">try</span><span class="py-op">:</span> </span>
+<span class="lineno"> 77</span>  <span class="py-line">                    <span class="py-name">iobjxp</span> <span class="py-op">=</span> <span class="py-name">rec</span><span class="py-op">.</span><span id="link-16" class="py-name"><a title="baseObjects.Record.process_xpath
+record.FtDomRecord.process_xpath
+record.LxmlRecord.process_xpath
+record.MarcRecord.process_xpath
+record.MinidomRecord.process_xpath
+record.SaxRecord.process_xpath" class="py-name" href="#" onclick="doclink('link-16', 'process_xpath', 'Method baseObjects.Record.process_xpath(session)=baseObjects.Record-class.html#process_xpath,Method record.FtDomRecord.process_xpath(session)=record.FtDomRecord-class.html#process_xpath,Method record.LxmlRecord.process_xpath(session)=record.LxmlRecord-class.html#process_xpath,Method record.MarcRecord.process_xpath(session)=record.MarcRecord-class.html#process_xpath,Method record.MinidomRecord.process_xpath(session)=record.MinidomRecord-class.html#process_xpath,Method record.SaxRecord.process_xpath(session)=record.SaxRecord-class.html#process_xpath'); return false;">process_xpath</a></span></span><span class="py-op">(</span><span class="py-string">"phrase[@id='%s']/descendant::word"</span> <span class="py-op">%</span> <span class="py-name">attrs</span><span class="py-op">[</span><span class="py-string">'arg2'</span><span class="py-op">]</span><span class="py-op">)</span> </span>
+<span class="lineno"> 78</span>  <span class="py-line">                    <span class="py-name">iobjlist</span> <span class="py-op">=</span> <span class="py-op">[</span><span class="py-string">'&lt;iobject&gt;'</span><span class="py-op">]</span> </span>
+<span class="lineno"> 79</span>  <span class="py-line">                    <span class="py-keyword">for</span> <span class="py-name">w</span> <span class="py-keyword">in</span> <span class="py-name">iobjxp</span><span class="py-op">:</span> </span>
+<span class="lineno"> 80</span>  <span class="py-line">                        <span class="py-op">(</span><span id="link-17" class="py-name"><a title="configParser.C3Object.name
+srboo.SrbFile.name" class="py-name" href="#" onclick="doclink('link-17', 'name', 'Variable configParser.C3Object.name=configParser.C3Object-class.html#name,Variable srboo.SrbFile.name=srboo.SrbFile-class.html#name'); return false;">name</a></span></span><span class="py-op">,</span> <span class="py-name">nattrs</span><span class="py-op">)</span> <span class="py-op">=</span> <span class="py-name">rec</span><span class="py-op">.</span><a title="record.SaxRecord._convert_elem" class="py-name" href="record.SaxRecord-class.html#_convert_elem">_convert_elem</a><span class="py-op">(</span><span class="py-name">w</span><span class="py-op">[</span><span class="py-number">0</span><span class="py-op">]</span><span class="py-op">)</span> </span>
+<span class="lineno"> 81</span>  <span class="py-line">                        <span class="py-name">iobjlist</span><span class="py-op">.</span><a title="resultSet.SimpleResultSet.append" class="py-name" href="resultSet.SimpleResultSet-class.html#append">append</a><span class="py-op">(</span><span class="py-string">'&lt;w pos="%s"&gt;%s&lt;/w&gt;'</span> <span class="py-op">%</span> <span class="py-op">(</span><span class="py-name">nattrs</span><span class="py-op">[</span><span class="py-string">'pos'</span><span class="py-op">]</span><span class="py-op">,</span> <span class="py-name">w</span><span class="py-op">[</span><span class="py-number">1</span><span class="py-op">]</span><span class="py-op">[</span><span class="py-number">2</span><span class="py-op">:</span><span class="py-op">]</span><span class="py-op">)</span><span class="py-op">)</span> </span>
+<span class="lineno"> 82</span>  <span class="py-line">                    <span class="py-name">iobjlist</span><span class="py-op">.</span><a title="resultSet.SimpleResultSet.append" class="py-name" href="resultSet.SimpleResultSet-class.html#append">append</a><span class="py-op">(</span><span class="py-string">'&lt;/iobject&gt;'</span><span class="py-op">)</span> </span>
+<span class="lineno"> 83</span>  <span class="py-line">                    <span class="py-name">iobjstr</span> <span class="py-op">=</span> <span class="py-string">' '</span><span class="py-op">.</span><span class="py-name">join</span><span class="py-op">(</span><span class="py-name">iobjlist</span><span class="py-op">)</span> <span class="py-op">+</span> <span class="py-string">"\n"</span> </span>
+<span class="lineno"> 84</span>  <span class="py-line">                <span class="py-keyword">except</span><span class="py-op">:</span> </span>
+<span class="lineno"> 85</span>  <span class="py-line">                    <span class="py-name">prepstr</span> <span class="py-op">=</span> <span class="py-string">""</span> </span>
+<span class="lineno"> 86</span>  <span class="py-line">                    <span class="py-name">iobjstr</span> <span class="py-op">=</span> <span class="py-string">""</span> </span>
+<span class="lineno"> 87</span>  <span class="py-line"> </span>
+<span class="lineno"> 88</span>  <span class="py-line">            <span class="py-name">verb</span><span class="py-op">.</span><a title="resultSet.SimpleResultSet.append" class="py-name" href="resultSet.SimpleResultSet-class.html#append">append</a><span class="py-op">(</span><span class="py-string">'&lt;/verb&gt;'</span><span class="py-op">)</span> </span>
+<span class="lineno"> 89</span>  <span class="py-line">            <span class="py-name">verb</span> <span class="py-op">=</span> <span class="py-string">' '</span><span class="py-op">.</span><span class="py-name">join</span><span class="py-op">(</span><span class="py-name">verb</span><span class="py-op">)</span> </span>
+<span class="lineno"> 90</span>  <span class="py-line">            <span class="py-name">docstr</span> <span class="py-op">=</span> <span class="py-string">"&lt;svopi&gt;\n  %s\n  %s\n  %s\n%s%s&lt;/svopi&gt;"</span> <span class="py-op">%</span> <span class="py-op">(</span><span class="py-name">subj</span><span class="py-op">,</span> <span class="py-name">verb</span><span class="py-op">,</span> <span class="py-name">obj</span><span class="py-op">,</span> <span class="py-name">prepstr</span><span class="py-op">,</span> <span class="py-name">iobjstr</span><span class="py-op">)</span> </span>
+<span class="lineno"> 91</span>  <span class="py-line">            <span class="py-name">doc</span> <span class="py-op">=</span> <a title="document.StringDocument" class="py-name" href="document.StringDocument-class.html">StringDocument</a><span class="py-op">(</span><span class="py-name">docstr</span><span class="py-op">)</span> </span>
+<span class="lineno"> 92</span>  <span class="py-line">            <span class="py-keyword">if</span> <a title="documentFactory.BaseDocumentFactory.cache" class="py-name" href="documentFactory.BaseDocumentFactory-class.html#cache">cache</a> <span class="py-op">==</span> <span class="py-number">0</span><span class="py-op">:</span> </span>
+<span class="lineno"> 93</span>  <span class="py-line">                <span class="py-keyword">yield</span> <span class="py-name">doc</span> </span>
+<span class="lineno"> 94</span>  <span class="py-line">            <span class="py-keyword">elif</span> <a title="documentFactory.BaseDocumentFactory.cache" class="py-name" href="documentFactory.BaseDocumentFactory-class.html#cache">cache</a> <span class="py-op">==</span> <span class="py-number">1</span><span class="py-op">:</span> </span>
+<span class="lineno"> 95</span>  <span class="py-line">                <span class="py-keyword">raise</span> <span class="py-name">NotImplementedError</span> </span>
+<span class="lineno"> 96</span>  <span class="py-line">            <span class="py-keyword">else</span><span class="py-op">:</span> </span>
+<span class="lineno"> 97</span>  <span class="py-line">                <span class="py-name">docs</span><span class="py-op">.</span><a title="resultSet.SimpleResultSet.append" class="py-name" href="resultSet.SimpleResultSet-class.html#append">append</a><span class="py-op">(</span><span class="py-name">doc</span><span class="py-op">)</span> </span>
+<span class="lineno"> 98</span>  <span class="py-line">        <span class="py-name">self</span><span class="py-op">.</span><a title="documentFactory.BaseDocumentStream.documents" class="py-name" href="documentFactory.BaseDocumentStream-class.html#documents">documents</a> <span class="py-op">=</span> <span class="py-name">docs</span> </span>
+<span class="lineno"> 99</span>  <span class="py-line">        <span class="py-keyword">raise</span> <span class="py-name">StopIteration</span> </span>
+</div></div><span class="lineno">100</span>  <span class="py-line"> </span><script type="text/javascript">
+<!--
+expandto(location.href);
+// -->
+</script>
+</pre>
+</div>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="trees.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="indices.html">Index</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th class="navbar">&nbsp;&nbsp;&nbsp;<a class="navbar"
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">Generated by Epydoc
+        3.0alpha2 on Wed Aug  9 18:10:32 2006</td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>

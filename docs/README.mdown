@@ -1,0 +1,90 @@
+Cheshire3 Documentation
+=======================
+
+27th February 2012 (2012-02-27)
+
+Contents
+--------
+
+- Description
+- Authors
+- Latest Version
+- Documentation
+- Errors, ommisions etc.
+- Licensing, Copyright and Legal
+
+
+Description
+-----------
+
+This is the HTML documentation for Cheshire3. This documentation is included 
+in packaged releases and in the main Cheshire3 GitHub repository as a subtree, 
+so you don't need to get it from here if you alreagy got Cheshire3 by one of 
+these methods. The documentation is maintained in its own repository, as it 
+may occasionally be desirable to checkout/clone the docs in isolation from the 
+software (e.g. for publication on our web-site.)
+
+
+Authors
+-------
+
+Cheshire3 Team at the University of Liverpool <http://www.liv.ac.uk>:
+
+* Robert Sanderson
+* **John Harrison** john.harrison@liv.ac.uk
+* Catherine Smith
+
+(Current maintainer in **bold**)
+
+
+Latest Version
+--------------
+
+The latest version of this documentation is under version control and 
+available from:
+http://github.com/cheshire3/cheshire3-docs
+
+Previously this documentation was available from our own Subversion server:
+http://cvs.cheshire3.org/repos/cheshire3/cheshire3/docs
+
+The SVN repository is being kept alive for the time being as read-only, and 
+best efforts will be made to keep it up-to-date with the GitHub repository.
+
+
+Documentation
+-------------
+
+```xslt
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+    <xsl:output method="text"/>
+    <xsl:template match="/">
+    	<xsl:apply-templates select="/"/>
+    </xsl:template>
+</xsl:stylesheet>
+```
+   
+This is documentation, there's no documentation for it ;-)
+
+
+Errors, ommisions etc.
+----------------------
+
+Errors or ommisions in the documentation should be reported using the GitHub 
+issue tracker for this repository:
+https://github.com/cheshire3/cheshire3-docs/issues
+
+Bug reports, feature requests etc. for the software itself should be made 
+using the GitHub issue tracker for the software repository:
+https://github.com/cheshire3/cheshire3/issues
+
+
+Copyright and Legal
+-------------------
+
+Documentation is Copyright of the University of Liverpool, 2005-2012.
+
+All software, scripts and documentation are provided without any expressed or 
+implied warranty, and with no guarantee of fitness for any purpose. It is 
+downloaded, installed, and used entirely at the user's own risk.
+
+

@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>Cheshire3 Objects Summary</title>
+        <link rel="stylesheet" type="text/css" href="http://www.cheshire3.org/cheshire3.css"></link>
+    </head>
+    <body>
+        <a name="top"></a>
+        <table cellpadding="0" cellspacing="0" class="maintitle">
+            <tr>
+                <td class="cheshirelogo">
+                    <img src="http://www.cheshire3.org/gfx/c3_white.gif" alt=" c h e s h i r e  |  3 "/>
+                </td>
+                <td>
+                    <img src="http://www.cheshire3.org/gfx/slant_grey.gif" alt=""/>
+                </td>
+                <td align="center">
+                    <h2>Cheshire3 Object Model</h2>
+                </td>
+            </tr>
+        </table>
+
+        <!--#config errmsg="<div id="navbar"/>" -->
+        <!--#include virtual="/navbar.ssi" -->
+
+        <div class="fieldset">
+            <span class="legend">Introduction</span>
+            <p>
+                A schematic layout of the object structure of a typical Cheshire3 database. 
+                Each of the brief descriptions below link to further information about the class of object, including the default implementations available as well as their API.
+            </p>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">Overview</span>
+            <p>
+                <img src="objectModel-v1.0.png" alt="Model unavailable"/>
+            </p>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend"><a href="object_base.html">Base Class</a></span>
+            <p>
+                The base class from which all configurable objects in the framework derive. 
+                As such, they all share this common API.
+            </p>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend"><a href="object_server.html">Server</a></span>
+            <p>
+                A protocol neutral collection of databases, users and their dependant objects. 
+                It acts as an inital entry point for all requests and handles such things as user authentication, multi-database searching, and global object configuration.
+            </p>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend"><a href="object_protocolHandler.html">ProtocolHandler</a></span>
+            <p>
+                Handles requests from a protocol and transforms them into their internal representation before handing them off to a server to process.
+                It takes back the results of the processing, transforms them into the protocol's response and returns it.
+            </p>
+        </div>      
+
+        <div class="fieldset">
+            <span class="legend"><a href="object_database.html">Database</a></span>
+            <p>
+                A virtual collection of records which may be interacted with. 
+                A database includes indexes, which contain data extracted from the records as well as configuration details. 
+                The database is responsable for handling queries which come to it and distributing it amongst its component objects.
+            </p>
+        </div>      
+
+        <div class="fieldset">
+            <span class="legend"><a href="object_index.html">Index</a></span>
+            <p>
+                A collection of terms extracted from records, along with their frequency. 
+                Extraction is done via a chain of objects before being stored in an IndexStore. 
+            </p>
+        </div>      
+
+        <div class="fieldset">
+            <span class="legend"><a href="object_documentFactory.html">DocumentFactory</a></span>
+            <p>
+                An object that will act as an interface to a collection of one or more documents outside of the Cheshire framework. 
+                This might load from a file, or directory, but equally could be an interface to another database or a remote system.
+            </p>
+        </div>      
+
+        <div class="fieldset">
+            <span class="legend"><a href="object_document.html">Document</a></span>
+            <p>
+                Unparsed data of any format. 
+                Documents are turned in to Records by Parsers, or into other Documents by PreParsers. 
+                Transformers turn Records into Documents.
+            </p>
+        </div>      
+
+        <div class="fieldset">
+            <span class="legend"><a href="object_record.html">Record</a></span>
+            <p>
+                Parsed machine readable data (most commonly XML) plus any associated metadata. 
+                Records are usually modelled internally using XML, with both DOM and SAX2 interfaces.
+            </p>
+        </div>      
+
+        <div class="fieldset">
+            <span class="legend"><a href="object_resultSet.html">ResultSet</a></span>
+            <p>
+                A collection of records, typically created as the result of a search on a database.
+            </p>
+        </div>
+        
+        <div class="fieldset">
+            <span class="legend"><a href="object_preParser.html">PreParser</a></span>
+            <p>
+                An interface to transform a Document into a different Document. 
+                For example to turn USMARC into unparsed MARCXML.
+            </p>
+        </div>
+        
+        <div class="fieldset">
+            <span class="legend"><a href="object_transformer.html">Transformer</a></span>
+            <p>
+                An interface to turn a Record into a Document. 
+                This might involve using XSLT to transform the record into a different schema.
+            </p>
+        </div>      
+        
+        <div class="fieldset">
+            <span class="legend"><a href="object_parser.html">Parser</a></span>
+            <p>
+                An interface to transform a Document containing raw XML into a Record.
+            </p>
+        </div>      
+        
+        <div class="fieldset">
+            <span class="legend"><a href="object_selector.html">Selector</a></span>
+            <p>
+                A simple wrapper around an XPath or other means of selecting data from a parsed structure in a <a href="object_record.html">Record</a>.  
+            </p>
+        </div>
+        
+        <div class="fieldset">
+            <span class="legend"><a href="object_extractor.html">Extractor</a></span>
+            <p>
+                An interface to extract data of a certain format from the results of evaluating an XPath expression on a Record.  
+            </p>
+        </div>
+        
+        <div class="fieldset">
+            <span class="legend"><a href="object_tokenizer.html">Tokenizer</a></span>
+            <p>
+                Takes a string of language and processes it to produce an ordered list of tokens.
+                For example, to turn a string into keywords.  
+            </p>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend"><a href="object_normalizer.html">Normalizer</a></span>
+            <p>
+                An interface to turn raw data from one form into another. 
+                Each normalizer does one atomic operation and may be strung together in chains with other objects to create the required end result.
+                For example, to turn a string into its lowercase form, or to turn a string or numerals into a number.
+            </p>
+        </div>
+        
+        <div class="fieldset">
+            <span class="legend"><a href="object_tokenMerger.html">TokenMerger</a></span>
+            <p>
+                Takes an ordered list of tokens (i.e. as produced by a Tokenizer) and merges them into a hash.
+                This might involve merging multiple tokens per key, while maintaining frequency, proximity information etc.
+            </p>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend"><a href="object_recordStore.html">RecordStore</a></span>
+            <p>
+                An interface to a persistent storage mechanism for records and their associated metadata.
+            </p>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend"><a href="object_indexStore.html">IndexStore</a></span>
+            <p>
+                An interface to a persistent storage mechanism for indexes and their extracted terms.
+            </p>
+        </div>
+        
+        <div class="fieldset">
+            <span class="legend"><a href="object_documentStore.html">DocumentStore</a></span>
+            <p>
+                An interface to a persistent storage mechanism for Documents and their associated metadata.
+            </p>
+        </div>
+        
+        <div class="fieldset">
+            <span class="legend"><a href="object_resultSetStore.html">ResultSetStore</a></span>
+            <p>
+                An interface to a persistent storage mechanism for saving ResultSets.
+            </p>
+        </div>
+        
+        
+        <div class="fieldset">
+            <span class="legend"><a href="object_objectStore.html">ObjectStore</a></span>
+            <p>
+                An interface to a persistent storage mechanism for configured Cheshire3 objects.
+            </p>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend"><a href="object_workflow.html">Workflow</a></span>
+            <p>
+                Objects that can interpret XML configuration and execute code based on it to perform tasks.
+            </p>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">Other Objects</span>
+            <p>Other modules in the Cheshire3 framework:</p>
+            <ul>
+                <li><b>bootstrap</b><br/>
+                Contains hard coded Parser, Document, Record and Session implementations to be used to bootstrap the system from XML configuration files (at which point the regular parser and record implementations can be used)</li>
+                <li><b>c3errors</b><br/>
+                A set of Cheshire3 specific exceptions. Most common are ConfigFileException and FileDoesNotExistException.</li>
+                <li><b>configParser</b><br/>
+                The base object for all configurable Cheshire3 objects, it handles turning the parsed config files into the appropriate object values</li>
+                <li><b>dynamic</b><br/>
+                Dynamic importing handler to allow objectType in the configuration files to be imported on demand and instantiated</li>
+                <li><b>protocolMap</b><br/>
+                Parse a ZeeRex file and map from index in the XML to index in the system.</li>
+                <li><b>logger</b><br/>
+                A logging system that can be configured to log all invocations of any functions in the system at minimal expense.</li>
+            </ul>
+        
+        </div>
+
+    </body>
+</html>

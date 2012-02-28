@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>Cheshire3 Objects: Selector</title>
+        <link rel="stylesheet" type="text/css" href="http://www.cheshire3.org/cheshire3.css"></link>
+    </head>
+    <body>
+        <a name="top"></a>
+	<table cellpadding="0" cellspacing="0" class="maintitle">
+            <tr>
+		<td class="cheshirelogo">
+                    <img src="http://www.cheshire3.org/gfx/c3_white.gif" alt=" c h e s h i r e  |  3 "/>
+		</td>
+		<td>
+                    <img src="http://www.cheshire3.org/gfx/slant_grey.gif" alt=""/>
+		</td>
+		<td align="center">
+			<h1>Cheshire3 Objects:  Selector</h1>
+		</td>
+            </tr>
+	</table>
+
+	<!--#config errmsg="<div id="navbar"/>" -->
+	<!--#include virtual="/navbar.ssi" -->
+
+        <div class="fieldset">
+            <h2 class="legend">Description</h2>
+            <p>
+                A Selector is a simple wrapper around an XPath or other means of selecting data from a parsed structure in a <a href="object_record.html">Record</a>
+            </p>
+        </div>
+
+        <div class="fieldset">
+            <h2 class="legend">Implementations</h2>
+            <p>There are no pre-configured out-of-the-box ready Selectors as these are completely data dependent.</p>
+        </div>
+        
+        <div class="fieldset">
+            <h2 class="legend">API</h2>
+            <p><em>Module</em>: <strong>cheshire3.selector</strong><br/>
+            <em>Classes</em>:
+            </p>
+            <ul>
+                <li><strong>SimpleSelector</strong><br/>
+                    Abstract base class for Selectors.
+                </li>
+                
+                <li><strong>XPathSelector</strong><br/>
+                    Selects data based on an XPath expression.
+                </li>
+                
+                <li><strong>SpanXPathSelector</strong><br/>
+                    Selector that allows selection of a span between two given XPath expressions - starts at the first and ends at the second.
+                    Two XPaths must be configured, although both can be the same in which case each node acts as a start and stop node.
+                </li>
+
+                <li><strong>MetadataSelector</strong><br/>
+                    Selector that specifies an attribute or function to select data from <a href="object_record.html">Record</a>.
+                </li>
+                
+                <li><strong>TransformerSelector</strong><br/>
+                    Selector that applies a configured <a href="object_transformer.html">Transformer</a> to the <a href="object_record.html">Record</a> and returns the result as the selected data.
+                </li>
+                
+            </ul>
+            
+            <p><em>Methods</em>:</p>
+            <table border="1" cellpadding="3" cellspacing="0" width="100%">
+                <tr><th>Function</th><th>Parameters</th><th>Returns</th><th>Description</th></tr>
+                <tr><td>__init__</td><td>config, parent</td><td>&nbsp;</td><td> </td></tr>
+                <tr><td>process_record</td><td>session, record</td><td>list of lists of selected data.</td></tr>
+            </table>
+
+            <h3>Sub Packages</h3>
+            
+            <p>
+                <em>Package</em>: <strong>graph</strong><br/>
+	            <em>Module</em>: <strong>cheshire3.graph.selector</strong><br/>
+	            <em>Classes</em>:
+            </p>
+            <ul>
+                <li><strong>SparqlSelector</strong><br/>
+                    Selects data from a GraphRecord based on a SPARQL query. 
+                </li>
+            </ul>
+        </div>
+
+    </body>
+</html>

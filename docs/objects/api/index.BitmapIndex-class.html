@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>index.BitmapIndex</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <link rel="stylesheet" href="/cheshire3.css" type="text/css"/>
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body>
+<table width="100%" border=0 cellpadding=0 cellspacing=0 class="maintitle">
+<tr height="75">
+<td class="cheshirelogo" width="25%">
+<img src="/gfx/c3_white.gif">
+</td>
+<td width="10">
+<img src="/gfx/slant_grey.gif">
+</td>
+<td width="75%" align="center">
+<h2>Cheshire3 Object Model: Class BitmapIndex
+</h2>
+</td></tr>
+</table>
+
+<div class="fieldset">
+<span class="legend"><a href="configParser-module.html">
+        <a href="index-module.html">Module&nbsp;index</a> ::
+        Class&nbsp;BitmapIndex
+      </span>
+<p>
+
+
+<h2 class="class">Class BitmapIndex
+<br/><span class="codelink"><a href="index-pysrc.html#BitmapIndex">source&nbsp;code</a></span></h2>
+<b>Object Tree:</b><pre class="base-tree">
+           object --+            
+                    |            
+<a href="configParser.C3Object-class.html">configParser.C3Object</a> --+        
+                        |        
+        <a href="baseObjects.Index-class.html">baseObjects.Index</a> --+    
+                            |    
+                  <a href="index.SimpleIndex-class.html">SimpleIndex</a> --+
+                                |
+                               <strong class="uidshort">BitmapIndex</strong>
+</pre>
+
+<hr />
+<!-- ==================== INSTANCE METHODS ==================== -->
+</div><div class="fieldset"><span class="legend">Instance Methods</span><p>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white"><tr>
+
+  <td>
+    <span class="sig"><a href="index.BitmapIndex-class.html#__init__" class="sig-name">__init__</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">a</span>,
+        <span class="sig-arg">b</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="index.BitmapIndex-class.html#serialise_terms" class="sig-name">serialise_terms</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">termid</span>,
+        <span class="sig-arg">terms</span>,
+        <span class="sig-arg">recs</span>=<span class="sig-default">0</span>,
+        <span class="sig-arg">occs</span>=<span class="sig-default">0</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="index.BitmapIndex-class.html#deserialise_terms" class="sig-name">deserialise_terms</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">data</span>,
+        <span class="sig-arg">prox</span>=<span class="sig-default">1</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="index.BitmapIndex-class.html#merge_terms" class="sig-name">merge_terms</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">structTerms</span>,
+        <span class="sig-arg">newTerms</span>,
+        <span class="sig-arg">op</span>=<span class="sig-default">&quot;replace&quot;</span>,
+        <span class="sig-arg">recs</span>=<span class="sig-default">0</span>,
+        <span class="sig-arg">occs</span>=<span class="sig-default">0</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="index.BitmapIndex-class.html#construct_item" class="sig-name">construct_item</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">term</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="index.BitmapIndex-class.html#construct_resultSet" class="sig-name">construct_resultSet</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">terms</span>,
+        <span class="sig-arg">queryHash</span>=<span class="sig-default">{}</span>)</span>
+    
+  </td>
+</tr>
+  <tr>
+    <td colspan="2">
+    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="index.SimpleIndex-class.html">SimpleIndex</a></code></span>:
+      <code><a href="index.SimpleIndex-class.html#begin_indexing">begin_indexing</a></code>,
+      <code><a href="index.SimpleIndex-class.html#commit_indexing">commit_indexing</a></code>,
+      <code><a href="index.SimpleIndex-class.html#delete_record">delete_record</a></code>,
+      <code><a href="index.SimpleIndex-class.html#extract_data">extract_data</a></code>,
+      <code><a href="index.SimpleIndex-class.html#index_record">index_record</a></code>,
+      <code><a href="index.SimpleIndex-class.html#scan">scan</a></code>,
+      <code><a href="index.SimpleIndex-class.html#search">search</a></code>,
+      <code><a href="index.SimpleIndex-class.html#store_terms">store_terms</a></code>
+      </p>
+    <div class="private">    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="index.SimpleIndex-class.html">SimpleIndex</a></code></span> (private):
+      <code><a href="index.SimpleIndex-class.html#_handleConfigNode">_handleConfigNode</a></code>,
+      <code><a href="index.SimpleIndex-class.html#_mergeHash">_mergeHash</a></code>,
+      <code><a href="index.SimpleIndex-class.html#_processChain">_processChain</a></code>,
+      <code><a href="index.SimpleIndex-class.html#_processRecord">_processRecord</a></code>
+      </p></div>
+    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="baseObjects.Index-class.html">baseObjects.Index</a></code></span>:
+      <code><a href="baseObjects.Index-class.html#sort">sort</a></code>
+      </p>
+    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="configParser.C3Object-class.html">configParser.C3Object</a></code></span>:
+      <code><a href="configParser.C3Object-class.html#auth_function">auth_function</a></code>,
+      <code><a href="configParser.C3Object-class.html#get_config">get_config</a></code>,
+      <code><a href="configParser.C3Object-class.html#get_default">get_default</a></code>,
+      <code><a href="configParser.C3Object-class.html#get_object">get_object</a></code>,
+      <code><a href="configParser.C3Object-class.html#get_path">get_path</a></code>,
+      <code><a href="configParser.C3Object-class.html#get_setting">get_setting</a></code>,
+      <code><a href="configParser.C3Object-class.html#log_function">log_function</a></code>,
+      <code><a href="configParser.C3Object-class.html#unauth_function">unauth_function</a></code>,
+      <code><a href="configParser.C3Object-class.html#unlog_function">unlog_function</a></code>
+      </p>
+    <div class="private">    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="configParser.C3Object-class.html">configParser.C3Object</a></code></span> (private):
+      <code><a href="configParser.C3Object-class.html#_getDomFromFile">_getDomFromFile</a></code>,
+      <code><a href="configParser.C3Object-class.html#_parseIncludes">_parseIncludes</a></code>,
+      <code><a href="configParser.C3Object-class.html#_recurseSubConfigs">_recurseSubConfigs</a></code>,
+      <code><a href="configParser.C3Object-class.html#_verifyDefault">_verifyDefault</a></code>,
+      <code><a href="configParser.C3Object-class.html#_verifyOption">_verifyOption</a></code>,
+      <code><a href="configParser.C3Object-class.html#_verifySetting">_verifySetting</a></code>
+      </p></div>
+    <p class="varlist"><span class="varlist-header">Inherited from <code>object</code></span>:
+      <code>__delattr__</code>,
+      <code>__getattribute__</code>,
+      <code>__hash__</code>,
+      <code>__new__</code>,
+      <code>__reduce__</code>,
+      <code>__reduce_ex__</code>,
+      <code>__repr__</code>,
+      <code>__setattr__</code>,
+      <code>__str__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+
+<br />
+<!-- ==================== CLASS VARIABLES ==================== -->
+</div><div class="fieldset"><span class="legend">Class Variables</span><p>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">  <tr>
+    <td colspan="2">
+    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="index.SimpleIndex-class.html">SimpleIndex</a></code></span>:
+      <code><a href="index.SimpleIndex-class.html#currentFullPath">currentFullPath</a></code>,
+      <code><a href="index.SimpleIndex-class.html#currentPath">currentPath</a></code>,
+      <code><a href="index.SimpleIndex-class.html#debug">debug</a></code>,
+      <code><a href="index.SimpleIndex-class.html#indexingData">indexingData</a></code>,
+      <code><a href="index.SimpleIndex-class.html#indexingTerm">indexingTerm</a></code>,
+      <code><a href="index.SimpleIndex-class.html#sources">sources</a></code>,
+      <code><a href="index.SimpleIndex-class.html#storeOrig">storeOrig</a></code>,
+      <code><a href="index.SimpleIndex-class.html#xPathAllAbsolute">xPathAllAbsolute</a></code>,
+      <code><a href="index.SimpleIndex-class.html#xPathAttributesRequired">xPathAttributesRequired</a></code>,
+      <code><a href="index.SimpleIndex-class.html#xPathsNormalized">xPathsNormalized</a></code>
+      </p>
+    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="baseObjects.Index-class.html">baseObjects.Index</a></code></span>:
+      <code><a href="baseObjects.Index-class.html#indexStore">indexStore</a></code>
+      </p>
+    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="configParser.C3Object-class.html">configParser.C3Object</a></code></span>:
+      <code><a href="configParser.C3Object-class.html#configStore">configStore</a></code>,
+      <code><a href="configParser.C3Object-class.html#defaults">defaults</a></code>,
+      <code><a href="configParser.C3Object-class.html#functionLogger">functionLogger</a></code>,
+      <code><a href="configParser.C3Object-class.html#id">id</a></code>,
+      <code><a href="configParser.C3Object-class.html#name">name</a></code>,
+      <code><a href="configParser.C3Object-class.html#objectType">objectType</a></code>,
+      <code><a href="configParser.C3Object-class.html#objects">objects</a></code>,
+      <code><a href="configParser.C3Object-class.html#parent">parent</a></code>,
+      <code><a href="configParser.C3Object-class.html#paths">paths</a></code>,
+      <code><a href="configParser.C3Object-class.html#permissionHandlers">permissionHandlers</a></code>,
+      <code><a href="configParser.C3Object-class.html#settings">settings</a></code>,
+      <code><a href="configParser.C3Object-class.html#subConfigs">subConfigs</a></code>,
+      <code><a href="configParser.C3Object-class.html#unresolvedObjects">unresolvedObjects</a></code>
+      </p>
+    <div class="private">    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="configParser.C3Object-class.html">configParser.C3Object</a></code></span> (private):
+      <code><a href="configParser.C3Object-class.html#_includeConfigStores">_includeConfigStores</a></code>,
+      <code><a href="configParser.C3Object-class.html#_objectRefs">_objectRefs</a></code>
+      </p></div>
+    <p class="varlist"><span class="varlist-header">Inherited from <code>object</code></span>:
+      <code>__class__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+
+<br />
+<!-- ==================== METHOD DETAILS ==================== --></div><div class="fieldset"><span class="legend">Method Details</span><p><a name="__init__"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">a</span>,
+        <span class="sig-arg">b</span>)</span>
+    <br /><em class="fname">(Constructor)</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="index-pysrc.html#BitmapIndex.__init__">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="index.SimpleIndex-class.html#__init__">SimpleIndex.__init__</a>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="serialise_terms"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">serialise_terms</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">termid</span>,
+        <span class="sig-arg">terms</span>,
+        <span class="sig-arg">recs</span>=<span class="sig-default">0</span>,
+        <span class="sig-arg">occs</span>=<span class="sig-default">0</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="index-pysrc.html#BitmapIndex.serialise_terms">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="index.SimpleIndex-class.html#serialise_terms">SimpleIndex.serialise_terms</a>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="deserialise_terms"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">deserialise_terms</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">data</span>,
+        <span class="sig-arg">prox</span>=<span class="sig-default">1</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="index-pysrc.html#BitmapIndex.deserialise_terms">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="index.SimpleIndex-class.html#deserialise_terms">SimpleIndex.deserialise_terms</a>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="merge_terms"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">merge_terms</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">structTerms</span>,
+        <span class="sig-arg">newTerms</span>,
+        <span class="sig-arg">op</span>=<span class="sig-default">&quot;replace&quot;</span>,
+        <span class="sig-arg">recs</span>=<span class="sig-default">0</span>,
+        <span class="sig-arg">occs</span>=<span class="sig-default">0</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="index-pysrc.html#BitmapIndex.merge_terms">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="index.SimpleIndex-class.html#merge_terms">SimpleIndex.merge_terms</a>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="construct_item"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">construct_item</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">term</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="index-pysrc.html#BitmapIndex.construct_item">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="index.SimpleIndex-class.html#construct_item">SimpleIndex.construct_item</a>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="construct_resultSet"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">construct_resultSet</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">terms</span>,
+        <span class="sig-arg">queryHash</span>=<span class="sig-default">{}</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="index-pysrc.html#BitmapIndex.construct_resultSet">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="index.SimpleIndex-class.html#construct_resultSet">SimpleIndex.construct_resultSet</a>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<br />
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">Generated by Epydoc
+        3.0alpha2 on Wed Aug  9 18:09:58 2006</td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>

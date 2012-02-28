@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>Configuring Indexes</title>
+        <link rel="stylesheet" type="text/css" href="http://www.cheshire3.org/cheshire3.css"></link>
+    </head>
+    <body>
+        <a name="top"></a>
+        <table cellpadding="0" cellspacing="0" class="maintitle">
+            <tr>
+                <td class="cheshirelogo">
+                    <img src="http://www.cheshire3.org/gfx/c3_white.gif" alt=" c h e s h i r e  |  3 "/>
+                </td>
+                <td>
+                    <img src="http://www.cheshire3.org/gfx/slant_grey.gif" alt=""/>
+                </td>
+                <td align="center">
+                    <h2>Configuring Indexes</h2>
+                </td>
+            </tr>
+        </table>
+
+        <!--#config errmsg="<div id="navbar"/>" -->
+        <!--#include virtual="/navbar.ssi" -->
+
+        <div class="fieldset">
+            <span class="legend">Introduction</span>
+            <p>
+                Indexes are the primary means of locating records in the system, and hence
+                need to be well thought out and specified in advance.  They consist of one
+                or more paths to tags in the record, and how to process the data once it has
+                been located.
+            </p>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">Example</span>
+            <p>Example index configurations:</p>
+            <pre>
+01  &lt;subConfig id = "xtitle-idx"&gt;
+02    &lt;objectType&gt;index.SimpleIndex&lt;/objectType&gt;
+03    &lt;paths&gt;
+04      &lt;object type="indexStore" ref="indexStore"/&gt;
+05    &lt;/paths&gt;
+06    &lt;source&gt;
+07      &lt;xpath&gt;/ead/eadheader/filedesc/titlestmt/titleproper&lt;/xpath&gt;
+08      &lt;process&gt;
+09        &lt;object type="extractor" ref="SimpleExtractor"/&gt;
+10        &lt;object type="normalizer" ref="SpaceNormalizer"/&gt;
+11        &lt;object type="normalizer" ref="CaseNormalizer"/&gt;
+12      &lt;/process&gt;
+13    &lt;/source&gt;
+14    &lt;options&gt;
+15      &lt;setting type="sortStore"&gt;true&lt;/setting&gt;
+16    &lt;/options&gt;
+17  &lt;/subConfig&gt;
+18
+19  &lt;subConfig id = "stemtitleword-idx"&gt;
+20    &lt;objectType&gt;index.ProximityIndex&lt;/objectType&gt;
+21    &lt;paths&gt;
+22      &lt;object type="indexStore" ref="indexStore"/&gt;
+23    &lt;/paths&gt;
+24    &lt;source&gt;
+25      &lt;xpath&gt;titleproper&lt;/xpath&gt;
+26      &lt;process&gt;
+27        &lt;object type="extractor" ref="SimpleExtractor" /&gt;
+28        &lt;object type="tokenizer" ref="RegexpFindOffsetTokenizer"/&gt;
+29        &lt;object type="tokenMerger" ref="OffsetProxTokenMerger"/&gt;
+30        &lt;object type="normalizer" ref="CaseNormalizer"/&gt;
+31        &lt;object type="normalizer" ref="PossessiveNormalizer"/&gt;
+32        &lt;object type="normalizer" ref="EnglishStemNormalizer"/&gt;
+33      &lt;/process&gt;
+34    &lt;/source&gt;
+35  &lt;/subConfig&gt;
+						
+            </pre>				
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">Explanation</span>
+            <p>
+                Lines 1 and 2, 19 and 20 should be second nature by now.  Line 4 and the
+                same in line 22 are a reference to the indexStore in which the index will be
+                maintained.
+            </p>
+            <p>
+                This brings us to the <i>source</i> section starting in line 6.
+                It must contain one or more <i>xpath</i> elements.  These XPaths will be
+                evaluated against the record to find a node, nodeSet or attribute value.
+                This is the base data that will be indexed after some processing.  In the
+                first case, we give the full path, but in the second only the final element.
+                <del>Cheshire3, it is generally most efficient to give as small a path as possible to
+                identify exactly which elements you want to index, so the path at line 25 is
+                cheaper than the path at line 7.</del>
+            </p>
+            <p>
+                If the records contain XML Namespaces, then there are two approaches
+                available.  If the element names are unique between all the namespaces in
+                the document, you can simply omit them.  For example /srw:record/dc:title
+                could be written as just /record/title.  The alternative is to define the
+                meanings of 'srw' and 'dc' on the xpath element in the normal xmlns fashion.
+            </p>
+            <p>
+                After the XPath(s), we need to tell the system how to process the data that gets pulled out. 
+                This happens in the <i>process</i> section, and is a list of objects to sequentially feed the data through. 
+                The first object must be an extractor. 
+                This may be followed by a Tokenizer and a TokenMerger. 
+                These are used to split the extracted data into tokens of a praticular type, and then merge it into discreet index entries.
+                If a Tokenizer is used, a TokenMerger must also be used. 
+                Generally any further processing objects in the chain are normalizers.
+            </p>
+            <p>
+                The first index uses the SimpleExtractor to pull out the text as it appears exactly as a single term.
+                This is followed by a SpaceNormalizer on line 10, to remove leading and trailing whitespace and normalize multiple adjacent whitespace characters (e.g. newlines folloed by tabs, spaces etc.) into single whitespaces
+                The second index also uses the SimpleExtractor, however it then uses a RegexpFindOffsetTokenizer to identify word tokens, their positions and character offsets.
+                It then uses the necessary OffsetProxTokenMerger to merge identical tokens into discreet index entries, maintaining the word positions and character offsets identified by the Tokenizer.
+                Both indexes then send the extracted terms to a CaseNormalizer, which will reduce all characters to lowercase. 
+                The second index then gives the lowercase terms to a PossessiveNormalizer to strip off 's and s' from the end, and then to EnglishStemNormalizer to apply linguistic stemming.
+            </p>
+            <p>
+                After these processes have happened, the system will store the transformed
+                terms in the indexStore referenced in the paths section.
+            </p>
+            <p>
+                Finally, in the first example, we have a setting called 'sortStore'.  If
+                this is given, then the system will create a map of record to term for the
+                index to allow it to be quickly retrieved for the purposes of sorting.
+            </p>
+        </div>
+
+    </body>
+</html>

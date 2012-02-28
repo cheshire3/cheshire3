@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>Cheshire3 Objects: DocumentFactory</title>
+        <link rel="stylesheet" type="text/css" href="http://www.cheshire3.org/cheshire3.css"></link>
+    </head>
+    <body>
+        <table cellpadding="0" cellspacing="0" class="maintitle">
+            <tr>
+                <td class="cheshirelogo">
+                    <img src="http://www.cheshire3.org/gfx/c3_white.gif" alt="c h e s h i r e | 3"/>
+                </td>
+                <td>
+                    <img src="http://www.cheshire3.org/gfx/slant_grey.gif" alt=""/>
+                </td>
+                <td align="center">
+                    <h2>Cheshire3 Objects:  DocumentFactory</h2>
+                </td>
+            </tr>
+        </table>
+
+		<!--#config errmsg="<div id="navbar"/>" -->
+		<!--#include virtual="/navbar.ssi" -->
+
+        <div class="fieldset">
+            <h2 class="legend">Description</h2>
+            <p>
+                DocumentFactories are the main means by which <a href="object_document.html">Documents</a> are ingested into the system.
+                Once the 'load' argument has been called, a DocumentFactory should be able to return, on request, one or more Documents.
+                The way in which it does this will depend on the way in which it has been configured, and how 'load' was called.
+                For example it may locate all documents, and cache them internally (e.g. for multiple XML documents within a single file), or it may crawl, locating and returning the documents one at a time (e.g. for many large files in a directory structure.)
+            </p>
+        </div>
+
+        <div class="fieldset">
+            <h2 class="legend">Implementations</h2>
+            <p>
+                The following implementations are pre-configured and ready to use.<br/>
+                They may be used out-of-the-box in configurations for <a href="object_workflow.html">Workflows</a>, or in code by getting the object from a <a href="object_server.html">Server</a>.
+            </p>
+            <ul>
+                <li>
+                    <strong>defaultDocumentFactory</strong>
+                    <p>
+                        A 'Smart' DocumentFactory that will attempt to do the most sensible thing to generate documents, based on the arguments passed to its 'load' method.
+                    </p>
+                </li>
+                <li><strong>defaultAccumulatingDocumentFactory</strong>
+                    <p>
+	                    A DocumentFactory that accumulates data across multiple 'load' calls to produce 1 or more Documents.<br/>
+	                    The main difference between this and the defaultDocumentFactory is that 'load' can be called repeatedly without losing Documents already discovered.
+                    </p>
+                </li>
+            </ul>
+            <p>
+                The DocumentFactory will try to guess the format based on the data argument passed to it, however if you know the format, you can tell the documentFactory by using the format keyword argument. e.g.
+            </p>
+            <p>
+                <code>documentFacory.load(session, "/home/user/data/", format="dir")</code><br/>
+                <code>documentFacory.load(session, "/home/user/data.zip", format="zip")</code>
+            </p>
+            <p>
+                A DocumentFactory will use an appropriate DocumentStream to deal with each format.
+                Part of the 'smart'ness of DocumentFactories is that the DocumentStreams can be recursively called.
+                e.g. You could call 'load' on a directory which contained a number of zip files, each of which were made up of a number of XML files.
+                The DocumentFactory would use a DirectoryDocumentStream, a ZipDocumentStream, a FileDocumentStream and a XmlDocumentStream in turn to find and return XML Documents.
+            </p>
+            <p>
+                At the present time, the following formats are supported by defaultDocumentFactory and defaultAccumulatingDocumentFactory.<br/>
+                <strong>Note Well</strong>: DocumentStreams are only intended for use by DocumentFactories, and are unlikely to behave correctly if called directly by users' scripts.
+            </p>
+            <table border="1" cellpadding="3" cellspacing="0" width="100%" summary="Currently supported formats">
+                <thead>
+                    <tr>
+                        <th>Short name</th>
+                        <th>DocumentStream used</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>xml</td>
+                        <td>XmlDocumentStream</td>
+                        <td>Given data, finds XML instances within it and treats each as a Document. 
+                            By default the documentFactory will use the first tag that it encounters as the basis of all future Documents, 
+                            but if you know the name of the tag to use, you can supply this with the tagName keyword argument. e.g.<br/>
+                            <code>documentFactory.load(session, "/home/user/myFile.xml", format="xml", tagName="myTag")</code>
+                        </td></tr>
+                    <tr>
+                        <td>marc</td>
+                        <td>MarcDocumentStream</td>
+                        <td>Given data containing MARC records, treats each MARC record as a Document (see also docs for <a href="object_parser.html">MarcParser</a> and <a href="object_record.html">MarcRecord</a>.)</td></tr>
+                    <tr>
+                        <td>dir</td>
+                        <td>DirectoryDocumentStream</td>
+                        <td>Given a directory name, walks though all files and sub-directories within it looking for Documents.</td></tr>
+                    <tr>
+                        <td>tar</td>
+                        <td>TarDocumentStream</td>
+                        <td>Given the data which makes up a tar file, extract the files from it as Documents.</td></tr>
+                    <tr>
+                        <td>zip</td>
+                        <td>ZipDocumentStream</td>
+                        <td>Given the data which makes up a zip file, extract the files from it as Documents.</td></tr>
+                    <tr>
+                        <td>cluster</td>
+                        <td>ClusterDocumentStream</td>
+                        <td>Given the path to a raw cluster data file (as created by a ClusterExtractionDocumentFactory), merge and create documents.</td></tr>
+                    <tr>
+                        <td>locate</td>
+                        <td>LocateDocumentStream</td>
+                        <td>Given a name or pattern, locates files whose names match.</td></tr>
+                    <tr>
+                        <td>component</td>
+                        <td>ComponentDocumentStream</td>
+                        <td>Given a Record, finds component Documents using a configured <a href="object_selector.html">Selector</a>.</td></tr>
+                    <tr>
+                        <td>termHash</td>
+                        <td>TermHashDocumentStream</td>
+                        <td>Given data consisting of a hash of terms, treat each term as a Document</td></tr>
+                    <tr>
+                        <td>file</td>
+                        <td>FileDocumentStream</td>
+                        <td>Given the path to a file, open it, and read the contents.</td></tr>
+                </tbody>
+            </table>
+            
+        </div>
+                
+        <div class="fieldset">
+            <h2 class="legend">API</h2>
+            <p>
+                <em>Module</em>: <strong>cheshire3.documentFactory</strong><br/>
+                <em>Classes</em>:
+            </p>
+            <ul>
+                <li><strong>SimpleDocumentFactory</strong><br/>
+                    A 'Smart' DocumentFactory that will attempt to do the most sensible thing to generate documents, based on the arguments passed to its 'load' method.
+                    Additional DocumentStreams can be registered with the SimpleDocumentFactory class by calling the class method 'register_stream' (see the methods table for details).
+                    Such DocumentStreams could be user-defined, as long as they conform to the DocumentStream API.
+                </li>
+                <li><strong>ComponentDocumentFactory</strong> <br/>
+                    A ComponentDocumentFactory is configured ahead of time with an XPath. 
+                    When its 'load' method is called on a <a href="object_record.html">Record</a>, the record is processed, and elements matching the configured XPath are extracted and treated as new documents in their own right.
+                </li>
+                <li><strong>AccumulatingDocumentFactory</strong><br/>
+                    A DocumentFactory that accumulates data across multiple 'load' calls to produce 1 or more documents.
+                </li>
+                <li><strong>XmlDocumentStream</strong><br/>
+                    Given data, finds XML instances within it and treats each as a Document. 
+                    By default the documentFactory will use the first tag that it encounters as the basis of all future Documents, 
+                    but if you know the name of the tag to use, you can supply this with the tagName keyword argument. e.g.<br/>
+                    <code>documentFactory.load(session, "/home/user/myFile.xml", format="xml", tagName="myTag")</code>
+                </li>
+                <li><strong>MarcDocumentStream</strong><br/>
+                    Given data containing MARC records, treats each MARC record as a Document (see also docs for <a href="object_parser.html">MarcParser</a> and <a href="object_record.html">MarcRecord</a>.)
+                </li>
+                <li><strong>DirectoryDocumentStream</strong><br/>
+                    Given a directory name, walks though all files and sub-directories within it looking for Documents.
+                </li>
+                <li><strong>TarDocumentStream</strong><br/>
+                    Given the data which makes up a tar file, extract the files from it as Documents.
+                </li>
+                <li><strong>ZipDocumentStream</strong><br/>
+                    Given the data which makes up a zip file, extract the files from it as Documents.
+                </li>
+                <li><strong>ClusterDocumentStream</strong><br/>
+                    Given the path to a raw cluster data file (as created by a ClusterExtractionDocumentFactory), merge and create documents.<br/>
+                </li>
+                <li><strong>LocateDocumentStream</strong><br/>
+                    Given a name or pattern, locates files whose names match.<br/>
+                </li>
+                <li><strong>ComponentDocumentStream</strong><br/>
+                    Given a Record, finds component Documents using a configured <a href="object_selector.html">Selector</a>.<br/>
+                </li>
+                <li><strong>TermHashDocumentStream</strong><br/>
+                    Given data consisting of a hash of terms, treat each term as a Document<br/>
+                </li>
+                <li><strong>FileDocumentStream</strong><br/>
+                    Given the path to a file, open it, and read the contents.<br/>
+                </li>
+            </ul>
+            <p><em>DocumentFactory Methods</em>:</p>
+            <table border="1" cellpadding="3" cellspacing="0" width="100%" summary="DocumentFactory Methods">
+                <tr><th>Function</th><th>Parameters</th><th>Returns</th><th>Description</th></tr>
+                <tr><td>__init__</td><td>session, config, parent</td><td>&#160;</td><td>The constructor takes the config node for the object, and its parent (usually a database).</td></tr>
+                <tr>
+                    <td>load</td>
+                    <td>session, ?data, ?cache, ?format, ?tagName, ?codec</td>
+                    <td>&#160;</td>
+                    <td>Load the data provide (or use the configured default if not provided). The way the data is loaded is dependent on the other parameters (or their configured defaults if absent):
+                        <ul>
+                            <li><i>cache</i> - should documents be cached in memory: 0 = No, 1 = Locations cached but not documents, 2 = Yes</li>
+                            <li><i>format</i> - specifies how to treat the data parameter</li>
+                            <li><i>tagName</i> - The XML tag to treat as the document root</li>
+                            <li><i>codec</i> - specifies the codec to use to read the documents in</li>
+                        </ul>
+                    </td></tr>
+                <tr><td>get_document</td><td>session, ?index</td><td>Document</td><td>Return the index'th document in the factory if index is provided, otherwise return the next document.</td></tr>
+                <tr>
+                    <td>register_stream</td>
+                    <td>session, format, class</td>
+                    <td>&#160;</td>
+                    <td>
+                        Class method to register the supplied class of DocumentStream with the document factory for the given format.
+                        This class will be used the next time 'load' is called with this format.</td></tr>
+            </table>
+            <br/>
+            <p><em>DocumentStream Methods</em>:</p>
+            <table border="1" cellpadding="3" cellspacing="0" width="100%" summary="DocumentFactory Methods">
+                <tr><th>Function</th><th>Parameters</th><th>Returns</th><th>Description</th></tr>
+                <tr>
+                    <td>__init__</td><td>session, stream, format, ?tagName, ?codec, ?factory</td>
+                    <td>&#160;</td>
+                    <td>The constructor takes the location of the data stream, the format. Optional arguments are the tagName to look for, the codec to use to read in data and the DocumentFactory that initialized the stream.</td>
+                </tr>
+                <tr>
+                    <td>open_stream</td>
+                    <td>streamLocation</td>
+                    <td>data stream</td>
+                    <td>Perform any operations needed before the data stream can be read (e.g. open files).</td>
+                </tr>
+                <tr><td>fetch_document</td><td>index</td><td>data/Document</td><td>Return the index'th piece of data or Document.</td></tr>
+                <tr><td>find_documents</td><td>session, cache</td><td>&#160;</td><td>Find documents within the data stream.</td></tr>
+            </table>
+            <h3>Sub-Packages</h3>
+            <p>
+                <em>Sub-Package</em>: <strong>web</strong><br/>
+                <em>Module</em>: <strong>cheshire3.web.documentFactory</strong><br/>
+                <em>Classes</em>:
+            </p>
+            <ul>
+                <li><strong>HttpDocumentStream</strong><br/>
+                    Given an URL, find and download Documents.
+                </li>
+                <li>
+                    <strong>FtpDocumentStream</strong><br/>
+                    Given a FTP URL, find and get (download) Documents.
+                </li>
+                <li>
+                    <strong>Z3950DocumentStream</strong><br/>
+                    Given a Z3950 request, as a URL, perform the search and then map the results to Documents.
+                </li>
+                <li>
+                    <strong>SruDocumentStream</strong><br/>
+                    Given a SRU request, as a URL, perform the request and then map the results to Documents.
+                </li>
+                <li>
+                    <strong>SrwDocumentStream</strong><br/>
+                    Same as SruDocumentStream, but uses SOAP over HTTP POST to carry out the request rather than HTTP GET.
+                </li>
+                <li>
+                    <strong>OAIHarvestDocumentStream</strong><br/>
+                    Given a an OAI-PMH request, as a URL, perform the request to harvest the records from the server and map them to Documents.
+                </li>
+                <li><strong>OpensearchDocumentStream</strong><br/>
+                    Given a tuple of OSD location and query, perform the search and then map the results to Documents.
+                </li>
+                <li><strong>SyndicationDocumentStream</strong><br/>
+                    Given a URL, filename or buffer, use universal feed parser to import rss, atom, etc. and map feeds to Documents.
+                </li>
+                <li><strong>AccHttpDocumentStream</strong><br/>
+                    AccumulatingDocumentFactory friendly version of HttpDocumentStream.
+                    Accumulate Documents from a number of URLs (e.g. when web-crawling).
+                </li>
+                <li>
+                    <del><strong>GoogleSearchDocumentStream</strong> <br/>
+                    Given a Google query, use the Google SOAP interface to search, fetch the actual files matched and map them to documents.
+                    </del> <br/>
+                    <strong>OBSELETE</strong> - Google have withdrawn their SOAP interface.
+                </li>
+            </ul>
+            
+            <p>
+                <em>Sub-Package</em>: <strong>vdb</strong><br/>
+                <em>Module</em>: <strong>cheshire3.vdb.documentFactory</strong><br/>
+                <em>Classes</em>:
+            </p>
+            <ul>
+                <li><strong>VdbDocumentFactory</strong><br/>
+                    Given a ZeeRex Record, create a summary Document for the remote service (e.g. XML representing the content of all indexes for a SRU server.)
+                </li>
+                <li><strong>VdbDocumentStream</strong><br/>
+                    Abstract Base Class for creating summary documents from remote services.
+                </li>
+                <li><strong>SruVdbDocumentStream</strong><br/>
+                    Harvest index terms from an SRU server.
+                </li>
+                <li><strong>SrwVdbDocumentStream</strong><br/>
+                    Harvest index terms from an SRW server. As SruVdbDocumentStream, but uses SOAP via HTTP POST.
+                </li>
+            </ul>
+	</div>
+
+    </body>
+</html>

@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>Cheshire3 Configuration: Index</title>
+        <link rel="stylesheet" type="text/css" href="http://www.cheshire3.org/cheshire3.css"></link>
+    </head>
+    <body>
+	<a name="top"></a>
+	<table width="100%" border=0 cellpadding=0 cellspacing=0 class="maintitle">
+            <tr>
+		<td class="cheshirelogo">
+			<img src="http://www.cheshire3.org/gfx/c3_white.gif" alt=" c h e s h i r e  |  3 "/>
+		</td>
+		<td>
+			<img src="http://www.cheshire3.org/gfx/slant_grey.gif" alt=""/>
+		</td>
+		<td align="center">
+			<h2>Cheshire3 Configuration: Index</h2>
+		</td>
+            </tr>
+	</table>
+
+	<!--#config errmsg="<div id="navbar"/>" -->
+	<!--#include virtual="/navbar.ssi" -->
+
+	<div class="fieldset">
+            <span class="legend">Introduction</span>
+            <p>
+            	Indexes need to be configured to know where to find the data that they should extract, how to process it once it's extracted and where to store it once processed.
+            </p>
+	</div>
+
+        <a name="example1"></a>
+	<div class="fieldset" id="example1">
+            <span class="legend">Example 1</span>
+            <pre>
+&lt;subConfig type="index" id="zrx-idx-9"&gt;
+  &lt;objectType&gt;index.ProximityIndex&lt;/objectType&gt;
+  &lt;paths&gt;
+    &lt;object type="indexStore" ref="zrxIndexStore"/&gt;
+  &lt;/paths&gt;
+  &lt;source&gt;
+    &lt;preprocess&gt;
+       &lt;object type="transformer" ref="zeerexTxr"/&gt;
+       &lt;object type="parser" ref="SaxParser"/&gt;
+    &lt;/preprocess&gt;
+    &lt;xpath&gt;name/value&lt;/xpath&gt;
+    &lt;xpath xmlns:zrx="http://explain.z3950.org/dtd/2.0"&gt;zrx:name/zrx:value&lt;/xpath&gt;
+    &lt;process&gt;
+      &lt;object type="extractor" ref="ExactParentProximityExtractor"/&gt;
+      &lt;object type="normalizer" ref="CaseNormalizer"/&gt;
+    &lt;/process&gt;
+  &lt;/source&gt;
+  &lt;options&gt;
+    &lt;setting type="sortStore"&gt;true&lt;/setting&gt;
+    &lt;setting type="lr_constant0"&gt;-3.7&lt;/setting&gt;
+  &lt;/options&gt;
+&lt;/subConfig&gt;
+            </pre>
+	</div>
+    
+	<a name="example2"></a>
+	<div class="fieldset" id="example2">
+            <span class="legend">Example 2</span>
+            <pre>
+&lt;subConfig type="XPathProcessor" id="indexXPath"&gt;
+  &lt;objectType&gt;xpathProcessor.SimpleXPathProcessor&lt;/objectType&gt;
+  &lt;source&gt;
+ 	&lt;xpath&gt;/explain/indexInfo/index/title&lt;/xpath&gt;
+ 	&lt;xpath&gt;/explain/indexInfo/index/description&lt;/xpath&gt;
+  &lt;/source&gt;
+&lt;/subConfig&gt;
+
+&lt;subConfig type="index" id="zrx-idx-10"&gt;
+  &lt;objectType&gt;index.ProximityIndex&lt;/objectType&gt;
+  &lt;paths&gt;
+    &lt;object type="indexStore" ref="zrxIndexStore"/&gt;
+  &lt;/paths&gt; 
+  &lt;source mode="data"&gt;
+    &lt;xpath ref="indexXPath"/&gt;
+    &lt;process&gt;
+      &lt;object type="extractor" ref="ProximityExtractor"/&gt;
+      &lt;object type="normalizer" ref="CaseNormalizer"/&gt;
+      &lt;object type="normalizer" ref="PossessiveNormalizer"/&gt;
+    &lt;/process&gt;
+  &lt;/source&gt;
+  &lt;source mode="any|all|="&gt;
+    &lt;process&gt;
+      &lt;object type="extractor" ref="PreserveMaskingProximityExtractor"/&gt;
+      &lt;object type="normalizer" ref="CaseNormalizer"/&gt;
+      &lt;object type="normalizer" ref="PossessiveNormalizer"/&gt;
+    &lt;/process&gt;
+  &lt;/source&gt; <!--
+  &lt;options&gt;
+    &lt;setting type="recordStoreSizes"&gt;1&lt;/setting&gt;
+  &lt;/options&gt;
+  -->
+&lt;/subConfig&gt;
+            
+            </pre>
+	</div>
+
+	<div class="fieldset" id="source">
+            <span class="legend">&lt;source&gt;</span>
+            <p>
+            	An index configuration must contain at least one source element.
+            	Each source block configures a way of treating the data that the index is asked to process.
+            </p>
+            <p>
+            	It's worth mentioning here that the index object will be asked to process incoming search terms as well as data from records being indexed.
+            	A source element may have a 'mode' attribute to specify when the processing configured within this source block should be applied.
+            	To clarify, the 'mode' attribute may have the value of any of the relations defined by CQL (any, all, =, exact, etc.), indicating that the processing in this source should be applied when the index is searched using that particular relation.
+            </p>
+            <p>
+            	The 'mode' attribute may also have the value 'data', indicating that the processing in the source block should be applied to the records at the time they are indexed.
+            	Multiple modes can be specified for a single source block by separating the with a vertical pipe (|) character within the value of the 'mode' attribute. 
+            	If no 'mode' attribute is specified, the source will default to being a 'data' source.
+            	<a href="#example2">Example 2</a> demonstrates the use of the mode attribute to apply a different Extractor object when carrying out searches using the 'any', 'all' or '=' CQL relation, in this case to preserve masking/wildcard characters.			
+            </p>
+            <p>
+            	Each data mode source block configures one or more XPaths to use to extract data from the record, a workflow of objects to process the results of the XPath evaluation and optionally a workflow of objects to preprocess the record to transform it into a state suitable for XPathing. 
+            	Each data mode source block will be processed in turn by the system for each record during indexing.
+            </p>
+            <p>
+            	For source blocks with modes other than data, only the element configuring the workflow of objects to process the incoming term with is required. 
+            	<a href="#xpath">&lt;xpath&gt;</a> and <a href="#preprocess">&lt;preprocess&gt;</a> elements will be ignored.
+            </p>
+	</div>
+
+        <div class="fieldset" id="xpath">
+            <span class="legend">&lt;xpath&gt;</span>
+            <p>
+                This element contains either an XPath expression (<a href="#example1">Example 1</a>) or a reference to a configured XPathProcessor (<a href="#example2">Example 2</a>), to use in extracting data from a record.
+            </p>
+            <p>
+            	It may appear more than once, but not when using a reference to a configured XPathProcessor; these may themselves specify multiple XPath expressions.
+            	When the element is repeated, the results of each expression will be processed by the process chain (as described below).
+            </p> 
+            <p>
+            	If the XPath makes use of XML namespaces, then the mappings for the namespace prefixes must be present on the XPath element. This can be seen in <a href="#example1">Example 1.</a>
+            </p>
+	</div>
+
+	<a name="process"></a>
+	<a name="preprocess"></a>
+	<div class="fieldset">
+            <span class="legend">&lt;process&gt; and &lt;preprocess&gt;</span>
+            <p>
+            	These elements contain an ordered list of objects.  The results of the first object is given to the second and so on down the chain.  
+            </p>
+            <p>
+            	The first object in a process chain must be an Extractor, as the input data is either a string, a DOM node or a SAX event list as appropriate to the XPath evaluation. 
+            	The result of a process chain must be a hash, typically from an Extractor or a Normalizer. 
+            	However if the last object is an IndexStore, it will be used to store the terms rather than the default.
+            </p>
+            <p>
+            	The input to a preprocess chain is a Record, so the first object is most likely to be a Transformer. 
+            	The result must also be a Record, so the last object is most likely to be a Parser.
+            </p>
+            <p>
+            	For existing processing objects that can be used in these fields, see the object documentation.
+            </p>
+	</div>
+
+	<div class="fieldset">
+            <span class="legend">Paths</span>
+            <ul>
+		<li>
+                    <b>indexStore</b>
+                    <p>An object reference to the default indexStore to use for extracted terms.</p>
+		</li>
+		<li>
+                    <b>termIdIndex</b>
+                    <p>Alternative index object to use for termId for terms in this index.</p>
+		</li>
+                <!-- 
+		<li>
+                    <b>termineDb</b>
+                    <p>Path to the 'termine' database of term scores for this index. Note, Termine does not come with C3 by default.</p>
+		</li>
+                -->
+		<li>
+                    <b>tempPath</b>
+                    <p>Path to a directory where temporary files will be stored during batch mode indexing.</p>
+		</li>
+            </ul>
+	</div>
+
+	<div class="fieldset">
+            <span class="legend">Settings</span>
+            <p>The value for any true/false type settings must be 0 or 1.</p>  
+            <ul>
+                <li>
+                    <b>sortStore</b>
+                    <p>If the value is 'true', then the indexStore is instructed to also create an inverted list of record Id to value (as opposed to value to list of records) which should be used for sorting by that index.</p>
+                </li>
+                <li>
+                    <b>cori_constant[0-2]</b>
+                    <p>Constants to be used during CORI relevance ranking, if different from the defaults.</p>
+                </li>
+                <li>
+                    <b>lr_constant[0-6]</b>
+                    <p>Constants to be used during logistic regression relevance ranking, if different from the defaults.</p>
+                </li>
+                <li>
+                    <b>noIndexDefault</b>
+                    <p>If the value is 'true', the index should not be called from db.index_record().</p>
+                </li>
+                <li>
+                    <b>noUnindexDefault</b>
+                    <p>If the value is 'true', the index should not be called from db.unindex_record()</p>
+                </li>
+                <li>
+                    <b>vectors</b>
+                    <p>Should the index store vectors (doc -&gt; list of termIds)</p>
+                </li>
+                <li>
+                    <b>proxVectors</b>
+                    <p>Should the index store vectors that also maintain proximity for their terms</p>
+                </li>
+                <li>
+                    <b>minimumSupport</b>
+                </li>
+                <li>
+                    <b>vectorMinGlobalFreq</b>
+                </li>
+                <li>
+                    <b>vectorMaxGlobalFreq</b>
+                </li>
+                <li>
+                    <b>vectorMinGlobalOccs</b>
+                </li>
+                <li>
+                    <b>vectorMaxGlobalOccs</b>
+                </li>
+                <li>
+                    <b>vectorMinLocalFreq</b>
+                </li>
+                <li>
+                    <b>vectorMaxLocalFreq</b>
+                </li>
+                <li>
+                    <b>longSize</b>
+                    <p>Size of a long integer in this index's underlying data structure (eg to migrate between 32 and 64 bit platforms)</p>
+                </li>
+                <li>
+                    <b>recordStoreSizes</b>
+                    <p>
+                    	Use average record sizes from recordStores when calculating relevances. 
+                    	This is useful when a database includes records from multiple recordStores, particularly when recordStores contain records of varying sizes.
+                    </p>
+                </li>
+                <li>
+                    <b>maxVectorCacheSize</b>
+                    <p>Number of terms to cache when building vectors.</p>
+                </li>
+            </ul>
+        </div>
+    </body>
+</html>

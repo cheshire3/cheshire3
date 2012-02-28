@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>Cheshire3 Configuration Files</title>
+        <link rel="stylesheet" type="text/css" href="http://www.cheshire3.org/cheshire3.css"></link>
+    </head>
+    <body>
+        <a name="top"></a>
+	<table cellpadding="0" cellspacing="0" class="maintitle">
+            <tr>
+                <td class="cheshirelogo">
+                    <img src="http://www.cheshire3.org/gfx/c3_white.gif" alt=" c h e s h i r e  |  3 "/>
+                </td>
+		<td>
+                    <img src="http://www.cheshire3.org/gfx/slant_grey.gif" alt=""/>
+		</td>
+		<td align="center">
+                    <h2>Cheshire3 Configuration Files</h2>
+		</td>
+            </tr>
+	</table>
+
+	<!--#config errmsg="<div id="navbar"/>" -->
+	<!--#include virtual="/navbar.ssi" -->
+
+	<div class="fieldset">
+            <span class="legend">Introduction</span>
+            <p>
+            	As Cheshire3 is so flexible and modular in the way that it can be implemented and then the pieces fitted together, it requires configuration files to set up which pieces to use and in which order. 
+            	The configuration files are also very modular, allowing as many objects to be defined in one file as desired and then imported as required. 
+            	They are put together from a small number of elements, with some additional constructions for specialised objects.
+            </p>
+            <p>
+            	Example configurations are included in the Cheshire3 distribution and may be used as a base on which to build.
+            </p>
+            <p>
+            	Every object in the system that is not instantiated from a request or as the result of processing requires a configuration section. 
+            	Many of these configurations will just contain the object class to instantiate and an identifier with which to refer to the object. 
+            	Object constructor functions are called with the top DOM node of their configuration and another object to be used as a parent. 
+            	This allows a tree heirarchy of objects, with a Server at the top level. 
+            	It also means that objects can handle their own specialised configuration elements, while leaving the common elements to the base configuration handler.
+            </p>
+            <p>
+            	The main elements will be described here,  the specialised elements and values will be described in object specific pages.
+            </p>
+	</div>
+
+	<div class="fieldset">
+		<span class="legend">Example</span>
+		<table width="95%" bgcolor="#FAFAFA">
+		  <tr>
+			<td>
+			<pre>
+&lt;config type="database" id="db_l5r"&gt;
+  &lt;objectType&gt;database.SimpleDatabase&lt;/objectType&gt;
+  &lt;paths&gt;
+    &lt;path type="defaultPath"&gt;/home/cheshire/c3/cheshire3/l5r&lt;/path&gt;
+    &lt;path type="metadataPath"&gt;metadata.bdb&lt;/path&gt;
+    &lt;object type="recordStore" ref="l5rRecordStore"/&gt;
+  &lt;/paths&gt;
+  &lt;options&gt;
+    &lt;setting type="log"&gt;handle_search&lt;/setting&gt;
+  &lt;/options&gt;
+  &lt;subConfigs&gt;
+    &lt;subConfig type="parser" id="l5rAttrParser"&gt;
+      &lt;objectType&gt;parser.SaxParser&lt;/objectType&gt;
+      &lt;options&gt;
+        &lt;setting type="attrHash"&gt;text@type&lt;/setting&gt;
+     &lt;/options&gt;
+    &lt;/subConfig&gt;
+    &lt;subConfig id = "l5r-idx-1"&gt;
+      &lt;objectType&gt;index.SimpleIndex&lt;/objectType&gt;
+      &lt;paths&gt;
+        &lt;object type="indexStore" ref="l5rIndexStore"/&gt;
+      &lt;/paths&gt;
+      &lt;source&gt;
+        &lt;xpath&gt;/card/name&lt;/xpath&gt;
+        &lt;process&gt;
+          &lt;object type="extractor" ref="ExactExtractor"/&gt;
+          &lt;object type="normalizer" ref="CaseNormalizer"/&gt;
+        &lt;/process&gt;
+      &lt;/source&gt;
+    &lt;/subConfig&gt;
+    &lt;path type="index" id="l5r-idx-2"&gt;configs/idx2-cfg.xml&lt;path&gt;
+  &lt;/subConfigs&gt;
+  &lt;objects&gt;
+    &lt;path ref="l5RAttrParser"/&gt;
+    &lt;path ref="l5r-idx-1"/&gt;
+  &lt;/objects&gt;
+&lt;/config&gt;
+			</pre>
+                    </td>
+                </tr>
+            </table>
+	</div>
+
+	<div class="fieldset" id="config">
+            <span class="legend">&lt;config&gt;</span>
+            <p>
+            	The top level element of any configuration file is the config element, and contains at least one object to construct. 
+            	It should have an 'id' attribute containing an identifier for the object in the system, and a 'type' attribute specifying what sort of object is being created.  
+            </p>
+            <p>
+            	If the configuration file is not for the top level Server, this element must contain an <a href="#objectType">&lt;objectType&gt;</a> element. 
+            	It may also contain one of each of 
+            	<a href="#docs">&lt;docs&gt;</a>, 
+            	<a href="#paths">&lt;paths&gt;</a>, 
+            	<a href="#subConfigs">&lt;subConfigs&gt;</a>, 
+            	<a href="#options">&lt;options&gt;</a> and 
+            	<a href="#objects">&lt;objects&gt;</a>.
+            </p>
+	</div>
+
+	<div class="fieldset" id="objectType">
+            <span class="legend">&lt;objectType&gt;</span>
+            <p>
+            	This element contains the module and class to use when instantiating the object. 
+            	If the class does not come from one of the base Cheshire3 modules, then it must be imported. 
+            	See the <a href="#imports">&lt;imports&gt;</a> section.  Otherwise it just uses the regular module.class Python syntax.
+            </p>
+	</div>
+	
+	<div class="fieldset" id="imports">
+            <span class="legend">&lt;imports&gt;</span>
+            <p>[Coming soon]</p>
+	</div>
+	
+	<div class="fieldset" id="docs">
+        <span class="legend">&lt;docs&gt;</span>
+            <p>
+            	This element may be used to provide configured object level documentation.
+            	<br/>e.g. to explain that a particular tokenizer splits data into sentences based on some pre-defined pattern.
+            </p>
+	</div>
+
+	<div class="fieldset" id="paths">
+            <span class="legend">&lt;paths&gt;</span>
+            <p>
+            	This element may contain <a href="#path">&lt;path&gt;</a> and <a href="#object">&lt;object&gt;</a> elements to be stored when building the object in the system. 
+            	Path elements are used for storing a file path to a resource required by the object. 
+            	Object elements are used to create references to other objects in the system by their identifier, for example the default recordStore used by the database.
+            </p>
+	</div>
+	
+	<div class="fieldset" id="path">
+            <span class="legend">&lt;path&gt;</span>
+            <p>
+            	This element is used to refer to a path to a resource and has several attributes to govern this.
+            </p>
+            <ul>
+            	<li>It <b>must</b> have a 'type' attribute, saying what sort of thing the resource is. This is somewhat context dependant, but is either an object type (eg 'database', 'index') or a description of a file path (eg 'defaultPath', 'metadataPath').</li>
+            	<li>For configurations which are being included as an external file, the path element should have the same 'id' attribute as the included configuration. </li>
+            	<li>For references to other configurations, a 'ref' attribute is used to contain the identifier of the referenced object.</li>
+            	<li>Finally, for configuration files which are held in a configStore object, the document's identifier within the store (rather than the identifier of the object it contains) should be put in a 'docid' attribute.</li>
+            </ul>
+	</div>
+
+        <div class="fieldset" id="object">
+            <span class="legend">&lt;object&gt;</span>
+                <p>
+                    A reference to an object in the system. 
+                    It has two attributes, the 'type' of object and 'ref' for the object's identifier.
+                </p>
+        </div>
+
+    <div class="fieldset" id="options">
+    	<span class="legend">&lt;options&gt;</span>
+    	<p>
+			This section may include one or more <a href="#setting">&lt;setting&gt;</a> (a value that can't be changed) and <a href="#default">&lt;default&gt;</a> (a value that can be overridden in a request). 
+    	</p>
+    </div>
+
+    <div class="fieldset" id="setting+default">
+    	<a name="setting"></a><a name="default"></a>
+    	<span class="legend">&lt;setting&gt; and &lt;default&gt;</span>
+    	<p>
+			Settings and Defaults have a 'type' attribute to specify which setting/default the value is for and the contents of the element is the value for it. 
+			Each class will have different setting and default types.
+    	</p>
+    </div>
+
+	<div class="fieldset" id="subConfigs">
+		<span class="legend">&lt;subConfigs&gt;</span>
+		<p>
+			This wrapper element contains one or more &lt;subConfig&gt; elements. 
+			Each subConfig has the same model as the config, and hence a nested tree of configurations and subConfigurations can be constructed. 
+			It may also contain &lt;path&gt; elements with a file path to another file to read in and treat as further subConfigurations.
+		</p>
+		<p>
+			Cheshire3 employs 'Just In Time' instantiation of objects. 
+			That is to say they will be instantiated when required by the system, or when requested from their parent object in a script.
+		</p>
+	</div>
+	
+	<div class="fieldset" id="subConfigs">
+		<span class="legend">&lt;subConfig&gt;</span>
+		<p>
+			This element has the same model as the <a href="#config">&lt;config&gt;</a> element to allow for nested configurations.
+			'id' and 'type' attributes are mandatory for this element.
+		</p>
+	</div>
+
+	<div class="fieldset" id="objects">
+		<span class="legend">&lt;objects&gt;</span>
+		<p>
+			The objects element contains one or more path elements, each with a reference to an identifier for a subConfiguration. 
+			This reference acts as an instruction to the system to actually instantiate the object from the configuration (after which time it would be refered to with an object element).
+		</p>
+		<p>
+			<b>Note Well</b> that while this is no longer required (due to the implementation of 'Just In Time' object instantiation) it remains in the configuration schema as there are still situation in which this may be desirable.
+			<br/>e.g. to instantiate objects with long spin-up times at the server level.
+		</p>
+	</div>
+
+	<div class="fieldset">
+		<span class="legend">Object Specific Elements</span>
+		<ul>
+			<li><a href="config_base.html">Common Path and Object References</a></li>
+			<li><a href="config_zeerex.html">ProtocolMap</a> (ZeeRex for SRW/CQL)</li>
+			<li><a href="config_index.html">Index</a></li>
+                        <li><a href="config_workflow.html">Workflow</a></li>
+		</ul>
+	</div>
+	
+  </body>
+</html>

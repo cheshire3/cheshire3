@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>Cheshire3 Objects: Database</title>
+        <link rel="stylesheet" type="text/css" href="http://www.cheshire3.org/cheshire3.css"></link>
+    </head>
+    <body>
+	   <table cellpadding="0" cellspacing="0" class="maintitle">
+            <tr>
+                <td class="cheshirelogo">
+                    <img src="http://www.cheshire3.org/gfx/c3_white.gif" alt=" c h e s h i r e  |  3 "/>
+                </td>
+                <td>
+                    <img src="http://www.cheshire3.org/gfx/slant_grey.gif" alt=""/>
+                </td>
+                <td align="center">
+                    <h1>Cheshire3 Objects:  Database</h1>
+                </td>
+            </tr>
+        </table>
+
+        <!--#config errmsg="<div id="navbar"/>" -->
+        <!--#include virtual="/navbar.ssi" -->
+
+        <div class="fieldset">
+            <h2 class="legend">Description</h2>
+            <p>
+                A Database is a collection of Records and Indexes. 
+                It is responsable for maintaining and allowing access to its components, as well as metadata associated with the collections. 
+                It must be able to interpret a request, splitting it amongst its known resources and then recombine the values into a single response.
+            </p>
+        </div>
+
+        <div class="fieldset">
+            <h2 class="legend">Implementations</h2>
+            <p>There are no pre-configured databases as this is totally application specific.
+                Configuring a database it your primary task when beginning to use Cheshire3 for your data.
+                There are some example databases including confiuguration available in the <a href="http://www.cheshire3.org/download">download section</a> of the <a href="http://www.cheshire3.org/">Cheshire3 web-site</a>.
+            </p>
+        </div>
+
+        <div class="fieldset">
+            <h2 class="legend">API</h2>
+            <p>
+            	<em>Module</em>: <strong>cheshire3.database</strong><br/>
+            	<em>Classes</em>: 
+            </p>
+            <ul>
+                <li><strong>SimpleDatabase</strong><br/>
+                    A simple database implementation. Handles the basics, but not authentication.
+                </li>
+                <li><strong>OptimisingDatabase</strong><br/>
+                    Slightly experimental query optimising database. 
+                    Attempts to canonicalize the query, and discern whether there will be any matches before actually creating resultSets (creating resultSets is what takes the time when searching!)  
+                </li>
+            </ul>
+            <p>
+                <em>Database Methods</em>:
+            </p>	
+            <table border="1" cellpadding="3" cellspacing="0" width="100%">
+            	<tr>
+            		<th>Function</th><th>Parameters</th><th>Returns</th><th>Description</th>
+            	</tr>
+            	<tr><td>__init__</td><td>domNode, parentObject</td><td>&#160;</td><td>The constructer takes a DOM tree containing the configuration of the database and the object which the database should consider as its parent, normally a <a href="object_server.html">Server</a>.</td></tr>
+                <tr><td>begin_indexing</td><td>session</td><td>&#160;</td><td>Perform any routines required before indexing records. e.g. discover configured indexes, initialize necessary files.</td></tr>
+                <tr><td>commit_indexing</td><td>session</td><td>&#160;</td><td>Perform any routines needed to complete indexing. e.g. collate temporary index files, commit finished indexes to disk.</td></tr>
+                <tr><td>commit_metadata</td><td>session</td><td>&#160;</td><td>Perform any routines needed to complete accumulation of metadata. e.g. calculate mean record size, commit values to disk.</td></tr>
+                <tr><td>clear_indexes</td><td>session</td><td>&#160;</td><td>Discover all configured indexes and clear them. This can prevent duplicates if called before re-indexing existing Records.</td></tr>
+            	<tr><td>add_record</td><td>session, record</td><td>&#160;</td><td>Function to call to ensure that a record is registered with the database. This will only do the registration, you have to call index_record to index it. </td></tr>
+            	<tr><td>index_record</td><td>session, record</td><td>&#160;</td><td>Sends the record to all known indexes to process</td></tr>
+                <tr><td>unindex_record</td><td>session, record</td><td>&#160;</td><td>Remove references to the record from all known indexes. Does not delete the record from the recordStore.</td></tr>
+                <tr><td>remove_record</td><td>session, record</td><td>&#160;</td><td>Remove the record from the database's register. This will only unregister the record, you have to call unindex_record to remove pointers from indexes.</td></tr>
+                <tr><td>scan</td><td>session, query, numberOfTerms, direction</td><td>list of term summaries</td><td>Given a query, resolve the index and return the raw information from it. <br/>Each item in the list returned consists of the term it represents (as a string), followed by a sequence of 3 integers: term id, number of matching records, total number of occurences.</td></tr>
+                <tr><td>search</td><td>session, query</td><td>resultSet</td><td>Given a query, process it and return a resultSet</td></tr>
+<!--            	<tr><td>retrieve</td><td>session, resultset, startPosition, numberOfRecords</td><td>list of Record</td><td>Given a result set of record pointers, fetch the actual records and return them</td></tr>-->
+<!--            	<tr><td>sort</td><td>session, resultSets, sortKeys</td><td>resultSet</td><td>Merge the given sets and sort by the keys, returning a new resultSet</td></tr>-->
+<!--            	<tr><td>index_records</td><td>session</td><td>&nbsp;</td><td>Index all records known</td></tr>-->
+<!--            	<tr><td>explain</td><td>session</td><td><i>undefined</i></td><td>Return some information about self. TBD.</td></tr>-->
+<!--            	<tr><td>connect</td><td>session</td><td>&nbsp;</td><td>Perform any routines required at a session start.</td></tr>-->
+<!--            	<tr><td>disconnect</td><td>session</td><td>&nbsp;</td><td>Perform any tidying routines at session end</td></tr>-->
+<!--            	<tr><td>authenticate</td><td>session</td><td>&nbsp;</td><td>Authenticate user with database.</td></tr>-->
+            </table>
+            
+            <h3>Sub-Packages</h3>
+            
+            <p>
+                <em>Sub-Package</em>: <strong>vdb</strong><br/>
+                <em>Module</em>: cheshire3.vdb.database
+            </p>
+            <ul>
+                <li><strong>VdbDatabase</strong><br/>
+                    A Virtual Database implementation for federated/meta searching remote databases.
+                    Currently supports SRU enabled remote databases only.
+				    Accurate relevancy sorting relies on remote database supporting SRU extension: cheshire3-2-resultSet.
+				    Search facets rely on remote database supporting SRU extension: cheshire3-2-facets.
+                </li>
+            </ul>
+        </div>
+
+    </body>
+</html>

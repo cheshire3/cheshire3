@@ -1,0 +1,998 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>indexStore.SrbBdbIndexStore</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <link rel="stylesheet" href="/cheshire3.css" type="text/css"/>
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body>
+<table width="100%" border=0 cellpadding=0 cellspacing=0 class="maintitle">
+<tr height="75">
+<td class="cheshirelogo" width="25%">
+<img src="/gfx/c3_white.gif">
+</td>
+<td width="10">
+<img src="/gfx/slant_grey.gif">
+</td>
+<td width="75%" align="center">
+<h2>Cheshire3 Object Model: Class SrbBdbIndexStore
+</h2>
+</td></tr>
+</table>
+
+<div class="fieldset">
+<span class="legend"><a href="configParser-module.html">
+        <a href="indexStore-module.html">Module&nbsp;indexStore</a> ::
+        Class&nbsp;SrbBdbIndexStore
+      </span>
+<p>
+
+
+<h2 class="class">Class SrbBdbIndexStore
+<br/><span class="codelink"><a href="indexStore-pysrc.html#SrbBdbIndexStore">source&nbsp;code</a></span></h2>
+<b>Object Tree:</b><pre class="base-tree">
+           object --+            
+                    |            
+<a href="configParser.C3Object-class.html">configParser.C3Object</a> --+        
+                        |        
+   <a href="baseObjects.IndexStore-class.html">baseObjects.IndexStore</a> --+    
+                            |    
+                <a href="indexStore.BdbIndexStore-class.html">BdbIndexStore</a> --+
+                                |
+                               <strong class="uidshort">SrbBdbIndexStore</strong>
+</pre>
+
+<hr />
+<!-- ==================== INSTANCE METHODS ==================== -->
+</div><div class="fieldset"><span class="legend">Instance Methods</span><p>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white"><tr class="private">
+
+  <td>
+    <span class="sig"><a href="indexStore.SrbBdbIndexStore-class.html#_connect" class="sig-name">_connect</a>(<span class="sig-arg">self</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="indexStore.SrbBdbIndexStore-class.html#__init__" class="sig-name">__init__</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">config</span>,
+        <span class="sig-arg">parent</span>)</span>
+    
+  </td>
+</tr>
+<tr class="private">
+
+  <td>
+    <span class="sig"><a href="indexStore.SrbBdbIndexStore-class.html#_openIndexChunk" class="sig-name">_openIndexChunk</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>,
+        <span class="sig-arg">chunk</span>)</span>
+    
+  </td>
+</tr>
+<tr class="private">
+
+  <td>
+    <span class="sig"><a href="indexStore.SrbBdbIndexStore-class.html#_createIndexChunk" class="sig-name">_createIndexChunk</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>,
+        <span class="sig-arg">chunk</span>)</span>
+    
+  </td>
+</tr>
+<tr class="private">
+
+  <td>
+    <span class="sig"><a href="indexStore.SrbBdbIndexStore-class.html#_storeIndexChunk" class="sig-name">_storeIndexChunk</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>,
+        <span class="sig-arg">chunk</span>)</span>
+    
+  </td>
+</tr>
+<tr class="private">
+
+  <td>
+    <span class="sig"><a href="indexStore.SrbBdbIndexStore-class.html#_whichChunk" class="sig-name">_whichChunk</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">term</span>)</span>
+    
+  </td>
+</tr>
+<tr class="private">
+
+  <td>
+    <span class="sig"><a href="indexStore.SrbBdbIndexStore-class.html#_maybeFetchChunk" class="sig-name">_maybeFetchChunk</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>,
+        <span class="sig-arg">term</span>)</span>
+    
+  </td>
+</tr>
+<tr class="private">
+
+  <td>
+    <span class="sig"><a href="indexStore.SrbBdbIndexStore-class.html#_fetchChunk" class="sig-name">_fetchChunk</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>,
+        <span class="sig-arg">chunk</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="indexStore.SrbBdbIndexStore-class.html#begin_indexing" class="sig-name">begin_indexing</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="indexStore.SrbBdbIndexStore-class.html#commit_indexing" class="sig-name">commit_indexing</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="indexStore.SrbBdbIndexStore-class.html#commit_indexing2" class="sig-name">commit_indexing2</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>,
+        <span class="sig-arg">sorted</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="indexStore.SrbBdbIndexStore-class.html#create_index" class="sig-name">create_index</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="indexStore.SrbBdbIndexStore-class.html#clean_index" class="sig-name">clean_index</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="indexStore.SrbBdbIndexStore-class.html#delete_index" class="sig-name">delete_index</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="indexStore.SrbBdbIndexStore-class.html#fetch_sortValue" class="sig-name">fetch_sortValue</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>,
+        <span class="sig-arg">item</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="indexStore.SrbBdbIndexStore-class.html#delete_terms" class="sig-name">delete_terms</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>,
+        <span class="sig-arg">terms</span>,
+        <span class="sig-arg">record</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="indexStore.SrbBdbIndexStore-class.html#store_terms" class="sig-name">store_terms</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>,
+        <span class="sig-arg">hash</span>,
+        <span class="sig-arg">record</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="indexStore.SrbBdbIndexStore-class.html#fetch_termList" class="sig-name">fetch_termList</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>,
+        <span class="sig-arg">term</span>,
+        <span class="sig-arg">numReq</span>=<span class="sig-default">0</span>,
+        <span class="sig-arg">relation</span>=<span class="sig-default">&quot;&quot;</span>,
+        <span class="sig-arg">end</span>=<span class="sig-default">&quot;&quot;</span>,
+        <span class="sig-arg">summary</span>=<span class="sig-default">0</span>,
+        <span class="sig-arg">reverse</span>=<span class="sig-default">0</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="indexStore.SrbBdbIndexStore-class.html#fetch_term" class="sig-name">fetch_term</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>,
+        <span class="sig-arg">term</span>)</span>
+    
+  </td>
+</tr>
+<tr>
+
+  <td>
+    <span class="sig"><a href="indexStore.SrbBdbIndexStore-class.html#fetch_packed" class="sig-name">fetch_packed</a>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>,
+        <span class="sig-arg">term</span>)</span>
+    
+  </td>
+</tr>
+  <tr>
+    <td colspan="2">
+    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="indexStore.BdbIndexStore-class.html">BdbIndexStore</a></code></span>:
+      <code><a href="indexStore.BdbIndexStore-class.html#contains_index">contains_index</a></code>,
+      <code><a href="indexStore.BdbIndexStore-class.html#create_item">create_item</a></code>,
+      <code><a href="indexStore.BdbIndexStore-class.html#create_term">create_term</a></code>,
+      <code><a href="indexStore.BdbIndexStore-class.html#fetch_indexList">fetch_indexList</a></code>,
+      <code><a href="indexStore.BdbIndexStore-class.html#fetch_indexStats">fetch_indexStats</a></code>,
+      <code><a href="indexStore.BdbIndexStore-class.html#fetch_temp_file">fetch_temp_file</a></code>,
+      <code><a href="indexStore.BdbIndexStore-class.html#get_indexingPosition">get_indexingPosition</a></code>
+      </p>
+    <div class="private">    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="indexStore.BdbIndexStore-class.html">BdbIndexStore</a></code></span> (private):
+      <code><a href="indexStore.BdbIndexStore-class.html#_closeIndex">_closeIndex</a></code>,
+      <code><a href="indexStore.BdbIndexStore-class.html#_fileFilter">_fileFilter</a></code>,
+      <code><a href="indexStore.BdbIndexStore-class.html#_generateFilename">_generateFilename</a></code>,
+      <code><a href="indexStore.BdbIndexStore-class.html#_get_externalId">_get_externalId</a></code>,
+      <code><a href="indexStore.BdbIndexStore-class.html#_get_internalId">_get_internalId</a></code>,
+      <code><a href="indexStore.BdbIndexStore-class.html#_openIndex">_openIndex</a></code>
+      </p></div>
+    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="configParser.C3Object-class.html">configParser.C3Object</a></code></span>:
+      <code><a href="configParser.C3Object-class.html#auth_function">auth_function</a></code>,
+      <code><a href="configParser.C3Object-class.html#get_config">get_config</a></code>,
+      <code><a href="configParser.C3Object-class.html#get_default">get_default</a></code>,
+      <code><a href="configParser.C3Object-class.html#get_object">get_object</a></code>,
+      <code><a href="configParser.C3Object-class.html#get_path">get_path</a></code>,
+      <code><a href="configParser.C3Object-class.html#get_setting">get_setting</a></code>,
+      <code><a href="configParser.C3Object-class.html#log_function">log_function</a></code>,
+      <code><a href="configParser.C3Object-class.html#unauth_function">unauth_function</a></code>,
+      <code><a href="configParser.C3Object-class.html#unlog_function">unlog_function</a></code>
+      </p>
+    <div class="private">    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="configParser.C3Object-class.html">configParser.C3Object</a></code></span> (private):
+      <code><a href="configParser.C3Object-class.html#_getDomFromFile">_getDomFromFile</a></code>,
+      <code><a href="configParser.C3Object-class.html#_handleConfigNode">_handleConfigNode</a></code>,
+      <code><a href="configParser.C3Object-class.html#_parseIncludes">_parseIncludes</a></code>,
+      <code><a href="configParser.C3Object-class.html#_recurseSubConfigs">_recurseSubConfigs</a></code>,
+      <code><a href="configParser.C3Object-class.html#_verifyDefault">_verifyDefault</a></code>,
+      <code><a href="configParser.C3Object-class.html#_verifyOption">_verifyOption</a></code>,
+      <code><a href="configParser.C3Object-class.html#_verifySetting">_verifySetting</a></code>
+      </p></div>
+    <p class="varlist"><span class="varlist-header">Inherited from <code>object</code></span>:
+      <code>__delattr__</code>,
+      <code>__getattribute__</code>,
+      <code>__hash__</code>,
+      <code>__new__</code>,
+      <code>__reduce__</code>,
+      <code>__reduce_ex__</code>,
+      <code>__repr__</code>,
+      <code>__setattr__</code>,
+      <code>__str__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+
+<br />
+<!-- ==================== CLASS VARIABLES ==================== -->
+</div><div class="fieldset"><span class="legend">Class Variables</span><p>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white"><tr>
+  <td width="15%">
+    <strong><a href="indexStore.SrbBdbIndexStore-class.html#host">host</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="indexStore.SrbBdbIndexStore-class.html#port">port</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="indexStore.SrbBdbIndexStore-class.html#user">user</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="indexStore.SrbBdbIndexStore-class.html#passwd">passwd</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="indexStore.SrbBdbIndexStore-class.html#dn">dn</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="indexStore.SrbBdbIndexStore-class.html#domain">domain</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="indexStore.SrbBdbIndexStore-class.html#resource">resource</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="indexStore.SrbBdbIndexStore-class.html#subcollection">subcollection</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="indexStore.SrbBdbIndexStore-class.html#connection">connection</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+  <td width="15%">
+    <strong><a href="indexStore.SrbBdbIndexStore-class.html#tempChunks">tempChunks</a></strong></td>
+  <td>&nbsp;</td>
+</tr>
+  <tr>
+    <td colspan="2">
+    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="indexStore.BdbIndexStore-class.html">BdbIndexStore</a></code></span>:
+      <code><a href="indexStore.BdbIndexStore-class.html#identifierMapCxn">identifierMapCxn</a></code>,
+      <code><a href="indexStore.BdbIndexStore-class.html#indexCxn">indexCxn</a></code>,
+      <code><a href="indexStore.BdbIndexStore-class.html#indexing">indexing</a></code>,
+      <code><a href="indexStore.BdbIndexStore-class.html#outFiles">outFiles</a></code>,
+      <code><a href="indexStore.BdbIndexStore-class.html#outSortFiles">outSortFiles</a></code>,
+      <code><a href="indexStore.BdbIndexStore-class.html#reservedLongs">reservedLongs</a></code>,
+      <code><a href="indexStore.BdbIndexStore-class.html#sortStoreCxn">sortStoreCxn</a></code>,
+      <code><a href="indexStore.BdbIndexStore-class.html#storeHash">storeHash</a></code>,
+      <code><a href="indexStore.BdbIndexStore-class.html#storeHashReverse">storeHashReverse</a></code>
+      </p>
+    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="configParser.C3Object-class.html">configParser.C3Object</a></code></span>:
+      <code><a href="configParser.C3Object-class.html#configStore">configStore</a></code>,
+      <code><a href="configParser.C3Object-class.html#defaults">defaults</a></code>,
+      <code><a href="configParser.C3Object-class.html#functionLogger">functionLogger</a></code>,
+      <code><a href="configParser.C3Object-class.html#id">id</a></code>,
+      <code><a href="configParser.C3Object-class.html#name">name</a></code>,
+      <code><a href="configParser.C3Object-class.html#objectType">objectType</a></code>,
+      <code><a href="configParser.C3Object-class.html#objects">objects</a></code>,
+      <code><a href="configParser.C3Object-class.html#parent">parent</a></code>,
+      <code><a href="configParser.C3Object-class.html#paths">paths</a></code>,
+      <code><a href="configParser.C3Object-class.html#permissionHandlers">permissionHandlers</a></code>,
+      <code><a href="configParser.C3Object-class.html#settings">settings</a></code>,
+      <code><a href="configParser.C3Object-class.html#subConfigs">subConfigs</a></code>,
+      <code><a href="configParser.C3Object-class.html#unresolvedObjects">unresolvedObjects</a></code>
+      </p>
+    <div class="private">    <p class="varlist"><span class="varlist-header">Inherited from <code><a href="configParser.C3Object-class.html">configParser.C3Object</a></code></span> (private):
+      <code><a href="configParser.C3Object-class.html#_includeConfigStores">_includeConfigStores</a></code>,
+      <code><a href="configParser.C3Object-class.html#_objectRefs">_objectRefs</a></code>
+      </p></div>
+    <p class="varlist"><span class="varlist-header">Inherited from <code>object</code></span>:
+      <code>__class__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+
+<br />
+<!-- ==================== METHOD DETAILS ==================== --></div><div class="fieldset"><span class="legend">Method Details</span><p><a name="_connect"></a>
+<div class="private">
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">_connect</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="indexStore-pysrc.html#SrbBdbIndexStore._connect">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="__init__"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">config</span>,
+        <span class="sig-arg">parent</span>)</span>
+    <br /><em class="fname">(Constructor)</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="indexStore-pysrc.html#SrbBdbIndexStore.__init__">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="indexStore.BdbIndexStore-class.html#__init__">BdbIndexStore.__init__</a>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="_openIndexChunk"></a>
+<div class="private">
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">_openIndexChunk</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>,
+        <span class="sig-arg">chunk</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="indexStore-pysrc.html#SrbBdbIndexStore._openIndexChunk">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="_createIndexChunk"></a>
+<div class="private">
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">_createIndexChunk</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>,
+        <span class="sig-arg">chunk</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="indexStore-pysrc.html#SrbBdbIndexStore._createIndexChunk">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="_storeIndexChunk"></a>
+<div class="private">
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">_storeIndexChunk</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>,
+        <span class="sig-arg">chunk</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="indexStore-pysrc.html#SrbBdbIndexStore._storeIndexChunk">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="_whichChunk"></a>
+<div class="private">
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">_whichChunk</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">term</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="indexStore-pysrc.html#SrbBdbIndexStore._whichChunk">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="_maybeFetchChunk"></a>
+<div class="private">
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">_maybeFetchChunk</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>,
+        <span class="sig-arg">term</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="indexStore-pysrc.html#SrbBdbIndexStore._maybeFetchChunk">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="_fetchChunk"></a>
+<div class="private">
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">_fetchChunk</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>,
+        <span class="sig-arg">chunk</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="indexStore-pysrc.html#SrbBdbIndexStore._fetchChunk">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="begin_indexing"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">begin_indexing</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="indexStore-pysrc.html#SrbBdbIndexStore.begin_indexing">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="indexStore.BdbIndexStore-class.html#begin_indexing">BdbIndexStore.begin_indexing</a>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="commit_indexing"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">commit_indexing</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="indexStore-pysrc.html#SrbBdbIndexStore.commit_indexing">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="indexStore.BdbIndexStore-class.html#commit_indexing">BdbIndexStore.commit_indexing</a>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="commit_indexing2"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">commit_indexing2</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>,
+        <span class="sig-arg">sorted</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="indexStore-pysrc.html#SrbBdbIndexStore.commit_indexing2">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="indexStore.BdbIndexStore-class.html#commit_indexing2">BdbIndexStore.commit_indexing2</a>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="create_index"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">create_index</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="indexStore-pysrc.html#SrbBdbIndexStore.create_index">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="indexStore.BdbIndexStore-class.html#create_index">BdbIndexStore.create_index</a>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="clean_index"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">clean_index</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="indexStore-pysrc.html#SrbBdbIndexStore.clean_index">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="indexStore.BdbIndexStore-class.html#clean_index">BdbIndexStore.clean_index</a>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="delete_index"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">delete_index</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="indexStore-pysrc.html#SrbBdbIndexStore.delete_index">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="indexStore.BdbIndexStore-class.html#delete_index">BdbIndexStore.delete_index</a>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="fetch_sortValue"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">fetch_sortValue</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>,
+        <span class="sig-arg">item</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="indexStore-pysrc.html#SrbBdbIndexStore.fetch_sortValue">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="indexStore.BdbIndexStore-class.html#fetch_sortValue">BdbIndexStore.fetch_sortValue</a>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="delete_terms"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">delete_terms</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>,
+        <span class="sig-arg">terms</span>,
+        <span class="sig-arg">record</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="indexStore-pysrc.html#SrbBdbIndexStore.delete_terms">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="indexStore.BdbIndexStore-class.html#delete_terms">BdbIndexStore.delete_terms</a>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="store_terms"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">store_terms</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>,
+        <span class="sig-arg">hash</span>,
+        <span class="sig-arg">record</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="indexStore-pysrc.html#SrbBdbIndexStore.store_terms">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="indexStore.BdbIndexStore-class.html#store_terms">BdbIndexStore.store_terms</a>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="fetch_termList"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">fetch_termList</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>,
+        <span class="sig-arg">term</span>,
+        <span class="sig-arg">numReq</span>=<span class="sig-default">0</span>,
+        <span class="sig-arg">relation</span>=<span class="sig-default">&quot;&quot;</span>,
+        <span class="sig-arg">end</span>=<span class="sig-default">&quot;&quot;</span>,
+        <span class="sig-arg">summary</span>=<span class="sig-default">0</span>,
+        <span class="sig-arg">reverse</span>=<span class="sig-default">0</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="indexStore-pysrc.html#SrbBdbIndexStore.fetch_termList">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="indexStore.BdbIndexStore-class.html#fetch_termList">BdbIndexStore.fetch_termList</a>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="fetch_term"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">fetch_term</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>,
+        <span class="sig-arg">term</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="indexStore-pysrc.html#SrbBdbIndexStore.fetch_term">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="indexStore.BdbIndexStore-class.html#fetch_term">BdbIndexStore.fetch_term</a>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="fetch_packed"></a>
+<div>
+<table width="100%" class="func-details"><tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3><span class="sig"><span class="sig-name">fetch_packed</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">session</span>,
+        <span class="sig-arg">index</span>,
+        <span class="sig-arg">term</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="indexStore-pysrc.html#SrbBdbIndexStore.fetch_packed">source&nbsp;code</a></span>&nbsp;</span
+    ></td>
+  </table>
+  
+  
+  <dl><dt></dt><dd>
+    <dl><dt>Overrides:
+      <a href="indexStore.BdbIndexStore-class.html#fetch_packed">BdbIndexStore.fetch_packed</a>
+    </dt></dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<br />
+<!-- ==================== CLASS VARIABLE DETAILS ==================== --></div><div class="fieldset"><span class="legend">Class Variable Details</span><p><a name="host"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>host</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="&quot;&quot;"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&quot;&quot;                                                                     
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="port"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>port</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="&quot;&quot;"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&quot;&quot;                                                                     
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="user"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>user</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="&quot;&quot;"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&quot;&quot;                                                                     
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="passwd"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>passwd</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="&quot;&quot;"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&quot;&quot;                                                                     
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="dn"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>dn</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="&quot;&quot;"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&quot;&quot;                                                                     
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="domain"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>domain</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="&quot;&quot;"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&quot;&quot;                                                                     
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="resource"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>resource</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="&quot;&quot;"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&quot;&quot;                                                                     
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="subcollection"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>subcollection</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="&quot;&quot;"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&quot;&quot;                                                                     
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="connection"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>connection</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="None"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+None&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<a name="tempChunks"></a>
+<div>
+<table width="100%" class="var-details"><tr><td>
+  <h3>tempChunks</h3>
+  
+  <dl><dt></dt><dd>
+    <dl title="0"><dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+0                                                                      
+      </pre></td></tr></table></dd>
+    </dl>
+  </dd></dl>
+</td></tr></table>
+</div>
+<br />
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">Generated by Epydoc
+        3.0alpha2 on Wed Aug  9 18:09:58 2006</td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sf.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>

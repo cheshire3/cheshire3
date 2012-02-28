@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>Build Script</title>
+        <link rel="stylesheet" type="text/css" href="http://www.cheshire3.org/cheshire3.css"></link>
+    </head>
+    <body>
+        <a name="top"></a>
+        <table cellpadding="0" cellspacing="0" class="maintitle">
+            <tr>
+                <td class="cheshirelogo">
+                    <img src="http://www.cheshire3.org/gfx/c3_white.gif" alt=" c h e s h i r e  |  3 "/>
+                </td>
+                <td>
+                    <img src="http://www.cheshire3.org/gfx/slant_grey.gif" alt=""/>
+                </td>
+                <td align="center">
+                    <h2>Build Script</h2>
+                </td>
+            </tr>
+        </table>
+
+        <!--#config errmsg="<div id="navbar"/>" -->
+        <!--#include virtual="/navbar.ssi" -->
+
+        <div class="fieldset">
+            <span class="legend">Introduction</span>
+            <p>
+                A sample and fairly straightforwards script to build a database from a single file containing XML documents. 
+                We go through it section by section and explain how things work.
+                Stylistically, the Python code itself could be slightly improved, but is easy to understand. 
+                It can be used as a template for other scripts, or as a base point for more complicated versions.
+            </p>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">Python Environment (01-11)</span>
+            <pre>
+01 #!/home/cheshire/install/bin/python
+02
+03 import sys
+04 
+05 osp = sys.path
+06 sys.path = ["/home/cheshire/cheshire3/code"]
+07 sys.path.extend(osp)
+08
+09 from baseObjects import Session
+10 from server import SimpleServer
+11
+12
+
+            </pre>
+            <p>
+                The first thing to do in any script is to setup Python such that you can use the various Cheshire3 objects. 
+                This allows us to find the Cheshire3 code first, before any other similarly named modules that might be installed. 
+                Lines 9 and 10 import the two Cheshire3 classes that we use directly - Session, and SimpleServer.
+            </p>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">Cheshire3 Environment (13-22)</span>
+            <pre>
+13 # Build environment...
+14 session = Session()
+15 serv = SimpleServer(session, "../configs/serverConfig.xml")
+16 db = serv.get_object(session, 'db_tei')
+17 docFac = db.get_object(session, 'defaultDocumentFactory')
+18 docParser = db.get_object(session, 'TeiParser')
+19 recStore = db.get_object(session, 'TeiRecordStore')
+20 
+21 docFac.load(session, "tei_files.xml", cache=2, tagName='tei')
+22 
+            </pre>
+            <p>
+                Next we need to set up the Cheshire3 environment which has been configured. 
+                The server is built (line 15) by giving it the path to a configuration file.
+                The database is retrieved from the server using its identifier. 
+                From there, the other objects needed, such as the documentFactory, parser, and recordStore (17-19) to be used are extracted by their identifier.
+            </p>
+            <p>
+                In order to store and index records, we need to have them in a processable form. 
+                Line 21 loads a file named 'tei_files.xml' which contains a number of discreet XML documents.
+                The 'cache' argument with value 2 tells the documentFactory to store all located documents in memory until they're needed.
+                The 'tagName' argument tells the documentFactory to look for documents contained within &lt;tei&gt; tags.
+            </p>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">Load and Index (23-34)</span>
+            <pre>
+23 db.begin_indexing(session)
+24 recStore.begin_storing(session)
+25 for doc in docFac:
+26     try:
+27         rec = docParser.process_document(session, doc)
+28     except:
+29         print doc.get_raw(session)
+30         sys.exit()
+31
+32     id = recStore.create_record(session, rec)
+33     db.add_record(session, rec)
+34     db.index_record(session, rec)
+
+            </pre>
+            <p>
+                First (line 23) we need to tell the database that we're going to be indexing a lot of information. 
+                This lets the system handle all of the loading in one go at the end (line 36) and store only temporary information until then. 
+                Likewise line 24 tells the record store that it's going to be getting a lot of information coming in, and is closed at line 35.
+            </p>
+            <p>
+                Then we step through each document in the documentFactory (25). 
+                Parsing (27) the record from the raw XML should always happen in a try: (27) block so that if the XML isn't well formed, you can do something sensible with it. 
+                The 'sensible' thing in this case is to print it to the screen and then exit the script (29-30)
+            </p>
+            <p>
+                Once we have a record, we need to store it in the recordStore (line 32). 
+                When we do this, the identifier assigned to the record by the recordStore is returned - we can assign this to a variable, and use it later if necessary. 
+                Then we add it to the database (33) [recall that records may be in more than one database] and then index it (34).
+            </p>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">Cleanup (35-37)</span>
+            <pre>
+35 recStore.commit_storing(session)
+36 db.commit_metadata(session)
+37 db.commit_indexing(session)
+
+            </pre>
+            <p>
+                Because we're not going to add any more records, we can close the recordStore (line 35). 
+                This ensures that any records are flushed to disk, rather than being kept in memory. 
+                We also need to commit the metadata about the database (such as the newly added records) to disk and then finally we commit the indexing (line 37).
+            </p>
+        </div>
+
+        <div class="fieldset">
+            <span class="legend">Complete Example</span>
+            <pre>
+#!/home/cheshire/install/bin/python
+
+import sys
+
+osp = sys.path
+sys.path = ["/home/cheshire/cheshire3/code"]
+sys.path.extend(osp)
+
+from baseObjects import Session
+from server import SimpleServer
+
+
+# Build environment...
+session = Session()
+serv = SimpleServer(session, "../configs/serverConfig.xml")
+db = serv.get_object(session, 'db_tei')
+docFac = db.get_object(session, 'defaultDocumentFactory')
+docParser = db.get_object(session, 'TeiParser')
+recStore = db.get_object(session, 'TeiRecordStore')
+ 
+docFac.load(session, "tei_files.xml", cache=2, tagName='tei')
+
+db.begin_indexing(session)
+recStore.begin_storing(session)
+for doc in docFac:
+    try:
+        rec = docParser.process_document(session, doc)
+    except:
+        print doc.get_raw(session)
+        sys.exit()
+
+    id = recStore.create_record(session, rec)
+    db.add_record(session, rec)
+    db.index_record(session, rec)
+recStore.commit_storing(session)
+db.commit_metadata(session)
+db.commit_indexing(session)
+
+            </pre>
+        </div>
+
+    </body>
+</html>
