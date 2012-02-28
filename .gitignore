@@ -1,2 +1,6 @@
 # file buffers
 *~
+# Anything Python created except source files
+*.pyc
+*.pyo
+
