@@ -14,5 +14,10 @@ sdist
 develop-eggs
 .installed.cfg
 
+# Eclipse
+*.pydevproject
+.project
+.metadata
+
 # O/S file buffers
 *~
