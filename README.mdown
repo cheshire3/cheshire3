@@ -95,32 +95,21 @@ Installation
 
 As mentioned, we're currently working on the installation process to make it 
 easier for both lay-persons and developers to get started with Cheshire3.
-The aim is to make it as simple as:
 
-**Users** (i.e. those not wanting to actually develop Cheshire3)
+**Users** (i.e. those not wanting to actually develop Cheshire3):
 
-1. 
-    Get the code, one of:
+1. Clone cheshire3 repository from GitHub
 
-    a. Clone from GitHub
-    
-    b. Checkout from Subversion
-    
-    c. Downloading and unpack a numbered release from cheshire3.org
-    
-2. python setup.py install
-
-
-or if you have easy_install:
-
-1. easy_install cheshire3
+2. Run ```python setup.py install```
 
 
 **Developers**:
 
-1. Clone the code from GitHub (or preferably fork it and clone from your fork)
+1. Fork the cheshire GitHub repository in GitHub
 
-2. python setup.py develop
+2. Clone your fork from GitHub
+
+3. Run ```python setup.py develop```
 
 
 Requirements / Dependencies
