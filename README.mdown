@@ -103,7 +103,9 @@ The aim is to make it as simple as:
     Get the code, one of:
 
     a. Clone from GitHub
+    
     b. Checkout from Subversion
+    
     c. Downloading and unpack a numbered release from cheshire3.org
     
 2. python setup.py install
