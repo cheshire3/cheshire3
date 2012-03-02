@@ -105,9 +105,9 @@ easier for both lay-persons and developers to get started with Cheshire3.
 
 **Developers**:
 
-1. Fork the cheshire GitHub repository in GitHub
+1. Fork the cheshire3 repository in GitHub
 
-2. Clone your fork from GitHub
+2. Clone your fork of the cheshire3 repository from GitHub 
 
 3. Run ```python setup.py develop```
 
