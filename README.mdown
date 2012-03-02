@@ -52,7 +52,7 @@ Cheshire3 Team at the University of Liverpool <http://www.liv.ac.uk>:
 * Robert Sanderson
 * **John Harrison** john.harrison@liv.ac.uk
 * Catherine Smith
- * Jerome Fuselier
+* Jerome Fuselier
 
 (Current maintainer in **bold**)
 
@@ -99,7 +99,8 @@ The aim is to make it as simple as:
 
 **Users** (i.e. those not wanting to actually develop Cheshire3)
 
-1. Get the code, one of:
+1. 
+    Get the code, one of:
 
     a. Clone from GitHub
     b. Checkout from Subversion
