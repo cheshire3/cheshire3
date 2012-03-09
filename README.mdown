@@ -205,8 +205,8 @@ configuration file.  You can find it dynamically as follows:
 ```python
 
     >>> import os
-    >>> c3home = os.environ.get('C3HOME', '')
-    >>> serverConfig = os.path.join(c3home, 'cheshire3', 'configs', 'serverConfig.xml') if c3home else "/home/cheshire/cheshire3/configs/serverConfig.xml"
+    >>> c3home = os.environ.get('C3HOME', os.path.expanduser('~'))
+    >>> serverConfig = os.path.join(c3home, 'cheshire3', 'configs', 'serverConfig.xml')
     >>> serv = SimpleServer(session, serverConfig)
     >>> serv
     <cheshire3.server.SimpleServer object...
