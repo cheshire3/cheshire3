@@ -15,10 +15,11 @@ modules = ['database', 'documentFactory', 'documentStore', 'extractor', 'index',
 
 cheshireVersion = (1,0,0)
 
-cheshireRoot = "/home/cheshire/cheshire3"
-cheshireCode = "/home/cheshire/cheshire3/code/extensions"
-cheshireDbs = "/home/cheshire/cheshire3/dbs"
-cheshireWww = "/home/cheshire/cheshire3/www"
+cheshireHome = os.environ.get('C3HOME', os.path.expanduser('~'))
+cheshireRoot = os.path.join(cheshireHome, "cheshire3")
+cheshireCode = os.path.join(cheshireRoot, "code", "extensions")
+cheshireDbs = os.path.join(cheshireRoot, "dbs")
+cheshireWww = os.path.join(cheshireRoot, "www")
 
 
 def get_api(object, all=False):
