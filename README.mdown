@@ -196,8 +196,19 @@ Coding Examples
 ### Initialization
 
 
-The first thing that we need to do is build a server. The server looks after 
-all of our objects, databases, indexes ... everything.
+The first thing that we need to do is create a Session and build a Server. The 
+Session object will be passed around amongst the processing objects to 
+maintain details of the current environment. It stores, for example, user and 
+identifier for the database.
+
+```python
+
+    >>> from cheshire3.baseObjects import Session
+    >>> session = Session()
+```
+
+The Server looks after all of our objects, 
+databases, indexes ... everything.
 
 Its constructor takes session and one argument, the filename of the top level 
 configuration file.  You can find it dynamically as follows:
@@ -205,8 +216,9 @@ configuration file.  You can find it dynamically as follows:
 ```python
 
     >>> import os
-    >>> c3home = os.environ.get('C3HOME', os.path.expanduser('~'))
-    >>> serverConfig = os.path.join(c3home, 'cheshire3', 'configs', 'serverConfig.xml')
+    >>> from cheshire3.server import SimpleServer
+    >>> from cheshire3.internal import cheshireRoot
+    >>> serverConfig = os.path.join(cheshireRoot, 'configs', 'serverConfig.xml')
     >>> serv = SimpleServer(session, serverConfig)
     >>> serv
     <cheshire3.server.SimpleServer object...
