@@ -59,7 +59,7 @@
     <path type="includeConfigs">configs/basicConfigs.xml</path>
     <path type="includeConfigs">configs/workflow.xml</path>
     <path type="includeConfigs">configs/extra</path>
-    <path type="includeConfigs">dbs/configs.xml</path> 
+    <path type="includeConfigs">dbs/configs.d</path>
 
   </subConfigs>
 

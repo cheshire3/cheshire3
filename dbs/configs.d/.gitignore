@@ -1,0 +1,3 @@
+# Don't track install specific database configs
+*.xml
+

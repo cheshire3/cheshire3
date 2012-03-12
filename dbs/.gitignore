@@ -1,3 +1,6 @@
 # Don't track install specific database configs, data etc.
+*
+# but include .gitignore for this dir
 !.gitignore
-*/
+# and the configurations dir
+!/configs.d
