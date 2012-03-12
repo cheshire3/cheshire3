@@ -96,6 +96,12 @@ Installation
 As mentioned, we're currently working on the installation process to make it 
 easier for both lay-persons and developers to get started with Cheshire3.
 
+The following guidelines assume that you administrative privileges on the 
+machine you're installing on. If this is not the case, then you might need to 
+use the option ```--user```. For more details, see:
+http://docs.python.org/install/index.html#alternate-installation
+
+
 **Users** (i.e. those not wanting to actually develop Cheshire3):
 
 1. Clone cheshire3 repository from GitHub
