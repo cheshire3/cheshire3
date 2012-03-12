@@ -2,8 +2,8 @@
 <config id="Cheshire3Server" type="server">
 
   <paths>
-    <path type="defaultPath">/home/cheshire/cheshire3</path>
-    <path type="sortPath">/home/cheshire/install/bin/sort</path> 
+    <path type="defaultPath">${cheshire3Home}/cheshire3</path>
+    <path type="sortPath">/bin/sort</path>
     <path type="zserverConfig">configs/zserver.xml</path>
     <object type="defaultLogger" ref="stdoutLogger"/>
     <object type="z3950Logger" ref="z3950Logger"/>
@@ -59,7 +59,7 @@
     <path type="includeConfigs">configs/basicConfigs.xml</path>
     <path type="includeConfigs">configs/workflow.xml</path>
     <path type="includeConfigs">configs/extra</path>
-    <path type="includeConfigs">dbs/configs.xml</path> 
+    <path type="includeConfigs">dbs/configs.d</path>
 
   </subConfigs>
 

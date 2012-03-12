@@ -69,7 +69,7 @@ def implementationResponseHandler(session, val, resp, other=None):
       <ident:application>Cheshire3 SRW Server</ident:application>
       <ident:version>%s</ident:version>
     </ident:serverInfo>
-    """ % ('.'.join([str(x) for x in internal.cheshireVersion]))
+    """ % ('.'.join([str(x) for x in internal.cheshire3Version]))
     return etree.XML(txt)
 
 

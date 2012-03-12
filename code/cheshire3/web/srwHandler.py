@@ -307,7 +307,7 @@ def process_explain(self, session, req):
                 <agents>
                     <agent type="vendor">The University of Liverpool</agent>
                 </agents>
-                </implementation>''' % internal.cheshireVersion)
+                </implementation>''' % internal.cheshire3Version)
                 dbNode.append(impNode)
                 
             if db.totalItems:

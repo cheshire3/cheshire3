@@ -13,12 +13,13 @@ processTypes = ['preParser', 'parser', 'normalizer', 'extractor', 'transformer',
 modules = ['database', 'documentFactory', 'documentStore', 'extractor', 'index', 'indexStore', 'logger', 'normalizer', 'objectStore', 'parser', 'postgres', 'preParser', 'protocolMap', 'queryFactory', 'queryStore', 'recordStore', 'resultSetStore', 'server', 'transformer', 'workflow', 'xpathProcessor', 'textmining.tmNormalizer', 'textmining.tmDocumentFactory', 'textmining.tmPreParser', 'textmining.tmTransformer', 'datamining.dmPreParser', 'datamining.dmTransformer', 'grid.srbIndex', 'grid.srbStore']
 
 
-cheshireVersion = (1,0,0)
+cheshire3Version = (1,0,0)
 
-cheshireRoot = "/home/cheshire/cheshire3"
-cheshireCode = "/home/cheshire/cheshire3/code/extensions"
-cheshireDbs = "/home/cheshire/cheshire3/dbs"
-cheshireWww = "/home/cheshire/cheshire3/www"
+cheshire3Home = os.environ.get('C3HOME', os.path.expanduser('~'))
+cheshire3Root = os.path.join(cheshire3Home, "cheshire3")
+cheshire3Code = os.path.join(cheshire3Root, "code", "extensions")
+cheshire3Dbs = os.path.join(cheshire3Root, "dbs")
+cheshire3Www = os.path.join(cheshire3Root, "www")
 
 
 def get_api(object, all=False):

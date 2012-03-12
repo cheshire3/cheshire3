@@ -143,7 +143,7 @@ class ZHandler:
         resp.exceptionalRecordSize = 0x10000
         resp.implementationId = 'Cheshire3'
         resp.implementationName = 'Cheshire3 Z39.50 Server'
-        resp.implementationVersion = '.'.join([str(x) for x in internal.cheshireVersion])
+        resp.implementationVersion = '.'.join([str(x) for x in internal.cheshire3Version])
         resp.result = 1
         pdu = self.encode(('initResponse', resp))
         if (name <> None):
