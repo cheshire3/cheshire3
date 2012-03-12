@@ -115,6 +115,9 @@ easier for both lay-persons and developers to get started with Cheshire3.
 Requirements / Dependencies
 ---------------------------
 
+Cheshire3 requires Python 2.6.0 or later. It has not yet been verified as 
+Python 3 compliant.
+
 Python package dependencies should be resolved by the standard Python package 
 management mechanisms (setuptools, easy_install) so need not be discussed 
 here.
