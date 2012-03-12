@@ -1,7 +1,11 @@
 
-import os, sys, time, glob
+import os
+import sys
+import time
+import glob
 import hashlib
 import inspect
+from string import Template
 from types import MethodType
 
 from cheshire3.session import Session
@@ -12,8 +16,13 @@ from cheshire3.bootstrap import BSParser, BootstrapDocument
 from cheshire3.bootstrap import BSLxmlParser
 from cheshire3.exceptions import *
 from cheshire3.permissionHandler import PermissionHandler
-from cheshire3.internal import defaultArchitecture, get_api
+from cheshire3.internal import defaultArchitecture, get_api, cheshire3Home, cheshire3Root, cheshire3Dbs, cheshire3Www
 
+cheshire3Paths = {'cheshire3Home': cheshire3Home,
+                  'cheshire3Root': cheshire3Root,
+                  'cheshire3Dbs': cheshire3Dbs,
+                  'cheshire3Www': cheshire3Www
+                  } 
 
 CONFIG_NS = "http://www.cheshire3.org/schemas/config/"
 
@@ -347,7 +356,10 @@ class C3Object(object):
                         except KeyError:
                             raise ConfigFileException("path must have type")
                         if e2.tag == 'path':
-                            self.paths[typ] = e2.text
+                            # Allow template strings in paths
+                            # e.g. ${cheshire3Home}/foo/bar
+                            pathTmpl = Template(e2.text)
+                            self.paths[typ] = pathTmpl.safe_substitute(cheshire3Paths)
                         elif e2.tag == 'object':
                             try:
                                 ref = e2.attrib['ref']
@@ -395,7 +407,10 @@ class C3Object(object):
                                 type = child2.getAttributeNS(None, 'type')
                                 if child2.localName == "path":
                                     value = getFirstData(child2)
-                                    self.paths[type] = value
+                                    # Allow template strings in paths
+                                    # e.g. ${cheshire3Home}/foo/bar
+                                    pathTmpl = Template(value)
+                                    self.paths[type] = pathTmpl.safe_substitute(cheshire3Paths)
                                 elif child2.localName == "object":
                                     value = child2.getAttributeNS(None,'ref')
                                     pathObjects[type] = value
