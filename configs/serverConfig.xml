@@ -3,7 +3,7 @@
 
   <paths>
     <path type="defaultPath">/home/cheshire/cheshire3</path>
-    <path type="sortPath">/home/cheshire/install/bin/sort</path> 
+    <path type="sortPath">/bin/sort</path>
     <path type="zserverConfig">configs/zserver.xml</path>
     <object type="defaultLogger" ref="stdoutLogger"/>
     <object type="z3950Logger" ref="z3950Logger"/>
