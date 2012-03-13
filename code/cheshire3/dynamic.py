@@ -24,7 +24,6 @@ def makeObjectFromDom(session, topNode, parentObject):
     return buildObject(session, objectType, [topNode, parentObject])
 
 
-
 def importObject(session, objectType):
     try:
         (modName, className) = objectType.rsplit('.', 1)
@@ -34,15 +33,21 @@ def importObject(session, objectType):
     try:
         m = __import__(modName)
     except ImportError as e:
-        if objectType[:9] != "cheshire3":
+        if not objectType.startswith("cheshire3"):
             try:
                 return importObject(session, "cheshire3.%s" % objectType)
-            except: pass
+            except:
+                pass
         try:
             raise e
         finally:
-            try: session.logger.log_lvl(session, 50, "Module %s does not define class %s" % (modName, className))
-            except AttributeError: pass # most likely session == None or session.logger == None
+            try:
+                session.logger.log_lvl(session, 
+                                       50, 
+                                       "Module %s does not define class %s" % (modName, className))
+            except AttributeError:
+                # most likely session == None or session.logger == None
+                pass
 
     # now split and fetch bits
     mods = modName.split('.')
@@ -53,31 +58,42 @@ def importObject(session, objectType):
             if not objectType.startswith("cheshire3"):
                 try:
                     return importObject(session, "cheshire3.%s" % objectType)
-                except: pass
+                except:
+                    pass
             try:
                 raise e
             finally:
-                try: session.logger.log_lvl(session, 50, "Module %s does not define class %s" % (modName, className))
-                except AttributeError: pass # most likely session == None or session.logger == None
+                try:
+                    session.logger.log_lvl(session, 
+                                           50, 
+                                           "Module %s does not define class %s" % (modName, className))
+                except AttributeError:
+                    # most likely session == None or session.logger == None
+                    pass
 
     try:
         parentClass = getattr(m, className)
     except AttributeError as e:
-        if objectType[:9] != "cheshire3":
+        if not objectType.startswith("cheshire3"):
             try:
                 return importObject(session, "cheshire3.%s" % objectType)
-            except: pass
+            except:
+                pass
         try:
             raise e
         finally:
-            try: session.logger.log_lvl(session, 50, "Module %s does not define class %s" % (modName, className))
-            except AttributeError: pass # most likely session == None or session.logger == None
+            try:
+                session.logger.log_lvl(session, 
+                                       50, 
+                                       "Module %s does not define class %s" % (modName, className))
+            except AttributeError:
+                # most likely session == None or session.logger == None
+                pass
             
     return parentClass
 
 
 def buildObject(session, objectType, args):
-
     parentClass = importObject(session, objectType)
     try:
         return parentClass(session, *args)    
@@ -85,5 +101,10 @@ def buildObject(session, objectType, args):
         try:
             raise
         finally:
-            try: session.logger.log_lvl(session, 50, "Failed to create object of type: '{0}'".format(parentClass.__name__))
-            except AttributeError: pass # most likely session == None or session.logger == None
+            try:
+                session.logger.log_lvl(session, 
+                                       50, 
+                                       "Failed to create object of type: '{0}'".format(parentClass.__name__))
+            except AttributeError:
+                # most likely session == None or session.logger == None
+                pass
