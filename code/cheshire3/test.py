@@ -16,6 +16,7 @@ architecture, and default server configurations.
 """
 
 import os
+import re
 
 try:
     import unittest2 as unittest
@@ -49,6 +50,12 @@ class Cheshire3ServerTestCase(Cheshire3TestCase):
         Cheshire3TestCase.setUp(self)
         serverConfig = os.path.join(cheshire3Root, 'configs', 'serverConfig.xml')
         self.server = SimpleServer(self.session, serverConfig)
+        # Compile a regex for acceptable missing imports (i.e. optional features)
+        self.importRegex = re.compile("""No\ module\ named\ (?:
+            svm     # Support Vector Machine (datamining)
+            |PyZ3950 # Z39.50 for Python (web)
+            |rdflib  # Resource Description Framework (graph)
+            )""", re.VERBOSE)
         
     def tearDown(self):
         # Nothing to do as yet...
@@ -73,7 +80,7 @@ class Cheshire3ServerTestCase(Cheshire3TestCase):
             except:
                 # Assert that only fails due to unavailable optional dependency
                 self.assertRaisesRegexp(ImportError, 
-                                        "No module named [svm]", 
+                                        self.importRegex, 
                                         serv.get_object, 
                                         session, 
                                         identifier)
