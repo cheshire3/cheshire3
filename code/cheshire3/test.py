@@ -87,6 +87,10 @@ def suite():
     return suite
 
 
+def load_tests(loader, tests, pattern):
+    suite = loader.loadTestsFromTestCase(Cheshire3ServerTestCase)
+    return suite
+
 if __name__ == '__main__':
     tr = unittest.TextTestRunner(verbosity=2)
-    tr.run(suite())
+    tr.run(load_tests(unittest.defaultTestLoader, [], 'test*.py'))
