@@ -66,6 +66,7 @@ class EnjuObject:
         exe = self.get_path(session, 'executable', 'enju')
         if not tp:
             tp = commands.getoutput('which %s' % exe)
+            tp = tp if not tp.startswith('which:') else exe
         else:
             tp = os.path.join(tp, exe)
         xml = self.get_setting(session, 'xml', 1)
@@ -73,11 +74,13 @@ class EnjuObject:
             cmd = "%s -xml" % tp
         else:
             cmd = tp
-
         self.pipe = Popen(cmd, shell=True, bufsize=1, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-
         l = ""
         while l != 'Ready\n':
+            # Check for errors with command
+            if "command not found" in l:
+                self.log_error(session, "Error while initializing EnjuObject: {0}".format(l.strip()))
+                break
             l = self.pipe.stderr.readline()
         
     def tag(self, session, data, xml=0):
