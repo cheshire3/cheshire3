@@ -53,7 +53,7 @@ class Cheshire3ServerTestCase(Cheshire3TestCase):
     def tearDown(self):
         # Nothing to do as yet...
         pass
-        
+    
     def test_serverInstance(self):
         self.assertIsInstance(self.server, SimpleServer)
     
@@ -63,32 +63,42 @@ class Cheshire3ServerTestCase(Cheshire3TestCase):
                      self.session, 
                      "An Object Identifier That Does Not Exist!!!")
         
-    def test_configs(self):
-        session = self.session
-        serv = self.server
-        for k in serv.subConfigs:
+    def generate_get_object_test(self, identifier):
+        """Generate and return a method to test get_object for the given identifier."""
+        def test(self):
+            session = self.session
+            serv = self.server
             try:
-                obj = serv.get_object(session, k)
+                obj = serv.get_object(session, identifier)
             except:
                 # Assert that only fails due to unavailable optional dependency
                 self.assertRaisesRegexp(ImportError, 
                                         "No module named [svm]", 
                                         serv.get_object, 
                                         session, 
-                                        k)
+                                        identifier)
             else:
                 self.assertIsInstance(obj,
                                       C3Object,
-                                      "Object {0} is not an instance of a C3Object sub-class!?")
-    
-    
-def suite():
-    suite = unittest.TestLoader().loadTestsFromTestCase(Cheshire3ServerTestCase)
-    return suite
-
+                                      "Object {0} is not an instance of a C3Object sub-class!?".format(identifier))
+        return test
+        
 
 def load_tests(loader, tests, pattern):
+    # Create a suite with default tests
     suite = loader.loadTestsFromTestCase(Cheshire3ServerTestCase)
+    # Create an instance of Cheshire3ServerTestCase
+    tc = Cheshire3ServerTestCase('test_sessionInstance')
+    # Set it up
+    tc.setUp()
+    # Iterate through all configured object adding a test for each
+    for k in tc.server.subConfigs.iterkeys():
+        test_name = "test_get_object_{0}".format(k)
+        test_method = tc.generate_get_object_test(k)
+        setattr(Cheshire3ServerTestCase, test_name, test_method)
+        suite.addTest(Cheshire3ServerTestCase(test_name))
+    # Return the complete test suite
+    
     return suite
 
 if __name__ == '__main__':
