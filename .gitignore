@@ -1,3 +1,7 @@
+# Cheshire3 BerkeleyDB based *Store files and metadata
+*Store.bdb
+*Store_*.bdb
+
 # Python compiled/optimized files
 *.py[co]
 
