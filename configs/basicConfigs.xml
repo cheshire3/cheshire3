@@ -29,12 +29,6 @@
 	    <setting type="namespaces">1</setting>
 	  </options>
 	</subConfig>
-	<!--<subConfig type="parser" id="FtParser">-->
-	<!--  <objectType>cheshire3.parser.FtParser</objectType>-->
-	<!--</subConfig>-->
-	<subConfig type="parser" id="defaultRecordStoreParser">
-	  <objectType>cheshire3.parser.XmlRecordStoreParser</objectType> 
-	</subConfig>
 	<subConfig type="parser" id="LxmlParser">
 	  <objectType>cheshire3.parser.LxmlParser</objectType>
 	</subConfig>
