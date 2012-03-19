@@ -89,7 +89,7 @@ class EnjuObject:
         except UnicodeEncodeError:
             self.pipe.stdin.write(s.encode('utf-8'))
         self.pipe.stdin.write("\n")
-        self.pipe.stind.flush()
+        self.pipe.stdin.flush()
         tagd = self.pipe.stdout.readline()                
         return tagd
 
