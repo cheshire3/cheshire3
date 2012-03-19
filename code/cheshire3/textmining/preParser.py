@@ -8,9 +8,11 @@ from xml.sax.saxutils import escape
 import os, re
 from subprocess import Popen, PIPE
 
+
 class PosPreParser(PreParser):
     """ Base class for deriving Part of Speech PreParsers """
     pass
+
 
 class TsujiiChunkerPreParser(PreParser):
     # Any need for this outside of preParsing??
@@ -22,23 +24,18 @@ class TsujiiChunkerPreParser(PreParser):
                       'executable' : {'docs' : 'Name of the executable'}}
 
     def __init__(self, session, node, parent):
-	PreParser.__init__(self, session, node, parent)
-
+        PreParser.__init__(self, session, node, parent)
         tp = self.get_path(session, 'executablePath', '')
         exe = self.get_path(session, 'executable', './parser')
         if not tp:
             tp = commands.getoutput('which %s' % exe)
 	    tp = os.path.dirname(tp)
-            
         tp = os.path.join(tp, exe)
-
-	if not tp:
+        if not tp:
             raise ConfigFileException("%s requires the path: filePath" % self.id)
-
         o = os.getcwd()
-	os.chdir(tp)
-
-	o = os.getcwd()
+        os.chdir(tp)
+        o = os.getcwd()
         os.chdir(tp)
         self.pipe = Popen(exe, shell=True, bufsize=1, stdin=PIPE, stdout=PIPE, stderr=PIPE)
         os.chdir(o)
@@ -70,6 +67,7 @@ class TsujiiXMLPosPreParser(PosPreParser, TsujiiObject):
         ttj = "<text>" + ttj + "</text>"
         return StringDocument(ttj, self.id, doc.processHistory, 'text/xml', doc.parent)
 
+
 class TsujiiTextPosPreParser(PosPreParser, TsujiiObject):
 
     def __init__(self, session, node, parent):
@@ -81,6 +79,7 @@ class TsujiiTextPosPreParser(PosPreParser, TsujiiObject):
         tt = self.tag(session, text, xml=0)
         tt = '\n'.join(tt)
         return StringDocument(tt, self.id, doc.processHistory, 'text/plain', doc.parent)
+
 
 class EnjuTextPreParser(PosPreParser, EnjuObject):
     def __init__(self, session, node, parent):
@@ -127,7 +126,6 @@ class GeniaTextPreParser(PreParser):
         txt = self.puncRe.sub('\\1', txt)
         return StringDocument(txt)
 
-    
 
 class GeniaVerbSpanPreParser(GeniaTextPreParser):
     # Take in unparsed genia and return spans between verb forms
@@ -144,7 +142,6 @@ class GeniaVerbSpanPreParser(GeniaTextPreParser):
         data = doc.get_raw(session)
         data = data.decode('utf-8')
         lines = data.split('\n')
-
         chunks = []        
         words = []
         nounOkay = 0
@@ -154,7 +151,6 @@ class GeniaVerbSpanPreParser(GeniaTextPreParser):
             except:
                 # ignore whitespace lines
                 continue
-
             if pos[0] in ['V', '.']:
                 if not self.requireNoun or nounOkay:
                     chunks.append(words)
@@ -170,10 +166,8 @@ class GeniaVerbSpanPreParser(GeniaTextPreParser):
                 words.append(w)
                 if pos[0] == "N":
                     nounOkay = 1
-
         if not self.requireNoun or nounOkay:
             chunks.append(words)
-
         # serialise a bit into xml
         xml = [u"""<document id="%s" docStore="%s">\n""" % (doc.id, doc.documentStore)]
         for c in chunks:
@@ -187,8 +181,3 @@ class GeniaVerbSpanPreParser(GeniaTextPreParser):
                 xml.append(u"<chunk>%s</chunk>\n" % (chunk))
         xml.append(u'</document>\n\n')
         return StringDocument(u''.join(xml))
-        
-
-
-        
-        
