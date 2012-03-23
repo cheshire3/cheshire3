@@ -427,7 +427,17 @@ class TokenExpansionNormalizer(FileAssistedNormalizer):
 
 try:
     import txngstemmer as Stemmer
+except ImportError:
 
+    class StemNormalizer(SimpleNormalizer):
+        def __init__(self, session, config, parent):
+            raise(ConfigFileException('Stemmer library not available'))
+
+
+    class PhraseStemNormalizer(SimpleNormalizer):
+        def __init__(self, session, config, parent):
+            raise(ConfigFileException('Stemmer library not available'))
+else:
     class StemNormalizer(SimpleNormalizer):
         """ Use a Snowball stemmer to stem the terms """
         stemmer = None
@@ -472,18 +482,6 @@ try:
             wds = data.split()
             stemmed = self.stemmer.stem(wds)
             return ' '.join(stemmed)
-
-
-except ImportError:
-
-    class StemNormalizer(SimpleNormalizer):
-        def __init__(self, session, config, parent):
-            raise(ConfigFileException('Stemmer library not available'))
-
-
-    class PhraseStemNormalizer(SimpleNormalizer):
-        def __init__(self, session, config, parent):
-            raise(ConfigFileException('Stemmer library not available'))
 
 
 class PhoneticNormalizer(SimpleNormalizer):
