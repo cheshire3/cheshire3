@@ -73,6 +73,19 @@ setup(
     maintainer = 'John Harrison',
     maintainer_email = u'john.harrison@liv.ac.uk',
     license = "BSD",
+    classifiers = [
+        "Intended Audience :: Developers",
+        "Intended Audience :: Information Technology",
+        "License :: OSI Approved :: BSD License",
+        "Programming Language :: Python :: 2.6",
+        "Programming Language :: Python :: 2.7",
+        "Topic :: Internet :: WWW/HTTP :: Indexing/Search",
+        "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
+        "Topic :: Internet :: Z39.50",
+        "Topic :: Text Processing :: Indexing",
+        "Topic :: Text Processing :: Linguistic",
+        "Topic :: Text Processing :: Markup"
+    ],
     url = "http://www.cheshire3.org/",
     download_url = 'http://www.cheshire3.org/download/{0}/src/{1}-{2}.tar.gz'.format(
     _version[:5], _name, _version)
