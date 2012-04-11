@@ -1,30 +1,22 @@
-"""SRU mod_python handler."""
- 
-from mod_python import apache
-from mod_python.util import FieldStorage
+"""SRU WSGI Application."""
+
+from cgi import FieldStorage
 
 from sruHandler import *
 
-class reqHandler(SRUProtocolHandler):
-
-    def send_xml(self, text, req, code=200):
-        req.content_type = 'text/xml'
-        req.content_length = len(text)
-        req.send_http_header()
-        req.write(text)
-
-    def dispatch(self, req):
-        path = req.uri.strip('/')
+class SRUWsgiHandler(SRUProtocolHandler):
+    """SRU Request Handling Class for WSGI."""
+    
+    def __call__(self, environ, start_response):
+        path = environ.get('PATH_INFO', '').strip('/')
+        out = [] 
         if not configs.has_key(path):
             # unknown endpoint
             # no specification
-            xml = ['<databases numberOfDatabases="%d">' % (len(configs))]
+            out.append('<databases numberOfDatabases="{0}">'.format(len(configs)))
             for k in sorted(configs.keys()):
-                xml.append("<database><path>%s</path></database>" % k)
-            xml.append('</databases>')
-            txt = ''.join(xml)
-            self.send_xml(txt, req)
-        
+                out.append("<database><path>{0}</path></database>".format(k))
+            out.append('</databases>')
         else:
             dbconf = configs[path]
             if isinstance(dbconf, tuple):
@@ -33,7 +25,6 @@ class reqHandler(SRUProtocolHandler):
                 config = db.get_object(session, dbconf[1]['http://www.loc.gov/zing/srw/'])
             else:
                 config = dbconf['http://www.loc.gov/zing/srw/']
-                
             # check db hasn't changed since instantiated
             db = config.parent
             fp = db.get_path(session, 'metadataPath')    # attempt to find filepath for db metadata
@@ -41,15 +32,18 @@ class reqHandler(SRUProtocolHandler):
                 # rediscover objects
                 dbid = db.id
                 del db
-                try: del serv.objects[dbid]
-                except KeyError: pass
-                try: del serv.databases[dbid]
-                except KeyError: pass
+                try:
+                    del serv.objects[dbid]
+                except KeyError:
+                    pass
+                try:
+                    del serv.databases[dbid]
+                except KeyError:
+                     pass
                 db = serv.get_object(session, dbid)
-                
-            session.path = "http://%s/%s" % (req.hostname, path)
+            session.path = "http://%s/%s" % (environ['HOSTNAME'], path)
             session.config = config
-            store = FieldStorage(req)
+            store = FieldStorage(fp=environ['wsgi.input'], environ=environ)
             opts = {}
             for qp in store.list:
                 if qp.value.isdigit():
@@ -91,22 +85,54 @@ class reqHandler(SRUProtocolHandler):
                     result.append(self.echoedQuery(opts))
                     self.extraData('response', opts, result)
                     session.currentResultSet = None
-
-            text = etree.tostring(result, pretty_print=True)
+            out.append('<?xml version="1.0"?>')
             if 'stylesheet' in opts:
-                text = u'<?xml version="1.0"?>\n<?xml-stylesheet type="text/xsl" href="%s"?>\n%s' % (opts['stylesheet'], text) 
-            else:
-                text = u'<?xml version="1.0"?>\n%s' % text
-
-            self.send_xml(text, req)
+                out.append('<?xml-stylesheet type="text/xsl" href="{0}"?>'.format(opts['stylesheet'])) 
+            out.append(etree.tostring(result, pretty_print=True))
             if len(serv.databaseConfigs) >=25:
                 # cleanup memory
-                try: del serv.objects[config.parent.id]
-                except KeyError: pass
-
+                try:
+                    del serv.objects[config.parent.id]
+                except KeyError:
+                    pass
+        response_headers = [('Content-Type', 'application/xml'),
+                            ('Content-Length', str(sum([len(d) for d in out])))]
+        start_response("200 OK", response_headers)
+        return out
         
-srwh = reqHandler()        
-def handler(req):
-    # do stuff
-    srwh.dispatch(req)
-    return apache.OK
+
+def environment_application(environ, start_response):
+    status = '200 OK'
+    output = ["{0}\n".format(i) for i in environ.iteritems()]
+    response_headers = [('Content-Type', 'text/plain'),
+                        ('Content-Length', str(sum([len(i) for i in output])))]
+    start_response(status, response_headers)
+    return output
+
+
+def main():
+    """Start up a simple app server to serve the SRU application."""
+    from wsgiref.simple_server import make_server
+    try:
+        host = sys.argv[1]
+    except IndexError:
+        try:
+            import socket
+            host = socket.gethostname()
+        except:
+            host = 'localhost'
+    try:
+        port = int(sys.argv[2])
+    except IndexError, ValueError:
+        port = 8000
+    httpd = make_server(host, port, application)
+    print """You will be able to access the application at:
+http://{0}:{1}""".format(host, port)
+    httpd.serve_forever()
+
+
+application = SRUWsgiHandler()    
+
+    
+if __name__ == "__main__":
+    sys.exit(main())
