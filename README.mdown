@@ -44,6 +44,12 @@ indexes after processing with configurable workflows to add extra
 normalization and processing. Once the indexes have been constructed, it 
 supports such operations as search, retrieve, browse and sort.
 
+The abstract protocolHandler allows integration of Cheshire3 into any 
+environment that will support Python. For example using Apache handlers or 
+WSGI applications, any interface from standard APIs like SRU, Z39.50 and OAI 
+(all included by default in the cheshire3.web sub-package), to an online shop 
+front can be provided. 
+
 
 Authors
 -------
