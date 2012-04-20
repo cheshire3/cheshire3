@@ -1,3 +1,5 @@
 # Don't track user specific web applications
+*
+# but include .gitignore for this dir
 !.gitignore
-*/
+
