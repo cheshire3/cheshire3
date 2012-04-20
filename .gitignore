@@ -24,5 +24,8 @@ develop-eggs
 .metadata
 .settings
 
+# PyZ3950 cruft
+PyZ3950_parsetab.*
+
 # O/S file buffers
 *~
