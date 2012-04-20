@@ -13,6 +13,7 @@ Contents
 - Requirements / Dependencies
     - Additional / Optional Features
 - Documentation
+    - Development
 - Bugs, Feature requests etc.
 - Licensing
 - Coding Examples
@@ -156,9 +157,30 @@ Documentation
 HTML Documentation is provided in the docs directory. There is additional 
 documentation for the source code in the form of comments and docstrings. 
 Documentation for most default object configurations can be found within 
-the &lt;docs&gt; tag in the config XML for each object. We would encourage 
+the `<docs>` tag in the config XML for each object. We would encourage 
 users to take advantage of this tag to provide documentation for their own 
 custom object configurations.
+
+
+### Development ###
+
+If you are intending to develop code to contribute back to Cheshire3, please 
+read this section.
+
+You should fork the repository, develop in your fork, then issue a pull 
+request.
+
+Devloped code for intended to be contributed back to Cheshire3 should follow 
+the recommendations made by the standard Style Guide for Python Code (which 
+includes the provision that the guidelines may be ignored in situations where 
+following them would make the code less readable):
+http://www.python.org/dev/peps/pep-0008/
+
+Particular attention should be paid to documentation and source code 
+annotation (comments). All developed modules, functions, classes, and methods 
+should be documented in the source code. Newly configured objects at the 
+server level should be documented using the `<docs>` tag.
+
 
 
 Bugs, Feature requests etc.
