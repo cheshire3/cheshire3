@@ -13,7 +13,7 @@ Contents
 - Requirements / Dependencies
     - Additional / Optional Features
 - Documentation
-    - Development
+- Development
 - Bugs, Feature requests etc.
 - Licensing
 - Coding Examples
@@ -110,6 +110,8 @@ http://docs.python.org/install/index.html#alternate-installation
 
 3. Run ```python setup.py develop```
 
+4. Read the Development section of this README
+
 
 Requirements / Dependencies
 ---------------------------
@@ -154,7 +156,8 @@ users to take advantage of this tag to provide documentation for their own
 custom object configurations.
 
 
-### Development ###
+Development
+-----------
 
 This section is intended for those who are intending to develop code to 
 contribute back to Cheshire3.
