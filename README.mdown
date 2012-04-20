@@ -203,7 +203,7 @@ the code itself.
   [1]: http://git-scm.com/ "Git"
   [2]: https://github.com/cheshire3/cheshire3 "Cheshire3 on github"
   [3]: http://nvie.com/posts/a-successful-git-branching-model/ "Vincent Driessen's branching model"
-  [4]: https://github.com/nvie/gitflow [git-flow]
+  [4]: https://github.com/nvie/gitflow "git-flow"
   [5]: http://www.python.org/dev/peps/pep-0008/ "PEP 8 -- Style Guide for Python Code"
 
 
