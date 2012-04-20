@@ -71,14 +71,6 @@ http://www.cheshire3.org/download/
 Source code is under version control and available from:
 http://github.com/cheshire3/cheshire3
 
-Development in the GitHub repository will follow (at least to begin with) 
-Vincent Driessen's branching model, and use git-flow to facilitate this. For 
-details of the model, see:
-http://nvie.com/posts/a-successful-git-branching-model/
-
-If you're developing Cheshire3, and intend to create releases, you may want to 
-install the package setuptools-git.
-
 Previously, source code was available from our own Subversion server:
 http://cvs.cheshire3.org/repos/cheshire3
 
@@ -164,23 +156,46 @@ custom object configurations.
 
 ### Development ###
 
-If you are intending to develop code to contribute back to Cheshire3, please 
-read this section.
+This section is intended for those who are intending to develop code to 
+contribute back to Cheshire3.
 
-You should fork the repository, develop in your fork, then issue a pull 
-request.
+The project will make use of a Distributed Version Control System (DVCS), 
+called [Git][1], for managing change within the Cheshire3 code base, 
+configurations and documentation. A repository will be maintained for 
+existing code, and any new developments, on [github][2].
 
-Devloped code for intended to be contributed back to Cheshire3 should follow 
-the recommendations made by the standard Style Guide for Python Code (which 
-includes the provision that the guidelines may be ignored in situations where 
-following them would make the code less readable):
-http://www.python.org/dev/peps/pep-0008/
+Development in the GitHub repository will follow (at least to begin with) 
+[Vincent Driessen's branching model][3], and use [git-flow][4] to facilitate 
+this.
+
+So your workflow should be something like:
+ 1. Fork the GitHub repository
+ 2. Clone your forked repository onto you local development machine
+ 3. Develop in the `develop` branch (or develop in you own `feature` branch 
+    and merge back into the `develop` branch.)
+ 4. Push your changes back to you github fork
+ 5. Issue a pull request
+
+If you're developing Cheshire3, and intend to create your own releases, you 
+may find it useful to install the package setuptools-git.
+
+Developed code for intended to be contributed back to Cheshire3 should follow 
+the recommendations made by the standard [Style Guide for Python Code][5] 
+(which includes the provision that guidelines may be ignored in situations 
+where following them would make the code less readable.)
 
 Particular attention should be paid to documentation and source code 
 annotation (comments). All developed modules, functions, classes, and methods 
 should be documented in the source code. Newly configured objects at the 
-server level should be documented using the `<docs>` tag.
+server level should be documented using the `<docs>` tag. Comments and 
+Documentation should be accurate and up-to-date, and should *never* contradict 
+the code itself.
 
+  [1]: http://git-scm.com/ "Git"
+  [2]: https://github.com/cheshire3/cheshire3 "Cheshire3 on github"
+  [3]: http://nvie.com/posts/a-successful-git-branching-model/ "Vincent Driessen's branching model"
+  [4]: https://github.com/nvie/gitflow [git-flow]
+  [5]: http://www.python.org/dev/peps/pep-0008/ "PEP 8 -- Style Guide for Python Code"
 
 
 Bugs, Feature requests etc.
