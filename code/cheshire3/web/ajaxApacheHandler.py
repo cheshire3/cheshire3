@@ -12,7 +12,7 @@ from cheshire3.internal import storeTypes, collTypes, processTypes, Architecture
 
 session = Session()
 session.environment = "apache"
-serv = SimpleServer(session, os.path.join(cheshire3Root, 'configs', 'serverConfig.xml'))
+serv = SimpleServer(session, os.path.join(cheshire3Root , 'configs', 'serverConfig.xml'))
 
 lastRefresh = time.time()
 arch = Architecture()
