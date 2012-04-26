@@ -12,6 +12,7 @@ import cStringIO as StringIO
 from cheshire3.server import SimpleServer
 # from cheshire3.utils import reader
 from cheshire3.baseObjects import Session
+from cheshire3.internal import cheshire3Root
 
 # Apache Config:
 #<Directory /usr/local/apache2/htdocs/srw>
@@ -23,11 +24,9 @@ from cheshire3.baseObjects import Session
 
 # NB. SetHandler, not AddHandler.
 
-cheshirePath = os.environ.get('C3HOME', '/home/cheshire')
-
 session = Session()
 session.environment = "apache"
-serv = SimpleServer(session, os.path.join(cheshirePath, 'cheshire3', 'configs', 'serverConfig.xml'))
+serv = SimpleServer(session, os.path.join(cheshire3Root, 'configs', 'serverConfig.xml'))
 
 configs = {}
 serv._cacheDatabases(session)

@@ -7,18 +7,15 @@ import re
 from lxml import etree
 from lxml.builder import ElementMaker
 
-cheshirePath = os.environ.get('C3HOME', '/home/cheshire')
-sys.path.insert(1, os.path.join(cheshirePath, 'cheshire3', 'code'))
-
 from cheshire3.baseObjects import Session
 from cheshire3.server import SimpleServer
 from cheshire3 import cqlParser
-from cheshire3 import internal
+from cheshire3.internal import cheshire3Version, cheshire3Root
 from cheshire3 import exceptions as c3errors
 
 session = Session()
 session.environment = "apache"
-serv = SimpleServer(session, os.path.join(cheshirePath, 'cheshire3', 'configs', 'serverConfig.xml'))
+serv = SimpleServer(session, os.path.join(cheshire3Root, 'configs', 'serverConfig.xml'))
 
 # find configs for databases permitted to be served by SRU
 configs = {}
@@ -227,7 +224,7 @@ class SRUProtocolHandler(object):
                 <agents>
                 <agent type="vendor">The University of Liverpool</agent>
                 </agents>
-                </implementation>''' % internal.cheshire3Version)
+                </implementation>''' % cheshire3Version)
                 dbNode.append(impNode)
 
             if db.totalItems:

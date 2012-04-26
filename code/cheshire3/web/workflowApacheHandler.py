@@ -44,12 +44,11 @@ from cheshire3 import document
 from cheshire3.workflow import SimpleWorkflow, CachingWorkflow
 from cheshire3 import dynamic
 from cheshire3.exceptions import *
-
-cheshirePath = os.environ.get('C3HOME', '/home/cheshire')
+from cheshire3.internal import cheshire3Root
 
 session = Session()
 session.environment = "apache"
-serv = SimpleServer(session, os.path.join(cheshirePath, 'cheshire3', 'configs', 'serverConfig.xml'))
+serv = SimpleServer(session, os.path.join(cheshire3Root, 'configs', 'serverConfig.xml'))
 mdp = serv.get_object(session, 'defaultParser')
 
 configs = {}

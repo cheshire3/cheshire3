@@ -8,13 +8,11 @@ from StringIO import StringIO
 from cheshire3.server import SimpleServer
 from cheshire3.baseObjects import Session
 from cheshire3.document import StringDocument
-from cheshire3.internal import storeTypes, collTypes, processTypes, Architecture
-
-cheshirePath = os.environ.get('C3HOME', '/home/cheshire')
+from cheshire3.internal import storeTypes, collTypes, processTypes, Architecture, cheshire3Root
 
 session = Session()
 session.environment = "apache"
-serv = SimpleServer(session, os.path.join(cheshirePath, 'cheshire3', 'configs', 'serverConfig.xml'))
+serv = SimpleServer(session, os.path.join(cheshire3Root, 'configs', 'serverConfig.xml'))
 
 lastRefresh = time.time()
 arch = Architecture()

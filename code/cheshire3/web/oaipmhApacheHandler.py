@@ -23,7 +23,7 @@ from cheshire3.resultSet import SimpleResultSet
 from cheshire3.document import StringDocument
 from cheshire3.exceptions import *
 from cheshire3.cqlParser import parse as cqlparse
-
+from cheshire3.internal import cheshire3Root
 from cheshire3.web.oai_utils import *
 
 from PyZ3950 import SRWDiagnostics
@@ -36,8 +36,6 @@ from oaipmh.metadata import  MetadataRegistry as OaiMetadataRegistry, global_met
 from oaipmh.error import *
 
 # Cheshire3 architecture
-cheshirePath = os.environ.get('C3HOME', '/home/cheshire')
-
 session = Session()
 
 try:
@@ -48,7 +46,7 @@ except ImportError:
 else:
     session.environment = "apache"
     
-serv = SimpleServer(session, os.path.join(cheshirePath, 'cheshire3', 'configs', 'serverConfig.xml'))
+serv = SimpleServer(session, os.path.join(cheshire3Root, 'configs', 'serverConfig.xml'))
 lxmlParser = serv.get_object(session, 'LxmlParser')
 
 configs = {}

@@ -29,11 +29,9 @@ from cheshire3.server import SimpleServer
 from cheshire3 import internal
 from cheshire3 import cqlParser
 
-cheshirePath = os.environ.get('C3HOME', '/home/cheshire')
-
 session = Session()
 session.environment = "apache"
-server = SimpleServer(session, os.path.join(cheshirePath, 'cheshire3', 'configs', 'serverConfig.xml'))
+server = SimpleServer(session, os.path.join(internal.cheshire3Root, 'configs', 'serverConfig.xml'))
 configs = {}
 dbmap = {}
 server._cacheDatabases(session)
