@@ -65,7 +65,7 @@ setup(
         'sql': ['PyGreSQL >= 3.8.1'],
         'web': ['PyZ3950 >= 2.04']
     },
-    test_suite = "cheshire3.test",
+    test_suite = "cheshire3.test.testAll",
     keywords = u"xml document search information retrieval engine data text",
     description = u'Cheshire3 Search and Retrieval Engine and Information Framework',
     long_description = _long_description,
