@@ -66,25 +66,28 @@ class Cheshire3ServerConfigsTestCase(Cheshire3TestCase):
         return test
 
 
-def load_tests(loader, tests, pattern):
-    # Create a suite with default tests
-    suite = loader.loadTestsFromTestCase(Cheshire3ServerConfigsTestCase)
-    # Create an instance of Cheshire3ServerTestCase from which to dynamically 
-    # generate test methods
-    tc = Cheshire3ServerConfigsTestCase('test_sessionInstance')
-    # Set it up
-    tc.setUp()
-    # Iterate through all configured object adding a test for each
-    for k in tc.server.subConfigs.iterkeys():
-        test_name = "test_get_object_{0}".format(k)
-        test_method = tc.generate_get_object_test(k)
-        setattr(Cheshire3ServerConfigsTestCase, test_name, test_method)
-        suite.addTest(Cheshire3ServerConfigsTestCase(test_name))
-    tc.tearDown()
-    # Return the complete test suite
-    return suite
-
+#def load_tests(loader, tests, pattern):
+#    # Create a suite with default tests
+#    suite = loader.loadTestsFromTestCase(Cheshire3ServerConfigsTestCase)
+#    # Create an instance of Cheshire3ServerTestCase from which to dynamically 
+#    # generate test methods
+#    tc = Cheshire3ServerConfigsTestCase('test_sessionInstance')
+#    # Set it up
+#    tc.setUp()
+#    # Iterate through all configured object adding a test for each
+#    for k in tc.server.subConfigs.iterkeys():
+#        test_name = "test_get_object_{0}".format(k)
+#        test_method = tc.generate_get_object_test(k)
+#        setattr(Cheshire3ServerConfigsTestCase, test_name, test_method)
+#        suite.addTest(Cheshire3ServerConfigsTestCase(test_name))
+#    tc.tearDown()
+#    # Return the complete test suite
+#    return suite
+#
+#
+#if __name__ == '__main__':
+#    tr = unittest.TextTestRunner(verbosity=2)
+#    tr.run(load_tests(unittest.defaultTestLoader, [], 'test*.py'))
 
 if __name__ == '__main__':
-    tr = unittest.TextTestRunner(verbosity=2)
-    tr.run(load_tests(unittest.defaultTestLoader, [], 'test*.py'))
+    unittest.main()
