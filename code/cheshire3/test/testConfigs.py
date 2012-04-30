@@ -1,4 +1,4 @@
-u"""Unittests for Cheshire3 Server."""
+u"""Unittests for Cheshire3 Server Configs."""
 
 import os
 import re
@@ -16,7 +16,7 @@ from cheshire3.exceptions import ObjectDoesNotExistException
 from cheshire3.test.testConfigParser import Cheshire3TestCase
 
 
-class Cheshire3ServerTestCase(Cheshire3TestCase):
+class Cheshire3ServerConfigsTestCase(Cheshire3TestCase):
     
     def setUp(self):
         Cheshire3TestCase.setUp(self)
@@ -68,17 +68,19 @@ class Cheshire3ServerTestCase(Cheshire3TestCase):
 
 def load_tests(loader, tests, pattern):
     # Create a suite with default tests
-    suite = loader.loadTestsFromTestCase(Cheshire3ServerTestCase)
-    # Create an instance of Cheshire3ServerTestCase
-    tc = Cheshire3ServerTestCase('test_sessionInstance')
+    suite = loader.loadTestsFromTestCase(Cheshire3ServerConfigsTestCase)
+    # Create an instance of Cheshire3ServerTestCase from which to dynamically 
+    # generate test methods
+    tc = Cheshire3ServerConfigsTestCase('test_sessionInstance')
     # Set it up
     tc.setUp()
     # Iterate through all configured object adding a test for each
     for k in tc.server.subConfigs.iterkeys():
         test_name = "test_get_object_{0}".format(k)
         test_method = tc.generate_get_object_test(k)
-        setattr(Cheshire3ServerTestCase, test_name, test_method)
-        suite.addTest(Cheshire3ServerTestCase(test_name))
+        setattr(Cheshire3ServerConfigsTestCase, test_name, test_method)
+        suite.addTest(Cheshire3ServerConfigsTestCase(test_name))
+    tc.tearDown()
     # Return the complete test suite
     return suite
 
