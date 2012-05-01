@@ -96,8 +96,10 @@ class CmdLinePreParser(TypedPreParser):
         if not stdIn:
             if doc.mimeType or doc.filename:
                 # guess our extn~n                
-                try: suff = mimetypes.guess_extension(doc.mimeType)
-                except: suff = ''
+                try:
+                    suff = mimetypes.guess_extension(doc.mimeType)
+                except:
+                    suff = ''
                 if not suff:
                     suff = mimetypes.guess_extension(doc.filename)
                     if not suff:
@@ -165,8 +167,10 @@ class CmdLinePreParser(TypedPreParser):
                         fh.close()
                 finally:
                     os.remove(outfn)
-                    try: os.remove(fh.name) # clean up when data was written somewhere other than outfn
-                    except OSError: pass
+                    try:
+                        os.remove(fh.name) # clean up when data was written somewhere other than outfn
+                    except OSError:
+                        pass
 
         if old:
             os.chdir(old)

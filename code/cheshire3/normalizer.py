@@ -57,10 +57,12 @@ class SimpleNormalizer(Normalizer):
                         kw[txt]['occurences'] += nv['occurences']
                         try:
                             kw[txt]['positions'].extend(nv['positions'])
-                        except: pass
+                        except:
+                            pass
                         try:
                             kw[txt]['proxLoc'].extend(nv['proxLoc'])
-                        except: pass
+                        except:
+                            pass
                     else:
                         kw[txt] = nv
             else:
@@ -69,21 +71,24 @@ class SimpleNormalizer(Normalizer):
                         kw[new]['occurences'] += d['occurences']
                         try:
                             kw[new]['positions'].extend(d['positions'])
-                        except: pass
+                        except:
+                            pass
                         try:
                             kw[new]['proxLoc'].extend(d['proxLoc'])
-                        except: pass
+                        except:
+                            pass
                     except KeyError:
                         d = d.copy()
                         try:
                             d['positions'] = d['positions'][:]
-                        except: pass
+                        except:
+                            pass
                         try:
                             d['proxLoc'] = d['proxLoc'][:]
-                        except: pass
+                        except:
+                            pass
                         d['text'] = new
                         kw[new] = d
-                        
         return kw
 
 
@@ -120,6 +125,7 @@ class TermExistsNormalizer(SimpleNormalizer):
             return "0"
 
     def process_hash(self, session, data):
+        kw = {}
         vals = data.values()
         if not vals:
             return kw
@@ -344,7 +350,8 @@ class FileAssistedNormalizer(SimpleNormalizer):
             dfp = self.get_path(session, "defaultPath")
             fp = os.path.join(dfp, fp)
             
-        try: fh = open(fp, 'r')
+        try:
+            fh = open(fp, 'r')
         except IOError as e:
             raise ConfigFileException("{0} for object with id '{1}'.".format(str(e), self.id))
             
@@ -393,8 +400,10 @@ class TokenExpansionNormalizer(FileAssistedNormalizer):
             self.expansions[bits[0]] = bits[1:]
     
     def process_string(self, session, data):
-        try: return ' '.join(self.expansions[data])
-        except KeyError: return data 
+        try:
+            return ' '.join(self.expansions[data])
+        except KeyError:
+            return data 
 
     def process_hash(self, session, data):
         kw = {}

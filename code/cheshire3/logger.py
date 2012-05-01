@@ -173,8 +173,10 @@ class DateTimeFileLogger(SimpleLogger):
             dtb = time.strftime(self.dateTimeFormats[dtlvl], self.lastLogTime)
             fnbits.append(dtb)
         if self.createSubDirs:
-            try: os.makedirs(os.path.join(*fnbits[:-1])) # create necessary directory structure
-            except OSError: pass
+            try:
+                os.makedirs(os.path.join(*fnbits[:-1])) # create necessary directory structure
+            except OSError:
+                pass
             fn = os.path.join(*fnbits) 
         else:
             fn = '-'.join(fnbits)

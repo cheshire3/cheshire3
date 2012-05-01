@@ -1129,39 +1129,53 @@ class BdbIndexStore(IndexStore):
 
         name = self._generateFilename(index)
         fullname = os.path.join(dfp, name)
-        try: self._create(session, fullname, vectorType=0)
-        except FileAlreadyExistsException: pass
+        try:
+            self._create(session, fullname, vectorType=0)
+        except FileAlreadyExistsException:
+            pass
         
         if (index.get_setting(session, "sortStore")):
-            try: self._create(session, fullname + "_VALUES")
-            except FileAlreadyExistsException: pass
+            try:
+                self._create(session, fullname + "_VALUES")
+            except FileAlreadyExistsException:
+                pass
             
         vecs = index.get_setting(session, "vectors")
         tids = index.get_setting(session, "termIds")
         if vecs or tids:
-            try: self._create(session, fullname + "_TERMIDS", flags=[bdb.db.DB_RECNUM])
-            except FileAlreadyExistsException: pass
+            try:
+                self._create(session, fullname + "_TERMIDS", flags=[bdb.db.DB_RECNUM])
+            except FileAlreadyExistsException:
+                pass
 
         if vecs:
             try:
-                try: self._create(session, fullname + "_VECTORS", flags=[bdb.db.DB_RECNUM])
-                except FileAlreadyExistsException: pass
+                try:
+                    self._create(session, fullname + "_VECTORS", flags=[bdb.db.DB_RECNUM])
+                except FileAlreadyExistsException:
+                    pass
 
                 if index.get_setting(session, 'proxVectors'):
-                    try: self._create(session, fullname + "_PROXVECTORS", flags=[bdb.db.DB_RECNUM])
-                    except FileAlreadyExistsException: pass
+                    try:
+                        self._create(session, fullname + "_PROXVECTORS", flags=[bdb.db.DB_RECNUM])
+                    except FileAlreadyExistsException:
+                        pass
 
             except:
                 raise(ValueError)
         fl = index.get_setting(session, "freqList", "") 
         if fl:
             if fl.find('rec') > -1: 
-                try: self._create(session, fullname + "_FREQ_REC", flags=[bdb.db.DB_RECNUM])
-                except FileAlreadyExistsException: pass
+                try:
+                    self._create(session, fullname + "_FREQ_REC", flags=[bdb.db.DB_RECNUM])
+                except FileAlreadyExistsException:
+                    pass
 
             if fl.find('occ') > -1:
-                try: self._create(session, fullname + "_FREQ_OCC", flags=[bdb.db.DB_RECNUM])
-                except FileAlreadyExistsException: pass
+                try:
+                    self._create(session, fullname + "_FREQ_OCC", flags=[bdb.db.DB_RECNUM])
+                except FileAlreadyExistsException:
+                    pass
 
         return 1
 
