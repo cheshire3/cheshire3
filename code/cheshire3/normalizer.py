@@ -393,7 +393,7 @@ class TokenExpansionNormalizer(FileAssistedNormalizer):
             self.expansions[bits[0]] = bits[1:]
     
     def process_string(self, session, data):
-        try: return ' '.join(expansions[data])
+        try: return ' '.join(self.expansions[data])
         except KeyError: return data 
 
     def process_hash(self, session, data):
