@@ -41,10 +41,14 @@ class reqHandler(SRUProtocolHandler):
                 # rediscover objects
                 dbid = db.id
                 del db
-                try: del serv.objects[dbid]
-                except KeyError: pass
-                try: del serv.databases[dbid]
-                except KeyError: pass
+                try:
+                    del serv.objects[dbid]
+                except KeyError:
+                    pass
+                try:
+                    del serv.databases[dbid]
+                except KeyError:
+                    pass
                 db = serv.get_object(session, dbid)
                 
             session.path = "http://%s/%s" % (req.hostname, path)
@@ -101,8 +105,10 @@ class reqHandler(SRUProtocolHandler):
             self.send_xml(text, req)
             if len(serv.databaseConfigs) >=25:
                 # cleanup memory
-                try: del serv.objects[config.parent.id]
-                except KeyError: pass
+                try:
+                    del serv.objects[config.parent.id]
+                except KeyError:
+                    pass
 
         
 srwh = reqHandler()        

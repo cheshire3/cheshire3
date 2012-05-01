@@ -192,8 +192,10 @@ class reqHandler:
         session.database = db.id
         returnstuff = self.handle_workflowRequest(config, req)
         # if a document is return, we probably want to return the contents rather than the object
-        try: returnstuff = returnstuff.get_raw(session)
-        except: pass
+        try:
+            returnstuff = returnstuff.get_raw(session)
+        except:
+            pass
         
         time.sleep(1);
         req.write('COMPLETE : %s\n' % (returnstuff))
