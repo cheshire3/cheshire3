@@ -23,9 +23,6 @@ class Cheshire3TestCase(unittest.TestCase):
     def tearDown(self):
         pass
         
-    def test_sessionInstance(self):
-        self.assertIsInstance(self.session, Session)
-
 
 class CaselessDictionaryTestCase(unittest.TestCase):
     
