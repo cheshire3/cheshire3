@@ -1,5 +1,7 @@
 u"""Abstract Base Class for Cheshire3 Object Unittests."""
 
+import os
+
 try:
     import unittest2 as unittest
 except ImportError:
@@ -9,19 +11,30 @@ import string
 
 from cheshire3.baseObjects import Session
 from cheshire3.configParser import CaselessDictionary
+from cheshire3.internal import cheshire3Root
+from cheshire3.server import SimpleServer
 
 
-class Cheshire3TestCase(unittest.TestCase):
+class Cheshire3ObjectTestCase(unittest.TestCase):
     u"""Abstract Base Class for Cheshire3 Test Cases.   
         
-    Almost all objects in Cheshire3 require a Session, so create one.
+    Almost all objects in Cheshire3 require a Session, and a server as its 
+    parent, so create these now.
     """
     
     def setUp(self):
         self.session = Session()
+        serverConfig = os.path.join(cheshire3Root, 'configs', 'serverConfig.xml')
+        self.server = SimpleServer(self.session, serverConfig)
+        # Disable stdout logging
+        lgr = self.server.get_path(self.session, 'defaultLogger')
+        lgr.minLevel = 60
     
     def tearDown(self):
         pass
+    
+    def test_serverInstance(self):
+        self.assertIsInstance(self.server, SimpleServer)
         
 
 class CaselessDictionaryTestCase(unittest.TestCase):

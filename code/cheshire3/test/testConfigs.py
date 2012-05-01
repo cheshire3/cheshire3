@@ -9,22 +9,14 @@ except ImportError:
     import unittest
 
 from cheshire3.configParser import C3Object
-from cheshire3.internal import cheshire3Root
-from cheshire3.server import SimpleServer
 from cheshire3.exceptions import ObjectDoesNotExistException
+from cheshire3.test.testConfigParser import Cheshire3ObjectTestCase
 
-from cheshire3.test.testConfigParser import Cheshire3TestCase
 
-
-class Cheshire3ServerConfigsTestCase(Cheshire3TestCase):
+class Cheshire3ServerConfigsTestCase(Cheshire3ObjectTestCase):
     
     def setUp(self):
-        Cheshire3TestCase.setUp(self)
-        serverConfig = os.path.join(cheshire3Root, 'configs', 'serverConfig.xml')
-        self.server = SimpleServer(self.session, serverConfig)
-        # Disable stdout logging
-        lgr = self.server.get_path(self.session, 'defaultLogger')
-        lgr.minLevel = 60
+        Cheshire3ObjectTestCase.setUp(self)
         # Compile a regex for acceptable missing imports (i.e. optional features)
         self.importRegex = re.compile("""No\ module\ named\ (?:
             svm     # Support Vector Machine (datamining)
@@ -35,9 +27,6 @@ class Cheshire3ServerConfigsTestCase(Cheshire3TestCase):
     def tearDown(self):
         # Nothing to do as yet...
         pass
-    
-    def test_serverInstance(self):
-        self.assertIsInstance(self.server, SimpleServer)
     
     def test_ObjectDoesNotExistException(self):
         self.assertRaises(ObjectDoesNotExistException, 
