@@ -155,8 +155,8 @@ class TermExistsNormalizerTestCase(SimpleNormalizerTestCase):
     def test_process_hash(self):
         if not self.process_hash_tests:
             self.skipTest("No test data defined")
-        for input, expected in self.process_hash_tests:
-            output = self.testObj.process_hash(self.session, input)
+        for inhash, expected in self.process_hash_tests:
+            output = self.testObj.process_hash(self.session, inhash)
             self.assertEqual(output, expected)
             
     def test_instance(self):
