@@ -12,7 +12,8 @@ import string
 from lxml import etree
 
 from cheshire3.normalizer import Normalizer, SimpleNormalizer, \
-    DataExistsNormalizer, TermExistsNormalizer, CaseNormalizer
+    DataExistsNormalizer, TermExistsNormalizer, CaseNormalizer, \
+    ReverseNormalizer
 from cheshire3.test.testConfigParser import Cheshire3ObjectTestCase
 
 
@@ -223,12 +224,34 @@ class CaseNormalizerTestCase(SimpleNormalizerTestCase):
         self.assertIsInstance(self.testObj, CaseNormalizer)
 
 
+class ReverseNormalizerTestCase(NormalizerTestCase):
+    
+    def _get_config(self):
+        return etree.XML('''\
+<subConfig type="normalizer" id="DataExistsNormalizer">
+    <objectType>cheshire3.normalizer.ReverseNormalizer</objectType>
+</subConfig>
+''')
+        
+    def _get_process_string_tests(self):
+        return[
+            ("foo", "oof"),
+            ("Hello World!", "!dlroW olleH"),
+            ("madam", "madam"),
+            ("A", "A")
+        ]
+        
+    def test_instance(self):
+        self.assertIsInstance(self.testObj, ReverseNormalizer)
+
+
 def load_tests(loader, tests, pattern):
     suite = loader.loadTestsFromTestCase(SimpleNormalizerTestCase)
     suite.addTests(loader.loadTestsFromTestCase(DataExistsNormalizerTestCase))
     suite.addTests(loader.loadTestsFromTestCase(TermExistsNormalizerTestCase))
     suite.addTests(loader.loadTestsFromTestCase(TermExistsNormalizerFreqTestCase))
     suite.addTests(loader.loadTestsFromTestCase(CaseNormalizerTestCase))
+    suite.addTests(loader.loadTestsFromTestCase(ReverseNormalizerTestCase))
     return suite
 
 
