@@ -11,6 +11,7 @@ import string
 
 from cheshire3.baseObjects import Session
 from cheshire3.configParser import CaselessDictionary
+from cheshire3.dynamic import makeObjectFromDom
 from cheshire3.internal import cheshire3Root
 from cheshire3.server import SimpleServer
 
@@ -22,6 +23,10 @@ class Cheshire3ObjectTestCase(unittest.TestCase):
     parent, so create these now.
     """
     
+    def _get_config(self):
+        # Return a parsed config for the object to be tested
+        raise NotImplementedError
+    
     def setUp(self):
         self.session = Session()
         serverConfig = os.path.join(cheshire3Root, 'configs', 'serverConfig.xml')
@@ -29,6 +34,9 @@ class Cheshire3ObjectTestCase(unittest.TestCase):
         # Disable stdout logging
         lgr = self.server.get_path(self.session, 'defaultLogger')
         lgr.minLevel = 60
+        # Create object that will be tested
+        config = self._get_config()
+        self.testObj = makeObjectFromDom(self.session, config, None)
     
     def tearDown(self):
         pass

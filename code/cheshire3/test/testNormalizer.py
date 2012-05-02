@@ -11,32 +11,66 @@ import string
 
 from lxml import etree
 
-from cheshire3.dynamic import makeObjectFromDom
+from cheshire3.normalizer import Normalizer, SimpleNormalizer, \
+    DataExistsNormalizer, TermExistsNormalizer, CaseNormalizer
 from cheshire3.test.testConfigParser import Cheshire3ObjectTestCase
 
 
-class SimpleNormalizerTestCase(Cheshire3ObjectTestCase):
-    u"""Base Class for Cheshire3 Normalizer Test Cases.
+class NormalizerTestCase(Cheshire3ObjectTestCase):
+    """Base Class for Cheshire3 Normalizer Test Cases.."""
     
-    Also includes tests for SimpleNormalizer base class that should not change
-    the data in any way. 
+    def _get_process_string_tests(self):
+        # Return a list of 2-string tuples containing test pairs:
+        # (string to be normalized, expected result)
+        return []
+    
+    def _get_process_hash_tests(self):
+        # Return a list of 2-dictionary tuples containing test pairs:
+        # (dictionary to be normalized, expected result)
+        return []
+        
+    def setUp(self):
+        Cheshire3ObjectTestCase.setUp(self)
+        self.process_string_tests = self._get_process_string_tests()
+        self.process_hash_tests = self._get_process_hash_tests()
+        
+    def tearDown(self):
+        pass
+        
+    def test_instance(self):
+        self.assertIsInstance(self.testObj, Normalizer)
+
+    def test_process_string(self):
+        for instring, expected in self.process_string_tests:
+            output = self.testObj.process_string(self.session, instring) 
+            self.assertEqual(output, expected)
+    
+    def test_process_hash(self):
+        for inhash, expected in self.process_hash_tests:
+            output = self.testObj.process_hash(self.session, inhash)
+            self.assertDictEqual(output, expected)
+    
+
+class SimpleNormalizerTestCase(NormalizerTestCase):
+    u"""Test Case for SimpleNormalizer (base class for Normalizers that should
+    not change the data in any way). 
     """
 
-    def _init_config(self):    
-        self.config = etree.XML('''\
+    def _get_config(self):    
+        return etree.XML('''\
 <subConfig type="normalizer" id="SimpleNormalizer">
   <objectType>cheshire3.normalizer.SimpleNormalizer</objectType>
 </subConfig>
 ''')
     
-    def _init_tests(self):
-        # Initialize equality tests for process_string
-        self.process_string_test_pairs = [
+    def _get_process_string_tests(self):
+        return [
             (string.uppercase, string.uppercase),
             (string.lowercase, string.lowercase),
             (string.punctuation, string.punctuation)]
-        # Initialize dictionary equality tests for process_hash
-        self.process_hash_test_pairs = [
+        
+    def _get_process_hash_tests(self):
+        return [
             ({'foo': {'text': 'foo', 
                       'occurences': 1, 
                       'positions': [0, 0, 0], 
@@ -49,56 +83,45 @@ class SimpleNormalizerTestCase(Cheshire3ObjectTestCase):
                       'proxLoc': [-1]
                       }
               })]
-    
-    def setUp(self):
-        Cheshire3ObjectTestCase.setUp(self)
-        self._init_config()
-        self.normalizer = makeObjectFromDom(self.session, self.config, None)
-        self._init_tests()
-
-    def tearDown(self):
-        pass
-
-    def test_process_string(self):
-        for input, expected in self.process_string_test_pairs:
-            output = self.normalizer.process_string(self.session, input) 
-            self.assertEqual(output, expected)
         
-    def test_process_hash(self):
-        for input, expected in self.process_hash_test_pairs:
-            output = self.normalizer.process_hash(self.session, input)
-            self.assertDictEqual(output, expected)
-
+    def test_instance(self):
+        self.assertIsInstance(self.testObj, SimpleNormalizer)
+    
 
 class DataExistsNormalizerTestCase(SimpleNormalizerTestCase):
     
-    def _init_config(self):
-        self.config = etree.XML('''\
+    def _get_config(self):
+        return etree.XML('''\
 <subConfig type="normalizer" id="DataExistsNormalizer">
     <objectType>cheshire3.normalizer.DataExistsNormalizer</objectType>
 </subConfig>
 ''')
     
-    def _init_tests(self):
-        # Initialize equality tests for process_string
-        self.process_string_test_pairs = [
+    def _get_process_string_tests(self):
+        return [
             (string.uppercase, "1"),
             (string.lowercase, "1"),
             (string.punctuation, "1"),
             ("", "0")]
-        # Initialize dictionary equality tests for process_hash
-        self.process_hash_test_pairs = [({"foo": {"text": "foo", "occurences": 1},
-                                          "bar": {"text": "bar", "occurences": 2},
-                                         "": {"text": "", "occurences": 10}},
-                                         {"1": {"text": "1", "occurences": 3},
-                                         "0": {"text": "0", "occurences": 10}})
-                                        ]
+        
+    def _get_process_hash_tests(self):
+        return [
+            ({"foo": {"text": "foo", "occurences": 1},
+              "bar": {"text": "bar", "occurences": 2},
+              "": {"text": "", "occurences": 10}
+             },
+             {"1": {"text": "1", "occurences": 3},
+              "0": {"text": "0", "occurences": 10}
+              })]
+        
+    def test_instance(self):
+        self.assertIsInstance(self.testObj, DataExistsNormalizer)
         
         
 class TermExistsNormalizerTestCase(SimpleNormalizerTestCase):
     
-    def _init_config(self):
-        self.config = etree.XML('''\
+    def _get_config(self):
+        return etree.XML('''\
 <subConfig type="normalizer" id="DataExistsNormalizer">
     <objectType>cheshire3.normalizer.TermExistsNormalizer</objectType>
     <options>
@@ -107,15 +130,15 @@ class TermExistsNormalizerTestCase(SimpleNormalizerTestCase):
 </subConfig>
 ''')
         
-    def _init_tests(self):
-        # Initialize equality tests for process_string
-        self.process_string_test_pairs = [
+    def _get_process_string_tests(self):
+        return[
             ('foo', "1"),
             ('bar', "1"),
             ('baz', "0")
         ]
-        # Initialize dictionary equality tests for process_hash
-        self.process_hash_test_pairs = [
+        
+    def _get_process_hash_tests(self):
+        return [
             ({
                 "foo": {"text": "foo", "occurences": 1},
                 "bar": {"text": "bar", "occurences": 2},
@@ -125,15 +148,18 @@ class TermExistsNormalizerTestCase(SimpleNormalizerTestCase):
         ]
 
     def test_process_hash(self):
-        for input, expected in self.process_hash_test_pairs:
-            output = self.normalizer.process_hash(self.session, input)
+        for input, expected in self.process_hash_tests:
+            output = self.testObj.process_hash(self.session, input)
             self.assertEqual(output, expected)
+            
+    def test_instance(self):
+        self.assertIsInstance(self.testObj, TermExistsNormalizer)
         
         
 class TermExistsNormalizerFreqTestCase(TermExistsNormalizerTestCase):
     
-    def _init_config(self):
-        self.config = etree.XML('''\
+    def _get_config(self):
+        return etree.XML('''\
 <subConfig type="normalizer" id="DataExistsNormalizer">
     <objectType>cheshire3.normalizer.TermExistsNormalizer</objectType>
     <options>
@@ -142,15 +168,15 @@ class TermExistsNormalizerFreqTestCase(TermExistsNormalizerTestCase):
     </options>
 </subConfig>
 ''')
-        
-    def _init_tests(self):
-        # Initialize equality tests for process_string
-        self.process_string_test_pairs = [
+    
+    def _get_process_string_tests(self):
+        return [
             ('foo', "1"),
             ('bar', "1"),
             ('baz', "0")]
-        # Initialize dictionary equality tests for process_hash
-        self.process_hash_test_pairs = [
+        
+    def _get_process_hash_tests(self):
+        return[
             ({
                 "foo": {"text": "foo", "occurences": 1},
                 "bar": {"text": "bar", "occurences": 2},
@@ -158,27 +184,27 @@ class TermExistsNormalizerFreqTestCase(TermExistsNormalizerTestCase):
              },
              "3")
         ]
-
+        
 
 class CaseNormalizerTestCase(SimpleNormalizerTestCase):
     
-    def _init_config(self):
-        self.config = etree.XML('''\
+    def _get_config(self):
+        return etree.XML('''\
 <subConfig type="normalizer" id="DataExistsNormalizer">
     <objectType>cheshire3.normalizer.CaseNormalizer</objectType>
 </subConfig>
 ''')
     
-    def _init_tests(self):
-        # Initialize equality tests for process_string
-        self.process_string_test_pairs = [
+    def _get_process_string_tests(self):
+        return [
             ("FooBar", "foobar"),
             (string.uppercase, string.lowercase),
             (string.lowercase, string.lowercase),
             (string.punctuation, string.punctuation)
         ]
-        # Initialize dictionary equality tests for process_hash
-        self.process_hash_test_pairs = [
+        
+    def _get_process_hash_tests(self):
+        return [
             ({
                 "foo": {"text": "foo", "occurences": 1},
                 "Foo": {"text": "Foo", "occurences": 1},
@@ -192,6 +218,9 @@ class CaseNormalizerTestCase(SimpleNormalizerTestCase):
                 "baz": {"text": "baz", "occurences": 10}
              })
         ]
+    
+    def test_instance(self):
+        self.assertIsInstance(self.testObj, CaseNormalizer)
 
 
 def load_tests(loader, tests, pattern):
