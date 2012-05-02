@@ -42,11 +42,15 @@ class NormalizerTestCase(Cheshire3ObjectTestCase):
         self.assertIsInstance(self.testObj, Normalizer)
 
     def test_process_string(self):
+        if not self.process_string_tests:
+            self.skipTest("No test data defined")
         for instring, expected in self.process_string_tests:
             output = self.testObj.process_string(self.session, instring) 
             self.assertEqual(output, expected)
     
     def test_process_hash(self):
+        if not self.process_hash_tests:
+            self.skipTest("No test data defined")
         for inhash, expected in self.process_hash_tests:
             output = self.testObj.process_hash(self.session, inhash)
             self.assertDictEqual(output, expected)
@@ -149,6 +153,8 @@ class TermExistsNormalizerTestCase(SimpleNormalizerTestCase):
         ]
 
     def test_process_hash(self):
+        if not self.process_hash_tests:
+            self.skipTest("No test data defined")
         for input, expected in self.process_hash_tests:
             output = self.testObj.process_hash(self.session, input)
             self.assertEqual(output, expected)
