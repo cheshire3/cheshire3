@@ -713,13 +713,13 @@ class SimpleDocumentFactory(DocumentFactory):
         # Some laziness checking
         if not format:
             if os.path.exists(data):
-                if data[-4:] == '.zip':
+                if data.endswith('.zip'):
                     format = 'zip'
-                elif data[-4:] == '.tar':
+                elif data.endswith('.tar'):
                     format = 'tar'
-                elif data[-4:] == '.xml':
+                elif data.endswith('.xml'):
                     format = 'xml'
-                elif data[-5:] == '.marc':
+                elif data.endswith('.marc'):
                     format = 'marc'
                 elif os.path.isdir(data):
                     format = 'dir'
