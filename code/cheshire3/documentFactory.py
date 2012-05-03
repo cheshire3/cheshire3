@@ -397,6 +397,11 @@ class MultipleDocumentStream(BaseDocumentStream):
 class DirectoryDocumentStream(MultipleDocumentStream):
 
     def find_documents(self, session, cache=0):
+        if  not os.path.isabs(self.streamLocation):
+            self.streamLocation = os.path.join(
+                self.factory.get_path(session, 'defaultPath'),
+                self.streamLocation
+            )
         for root, dirs, files in os.walk(self.streamLocation):
             for d in dirs:
                 if os.path.islink(os.path.join(root, d)):
