@@ -693,7 +693,7 @@ class SimpleResultSet(RankedResultSet):
             self.termIdHash[o.termid] = o.queryTerm
             if o.fromStore:
                 #re-sort before combining as likely out of order
-                if o[0].numericId != None:
+                if o[0].numericId is not None:
                     o.order(session, 'numericId')
                 else:
                     o.order(session, 'id')
@@ -955,7 +955,7 @@ class SimpleResultSet(RankedResultSet):
         elif (type(spec) == str and hasattr(self[0], spec)):
               # Sort by attribute of item
               tmplist = [(getattr(x, spec), x) for x in l]
-              if ascending == None:
+              if ascending is None:
                   if spec in ['id', 'numericId']:
                       ascending = 1
                   else:
@@ -1105,8 +1105,8 @@ class SimpleResultSetItem(ResultSetItem):
 
     def __cmp__(self, other):
         # default sort by docid
-        if self.numericId != None:
-            if other.numericId != None:
+        if self.numericId is not None:
+            if other.numericId is not None:
                 oid = other.numericId
             else:
                 oid = other.id
@@ -1152,7 +1152,7 @@ class BitmapResultSet(ResultSet):
         self.relevancy = 0
 
     def __getitem__(self, k):
-        if self.currItems == None:
+        if self.currItems is None:
             self.currItems = self.bitfield.trueItems()            
         return SimpleResultSetItem(None, self.currItems[k], self.recordStore, 1)
 

@@ -89,7 +89,7 @@ class ReportLabDocumentFactory(AccumulatingDocumentFactory):
         self.ttfontBold = self.get_setting(session, 'ttfontBold', None)        
         self.ttfontItalic = self.get_setting(session, 'ttfontItalic', None)        
         self.ttfontBoldItalic = self.get_setting(session, 'ttfontBoldItalic', None)
-        if self.ttfontNormal != None:
+        if self.ttfontNormal is not None:
             self.normaltag = self.ttfontNormal[self.ttfontNormal.rfind('/')+1:self.ttfontNormal.rfind('.')]
             self.boldtag = self.ttfontBold[self.ttfontBold.rfind('/')+1:self.ttfontBold.rfind('.')]
             self.italictag = self.ttfontItalic[self.ttfontItalic.rfind('/')+1:self.ttfontItalic.rfind('.')]
@@ -206,7 +206,7 @@ class ReportLabDocumentFactory(AccumulatingDocumentFactory):
         headerPage = platypus.PageTemplate(id='Header',frames=withHeader)
         normalPage = platypus.PageTemplate(id='noHeader',frames=withoutHeader)
         
-        if self.headerString != None:
+        if self.headerString is not None:
             output.addPageTemplates([headerPage, normalPage])
             header(OutputElements, self.headerString)
             OutputElements.append(platypus.FrameBreak())

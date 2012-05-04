@@ -41,7 +41,7 @@ class SimpleDocumentStore(DocumentStore):
                 raise PermissionException("Permission required to create an object in %s" % self.id)
 
         id = self.generate_id(session)
-        if (doc == None):
+        if (doc is None):
             # Create a placeholder
             doc = StringDocument("")
         else:
@@ -61,9 +61,9 @@ class SimpleDocumentStore(DocumentStore):
 
     def store_document(self, session, doc):
         doc.documentStore = self.id
-        if (self.inPreParser != None):
+        if (self.inPreParser is not None):
             doc = self.inPreParser.process_document(session, doc)
-        elif self.inWorkflow != None:
+        elif self.inWorkflow is not None:
             doc = self.inWorkflow.process(session, doc)            
         data = doc.get_raw(session)
         md = {}
@@ -91,9 +91,9 @@ class SimpleDocumentStore(DocumentStore):
         data = self.fetch_data(session, id)
         if (data):
             doc = StringDocument(data)
-            if (self.outPreParser != None):
+            if (self.outPreParser is not None):
                 doc = self.outPreParser.process_document(session, doc)
-            elif (self.outWorkflow != None):
+            elif (self.outWorkflow is not None):
                 doc = self.outWorkflow.process(session, doc)
             doc.id = id
             doc.documentStore = self.id
@@ -120,13 +120,13 @@ class SimpleDocumentStore(DocumentStore):
               
     def _process_data(self, session, id, data, preParser=None):
         # Split from fetch record for Iterators
-        if (preParser != None):
+        if (preParser is not None):
             doc = StringDocument(data)
             doc = preParser.process_document(session, doc)
-        elif (self.outPreParser != None):
+        elif (self.outPreParser is not None):
             doc = StringDocument(data)
             doc = self.outPreParser.process_document(session, doc)
-        elif (self.outWorkflow != None):
+        elif (self.outWorkflow is not None):
             doc = StringDocument(data)
             doc = self.outWorkflow.process(session, doc)
         else:

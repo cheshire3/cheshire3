@@ -26,7 +26,7 @@ class CassandraC3Object(C3Object):
         self._verifyDatabase(session)
         
     def _openContainer(self, session):
-        if self.cxn == None:
+        if self.cxn is None:
             self.cxn = cxn = pycassa.connect(self.keyspace, servers=self.servers)
             if (self.username is not None) and (self.passwd is not None):
                 cxn.login(credentials={'username': self.username, 'password': self.passwd})

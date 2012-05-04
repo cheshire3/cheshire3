@@ -592,7 +592,7 @@ class ClassificationPreParser(PreParser):
         
             
     def process_document(self, session, doc):
-        if self.model != None and self.predicting:
+        if self.model is not None and self.predicting:
             # predict
             return self.predict(session, doc)
         else:

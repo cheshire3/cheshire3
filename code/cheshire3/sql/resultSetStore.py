@@ -85,7 +85,7 @@ class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
         rset.timeExpires = expires
         expiresStr = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(expires))
         id = rset.id
-        if (self.idNormalizer != None):
+        if (self.idNormalizer is not None):
             id = self.idNormalizer.process_string(session, id)
 
         # Serialise and store
@@ -109,7 +109,7 @@ class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
             elif hasattr(rset, 'retryOnFail'):
                 # generate new id, re-store
                 id = self.generate_id(session)
-                if (self.idNormalizer != None):
+                if (self.idNormalizer is not None):
                     id = self.idNormalizer.process_string(session, id)
                 query = "INSERT INTO %s (identifier, data, size, class, timeCreated, timeAccessed, expires) VALUES ('%s', E'%s', %s, '%s', '%s', '%s', '%s')" % (self.table, id, ndata, len(rset), cl, nowStr, nowStr, expiresStr)
                 try:
@@ -125,7 +125,7 @@ class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
         self._openContainer(session)
 
         sid = str(id)
-        if (self.idNormalizer != None):
+        if (self.idNormalizer is not None):
             sid = self.idNormalizer.process_string(session, sid)
         query = "SELECT class, data FROM %s WHERE identifier = '%s';" % (self.table, sid)
         res = self._query(query)
@@ -164,7 +164,7 @@ class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
     def delete_resultSet(self, session, id):
         self._openContainer(session)
         sid = str(id)
-        if (self.idNormalizer != None):
+        if (self.idNormalizer is not None):
             sid = self.idNormalizer.process_string(session, sid)
         query = "DELETE FROM %s WHERE identifier = '%s';" % (self.table, sid)
         self._query(query)

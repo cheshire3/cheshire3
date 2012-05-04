@@ -38,7 +38,7 @@ class SpanXPathTaggedTermExtractor(SimpleExtractor):
             lastLen = 0
             startNode = xp[0]
             endNode = xp[1]
-            if root == None:
+            if root is None:
                 for n in startNode.iterancestors():
                     root = n
             inrange = False
@@ -52,7 +52,7 @@ class SpanXPathTaggedTermExtractor(SimpleExtractor):
                         inrange = False
                         break
                     elif inrange == True and el.tag == 'w':                        
-                        if el.text != None:
+                        if el.text is not None:
                             attr = el.attrib
                             bits['text'] = el.text
                             if self.pos:
@@ -214,7 +214,7 @@ class TaggedTermExtractor(SimpleExtractor):
                                 if m.group() == 'n':                                 
                                     punctCount += len(data[j+1][2:])
                         
-            if bitsText and not bitsOffset == None:
+            if bitsText and not bitsOffset is None:
                 previousText = bitsText
                 txt.append("%s/%s" % (bitsText, bitsOffset))
                 wordOffs.append(bitsWord)

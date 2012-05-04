@@ -248,7 +248,7 @@ class reqHandler:
             # first, recheck any configStores
             for csid in obj._includeConfigStores:
                 confStore = obj.get_object(session, csid)
-                if confStore != None:
+                if confStore is not None:
                     for rec in confStore:
                         # do something with config
                         if (not (rec.id in obj.subConfigs.keys())):

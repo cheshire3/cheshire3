@@ -210,7 +210,7 @@ class PostgresStore(SimpleStore):
         self._openContainer(session)
         id = str(id)
         now = time.strftime("%Y-%m-%d %H:%M:%S")
-        if (self.idNormalizer != None):
+        if (self.idNormalizer is not None):
             id = self.idNormalizer.process_string(session, id)
         data = data.replace(nonTextToken, '\\\\000\\\\001')
 
@@ -251,7 +251,7 @@ class PostgresStore(SimpleStore):
     def fetch_data(self, session, id):
         self._openContainer(session)
         sid = str(id)
-        if (self.idNormalizer != None):
+        if (self.idNormalizer is not None):
             sid = self.idNormalizer.process_string(session, sid)
         query = "SELECT data FROM %s WHERE identifier = '%s';" % (self.table, sid)
         res = self._query(query)
@@ -273,14 +273,14 @@ class PostgresStore(SimpleStore):
     def delete_data(self, session, id):
         self._openContainer(session)
         sid = str(id)
-        if (self.idNormalizer != None):
+        if (self.idNormalizer is not None):
             sid = self.idNormalizer.process_string(session, str(id))
         query = "DELETE FROM %s WHERE identifier = '%s';" % (self.table, sid)
         self._query(query)
         return None
 
     def fetch_metadata(self, session, id, mType):
-        if (self.idNormalizer != None):
+        if (self.idNormalizer is not None):
             id = self.idNormalizer.process_string(session, id)
         elif type(id) == unicode:
             id = id.encode('utf-8')
@@ -298,7 +298,7 @@ class PostgresStore(SimpleStore):
         return data
 
     def store_metadata(self, session, key, mType, value):
-        if (self.idNormalizer != None):
+        if (self.idNormalizer is not None):
             id = self.idNormalizer.process_string(session, id)
         elif type(id) == unicode:
             id = id.encode('utf-8')

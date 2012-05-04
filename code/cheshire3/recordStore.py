@@ -57,7 +57,7 @@ class SimpleRecordStore(RecordStore):
 
 
         id = self.generate_id(session)
-        if (rec == None):
+        if (rec is None):
             # Create a placeholder
             rec = SaxRecord([], "", id)
         else:
@@ -90,14 +90,14 @@ class SimpleRecordStore(RecordStore):
         rec.recordStore = self.id        
 
         # Maybe add metadata, etc.
-        if transformer != None:
+        if transformer is not None:
             # Allow custom transformer
             doc = transformer.process_record(session, rec)
             data = doc.get_raw(session)            
-        elif self.inTransformer != None:
+        elif self.inTransformer is not None:
             doc = self.inTransformer.process_record(session, rec)
             data = doc.get_raw(session)
-        elif self.inWorkflow != None:
+        elif self.inWorkflow is not None:
             doc = self.inWorkflow.process(session, rec)
             data = doc.get_raw(session)
         else:
@@ -170,11 +170,11 @@ class SimpleRecordStore(RecordStore):
         # Split from fetch record for Iterators
 
         doc = StringDocument(data)
-        if (parser != None):
+        if (parser is not None):
             rec = parser.process_document(session, doc)
-        elif (self.outParser != None):
+        elif (self.outParser is not None):
             rec = self.outParser.process_document(session, doc)
-        elif (self.outWorkflow != None):
+        elif (self.outWorkflow is not None):
             rec = self.outWorkflow.process(session, doc)
         else:
             # Assume raw XML into LXML
@@ -279,7 +279,7 @@ class RemoteWriteRecordStore(BdbRecordStore):
     def store_data(self, session, id, data, metadata={}):
         # Return Id to other task
         # Almost don't need this function/class
-        if id == None:
+        if id is None:
             id = self.generate_id(session)
         try:
             BdbRecordStore.store_data(self, session, id, data, metadata)
@@ -311,7 +311,7 @@ class RemoteSlaveRecordStore(BdbRecordStore):
         return None
 
     def create_record(self, session, rec=None):
-        if (rec == None):
+        if (rec is None):
             rec = SaxRecord([], "", None)
         else:
             rec.id = None
@@ -322,14 +322,14 @@ class RemoteSlaveRecordStore(BdbRecordStore):
         rec.recordStore = self.recordStore.id        
 
         # Maybe add metadata, etc.
-        if transformer != None:
+        if transformer is not None:
             # Allow custom transformer
             doc = transformer.process_record(session, rec)
             data = doc.get_raw(session)            
-        elif self.inTransformer != None:
+        elif self.inTransformer is not None:
             doc = self.inTransformer.process_record(session, rec)
             data = doc.get_raw(session)
-        elif self.inWorkflow != None:
+        elif self.inWorkflow is not None:
             doc = self.inWorkflow.process(session, rec)
             data = doc.get_raw(session)
         else:
@@ -342,12 +342,12 @@ class RemoteSlaveRecordStore(BdbRecordStore):
               'wordCount' : rec.wordCount,
               'digest' : dig}
             
-        if (self.writeTask != None):            
+        if (self.writeTask is not None):            
             self.writeTask.call(self.recordStore, 'store_data', session, rec.id, data, md)
             msg = self.writeTask.recv()
         else:
             raise ValueError('WriteTask is None... did you call begin_storing?')
-        if rec.id == None:
+        if rec.id is None:
             rec.id = msg.data
         return rec
 

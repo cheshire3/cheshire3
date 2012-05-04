@@ -57,7 +57,7 @@ class SaxContentHandler(ContentHandler):
 
     def startPrefixMapping(self, pfx, uri):
         self.currentLine += 1
-        if (pfx == None):
+        if (pfx is None):
             pfx = ''
         self.currentText.append("6 %r, %r" % (pfx, uri))
         
@@ -316,7 +316,7 @@ class SaxToXmlHandler:
         if (not ns):
             return ""
         pref = self.namespaces.get(ns, None)
-        if (pref == None):
+        if (pref is None):
             self.currNs += 1
             pref = "ns%d" % (self.currNs)
             self.namespaces[ns] = pref
@@ -429,7 +429,7 @@ class MinidomRecord(DomRecord):
     def _walkTop(self, node):
         # top level node
         if node.nodeType == utils.elementType:
-            self.namespaces = node.namespaceURI != None
+            self.namespaces = node.namespaceURI is not None
             self._walk(node)
         
     def _walk(self, node):
@@ -940,7 +940,7 @@ class SaxRecord(Record):
                     return False
             elif pred[1] == 'regexp':
                 if pred[2] in attrs:
-                    return pred[3].search(attrs[pred[2]]) != None
+                    return pred[3].search(attrs[pred[2]]) is not None
                 else:
                     return False
             raise NotImplementedError
@@ -1003,7 +1003,7 @@ class SaxRecord(Record):
             raise ValueError("Called convert on non element.")
 
     def saxify(self, session, handler=None, sax=[]):
-        if handler == None:
+        if handler is None:
             handler = self
         if not sax:
             sax = self.get_sax(session)

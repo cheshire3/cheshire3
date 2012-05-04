@@ -66,7 +66,7 @@ class SimpleNormalizer(Normalizer):
                     else:
                         kw[txt] = nv
             else:
-                if new != None:
+                if new is not None:
                     try:
                         kw[new]['occurences'] += d['occurences']
                         try:

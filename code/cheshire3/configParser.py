@@ -125,7 +125,7 @@ class C3Object(object):
         # Look on self for instantiated parser, otherwise use bootstrap
         p = self.get_path(session, 'parser', None)
         try:
-            if (p != None):
+            if (p is not None):
                 record = p.process_document(session, doc)
             elif parser == 'minidom':
                 record = BSParser.process_document(session, doc)
@@ -531,7 +531,7 @@ class C3Object(object):
         # Now check for configStore objects
 ##         for csid in self._includeConfigStores:
 ##             confStore = self.get_object(session, csid)
-##             if confStore != None:
+##             if confStore is not None:
 ##                 for rec in confStore:
 ##                     # do something with config
 ##                     node = rec.get_dom(session)
@@ -573,7 +573,7 @@ class C3Object(object):
                     self.log_critical(session, "... while getting it from object '%s'" % (self.id))
                     raise
                 return obj
-            elif (self.parent != None):
+            elif (self.parent is not None):
                 return self.parent.get_object(session, id)
             else:
                 raise ObjectDoesNotExistException(id)
@@ -602,7 +602,7 @@ class C3Object(object):
             except KeyError:
                 pass
             return o
-        elif (self.parent != None):
+        elif (self.parent is not None):
             return self.parent.get_path(session, id, default)
         else:
             return default

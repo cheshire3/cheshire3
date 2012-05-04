@@ -196,7 +196,7 @@ class SpanXPathSelector(SimpleSelector):
                 if elem in startNodes:
                     # if we don't have a start node in our tuple put this one 
                     # in the start node
-                    if tuple[0] == None:
+                    if tuple[0] is None:
                         tuple = (elem, tuple[1])
                     # if we do have a start node add this as the end node, 
                     # start a new tuple and add this also as the start node 
@@ -220,7 +220,7 @@ class SpanXPathSelector(SimpleSelector):
                 # N.B. developers: this works slightly differently from the 
                 # previous SAX version which treated the end of the record 
                 # as an end tag this does not
-                elif elem in endNodes and tuple[0] != None:
+                elif elem in endNodes and tuple[0] is not None:
                     tuple = (tuple[0], elem)
                     vals.append(tuple)
                     tuple = (None, None)       

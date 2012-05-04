@@ -518,7 +518,7 @@ class ClusterDocumentStream(BaseDocumentStream):
 
         data = self.streamLocation
         sortx = self.factory.get_path(session, 'sortPath', None)
-        if sortx == None:
+        if sortx is None:
             sortx = getShellResult('which sort')
         sorted = data + "_SORT"
         os.spawnl(os.P_WAIT, sortx, sortx, data, '-o', sorted)
@@ -703,16 +703,16 @@ class SimpleDocumentFactory(DocumentFactory):
 
     def load(self, session, data=None, cache=None, format=None, tagName=None, codec=None):
         self.loadSession = session
-        if data == None:
+        if data is None:
             data = self.dataPath
 
-        if format == None:
+        if format is None:
             format = self.format
-        if cache == None:
+        if cache is None:
             cache = self.cache
-        if tagName == None:
+        if tagName is None:
             tagName = self.tagName
-        if codec == None:
+        if codec is None:
             codec = self.codec
         
         # Some laziness checking
@@ -925,15 +925,15 @@ class AccumulatingDocumentFactory(SimpleDocumentFactory):
 
         self.loadSession = session
 
-        if data == None:
+        if data is None:
             data = self.dataPath
-        if format == None:
+        if format is None:
             format = self.format
-        if cache == None:
+        if cache is None:
             cache = self.cache
-        if tagName == None:
+        if tagName is None:
             tagName = self.tagName
-        if codec == None:
+        if codec is None:
             codec = self.codec
 
         # Some laziness checking
@@ -1004,7 +1004,7 @@ class ClusterExtractionDocumentFactory(AccumulatingDocumentFactory):
             if isinstance(self.maps[m][2], list):
                 for t in range(len(self.maps[m][2])):
                     o = self.get_object(session, self.maps[m][2][t][1])
-                    if (o != None):
+                    if (o is not None):
                         self.maps[m][2][t][1] = o
                     else:
                         raise(ConfigFileException("Unknown object %s" % (self.maps[m][2][t][1])))
@@ -1012,7 +1012,7 @@ class ClusterExtractionDocumentFactory(AccumulatingDocumentFactory):
         if isinstance(self.keyMap[2], list):
             for t in range(len(self.keyMap[2])):
                 o = self.get_object(session, self.keyMap[2][t][1])
-                if (o != None):
+                if (o is not None):
                     self.keyMap[2][t][1] = o
                 else:
                     raise(ConfigFileException("Unknown object %s" % (self.keyMap[2][t][1])))

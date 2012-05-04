@@ -263,7 +263,7 @@ class SimpleStore(C3Object, SummaryObject):
         for t in self.reverseMetadataTypes:
             self._closeDb(session, t + "Reverse")
         for (t, cxn) in self.cxns.items():
-            if cxn != None:
+            if cxn is not None:
                 try:
                     cxn.close();
                     self.cxns[t] = None
@@ -591,7 +591,7 @@ class SwitchingBdbConnection(object):
         return ['0']
 
     def _open(self, b):
-        if self.cxns.has_key(b) and self.cxns[b] != None:
+        if self.cxns.has_key(b) and self.cxns[b] is not None:
             return self.cxns[b]
         else:
             cxn = bdb.db.DB()
@@ -684,7 +684,7 @@ class SwitchingBdbCursor(object):
             raise ValueError("%r is not a known bucket (%r)" % (b, self.buckets))
         cxn = self.switch._open(b)
         cur = cxn.cursor()
-        if self.currCursor != None:
+        if self.currCursor is not None:
             self.currCursor.close()
         self.currCursor = cur
         return cur
@@ -714,7 +714,7 @@ class SwitchingBdbCursor(object):
                 x = self.currCursor.next(doff=doff, dlen=dlen)
             else:
                 x = self.currCursor.next()
-            if x == None and self.currBucketIdx != len(self.buckets) -1:
+            if x is None and self.currBucketIdx != len(self.buckets) -1:
                 c = self.set_cursor(self.buckets[self.currBucketIdx+1])
                 if dlen != -1:
                     return c.first(doff=doff, dlen=dlen)
@@ -732,7 +732,7 @@ class SwitchingBdbCursor(object):
                 x = self.currCursor.prev(doff=doff, dlen=dlen)
             else:
                 x = self.currCursor.prev()
-            if x == None and self.currBucketIdx != 0:                
+            if x is None and self.currBucketIdx != 0:                
                 c = self.set_cursor(self.buckets[self.currBucketIdx-1])
                 if dlen != -1:
                     return c.last(doff=doff, dlen=dlen)
@@ -766,7 +766,7 @@ class SwitchingBdbCursor(object):
             x = cursor.set_range(where)
         # at end of where bucket, step to next
 
-        if x == None and self.currBucketIdx != len(self.buckets) -1:
+        if x is None and self.currBucketIdx != len(self.buckets) -1:
             c = self.set_cursor(self.buckets[self.currBucketIdx+1])
             if dlen != -1:
                 return c.first(doff=doff, dlen=dlen)
@@ -829,9 +829,9 @@ class BdbStore(SimpleStore):
 
     def _openDb(self, session, dbType):
         cxn = self.cxns.get(dbType, None)
-        if cxn == None:
+        if cxn is None:
             dbp = self.get_path(session, dbType + 'Path')
-            if dbp == None:
+            if dbp is None:
                 self._initDb(session, dbType)
                 dbp = self.get_path(session, dbType + 'Path')
             if os.path.exists(dbp) or dbType in self.storageTypes or (dbType[-7:] == 'Reverse' and dbType[:-7] in self.reverseMetadataTypes):
@@ -863,7 +863,7 @@ class BdbStore(SimpleStore):
 
     def _closeDb(self, session, dbType):
         cxn = self.cxns.get(dbType, None)
-        if cxn != None:
+        if cxn is not None:
             try:
                 cxn.close()
             except:
@@ -883,7 +883,7 @@ class BdbStore(SimpleStore):
 
     def get_dbSize(self, session):
         cxn = self._openDb(session, 'digest')
-        if cxn == None:
+        if cxn is None:
             cxn = self._openDb(session, 'database')
         return cxn.stat(bdb.db.DB_FAST_STAT)['nkeys']
 
@@ -892,7 +892,7 @@ class BdbStore(SimpleStore):
             return gen_uuid()
 
         cxn = self._openDb(session, 'digest')
-        if cxn == None:
+        if cxn is None:
             cxn = self._openDb(session, 'database')
         if (self.currentId == -1 or session.environment == "apache"):
             c = cxn.cursor()
@@ -928,9 +928,9 @@ class BdbStore(SimpleStore):
 
         cxn = self._openDb(session, 'database')
         # Should always have an id by now, but just in case
-        if id == None:
+        if id is None:
             id = self.generate_id(session)
-        if (self.idNormalizer != None):
+        if (self.idNormalizer is not None):
             id = self.idNormalizer.process_string(session, id)
         elif type(id) == unicode:
             id = id.encode('utf-8')
@@ -947,7 +947,7 @@ class BdbStore(SimpleStore):
 
     def fetch_data(self, session, id):
         cxn = self._openDb(session, 'database')
-        if (self.idNormalizer != None):
+        if (self.idNormalizer is not None):
             id = self.idNormalizer.process_string(session, id)
         elif type(id) == unicode:
             id = id.encode('utf-8')
@@ -968,7 +968,7 @@ class BdbStore(SimpleStore):
         self._openAll(session)
         cxn = self._openDb(session, 'database')
 
-        if (self.idNormalizer != None):
+        if (self.idNormalizer is not None):
             id = self.idNormalizer.process_string(session, id)
         elif type(id) == unicode:
             id = id.encode('utf-8')
@@ -978,12 +978,12 @@ class BdbStore(SimpleStore):
         # main database is a storageType now
         for dbt in self.storageTypes:
             cxn = self._openDb(session, dbt)
-            if cxn != None:
+            if cxn is not None:
                 if dbt in self.reverseMetadataTypes:
                     # fetch value here, delete reverse
                     data = cxn.get(id)
                     cxn2 = self._openDb(session, dbt + "Reverse")                
-                    if cxn2 != None:
+                    if cxn2 is not None:
                         cxn2.delete(data)
                 cxn.delete(id)
                 cxn.sync()
@@ -998,14 +998,14 @@ class BdbStore(SimpleStore):
 
     def fetch_metadata(self, session, id, mType):
         if not mType.endswith("Reverse"):#mType[-7:] != "Reverse":
-            if (self.idNormalizer != None):
+            if (self.idNormalizer is not None):
                 id = self.idNormalizer.process_string(session, id)
             elif type(id) == unicode:
                 id = id.encode('utf-8')
             elif type(id) != str:
                 id = str(id)
         cxn = self._openDb(session, mType)
-        if cxn != None:
+        if cxn is not None:
             data = cxn.get(id)
             if data:
                 if mType.endswith(("Count", "Position", "Amount", "Offset")):#mType[-5:] == "Count" or mType[-8:] == "Position" or mType[-6:] in ("Amount", 'Offset'):
@@ -1020,24 +1020,24 @@ class BdbStore(SimpleStore):
         if value is None:
             return
         cxn = self._openDb(session, mType)
-        if cxn == None:
+        if cxn is None:
             self._initDb(session, mType)
             self._verifyDb(session, mType)
             cxn = self._openDb(session, mType)
 
-        if cxn != None:
+        if cxn is not None:
             if type(value) in (int, long, float):
                 value = str(value)
             cxn.put(id, value)
             if mType in self.reverseMetadataTypes:
                 cxn = self._openDb(session, mType + "Reverse")
-                if cxn != None:
+                if cxn is not None:
                     cxn.put(value, id)
         
     def flush(self, session):
         # Call sync to flush all to disk
         for cxn in self.cxns.values():
-            if cxn != None:
+            if cxn is not None:
                 cxn.sync()
 
                 
@@ -1149,7 +1149,7 @@ class FileSystemStore(BdbStore):
                 if exists:
                     raise ObjectAlreadyExistsException(exists)
 
-        if (self.idNormalizer != None):
+        if (self.idNormalizer is not None):
             id = self.idNormalizer.process_string(session, id)
         elif type(id) == unicode:
             id = id.encode('utf-8')
@@ -1164,7 +1164,7 @@ class FileSystemStore(BdbStore):
         return None
 
     def fetch_data(self, session, id):
-        if (self.idNormalizer != None):
+        if (self.idNormalizer is not None):
             id = self.idNormalizer.process_string(session, id)
         elif type(id) == unicode:
             id = id.encode('utf-8')
@@ -1201,7 +1201,7 @@ class FileSystemStore(BdbStore):
     def delete_data(self, session, id):
         self._openAll(session)
 
-        if (self.idNormalizer != None):
+        if (self.idNormalizer is not None):
             id = self.idNormalizer.process_string(session, id)
         elif type(id) == unicode:
             id = id.encode('utf-8')
@@ -1215,12 +1215,12 @@ class FileSystemStore(BdbStore):
         # main database is a storageType now
         for dbt in self.storageTypes:
             cxn = self._open(session, dbt)
-            if cxn != None:
+            if cxn is not None:
                 if dbt in self.reverseMetadataTypes:
                     # fetch value here, delete reverse
                     data = cxn.get(id)
                     cxn2 = self._open(session, dbt + "Reverse")                
-                    if cxn2 != None:
+                    if cxn2 is not None:
                         cxn2.delete(data)
                 cxn.delete(id)
                 cxn.sync()

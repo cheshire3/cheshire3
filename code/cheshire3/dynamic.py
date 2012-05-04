@@ -19,7 +19,7 @@ def makeObjectFromDom(session, topNode, parentObject):
                 # Here's what we want to instantiate
                 objectType = getFirstData(c)
                 break
-    if objectType == None:
+    if objectType is None:
         raise(ConfigFileException('No objectType set in config file.'))
     return buildObject(session, objectType, [topNode, parentObject])
 
@@ -46,7 +46,7 @@ def importObject(session, objectType):
                                        50, 
                                        "Module %s does not define class %s" % (modName, className))
             except AttributeError:
-                # most likely session == None or session.logger == None
+                # most likely session is None or session.logger is None
                 pass
 
     # now split and fetch bits
@@ -68,7 +68,7 @@ def importObject(session, objectType):
                                            50, 
                                            "Module %s does not define class %s" % (modName, className))
                 except AttributeError:
-                    # most likely session == None or session.logger == None
+                    # most likely session is None or session.logger is None
                     pass
 
     try:
@@ -87,7 +87,7 @@ def importObject(session, objectType):
                                        50, 
                                        "Module %s does not define class %s" % (modName, className))
             except AttributeError:
-                # most likely session == None or session.logger == None
+                # most likely session is None or session.logger is None
                 pass
             
     return parentClass
@@ -106,5 +106,5 @@ def buildObject(session, objectType, args):
                                        50, 
                                        "Failed to create object of type: '{0}'".format(parentClass.__name__))
             except AttributeError:
-                # most likely session == None or session.logger == None
+                # most likely session is None or session.logger is None
                 pass

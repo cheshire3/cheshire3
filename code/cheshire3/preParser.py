@@ -39,7 +39,7 @@ class NormalizerPreParser(PreParser):
     def __init__(self, session, config, parent):
         PreParser.__init__(self, session, config, parent)
         self.normalizer = self.get_path(session, 'normalizer', None)
-        if self.normalizer == None:
+        if self.normalizer is None:
             raise ConfigFileException("Normalizer for %s does not exist." % self.id)
 
     def process_document(self, session, doc):

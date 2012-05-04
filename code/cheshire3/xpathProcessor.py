@@ -95,7 +95,7 @@ class SimpleXPathProcessor(XPathProcessor):
 #                        end = line.rfind("}")
 #                        stuff = eval(line[2:end+1])
 #                        ns, tag = stuff[0], stuff[1]
-#                        if ns != None:
+#                        if ns is not None:
 #                            actualNs = 1
 #                        openTags.append((ns, tag))
 #                        comp.append(line)

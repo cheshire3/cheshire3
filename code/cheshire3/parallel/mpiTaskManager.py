@@ -176,7 +176,7 @@ class TaskManager:
         # Receive a message from anywhere, create Message 
         # round robin irecvs
 
-        if self.currentReceive == None:
+        if self.currentReceive is None:
             self.currentReceive = mpi.irecv()
         if self.currentReceive:
             # Find source task
@@ -400,9 +400,9 @@ class Task:
      
     def irecv(self):
         # Read data from this specific task, nonblocking
-        if self.currentReceive == None:
+        if self.currentReceive is None:
             self.currentReceive = mpi.irecv(self.tid)
-        if mpi.testany(self.currentReceive)[0] != None:
+        if mpi.testany(self.currentReceive)[0] is not None:
             msg = self.currentReceive.message
             msg = Message(msg, self, self.manager, self.currentReceive.status)
             self.currentReceive = None

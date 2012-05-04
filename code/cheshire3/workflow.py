@@ -288,7 +288,7 @@ class SimpleWorkflow(Workflow):
             code.append('input = object.%s(session)' % function)
         elif (typ == 'index' and function == 'store_terms'):
             code.append('object.store_terms(session, input, inRecord)')
-        elif typ == 'documentFactory' and function == 'load' and input == None:
+        elif typ == 'documentFactory' and function == 'load' and input is None:
             code.append('input = object.load(session)')
         elif typ == 'documentStore':
             # Check for normalizer output  (deprecated, use documentFactory)
@@ -303,7 +303,7 @@ class SimpleWorkflow(Workflow):
             code.append('input = object.process_record(session, input)')
         else:
             code.append('result = object.%s(session, input)' % function)
-            code.append('if result != None:')
+            code.append('if result is not None:')
             code.append('    input = result')           
         #code.append('else:')
         #code.append('    raise WorkflowException("No function: %s on %%s" %% object)' % function)
@@ -509,7 +509,7 @@ class CachingWorkflow(SimpleWorkflow):
             code.append('input = %s.%s(session)' % (o, function))
         elif (typ == 'index' and function == 'store_terms'):
             code.append('%s.store_terms(session, input, inRecord)' % o)
-        elif typ == 'documentFactory' and function == 'load' and input == None:
+        elif typ == 'documentFactory' and function == 'load' and input is None:
             code.append('input = %s.load(session)' % o)
         elif typ == 'documentStore':
             # Check for normalizer output
@@ -524,7 +524,7 @@ class CachingWorkflow(SimpleWorkflow):
             code.append('input = %s.process_record(session, input)' % o)
         else:
             code.append('result = %s.%s(session, input)' % (o, function))
-            code.append('if result != None:')
+            code.append('if result is not None:')
             code.append('    input = result')            
         return code
 

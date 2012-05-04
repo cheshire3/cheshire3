@@ -67,7 +67,7 @@ class ParallelWorkflow(CachingWorkflow):
                 code.append('input = %s.%s(session)' % (o, function))
             elif (typ == 'index' and function == 'store_terms'):
                 code.append('%s.store_terms(session, input, inRecord)' % o)
-            elif typ == 'documentFactory' and function == 'load' and input == None:
+            elif typ == 'documentFactory' and function == 'load' and input is None:
                 code.append('input = %s.load(session)' % o)
             elif typ == 'documentStore':
                 # Check for normalizer output
@@ -82,7 +82,7 @@ class ParallelWorkflow(CachingWorkflow):
                 code.append('input = %s.process_record(session, input)' % o)
             else:
                 code.append('result = %s.%s(session, input)' % (o, function))
-                code.append('if result != None:')
+                code.append('if result is not None:')
                 code.append('    input = result')  
         else:
             if proc == 'all':
@@ -99,7 +99,7 @@ class ParallelWorkflow(CachingWorkflow):
                     code.append('result = tm.call(session, %s, "%s", input)' % (o, function))
             else:
                 raise ConfigFileException("Unknown process type on workflow: %s" % proc)
-            code.append('if result != None:')
+            code.append('if result is not None:')
             code.append('    input = result')
                           
         return code
