@@ -21,7 +21,7 @@ _install_requires = ['lxml >= 2.1', 'zopyx.txng3.ext == 3.3.1']
 # Determine python-dateutil version
 dateutilstr = 'python-dateutil == 1.5' if py_version < (3, 0) else 'python-dateutil >= 2.0'
 _install_requires.append(dateutilstr)
-if sys.version_info < (2,7):
+if py_version < (2,7):
     _install_requires.append('argparse')
 
 # Inspect to find current path
