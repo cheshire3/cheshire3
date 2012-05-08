@@ -75,6 +75,7 @@ setup(
     entry_points = {
         'console_scripts': [
             'cheshire3 = cheshire3.commands.cheshire3:main',
+            'cheshire3-init = cheshire3.commands.cheshire3_init:main'
         ],
     },
     keywords = u"xml document search information retrieval engine data text",
