@@ -5,6 +5,9 @@ from __future__ import absolute_import
 import sys
 import os
 
+from lxml import etree
+from lxml.builder import E
+
 # Manipulate sys.path to eliminate possibility of local imports
 # i.e. local import of cheshire3.py will block import of cheshire3 package
 sys.path.pop(0)
@@ -45,11 +48,43 @@ Please specify an id using the --database option.""".format(dbid)
             # Doesn't exists, so OK to init it
             pass
         else:
+            # TODO: check for --force ?
             msg = """database with id '{0}' has already been init'd. \
 Please specify a different id.""".format(dbid)
             server.log_critical(session, msg)
             raise ValueError(msg)
     # Create a .cheshire3 directory and populate it
+    c3_dir = os.path.join(args.directory, '.cheshire3')
+    for dir_path in [c3_dir, 
+                     os.path.join(c3_dir, 'stores'),
+                     os.path.join(c3_dir, 'indexes'),
+                     os.path.join(c3_dir, 'logs')]:
+        try:
+            os.makedirs(dir_path)
+        except OSError:
+            # Directory already exists
+            server.log_error(session, 
+                             "directory already exists {0}".format(dir_path))
+    # Generate Protocol Map(s) (ZeeRex)
+    # Generate config file
+    with open(os.path.join(c3_dir, 'config.xml'), 'w') as conffh:
+        config = E.config(
+                     E.objectType("cheshire3.database.SimpleDatabase"),     
+                     E.paths(
+                         E.path(c3_dir, {'type': "defaultPath"}),
+                         # subsequent paths may be relative to defaultPath
+                         E.path(os.path.join('stores', 'metadata.bdb'),
+                                {'type': "metadataPath"}),
+                         E.path("indexStore", {'type': "indexStoreList"}),
+                     ),
+                     {'id': dbid,
+                      'type': 'database'}
+                 )
+        conffh.write(etree.tostring(config, 
+                                    pretty_print=True,
+                                    encoding="utf-8"))
+        
+    # Insert database into server configuration
     return 0
 
 
