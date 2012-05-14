@@ -1,4 +1,4 @@
-"""Cheshire3 init sub-command."""
+"""Initialize a Cheshire 3 database."""
 
 from __future__ import absolute_import
 
@@ -25,9 +25,8 @@ def main(argv=None):
     server = SimpleServer(session, args.serverconfig)
     if args.database is None:
         # Find local database name to use as basis of database id
-        cwdir = os.path.basename(os.getcwd())
-        dbid = "db_{0}".format(cwdir)
-        server.log_debug(session, "database name not specified, defaulting to: {0}".format(dbid))
+        dbid = "db_{0}".format(os.path.basename(args.directory))
+        server.log_debug(session, "database identifier not specified, defaulting to: {0}".format(dbid))
         try:
             db = server.get_object(session, dbid)
         except ObjectDoesNotExistException:
@@ -55,10 +54,16 @@ Please specify a different id.""".format(dbid)
 
 
 argparser = Cheshire3ArgumentParser(conflict_handler='resolve')
+argparser.add_argument('directory', type=str,
+                       action='store', nargs='?',
+                       default=os.getcwd(), metavar='DIRECTORY',
+                       help="name of directory in which to init the Cheshire3 database. default: current-working-dir")
 argparser.add_argument('-d', '--database', type=str,
                   action='store', dest='database',
                   default=None, metavar='DATABASE',
                   help="identifier of Cheshire3 database to init. default: db_<current-working-dir>")
+
+
 
 session = None
 server = None
