@@ -12,7 +12,62 @@ from cheshire3.exceptions import ObjectDoesNotExistException
 from cheshire3.commands.cmd_utils import Cheshire3ArgumentParser
 
 
+def create_defaultConfig(identifier, defaultPath):
+    """Create and return a generic database configuration."""
+    config = E.config(
+        {'id': identifier,
+         'type': 'database'},
+        E.objectType("cheshire3.database.SimpleDatabase"),
+        # <paths>
+        E.paths(
+            E.path({'type': "defaultPath"}, defaultPath),
+            # subsequent paths may be relative to defaultPath
+            E.path({'type': "metadataPath"},
+                   os.path.join('.cheshire3', 'stores', 'metadata.bdb')
+                   ),
+            E.object({'type': "recordStore",
+                      'ref': "recordStore"}),
+            E.path({'type': "indexStoreList"}, "indexStore"),
+        ),
+        E.subConfigs(
+            # recordStore
+            E.subConfig(
+                {'type': "recordStore",
+                 'id': "recordStore"},
+                E.objectType("cheshire3.recordStore.BdbRecordStore"),
+                E.paths(
+                    E.path({'type': "defaultPath"},
+                           os.path.join('.cheshire3', 'stores')),
+                    E.path({'type': "databasePath"},
+                           'recordStore.bdb'),
+                    E.object({'type': "idNormalizer",
+                              'ref': "StringIntNormalizer"}),
+                ),
+                E.options(
+                    E.setting({'type': "digest"}, 'md5'),
+                ),
+            ),
+            # indexStore
+            E.subConfig(
+                {'type': "indexStore",
+                 'id': "indexStore"},
+                E.objectType("cheshire3.indexStore.BdbIndexStore"),
+                E.paths(
+                    E.path({'type': "defaultPath"},
+                           os.path.join('.cheshire3', 'indexes')),
+                    E.path({'type': "tempPath"},
+                           'temp'),
+                    E.path({'type': "recordStoreHash"},
+                           'recordStore'),
+                )
+            ),
+        ),
+    )
+    return config
+
+
 def main(argv=None):
+    """Initialize a Cheshire 3 database based on parameters in argv."""
     global argparser, session, server, db
     if argv is None:
         args = argparser.parse_args()
@@ -62,55 +117,7 @@ Please specify a different id.""".format(dbid)
     # Generate Protocol Map(s) (ZeeRex)
     # Generate config file
     with open(os.path.join(c3_dir, 'config.xml'), 'w') as conffh:
-        config = E.config(
-                     {'id': dbid,
-                      'type': 'database'},
-                     E.objectType("cheshire3.database.SimpleDatabase"),
-                     # <paths>
-                     E.paths(
-                         E.path({'type': "defaultPath"}, args.directory),
-                         # subsequent paths may be relative to defaultPath
-                         E.path({'type': "metadataPath"},
-                                os.path.join('.cheshire3', 'stores', 'metadata.bdb')
-                                ),
-                         E.object({'type': "recordStore",
-                                   'ref': "recordStore"}),
-                         E.path({'type': "indexStoreList"}, "indexStore"),
-                     ),
-                     E.subConfigs(
-                         # recordStore
-                         E.subConfig(
-                             {'type': "recordStore",
-                              'id': "recordStore"},
-                             E.objectType("cheshire3.recordStore.BdbRecordStore"),
-                             E.paths(
-                                 E.path({'type': "defaultPath"},
-                                        os.path.join('.cheshire3', 'stores')),
-                                 E.path({'type': "databasePath"},
-                                        'recordStore.bdb'),
-                                 E.object({'type': "idNormalizer",
-                                           'ref': "StringIntNormalizer"}),
-                             ),
-                             E.options(
-                                 E.setting({'type': "digest"}, 'md5'),
-                             ),
-                         ),
-                         # indexStore
-                         E.subConfig(
-                             {'type': "indexStore",
-                              'id': "indexStore"},
-                             E.objectType("cheshire3.indexStore.BdbIndexStore"),
-                             E.paths(
-                                 E.path({'type': "defaultPath"},
-                                        os.path.join('.cheshire3', 'indexes')),
-                                 E.path({'type': "tempPath"},
-                                        'temp'),
-                                 E.path({'type': "recordStoreHash"},
-                                        'recordStore'),
-                             )
-                         ),
-                     ),
-                 )
+        config = create_defaultConfig(dbid, args.directory)
         conffh.write(etree.tostring(config, 
                                     pretty_print=True,
                                     encoding="utf-8"))
