@@ -1,16 +1,10 @@
 """Initialize a Cheshire 3 database."""
 
-from __future__ import absolute_import
-
 import sys
 import os
 
 from lxml import etree
 from lxml.builder import E
-
-# Manipulate sys.path to eliminate possibility of local imports
-# i.e. local import of cheshire3.py will block import of cheshire3 package
-sys.path.pop(0)
 
 from cheshire3.server import SimpleServer
 from cheshire3.session import Session
