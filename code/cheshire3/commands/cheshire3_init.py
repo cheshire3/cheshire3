@@ -75,6 +75,7 @@ Please specify a different id.""".format(dbid)
                                 ),
                          E.object({'type': "recordStore",
                                    'ref': "recordStore"}),
+                         E.path({'type': "indexStoreList"}, "indexStore"),
                      ),
                      E.subConfigs(
                          # recordStore
@@ -93,6 +94,20 @@ Please specify a different id.""".format(dbid)
                              E.options(
                                  E.setting({'type': "digest"}, 'md5'),
                              ),
+                         ),
+                         # indexStore
+                         E.subConfig(
+                             {'type': "indexStore",
+                              'id': "indexStore"},
+                             E.objectType("cheshire3.indexStore.BdbIndexStore"),
+                             E.paths(
+                                 E.path({'type': "defaultPath"},
+                                        os.path.join('.cheshire3', 'indexes')),
+                                 E.path({'type': "tempPath"},
+                                        'temp'),
+                                 E.path({'type': "recordStoreHash"},
+                                        'recordStore'),
+                             )
                          ),
                      ),
                  )
