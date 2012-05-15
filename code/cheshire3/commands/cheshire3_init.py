@@ -63,16 +63,17 @@ Please specify a different id.""".format(dbid)
     # Generate config file
     with open(os.path.join(c3_dir, 'config.xml'), 'w') as conffh:
         config = E.config(
-                     E.objectType("cheshire3.database.SimpleDatabase"),     
-                     E.paths(
-                         E.path(c3_dir, {'type': "defaultPath"}),
-                         # subsequent paths may be relative to defaultPath
-                         E.path(os.path.join('stores', 'metadata.bdb'),
-                                {'type': "metadataPath"}),
-                         E.path("indexStore", {'type': "indexStoreList"}),
-                     ),
                      {'id': dbid,
-                      'type': 'database'}
+                      'type': 'database'},
+                     E.objectType("cheshire3.database.SimpleDatabase"),
+                     # <paths>
+                     E.paths(
+                         E.path({'type': "defaultPath"}, args.directory),
+                         # subsequent paths may be relative to defaultPath
+                         E.path({'type': "metadataPath"},
+                                os.path.join('.cheshire3', 'stores', 'metadata.bdb')
+                                ),
+                     ),
                  )
         conffh.write(etree.tostring(config, 
                                     pretty_print=True,
