@@ -73,6 +73,27 @@ Please specify a different id.""".format(dbid)
                          E.path({'type': "metadataPath"},
                                 os.path.join('.cheshire3', 'stores', 'metadata.bdb')
                                 ),
+                         E.object({'type': "recordStore",
+                                   'ref': "recordStore"}),
+                     ),
+                     E.subConfigs(
+                         # recordStore
+                         E.subConfig(
+                             {'type': "recordStore",
+                              'id': "recordStore"},
+                             E.objectType("cheshire3.recordStore.BdbRecordStore"),
+                             E.paths(
+                                 E.path({'type': "defaultPath"},
+                                        os.path.join('.cheshire3', 'stores')),
+                                 E.path({'type': "databasePath"},
+                                        'recordStore.bdb'),
+                                 E.object({'type': "idNormalizer",
+                                           'ref': "StringIntNormalizer"}),
+                             ),
+                             E.options(
+                                 E.setting({'type': "digest"}, 'md5'),
+                             ),
+                         ),
                      ),
                  )
         conffh.write(etree.tostring(config, 
