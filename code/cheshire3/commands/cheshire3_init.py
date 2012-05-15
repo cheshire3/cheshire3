@@ -61,6 +61,45 @@ def create_defaultConfig(identifier, defaultPath):
                            'recordStore'),
                 )
             ),
+            E.path({'type': "includeConfigs"}, 
+                   os.path.join(".cheshire3", "configSelectors.xml")
+            ),
+        ),
+    )
+    return config
+
+
+def create_defaultConfigSelectors():
+    """Create and return configuration for generic data selectors."""
+    config = E.config(
+        E.subConfigs(
+            # Identifier Attribute Selector
+            E.subConfig(
+                {'type': "selector",
+                 'id': "idSelector"},
+                E.objectType("cheshire3.selector.MetadataSelector"),
+                E.source(
+                    E.location({'type': "attribute"}, "id"),
+                ),
+            ),
+            # Load Time Function Selector
+            E.subConfig(
+                {'type': "selector",
+                 'id': "nowTimeSelector"},
+                E.objectType("cheshire3.selector.MetadataSelector"),
+                E.source(
+                    E.location({'type': "function"}, "now()"),
+                ),
+            ),
+            # Anywhere XPath Selector
+            E.subConfig(
+                {'type': "selector",
+                 'id': "anywhereXpathSelector"},
+                E.objectType("cheshire3.selector.XPathSelector"),
+                E.source(
+                    E.location({'type': "xpath"}, "/*"),
+                ),
+            ),
         ),
     )
     return config
@@ -115,7 +154,14 @@ Please specify a different id.""".format(dbid)
             server.log_error(session, 
                              "directory already exists {0}".format(dir_path))
     # Generate Protocol Map(s) (ZeeRex)
-    # Generate config file
+    # Generate config file(s)
+    # Generate config for generic selectors
+    with open(os.path.join(c3_dir, 'configSelectors.xml'), 'w') as conffh:
+        config = create_defaultConfigSelectors()
+        conffh.write(etree.tostring(config, 
+                                    pretty_print=True,
+                                    encoding="utf-8"))
+    # Generate generic database config
     with open(os.path.join(c3_dir, 'config.xml'), 'w') as conffh:
         config = create_defaultConfig(dbid, args.directory)
         conffh.write(etree.tostring(config, 
