@@ -340,6 +340,28 @@ Please specify a different id.""".format(dbid)
     xmlFilesToWrite[path] = indexConfig
     
     # Insert database into server configuration
+    pathEl = E.path({'type': "database",
+                     'id': dbid},
+                    dbConfigPath
+             )
+    # Try to do this by writing config plugin file if possible
+    serverDefaultPath = server.get_path(session,
+                                        'defaultPath',
+                                        cheshire3Root)
+    includesPath = os.path.join(serverDefaultPath, 
+                              'dbs', 
+                              'configs.d')
+    if os.path.exists(includesPath) and os.path.isdir(includesPath):
+        plugin = E.config(
+                     E.subConfigs(
+                         pathEl
+                     )
+                 )
+        xmlFilesToWrite[os.path.join(includesPath, '{0}.xml'.format(dbid))] = plugin
+    else:
+        # No database plugin directory
+        server.log_warning(session, "No database plugin directory")
+        raise ValueError("No database plugin directory")
 
     # Write configs to files
     for path, node in xmlFilesToWrite.iteritems():
