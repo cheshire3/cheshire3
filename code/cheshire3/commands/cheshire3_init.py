@@ -282,29 +282,21 @@ def main(argv=None):
         # Find local database name to use as basis of database id
         dbid = "db_{0}".format(os.path.basename(args.directory))
         server.log_debug(session, "database identifier not specified, defaulting to: {0}".format(dbid))
-        try:
-            db = server.get_object(session, dbid)
-        except ObjectDoesNotExistException:
-            # Doesn't exists, so OK to init it
-            pass
-        else:
-            msg = """database with id '{0}' has already been init'd. \
-Please specify an id using the --database option.""".format(dbid)
-            server.log_critical(session, msg)
-            raise ValueError(msg)
     else:
         dbid = args.database
-        try:
-            db = server.get_object(session, dbid)
-        except ObjectDoesNotExistException:
-            # Doesn't exists, so OK to init it
-            pass
-        else:
-            # TODO: check for --force ?
-            msg = """database with id '{0}' has already been init'd. \
-Please specify a different id.""".format(dbid)
-            server.log_critical(session, msg)
-            raise ValueError(msg)
+        
+    try:
+        db = server.get_object(session, dbid)
+    except ObjectDoesNotExistException:
+        # Doesn't exists, so OK to init it
+        pass
+    else:
+        # TODO: check for --force ?
+        msg = """database with id '{0}' has already been init'd. \
+Please specify a different id using the --database option.""".format(dbid)
+        server.log_critical(session, msg)
+        raise ValueError(msg)
+    
     # Create a .cheshire3 directory and populate it
     c3_dir = os.path.join(args.directory, '.cheshire3')
     for dir_path in [c3_dir, 
