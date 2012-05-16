@@ -5,8 +5,10 @@ from __future__ import with_statement
 import sys
 import os
 
+from socket import gethostname
+from datetime import datetime
 from lxml import etree
-from lxml.builder import E
+from lxml.builder import ElementMaker, E
 
 from cheshire3.server import SimpleServer
 from cheshire3.session import Session
@@ -261,6 +263,135 @@ def create_defaultConfigIndexes():
     return config
 
 
+def create_defaultZeerex(identifier, args):
+    """Create and return ZeeRex (to be used for CQL + SRU protocolMap).
+    
+    For more information on ProtocolMap, see:
+    http://cheshire3.org/docs/build/build_protocolMap.html
+    
+    This is dependent on indexes created by create_defaultConfigIndexes() and
+    should be kept up-to-date with it.
+    """
+    # Derive and create serverInfo
+    try:
+        host = gethostname()
+    except:
+        # Fall back to simply localhost
+        host = 'localhost'
+    if args.port:
+        port = str(args.port)
+    else:
+        port = "80"
+    serverInfo = Z.serverInfo(
+                     {'protocol': "srw/u",
+                      'version': "1.1",
+                      'transport': "http"},
+                     Z.host(host),
+                     Z.port(port),
+                 )
+    # Assemble to complete ZeeRex base on created nodes
+    zeerex = Z.explain(
+                 {'id': identifier,
+                  'authoritative': "true"},
+                 serverInfo,
+                 Z.databaseInfo(
+                     Z.title(args.title),
+                     Z.description(args.description),
+                 ),
+                 Z.metaInfo(
+                     Z.dateModified(datetime.utcnow().isoformat()),
+                 ),
+                 # Don't know schemaInfo but should include the node
+                 Z.schemaInfo(),
+                 Z.indexInfo(
+                     Z.set({'identifier': "info:srw/cql-context-set/1/cql-v1.2",
+                            'name': "cql"}),
+                     Z.set({'identifier': "info:srw/cql-context-set/1/dc-v1.1",
+                            'name': "dc"}),
+                     Z.set({'identifier': "info:srw/cql-context-set/2/rec-1.1",
+                            'name': "rec"}),
+                     Z.index(
+                         {'{http://www.cheshire3.org/schemas/explain/}index': "idx-identifier"},
+                         Z.title("Record Identifier"),
+                         Z.map(
+                             Z.name({'set': "rec"}, "identifier"),
+                         ),
+                         Z.configInfo(
+                             Z.supports({'type': "relation"}, "exact"),
+                             Z.supports({'type': "relation"}, "="),
+                             Z.supports({'type': "relation"}, "any"),
+                             Z.supports({'type': "relation"}, "all"),
+                             Z.supports({'type': "relation"}, "<"),
+                             Z.supports({'type': "relation"}, "<="),
+                             Z.supports({'type': "relation"}, ">"),
+                             Z.supports({'type': "relation"}, ">="),
+                             Z.supports({'type': "relation"}, "within"),
+                         ),
+                     ),
+                     Z.index(
+                         {'{http://www.cheshire3.org/schemas/explain/}index': "idx-creationDate"},
+                         Z.title("Record Creation Date"),
+                         Z.map(
+                             Z.name({'set': "rec"}, "creationDate"),
+                         ),
+                         Z.configInfo(
+                             Z.supports({'type': "relation"}, "exact"),
+                             Z.supports({'type': "relation"}, "="),
+                             Z.supports({'type': "relation"}, "<"),
+                             Z.supports({'type': "relation"}, "<="),
+                             Z.supports({'type': "relation"}, ">"),
+                             Z.supports({'type': "relation"}, ">="),
+                             Z.supports({'type': "relation"}, "within"),
+                         ),
+                     ),
+                     Z.index(
+                         {'{http://www.cheshire3.org/schemas/explain/}index': "idx-modificationDate"},
+                         Z.title("Record Modification Date"),
+                         Z.map(
+                             Z.name({'set': "rec"}, "modificationDate"),
+                         ),
+                         Z.configInfo(
+                             Z.supports({'type': "relation"}, "exact"),
+                             Z.supports({'type': "relation"}, "="),
+                             Z.supports({'type': "relation"}, "<"),
+                             Z.supports({'type': "relation"}, "<="),
+                             Z.supports({'type': "relation"}, ">"),
+                             Z.supports({'type': "relation"}, ">="),
+                             Z.supports({'type': "relation"}, "within"),
+                         ),
+                     ),
+                     Z.index(
+                         {'{http://www.cheshire3.org/schemas/explain/}index': "idx-anywhere"},
+                         Z.title("Anywhere / Full-text Keywords"),
+                         Z.map(
+                             Z.name({'set': "cql"}, "anywhere"),
+                         ),
+                         Z.configInfo(
+                             Z.supports({'type': "relation"}, "="),
+                             Z.supports({'type': "relation"}, "any"),
+                             Z.supports({'type': "relation"}, "all"),
+                             Z.supports({'type': "relationModifier"}, "word"),
+                         ),
+                     ),
+                 ),
+                 Z.configInfo(
+                     Z.default({'type': "numberOfRecords"}, "1"),
+                     Z.default({'type': "contextSet"}, "cql"),
+                     Z.default({'type': "index"}, "cql.anywhere"),
+                     Z.default({'type': "relation"}, "all"),
+                     Z.default({'type': "sortCaseSensitive"}, "false"),
+                     Z.default({'type': "sortAscending"}, "true"),
+                     Z.default({'type': "sortMissingValue"}, "HighValue"),
+                     Z.setting({'type': "maximumRecords"}, "50"),
+                     Z.supports({'type': "resultSets"}),
+                     Z.supports({'type': "sort"}),
+                     Z.supports({'type': "relationModifier"}, "relevant"),
+                     Z.supports({'type': "relationModifier"}, "word"),
+                 ),
+             )
+    return zeerex
+
+
 def include_configByPath(config, path):
     """Modify 'config' to include file found at 'path', return 'config'.
     
@@ -331,7 +462,10 @@ Please specify a different id using the --database option.""".format(dbid)
     xmlFilesToWrite[dbConfigPath] = dbConfig 
     
     # Generate Protocol Map(s) (ZeeRex)
-                   
+    zrx = create_defaultZeerex(dbid, args)
+    zrxPath = os.path.join(c3_dir, 'zeerex_sru.xml')
+    xmlFilesToWrite[zrxPath] = zrx
+    
     # Generate config for generic selectors
     selectorConfig = create_defaultConfigSelectors()
     path = os.path.join(c3_dir, 'configSelectors.xml')
@@ -395,7 +529,16 @@ argparser.add_argument('-c', '--description', type=str,
                   action='store', dest='description',
                   default="", metavar='DESCRIPTION',
                   help="Description of the Cheshire3 database to init.")
+argparser.add_argument('-p', '--port', type=int,
+                  action='store', dest='port',
+                  default=0, metavar='PORT',
+                  help="Port on which Cheshire3 database will be served via SRU.")
 
+
+# Set up ElementMaker for ZeeRex and Cheshire3 Explain namespaces
+Z = ElementMaker(namespace="http://explain.z3950.org/dtd/2.0/",
+                  nsmap={None: "http://explain.z3950.org/dtd/2.0/",
+                         'c3': "http://www.cheshire3.org/schemas/explain/"})
 
 session = None
 server = None
