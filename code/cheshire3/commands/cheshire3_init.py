@@ -79,15 +79,17 @@ def create_defaultConfigSelectors():
             E.subConfig(
                 {'type': "selector",
                  'id': "idSelector"},
+                E.docs("Record identifier attribute Selector"),
                 E.objectType("cheshire3.selector.MetadataSelector"),
                 E.source(
                     E.location({'type': "attribute"}, "id"),
                 ),
             ),
-            # Load Time Function Selector
+            # Current Time Function Selector
             E.subConfig(
                 {'type': "selector",
                  'id': "nowTimeSelector"},
+                E.docs("Current time function Selector"),
                 E.objectType("cheshire3.selector.MetadataSelector"),
                 E.source(
                     E.location({'type': "function"}, "now()"),
@@ -96,7 +98,8 @@ def create_defaultConfigSelectors():
             # Anywhere XPath Selector
             E.subConfig(
                 {'type': "selector",
-                 'id': "anywhereXpathSelector"},
+                 'id': "anywhereXPathSelector"},
+                E.docs("Anywhere XPath Selector"),
                 E.objectType("cheshire3.selector.XPathSelector"),
                 E.source(
                     E.location({'type': "xpath"}, "/*"),
