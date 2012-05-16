@@ -63,12 +63,6 @@ def create_defaultConfig(identifier, defaultPath):
                            'recordStore'),
                 )
             ),
-            E.path({'type': "includeConfigs"},
-                   os.path.join(".cheshire3", "configSelectors.xml")
-            ),
-            E.path({'type': "includeConfigs"},
-                   os.path.join(".cheshire3", "configIndexes.xml")
-            ),
         ),
     )
     return config
@@ -322,27 +316,35 @@ Please specify a different id.""".format(dbid)
             # Directory already exists
             server.log_error(session, 
                              "directory already exists {0}".format(dir_path))
-    # Generate Protocol Map(s) (ZeeRex)
+    
     # Generate config file(s)
-    # Generate config for generic selectors
-    with open(os.path.join(c3_dir, 'configSelectors.xml'), 'w') as conffh:
-        config = create_defaultConfigSelectors()
-        conffh.write(etree.tostring(config, 
-                                    pretty_print=True,
-                                    encoding="utf-8"))
-    # Generate config for generic indexes
-    with open(os.path.join(c3_dir, 'configIndexes.xml'), 'w') as conffh:
-        config = create_defaultConfigIndexes()
-        conffh.write(etree.tostring(config, 
-                                    pretty_print=True,
-                                    encoding="utf-8"))
+    configs = []
     # Generate generic database config
-    with open(os.path.join(c3_dir, 'config.xml'), 'w') as conffh:
-        config = create_defaultConfig(dbid, args.directory)
-        conffh.write(etree.tostring(config, 
-                                    pretty_print=True,
-                                    encoding="utf-8"))
-        
+    dbConfig = create_defaultConfig(dbid, args.directory)
+    dbConfigPath = os.path.join(c3_dir, 'config.xml')
+    configs.append((dbConfigPath, dbConfig))
+    
+    # Generate Protocol Map(s) (ZeeRex)
+                   
+    # Generate config for generic selectors
+    selectorConfig = create_defaultConfigSelectors()
+    path = os.path.join(c3_dir, 'configSelectors.xml')
+    include_configByPath(dbConfig, path)
+    configs.append((path, selectorConfig))
+    
+    # Generate config for generic indexes
+    indexConfig = create_defaultConfigIndexes()
+    path = os.path.join(c3_dir, 'configIndexes.xml')
+    include_configByPath(dbConfig, path)
+    configs.append((path, indexConfig))
+    
+    # Write configs to files
+    for path, node in configs:
+        with open(path, 'w') as conffh:
+            conffh.write(etree.tostring(node, 
+                                        pretty_print=True,
+                                        encoding="utf-8"))
+    
     # Insert database into server configuration
     return 0
 
@@ -358,10 +360,9 @@ argparser.add_argument('-d', '--database', type=str,
                   help="identifier of Cheshire3 database to init. default: db_<current-working-dir>")
 
 
-
 session = None
 server = None
 db = None
-   
+
 if __name__ == '__main__':
     main(sys.argv)
