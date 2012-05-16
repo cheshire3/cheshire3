@@ -10,6 +10,7 @@ from lxml.builder import E
 
 from cheshire3.server import SimpleServer
 from cheshire3.session import Session
+from cheshire3.internal import cheshire3Root
 from cheshire3.exceptions import ObjectDoesNotExistException
 from cheshire3.commands.cmd_utils import Cheshire3ArgumentParser
 
@@ -318,34 +319,35 @@ Please specify a different id.""".format(dbid)
                              "directory already exists {0}".format(dir_path))
     
     # Generate config file(s)
-    configs = []
+    xmlFilesToWrite = {}
     # Generate generic database config
     dbConfig = create_defaultConfig(dbid, args.directory)
     dbConfigPath = os.path.join(c3_dir, 'config.xml')
-    configs.append((dbConfigPath, dbConfig))
+    xmlFilesToWrite[dbConfigPath] = dbConfig 
     
     # Generate Protocol Map(s) (ZeeRex)
                    
     # Generate config for generic selectors
     selectorConfig = create_defaultConfigSelectors()
     path = os.path.join(c3_dir, 'configSelectors.xml')
-    include_configByPath(dbConfig, path)
-    configs.append((path, selectorConfig))
+    dbConfig = include_configByPath(dbConfig, path)
+    xmlFilesToWrite[path] = selectorConfig 
     
     # Generate config for generic indexes
     indexConfig = create_defaultConfigIndexes()
     path = os.path.join(c3_dir, 'configIndexes.xml')
-    include_configByPath(dbConfig, path)
-    configs.append((path, indexConfig))
+    dbConfig = include_configByPath(dbConfig, path)
+    xmlFilesToWrite[path] = indexConfig
     
+    # Insert database into server configuration
+
     # Write configs to files
-    for path, node in configs:
+    for path, node in xmlFilesToWrite.iteritems():
         with open(path, 'w') as conffh:
             conffh.write(etree.tostring(node, 
                                         pretty_print=True,
                                         encoding="utf-8"))
     
-    # Insert database into server configuration
     return 0
 
 
