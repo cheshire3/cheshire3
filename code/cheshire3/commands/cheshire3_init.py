@@ -15,8 +15,13 @@ from cheshire3.exceptions import ObjectDoesNotExistException
 from cheshire3.commands.cmd_utils import Cheshire3ArgumentParser
 
 
-def create_defaultConfig(identifier, defaultPath):
-    """Create and return a generic database configuration."""
+def create_defaultConfig(identifier, args):
+    """Create and return a generic database configuration.
+    
+    identifier := string
+    args := argparse.Namespace
+    """
+    defaultPath = args.directory
     config = E.config(
         {'id': identifier,
          'type': 'database'},
@@ -313,7 +318,7 @@ Please specify a different id using the --database option.""".format(dbid)
     # Generate config file(s)
     xmlFilesToWrite = {}
     # Generate generic database config
-    dbConfig = create_defaultConfig(dbid, args.directory)
+    dbConfig = create_defaultConfig(dbid, args)
     dbConfigPath = os.path.join(c3_dir, 'config.xml')
     xmlFilesToWrite[dbConfigPath] = dbConfig 
     
