@@ -253,6 +253,27 @@ def create_defaultConfigIndexes():
     return config
 
 
+def include_configByPath(config, path):
+    """Modify 'config' to include file found at 'path', return 'config'.
+    
+    config := lxml.etree.Element
+    path := string/unicode
+    """
+    try:
+        subConfigs = config.xpath('/config/subConfigs')[-1]
+    except IndexError:
+        # Element for subConfigs does not exist - create it
+        subConfigs = E.subConfigs()
+        config.append(subConfigs)
+        
+    subConfigs.append(E.path(
+                          {'type': "includeConfigs"},
+                          path
+                      )
+    )
+    return config
+
+
 def main(argv=None):
     """Initialize a Cheshire 3 database based on parameters in argv."""
     global argparser, session, server, db
