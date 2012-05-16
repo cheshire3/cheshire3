@@ -71,6 +71,14 @@ def create_defaultConfig(identifier, args):
             ),
         ),
     )
+    # Add database docs if provided
+    if args.title and args.description:
+        config.insert(0, E.docs("{0.title} - {0.description}".format(args)))
+    elif args.title:
+        config.insert(0, E.docs(args.title))
+    elif args.description:
+        config.insert(0, E.docs(args.description))
+        
     return config
 
 
@@ -379,6 +387,14 @@ argparser.add_argument('-d', '--database', type=str,
                   action='store', dest='database',
                   default=None, metavar='DATABASE',
                   help="identifier of Cheshire3 database to init. default: db_<current-working-dir>")
+argparser.add_argument('-t', '--title', type=str,
+                  action='store', dest='title',
+                  default="", metavar='TITLE',
+                  help="Title for the Cheshire3 database to init.")
+argparser.add_argument('-c', '--description', type=str,
+                  action='store', dest='description',
+                  default="", metavar='DESCRIPTION',
+                  help="Description of the Cheshire3 database to init.")
 
 
 session = None
