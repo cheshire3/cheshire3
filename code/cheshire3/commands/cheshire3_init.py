@@ -63,8 +63,11 @@ def create_defaultConfig(identifier, defaultPath):
                            'recordStore'),
                 )
             ),
-            E.path({'type': "includeConfigs"}, 
+            E.path({'type': "includeConfigs"},
                    os.path.join(".cheshire3", "configSelectors.xml")
+            ),
+            E.path({'type': "includeConfigs"},
+                   os.path.join(".cheshire3", "configIndexes.xml")
             ),
         ),
     )
@@ -103,6 +106,146 @@ def create_defaultConfigSelectors():
                 E.objectType("cheshire3.selector.XPathSelector"),
                 E.source(
                     E.location({'type': "xpath"}, "/*"),
+                ),
+            ),
+        ),
+    )
+    return config
+
+
+def create_defaultConfigIndexes():
+    """Create and return configuration for generic indexes."""
+    config = E.config(
+        E.subConfigs(
+            # Identifier Index
+            E.subConfig(
+                {'type': "index",
+                 'id': "idx-identifier"},
+                E.docs("Identifier Index"),
+                E.objectType("cheshire3.index.SimpleIndex"),
+                E.paths(
+                    E.path({'type': "indexStore",
+                            'ref': "indexStore"}),
+                ),
+                E.source(
+                    E.selector({'ref': "identifierSelector"}),
+                    E.process(
+                        E.object({'type': "extractor",
+                                  'ref': "SimpleExtractor"}),
+                    ),
+                ),
+            ),
+            # Created Time Index
+            E.subConfig(
+                {'type': "index",
+                 'id': "idx-creationDate"},
+                E.docs("Created Time Index"),
+                E.objectType("cheshire3.index.SimpleIndex"),
+                E.paths(
+                    E.path({'type': "indexStore",
+                            'ref': "indexStore"}),
+                ),
+                E.source(
+                    E.selector({'ref': "nowTimeSelector"}),
+                    E.process(
+                        E.object({'type': "extractor",
+                                  'ref': "SimpleExtractor"}),
+                        E.object({'type': "extractor",
+                                  'ref': "DateTokenizer"}),
+                        E.object({'type': "extractor",
+                                  'ref': "SimpleTokenMerger"}),
+                    ),
+                ),
+                E.options(
+                    # Don't index or unindex in db.[un]index_record()
+                    E.setting({'type': "noIndexDefault"}, "1"),
+                    E.setting({'type': "noUnindexDefault"}, "1"),
+                    # Need vectors to unindex these in future
+                    E.setting({'type': "vectors"}, "1"),
+                ),
+            ),
+            # Modified Time Index
+            E.subConfig(
+                {'type': "index",
+                 'id': "idx-modificationDate"},
+                E.docs("Modified Time Index"),
+                E.objectType("cheshire3.index.SimpleIndex"),
+                E.paths(
+                    E.path({'type': "indexStore",
+                            'ref': "indexStore"}),
+                ),
+                E.source(
+                    E.selector({'ref': "nowTimeSelector"}),
+                    E.process(
+                        E.object({'type': "extractor",
+                                  'ref': "SimpleExtractor"}),
+                        E.object({'type': "extractor",
+                                  'ref': "DateTokenizer"}),
+                        E.object({'type': "extractor",
+                                  'ref': "SimpleTokenMerger"}),
+                    ),
+                ),
+                E.options(
+                    # Need vectors to unindex these in future
+                    E.setting({'type': "vectors"}, "1")
+                ),
+            ),
+            # Anywhere / Full-text Index
+            E.subConfig(
+                {'type': "index",
+                 'id': "idx-anywhere"},
+                E.docs("Anywhere / Full-text Index"),
+                E.objectType("cheshire3.index.SimpleIndex"),
+                E.paths(
+                    E.path({'type': "indexStore",
+                            'ref': "indexStore"}),
+                ),
+                # Source when processing data
+                E.source(
+                    {'mode': "data"},
+                    E.selector({'ref': "anywhereXPathSelector"}),
+                    E.process(
+                        E.object({'type': "extractor",
+                                  'ref': "SimpleExtractor"}),
+                        E.object({'type': "tokenizer",
+                                  'ref': "RegexpFindTokenizer"}),
+                        E.object({'type': "tokenMerger",
+                                  'ref': "SimpleTokenMerger"}),
+                    ),
+                ),
+                # Source when processing all, any, = queries
+                E.source(
+                    {'mode': "all|any|="},
+                    E.process(
+                        E.object({'type': "extractor",
+                                  'ref': "SimpleExtractor"}),
+                        E.object({'type': "tokenizer",
+                                  'ref': "PreserveMaskingTokenizer"}),
+                        E.object({'type': "tokenMerger",
+                                  'ref': "SimpleTokenMerger"}),
+                        E.object({'type': "normalizer",
+                                  'ref': "DiacriticNormalizer"}),
+                        E.object({'type': "normalizer",
+                                  'ref': "CaseNormalizer"}),
+                    ),
+                ),
+                # Source when processing exact queries
+                E.source(
+                    {'mode': "exact"},
+                    E.process(
+                        E.object({'type': "extractor",
+                                  'ref': "SimpleExtractor"}),
+                        E.object({'type': "tokenizer",
+                                  'ref': "PreserveMaskingTokenizer"}),
+                        E.object({'type': "tokenMerger",
+                                  'ref': "SimpleTokenMerger"}),
+                        E.object({'type': "normalizer",
+                                  'ref': "SpaceNormalizer"}),
+                        E.object({'type': "normalizer",
+                                  'ref': "DiacriticNormalizer"}),
+                        E.object({'type': "normalizer",
+                                  'ref': "CaseNormalizer"}),
+                    ),
                 ),
             ),
         ),
@@ -163,6 +306,12 @@ Please specify a different id.""".format(dbid)
     # Generate config for generic selectors
     with open(os.path.join(c3_dir, 'configSelectors.xml'), 'w') as conffh:
         config = create_defaultConfigSelectors()
+        conffh.write(etree.tostring(config, 
+                                    pretty_print=True,
+                                    encoding="utf-8"))
+    # Generate config for generic indexes
+    with open(os.path.join(c3_dir, 'configIndexes.xml'), 'w') as conffh:
+        config = create_defaultConfigIndexes()
         conffh.write(etree.tostring(config, 
                                     pretty_print=True,
                                     encoding="utf-8"))
