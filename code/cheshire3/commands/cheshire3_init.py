@@ -307,7 +307,7 @@ Please specify a different id using the --database option.""".format(dbid)
             os.makedirs(dir_path)
         except OSError:
             # Directory already exists
-            server.log_error(session, 
+            server.log_warning(session, 
                              "directory already exists {0}".format(dir_path))
     
     # Generate config file(s)
