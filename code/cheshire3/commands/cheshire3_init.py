@@ -37,6 +37,8 @@ def create_defaultConfig(identifier, args):
                    ),
             E.object({'type': "recordStore",
                       'ref': "recordStore"}),
+            E.object({'type': "protocolMap",
+                      'ref': "cqlProtocolMap"}),
             E.path({'type': "indexStoreList"}, "indexStore"),
         ),
         E.subConfigs(
@@ -70,6 +72,15 @@ def create_defaultConfig(identifier, args):
                     E.path({'type': "recordStoreHash"},
                            'recordStore'),
                 )
+            ),
+            # protocolMap
+            E.subConfig(
+                {'type': "protocolMap",
+                 'id': "cqlProtocolMap"},
+                E.objectType("cheshire3.protocolMap.CQLProtocolMap"),
+                E.paths(
+                    E.path({'type': "zeerexPath"}, args.zeerexPath)
+                ),
             ),
         ),
     )
@@ -456,15 +467,17 @@ Please specify a different id using the --database option.""".format(dbid)
     
     # Generate config file(s)
     xmlFilesToWrite = {}
-    # Generate generic database config
-    dbConfig = create_defaultConfig(dbid, args)
-    dbConfigPath = os.path.join(c3_dir, 'config.xml')
-    xmlFilesToWrite[dbConfigPath] = dbConfig 
     
     # Generate Protocol Map(s) (ZeeRex)
     zrx = create_defaultZeerex(dbid, args)
     zrxPath = os.path.join(c3_dir, 'zeerex_sru.xml')
+    args.zeerexPath = zrxPath
     xmlFilesToWrite[zrxPath] = zrx
+    
+    # Generate generic database config
+    dbConfig = create_defaultConfig(dbid, args)
+    dbConfigPath = os.path.join(c3_dir, 'config.xml')
+    xmlFilesToWrite[dbConfigPath] = dbConfig 
     
     # Generate config for generic selectors
     selectorConfig = create_defaultConfigSelectors()
