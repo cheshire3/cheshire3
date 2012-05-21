@@ -1,4 +1,4 @@
-"""Initialize a Cheshire 3 database."""
+"""Initialize a Cheshire3 database."""
 
 from __future__ import with_statement
 
