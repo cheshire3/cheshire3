@@ -23,6 +23,16 @@ class Cheshire3Console(InteractiveConsole):
         for line in init_code_lines:
             self.push(line)
             
+    def push(self, line):
+        if line.strip() == 'help':
+            # Write some Cheshire3 help
+            return
+        elif line.strip() == 'copyright':
+            # Write Cheshire3 copyright info, before that of Python
+            self.write('Cheshire3 is Copyright (c) 2005-2012, the University of Liverpool.\n')
+            self.write('All rights reserved.\n\n')
+        return InteractiveConsole.push(self, line)
+            
     def interact(self, banner=None):
         """Emulate the standard interactive Python console.
         
