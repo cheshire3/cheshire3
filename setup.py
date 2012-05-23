@@ -1,4 +1,5 @@
 # Setup file for cheshire3 package
+
 import sys
 import os
 import inspect
@@ -77,6 +78,7 @@ setup(
             'cheshire3 = cheshire3.commands.cheshire3_console:main',
             'cheshire3-init = cheshire3.commands.cheshire3_init:main',
             'cheshire3-load = cheshire3.commands.cheshire3_load:main',
+            'cheshire3-search = cheshire3.commands.cheshire3_search:main',
         ],
     },
     keywords = u"xml document search information retrieval engine data text",
