@@ -3,13 +3,11 @@
 import sys
 import os
 
-from lxml import etree
-
 from cheshire3.server import SimpleServer
 from cheshire3.session import Session
-from cheshire3.internal import cheshire3Root
 from cheshire3.exceptions import ObjectDoesNotExistException
 from cheshire3.commands.cmd_utils import Cheshire3ArgumentParser, identify_database
+
 
 def main(argv=None):
     """Load data into a Cheshire3 database based on parameters in argv."""
