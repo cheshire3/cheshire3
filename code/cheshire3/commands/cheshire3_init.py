@@ -145,7 +145,7 @@ def create_defaultConfigIndexes():
                 E.docs("Identifier Index"),
                 E.objectType("cheshire3.index.SimpleIndex"),
                 E.paths(
-                    E.path({'type': "indexStore",
+                    E.object({'type': "indexStore",
                             'ref': "indexStore"}),
                 ),
                 E.source(
@@ -163,7 +163,7 @@ def create_defaultConfigIndexes():
                 E.docs("Created Time Index"),
                 E.objectType("cheshire3.index.SimpleIndex"),
                 E.paths(
-                    E.path({'type': "indexStore",
+                    E.object({'type': "indexStore",
                             'ref': "indexStore"}),
                 ),
                 E.source(
@@ -192,7 +192,7 @@ def create_defaultConfigIndexes():
                 E.docs("Modified Time Index"),
                 E.objectType("cheshire3.index.SimpleIndex"),
                 E.paths(
-                    E.path({'type': "indexStore",
+                    E.object({'type': "indexStore",
                             'ref': "indexStore"}),
                 ),
                 E.source(
@@ -218,7 +218,7 @@ def create_defaultConfigIndexes():
                 E.docs("Anywhere / Full-text Index"),
                 E.objectType("cheshire3.index.SimpleIndex"),
                 E.paths(
-                    E.path({'type': "indexStore",
+                    E.object({'type': "indexStore",
                             'ref': "indexStore"}),
                 ),
                 # Source when processing data
