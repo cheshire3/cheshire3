@@ -9,6 +9,29 @@ from cheshire3.exceptions import ObjectDoesNotExistException
 from cheshire3.commands.cmd_utils import Cheshire3ArgumentParser, identify_database
 
 
+def format_resultSet(resultSet, outStream=sys.stdout, 
+                     maximumRecords=10, startRecord=1):
+    """Format and write resultSet to outstream.
+    
+    resultSet := instance of (sub-class of) cheshire3.baseObjects.ResultSet
+    outStream := file-like object for writing to. defaults to sys.stdout
+    maxRecords := maximum number of hits to display (int)
+    startRecord := where in the recordStore to start from (enables result paging)
+                   first record in resultSet = 1 (not 0) 
+    """
+    hits = len(resultSet)
+    outStream.write("searched: {0}\n".format(resultSet.query.toCQL()))
+    outStream.write("{0} hits\n".format(hits))
+    # Fencepost.  startRecord starts at 1, C3 ResultSetstarts at 0
+    startRecord = startRecord - 1
+    end = min(startRecord + maximumRecords, hits)
+    for rIdx in range(startRecord, end):
+        resultSetItem = resultSet[rIdx]
+        outStream.write("{0.resultSetPosition} {0}\n".format(resultSetItem))
+    outStream.flush()
+    return 0
+
+
 def main(argv=None):
     """Search a Cheshire3 database based on query in argv."""
     global argparser, session, server, db
@@ -42,7 +65,7 @@ Please provide a different database identifier using the --database option.
         qFac = db.get_object(session, 'defaultQueryFactory')
         query = qFac.get_query(session, args.query, format=args.format)
         resultSet = db.search(session, query)
-        return 0
+        return format_resultSet(resultSet)
 
 
 argparser = Cheshire3ArgumentParser(conflict_handler='resolve')
