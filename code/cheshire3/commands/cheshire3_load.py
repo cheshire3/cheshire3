@@ -40,7 +40,11 @@ Please provide a different database identifier using the --database option.
         return 2
     else:
         docFac = db.get_object(session, 'defaultDocumentFactory')
-        docFac.load(session, args.data)
+        docFac.load(session, args.data, 
+                    args.cache, args.format, args.tagname, args.codec)
+        for doc in docFac:
+            pass
+#            server.log_debug(session, doc.get_raw(session))
         wf = db.get_object(session, 'buildIndexWorkflow')
         wf.process(session, docFac)
 
@@ -48,6 +52,32 @@ Please provide a different database identifier using the --database option.
 argparser = Cheshire3ArgumentParser(conflict_handler='resolve')
 argparser.add_argument('data', type=str, action='store',
                        help="data to load into the Cheshire3 database.")
+argparser.add_argument('-l', '--cache-level', type=int, 
+                   action='store', dest='cache',
+                   default=0, metavar='CACHE',
+                   help="""level of in memory caching to use when reading \
+documents in. For details, see: \
+https://github.com/cheshire3/cheshire3#loading-data"""
+                       )
+argparser.add_argument('-f', '--format', type=str,
+                  action='store', dest='format',
+                  default=None, metavar='FORMAT',
+                  help="""format of the data parameter. For details, see: \
+https://github.com/cheshire3/cheshire3#loading-data"""
+                       )
+argparser.add_argument('-t', '--tagname', type=str,
+                   action='store', dest='tagname',
+                   default=None, metavar='TAGNAME',
+                   help="""the name of the tag which starts (and ends!) a \
+record. This is useful for extracting sections of documents and ignoring the \
+rest of the XML in the file."""
+                       )
+argparser.add_argument('-c', '--codec', type=str,
+                   action='store', dest='codec',
+                   default=None, metavar='CODEC',
+                   help="""the name of the codec in which the data is encoded. \
+Commonly 'ascii' or 'utf-8'"""
+                   )
 
 session = None
 server = None
