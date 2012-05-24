@@ -19,7 +19,7 @@
 # 0.04 - 2005/11/03 - JH - Starts and uses a local copy of multivalent server if a path to it is provided
 #                        - Also provides a method close_mvServer to close the external server cleanly
 #
-
+from __future__ import absolute_import
 
 from cheshire3.baseObjects import PreParser
 from cheshire3.document import StringDocument
