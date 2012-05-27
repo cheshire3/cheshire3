@@ -54,8 +54,11 @@ setup(
     package_dir = {'': 'code'},
     include_package_data = True,
     exclude_package_data = {'': ['README.mdown']},
-    requires=['lxml(>=2.1)', 'bsddb', 'dateutil'],
-    install_requires=['lxml >= 2.1', dateutilstr, 'zopyx.txng3.ext == 3.3.1'],
+    requires=['lxml(>=2.1)', 'bsddb', 'dateutil', 'unittest2'],
+    install_requires=['lxml >= 2.1', 
+                      dateutilstr, 
+                      'zopyx.txng3.ext == 3.3.1',
+                      'unittest2'],
     dependency_links = [
     	"http://labix.org/python-dateutil"
 	],

@@ -6,7 +6,11 @@ be instantiated using configuration data defined within this testing module,
 and tests carried out on instances.
 """
 
-import unittest
+try:
+    import unittest2 as unittest
+except ImportError:
+    import unittest
+
 import string
 
 from lxml import etree
