@@ -9,7 +9,7 @@ from cheshire3.xpathProcessor import SimpleXPathProcessor
 from lxml import etree
 
 import re, os, cStringIO
-import codecs, types
+import codecs
 import mimetypes
 import zipfile, tarfile
 
@@ -599,7 +599,7 @@ class ComponentDocumentStream(BaseDocumentStream):
             raw = src.process_record(session, rec)
             for xp in raw:
                 for r in xp:
-                    if (type(r) == types.ListType):
+                    if isinstance(r, list):
                         tempRec = SaxRecord(r)
                         docstr = tempRec.get_xml(session)
                         hasNs = hasNsRe.search(docstr)
@@ -608,10 +608,10 @@ class ComponentDocumentStream(BaseDocumentStream):
                             docstr = "<c3:component xmlns:c3=\"http://www.cheshire3.org/schemas/component/\" parent=\"%r\" event=\"%s\">%s</c3:component>" % (rec, saxid, docstr)
                         else:
                             docstr = "<c3component parent=\"%r\" event=\"%s\">%s</c3component>" % (rec, saxid, docstr)
-                    elif (type(r) == types.StringType):
+                    elif isinstance(r, basestring):
                         docstr = "<c3component parent=\"%r\"><data>%s</data></c3component>" % (rec, escape(r))
                     else:
-                        if r.__class__ == etree._Element:
+                        if isinstance(r, etree._Element):
                             # Lxml Record
                             docstr = etree.tostring(r)
                             tree = r.getroottree()
