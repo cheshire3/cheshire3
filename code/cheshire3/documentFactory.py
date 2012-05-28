@@ -598,6 +598,35 @@ class ComponentDocumentStream(BaseDocumentStream):
         for src in self.sources:
             raw = src.process_record(session, rec)
             for xp in raw:
+                if (isinstance(xp, tuple) and 
+                    len(xp) == 2 and 
+                    isinstance(xp[0], etree._Element)):
+                    # Result of a SpanXPathSelector (startNoe, endNode)
+                    r = xp[0]
+                    doc = [etree.tostring(r)]
+                    for x in r.itersiblings():
+                        if x == xp[1]:
+                            break
+                        else:
+                            doc.append(etree.tostring(x))
+                    docstr = ''.join(doc)
+                    tree = r.getroottree()
+                    path = tree.getpath(r)
+                    if (r.nsmap):
+                        namespaceList = []
+                        for (pref, ns) in r.nsmap.iteritems():
+                            namespaceList.append("xmlns:%s=\"%s\"" % (pref, ns))
+                        namespaces = " ".join(namespaceList)
+                        docstr = """<c3:component xmlns:c3="http://www.cheshire3.org/schemas/component/" %s parent="%r" xpath="%s">%s</c3component>""".format(namespaces, rec, path, docstr)
+                    else:
+                        docstr = """<c3component parent="%r" xpath="%s">%s</c3component>""" % (rec, path, docstr)
+                    doc = StringDocument(docstr)
+                    if cache == 0:
+                        yield doc
+                    else:
+                        self.documents.append(doc)
+                    continue
+                # Iterate through selected data
                 for r in xp:
                     if isinstance(r, list):
                         tempRec = SaxRecord(r)
