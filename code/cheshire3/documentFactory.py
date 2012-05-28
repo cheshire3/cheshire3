@@ -1,17 +1,20 @@
 
+import os
+import re
+import cStringIO
+import codecs
+import mimetypes
+import zipfile
+import tarfile
+
+from lxml import etree
+
 from cheshire3.baseObjects import DocumentFactory
 from cheshire3.document import StringDocument
 from cheshire3.record import SaxRecord
 from cheshire3.utils import elementType, getFirstData, flattenTexts, getShellResult
 from cheshire3.workflow import CachingWorkflow
 from cheshire3.xpathProcessor import SimpleXPathProcessor
-
-from lxml import etree
-
-import re, os, cStringIO
-import codecs
-import mimetypes
-import zipfile, tarfile
 
 mimetypes.add_type('application/marc', '.marc')
 sliceRe = re.compile('^(.*)\[([0-9]+):([-0-9]+)\]$')
