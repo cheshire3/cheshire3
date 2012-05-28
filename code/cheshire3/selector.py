@@ -182,8 +182,8 @@ class SpanXPathSelector(SimpleSelector):
         tree = etree.fromstring(record.get_xml(session))
         # Find all of the start nodes
         startNodes = tree.xpath(startPath)
-        # Initialize empty tuple
-        tuple = (None, None)
+        # Initialize empty startEndPair
+        startEndPair = (None, None)
         if startPath == endPath:
             # Paths are the same - copy the start nodes
             endNodes = startNodes[:]
@@ -191,18 +191,18 @@ class SpanXPathSelector(SimpleSelector):
             for elem in tree.iter():
                 if elem in startNodes:
                     # When we hit a node from the start node list
-                    if tuple[0] is None:
-                        # we don't have a start node in our tuple
+                    if startEndPair[0] is None:
+                        # we don't have a start node in our startEndPair
                         # put this one in as the start node
-                        tuple = (elem, tuple[1])
+                        startEndPair = (elem, startEndPair[1])
                     else:
                         # We already have a start node
                         # Add this as the end node
-                        tuple = (tuple[0], elem)
-                        # Append the tuple to the list
-                        vals.append(tuple) 
-                        # Start a new tuple with this as the start node 
-                        tuple = (elem, None)
+                        startEndPair = (startEndPair[0], elem)
+                        # Append the startEndPair to the list
+                        vals.append(startEndPair) 
+                        # Start a new startEndPair with this as the start node 
+                        startEndPair = (elem, None)
         else:
             # Start path and end path are different
             #
@@ -220,14 +220,14 @@ class SpanXPathSelector(SimpleSelector):
                 if elem in startNodes:
                     # When we hit a node from the start node list
                     # put this one in as the start node
-                    tuple = (elem, tuple[1])
-                elif elem in endNodes and tuple[0] is not None:
+                    startEndPair = (elem, startEndPair[1])
+                elif elem in endNodes and startEndPair[0] is not None:
                     # When we hit an end node and we already have a start node
                     # Add this as the end node
-                    tuple = (tuple[0], elem)
-                    # Append the tuple to the list
-                    vals.append(tuple)
-                    # Reset the tuple
-                    tuple = (None, None)       
+                    startEndPair = (startEndPair[0], elem)
+                    # Append the startEndPair to the list
+                    vals.append(startEndPair)
+                    # Reset the startEndPair
+                    startEndPair = (None, None)       
         return vals
     
