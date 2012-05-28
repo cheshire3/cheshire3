@@ -27,7 +27,7 @@ def format_resultSet(resultSet, outStream=sys.stdout,
     end = min(startRecord + maximumRecords, hits)
     for rIdx in range(startRecord, end):
         resultSetItem = resultSet[rIdx]
-        outStream.write("{0.resultSetPosition} {0}\n".format(resultSetItem))
+        outStream.write("{0} {1}\n".format(rIdx + 1, resultSetItem))
     outStream.flush()
     return 0
 
