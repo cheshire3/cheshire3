@@ -179,7 +179,12 @@ class SpanXPathSelector(SimpleSelector):
         vals = []
         startPath = self.sources[0][0]['string']
         endPath = self.sources[0][1]['string']
-        tree = etree.fromstring(record.get_xml(session))
+        if isinstance(record, LxmlRecord):
+            # Avoid unnecessary re-parsing
+            tree = record.get_dom(session)
+        else:
+            # Parse to an lxml.etree
+            tree = etree.fromstring(record.get_xml(session))
         # Find all of the start nodes
         startNodes = tree.xpath(startPath)
         # Initialize empty startEndPair
