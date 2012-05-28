@@ -65,7 +65,9 @@ Please provide a different database identifier using the --database option.
         qFac = db.get_object(session, 'defaultQueryFactory')
         query = qFac.get_query(session, args.query, format=args.format)
         resultSet = db.search(session, query)
-        return format_resultSet(resultSet)
+        return format_resultSet(resultSet, 
+                                maximumRecords=args.maxRecs, 
+                                startRecord=args.startRec)
 
 
 argparser = Cheshire3ArgumentParser(conflict_handler='resolve')
@@ -75,6 +77,15 @@ argparser.add_argument('-f', '--format', type=str,
                   action='store', dest='format',
                   default="cql", metavar='FORMAT',
                   help="format/language of query. default: cql (Contextual Query Language)")
+argparser.add_argument('-m', '--maximum-records', type=int,
+                  action='store', dest='maxRecs',
+                  default=10, metavar='MAXIMUM',
+                  help="maximum number of hits to display")
+argparser.add_argument('-s', '--start-record', type=int,
+                  action='store', dest='startRec',
+                  default=1, metavar='START',
+                  help="""point in the resultSet to start from (enables \
+result paging) first record in resultSet = 1 (not 0)""")
 
 
 session = None
