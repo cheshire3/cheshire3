@@ -1,13 +1,16 @@
 
 import os
 import re
-import cStringIO
 import codecs
 import mimetypes
 import zipfile
 import tarfile
 
 from lxml import etree
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from StringIO import StringIO
 
 from cheshire3.baseObjects import DocumentFactory
 from cheshire3.document import StringDocument
@@ -82,7 +85,7 @@ class BaseDocumentStream:
             else:
                 # is a string
                 self.streamLocation = "STRING"
-                return cStringIO.StringIO(stream)
+                return StringIO(stream)
             
     def fetch_document(self, idx):
         if self.length and idx >= self.length:
@@ -437,7 +440,7 @@ class TarDocumentStream(MultipleDocumentStream):
         elif os.path.exists(stream):
             return tarfile.open(stream, mode="r") # transparent 
         else:
-            s = cStringIO.StringIO(stream)
+            s = StringIO(stream)
             return tarfile.open(fileobj=s, mode="r|%s" % modeSuf)
             
     def _processFile(self, session, item):
@@ -467,11 +470,11 @@ class ZipDocumentStream(DirectoryDocumentStream):
         if hasattr(stream, 'read') or os.path.exists(stream):
             return zipfile.ZipFile(stream, mode="r")
         else:
-            s = cStringIO.StringIO(stream)
+            s = StringIO(stream)
             return zipfile.ZipFile(s, mode="r")
             
     def _fetchStream(self, path):
-        return cStringIO.StringIO(self.stream.read(path))
+        return StringIO(self.stream.read(path))
     
     def _fetchName(self, item):
         return item
