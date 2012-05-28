@@ -20,8 +20,8 @@ ComponentDocumentFactory
 from cheshire3.test.testConfigParser import Cheshire3ObjectTestCase
 
 
-class DocumentFactoryTestCase(Cheshire3ObjectTestCase):
-    """Base Class for Cheshire3 DocumentFactory Test Case."""
+class SimpleDocumentFactoryTestCase(Cheshire3ObjectTestCase):
+    """Cheshire3 SimpleDocumentFactory Test Case."""
     
     def _get_class(self):
         return SimpleDocumentFactory
@@ -33,8 +33,7 @@ class DocumentFactoryTestCase(Cheshire3ObjectTestCase):
 </subConfig>'''.format(self._get_class().__name__))
         
     def _get_testData(self):
-        return ['<doc/>',
-                '<doc><foo/><bar/><baz/></doc>']
+        return []
         
     def test_instance(self):
         self.assertIsInstance(self.testObj, self._get_class())
@@ -47,7 +46,7 @@ class DocumentFactoryTestCase(Cheshire3ObjectTestCase):
         
 
 class ComponentDocumentFactoryTestCase(DocumentFactoryTestCase):
-    """Simple ComponentDocumentFactory Test Case."""
+    """ComponentDocumentFactory Test Case with simple XPath selectors."""
     
     def _get_class(self):
         return ComponentDocumentFactory
@@ -66,10 +65,13 @@ class ComponentDocumentFactoryTestCase(DocumentFactoryTestCase):
         <default type="format">component</default>
     </options>
 </subConfig>'''.format(self._get_class().__name__))
+
+    def test_componentExtraction(self):
+        pass
     
 
 class SpanComponentDocumentFactoryTestCase(ComponentDocumentFactoryTestCase):
-    """Span ComponentDocumentFactory Test Case."""
+    """ComponentDocumentFactory Test Case with SpanXPathSelectors."""
     
     def _get_config(self):
         # Return a parsed config for the object to be tested
