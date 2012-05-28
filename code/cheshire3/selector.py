@@ -180,49 +180,54 @@ class SpanXPathSelector(SimpleSelector):
         startPath = self.sources[0][0]['string']
         endPath = self.sources[0][1]['string']
         tree = etree.fromstring(record.get_xml(session))
-        # get all the start nodes
+        # Find all of the start nodes
         startNodes = tree.xpath(startPath)
-        # get all the end nodes or copy the start nodes if the paths are the same
-        if endPath != startPath:
-            endNodes = tree.xpath(endPath)
-        else:
-            endNodes = startNodes[:]
-        
+        # Initialize empty tuple
         tuple = (None, None)
         if startPath == endPath:
-            # start path and end path are the same, treat as break points
+            # Paths are the same - copy the start nodes
+            endNodes = startNodes[:]
+            # Start path and end path are the same, treat as break points
             for elem in tree.iter():
-                # if we hit a node from the start node list
                 if elem in startNodes:
-                    # if we don't have a start node in our tuple put this one 
-                    # in the start node
+                    # When we hit a node from the start node list
                     if tuple[0] is None:
+                        # we don't have a start node in our tuple
+                        # put this one in as the start node
                         tuple = (elem, tuple[1])
-                    # if we do have a start node add this as the end node, 
-                    # start a new tuple and add this also as the start node 
-                    # of the next tuple
-                    else :
+                    else:
+                        # We already have a start node
+                        # Add this as the end node
                         tuple = (tuple[0], elem)
-                        vals.append(tuple)
+                        # Append the tuple to the list
+                        vals.append(tuple) 
+                        # Start a new tuple with this as the start node 
                         tuple = (elem, None)
         else:
-            # start path and end path are different - more complex
+            # Start path and end path are different
+            #
+            # N.B. this algorithm is non-greedy.
+            # The shortest span is always selected. If another start node is 
+            # hit before an end node occurs it will overwrite the first
+            #
+            # N.B. developers: this works slightly differently from the 
+            # previous SAX base version which treated the end of the record 
+            # as an end tag, this does not
+            #
+            # Find all the end nodes
+            endNodes = tree.xpath(endPath)
             for elem in tree.iter():
-                # if we hit a node from the start node list put it in first 
-                # position of the tuple 
-                # N.B. the shortest span is always selected, if another start 
-                # node is hit before an end node it will overwrite the first
                 if elem in startNodes:
+                    # When we hit a node from the start node list
+                    # put this one in as the start node
                     tuple = (elem, tuple[1])
-                # if we hit an end node and we already have a start node in 
-                # our tuple add the end node append the tuple to the list and 
-                # start a new one
-                # N.B. developers: this works slightly differently from the 
-                # previous SAX version which treated the end of the record 
-                # as an end tag this does not
                 elif elem in endNodes and tuple[0] is not None:
+                    # When we hit an end node and we already have a start node
+                    # Add this as the end node
                     tuple = (tuple[0], elem)
+                    # Append the tuple to the list
                     vals.append(tuple)
+                    # Reset the tuple
                     tuple = (None, None)       
         return vals
     
