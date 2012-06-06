@@ -14,7 +14,11 @@ except ImportError:
 from lxml import etree
 
 from cheshire3.document import Document, StringDocument
-from cheshire3.preParser import PreParser, UnicodeDecodePreParser
+from cheshire3.preParser import PreParser, UnicodeDecodePreParser, \
+    CmdLinePreParser, FileUtilPreParser, MagicRedirectPreParser, \
+    HtmlSmashPreParser, RegexpSmashPreParser, SgmlPreParser, AmpPreParser, \
+    MarcToXmlPreParser, MarcToSgmlPreParser, TxtToXmlPreParser,\
+    PicklePreParser, UnpicklePreParser
 from cheshire3.test.testConfigParser import Cheshire3ObjectTestCase
 
 
@@ -88,7 +92,12 @@ class ImplementedPreParserTestCase(PreParserTestCase):
 
 
 class UnicodeDecodePreParserTestCase(ImplementedPreParserTestCase):
-    """Base Class for Cheshire3 UnicodeDecodePreParser Test Cases."""
+    """Base Class for Cheshire3 UnicodeDecodePreParser Test Cases.
+    
+    A UnicodeDecodePreParser should accept a Document with content encoded in a
+    non-unicode character encoding scheme and return a Document with the same 
+    content decoded to Python's Unicode implementation.
+    """
     
     @classmethod
     def _get_class(self):
@@ -154,6 +163,142 @@ class Iso8859_1UnicodeDecodePreParserTestCase(UnicodeDecodePreParserTestCase):
         return 'iso-8859-1'
 
 
+class CmdLinePreParserTestCase(ImplementedPreParserTestCase):
+    """Cheshire3 CmdLinePreParser Unittests.
+    
+    A CmdLinePreParser should run a command in the native Operating System to
+    preParse the Document.
+    """
+    
+    @classmethod
+    def _get_class(self):
+        return CmdLinePreParser
+
+
+class FileUtilPreParserTestCase(ImplementedPreParserTestCase):
+    """Cheshire3 FileUtilPreParserTestCase Unittests.
+    
+    A FileUtilPreParserTestCase calls 'file' util to find out the current MIME
+    type of file.
+    """
+    
+    @classmethod
+    def _get_class(self):
+        return FileUtilPreParser
+
+
+class MagicRedirectPreParserTestCase(ImplementedPreParserTestCase):
+    """Cheshire3 MagicRedirectPreParser Unittests.
+
+    A MagicRedirectPreParser maps to another appropriate PreParser based on
+    the MIME type of the incoming Document.
+    """
+
+    @classmethod
+    def _get_class(self):
+        return MagicRedirectPreParser
+
+
+class HtmlSmashPreParserTestCase(ImplementedPreParserTestCase):
+    """Cheshire3 HtmlSmashPreParser Unittests.
+
+    An HtmlSmashPreParser attempts to reduce HTML to its raw text.
+    """
+
+    @classmethod
+    def _get_class(self):
+        return HtmlSmashPreParser
+
+
+class RegexpSmashPreParserTestCase(ImplementedPreParserTestCase):
+    """Cheshire3 RegexpSmashPreParser Unittests.
+
+    A RegexpSmashPreParser either strips, replaces or keeps only data which 
+    matches a given regular expression.
+    """
+    
+    @classmethod
+    def _get_class(self):
+        return RegexpSmashPreParser
+
+
+class SgmlPreParserTestCase(ImplementedPreParserTestCase):
+    """Cheshire3 SgmlPreParser Unittests.
+
+    A SgmlPreParser converts SGML into XML.
+    """
+
+    @classmethod
+    def _get_class(self):
+        return SgmlPreParser
+
+
+class AmpPreParserTestCase(ImplementedPreParserTestCase):
+    """Cheshire3 AmpPreParser Unittests.
+
+    An AmpPreParser escapes lone ampersands in otherwise XML text.
+    """
+
+    @classmethod
+    def _get_class(self):
+        return AmpPreParser
+
+
+class MarcToXmlPreParserTestCase(ImplementedPreParserTestCase):
+    """Cheshire3 MarcToXmlPreParser Unittests.
+    
+    A MarcToXmlPreParser converts MARC into MARCXML.
+    """
+    
+    @classmethod
+    def _get_class(self):
+        return MarcToXmlPreParser
+
+
+class MarcToSgmlPreParserTestCase(ImplementedPreParserTestCase):
+    """Cheshire3 MarcToSgmlPreParser Unittests.
+    
+    A MarcToSgmlPreParser converts MARC into Cheshire2's MarcSgml.
+    """
+    
+    @classmethod
+    def _get_class(self):
+        return MarcToSgmlPreParser
+
+
+class TxtToXmlPreParserTestCase(ImplementedPreParserTestCase):
+    """Cheshire3 TxtToXmlPreParser Unittests.
+    
+    A TxtToXmlPreParser minimally wrap text in <data> XML tags.
+    """
+    
+    @classmethod
+    def _get_class(self):
+        return TxtToXmlPreParser
+
+
+class PicklePreParserTestCase(ImplementedPreParserTestCase): 
+    """Cheshire3 PicklePreParser Unittests.
+     
+    A PicklePreParser compresses Document content using Python pickle.
+    """
+
+    @classmethod
+    def _get_class(self):
+        return PicklePreParser
+
+    
+class UnpicklePreParserTestCase(ImplementedPreParserTestCase):
+    """Chechire3 UnpicklePreParser Unittests.
+    
+    An UnpicklePreParser decompresses Document content using Python pickle.
+    """
+    
+    @classmethod
+    def _get_class(self):
+        return UnpicklePreParser
+
+
 def load_tests(loader, tests, pattern):
     # Alias loader.loadTestsFromTestCase for sake of line lengths
     ltc = loader.loadTestsFromTestCase 
@@ -161,6 +306,15 @@ def load_tests(loader, tests, pattern):
     suite.addTests(ltc(Utf8UnicodeDecodePreParserTestCase))
     suite.addTests(ltc(AsciiUnicodeDecodePreParserTestCase))
     suite.addTests(ltc(Iso8859_1UnicodeDecodePreParserTestCase))
+    suite.addTests(ltc(CmdLinePreParserTestCase))
+    suite.addTests(ltc(FileUtilPreParserTestCase))
+    suite.addTests(ltc(MagicRedirectPreParserTestCase))
+    suite.addTests(ltc(HtmlSmashPreParserTestCase))
+    suite.addTests(ltc(RegexpSmashPreParserTestCase))
+    suite.addTests(ltc(SgmlPreParserTestCase))
+    suite.addTests(ltc(AmpPreParserTestCase))
+    suite.addTests(ltc(MarcToXmlPreParserTestCase))
+    suite.addTests(ltc(MarcToSgmlPreParserTestCase))
     return suite
 
 
