@@ -21,7 +21,7 @@ from cheshire3.test.testConfigParser import Cheshire3ObjectTestCase
 class PreParserTestCase(Cheshire3ObjectTestCase):
     """Base Class for Cheshire3 PreParser Test Cases.
     
-    Tests that Abstract Base Class has not been modified.
+    Also checks that Abstract Base Class has not been modified.
     """
     
     @classmethod
@@ -43,9 +43,11 @@ class PreParserTestCase(Cheshire3ObjectTestCase):
         pass
         
     def test_instance(self):
+        "Check that PreParser is an instance of expected class"
         self.assertIsInstance(self.testObj, self._get_class())
 
     def test_process_document_returnType(self):
+        "Check that Base Class raises NotImplementedError."
         self.assertRaises(NotImplementedError, 
                           self.testObj.process_document,
                           self.session,
@@ -63,14 +65,15 @@ class ImplementedPreParserTestCase(PreParserTestCase):
         raise NotImplementedError
         
     def test_process_document_returnType(self):
-        # Test that return value is a Document
+        "Check that PreParser returns a Document."
         self.assertIsInstance(self.outDoc, Document)
     
     def test_process_document_returnProcessHistory(self):
+        "Check processHistory of returned Document."
         # Test for presence of process history
         procHist = self.outDoc.processHistory
         self.assertIsInstance(procHist, list)
-        # Test that process history has been copied
+        # Test that previous process history has been copied correctly
         for i, phi in enumerate(self.inDoc.processHistory):
             self.assertEqual(phi,
                              procHist[i])
@@ -107,7 +110,7 @@ class UnicodeDecodePreParserTestCase(ImplementedPreParserTestCase):
         self.outDoc = self.testObj.process_document(self.session, self.inDoc)
 
     def test_unicode_content(self):
-        "Check Document with content returns unaltered."
+        "Check Document with Unicode content returns unaltered."
         uDoc = StringDocument(self.testUc)
         outDoc = self.testObj.process_document(self.session, uDoc)
         outDocContent = outDoc.get_raw(self.session)
@@ -115,7 +118,7 @@ class UnicodeDecodePreParserTestCase(ImplementedPreParserTestCase):
                          self.testUc)
         
     def test_process_document_returnContent(self):
-        # Test that content of returned Document is unaltered
+        "Check content of returned Document is unaltered aside from encoding."
         outDocContent = self.outDoc.get_raw(self.session)
         self.assertEqual(outDocContent,
                          self.testUc)
