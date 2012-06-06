@@ -45,7 +45,7 @@ class NormalizerPreParser(PreParser):
     def process_document(self, session, doc):
         data = doc.get_raw(session)
         new = self.normalizer.process_string(session, data)
-        return StringDocument(data, self.id, doc.processHistory, mimeType=doc.mimeType, parent=doc.parent, filename=doc.filename)
+        return StringDocument(new, self.id, doc.processHistory, mimeType=doc.mimeType, parent=doc.parent, filename=doc.filename)
 
 
 class UnicodeDecodePreParser(PreParser):
