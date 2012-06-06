@@ -105,6 +105,14 @@ class UnicodeDecodePreParserTestCase(ImplementedPreParserTestCase):
         self.testUc = u'This is my document'
         self.inDoc = StringDocument(self.testUc.encode(self._get_codec()))
         self.outDoc = self.testObj.process_document(self.session, self.inDoc)
+
+    def test_unicode_content(self):
+        "Check Document with content returns unaltered."
+        uDoc = StringDocument(self.testUc)
+        outDoc = self.testObj.process_document(self.session, uDoc)
+        outDocContent = outDoc.get_raw(self.session)
+        self.assertEqual(outDocContent,
+                         self.testUc)
         
     def test_process_document_returnContent(self):
         # Test that content of returned Document is unaltered
