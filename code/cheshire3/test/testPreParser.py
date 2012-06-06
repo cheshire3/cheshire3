@@ -63,6 +63,12 @@ class ImplementedPreParserTestCase(PreParserTestCase):
     
     def _get_class(self):
         raise NotImplementedError
+
+    def setUp(self):
+        PreParserTestCase.setUp(self)
+        self.testUc = u'This is my document'
+        self.inDoc = StringDocument(self.testUc)
+        self.outDoc = self.testObj.process_document(self.session, self.inDoc)
         
     def test_process_document_returnType(self):
         "Check that PreParser returns a Document."
