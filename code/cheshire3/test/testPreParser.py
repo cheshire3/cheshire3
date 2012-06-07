@@ -271,6 +271,10 @@ class MarcToXmlPreParserTestCase(ImplementedPreParserTestCase):
     def _get_class(self):
         return MarcToXmlPreParser
 
+    @classmethod
+    def _get_testUnicode(self):
+        return u''
+
 
 class MarcToSgmlPreParserTestCase(ImplementedPreParserTestCase):
     """Cheshire3 MarcToSgmlPreParser Unittests.
@@ -281,6 +285,10 @@ class MarcToSgmlPreParserTestCase(ImplementedPreParserTestCase):
     @classmethod
     def _get_class(self):
         return MarcToSgmlPreParser
+
+    @classmethod
+    def _get_testUnicode(self):
+        return u''
 
 
 class TxtToXmlPreParserTestCase(ImplementedPreParserTestCase):
