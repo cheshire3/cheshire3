@@ -95,13 +95,19 @@ class ImplementedPreParserTestCase(PreParserTestCase):
             self.skipTest("No test Document available")
         # Test for presence of process history
         procHist = self.outDoc.processHistory
-        self.assertIsInstance(procHist, list)
+        self.assertIsInstance(procHist, list,
+                              u"processHistory is not a list")
         # Test that previous process history has been copied correctly
         for i, phi in enumerate(self.inDoc.processHistory):
             self.assertEqual(phi,
-                             procHist[i])
+                             procHist[i],
+                             u"processHistory missing historic item(s)")
+        # Test that processHistory contains at least one item
+        self.assertGreaterEqual(len(procHist), 1,
+                                u"processHistory contains no items")
         # Test that this PreParser has been added to processHistory
-        self.assertEqual(procHist[-1], self.testObj.id)
+        self.assertEqual(procHist[-1], self.testObj.id,
+                         u"processHistory does not contain PreParser")
 
 
 class UnicodeDecodePreParserTestCase(ImplementedPreParserTestCase):
