@@ -65,6 +65,7 @@ class ImplementedPreParserTestCase(PreParserTestCase):
     something
     """
     
+    @classmethod
     def _get_class(self):
         raise NotImplementedError
 
