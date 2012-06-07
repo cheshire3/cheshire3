@@ -192,7 +192,7 @@ class CmdLinePreParserTestCase(ImplementedPreParserTestCase):
     A CmdLinePreParser should run a command in the native Operating System to
     preParse the Document.
     """
-    
+
     @classmethod
     def _get_class(self):
         return CmdLinePreParser
@@ -254,6 +254,28 @@ class SgmlPreParserTestCase(ImplementedPreParserTestCase):
     @classmethod
     def _get_class(self):
         return SgmlPreParser
+
+    @classmethod
+    def _get_config(self):
+        return etree.XML('''
+<subConfig type="preParser" id="{0.__name__}">
+  <objectType>cheshire3.preParser.{0.__name__}</objectType>
+  <options>
+    <setting type="emptyElements">img</setting>
+  </options>
+</subConfig>
+'''.format(self._get_class()))
+
+    @classmethod
+    def _get_testUnicode(self):
+        return u'<html>A Document with an <img alt=image></html>'
+
+    def test_process_document_returnContent(self):
+        if self.inDoc is None:
+            self.skipTest("No test Document available")
+        self.assertEqual(
+            self.outDoc.text,
+            u'<html>A Document with an <img alt="image"/></html>')
 
 
 class AmpPreParserTestCase(ImplementedPreParserTestCase):
