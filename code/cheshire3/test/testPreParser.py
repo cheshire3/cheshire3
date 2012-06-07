@@ -210,18 +210,6 @@ class FileUtilPreParserTestCase(ImplementedPreParserTestCase):
         return FileUtilPreParser
 
 
-class MagicRedirectPreParserTestCase(ImplementedPreParserTestCase):
-    """Cheshire3 MagicRedirectPreParser Unittests.
-
-    A MagicRedirectPreParser maps to another appropriate PreParser based on
-    the MIME type of the incoming Document.
-    """
-
-    @classmethod
-    def _get_class(self):
-        return MagicRedirectPreParser
-
-
 class HtmlSmashPreParserTestCase(ImplementedPreParserTestCase):
     """Cheshire3 HtmlSmashPreParser Unittests.
 
@@ -351,7 +339,6 @@ def load_tests(loader, tests, pattern):
     suite.addTests(ltc(Iso8859_1UnicodeDecodePreParserTestCase))
     suite.addTests(ltc(CmdLinePreParserTestCase))
     suite.addTests(ltc(FileUtilPreParserTestCase))
-    suite.addTests(ltc(MagicRedirectPreParserTestCase))
     suite.addTests(ltc(HtmlSmashPreParserTestCase))
     suite.addTests(ltc(RegexpSmashPreParserTestCase))
     suite.addTests(ltc(SgmlPreParserTestCase))
