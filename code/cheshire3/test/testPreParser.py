@@ -243,7 +243,19 @@ class RegexpSmashPreParserTestCase(ImplementedPreParserTestCase):
     @classmethod
     def _get_class(self):
         return RegexpSmashPreParser
-
+    
+    @classmethod
+    def _get_config(self):
+        return etree.XML('''
+<subConfig type="preParser" id="{0.__name__}">
+  <objectType>cheshire3.preParser.{0.__name__}</objectType>
+  <options>
+    <setting type="regexp"> </setting>
+    <setting type="char"> </setting>
+  </options>
+</subConfig>
+'''.format(self._get_class()))
+    
 
 class SgmlPreParserTestCase(ImplementedPreParserTestCase):
     """Cheshire3 SgmlPreParser Unittests.
