@@ -64,6 +64,8 @@ class ImplementedPreParserTestCase(PreParserTestCase):
     i.e. PreParsers with a process_document method that actually does 
     something
     """
+    inDoc = None
+    outDoc = None
     
     @classmethod
     def _get_class(self):
@@ -76,15 +78,21 @@ class ImplementedPreParserTestCase(PreParserTestCase):
     def setUp(self):
         PreParserTestCase.setUp(self)
         self.testUc = self._get_testUnicode()
-        self.inDoc = StringDocument(self.testUc)
-        self.outDoc = self.testObj.process_document(self.session, self.inDoc)
-        
+        if self.testUc:
+            self.inDoc = StringDocument(self.testUc)
+            self.outDoc = self.testObj.process_document(self.session, 
+                                                        self.inDoc)
+
     def test_process_document_returnType(self):
         "Check that PreParser returns a Document."
+        if self.inDoc is None:
+            self.skipTest("No test Document available") 
         self.assertIsInstance(self.outDoc, Document)
     
     def test_process_document_returnProcessHistory(self):
         "Check processHistory of returned Document."
+        if self.inDoc is None:
+            self.skipTest("No test Document available")
         # Test for presence of process history
         procHist = self.outDoc.processHistory
         self.assertIsInstance(procHist, list)
@@ -131,6 +139,8 @@ class UnicodeDecodePreParserTestCase(ImplementedPreParserTestCase):
 
     def test_unicode_content(self):
         "Check Document with Unicode content returns unaltered."
+        if not self.testUc:
+            self.skipTest("No test Unicode available")
         uDoc = StringDocument(self.testUc)
         outDoc = self.testObj.process_document(self.session, uDoc)
         outDocContent = outDoc.get_raw(self.session)
@@ -139,6 +149,8 @@ class UnicodeDecodePreParserTestCase(ImplementedPreParserTestCase):
         
     def test_process_document_returnContent(self):
         "Check content of returned Document is unaltered aside from encoding."
+        if self.inDoc is None:
+            self.skipTest("No test Document available")
         outDocContent = self.outDoc.get_raw(self.session)
         self.assertEqual(outDocContent,
                          self.testUc)
