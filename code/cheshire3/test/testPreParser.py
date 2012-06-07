@@ -68,10 +68,14 @@ class ImplementedPreParserTestCase(PreParserTestCase):
     @classmethod
     def _get_class(self):
         raise NotImplementedError
+    
+    @classmethod
+    def _get_testUnicode(self):
+        return u'This is my document'
 
     def setUp(self):
         PreParserTestCase.setUp(self)
-        self.testUc = u'This is my document'
+        self.testUc = self._get_testUnicode()
         self.inDoc = StringDocument(self.testUc)
         self.outDoc = self.testObj.process_document(self.session, self.inDoc)
         
@@ -121,7 +125,7 @@ class UnicodeDecodePreParserTestCase(ImplementedPreParserTestCase):
         
     def setUp(self):
         PreParserTestCase.setUp(self)
-        self.testUc = u'This is my document'
+        self.testUc = self._get_testUnicode()
         self.inDoc = StringDocument(self.testUc.encode(self._get_codec()))
         self.outDoc = self.testObj.process_document(self.session, self.inDoc)
 
