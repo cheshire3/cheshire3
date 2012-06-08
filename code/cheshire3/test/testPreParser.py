@@ -42,6 +42,7 @@ class PreParserTestCase(Cheshire3ObjectTestCase):
     
     def setUp(self):
         Cheshire3ObjectTestCase.setUp(self)
+        self.longMessage = True
         
     def tearDown(self):
         pass
@@ -211,7 +212,8 @@ class CmdLinePreParserTestCase(ImplementedPreParserTestCase):
     def test_process_document_returnContent(self):
         "Check content of returned Document (should be unaltered)."
         self.assertEqual(self.outDoc.get_raw(self.session),
-                         self.inDoc.get_raw(self.session))
+                         self.inDoc.get_raw(self.session),
+                         u"Returned document content not as expected")
 
 
 class CmdLinePreParserInDocTestCase(CmdLinePreParserTestCase):
