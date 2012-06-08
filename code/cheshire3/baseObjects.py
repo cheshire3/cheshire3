@@ -617,7 +617,7 @@ class Record:
         raise(NotImplementedError)
     
     def __repr__(self):
-            if self.recordStore != None:
+            if self.recordStore is not None:
                 return "%s/%s" % (self.recordStore, self.id)            
             else:
                 return "%s-%s" % (str(self.__class__).split('.')[-1], self.id)

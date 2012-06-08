@@ -173,7 +173,7 @@ class HttpDocumentStream(RemoteDocumentStream, MultipleDocumentStream):
                 return None
             
         mimetype = mimetypes.guess_type(item, 0)
-        if mimetype[0] == None:
+        if mimetype[0] is None:
             # get mimetype from stream
             s = self._fetchStream(item)
             mimetype = (s.mimetype, None)

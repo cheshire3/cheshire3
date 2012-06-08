@@ -50,7 +50,7 @@ class CorpusPrepTransformer(Transformer):
         tree = rec.get_dom(session)
         
         # add option to sentence tokenize?
-        if self.eidXpath != None:
+        if self.eidXpath is not None:
             elems = tree.xpath(self.eidXpath)
             eid = 1       
             for e in elems :

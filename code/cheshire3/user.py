@@ -57,7 +57,7 @@ class SimpleUser(User):
                                 flag = getFirstData(c2)
                                 if (flag not in self.allFlags) and (flag[:4] != "c3fn"):
                                     raise ConfigFileException("Unknown flag: %s" % flag)
-                    if obj == None or flag == None:
+                    if obj is None or flag is None:
                         raise ConfigFileException("Missing object or value element for flag for user %s" % self.username)
                     if (obj):
                         f = self.flags.get(flag, [])
@@ -91,7 +91,7 @@ class SimpleUser(User):
                             flag = flattenTexts(c2).strip()
                             if (flag not in self.allFlags) and (flag[:4] != "c3fn"):
                                 raise ConfigFileException("Unknown flag: %s" % flag)
-                    if obj == None or flag == None:
+                    if obj is None or flag is None:
                         raise ConfigFileException("Missing object or value element for flag for user %s" % self.username)
                     f = self.flags.get(flag, [])
                     if (obj):

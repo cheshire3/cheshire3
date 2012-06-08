@@ -119,9 +119,9 @@ class SQLiteStore(SimpleStore):
             if exists:
                 raise ObjectAlreadyExistsException(exists)
 
-        if id == None:
+        if id is None:
             id = self.generate_id(session)
-        if (self.idNormalizer != None):
+        if (self.idNormalizer is not None):
             id = self.idNormalizer.process_string(session, id)
         elif type(id) == unicode:
             id = id.encode('utf-8')
@@ -164,7 +164,7 @@ class SQLiteStore(SimpleStore):
 
 
     def fetch_data(self, session, id):
-        if (self.idNormalizer != None):
+        if (self.idNormalizer is not None):
             id = self.idNormalizer.process_string(session, id)
         elif type(id) == unicode:
             id = id.encode('utf-8')
@@ -191,7 +191,7 @@ class SQLiteStore(SimpleStore):
         return data
 
     def delete_data(self, session, id):
-        if (self.idNormalizer != None):
+        if (self.idNormalizer is not None):
             id = self.idNormalizer.process_string(session, id)
         elif type(id) == unicode:
             id = id.encode('utf-8')
@@ -217,7 +217,7 @@ class SQLiteStore(SimpleStore):
             # reverse our lookup
             pass
         else:
-            if (self.idNormalizer != None):
+            if (self.idNormalizer is not None):
                 id = self.idNormalizer.process_string(session, id)
             elif type(id) == unicode:
                 id = id.encode('utf-8')
@@ -233,7 +233,7 @@ class SQLiteStore(SimpleStore):
 
     def store_metadata(self, session, id, mType, value):
 
-        if (self.idNormalizer != None):
+        if (self.idNormalizer is not None):
             id = self.idNormalizer.process_string(session, id)
         elif type(id) == unicode:
             id = id.encode('utf-8')
@@ -317,7 +317,7 @@ class TrivialSqliteResultSetStore(ResultSetStore, SQLiteStore):
         rset.timeExpires = expires
         expiresStr = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(expires))
         id = rset.id
-        if (self.idNormalizer != None):
+        if (self.idNormalizer is not None):
             id = self.idNormalizer.process_string(session, id)
 
         # Serialise and store
@@ -331,7 +331,7 @@ class TrivialSqliteResultSetStore(ResultSetStore, SQLiteStore):
             if hasattr(rset, 'retryOnFail'):
                 # generate new id, re-store
                 id = self.generate_id(session)
-                if (self.idNormalizer != None):
+                if (self.idNormalizer is not None):
                     id = self.idNormalizer.process_string(session, id)
                 self.cxn.execute(query, (id, data, len(rset), expiresStr, rset.queryTime, nowStr, nowStr))
             else:
@@ -342,7 +342,7 @@ class TrivialSqliteResultSetStore(ResultSetStore, SQLiteStore):
 
     def fetch_resultSet(self, session, id):
         sid = str(id)
-        if (self.idNormalizer != None):
+        if (self.idNormalizer is not None):
             sid = self.idNormalizer.process_string(session, sid)
         query = "SELECT data, size FROM %s WHERE identifier = ?" % (self.id)
         cur = self.cxn.execute(query, (sid,))
@@ -368,7 +368,7 @@ class TrivialSqliteResultSetStore(ResultSetStore, SQLiteStore):
 
     def delete_resultSet(self, session, id):
         sid = str(id)
-        if (self.idNormalizer != None):
+        if (self.idNormalizer is not None):
             sid = self.idNormalizer.process_string(session, sid)
         query = "DELETE FROM %s WHERE identifier = ?" % (self.table)
         self.cxn.execute(query, (sid,))

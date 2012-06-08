@@ -78,7 +78,7 @@ formatHash = {'application/xhtml+xml' : 'rdfa',
 
 class Graph(ConjunctiveGraph):
     def __init__(self, store=None, id=None):
-        if store != None and id != None:
+        if store is not None and id is not None:
             ConjunctiveGraph.__init__(self, store, id)
         else:
             ConjunctiveGraph.__init__(self)
@@ -112,7 +112,7 @@ class RdfObject(object):
         self._graph_ = graph
         if isinstance(uri, URIRef) or isinstance(uri, BNode):
             self._uri_ = uri
-        elif uri == None:
+        elif uri is None:
             self._uri_ = BNode()
         elif type(uri) in [str, unicode]:
             self._uri_ = URIRef(uri)
@@ -225,7 +225,7 @@ class RdfObject(object):
         done = []
         while stack:
             what = stack.pop(0)
-            if what == None or what in done:
+            if what is None or what in done:
                 continue
             done.append(what)            
             g += what._graph_

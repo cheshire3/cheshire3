@@ -171,7 +171,7 @@ class MARC:
         self.fields = {}
         self.ok = 0
         self.marc = MARC
-        if MARC == None:
+        if MARC is None:
             return # we'll write to it later
         reclen = self.extract_int (0,4)
         self.reclen = reclen
@@ -211,7 +211,7 @@ class MARC:
                 # 1-elt list for orthogonality of processing
             else:
                 ps = parse_sub (line)
-                if ps == None:
+                if ps is None:
                     raise MarcError (repr(line))
                 self.fields.setdefault (field, []).append (ps)
         self.ok = 1

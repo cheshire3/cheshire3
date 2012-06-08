@@ -243,7 +243,7 @@ class TeiExtractor(SimpleExtractor):
                     txt.append(' ')
                 bit = e[2:]
                 if processStack:
-                    if processStack[-1][1] == None:
+                    if processStack[-1][1] is None:
                         continue
                     else:
                         bit = processStack[-1][1](bit)
@@ -268,7 +268,7 @@ class SpanXPathExtractor(SimpleExtractor):
         for xp in data:
             startNode = xp[0]
             endNode = xp[1]
-            if root == None:
+            if root is None:
                 for n in startNode.iterancestors():
                     root = n
             inrange = False
@@ -285,9 +285,9 @@ class SpanXPathExtractor(SimpleExtractor):
                     inrange = True
                     if el in extraSpaceNodes:
                         text.append(' ')
-                    if el.text != None:
+                    if el.text is not None:
                         text.append(el.text)
-                    if el.tail != None:
+                    if el.tail is not None:
                         text.append(el.tail)
                 elif el == endNode:
                     inrange = False
@@ -295,7 +295,7 @@ class SpanXPathExtractor(SimpleExtractor):
                 elif inrange == True:
                     if el in extraSpaceNodes:
                         text.append(' ')
-                    if el.text != None:
+                    if el.text is not None:
                         text.append(el.text)
             txt = ''.join(text)
             # We MUST turn newlines into space or can't index

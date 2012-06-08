@@ -222,7 +222,7 @@ class Triple (PrefixableObject):
         if fullResultSetNameCheck == 0 or self.boolean.value in ['not', 'prox']:
             return ""
 
-        if top == None:
+        if top is None:
             topLevel = 1
             top = self;
         else:

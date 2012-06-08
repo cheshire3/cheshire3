@@ -54,7 +54,7 @@ class BootstrapDocument:
     def get_raw(self, session):
         if (self.txt):
             return self.txt
-        elif (self.handle != None):
+        elif (self.handle is not None):
             self.txt =  self.handle.read()
             self.handle.close()
             return self.txt

@@ -49,7 +49,7 @@ class Z3950ProtocolMap(ZeerexProtocolMap):
                     xsl = c.getAttributeNS(self.c3Namespace, 'transformer')
                     if (xsl):
                         txr = self.get_object(session, xsl)
-                        if (txr == None):
+                        if (txr is None):
                             raise ConfigFileException("[%s] No transformer to map to for %s" % (self.id, xsl))
                     else:
                         txr = None
@@ -70,7 +70,7 @@ class Z3950ProtocolMap(ZeerexProtocolMap):
             # Process indexes
             idxName = node.getAttributeNS(self.c3Namespace, 'index')
             indexObject = self.get_object(session, idxName)
-            if indexObject == None:
+            if indexObject is None:
                 raise(ConfigFileException("Could not find Index object %s" % (idxName)))
             maps = []
             defaults = []
@@ -370,7 +370,7 @@ class OAIPMHProtocolMap(ZeerexProtocolMap):
             txrid = node.getAttributeNS(self.c3Namespace, 'transformer')
             if (txrid):
                 txr = self.get_object(session, txrid)
-                if (txr == None):
+                if (txr is None):
                     raise ConfigFileException("No transformer to map to for %s" % (txrid))
                 self.transformerHash[id] = txr
             self.recordNamespaces[name] = id

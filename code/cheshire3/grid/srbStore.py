@@ -83,7 +83,7 @@ try:
                 self.connection.open_collection(self.subcollection)
 
         def _openContainer(self, session):
-            if self.connection == None:
+            if self.connection is None:
                 try:                    
                     self.connection = SrbConnection(self.host, self.port, self.domain, user = self.user, passwd = self.passwd, dn = self.dn)
                     self.connection.resource = self.resource
@@ -93,7 +93,7 @@ try:
                 self.connection.open_collection(self.subcollection)
 
         def _closeContainer(self, session):
-            if self.connection != None:
+            if self.connection is not None:
                 self.connection.disconnect()
                 self.connection = None
 
@@ -338,7 +338,7 @@ try:
                 if ti.name == sid:
                     f = tar.extractfile(ti)
                     break
-            if f != None:
+            if f is not None:
                 recdata = f.read()
                 f.close()
             else:
@@ -372,7 +372,7 @@ try:
             tar = TarFile.open(mode="w|", fileobj=tarbuffer)
             for (id, data) in self.incomingRecords:
                 sid = str(id)
-                if (self.idNormaliser != None):
+                if (self.idNormaliser is not None):
                     sid = self.idNormaliser.process_string(session, sid)
                 ti = TarInfo(sid)
                 if type(data) == types.UnicodeType:
@@ -395,7 +395,7 @@ try:
             startsid = str(self.incomingRecords[0][0])
             endsid = str(self.incomingRecords[0][0] + self.maxRecords -1)
 
-            if (self.idNormaliser != None):
+            if (self.idNormaliser is not None):
                 startsid = self.idNormaliser.process_string(session, startsid)
                 endsid = self.idNormaliser.process_string(session, endsid)
 

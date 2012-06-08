@@ -157,7 +157,7 @@ class BdbIndexStore(IndexStore):
         return IndexStoreIter(self.session, self)
 
     def _openMetadata(self, session):
-        if self.metadataCxn != None:
+        if self.metadataCxn is not None:
             return self.metadataCxn
         else:
             mp = self.get_path(session, 'metadataPath')
@@ -179,7 +179,7 @@ class BdbIndexStore(IndexStore):
             return cxn
 
     def _closeMetadata(self, session):
-        if self.metadataCxn != None:
+        if self.metadataCxn is not None:
             self.metadataCxn.close()
             self.metadataCxn = None
 
@@ -490,10 +490,10 @@ class BdbIndexStore(IndexStore):
             tidcxn = None
             if vectors:
                 tidcxn = self.termIdCxn.get(index, None)
-                if tidcxn == None:
+                if tidcxn is None:
                     self._openVectors(session, index)
                     tidcxn = self.termIdCxn.get(index, None)
-            if tidcxn == None:
+            if tidcxn is None:
                 # okay, no termid hash. hope for best with final set
                 # of terms from regular index
                 (term, value) = cursor.last(doff=0, dlen=3*index.longStructSize)
@@ -523,7 +523,7 @@ class BdbIndexStore(IndexStore):
         dbname = os.path.join(dfp, basename)
         if vectors or termIds:
             tidcxn = self.termIdCxn.get(index, None)
-            if tidcxn == None:
+            if tidcxn is None:
                 self._openVectors(session, index)
                 tidcxn = self.termIdCxn.get(index, None)
         
@@ -553,7 +553,7 @@ class BdbIndexStore(IndexStore):
                 if currData:                
                     if (nonEmpty):
                         val = cxn.get(currTerm)
-                        if (val != None):
+                        if (val is not None):
                             unpacked = s2t(session, val)
                             tempTermId = unpacked[0]
                             unpacked = mt(session, unpacked, currData, 'add', nRecs=totalRecs, nOccs=totalOccs)
@@ -690,7 +690,7 @@ class BdbIndexStore(IndexStore):
         proxHash = {}
 
         cxn = self.vectorCxn.get(index, None)
-        if cxn == None:
+        if cxn is None:
             self._openVectors(session, index)
             cxn = self.vectorCxn[index]
         if proxVectors:
@@ -733,7 +733,7 @@ class BdbIndexStore(IndexStore):
             currDoc = docid
             currStore = storeid
             tid = termCache.get(term, None)
-            if tid == None:
+            if tid is None:
                 if not term:
                     #???
                     continue
@@ -866,7 +866,7 @@ class BdbIndexStore(IndexStore):
         # rec can be resultSetItem or record
 
         tidcxn = self.termIdCxn.get(index, None)
-        if tidcxn == None:
+        if tidcxn is None:
             self._openVectors(session, index)
             tidcxn = self.termIdCxn.get(index, None)
             cxn = self.vectorCxn.get(index, None)
@@ -903,7 +903,7 @@ class BdbIndexStore(IndexStore):
         # rec can be resultSetItem or record
 
         cxn = self.proxVectorCxn.get(index, None)
-        if cxn == None:
+        if cxn is None:
             self._openVectors(session, index)
             cxn = self.proxVectorCxn.get(index, None)
 
@@ -953,7 +953,7 @@ class BdbIndexStore(IndexStore):
 
     def fetch_termById(self, session, index, termId):
         tidcxn = self.termIdCxn.get(index, None)
-        if tidcxn == None:
+        if tidcxn is None:
             self._openVectors(session, index)
             tidcxn = self.termIdCxn.get(index, None)
         termid = "%012d" % termId
@@ -985,7 +985,7 @@ class BdbIndexStore(IndexStore):
 
         cxns = self.termFreqCxn.get(index, {})
         tfcxn = cxns.get(which, None)
-        if tfcxn != None:
+        if tfcxn is not None:
             return tfcxn
 
         dfp = self.get_path(session, 'defaultPath')
@@ -1018,7 +1018,7 @@ class BdbIndexStore(IndexStore):
 
     def fetch_termFrequencies(self, session, index, mType='occ', start=0, nTerms=100, direction=">"):
         cxn = self._openTermFreq(session, index, mType)
-        if cxn == None:
+        if cxn is None:
             return []
         else:
             c = cxn.cursor()
@@ -1235,7 +1235,7 @@ class BdbIndexStore(IndexStore):
             cxn = self._openSortStore(session, index)
 
         val = cxn.get("%s/%s" % (str(rec.recordStore), rec.id))
-        if val == None:
+        if val is None:
             val = cxn.get("%s/%s" % (str(rec.recordStore), rec.numericId)) 
         return val
 
@@ -1326,7 +1326,7 @@ class BdbIndexStore(IndexStore):
                 except:
                     pass
                 val = cxn.get(key.encode('utf-8'))
-                if (val != None):
+                if (val is not None):
                     current = index.deserialize_term(session, val)               
                     unpacked = index.merge_term(session, current, stuff, op="replace", nRecs=1, nOccs=k['occurences'])
                     (termid, totalRecs, totalOccs) = unpacked[:3]
@@ -1338,10 +1338,10 @@ class BdbIndexStore(IndexStore):
                     tidcxn = None
                     if vecs or tids:
                         tidcxn = self.termIdCxn.get(index, None)
-                        if tidcxn == None:
+                        if tidcxn is None:
                             self._openVectors(session, index)
                             tidcxn = self.termIdCxn.get(index, None)
-                    if tidcxn == None:
+                    if tidcxn is None:
                         # okay, no termid hash. hope for best with final set
                         # of terms from regular index
                         cursor = cxn.cursor()
@@ -1399,7 +1399,7 @@ class BdbIndexStore(IndexStore):
 
             for k in terms.keys():
                 val = cxn.get(k.encode('utf-8'))
-                if (val != None):
+                if (val is not None):
                     current = index.deserialize_term(session, val)               
                     gone = [docid, storeid, terms[k]['occurences']]
                     unpacked = index.merge_term(session, current, gone, 'delete')
@@ -1580,7 +1580,7 @@ class BdbIndexStore(IndexStore):
                 raise PermissionException("Permission required to search indexStore %s" % self.id)
         unpacked = []
         val = self._fetch_packed(session, index, term, summary)
-        if (val != None):
+        if (val is not None):
             try:
                 unpacked = index.deserialize_term(session, val, prox=prox)
             except:

@@ -85,7 +85,7 @@ try:
                         else:
                             kw[txt] = k
                 else:
-                    if new != None:
+                    if new is not None:
                         try:
                             kw[new]['occurences'] += d['occurences']
                             if prox:

@@ -162,7 +162,7 @@ class SRUProtocolHandler(object):
                     
                 if (typ == eType or (eType == 'response' and typ == opts['operation'])):
                     node = fn(session, v, result, *args)
-                    if node != None:
+                    if node is not None:
                         nodes.append(node)
                 
         if nodes:
@@ -319,7 +319,7 @@ class SRUProtocolHandler(object):
                 rsi = rs[rIdx]
                 r = rsi.fetch_record(session)
 
-                if (txr != None):
+                if (txr is not None):
                     doc = txr.process_record(session, r)
                     xml = doc.get_raw(session)
                 else:

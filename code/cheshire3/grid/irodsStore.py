@@ -137,7 +137,7 @@ class IrodsStore(SimpleStore):
 
     def _open(self, session):
 
-        if self.cxn == None:
+        if self.cxn is None:
             # connect to iRODS
             myEnv, status = irods.getRodsEnv()
 
@@ -163,7 +163,7 @@ class IrodsStore(SimpleStore):
                 self.resourceHash[r.getName()] = r
 
             
-        if self.coll != None:
+        if self.coll is not None:
             # already open, just skip
             return None
 
@@ -292,7 +292,7 @@ class IrodsStore(SimpleStore):
 
     def delete_data(self, session, id):
         """ Delete data stored against id. """
-        if (self.idNormalizer != None):
+        if (self.idNormalizer is not None):
             id = self.idNormalizer.process_string(session, id)
         elif type(id) == unicode:
             id = id.encode('utf-8')
@@ -336,7 +336,7 @@ class IrodsStore(SimpleStore):
 
     def fetch_data(self, session, id):
         """ Fetch and return data stored against id. """
-        if (self.idNormalizer != None):
+        if (self.idNormalizer is not None):
             id = self.idNormalizer.process_string(session, id)
         elif type(id) == unicode:
             id = id.encode('utf-8')
@@ -388,9 +388,9 @@ class IrodsStore(SimpleStore):
             if match:
                 raise ObjectAlreadyExistsException(match[0])
 
-        if id == None:
+        if id is None:
             id = self.generate_id(session)
-        if (self.idNormalizer != None):
+        if (self.idNormalizer is not None):
             id = self.idNormalizer.process_string(session, id)
         elif type(id) == unicode:
             id = id.encode('utf-8')
@@ -441,9 +441,9 @@ class IrodsStore(SimpleStore):
         if not self.resourceHash.has_key(location):
             raise ObjectDoesNotExistException('Unknown Storage Resource: %s' % location)
 
-        if id == None:
+        if id is None:
             id = self.generate_id(session)
-        if (self.idNormalizer != None):
+        if (self.idNormalizer is not None):
             id = self.idNormalizer.process_string(session, id)
         elif type(id) == unicode:
             id = id.encode('utf-8')
@@ -475,7 +475,7 @@ class IrodsStore(SimpleStore):
     def fetch_metadata(self, session, id, mType):
         """ Open irodsFile and get metadata from it. """
 
-        if (self.idNormalizer != None):
+        if (self.idNormalizer is not None):
             id = self.idNormalizer.process_string(session, id)
         elif type(id) == unicode:
             id = id.encode('utf-8')
@@ -529,7 +529,7 @@ class IrodsStore(SimpleStore):
     def store_metadata(self, session, id, mType, value):
         """ Store value for mType metadata against id. """
 
-        if (self.idNormalizer != None):
+        if (self.idNormalizer is not None):
             id = self.idNormalizer.process_string(session, id)
         elif type(id) == unicode:
             id = id.encode('utf-8')
@@ -658,7 +658,7 @@ class IrodsSwitchingBdbConnection(SwitchingBdbConnection):
 
     def __init__(self, session, parent, path="", maxBuckets=0, maxItemsPerBucket=0, bucketType=''):
         SwitchingBdbConnection.__init__(self, session, parent, path, maxBuckets, maxItemsPerBucket, bucketType)
-        if parent.coll == None:
+        if parent.coll is None:
             parent._openIrods(session)
         self.irodsObjects = parent.coll.getObjects()
         self.cxnFiles = {}
@@ -668,7 +668,7 @@ class IrodsSwitchingBdbConnection(SwitchingBdbConnection):
         return b in self.irodsObjects or os.path.exists(self.basePath + '_' + b)
             
     def _open(self, b):
-        if self.cxns.has_key(b) and self.cxns[b] != None:
+        if self.cxns.has_key(b) and self.cxns[b] is not None:
             return self.cxns[b] 
         else:
             cxn = bdb.db.DB()
@@ -744,7 +744,7 @@ class IrodsSwitchingRecordStore(BdbRecordStore):
 
     def _openIrods(self, session):
 
-        if self.cxn == None:
+        if self.cxn is None:
             # connect to iRODS
             myEnv, status = irods.getRodsEnv()
             conn, errMsg = irods.rcConnect(myEnv.getRodsHost(), myEnv.getRodsPort(), 
@@ -755,7 +755,7 @@ class IrodsSwitchingRecordStore(BdbRecordStore):
             self.cxn = conn
             self.env = myEnv
             
-        if self.coll != None:
+        if self.coll is not None:
             # already open, just skip
             return None
 
@@ -841,7 +841,7 @@ class IrodsIndexStore(BdbIndexStore):
 
     def _open(self, session):
 
-        if self.cxn == None:
+        if self.cxn is None:
             # connect to iRODS
             myEnv, status = irods.getRodsEnv()
             host = self.host if self.host else myEnv.getRodsHost()
@@ -866,7 +866,7 @@ class IrodsIndexStore(BdbIndexStore):
                 self.resourceHash[r.getName()] = r
 
             
-        if self.coll != None:
+        if self.coll is not None:
             # already open, just skip
             return None
 

@@ -174,7 +174,7 @@ class SimpleDatabase(SummaryObject, Database):
                     pm = self.protocolMaps.get('http://www.loc.gov/zing/srw/')
                     self.paths['protocolMap'] = pm
                 idx = pm.resolveIndex(session, query)
-                if (idx != None):
+                if (idx is not None):
                     query.config = pm
                     rs = idx.search(session, query, self)
                     query.config = None
@@ -334,7 +334,7 @@ class SimpleDatabase(SummaryObject, Database):
             pm = self.protocolMaps.get('http://www.loc.gov/zing/srw/')
             self.paths['protocolMap'] = pm
         idx = pm.resolveIndex(session, clause)
-        if (idx != None):
+        if (idx is not None):
             return idx.scan(session, clause, nTerms, direction)
         else:
             raise ObjectDoesNotExistException(clause.index.toCQL())

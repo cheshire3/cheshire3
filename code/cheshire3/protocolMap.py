@@ -25,7 +25,7 @@ class ZeerexProtocolMap(ProtocolMap):
     def __init__(self, session, node, parent):
         ProtocolMap.__init__(self, session, node, parent)
         p = self.get_path(session, 'zeerexPath')
-        if (p == None):
+        if (p is None):
             raise(ConfigFileException('ZeerexPath not specified for CQLConfig.'))
         else:
             if ( not os.path.isabs(p)):
@@ -72,7 +72,7 @@ class UpdateProtocolMap(ZeerexProtocolMap):
             xsl = node.getAttributeNS(self.c3Namespace, 'transformer')
             if (xsl):
                 txr = self.get_object(session, xsl)
-                if (txr == None):
+                if (txr is None):
                     raise ConfigFileException("No transformer to map to for %s" % (xsl))
                 self.transformerHash[id] = txr
             self.recordNamespaces[name] = id
@@ -83,7 +83,7 @@ class UpdateProtocolMap(ZeerexProtocolMap):
                 wflw = node.getAttributeNS(self.c3Namespace, 'workflow')
                 if (wflw):
                     flow = self.get_object(session, wflw)
-                    if (flow == None):                        
+                    if (flow is None):                        
                         raise ConfigFileException("No workflow to map to for %s" % wflw)
                     self.workflowHash[data] = self.get_object(session, wflw)
         elif (node.localName == 'default'):
@@ -249,7 +249,7 @@ class CQLProtocolMap(ZeerexProtocolMap):
             xsl = node.getAttributeNS(self.c3Namespace, 'transformer')
             if (xsl):
                 txr = self.get_object(session, xsl)
-                if (txr == None):
+                if (txr is None):
                     raise ConfigFileException("No transformer to map to for %s" % (xsl))
                 self.transformerHash[id] = txr
             self.recordNamespaces[name] = id
@@ -263,7 +263,7 @@ class CQLProtocolMap(ZeerexProtocolMap):
             # Process indexes
             idxName = node.getAttributeNS(self.c3Namespace, 'index')
             indexObject = self.get_object(session, idxName)
-            if indexObject == None:
+            if indexObject is None:
                 raise(ConfigFileException("[%s] No Index to map to for %s" % (self.id, idxName)))
             maps = []
 
@@ -282,7 +282,7 @@ class CQLProtocolMap(ZeerexProtocolMap):
                                 indexObject2 = indexObject
                             else:
                                 indexObject2 = self.get_object(session, idxName2)
-                                if indexObject2 == None:
+                                if indexObject2 is None:
                                     raise(ConfigFileException("[%s] No Index to map to for %s" % (self.id, idxName2)))
                             st = str(c2.getAttribute('type'))
                             val = str(flattenTexts(c2))

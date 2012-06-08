@@ -292,7 +292,7 @@ class VectorTransformer(Transformer):
         if type(l) != int and (type(l) in [str, unicode] and not l.isdigit()):
             # assign mapping to an int
             exists = self.labelMap.get(l, None)
-            if exists != None:
+            if exists is not None:
                 l = exists
             else:
                 self.currLabel += 1

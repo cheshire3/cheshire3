@@ -141,12 +141,12 @@ class PostgresIndexStore(IndexStore, PostgresStore):
         if (isinstance(query, cql.SearchClause)):
             idx = pm.resolveIndex(session, query)
 
-            if (idx != None):
+            if (idx is not None):
                 # check if 'stem' relmod
 
                 # get the index to chunk the term
                 pn = idx.get_setting(session, 'termProcess')
-                if (pn == None):
+                if (pn is None):
                     pn = 0
                 else:
                     pn = int(pn)

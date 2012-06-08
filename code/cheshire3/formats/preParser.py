@@ -213,7 +213,7 @@ class XmlParsingCmdLineMetadataDiscoveryPreParser(CmdLineMetadataDiscoveryPrePar
             xp = None
             for child in node.iterchildren(tag=etree.Element):
                 if child.tag == "xpath":
-                    if xp == None:
+                    if xp is None:
                         ref = child.attrib.get('ref', '')
                         if ref:
                             xp = self.get_object(session, ref)

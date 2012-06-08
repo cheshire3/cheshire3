@@ -124,7 +124,7 @@ class SimpleIndex(Index):
             for child in node.childNodes:
                 if child.nodeType == elementType:
                     if child.localName == "xpath":
-                        if xp == None:
+                        if xp is None:
                             ref = child.getAttributeNS(None, 'ref')
                             if ref:
                                 xp = self.get_object(session, ref)
@@ -171,7 +171,7 @@ class SimpleIndex(Index):
             xp = None
             for child in node.iterchildren(tag=etree.Element):
                 if child.tag == "xpath":
-                    if xp == None:
+                    if xp is None:
                         ref = child.attrib.get('ref', '')
                         if ref:
                             xp = self.get_object(session, ref)
@@ -234,7 +234,7 @@ class SimpleIndex(Index):
         iStore = self.get_path(session, 'indexStore', None)
         self.indexStore = iStore
 
-        if (iStore == None):
+        if (iStore is None):
             raise(ConfigFileException("Index (%s) does not have an indexStore." % (self.id)))
         else:
             iStore.create_index(session, self)
@@ -337,12 +337,12 @@ class SimpleIndex(Index):
             for (t,f) in vec[2]:
                 term = self.fetch_termById(session, t)
                 processed[term] = {'occurences' : f}
-            if istore != None:
+            if istore is not None:
                 istore.delete_terms(session, self, processed, rec)
         else:
             for src in self.sources[u'data']:
                 processed = self._processRecord(session, rec, src)
-                if (istore != None):
+                if (istore is not None):
                     istore.delete_terms(session, self, processed, rec)
                 
     def begin_indexing(self, session):
@@ -356,7 +356,7 @@ class SimpleIndex(Index):
                 raise PermissionException("Permission required to add to index %s" % self.id)
         stores = []
         istore = self.get_path(session, 'indexStore')
-        if (istore != None and not istore in stores):
+        if (istore is not None and not istore in stores):
             stores.append(istore)
         for s in stores:
             s.begin_indexing(session, self)
@@ -371,7 +371,7 @@ class SimpleIndex(Index):
                 raise PermissionException("Permission required to add to index %s" % self.id)
         stores = []
         istore = self.get_path(session, 'indexStore')
-        if (istore != None and not istore in stores):
+        if (istore is not None and not istore in stores):
             stores.append(istore)
         for s in stores:
             s.commit_indexing(session, self)
@@ -1715,14 +1715,14 @@ class ClusterExtractionIndex(SimpleIndex):
             if isinstance(self.maps[m][2], list):
                 for t in range(len(self.maps[m][2])):
                     o = self.get_object(session, self.maps[m][2][t][1])
-                    if (o != None):
+                    if (o is not None):
                         self.maps[m][2][t][1] = o
                     else:
                         raise(ConfigFileException("Unknown object %s" % (self.maps[m][2][t][1])))
         if isinstance(self.keyMap[2], list):
             for t in range(len(self.keyMap[2])):
                 o = self.get_object(session, self.keyMap[2][t][1])
-                if (o != None):
+                if (o is not None):
                     self.keyMap[2][t][1] = o
                 else:
                     raise(ConfigFileException("Unknown object %s" % (self.keyMap[2][t][1])))

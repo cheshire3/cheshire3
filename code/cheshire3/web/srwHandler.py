@@ -144,7 +144,7 @@ def process_searchRetrieve(self, session, req):
     rs = db.search(session, req.queryStructure)
 
     recs = []
-    if (rs != None):
+    if (rs is not None):
         self.numberOfRecords = len(rs)
         if (ttl and not rsn):
             rs.expires = ttl
@@ -160,7 +160,7 @@ def process_searchRetrieve(self, session, req):
             ro.recordPacking = recordPacking
             ro.recordSchema = schema
 
-            if (txr != None):
+            if (txr is not None):
                 doc = txr.process_record(session, r)
                 rec = doc.get_raw(session)
                 rec = xmlver.sub("", rec)

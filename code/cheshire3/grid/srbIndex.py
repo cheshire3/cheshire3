@@ -274,7 +274,7 @@ try:
                         cxn = createChunk(session, index, which)
                         currChunk = which
                         currFirst = term[:2]
-                        if prevTerm == None:
+                        if prevTerm is None:
                             prevTerm = term
                 fullinfo = map(long, data[1:])
                 occs = acc(term, fullinfo)
@@ -400,7 +400,7 @@ try:
             # Only return to end of current index?
 
             chunk = self._maybeFetchChunk(session, index, term)
-            if chunk == None:
+            if chunk is None:
                 # no data
                 return []
             cxn = self._openIndexChunk(session, index, chunk)
@@ -467,7 +467,7 @@ try:
 
         def fetch_term(self, session, index, term):
             val = self.fetch_packed(session, index, term)
-            if val != None:
+            if val is not None:
                 return index.deserialise_terms(val)
             else:
                 return []
@@ -478,7 +478,7 @@ try:
             except:
                 pass
             chunk = self._maybeFetchChunk(session, index, term)
-            if chunk == None:
+            if chunk is None:
                 return None
             cxn = self._openIndexChunk(session, index, chunk)
             val = cxn.get(term)
