@@ -197,6 +197,17 @@ class CmdLinePreParserTestCase(ImplementedPreParserTestCase):
     def _get_class(self):
         return CmdLinePreParser
 
+    @classmethod
+    def _get_config(self):
+        return etree.XML('''
+<subConfig type="preParser" id="{0.__name__}">
+  <objectType>cheshire3.preParser.{0.__name__}</objectType>
+  <paths>
+    <path type="executable">echo</path>
+  </paths>
+</subConfig>
+'''.format(self._get_class()))
+
 
 class FileUtilPreParserTestCase(ImplementedPreParserTestCase):
     """Cheshire3 FileUtilPreParserTestCase Unittests.
