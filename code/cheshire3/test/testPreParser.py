@@ -13,6 +13,11 @@ try:
 except ImportError:
     import unittest
 
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+
 from lxml import etree
 
 from cheshire3.document import Document, StringDocument
@@ -514,10 +519,18 @@ class PicklePreParserTestCase(ImplementedPreParserTestCase):
     @classmethod
     def _get_class(self):
         return PicklePreParser
+    
+    def test_process_document_returnContent(self):
+        if self.inDoc is None:
+            self.skipTest("No test Document available")
+        self.assertEqual(
+            self.outDoc.text,
+            pickle.dumps(self.testUc),
+            u"Returned document content not as expected")
 
     
 class UnpicklePreParserTestCase(ImplementedPreParserTestCase):
-    """Chechire3 UnpicklePreParser Unittests.
+    """Cheshire3 UnpicklePreParser Unittests.
     
     An UnpicklePreParser decompresses Document content using Python pickle.
     """
@@ -525,6 +538,20 @@ class UnpicklePreParserTestCase(ImplementedPreParserTestCase):
     @classmethod
     def _get_class(self):
         return UnpicklePreParser
+    
+    @classmethod
+    def _get_testUnicode(self):
+        # Keep method name, despite this PreParser requiring byte string
+        # instead of unicode
+        return 'VThis is my document\np0\n.'
+
+    def test_process_document_returnContent(self):
+        if self.inDoc is None:
+            self.skipTest("No test Document available")
+        self.assertEqual(
+            self.outDoc.text,
+            pickle.loads(self.testUc),
+            u"Returned document content not as expected")
 
 
 def load_tests(loader, tests, pattern):
@@ -548,6 +575,8 @@ def load_tests(loader, tests, pattern):
     suite.addTests(ltc(MarcToXmlPreParserTestCase))
     suite.addTests(ltc(MarcToSgmlPreParserTestCase))
     suite.addTests(ltc(TxtToXmlPreParserTestCase))
+    suite.addTests(ltc(PicklePreParserTestCase))
+    suite.addTests(ltc(UnpicklePreParserTestCase))
     return suite
 
 
