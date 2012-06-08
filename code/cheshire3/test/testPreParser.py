@@ -1,3 +1,4 @@
+from base64 import b64encode
 u"""Cheshire3 PreParser Unittests.
 
 PreParser configurations may be customized by the user. For the purposes of 
@@ -6,6 +7,7 @@ be instantiated using configurations defined within this testing module,
 and tests carried out on those instances using data defined in this module.
 """
 
+import binascii
 import re
 
 try:
@@ -25,7 +27,9 @@ from cheshire3.preParser import PreParser, UnicodeDecodePreParser, \
     CmdLinePreParser, FileUtilPreParser, MagicRedirectPreParser, \
     HtmlSmashPreParser, RegexpSmashPreParser, SgmlPreParser, AmpPreParser, \
     MarcToXmlPreParser, MarcToSgmlPreParser, TxtToXmlPreParser,\
-    PicklePreParser, UnpicklePreParser
+    PicklePreParser, UnpicklePreParser, \
+    B64EncodePreParser, B64DecodePreParser
+    
 from cheshire3.test.testConfigParser import Cheshire3ObjectTestCase
 
 
@@ -554,6 +558,46 @@ class UnpicklePreParserTestCase(ImplementedPreParserTestCase):
             u"Returned document content not as expected")
 
 
+class B64EncodePreParserTestCase(ImplementedPreParserTestCase):
+    """Cheshire3 B64EncodePreParser Unittests.
+
+    A B64EncodePreParser encodes document in Base64."""
+
+    @classmethod
+    def _get_class(self):
+        return B64EncodePreParser
+
+    def test_process_document_returnContent(self):
+        if self.inDoc is None:
+            self.skipTest("No test Document available")
+        self.assertEqual(
+            self.outDoc.text,
+            'N\x18\xac\x8a\xc9\xb2v\x87.\x99\xe9\xed',
+            u"Returned document content not as expected")
+
+
+class B64DecodePreParserTestCase(ImplementedPreParserTestCase):
+    """Cheshire3 B64EncodePreParser Unittests.
+    
+    A B64DecodePreParser decodes Document from Base64."""
+
+    @classmethod
+    def _get_class(self):
+        return B64DecodePreParser
+
+    @classmethod
+    def _get_testUnicode(self):
+        return 'N\x18\xac\x8a\xc9\xb2v\x87.\x99\xe9\xed'
+
+    def test_process_document_returnContent(self):
+        if self.inDoc is None:
+            self.skipTest("No test Document available")
+        self.assertEqual(
+            self.outDoc.text,
+            u'This is my document',
+            u"Returned document content not as expected")
+
+
 def load_tests(loader, tests, pattern):
     # Alias loader.loadTestsFromTestCase for sake of line lengths
     ltc = loader.loadTestsFromTestCase 
@@ -577,6 +621,8 @@ def load_tests(loader, tests, pattern):
     suite.addTests(ltc(TxtToXmlPreParserTestCase))
     suite.addTests(ltc(PicklePreParserTestCase))
     suite.addTests(ltc(UnpicklePreParserTestCase))
+    suite.addTests(ltc(B64EncodePreParserTestCase))
+    suite.addTests(ltc(B64DecodePreParserTestCase))
     return suite
 
 
