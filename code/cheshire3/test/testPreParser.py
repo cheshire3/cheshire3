@@ -443,6 +443,18 @@ class AmpPreParserTestCase(ImplementedPreParserTestCase):
     def _get_class(self):
         return AmpPreParser
 
+    @classmethod
+    def _get_testUnicode(self):
+        return u'<html>tom&jerry & &amp;</html>'
+
+    def test_process_document_returnContent(self):
+        if self.inDoc is None:
+            self.skipTest("No test Document available")
+        self.assertEqual(
+            self.outDoc.text,
+            u'<html>tom&amp;jerry &amp; &amp;</html>',
+            u"Returned document content not as expected")
+
 
 class MarcToXmlPreParserTestCase(ImplementedPreParserTestCase):
     """Cheshire3 MarcToXmlPreParser Unittests.
