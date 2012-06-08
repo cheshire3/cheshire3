@@ -489,12 +489,20 @@ class MarcToSgmlPreParserTestCase(ImplementedPreParserTestCase):
 class TxtToXmlPreParserTestCase(ImplementedPreParserTestCase):
     """Cheshire3 TxtToXmlPreParser Unittests.
     
-    A TxtToXmlPreParser minimally wrap text in <data> XML tags.
+    A TxtToXmlPreParser minimally wraps text in <data> XML tags.
     """
     
     @classmethod
     def _get_class(self):
         return TxtToXmlPreParser
+
+    def test_process_document_returnContent(self):
+        if self.inDoc is None:
+            self.skipTest("No test Document available")
+        self.assertEqual(
+            self.outDoc.text,
+            u'<data>{0}</data>'.format(self.testUc),
+            u"Returned document content not as expected")
 
 
 class PicklePreParserTestCase(ImplementedPreParserTestCase): 
@@ -539,6 +547,7 @@ def load_tests(loader, tests, pattern):
     suite.addTests(ltc(AmpPreParserTestCase))
     suite.addTests(ltc(MarcToXmlPreParserTestCase))
     suite.addTests(ltc(MarcToSgmlPreParserTestCase))
+    suite.addTests(ltc(TxtToXmlPreParserTestCase))
     return suite
 
 
