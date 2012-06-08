@@ -6,6 +6,8 @@ be instantiated using configurations defined within this testing module,
 and tests carried out on those instances using data defined in this module.
 """
 
+import re
+
 try:
     import unittest2 as unittest
 except ImportError:
@@ -307,7 +309,96 @@ class RegexpSmashPreParserTestCase(ImplementedPreParserTestCase):
   </options>
 </subConfig>
 '''.format(self._get_class()))
+
+    def test_process_document_returnContent(self):
+        "Check content of returned Document (should be unaltered)."
+        self.assertEqual(self.outDoc.get_raw(self.session),
+                         self.inDoc.get_raw(self.session))
+
+
+class RegexpSmashPreParserStripTestCase(RegexpSmashPreParserTestCase):
+    """Cheshire3 RegexpSmashPreParser Unittests.
+
+    A RegexpSmashPreParser either strips, replaces or keeps only data which 
+    matches a given regular expression.
     
+    This test case tests stripping a match.
+    """
+
+    @classmethod
+    def _get_config(self):
+        return etree.XML('''
+<subConfig type="preParser" id="{0.__name__}">
+  <objectType>cheshire3.preParser.{0.__name__}</objectType>
+  <options>
+    <setting type="regexp">\sis</setting>
+  </options>
+</subConfig>
+'''.format(self._get_class()))
+
+    def test_process_document_returnContent(self):
+        "Check content of returned Document (should lack 'is')."
+        self.assertEqual(self.outDoc.get_raw(self.session),
+                         re.sub('\sis', '', self.testUc),
+                         u"Returned document content not as expected")
+
+
+class RegexpSmashPreParserSubTestCase(RegexpSmashPreParserTestCase):
+    """Cheshire3 RegexpSmashPreParser Unittests.
+
+    A RegexpSmashPreParser either strips, replaces or keeps only data which 
+    matches a given regular expression.
+    
+    This test case tests substituting a match.
+    """
+
+    @classmethod
+    def _get_config(self):
+        return etree.XML('''
+<subConfig type="preParser" id="{0.__name__}">
+  <objectType>cheshire3.preParser.{0.__name__}</objectType>
+  <options>
+    <setting type="regexp">my</setting>
+    <setting type="char">your</setting>
+  </options>
+</subConfig>
+'''.format(self._get_class()))
+
+    def test_process_document_returnContent(self):
+        "Check content of returned Document ('my' -> 'your')."
+        self.assertEqual(self.outDoc.get_raw(self.session),
+                         re.sub('my', 'your', self.testUc),
+                         u"Returned document content not as expected")
+
+
+class RegexpSmashPreParserKeepTestCase(RegexpSmashPreParserTestCase):
+    """Cheshire3 RegexpSmashPreParser Unittests.
+
+    A RegexpSmashPreParser either strips, replaces or keeps only data which 
+    matches a given regular expression.
+    
+    This test case tests keeping only a match.
+    """
+
+    @classmethod
+    def _get_config(self):
+        return etree.XML('''
+<subConfig type="preParser" id="{0.__name__}">
+  <objectType>cheshire3.preParser.{0.__name__}</objectType>
+  <options>
+    <setting type="regexp">document</setting>
+    <setting type="keep">1</setting>
+    
+  </options>
+</subConfig>
+'''.format(self._get_class()))
+
+    def test_process_document_returnContent(self):
+        "Check content of returned Document ('my' -> 'your')."
+        self.assertEqual(self.outDoc.get_raw(self.session),
+                         u''.join(re.findall('document', self.testUc)),
+                         u"Returned document content not as expected")
+
 
 class SgmlPreParserTestCase(ImplementedPreParserTestCase):
     """Cheshire3 SgmlPreParser Unittests.
@@ -429,6 +520,9 @@ def load_tests(loader, tests, pattern):
     suite.addTests(ltc(FileUtilPreParserTestCase))
     suite.addTests(ltc(HtmlSmashPreParserTestCase))
     suite.addTests(ltc(RegexpSmashPreParserTestCase))
+    suite.addTests(ltc(RegexpSmashPreParserStripTestCase))
+    suite.addTests(ltc(RegexpSmashPreParserSubTestCase))
+    suite.addTests(ltc(RegexpSmashPreParserKeepTestCase))
     suite.addTests(ltc(SgmlPreParserTestCase))
     suite.addTests(ltc(AmpPreParserTestCase))
     suite.addTests(ltc(MarcToXmlPreParserTestCase))
