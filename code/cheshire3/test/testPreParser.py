@@ -203,8 +203,59 @@ class CmdLinePreParserTestCase(ImplementedPreParserTestCase):
 <subConfig type="preParser" id="{0.__name__}">
   <objectType>cheshire3.preParser.{0.__name__}</objectType>
   <paths>
-    <path type="executable">echo</path>
+    <path type="executable">cat</path>
   </paths>
+</subConfig>
+'''.format(self._get_class()))
+
+    def test_process_document_returnContent(self):
+        "Check content of returned Document (should be unaltered)."
+        self.assertEqual(self.outDoc.get_raw(self.session),
+                         self.inDoc.get_raw(self.session))
+
+
+class CmdLinePreParserInDocTestCase(CmdLinePreParserTestCase):
+    """Cheshire3 CmdLinePreParser with %INDOC% Unittests.
+    
+    A CmdLinePreParser should run a command in the native Operating System to
+    preParse the Document. In this case, test a command that requires an 
+    incoming file.
+    """
+    
+    @classmethod
+    def _get_config(self):
+        return etree.XML('''
+<subConfig type="preParser" id="{0.__name__}">
+  <objectType>cheshire3.preParser.{0.__name__}</objectType>
+  <paths>
+    <path type="executable">cat</path>
+  </paths>
+  <options>
+    <setting type="commandLine">%INDOC%</setting>
+  </options>
+</subConfig>
+'''.format(self._get_class()))
+
+
+class CmdLinePreParserInOutDocTestCase(CmdLinePreParserTestCase):
+    """Cheshire3 CmdLinePreParser with %INDOC% Unittests.
+    
+    A CmdLinePreParser should run a command in the native Operating System to
+    preParse the Document. In this case, test a command that requires an 
+    incoming file.
+    """
+    
+    @classmethod
+    def _get_config(self):
+        return etree.XML('''
+<subConfig type="preParser" id="{0.__name__}">
+  <objectType>cheshire3.preParser.{0.__name__}</objectType>
+  <paths>
+    <path type="executable">cat</path>
+  </paths>
+  <options>
+    <setting type="commandLine">%INDOC% > %OUTDOC%</setting>
+  </options>
 </subConfig>
 '''.format(self._get_class()))
 
@@ -371,6 +422,8 @@ def load_tests(loader, tests, pattern):
     suite.addTests(ltc(AsciiUnicodeDecodePreParserTestCase))
     suite.addTests(ltc(Iso8859_1UnicodeDecodePreParserTestCase))
     suite.addTests(ltc(CmdLinePreParserTestCase))
+    suite.addTests(ltc(CmdLinePreParserInDocTestCase))
+    suite.addTests(ltc(CmdLinePreParserInOutDocTestCase))
     suite.addTests(ltc(FileUtilPreParserTestCase))
     suite.addTests(ltc(HtmlSmashPreParserTestCase))
     suite.addTests(ltc(RegexpSmashPreParserTestCase))
