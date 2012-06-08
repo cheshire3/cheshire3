@@ -8,6 +8,7 @@ from cheshire3.exceptions import ConfigFileException, ExternalSystemException
 import re, time, string, binascii, cStringIO as StringIO
 import os, time, glob
 import httplib, mimetypes, tempfile, hashlib
+import subprocess
 from xml.sax.saxutils import escape
 from warnings import warn
 from lxml import etree
