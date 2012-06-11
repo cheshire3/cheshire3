@@ -7,7 +7,7 @@ from cheshire3.index import *
 from cheshire3.baseStore import SwitchingBdbConnection
 from cheshire3.utils import getShellResult
 
-import os, types, struct, sys, time, glob
+import os, types, struct, sys, time, glob, re
 try:
     # Python 2.3 vs 2.2
     import bsddb as bdb
@@ -541,7 +541,24 @@ class BdbIndexStore(IndexStore):
             l = f.readline()[:-1]
             data = l.split(nonTextToken)
             term = data[0]
-            fullinfo = [long(x) for x in data[1:]]
+            fullinfo = []
+            for x in data[1:]:
+                try:
+                    fullinfo.append(long(x))
+                except ValueError:
+                    # Some unexpected data in the index :(
+                    self.log_debug(session, 'Unexpected value in raw index, attempting to recover...')
+                    # Attempt to recover
+                    # Find the first thing that could be a long but not entirely compsed of 0s
+                    try:
+                        mylong = long(re.search('\d*[1-9]\d*', x).group(0))
+                    except AttributeError:
+                        # No match - nothing we can do
+                        continue
+                        self.log_error(session, 'Unexpected value in raw index data, skipping entry')
+                    else:
+                        fullinfo.append(mylong)
+                        self.log_debug(session, 'Recovered value: {0}'.format(mylong))
             if term == currTerm:
                 # accumulate
                 if fullinfo:
