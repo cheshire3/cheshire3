@@ -1,6 +1,5 @@
 """MPI based parallel processing."""
 
-import os
 import sys
 import time
 import commands
@@ -19,6 +18,7 @@ except ImportError:
 
 from cheshire3.exceptions import ObjectDoesNotExistException
 from cheshire3.baseObjects import Session, Record
+from cheshire3.configParser import C3Object
 
 
 class Message:
@@ -44,32 +44,50 @@ class Message:
         self.source.send(data)
 
 
-class TaskManager:
+class TaskManager(C3Object):
     tid = -1
     tasks = {}
     idle = []
-    ntasks = 0
+    nTasks = 0
     status = None
     debug = 0
     messagesSent = {}
     currentReceive = None
     server = None
     namedTasks = {}
+    
+    _possibleSettings = {
+        'nTasks': {
+            'docs': """\
+Number of tasks to create and distribute work between. Defaults to MPI pool 
+size.""",
+            'type': int
+        },
+        'hostname': {
+            'docs': """Name of MPI host."""
+        }
+    }
 
-    def __init__(self, session):
+    def __init__(self, session, config, parent):
+        C3Object.__init__(self, session, config, parent)
         self.currentReceive = None
-        self.ntasks = mpi.WORLD.size
+        nTasks = self.get_setting(session, 'nTasks')
+        if nTasks:
+            # Size of MPI world should be the ceiling
+            self.nTasks = min(nTasks, mpi.WORLD.size)
+        else:
+            self.nTasks = mpi.WORLD.size
         self.tid = mpi.rank
         self.session = session
         self.server = session.server
         self.namedTasks = {}
-
+        self.hostname = self.get_setting(session, 'hostname',
+                                         commands.getoutput('hostname'))
         if self.debug:
-            self.hostname = commands.getoutput('hostname')
-            self.logh = file('debug_%s_%s' % (self.tid, self.hostname), 'w')
+            self.logh = open('debug_%s_%s' % (self.tid, self.hostname), 'w')
 
-        if self.ntasks > 1:
-            for t in range(self.ntasks):
+        if self.nTasks > 1:
+            for t in range(self.nTasks):
                 task = Task(t, manager=self)
                 self.tasks[t] = task
                 self.messagesSent[t] = 0
@@ -104,7 +122,7 @@ class TaskManager:
             self.logh.flush()
 
     def start(self):
-        if self.ntasks == 1:
+        if self.nTasks == 1:
             raise ValueError("Not running in parallel.")
         if self.tid != 0:
             # Start listening
@@ -430,3 +448,6 @@ class Task:
             return msg
         else:
             return 0
+
+
+MPITaskManager = TaskManager
