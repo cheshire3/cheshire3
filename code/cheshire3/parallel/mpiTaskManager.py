@@ -5,7 +5,11 @@ import sys
 import time
 import commands
 import traceback
-import cPickle
+
+try:
+    import cPickle as pickle
+except ImportError:
+    pickle
 
 try:
     import mpi
@@ -395,7 +399,7 @@ class Task:
             mpi.send(data, self.tid)
         except:
             if type(data) == list and isinstance(data[0],
-                                                 cPickle.UnpickleableError):
+                                                 pickle.UnpickleableError):
                 data[0] = ValueError("Unpickleable!")
                 try:
                     mpi.send(data, self.tid)
