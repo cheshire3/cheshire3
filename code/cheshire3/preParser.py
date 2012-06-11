@@ -71,13 +71,9 @@ class NormalizerPreParser(PreParser):
     def process_document(self, session, doc):
         data = doc.get_raw(session)
         new = self.normalizer.process_string(session, data)
-<<<<<<< HEAD
         return StringDocument(new, self.id, doc.processHistory,
                               mimeType=doc.mimeType, parent=doc.parent,
                               filename=doc.filename)
-=======
-        return StringDocument(new, self.id, doc.processHistory, mimeType=doc.mimeType, parent=doc.parent, filename=doc.filename)
->>>>>>> hotfix/1.0.0b40
 
 
 class UnicodeDecodePreParser(PreParser):
