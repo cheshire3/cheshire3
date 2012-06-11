@@ -10,6 +10,7 @@ except ImportError:
     pass
 
 from baseObjects import Session
+from cheshire3.configParser import C3Object
 
 
 def shutdown():
@@ -36,17 +37,26 @@ class Message:
         self.source.send(data)
 
 
-class TaskManager:
+class TaskManager(C3Object):
     tid = -1
     tasks = {}
     idle = []
     slave = ""
-    ntasks = 0
+    nTasks = 0
 
-    def __init__(self, slaveFile, ntasks):
+    _possibleSettings = {
+        'nTasks': {
+            'docs': """\
+Number of tasks to create and distribute work between. Defaults to MPI pool 
+size.""",
+            'type': int
+        },
+    }
+    
+    def __init__(self, slaveFile, nTasks):
         self.tid = pypvm.mytid()
         self.slaveFile = slaveFile
-        self.ntasks = ntasks
+        self.nTasks = nTasks
         self.tasks = {}
         self.idle = []
         self.hosts = []
@@ -64,8 +74,8 @@ class TaskManager:
 
     def start(self):
         if self.hosts and self.splitTasksEvenly:
-            tph = self.ntasks / len(self.hosts)
-            rem = self.ntasks - (tph * len(self.hosts))
+            tph = self.nTasks / len(self.hosts)
+            rem = self.nTasks - (tph * len(self.hosts))
             tids = []
             for h in self.hosts:
                 htids = pypvm.spawn(self.slaveFile, [], pypvm.PvmTaskHost,
@@ -77,7 +87,7 @@ class TaskManager:
                 tids.extend(rtids)
         else:
             tids = pypvm.spawn(self.slaveFile, [],
-                               pypvm.PvmTaskDefault, "", self.ntasks)
+                               pypvm.PvmTaskDefault, "", self.nTasks)
         for n in range(len(tids)):
             name = 'Task%s' % n
             self.tasks[tids[n]] = Task(tids[n], name)
