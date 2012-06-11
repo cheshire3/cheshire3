@@ -44,7 +44,7 @@ class Message:
         self.source.send(data)
 
 
-class TaskManager(C3Object):
+class TaskManager(object):
     tid = -1
     tasks = {}
     idle = []
@@ -55,35 +55,17 @@ class TaskManager(C3Object):
     currentReceive = None
     server = None
     namedTasks = {}
-    
-    _possibleSettings = {
-        'nTasks': {
-            'docs': """\
-Number of tasks to create and distribute work between. Defaults to MPI pool 
-size.""",
-            'type': int
-        },
-        'hostname': {
-            'docs': """Name of MPI host."""
-        }
-    }
 
-    def __init__(self, session, config, parent):
-        C3Object.__init__(self, session, config, parent)
+    def __init__(self, session):
         self.currentReceive = None
-        nTasks = self.get_setting(session, 'nTasks')
-        if nTasks:
-            # Size of MPI world should be the ceiling
-            self.nTasks = min(nTasks, mpi.WORLD.size)
-        else:
-            self.nTasks = mpi.WORLD.size
+        self.nTasks = mpi.WORLD.size
         self.tid = mpi.rank
         self.session = session
         self.server = session.server
         self.namedTasks = {}
-        self.hostname = self.get_setting(session, 'hostname',
-                                         commands.getoutput('hostname'))
+        
         if self.debug:
+            self.hostname = commands.getoutput('hostname')
             self.logh = open('debug_%s_%s' % (self.tid, self.hostname), 'w')
 
         if self.nTasks > 1:
@@ -450,4 +432,26 @@ class Task:
             return 0
 
 
-MPITaskManager = TaskManager
+class MPITaskManager(C3Object):
+    """Configurable Cheshire3 object to manage MPI parallel processing."""
+    
+    _possibleSettings = {
+        'nTasks': {
+            'docs': """\
+Number of tasks to create and distribute work between. Defaults to MPI pool 
+size.""",
+            'type': int
+        },
+        'hostname': {
+            'docs': """Name of MPI host."""
+        }
+    }
+
+    def __init__(self, session, config, parent):
+        C3Object.__init__(self, session, config, parent)
+        TaskManager(session)
+        nTasks = self.get_setting(session, 'nTasks')
+        if nTasks:
+            # Size of MPI world should be the ceiling
+            self.nTasks = min(nTasks, self.nTasks)
+        self.hostname = self.get_setting(session, 'hostname', self.hostname)
