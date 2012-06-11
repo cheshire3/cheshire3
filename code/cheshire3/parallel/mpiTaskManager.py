@@ -1,15 +1,21 @@
+"""MPI based parallel processing."""
 
-import sys, time, commands, os
+import os
+import sys
+import time
+import commands
 import traceback
 import cPickle
-from c3errors import ObjectDoesNotExistException
-from baseObjects import Session, Record
 
 try:
     import mpi
 except ImportError:
     # Don't need it to import, just to use (???)
     pass
+
+from cheshire3.exceptions import ObjectDoesNotExistException
+from cheshire3.baseObjects import Session, Record
+
 
 class Message:
     source = None
@@ -24,12 +30,15 @@ class Message:
         self.manager = manager  # TaskManager
         self.source = source    # Task
         self.status = status
-        if (isinstance(data, list) and isinstance(data[0], Exception) and len(data) == 2):
+        if (isinstance(data, list) and
+            isinstance(data[0], Exception) and
+            len(data) == 2):
             data[0].tb = data[1]
             raise data[0]
-        
+
     def reply(self, data):
         self.source.send(data)
+
 
 class TaskManager:
     tid = -1
@@ -51,38 +60,48 @@ class TaskManager:
         self.server = session.server
         self.namedTasks = {}
 
-	if self.debug:
-	    self.hostname = commands.getoutput('hostname')
-	    self.logh = file('debug_%s_%s' % (self.tid, self.hostname), 'w')
+        if self.debug:
+            self.hostname = commands.getoutput('hostname')
+            self.logh = file('debug_%s_%s' % (self.tid, self.hostname), 'w')
 
         if self.ntasks > 1:
             for t in range(self.ntasks):
                 task = Task(t, manager=self)
                 self.tasks[t] = task
-	        self.messagesSent[t] = 0
+                self.messagesSent[t] = 0
                 self.idle.append(task)
             if self.tid == 0:
                 # Strip self
                 del self.tasks[0]
                 self.idle.pop(0)
 
-
     def shutdown(self):
         for t in self.tasks.values():
             t.send("SHUTDOWN")
 
     def log(self, type, msg, to=None):
-	if self.debug:
-	    if type== "recv":
-                self.logh.write("[%s] %s @ %s got %r from %s\n" % (time.time(), self.tid, self.hostname, msg, msg.source))
-	    else:
-	        self.logh.write("[%s] %s @ %s sending %s to %s\n" % (time.time(), self.tid, self.hostname, msg, to))
-	    self.logh.flush()
+        if self.debug:
+            if type == "recv":
+                self.logh.write(
+                    "[%s] %s @ %s got %r from %s\n" % (time.time(),
+                                                       self.tid,
+                                                       self.hostname,
+                                                       msg,
+                                                       msg.source)
+                )
+            else:
+                self.logh.write(
+                    "[%s] %s @ %s sending %s to %s\n" % (time.time(),
+                                                         self.tid,
+                                                         self.hostname,
+                                                         msg,
+                                                         to)
+                )
+            self.logh.flush()
 
     def start(self):
         if self.ntasks == 1:
             raise ValueError("Not running in parallel.")
-
         if self.tid != 0:
             # Start listening
             cont = 1
@@ -97,8 +116,7 @@ class TaskManager:
                 else:
                     # Listen for reqs from master
                     msg = master.recv()
-
-                self.log("recv", msg)  
+                self.log("recv", msg)
                 try:
                     val = -1
                     if msg.data == "SHUTDOWN":
@@ -120,7 +138,8 @@ class TaskManager:
                     try:
                         (objid, fn, args, kw) = msg.data
                         if isinstance(args[0], Session):
-                            db = self.server.get_object(self.session, args[0].database)
+                            db = self.server.get_object(self.session,
+                                                        args[0].database)
                             session = args[0]
                         else:
                             session = self.session
@@ -139,7 +158,7 @@ class TaskManager:
                             val = (target, objid, fn)
                         if isinstance(val, Record):
                             val = "%s/%s" % (val.recordStore, val.id)
-                        
+
                     except Exception, e:
                         val = [e, traceback.format_tb(sys.exc_info()[2])]
 
@@ -157,8 +176,8 @@ class TaskManager:
                     # Something seriously wrong, need to reply SOMETHING
                     val = [e, traceback.format_tb(sys.exc_info()[2])]
                     msg.reply(val)
-	        except:
-		    msg.reply('-2')
+                except:
+                    msg.reply('-2')
 
     def recv(self):
         # blocking receive from anywhere
@@ -168,14 +187,12 @@ class TaskManager:
         if not src in self.idle:
             self.idle.append(src)
         msg = Message(data, src, self, status)
-        self.log("recv", msg) 
+        self.log("recv", msg)
         return msg
 
-
     def irecv(self):
-        # Receive a message from anywhere, create Message 
+        # Receive a message from anywhere, create Message
         # round robin irecvs
-
         if self.currentReceive is None:
             self.currentReceive = mpi.irecv()
         if self.currentReceive:
@@ -221,7 +238,7 @@ class TaskManager:
     # Put task back in pool
     def relinquish_task(self, task):
         self.idle.append(task)
-	self.tasks[task.tid] = task
+        self.tasks[task.tid] = task
         return 1
 
     def name_task(self, task, name):
@@ -229,21 +246,20 @@ class TaskManager:
         task.name = name
         for t in self.tasks.values():
             t.send(["NAMETASK", task.tid, name])
-        
 
     def bcall(self, o, fn, *args, **kw):
         # Broadcast message to non removed tasks
-	tasks = self.tasks.values()
+        tasks = self.tasks.values()
         for t in tasks:
             t.call(o, fn, *args, **kw)
-	self.idle = []
-	return len(tasks)
-        
+        self.idle = []
+        return len(tasks)
+
     def waitall(self):
         start = time.time()
         waiting = self.tasks.copy()
-	for t in self.idle:
-	    del waiting[t.tid]	
+        for t in self.idle:
+            del waiting[t.tid]
         msgs = []
         while waiting:
             for t in waiting.values():
@@ -251,7 +267,7 @@ class TaskManager:
                 if msg != 0:
                     msgs.append(msg)
                     del waiting[t.tid]
-	            self.idle.append(t)
+                    self.idle.append(t)
             #if time.time() > start + 600:
             # raise ValueError("Tasks in deadlock")
             time.sleep(0.5)
@@ -259,7 +275,7 @@ class TaskManager:
 
     def callOnEach(self, stack, function, *args, **kw):
         # Fill tasks
-	tasks = self.tasks.values()
+        tasks = self.tasks.values()
         for t in tasks:
             try:
                 what = stack.pop()
@@ -269,12 +285,12 @@ class TaskManager:
                 t.call(what, function, *args, **kw)
             else:
                 t.call(what, function, *args, **kw)
-	self.idle = []
+        self.idle = []
 
         while stack:
             try:
-                okay = self.recv() 
-            except Exception, e:               
+                okay = self.recv()
+            except Exception, e:
                 print e
                 if (hasattr(e, 'tb')):
                     for l in e.tb:
@@ -296,12 +312,12 @@ class TaskManager:
                 t.call(object, function, args[0], what, *args[1:], **kw)
             else:
                 t.call(object, function, what, **kw)
-	self.idle = []
+        self.idle = []
 
         while stack:
             try:
-                okay = self.recv() 
-            except Exception, e:               
+                okay = self.recv()
+            except Exception, e:
                 print e
                 if (hasattr(e, 'tb')):
                     for l in e.tb:
@@ -313,9 +329,8 @@ class TaskManager:
             else:
                 self.call(object, function, what, **kw)
         self.waitall()
-        
 
-            
+
 class Task:
     tid = -1
     name = ""
@@ -323,10 +338,10 @@ class Task:
     currentReceive = None
 
     def __init__(self, tid=-1, name="", debug=0, manager=None):
-	self.debug = 0
+        self.debug = 0
         self.currentSend = None
         self.currentReceive = None
-	self.manager=manager
+        self.manager = manager
         self.name = ""
         if tid > -1:
             self.tid = tid
@@ -363,23 +378,24 @@ class Task:
             session.server = svr
 
     def log(self, type, msg, to=None):
-	if self.manager:
-	    self.manager.log(type, msg, to)
-	elif self.debug:
-	    # Task object created outside normal scope
-	    fileh = file("debug_%s" % self.tid, 'a')
-	    fileh.write("type:%r msg:%r to:%r\n" % (type, msg, to))
-	    fileh.flush()
-	    fileh.close()
+        if self.manager:
+            self.manager.log(type, msg, to)
+        elif self.debug:
+            # Task object created outside normal scope
+            fileh = file("debug_%s" % self.tid, 'a')
+            fileh.write("type:%r msg:%r to:%r\n" % (type, msg, to))
+            fileh.flush()
+            fileh.close()
 
     def send(self, data, listen=0):
-	if self.manager:
+        if self.manager:
             self.manager.messagesSent[self.tid] += 1
-	self.log("send", data, self.tid)
+        self.log("send", data, self.tid)
         try:
             mpi.send(data, self.tid)
         except:
-            if type(data) == list and isinstance(data[0], cPickle.UnpickleableError):
+            if type(data) == list and isinstance(data[0],
+                                                 cPickle.UnpickleableError):
                 data[0] = ValueError("Unpickleable!")
                 try:
                     mpi.send(data, self.tid)
@@ -391,26 +407,22 @@ class Task:
                 print "Fail in send:"
                 print data
                 raise
-                
 
     def recv(self):
         # Read data from this specific task
         (data, status) = mpi.recv(self.tid)
         return Message(data, self, self.manager, status)
-     
+
     def irecv(self):
         # Read data from this specific task, nonblocking
         if self.currentReceive is None:
             self.currentReceive = mpi.irecv(self.tid)
         if mpi.testany(self.currentReceive)[0] is not None:
             msg = self.currentReceive.message
-            msg = Message(msg, self, self.manager, self.currentReceive.status)
+            msg = Message(msg, self, self.manager,
+                          self.currentReceive.status)
             self.currentReceive = None
-	    self.log("recv", msg)
-	    return msg
+            self.log("recv", msg)
+            return msg
         else:
             return 0
-
-
-
-
