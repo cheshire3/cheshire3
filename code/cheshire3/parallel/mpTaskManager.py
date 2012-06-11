@@ -6,7 +6,7 @@ import traceback
 import multiprocessing as mp
 
 from cheshire3.configParser import C3Object
-from cheshire3.baseObjects import Session
+from cheshire3.baseObjects import Session, Record
 
 
 # Remote Process
