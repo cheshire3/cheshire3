@@ -969,7 +969,7 @@ class BdbIndexStore(IndexStore):
         if index.get_setting(session, 'proxVectors'):
             dbp = dbname + "_PROXVECTORS"
             if self.vectorSwitching:
-                cxn = self.vectorSwitchingClass(session, self, fullname,
+                cxn = self.vectorSwitchingClass(session, self, dbp,
                                                 bucketType=vbt, maxBuckets=vmb,
                                                 maxItemsPerBucket=vmi)
             else:
@@ -1410,7 +1410,7 @@ class BdbIndexStore(IndexStore):
                 docid = self._get_internalId(session, rec)         
         elif (docid == -1):
             # Unstored record
-            raise ValueError(str(record))
+            raise ValueError(str(rec))
         
         if index in self.outFiles:
             # Batch loading
@@ -1609,7 +1609,7 @@ class BdbIndexStore(IndexStore):
                                               bucketType=vbt, maxBuckets=vmb,
                                               maxItemsPerBucket=vmi)
                 else:
-                    cxn = self.switchingClass(session, self, dbp)
+                    cxn = self.switchingClass(session, self, fullname)
 
             else:
                 cxn = bdb.db.DB()
@@ -1728,7 +1728,7 @@ class BdbIndexStore(IndexStore):
                      "occurences": nOccs,
                      "database": session.database})
         else:
-            raise NotImplementedError(rsitype)
+            raise NotImplementedError(rsiType)
 
     def fetch_term(self, session, index, term, summary=False, prox=True):
         p = self.permissionHandlers.get('info:srw/operation/2/search', None)
