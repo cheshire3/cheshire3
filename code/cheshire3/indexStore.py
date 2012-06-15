@@ -1,7 +1,7 @@
   
 from cheshire3.baseObjects import IndexStore, Database
 from cheshire3.configParser import C3Object
-from cheshire3.exceptions import ConfigFileException, FileDoesNotExistException, FileAlreadyExistsException
+from cheshire3.exceptions import ConfigFileException, FileDoesNotExistException, FileAlreadyExistsException, PermissionException
 from cheshire3.resultSet import SimpleResultSetItem
 from cheshire3.index import *
 from cheshire3.baseStore import SwitchingBdbConnection
