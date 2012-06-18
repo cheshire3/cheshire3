@@ -1,7 +1,9 @@
 
 import exceptions
 
+
 class C3Exception(Exception):
+
     text = ""
 
     def __init__(self, text="None"):
@@ -12,24 +14,31 @@ class C3Exception(Exception):
 
     def __repr__(self):
         return str(self.__class__) + ": " + self.reason
-    
+
+
 class C3ObjectTypeError(C3Exception):
     pass
+
 
 class ConfigFileException(C3Exception):
     pass
 
+
 class FileDoesNotExistException(C3Exception):
     pass
+
 
 class FileAlreadyExistsException(C3Exception):
     pass
 
+
 class ObjectDoesNotExistException(C3Exception):
     pass
 
+
 class ObjectAlreadyExistsException(C3Exception):
     pass
+
 
 class ObjectDeletedException(C3Exception):
 
@@ -41,17 +50,21 @@ class ObjectDeletedException(C3Exception):
 
 
 class QueryException(C3Exception):
+
     diagnostic = 0
+
     def __init__(self, text="", diag=0):
         self.reason = text
         self.diagnostic = diag
 
+
 class PermissionException(C3Exception):
     pass
+
 
 class IntegrityException(C3Exception):
     pass
 
+
 class ExternalSystemException(C3Exception):
     pass
-
