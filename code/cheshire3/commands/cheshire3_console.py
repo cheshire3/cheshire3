@@ -68,6 +68,10 @@ def main(argv=None):
 
 
 argparser = Cheshire3ArgumentParser()
+argparser.add_argument('-d', '--database', type=str,
+                       action='store', dest='database',
+                       default=None, metavar='DATABASE',
+                       help="identifier of Cheshire3 database")
 #subparsers = argparser.add_subparsers(title='subcommands',
 #                                   description='valid subcommands')
 session = None

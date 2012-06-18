@@ -50,6 +50,10 @@ Please provide a different database identifier using the --database option.
 
 
 argparser = Cheshire3ArgumentParser(conflict_handler='resolve')
+argparser.add_argument('-d', '--database', type=str,
+                       action='store', dest='database',
+                       default=None, metavar='DATABASE',
+                       help="identifier of Cheshire3 database")
 argparser.add_argument('data', type=str, action='store',
                        help="data to load into the Cheshire3 database.")
 argparser.add_argument('-l', '--cache-level', type=int, 

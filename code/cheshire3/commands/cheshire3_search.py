@@ -71,6 +71,10 @@ Please provide a different database identifier using the --database option.
 
 
 argparser = Cheshire3ArgumentParser(conflict_handler='resolve')
+argparser.add_argument('-d', '--database', type=str,
+                       action='store', dest='database',
+                       default=None, metavar='DATABASE',
+                       help="identifier of Cheshire3 database")
 argparser.add_argument('query', type=str, action='store',
                        help="query to execute on the Cheshire3 database.")
 argparser.add_argument('-f', '--format', type=str,

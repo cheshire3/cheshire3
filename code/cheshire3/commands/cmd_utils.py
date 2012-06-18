@@ -26,11 +26,6 @@ class Cheshire3ArgumentParser(ArgumentParser):
                           action='store', dest='serverconfig',
                           default=defaultConfig, metavar='PATH', 
                           help="path to Cheshire3 server configuration file. default: {0}".format(defaultConfig))
-        self.add_argument('-d', '--database', type=str,
-                          action='store', dest='database',
-                          default=None, metavar='DATABASE',
-                          help="identifier of Cheshire3 database")
-        
         
     def parse_args(self, args=None, namespace=None):
         args = ArgumentParser.parse_args(self, args, namespace)
