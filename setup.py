@@ -79,6 +79,7 @@ setup(
             'cheshire3-init = cheshire3.commands.cheshire3_init:main',
             'cheshire3-load = cheshire3.commands.cheshire3_load:main',
             'cheshire3-search = cheshire3.commands.cheshire3_search:main',
+            'cheshire3-serve = cheshire3.commands.cheshire3_serve:main'
         ],
     },
     keywords = u"xml document search information retrieval engine data text",
