@@ -1,38 +1,79 @@
 
+import sys
+import os
+import re
+import time
+
+from lxml import etree
+try:
+    # Name when installed by hand
+    import bsddb3 as bdb
+except:
+    # Name that comes in Python 2.3
+    # though Python 2.3 no longer supported
+    import bsddb as bdb
+
 from cheshire3.configParser import C3Object, CaselessDictionary
 from cheshire3.baseObjects import Database, Index, ProtocolMap, Record
 from cheshire3.baseStore import SummaryObject
-from cheshire3.exceptions import ConfigFileException, ObjectDoesNotExistException, QueryException
+from cheshire3.exceptions import ConfigFileException,\
+                                 ObjectDoesNotExistException, QueryException
 from cheshire3.bootstrap import BSParser, BootstrapDocument
 from cheshire3.resultSet import SimpleResultSet, BitmapResultSet
 import cheshire3.cqlParser as cql
 
-import os, sys, re, time
-from lxml import etree
-
-try:
-    # name when installed by hand
-    import bsddb3 as bdb
-except:
-    # name that comes in python 2.3
-    import bsddb as bdb
-
 
 class SimpleDatabase(SummaryObject, Database):
-    """ Default database implementation """
+    """ Default database implementation"""
 
-    _possibleSettings = {'srw' : {'docs' : 'Should the database be available via the SRW protocol', 'type' : int, 'options' : "0|1"},
-                         'z3950' : {'docs' : 'Should the database be available via the Z39.50 protocol', 'type' : int, 'options' : "0|1"},
-                         'remoteWorkflow' : {'docs' : 'Should the database be available via the remote workflow protocol for Cheshire3. This MUST be secured, so it is not recommended without fully understanding the implications', 'type' : int, 'options' : "0|1"},
-                         'oai-pmh' : {'docs' : 'Should the database be available via the OAI protocol', 'type' : int, 'options' : "0|1"},
-                         'www' : {'docs' : "Should the database be available via Cheshire3's introspective web search interface.", 'type': int, 'options': "0|1"}
-                         }
+    _possibleSettings = {
+        'srw': {
+            'docs': 'Should the database be available via the SRW protocol',
+            'type': int,
+            'options': "0|1"
+        },
+        'z3950': {
+            'docs': 'Should the database be available via the Z39.50 protocol',
+            'type': int,
+            'options': "0|1"
+        },
+        'remoteWorkflow': {
+            'docs': ('Should the database be available via the remote '
+                     'workflow protocol for Cheshire3. This MUST be secured, '
+                     'so it is not recommended without fully understanding '
+                     'the implications'),
+            'type': int,
+            'options': "0|1"
+        },
+        'oai-pmh': {
+            'docs': 'Should the database be available via the OAI protocol',
+            'type': int,
+            'options': "0|1"
+        },
+        'www': {
+            'docs': ("Should the database be available via Cheshire3's "
+                     "introspective web search interface."),
+            'type': int,
+            'options': "0|1"
+        }
+    }
 
-    _possiblePaths = {'indexStoreList' : {'docs' : "Space separated list of indexStore identifiers for this database."}
-                      , 'indexStore' : {'docs' : "Single indexStore identifier for this database"}
-                      , 'recordStore' : {'docs' : "Single (default) recordStore identifier"}
-                      , 'protocolMap' : {'docs' : "Single (default) protocolMap identifier"}
-                      }
+    _possiblePaths = {
+        'indexStoreList': {
+            'docs': ("Space separated list of indexStore identifiers for this "
+                     "database.")
+        },
+        'indexStore': {
+            'docs': "Single indexStore identifier for this database"
+        },
+        'recordStore': {
+            'docs': "Single (default) recordStore identifier"
+        },
+        'protocolMap': {
+            'docs': "Single (default) protocolMap identifier"
+        }
+    }
+    
     indexes = {}
     protocolMaps = {}
     indexConfigs = {}
@@ -55,7 +96,9 @@ class SimpleDatabase(SummaryObject, Database):
         if not storeList:
             indexStore = self.get_path(session, 'indexStore')
             if not indexStore:
-                raise ConfigFileException("No indexStore/indexStoreList associated with database: %s" % self.id)
+                msg = ("No indexStore/indexStoreList associated with "
+                       "database: %s" % self.id)
+                raise ConfigFileException(msg)
             storeList = [indexStore.id]
         else:
             storeList = storeList.split(' ')
@@ -94,9 +137,9 @@ class SimpleDatabase(SummaryObject, Database):
         try:
             full = self.records.get(storeid, [[]])
             k = full[-1]
-            if (len(k) > 1 and k[1] == id -1):
+            if (len(k) > 1 and k[1] == id - 1):
                 k[1] = id
-            elif ((len(k) == 1 and k[0] == id -1) or not k):
+            elif ((len(k) == 1 and k[0] == id - 1) or not k):
                 k.append(id)
             else:
                 full.append([id])
@@ -118,7 +161,6 @@ class SimpleDatabase(SummaryObject, Database):
         self.totalItems -= 1
         (storeid, id) = (rec.recordStore, rec.id)        
         # XXX remove from self.records
-        
         # XXX this should be SummaryObject.unaccumulate_metadata() ?
         if (rec.wordCount):
             self.totalWordCount -= rec.wordCount
@@ -145,7 +187,6 @@ class SimpleDatabase(SummaryObject, Database):
             idx.commit_indexing(session)
         return None
 
-
     def clear_indexes(self, session):
         if not len(self.indexes):
             self._cacheIndexes(session)
@@ -164,7 +205,7 @@ class SimpleDatabase(SummaryObject, Database):
                     rss = self.get_object(session, rssid)
                 else:
                     rss = self.get_object(session, "defaultResultSetStore")
-                rset =  rss.fetch_resultSet(session, rsid)
+                rset = rss.fetch_resultSet(session, rsid)
                 rset.fromStore = 1
                 return rset
             else:
@@ -191,11 +232,14 @@ class SimpleDatabase(SummaryObject, Database):
             if left.__class__ == right.__class__:
                 new = left.__class__(session, [], recordStore=left.recordStore)
             elif left.__class__ == BitmapResultSet:
-                # Want to switch the left/right, but rset assumes list[0] is same type
-                new = right.__class__(session, [], recordStore=right.recordStore)
+                # Want to switch the left/right,
+                # but rset assumes list[0] is same type
+                new = right.__class__(session, [],
+                                      recordStore=right.recordStore)
                 if query.boolean.value == 'prox':
                     # bitmaps can't do prox, so just raise
-                    raise QueryException("Cannot use Prox with %s" % left.index.toCQL(), 18)
+                    msg = "Cannot use Prox with %s" % left.index.toCQL()
+                    raise QueryException(msg, 18)
                 elif query.boolean.value == 'not':
                     # can't reorder without changing query
                     return new.combine(session, [left, right], query, self)
@@ -214,27 +258,27 @@ class SimpleDatabase(SummaryObject, Database):
             return rs
 
     def search(self, session, query):
-        # check for optimised indexStore based search (eg SQL translation)
+        # Check for optimized indexStore based search (eg SQL translation)
         storeList = self.get_path(session, 'indexStoreList')
         if not storeList:
             indexStore = self.get_path(session, 'indexStore')
             if not indexStore:
-                raise ConfigFileException("No indexStore/indexStoreList associated with database: %s" % self.id)
+                msg = ("No indexStore/indexStoreList associated with "
+                       "database: %s" % self.id)
+                raise ConfigFileException(msg)
             storeList = [indexStore.id]
         else:
             storeList = storeList.split(' ')
 
         # FIXME: Should respect multiple index stores somehow?
         idxStore = self.get_object(session, storeList[0])
-        # check if there's an indexStore specific search function
+        # Check if there's an indexStore specific search function
         start = time.time()
         if hasattr(idxStore, 'search'):
             rs = idxStore.search(session, query, self)
         else:
             rs = self._search(session, query)
-        # now do top level stuff, like sort
-
-
+        # Now do top level stuff, like sort
         if rs.relevancy:
             rs.scale_weights()
             rs.order(session, "weight")
@@ -264,9 +308,9 @@ class SimpleDatabase(SummaryObject, Database):
                 index = pm.resolveIndex(session, sc)
                 # and find params from modifiers
                 if idx['ascending']:
-                    ascending=True
+                    ascending = True
                 elif idx['descending']:
-                    ascending=False
+                    ascending = False
                 elif hasattr(pm, 'defaultSortDirection'):
                     ascending = pm.defaultSortDirection[:3].lower() == 'asc'
                 else:    
@@ -286,7 +330,7 @@ class SimpleDatabase(SummaryObject, Database):
                     m = pm.defaultSortMissing
                     vals = ['low', 'omit', 'high']
                     if m in vals:
-                        miss = int(vals.index(m))-1
+                        miss = int(vals.index(m)) - 1
                     elif m == 'fail':
                         miss = cql.Diagnostic()
                     else:
@@ -317,10 +361,9 @@ class SimpleDatabase(SummaryObject, Database):
                         accents = 0
                 else:
                     accents = None
-
-                # now, finally, order resultSet
-                rs.order(session, index, ascending=ascending, missing=miss, case=case, accents=accents)
-
+                # Now, finally, order resultSet
+                rs.order(session, index, ascending=ascending,
+                         missing=miss, case=case, accents=accents)
         query.resultSet = rs
         rs.queryTime = time.time() - start
         return rs
@@ -349,24 +392,27 @@ class OptimisingDatabase(SimpleDatabase):
         
     def _rewriteQuery(self, session, query):
         if not hasattr(query, 'leftOperand'):
-            if query.relation.value == "all" :
-                # rewrite to AND triples
+            if query.relation.value == "all":
+                # Rewrite to AND triples
                 nbool = " and "
             elif query.relation.value == "any":
                 nbool = " or "
-            elif query.relation.value == "=" and not query.term.value.isnumeric() and query.term.value.index(' ') > -1:
+            elif (query.relation.value == "=" and not
+                  query.term.value.isnumeric() and
+                  query.term.value.index(' ') > -1):
                 nbool = " prox "
             else:
-                # can't rewrite
+                # Can't rewrite
                 return None
-
-            # now split on spaces
+            # Now split on spaces
             terms = query.term.value.split(' ')
             if len(terms) == 1:
                 return None
             nq = []
             for t in terms:
-                nq.append(' '.join([query.index.toCQL(), query.relation.toCQL(), '"' + t + '"']))
+                nq.append(' '.join([query.index.toCQL(),
+                                    query.relation.toCQL(),
+                                    '"' + t + '"']))
             newstr = nbool.join(nq)
             newQuery = cql.parse(newstr)
             return newQuery
@@ -394,77 +440,81 @@ class OptimisingDatabase(SimpleDatabase):
                 # terms should be atomic now.
                 scandata = idx.scan(session, query, 1)
                 if scandata[0][0] != query.term.value:
-                    # no matches
+                    # No matches
                     query.resultCount = 0
                 else:
                     query.resultCount = scandata[0][1][1]
         else:
+            leftResultCount = query.leftOperand.resultCount
+            rightResultCount = query.rightOperand.resultCount
             self._attachResultCount(session, query.leftOperand)
-            if query.boolean.value in ['and', 'prox'] and query.leftOperand.resultCount == 0:
+            if (query.boolean.value in ['and', 'prox'] and
+                leftResultCount == 0):
                 query.resultCount = 0
                 return
 
             self._attachResultCount(session, query.rightOperand)
             if query.boolean.value in ['and', 'prox']:
-                query.resultCount = min(query.leftOperand.resultCount, query.rightOperand.resultCount)
-                if query.boolean.value == "and" and query.rightOperand.resultCount < query.leftOperand.resultCount:
-                    # can't reorder prox
+                query.resultCount = min(leftResultCount, rightResultCount)
+                if (query.boolean.value == "and" and
+                    rightResultCount < leftResultCount):
+                    # Can't reorder prox
                     temp = query.leftOperand
                     query.leftOperand = query.rightOperand
                     query.rightOperand = temp                    
                     del temp
             elif query.boolean.value == 'or':
-                query.resultCount = query.leftOperand.resultCount + query.rightOperand.resultCount
-                if query.rightOperand.resultCount > query.leftOperand.resultCount:
+                query.resultCount = leftResultCount + rightResultCount
+                if rightResultCount > leftResultCount:
                     temp = query.leftOperand
                     query.leftOperand = query.rightOperand
                     query.rightOperand = temp                    
                     del temp
             else:
                 # Can't really predict not and can't reorder. just take LHS
-                query.resultCount = query.leftOperand.resultCount
+                query.resultCount = leftResultCount
         return None
-
 
     def _search(self, session, query):
         if query.resultCount == 0:
-            # no matches in this full subtree
+            # No matches in this full subtree
             return SimpleResultSet([])
         else:
             return SimpleDatabase._search(self, session, query)
                 
     def search(self, session, query):
-        # check for optimised indexStore based search (eg SQL translation)
+        # Check for optimized indexStore based search (eg SQL translation)
         storeList = self.get_path(session, 'indexStoreList')
         if not storeList:
             indexStore = self.get_path(session, 'indexStore')
             if not indexStore:
-                raise ConfigFileException("No indexStore/indexStoreList associated with database: %s" % self.id)
+                msg = ("No indexStore/indexStoreList associated with "
+                       "database: %s" % self.id)
+                raise ConfigFileException(msg)
             storeList = [indexStore.id]
         else:
             storeList = storeList.split(' ')
-
         # FIXME: Should respect multiple index stores somehow?
         idxStore = self.get_object(session, storeList[0])
-        # check if there's an indexStore specific search function
+        # Check if there's an indexStore specific search function
         if hasattr(idxStore, 'search'):
             return idxStore.search(session, query, self)
         else:
-
-            if ((not hasattr(query, 'leftOperand')) and query.relation.value == "any"):
-                # don't try to rewrite, futile.
+            if ((not hasattr(query, 'leftOperand')) and
+                query.relation.value == "any"):
+                # Don't try to rewrite, futile.
                 pass
             else:
                 n = self._rewriteQuery(session, query)
                 if n:
                     query = n
             if not hasattr(query, 'leftOperand'):
-                # single term or any in single clause
+                # Single term or any in single clause
                 query.resultCount = 1
                 rs = self._search(session, query)
             else:
-                # triples... walk and look for ANDs that have a 0 length rs
-                # attach resultsets with counts
+                # Triples... walk and look for ANDs that have a 0 length rs
+                # Attach resultsets with counts
                 self._attachResultCount(session, query)
                 if query.resultCount == 0:
                     # no matches
@@ -493,9 +543,9 @@ class OptimisingDatabase(SimpleDatabase):
                 index = pm.resolveIndex(session, query)
                 # and find params from modifiers
                 if idx['ascending']:
-                    ascending=True
+                    ascending = True
                 elif idx['descending']:
-                    ascending=False
+                    ascending = False
                 elif hasattr(pm, 'defaultSortDirection'):
                     ascending = pm.defaultSortDirection[:3].lower() == 'asc'
                 else:    
@@ -515,7 +565,7 @@ class OptimisingDatabase(SimpleDatabase):
                     m = pm.defaultSortMissing
                     vals = ['low', 'omit', 'high']
                     if m in vals:
-                        miss = int(vals.index(m))-1
+                        miss = int(vals.index(m)) - 1
                     elif m == 'fail':
                         miss = cql.Diagnostic()
                     else:
@@ -548,8 +598,8 @@ class OptimisingDatabase(SimpleDatabase):
                     accents = None
 
                 # now, finally, order resultSet
-                rs.order(session, idx, ascending=asc, missing=miss, case=case, accents=accents)
+                rs.order(session, idx, ascending=asc,
+                         missing=miss, case=case, accents=accents)
 
         query.resultSet = rs
         return rs
-        
