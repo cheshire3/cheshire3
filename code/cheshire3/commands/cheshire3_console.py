@@ -6,13 +6,15 @@ import os
 from code import InteractiveConsole
 
 from cheshire3.internal import cheshire3Version
-from cheshire3.commands.cmd_utils import Cheshire3ArgumentParser
+from cheshire3.commands.cmd_utils import Cheshire3ArgumentParser, \
+                                         identify_database
 
 class Cheshire3Console(InteractiveConsole):
     """Cheshire3 Interactive Console."""
     
     def __init__(self, args, locals=None, filename="<console>"):
         InteractiveConsole.__init__(self, locals, filename)
+        # Standard Cheshire3 initialization code
         init_code_lines = [
            'from cheshire3.session import Session',
            'from cheshire3.server import SimpleServer',
@@ -58,9 +60,17 @@ def main(argv=None):
     else:
         args = argparser.parse_args(argv)
     console = Cheshire3Console(args)
-    # Standard Cheshire3 initialization code
     if args.database is not None:
-        dbline = 'db = server.get_object(session, "{}")'.format(args.database)
+        dbid = args.database
+    else:
+        # Inspect context
+        try:
+            dbid = identify_database(session, os.getcwd())
+        except EnvironmentError as e:
+            dbid = None
+        
+    if dbid is not None:
+        dbline = 'db = server.get_object(session, "{}")'.format(dbid)
         console.push(dbline)
     
     console.interact()
