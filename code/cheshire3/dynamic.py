@@ -1,9 +1,14 @@
+"""Cheshire3 configured object dynamic creation.
 
-# Module wrapper into which we're going to import anything
-# defined in configfiles
+Module to support dynamic creation of Cheshire3 objects based on XML
+configurations.
+"""
+
+import sys
+
 from cheshire3.utils import getFirstData, elementType
 from cheshire3.exceptions import ConfigFileException
-import sys
+
 
 def makeObjectFromDom(session, topNode, parentObject):
     # Lots of indirections from xml to object
@@ -12,7 +17,7 @@ def makeObjectFromDom(session, topNode, parentObject):
         objectType = topNode.xpath('./objectType/text()')[0]
     except IndexError:
         from lxml import etree
-        print etree.tostring(topNode)            
+        print etree.tostring(topNode)
     except AttributeError:
         for c in topNode.childNodes:
             if (c.nodeType == elementType and c.localName == "objectType"):
@@ -28,8 +33,8 @@ def importObject(session, objectType):
     try:
         (modName, className) = objectType.rsplit('.', 1)
     except:
-        raise ConfigFileException("Need module.class instead of %s" % objectType)
-
+        msg = "Need module.class instead of %s" % objectType
+        raise ConfigFileException(msg)
     try:
         m = __import__(modName)
     except ImportError as e:
@@ -42,14 +47,14 @@ def importObject(session, objectType):
             raise e
         finally:
             try:
-                session.logger.log_lvl(session, 
-                                       50, 
-                                       "Module %s does not define class %s" % (modName, className))
+                session.logger.log_lvl(session,
+                                       50,
+                                       "Module %s does not define class "
+                                       "%s" % (modName, className))
             except AttributeError:
-                # most likely session is None or session.logger is None
+                # Most likely session is None or session.logger is None
                 pass
-
-    # now split and fetch bits
+    # Now split and fetch bits
     mods = modName.split('.')
     for mn in mods[1:]:
         try:
@@ -64,13 +69,13 @@ def importObject(session, objectType):
                 raise e
             finally:
                 try:
-                    session.logger.log_lvl(session, 
-                                           50, 
-                                           "Module %s does not define class %s" % (modName, className))
+                    session.logger.log_lvl(session,
+                                           50,
+                                           "Module %s does not define class "
+                                           "%s" % (modName, className))
                 except AttributeError:
-                    # most likely session is None or session.logger is None
+                    # Most likely session is None or session.logger is None
                     pass
-
     try:
         parentClass = getattr(m, className)
     except AttributeError as e:
@@ -83,28 +88,29 @@ def importObject(session, objectType):
             raise e
         finally:
             try:
-                session.logger.log_lvl(session, 
-                                       50, 
-                                       "Module %s does not define class %s" % (modName, className))
+                session.logger.log_lvl(session,
+                                       50,
+                                       "Module %s does not define class "
+                                       "%s" % (modName, className))
             except AttributeError:
-                # most likely session is None or session.logger is None
+                # Most likely session is None or session.logger is None
                 pass
-            
     return parentClass
 
 
 def buildObject(session, objectType, args):
     parentClass = importObject(session, objectType)
     try:
-        return parentClass(session, *args)    
+        return parentClass(session, *args)
     except:
         try:
             raise
         finally:
             try:
-                session.logger.log_lvl(session, 
-                                       50, 
-                                       "Failed to create object of type: '{0}'".format(parentClass.__name__))
+                session.logger.log_lvl(session,
+                                       50,
+                                       "Failed to create object of type: "
+                                       "'{0}'".format(parentClass.__name__))
             except AttributeError:
-                # most likely session is None or session.logger is None
+                # Most likely session is None or session.logger is None
                 pass
