@@ -5,18 +5,20 @@ import time
 import glob
 import hashlib
 import inspect
+
 from string import Template
 from types import MethodType
 
 from cheshire3.session import Session
-
 from cheshire3 import dynamic
 from cheshire3.utils import getFirstData, elementType, getShellResult
 from cheshire3.bootstrap import BSParser, BootstrapDocument
 from cheshire3.bootstrap import BSLxmlParser
 from cheshire3.exceptions import *
 from cheshire3.permissionHandler import PermissionHandler
-from cheshire3.internal import defaultArchitecture, get_api, cheshire3Home, cheshire3Root, cheshire3Dbs, cheshire3Www
+from cheshire3.internal import defaultArchitecture, get_api, cheshire3Home,\
+                               cheshire3Root, cheshire3Dbs, cheshire3Www
+
 
 cheshire3Paths = {'cheshire3Home': cheshire3Home,
                   'cheshire3Root': cheshire3Root,
@@ -28,8 +30,14 @@ CONFIG_NS = "http://www.cheshire3.org/schemas/config/"
 
 from lxml import etree
 
+
 class CaselessDictionary(dict):
-    """ A dictionary that is case-insensitive when searching, but also preserves the keys as inserted. """
+    """A case-insensitive dictionary.
+    
+    A dictionary that is case-insensitive when searching, but also preserves 
+    the keys as inserted.
+    """
+    
     def __init__(self, initval={}):
         if isinstance(initval, dict):
             for key, value in initval.iteritems():
@@ -78,7 +86,8 @@ class CaselessDictionary(dict):
     
 
 class C3Object(object):
-    """ Abstract Base Class for Cheshire3 Objects. """
+    """Abstract Base Class for Cheshire3 Objects."""
+    
     id = ""
     version = ""
     complexity = ""
@@ -88,8 +97,8 @@ class C3Object(object):
     objectType = ""
     parent = None
     paths = {}
-    subConfigs = {} # Will be a CaselessDictionary after __init__
-    objects = {} # Will be a CaselessDictionary after __init__
+    subConfigs = {}  # Will be a CaselessDictionary after __init__
+    objects = {}     # Will be a CaselessDictionary after __init__
     configStore = None
     settings = {}
     defaults = {}
@@ -104,20 +113,36 @@ class C3Object(object):
     _includeConfigStores = []
     _objectRefs = []
 
-    _possiblePaths = {'defaultPath' : {'docs' : 'Default path for this object.  Almost all other paths below this object will have this prepended if they are relative.'}}
+    _possiblePaths = {
+        'defaultPath': {
+            'docs': ('Default path for this object. Almost all other paths '
+                     'below this object will have this prepended if they are '
+                     'relative.')
+        }
+    }
 
-    _possibleSettings = {'debug': {'docs' : "Set this object to debugging. Object specific results.", 'type' : int, 'options' : "0|1"},
-                         'log' : {'docs' : 'Space separated list of function names to enable function logging for.'}
-                         }
+    _possibleSettings = {
+        'debug': {
+            'docs': "Set this object to debugging. Object specific results.",
+                    'type': int,
+                    'options': "0|1"
+        },
+        'log': {
+            'docs': ('Space separated list of function names to enable '
+                     'function logging for.')}
+    }
+    
     _possibleDefaults = {}
 
-
     def _getDomFromFile(self, session, fileName, parser=''):
-        """Read in an XML file from disk to get the configuration for this object."""
+        """Read, parse and return configuration from a file.
+        
+        Read in an XML file from disk to get the configuration for this 
+        object.
+        """
         # We need to be able to read in configurations from disk
-
         if not os.path.exists(fileName):
-            raise(FileDoesNotExistException(fileName))
+            raise FileDoesNotExistException(fileName)
         
         f = file(fileName)
         doc = BootstrapDocument(f)
@@ -130,25 +155,27 @@ class C3Object(object):
             elif parser == 'minidom':
                 record = BSParser.process_document(session, doc)
             else:
-                record = BSLxmlParser.process_document(session,doc)
+                record = BSLxmlParser.process_document(session, doc)
         except Exception as e:
             raise ConfigFileException("Cannot parse %s: %s" % (fileName, e))
         dom = record.get_dom(session)
         f.close()
         return dom
 
-
     def _handleConfigNode(self, session, node):
-        """Handle config node when parsed as a DOM (4Suite/minidom/Domlette) - DEPRECATED."""
+        """Handle DOM (4Suite/minidom/Domlette) configuration node.
+        
+        Handle config node when parsed as a DOM (4Suite/minidom/Domlette)
+        DEPRECATED in favour of lxml.etree parsed configurations.
+        """
         pass
 
     def _handleLxmlConfigNode(self, session, node):
         """Handle config node parsed by lxml.etree."""
         pass
 
-    # Return parsed value (eg Int, Bool, String etc)
-    # Or raise an error
     def _verifyOption(self, type, value):
+        # Return parsed value (eg Int, Bool, String etc) or raise an error
         return value
 
     def _verifySetting(self, type, value):
@@ -156,7 +183,8 @@ class C3Object(object):
         info = params.get(type, {})
 
         if not info:
-            raise ConfigFileException("Unknown Setting on '%s': %s" % (self.id, type))
+            msg = "Unknown Setting on '%s': %s" % (self.id, type)
+            raise ConfigFileException(msg)
         else:
             t = info.get('type', 0)
             if t:
@@ -168,14 +196,14 @@ class C3Object(object):
         params = defaultArchitecture.find_params(self.__class__)[2]
         info = params.get(type, {})
         if not info:
-            raise ConfigFileException("Unknown Default on '%s': %s" % (self.id, type))
+            msg = "Unknown Default on '%s': %s" % (self.id, type)
+            raise ConfigFileException(msg)
         else:
             t = info.get('type', 0)
             if t:
                 return t(value)
             else:
                 return value
-
 
     def _parseIncludes(self, session, path):
         dom = self._getDomFromFile(session, path)
@@ -186,19 +214,20 @@ class C3Object(object):
                 elif (child2.localName == "objects"):
                     # record object ref to instantiate
                     for obj in child2.childNodes:
-                        if (obj.nodeType == elementType and obj.localName == "path"):
-                            type = obj.getAttributeNS(None,'type')
-                            id = obj.getAttributeNS(None,'ref')
+                        if (obj.nodeType == elementType and
+                            obj.localName == "path"):
+                            type = obj.getAttributeNS(None, 'type')
+                            id = obj.getAttributeNS(None, 'ref')
                             self._objectRefs.append((id, type))
 
     def _recurseSubConfigs(self, session, child):
         for mod in child.childNodes:
             if mod.nodeType == elementType and mod.localName == "subConfig":
-                id = mod.getAttributeNS(None,'id')
+                id = mod.getAttributeNS(None, 'id')
                 self.subConfigs[id] = mod
 
                 # Cache indexes and maps
-                type = mod.getAttributeNS(None,'type')
+                type = mod.getAttributeNS(None, 'type')
                 if type == 'index':
                     self.indexConfigs[id] = mod
                 elif type == 'protocolMap':
@@ -206,19 +235,24 @@ class C3Object(object):
                 elif type == 'database':
                     self.databaseConfigs[id] = mod
                 elif type == '':
-                    raise ConfigFileException("Object must have a type attribute: %s" % id)
+                    msg = "Object must have a type attribute: %s" % id
+                    raise ConfigFileException(msg)
                     
             elif mod.nodeType == elementType and mod.localName == "path":
-                if (mod.hasAttributeNS(None, 'type') and mod.getAttributeNS(None,'type') == 'includeConfigs'):
+                if (mod.hasAttributeNS(None, 'type') and
+                    mod.getAttributeNS(None, 'type') == 'includeConfigs'):
                     # Import into our space
                     if (mod.hasAttributeNS(None, 'ref')):
                         # <path type="includeConfigs" ref="configStore"/>
-                        self._includeConfigStores.append(mod.getAttributeNS(None,'ref'))
+                        self._includeConfigStores.append(
+                            mod.getAttributeNS(None, 'ref')
+                        )
                     else:
-                        # <path type="includeConfigs">path/to/some/file.xml</path>
+                        # <path type="includeConfigs">path/to/file.xml</path>
                         path = getFirstData(mod)
                         if  not os.path.isabs(path):
-                            path = os.path.join(self.get_path(session, 'defaultPath'), path)
+                            path = os.path.join(
+                                self.get_path(session, 'defaultPath'), path)
                         if os.path.isdir(path):
                             # include all configs in it at our space
                             files = glob.glob("%s/*.xml" % path)
@@ -229,14 +263,14 @@ class C3Object(object):
                 else:
                     path = getFirstData(mod)
                     if  not os.path.isabs(path):
-                        path = os.path.join(self.get_path(session, 'defaultPath'), path)
+                        path = os.path.join(
+                            self.get_path(session, 'defaultPath'), path)
                     dom = self._getDomFromFile(session, path)
-                    id = mod.getAttributeNS(None,'id')
+                    id = mod.getAttributeNS(None, 'id')
                     self.subConfigs[id] = dom.childNodes[0]
-                    ot = mod.getAttributeNS(None,'type')
+                    ot = mod.getAttributeNS(None, 'type')
                     if ot == 'database':
                         self.databaseConfigs[id] = dom.childNodes[0]
-
 
     def _parseLxmlIncludes(self, session, path):
         dom = self._getDomFromFile(session, path)
@@ -262,7 +296,8 @@ class C3Object(object):
                 elif typ == 'database':
                     self.databaseConfigs[id] = e
                 elif typ == '':
-                    raise ConfigFileException("Object must have a type attribute: %s" % id)
+                    msg = "Object must have a type attribute: %s" % id
+                    raise ConfigFileException(msg)
             elif e.tag == 'path':
                 typ = e.attrib.get('type', '')
                 if typ == 'includeConfigs':
@@ -271,7 +306,8 @@ class C3Object(object):
                     else:
                         path = e.text
                         if not os.path.isabs(path):
-                            path = os.path.join(self.get_path(session, 'defaultPath'), path)
+                            path = os.path.join(
+                                self.get_path(session, 'defaultPath'), path)
                         if os.path.isdir(path):
                             files = glob.glob("%s/*.xml" % path)
                             for f in files:
@@ -281,19 +317,19 @@ class C3Object(object):
                 else:
                     path = e.text
                     if not os.path.isabs(path):
-                        path = os.path.join(self.get_path(session, 'defaultPath'), path)
+                        path = os.path.join(
+                            self.get_path(session, 'defaultPath'), path)
                     dom = self._getDomFromFile(session, path)
                     id = e.attrib['id']
                     self.subConfigs[id] = dom
                     ot = e.attrib.get('type', '')
                     if ot == 'database':
                         self.databaseConfigs[id] = dom
- 
-
-               
 
     def __init__(self, session, config, parent=None):
-        """The constructor for all Cheshire3 objects take the same arguments:
+        """Constructor inherited by all configured Cheshire3 objects.
+        
+        The constructor for all Cheshire3 objects take the same arguments:
         session:  A Session object
         topNode:  The <config> or <subConfig> domNode for the configuration
         parent:   The object that provides the scope for this object.
@@ -338,7 +374,7 @@ class C3Object(object):
                     self.objectType = e.text
                 elif e.tag == 'checkSums':
                     for e2 in e.iterchildren(tag=etree.Element):
-                        # store checksum on self, and hash code against it
+                        # Store checksum on self, and hash code against it
                         pt = e2.attrib.get('pathType', '__code__')
                         ct = e2.attrib.get('type', 'md5')
                         if pt != '__code__':
@@ -359,22 +395,25 @@ class C3Object(object):
                             # Allow template strings in paths
                             # e.g. ${cheshire3Home}/foo/bar
                             pathTmpl = Template(e2.text)
-                            self.paths[typ] = pathTmpl.safe_substitute(cheshire3Paths)
+                            sub = pathTmpl.safe_substitute
+                            self.paths[typ] = sub(cheshire3Paths)
                         elif e2.tag == 'object':
                             try:
                                 ref = e2.attrib['ref']
                             except KeyError:
-                                raise ConfigFileException("object must have ref")
+                                msg = "object must have ref"
+                                raise ConfigFileException(msg)
                             pathObjects[typ] = ref
                 elif e.tag == 'subConfigs':
-                    # recurse
+                    # Recurse
                     self._recurseLxmlSubConfigs(session, e)
                 elif e.tag == 'options':
                     for e2 in e.iterchildren(tag=etree.Element):
                         try:
                             typ = e2.attrib['type']
                         except KeyError:
-                            raise ConfigFileException("option (setting/default) must have type")
+                            msg = "option (setting/default) must have type"
+                            raise ConfigFileException(msg)
                         if e2.tag == 'setting':
                             value = self._verifySetting(typ, e2.text)
                             self.settings[typ] = value
@@ -410,9 +449,10 @@ class C3Object(object):
                                     # Allow template strings in paths
                                     # e.g. ${cheshire3Home}/foo/bar
                                     pathTmpl = Template(value)
-                                    self.paths[type] = pathTmpl.safe_substitute(cheshire3Paths)
+                                    sub = pathTmpl.safe_substitute
+                                    self.paths[type] = sub(cheshire3Paths)
                                 elif child2.localName == "object":
-                                    value = child2.getAttributeNS(None,'ref')
+                                    value = child2.getAttributeNS(None, 'ref')
                                     pathObjects[type] = value
                     elif (child.localName == "subConfigs"):
                         # Pointers to dom nodes for config ids
@@ -420,15 +460,16 @@ class C3Object(object):
 
                     elif (child.localName == "objects"):
                         for obj in child.childNodes:
-                            if (obj.nodeType == elementType and obj.localName == "path"):
-                                type = obj.getAttributeNS(None,'type')
-                                id = obj.getAttributeNS(None,'ref')
+                            if (obj.nodeType == elementType and
+                                obj.localName == "path"):
+                                type = obj.getAttributeNS(None, 'type')
+                                id = obj.getAttributeNS(None, 'ref')
                                 self._objectRefs.append((id, type))
                     elif (child.localName == "options"):
                         # See configInfo in ZeeRex
                         for child2 in child.childNodes:
                             if (child2.nodeType == elementType):
-                                type = child2.getAttributeNS(None,'type')
+                                type = child2.getAttributeNS(None, 'type')
                                 if (child2.localName == "setting"):
                                     dc = getFirstData(child2)
                                     if (dc):
@@ -440,7 +481,7 @@ class C3Object(object):
                                         value = self._verifyDefault(type, dc)
                                         self.defaults[type] = value
                     elif (child.localName == "actions"):
-                        # permission rqmts
+                        # Permission rqmts
                         for child2 in child.childNodes:
                             if child2.nodeType == elementType:
                                 p = PermissionHandler(child2, self)
@@ -455,7 +496,7 @@ class C3Object(object):
             sys.path.append(self.paths['pythonPath'][1])
 
         # Allow any object to be set to debug
-        # functionality of this dependent on object
+        # Functionality of this dependent on object
         self.debug = self.get_setting(session, "debug", 0)
         
         for p in self.permissionHandlers.keys():
@@ -475,7 +516,9 @@ class C3Object(object):
             self.unresolvedObjects[t] = pathObjects[t]
 
         # Built, maybe set function logging
-        log = self.get_setting(session, 'log', session.server.defaultFunctionLog)
+        log = self.get_setting(session,
+                               'log',
+                               session.server.defaultFunctionLog)
         if log:
             fl = self.get_path(session, 'functionLogger')
             if fl != self:
@@ -523,10 +566,8 @@ class C3Object(object):
                     m.update(data)
                     digest = m.hexdigest()
                     if digest != val:
-                        raise IntegrityException("%s/%s (%s): %s" % (self.id, pt, fn, digest))
-                
-            
-        
+                        msg = "%s/%s (%s): %s" % (self.id, pt, fn, digest)
+                        raise IntegrityException(msg)
             
         # Now check for configStore objects
 ##         for csid in self._includeConfigStores:
@@ -547,8 +588,9 @@ class C3Object(object):
 ##                     elif ntype == 'database':
 ##                         self.databaseConfigs[nid] = node
 ##                     elif ntype == '':
-##                         raise ConfigFileException("Object must have a type attribute: %s  -- in configStore %s" % (nid, csid))
-                        
+##                         msg = ("Object must have a type attribute: %s  -- "
+##                                "in configStore %s" % (nid, csid))
+##                         raise ConfigFileException(msg)
 
     def get_setting(self, session, id, default=None):
         """Return the value for a setting on this object."""
@@ -559,7 +601,10 @@ class C3Object(object):
         return self.defaults.get(id, default)
 
     def get_object(self, session, id):
-        """Return an object with the given id within this object's scope, or search upwards for it."""
+        """Return the object with the given id.
+        
+        Searches first within this object's scope, or search upwards for it.
+        """
         if (id in self.objects):
             return self.objects[id]
         else:
@@ -568,9 +613,13 @@ class C3Object(object):
                 try:
                     obj = dynamic.makeObjectFromDom(session, config, self)
                 except (ConfigFileException, AttributeError, ImportError):
-                    # Push back up as is 
-                    self.log_critical(session, "... while trying to build object with id '%s'" % id)
-                    self.log_critical(session, "... while getting it from object '%s'" % (self.id))
+                    # Push back up as is
+                    self.log_critical(session,
+                                      "... while trying to build object with "
+                                      "id '%s'" % id)
+                    self.log_critical(session,
+                                      "... while getting it from object "
+                                      "'%s'" % (self.id))
                     raise
                 return obj
             elif (self.parent is not None):
@@ -616,7 +665,9 @@ class C3Object(object):
         else:
             names = [name]
         for name in names:
-            if (hasattr(self, name) and callable(getattr(self,name)) and name[0] != '_'):
+            if (hasattr(self, name) and
+                callable(getattr(self, name)) and
+                name[0] != '_'):
                 func = getattr(self, name)
                 setattr(self, "__postlog_%s" % (name), getattr(self, name))
                 code = """
@@ -630,7 +681,8 @@ def mylogfn(self, *args, **kw):
         fl.log_fn(sess, self, '%s', *args, **kw);
     return self.__postlog_%s(*args, **kw);""" % (name, name)
                 exec(code)
-                setattr(self, name, MethodType(locals()['mylogfn'], self, self.__class__))
+                setattr(self, name,
+                        MethodType(locals()['mylogfn'], self, self.__class__))
 
     def remove_logging(self, session, name):
         """Remove the logging from a named function."""
@@ -639,16 +691,18 @@ def mylogfn(self, *args, **kw):
         else:
             names = [name]
         for name in names:
-            if (hasattr(self, name) and callable(getattr(self,name)) and name[0] != '_' and hasattr(self, '__postlog_%s' % name)):
+            if (hasattr(self, name) and callable(getattr(self, name)) and
+                name[0] != '_' and hasattr(self, '__postlog_%s' % name)):
                 setattr(self, name, getattr(self, '__postlog_%s' % name))
                 delattr(self, '__postlog_%s' % name)
 
     def add_auth(self, session, name):
         """Add an authorisation layer on top of a named function."""
-        if (hasattr(self, name) and callable(getattr(self,name)) and name[0] != '_'):
+        if (hasattr(self, name) and callable(getattr(self, name)) and
+            name[0] != '_'):
             func = getattr(self, name)
             setattr(self, "__postauth_%s" % (name), func)
-            code = """
+            code = """\
 def myauthfn(self, session, *args, **kw):
     p = self.permissionHandlers['c3fn:%s']
     if (p):
@@ -659,8 +713,8 @@ def myauthfn(self, session, *args, **kw):
     return self.__postauth_%s(*args, **kw);
 """ % (name, name, name, name)
             exec(code)
-            setattr(self, name, MethodType(locals()['myauthfn'], self, self.__class__))
-
+            setattr(self, name,
+                    MethodType(locals()['myauthfn'], self, self.__class__))
 
     def remove_auth(self, session, name):
         """Remove the authorisation requirement from the named function."""
@@ -669,7 +723,8 @@ def myauthfn(self, session, *args, **kw):
         else:
             names = [name]
         for name in names:
-            if (hasattr(self, name) and callable(getattr(self,name)) and name[0] != '_' and hasattr(self, '__postauth_%s' % name)):
+            if (hasattr(self, name) and callable(getattr(self, name)) and
+                name[0] != '_' and hasattr(self, '__postauth_%s' % name)):
                 setattr(self, name, getattr(self, '__postauth_%s' % name))
                 delattr(self, '__postauth_%s' % name)
 
@@ -690,14 +745,18 @@ def myauthfn(self, session, *args, **kw):
 
     def log(self, session, msg, *args, **kw):
         self.log_lvl(session, 0, *args, **kw)
+
     def log_debug(self, session, msg, *args, **kw):
         self.log_lvl(session, 10, msg, *args, **kw)
+
     def log_info(self, session, msg, *args, **kw):
         self.log_lvl(session, 20, msg, *args, **kw)
+
     def log_warning(self, session, msg, *args, **kw):
         self.log_lvl(session, 30, msg, *args, **kw)
+
     def log_error(self, session, msg, *args, **kw):
         self.log_lvl(session, 40, msg, *args, **kw)
+
     def log_critical(self, session, msg, *args, **kw):
         self.log_lvl(session, 50, msg, *args, **kw)
-    
