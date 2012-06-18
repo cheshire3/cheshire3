@@ -30,7 +30,7 @@ def create_defaultConfig(identifier, args):
         E.objectType("cheshire3.database.SimpleDatabase"),
         # <paths>
         E.paths(
-            E.path({'type': "defaultPath"}, defaultPath),
+            E.path({'type': "defaultPath"}, os.path.abspath(defaultPath)),
             # subsequent paths may be relative to defaultPath
             E.path({'type': "metadataPath"},
                    os.path.join('.cheshire3', 'stores', 'metadata.bdb')
@@ -453,7 +453,7 @@ Please specify a different id using the --database option.""".format(dbid)
         raise ValueError(msg)
     
     # Create a .cheshire3 directory and populate it
-    c3_dir = os.path.join(args.directory, '.cheshire3')
+    c3_dir = os.path.join(os.path.abspath(args.directory), '.cheshire3')
     for dir_path in [c3_dir, 
                      os.path.join(c3_dir, 'stores'),
                      os.path.join(c3_dir, 'indexes'),
@@ -528,8 +528,10 @@ Please specify a different id using the --database option.""".format(dbid)
 argparser = Cheshire3ArgumentParser(conflict_handler='resolve')
 argparser.add_argument('directory', type=str,
                        action='store', nargs='?',
-                       default=os.getcwd(), metavar='DIRECTORY',
-                       help="name of directory in which to init the Cheshire3 database. default: current-working-dir")
+                       default=os.getcwd(),
+                       metavar='DIRECTORY',
+                       help=("name of directory in which to init the Cheshire3"
+                             " database. default: current-working-dir"))
 argparser.add_argument('-d', '--database', type=str,
                   action='store', dest='database',
                   default=None, metavar='DATABASE',
