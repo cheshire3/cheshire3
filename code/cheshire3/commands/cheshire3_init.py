@@ -2,7 +2,6 @@
 
 from __future__ import with_statement
 
-import sys
 import os
 
 from socket import gethostname
@@ -315,14 +314,16 @@ def create_defaultZeerex(identifier, args):
                  # Don't know schemaInfo but should include the node
                  Z.schemaInfo(),
                  Z.indexInfo(
-                     Z.set({'identifier': "info:srw/cql-context-set/1/cql-v1.2",
+                     Z.set({'identifier':
+                            "info:srw/cql-context-set/1/cql-v1.2",
                             'name': "cql"}),
                      Z.set({'identifier': "info:srw/cql-context-set/1/dc-v1.1",
                             'name': "dc"}),
                      Z.set({'identifier': "info:srw/cql-context-set/2/rec-1.1",
                             'name': "rec"}),
                      Z.index(
-                         {'{http://www.cheshire3.org/schemas/explain/}index': "idx-identifier"},
+                         {'{http://www.cheshire3.org/schemas/explain/}index':
+                          "idx-identifier"},
                          Z.title("Record Identifier"),
                          Z.map(
                              Z.name({'set': "rec"}, "identifier"),
@@ -340,7 +341,8 @@ def create_defaultZeerex(identifier, args):
                          ),
                      ),
                      Z.index(
-                         {'{http://www.cheshire3.org/schemas/explain/}index': "idx-creationDate"},
+                         {'{http://www.cheshire3.org/schemas/explain/}index':
+                          "idx-creationDate"},
                          Z.title("Record Creation Date"),
                          Z.map(
                              Z.name({'set': "rec"}, "creationDate"),
@@ -356,7 +358,8 @@ def create_defaultZeerex(identifier, args):
                          ),
                      ),
                      Z.index(
-                         {'{http://www.cheshire3.org/schemas/explain/}index': "idx-modificationDate"},
+                         {'{http://www.cheshire3.org/schemas/explain/}index':
+                          "idx-modificationDate"},
                          Z.title("Record Modification Date"),
                          Z.map(
                              Z.name({'set': "rec"}, "modificationDate"),
@@ -372,7 +375,8 @@ def create_defaultZeerex(identifier, args):
                          ),
                      ),
                      Z.index(
-                         {'{http://www.cheshire3.org/schemas/explain/}index': "idx-anywhere"},
+                         {'{http://www.cheshire3.org/schemas/explain/}index':
+                          "idx-anywhere"},
                          Z.title("Anywhere / Full-text Keywords"),
                          Z.map(
                              Z.name({'set': "cql"}, "anywhere"),
@@ -436,7 +440,9 @@ def main(argv=None):
     if args.database is None:
         # Find local database name to use as basis of database id
         dbid = "db_{0}".format(os.path.basename(args.directory))
-        server.log_debug(session, "database identifier not specified, defaulting to: {0}".format(dbid))
+        server.log_debug(session,
+                         ("database identifier not specified, defaulting to: "
+                          "{0}".format(dbid)))
     else:
         dbid = args.database
         
@@ -509,7 +515,8 @@ Please specify a different id using the --database option.""".format(dbid)
                          pathEl
                      )
                  )
-        xmlFilesToWrite[os.path.join(includesPath, '{0}.xml'.format(dbid))] = plugin
+        pluginpath = os.path.join(includesPath, '{0}.xml'.format(dbid))
+        xmlFilesToWrite[pluginpath] = plugin
     else:
         # No database plugin directory
         server.log_warning(session, "No database plugin directory")
@@ -535,7 +542,8 @@ argparser.add_argument('directory', type=str,
 argparser.add_argument('-d', '--database', type=str,
                   action='store', dest='database',
                   default=None, metavar='DATABASE',
-                  help="identifier of Cheshire3 database to init. default: db_<current-working-dir>")
+                  help=("identifier of Cheshire3 database to init. default: "
+                        "db_<current-working-dir>"))
 argparser.add_argument('-t', '--title', type=str,
                   action='store', dest='title',
                   default="", metavar='TITLE',
@@ -547,7 +555,8 @@ argparser.add_argument('-c', '--description', type=str,
 argparser.add_argument('-p', '--port', type=int,
                   action='store', dest='port',
                   default=0, metavar='PORT',
-                  help="Port on which Cheshire3 database will be served via SRU.")
+                  help=("Port on which Cheshire3 database will be served via "
+                        "SRU."))
 
 
 # Set up ElementMaker for ZeeRex and Cheshire3 Explain namespaces
@@ -560,4 +569,4 @@ server = None
 db = None
 
 if __name__ == '__main__':
-    main(sys.argv)
+    main()

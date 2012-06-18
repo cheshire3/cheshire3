@@ -15,6 +15,7 @@ from lxml import etree
 from cheshire3.internal import cheshire3Root
 from cheshire3.bootstrap import BootstrapDocument, BSLxmlParser
 
+
 class Cheshire3ArgumentParser(ArgumentParser):
     
     def __init__(self, *args, **kwargs):
@@ -25,12 +26,16 @@ class Cheshire3ArgumentParser(ArgumentParser):
         self.add_argument('-s', '--server-config', type=str, 
                           action='store', dest='serverconfig',
                           default=defaultConfig, metavar='PATH', 
-                          help="path to Cheshire3 server configuration file. default: {0}".format(defaultConfig))
+                          help=("path to Cheshire3 server configuration "
+                                "file. default: {0}".format(defaultConfig))
+                          )
         
     def parse_args(self, args=None, namespace=None):
         args = ArgumentParser.parse_args(self, args, namespace)
         # Expand server config file path
-        args.serverconfig = os.path.abspath(os.path.expanduser(args.serverconfig))
+        args.serverconfig = os.path.abspath(
+                                os.path.expanduser(args.serverconfig)
+                            )
         return args
 
 

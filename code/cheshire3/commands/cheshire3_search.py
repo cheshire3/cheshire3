@@ -6,7 +6,8 @@ import os
 from cheshire3.server import SimpleServer
 from cheshire3.session import Session
 from cheshire3.exceptions import ObjectDoesNotExistException
-from cheshire3.commands.cmd_utils import Cheshire3ArgumentParser, identify_database
+from cheshire3.commands.cmd_utils import Cheshire3ArgumentParser, \
+identify_database
 
 
 def format_resultSet(resultSet, outStream=sys.stdout, 
@@ -16,8 +17,8 @@ def format_resultSet(resultSet, outStream=sys.stdout,
     resultSet := instance of (sub-class of) cheshire3.baseObjects.ResultSet
     outStream := file-like object for writing to. defaults to sys.stdout
     maxRecords := maximum number of hits to display (int)
-    startRecord := where in the recordStore to start from (enables result paging)
-                   first record in resultSet = 1 (not 0) 
+    startRecord := where in the recordStore to start from (enables result 
+                   paging) first record in resultSet = 1 (not 0) 
     """
     hits = len(resultSet)
     outStream.write("searched: {0}\n".format(resultSet.query.toCQL()))
@@ -78,18 +79,22 @@ argparser.add_argument('-d', '--database', type=str,
 argparser.add_argument('query', type=str, action='store',
                        help="query to execute on the Cheshire3 database.")
 argparser.add_argument('-f', '--format', type=str,
-                  action='store', dest='format',
-                  default="cql", metavar='FORMAT',
-                  help="format/language of query. default: cql (Contextual Query Language)")
+                       action='store', dest='format',
+                       default="cql", metavar='FORMAT',
+                       help=("format/language of query. "
+                             "default: cql (Contextual Query Language)")
+                       )
 argparser.add_argument('-m', '--maximum-records', type=int,
-                  action='store', dest='maxRecs',
-                  default=10, metavar='MAXIMUM',
-                  help="maximum number of hits to display")
+                       action='store', dest='maxRecs',
+                       default=10, metavar='MAXIMUM',
+                       help="maximum number of hits to display")
 argparser.add_argument('-s', '--start-record', type=int,
-                  action='store', dest='startRec',
-                  default=1, metavar='START',
-                  help="""point in the resultSet to start from (enables \
-result paging) first record in resultSet = 1 (not 0)""")
+                       action='store', dest='startRec',
+                       default=1, metavar='START',
+                       help=("point in the resultSet to start from (enables "
+                             "result paging) first record in resultSet = 1 "
+                             "(not 0)")
+                       )
 
 
 session = None

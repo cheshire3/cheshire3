@@ -6,7 +6,8 @@ import os
 from cheshire3.server import SimpleServer
 from cheshire3.session import Session
 from cheshire3.exceptions import ObjectDoesNotExistException
-from cheshire3.commands.cmd_utils import Cheshire3ArgumentParser, identify_database
+from cheshire3.commands.cmd_utils import Cheshire3ArgumentParser, \
+                                         identify_database
 
 
 def main(argv=None):
@@ -79,8 +80,8 @@ rest of the XML in the file."""
 argparser.add_argument('-c', '--codec', type=str,
                    action='store', dest='codec',
                    default=None, metavar='CODEC',
-                   help="""the name of the codec in which the data is encoded. \
-Commonly 'ascii' or 'utf-8'"""
+                   help=("the name of the codec in which the data is encoded. "
+                         "Commonly 'ascii' or 'utf-8'")
                    )
 
 session = None
