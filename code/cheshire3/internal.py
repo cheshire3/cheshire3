@@ -1,19 +1,30 @@
 
 import os
-import cheshire3
 import inspect
 
-storeTypes = ['authStore', 'objectStore', 'configStore', 'recordStore', 'documentStore', 'resultSetStore', 'indexStore', 'queryStore']
+import cheshire3
+
+storeTypes = ['authStore', 'objectStore', 'configStore', 'recordStore',
+              'documentStore', 'resultSetStore', 'indexStore', 'queryStore']
 collTypes = ['server', 'database', 'index', 'workflow']
-processTypes = ['preParser', 'parser', 'normalizer', 'extractor', 'transformer', 'documentFactory', 'xpathProcessor', 'logger', 'tokenMerger', 'tokenizer']
+processTypes = ['preParser', 'parser', 'normalizer', 'extractor',
+                'transformer', 'documentFactory', 'xpathProcessor',
+                'logger', 'tokenMerger', 'tokenizer']
 
 
 # XXX This should be dynamic
 # modules in which we can find configurable objects
-modules = ['database', 'documentFactory', 'documentStore', 'extractor', 'index', 'indexStore', 'logger', 'normalizer', 'objectStore', 'parser', 'postgres', 'preParser', 'protocolMap', 'queryFactory', 'queryStore', 'recordStore', 'resultSetStore', 'server', 'transformer', 'workflow', 'xpathProcessor', 'textmining.tmNormalizer', 'textmining.tmDocumentFactory', 'textmining.tmPreParser', 'textmining.tmTransformer', 'datamining.dmPreParser', 'datamining.dmTransformer', 'grid.srbIndex', 'grid.srbStore']
+modules = ['database', 'documentFactory', 'documentStore', 'extractor',
+           'index', 'indexStore', 'logger', 'normalizer', 'objectStore',
+           'parser', 'postgres', 'preParser', 'protocolMap', 'queryFactory',
+           'queryStore', 'recordStore', 'resultSetStore', 'server',
+           'transformer', 'workflow', 'xpathProcessor',
+           'textmining.tmNormalizer', 'textmining.tmDocumentFactory',
+           'textmining.tmPreParser', 'textmining.tmTransformer',
+           'datamining.dmPreParser', 'datamining.dmTransformer',
+           'grid.srbIndex', 'grid.srbStore']
 
-
-cheshire3Version = (1,0,0)
+cheshire3Version = (1, 0, 0)
 
 cheshire3Home = os.environ.get('C3HOME', os.path.expanduser('~'))
 cheshire3Root = os.path.join(cheshire3Home, "cheshire3")
@@ -56,7 +67,6 @@ def get_api(object, all=False):
                     names.append(nm)
     return names
 
-    
 
 def get_subpackages():
     sps = []
@@ -68,8 +78,9 @@ def get_subpackages():
             sps.append(f)
     return sps
 
+
 class Architecture(object):
-    # Facilitate Architecture Introspection 
+    """Class to facilitate Architecture Introspection.""" 
 
     moduleObjects = []
     classDefns = []
@@ -79,7 +90,7 @@ class Architecture(object):
         self.classDefns = []
 
     def discover_classes(self):
-        # cache, as no new code before restart
+        # Cache, as no new code before restart
         # (barring total psychedelic craziosity)
         if self.classDefns:
             return self.classDefns
@@ -95,7 +106,6 @@ class Architecture(object):
             except:
                 # XXX: log("Could not import module: %s" % m)
                 raise
-
 
         classes = []
         for mod in self.moduleObjects:
@@ -119,14 +129,13 @@ class Architecture(object):
         classes.sort()
         self.classDefns = classes
         return classes
-                        
 
     def find_class(self, name):
-        bits  = name.split('.')
+        bits = name.split('.')
         try:
             loaded = __import__(bits[0])
         except ImportError:
-            # no such module, default error is appropriate
+            # No such module, default error is appropriate
             raise
         for moduleName in bits[1:-1]:
             loaded = getattr(loaded, moduleName)
@@ -135,13 +144,13 @@ class Architecture(object):
         try:
             cls = getattr(loaded, className)
         except AttributeError:
-            # no such class
-            raise AttributeError("Module %s has no class %s" % (moduleName, className))
+            # No such class
+            raise AttributeError("Module %s has no class %s" %
+                                 (moduleName, className))
         if not isinstance(cls, type):
-            # not a class defn
+            # Not a class defn
             raise AttributeError("Class %s is not a C3 Object" % name)
         return cls
-
 
     def find_params(self, cls):
         try:
@@ -149,21 +158,21 @@ class Architecture(object):
             settings = cls._possibleSettings
             defaults = cls._possibleDefaults
         except:
-            # not a c3object
-            raise AttributeError("Class %s is not a C3 Object" % name)
+            # Not a C3object
+            raise AttributeError("Class %s is not a C3 Object" % cls.__name__)
 
         bases = list(cls.__bases__)
 
         while bases:
             cls = bases.pop(0)
             try:
-                for (k,v) in cls._possiblePaths.iteritems():
+                for (k, v) in cls._possiblePaths.iteritems():
                     if not k in paths:
                         paths[k] = v                        
-                for (k,v) in cls._possibleSettings.iteritems():
+                for (k, v) in cls._possibleSettings.iteritems():
                     if not k in settings:
                         settings[k] = v
-                for (k,v) in cls._possibleDefaults.iteritems():
+                for (k, v) in cls._possibleDefaults.iteritems():
                     if not k in defaults:
                         defaults[k] = v
             except:
