@@ -720,7 +720,7 @@ class SimpleIndex(Index):
                 replaced = 0
                 for x in range(3, len(currentData), 3):
                     if currentData[x] == docid and currentData[x+1] == storeid:
-                        currentData[x+2] == newData[n+2]
+                        currentData[x+2] = newData[n+2]
                         replaced = 1
                         break
                 if not replaced:
