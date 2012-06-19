@@ -518,23 +518,21 @@ class ModifierClause:
 
     def toXCQL(self, depth=0):
         if (self.value):
-            return (
-                "%s<modifier>\n" % ("  " * depth)
-                "%s<type>%s</type>\n" % ("  " * (depth + 1),
-                                         escape(str(self.type)))
-                "%s<comparison>%s</comparison>\n" % ("  " * (depth + 1),
-                                                     escape(self.comparison))
-                "%s<value>%s</value>\n" % ("  " * (depth + 1),
-                                           escape(self.value))
-                "%s</modifier>\n" % ("  " * depth)
-            )
+            return '\n'.join(["%s<modifier>" % ("  " * depth),
+                              "%s<type>%s</type>" %
+                              ("  " * (depth + 1), escape(str(self.type))),
+                              "%s<comparison>%s</comparison>" % 
+                              ("  " * (depth + 1), escape(self.comparison)),
+                              "%s<value>%s</value>" %
+                              ("  " * (depth + 1), escape(self.value)),
+                              "%s</modifier>" % ("  " * depth)
+                              ])
         else:
-            return (
-                "%s<modifier>\n" % ("  " * depth)
-                "%s<type>%s</type>\n" % ("  " * (depth + 1),
-                                         escape(str(self.type)))
-                "%s</modifier>\n" % ("  " * depth)
-            )
+            return '\n'.join(["%s<modifier>" % ("  " * depth),
+                "             %s<type>%s</type>" %
+                              ("  " * (depth + 1), escape(str(self.type))),
+                              "%s</modifier>" % ("  " * depth)
+                              ])
 
     def toCQL(self):
         return str(self)
@@ -833,7 +831,7 @@ class CQLParser:
             
         else:
             diag = Diagnostic()
-            diag.details = ("Expected Boolean or Relation but got: "
+            diag.details = ("Expected Boolean or Relation but got: " +
                             self.currentToken)
             raise diag
         return irt
@@ -902,7 +900,7 @@ def parse(query):
     if parser.currentToken != '':
         diag = Diagnostic()
         diag.code = 10
-        diag.details = ("Unprocessed tokens remain: " 
+        diag.details = ("Unprocessed tokens remain: " + 
                         repr(parser.currentToken))
         raise diag
     else:
