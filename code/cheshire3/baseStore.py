@@ -3,9 +3,10 @@ import os
 import time
 import hashlib
 import bsddb as bdb
+import datetime
+import dateutil.tz
 
 from dateutil import parser as dateparser
-import datetime, dateutil.tz
 
 from cheshire3.exceptions import *
 from cheshire3.configParser import C3Object
@@ -41,11 +42,14 @@ class SummaryObject(object):
     meanByteCount = 0
     lastModified = ''
 
-    _possiblePaths = {'metadataPath' : {'docs' : "Path to file where the summary metadata will be kept."}}
+    _possiblePaths = {
+        'metadataPath': {
+            'docs': "Path to file where the summary metadata will be kept."
+        }
+    }
 
     def __init__(self, session, config, parent):
-
-        # don't want to inherit from database!
+        # Don't want to inherit from database!
         mp = self.paths.get('metadataPath', '')
         if not mp:
             self.paths['metadataPath'] = ''
@@ -54,7 +58,9 @@ class SummaryObject(object):
             # Prepend defaultPath from parents
             dfp = self.get_path(session, 'defaultPath')
             if (not dfp):
-                raise(ConfigFileException("Store has relative metadata path, and no visible defaultPath."))
+                msg = ("Store has relative metadata path, and no visible "
+                       "defaultPath.")
+                raise ConfigFileException(msg)
             mp = os.path.join(dfp, mp)
         self.paths['metadataPath'] = mp
 
@@ -97,8 +103,10 @@ class SummaryObject(object):
             if (not os.path.isabs(databasePath)):
                 # Prepend defaultPath from parents
                 dfp = self.get_path(session, 'defaultPath')
-                if (not dfp):
-                    raise(ConfigFileException("Store has relative path, and no visible defaultPath."))
+                if not dfp:
+                    msg = ("Store has relative path, and no visible "
+                           "defaultPath.")
+                    raise ConfigFileException(msg)
                 databasePath = os.path.join(dfp, databasePath)
             self.paths[dbp] = databasePath
                     
@@ -106,7 +114,8 @@ class SummaryObject(object):
         cxn = bdb.db.DB()
         cxn.set_flags(bdb.db.DB_RECNUM)
         try:
-            cxn.open(dbPath, dbtype=bdb.db.DB_BTREE, flags = bdb.db.DB_CREATE, mode=0660)
+            cxn.open(dbPath, dbtype=bdb.db.DB_BTREE,
+                     flags=bdb.db.DB_CREATE, mode=0660)
         except:
             raise ValueError("Could not create %s" % dbPath)
         cxn.put("lastModified", time.strftime('%Y-%m-%d %H:%M:%S'))
@@ -152,8 +161,7 @@ class SummaryObject(object):
             self.minByteCount = obj.byteCount
         if obj.byteCount > self.maxByteCount:
             self.maxByteCount = obj.byteCount
-        
-    
+
 
 class SimpleStore(C3Object, SummaryObject):
     """ Base Store implementation.  Provides non-storage-specific functions """
@@ -170,31 +178,74 @@ class SimpleStore(C3Object, SummaryObject):
     session = None
     switching = 0
 
-    _possiblePaths = {'idNormalizer' : {'docs' : "Identifier for Normalizer to use to turn the data object's identifier into a suitable form for storing. Eg: StringIntNormalizer"},
-                      'outIdNormalizer' : {'docs' : "Normalizer to reverse the process done by idNormalizer"},
-                      'inWorkflow' : {'docs' : "Workflow with which to process incoming data objects."},
-                      'outWorkflow' : {'docs' : "Workflow with which to process stored data objects when requested."}
-                      }
+    _possiblePaths = {
+        'idNormalizer': {
+            'docs': ("Identifier for Normalizer to use to turn the data "
+                     "object's identifier into a suitable form for storing. "
+                     "Eg: StringIntNormalizer")
+        },
+        'outIdNormalizer': {
+            'docs': "Normalizer to reverse the process done by idNormalizer"
+        },
+        'inWorkflow': {
+            'docs': "Workflow with which to process incoming data objects."
+        },
+        'outWorkflow': {
+            'docs': ("Workflow with which to process stored data objects "
+                     "when requested.")
+        }
+    }
 
+    _possibleSettings = {
+        'useUUID': {
+            'docs': "Each stored data object should be assigned a UUID.",
+            'type': int,
+            'options': "0|1"
+        },
+        'digest': {
+            'docs': "Type of digest/checksum to use. Defaults to no digest",
+            'options': 'sha|md5'
+        },
+        'expires': {
+            'docs': ("Time after ingestion at which to delete the data "
+                     "object in number of seconds."),
+            'type': int
+        },
+        'storeDeletions': {
+            'docs': "Maintain when an object was deleted from this store.",
+            'type': int,
+            'options': "0|1"
+        },
+        'bucketType': {
+            'docs': ("Type of 'bucket' to use when splitting an index over "
+                     "multiple files."),
+        },
+        'maxBuckets': {
+            'docs': "Maximum number of 'buckets' to split an index into",
+            'type': int
+        },
+        'maxItemsPerBucket': {
+            'docs': "Maximum number of items to put into each 'bucket'",
+            'type': int
+        },
+    }
 
-    _possibleSettings = {'useUUID' : {'docs' : "Each stored data object should be assigned a UUID.", 'type': int, 'options' : "0|1"},
-                         'digest' : {'docs' : "Type of digest/checksum to use. Defaults to no digest", 'options': 'sha|md5'},
-                         'expires' : {'docs' : "Time after ingestion at which to delete the data object in number of seconds.", 'type' : int },
-                         'storeDeletions' : {'docs' : "Maintain when an object was deleted from this store.", 'type' : int, 'options' : "0|1"},
-                         'bucketType' : {'docs' : ''},
-                         'maxBuckets' : {'docs' : '', 'type' : long},
-                         'maxItemsPerBucket' : {'docs' : '', 'type' : long}
-                         }
-
-    _possibleDefaults = {'expires': {"docs" : 'Default time after ingestion at which to delete the data object in number of seconds.  Can be overridden by the individual object.', 'type' : int}}
+    _possibleDefaults = {
+        'expires': {
+            "docs": ('Default time after ingestion at which to delete the '
+                     'data object in number of seconds. Can be overridden by '
+                     'the individual object.'),
+            'type': int
+        }
+    }
     
     def __init__(self, session, config, parent):
-
-        # don't inherit metadataPath!
+        # Don't inherit metadataPath!
         C3Object.__init__(self, session, config, parent)
-        self.switching = self.get_setting(session, 'bucketType', '') or \
-                         self.get_setting(session, 'maxBuckets', 0) or \
-                         self.get_setting(session, 'maxItemsPerBucket', 0)
+        self.switching = (
+            self.get_setting(session, 'bucketType', '') or \
+            self.get_setting(session, 'maxBuckets', 0) or \
+            self.get_setting(session, 'maxItemsPerBucket', 0))
 
         SummaryObject.__init__(self, session, config, parent)
         self.idNormalizer = self.get_path(session, 'idNormalizer', None)
@@ -212,7 +263,6 @@ class SimpleStore(C3Object, SummaryObject):
         self.useUUID = self.get_setting(session, 'useUUID', 0)
         self.expires = self.get_default(session, 'expires', 0)
 
-
         for dbt in dbts:
             self._initDb(session, dbt)
             self._verifyDb(session, dbt)
@@ -220,7 +270,6 @@ class SimpleStore(C3Object, SummaryObject):
                 dbt = dbt + "Reverse"
                 self._initDb(session, dbt)
                 self._verifyDb(session, dbt)
-
 
     def _verifyDb(self, session, dbType):
         pass
@@ -265,13 +314,13 @@ class SimpleStore(C3Object, SummaryObject):
         for (t, cxn) in self.cxns.items():
             if cxn is not None:
                 try:
-                    cxn.close();
+                    cxn.close()
                     self.cxns[t] = None
                 except:
                     pass
 
     def generate_id(self, session):
-        # generate a new unique identifier
+        """Generate and return a new unique identifier."""
         return self.get_dbSize(session)
 
     def get_storageTypes(self, session):
@@ -281,20 +330,27 @@ class SimpleStore(C3Object, SummaryObject):
         return ['digest', 'expires']
         
     def get_dbSize(self, session):
+        """Return number of items in storage."""
         raise NotImplementedError
 
     def begin_storing(self, session):
+        """Prepare to store objects."""
         self._openAll(session)
         return None
 
     def commit_storing(self, session):
+        """Finalize storing, e.g. commit to peristent storage."""
         self._closeAll(session)
         self.commit_metadata(session)
         return None
     
     def get_idChunkGenerator(self, session, taskManager=None):
-        """Generate chunks of ids from the store."""
-        # defaults
+        """Generator to yield chunks of ids from the store.
+        
+        Can be used during parallel processing to split processing into 
+        chunks to be distributed across processes or processing nodes.
+        """
+        # Defaults
         maxChunkSize = 1000
         maxChunkByteCount = 2048000
         maxChunkWordCount = maxChunkByteCount / 5
@@ -302,17 +358,21 @@ class SimpleStore(C3Object, SummaryObject):
         chunkThreshold = 1
         total = self.get_dbSize(session)
         if taskManager is not None:
-            maxChunkSize = taskManager.get_setting(session, 'maxChunkSize', maxChunkSize)
+            maxChunkSize = taskManager.get_setting(session,
+                                                   'maxChunkSize',
+                                                   maxChunkSize)
             chunkBy = taskManager.get_setting(session, 'chunkBy', chunkBy)
             if (chunkBy is not None) and chunkBy.isalpha():
-                # chunking based on metadata
+                # Chunking based on metadata
                 cmax = 'maxChunk{0}'.format(chunkBy[0].upper() + chunkBy[1:])
-                chunkThreshold = taskManager.get_setting(session, 
-                                                           cmax,
-                                                           locals().get(cmax, chunkByThreshold)
-                                                           )
+                chunkThreshold = taskManager.get_setting(
+                                     session, 
+                                     cmax,
+                                     locals().get(cmax,
+                                     chunkByThreshold)
+                )
             else:
-                # generic chunking
+                # Generic chunking
                 if (chunkBy is not None) and chunkBy.isdigit():
                     # chunkBy is a number of preferred times to use each chunk
                     nIters = int(chunkBy)
@@ -328,10 +388,12 @@ class SimpleStore(C3Object, SummaryObject):
         while numericId < total:
             chunk = []
             chunkTotal = 0
-            while chunkTotal < chunkThreshold and len(chunk) < maxChunkSize and numericId < total:
-                # get real id and de-normalize if possible
+            while (chunkTotal < chunkThreshold and
+                   len(chunk) < maxChunkSize and
+                   numericId < total):
+                # Get real id and de-normalize if possible
                 id = iterator.nextData[0]
-                obj = iterator.next() # move iterator on
+                obj = iterator.next()  # Move iterator on
                 if outIdNormalizer:
                     id = outIdNormalizer.process_string(session, id)
                 # chunkBy
@@ -407,21 +469,23 @@ class BdbIter(object):
         return self.nextData[0]
 
 
-
 class SwitchingBdbConnection(object):
 
-    def __init__(self, session, parent, path="", maxBuckets=0, maxItemsPerBucket=0, bucketType=''):
+    def __init__(self, session, parent, path="",
+                 maxBuckets=0, maxItemsPerBucket=0, bucketType=''):
         self.session = session
         self.store = parent
 
-        # allow per call overrides, eg if parent object has multiple types
+        # Allow per call overrides, eg if parent object has multiple types
         if maxBuckets == 0:
             self.maxBuckets = parent.get_setting(session, 'maxBuckets', 0) 
         else:
             self.maxBuckets = maxBuckets
 
         if maxItemsPerBucket == 0:
-            self.maxItemsPerBucket = parent.get_setting(session, 'maxItemsPerBucket', 0)
+            self.maxItemsPerBucket = parent.get_setting(session,
+                                                        'maxItemsPerBucket',
+                                                        0)
         else:
             self.maxItemsPerBucket = maxItemsPerBucket
 
@@ -449,20 +513,20 @@ class SwitchingBdbConnection(object):
         self.createArgs = {}
         self.openArgs = {}
         self.preOpenFlags = 0
-        self.bucketFns = {'term1' : self.termBucket1,
-                          'term-1' : self.termBucket_1,
-                          'term2' : self.termBucket2,
-                          'term-2' : self.termBucket_2,
-                          'hash' : self.hashBucket,
-                          'int' : self.intBucket,
-                          'null' : self.nullBucket}
-        self.listBucketFns = {'term1' : self.listTermBucket1,
-                              'term-1' : self.listTermBucket1,
-                              'term2' : self.listTermBucket2,
-                              'term-2' : self.listTermBucket_2,
-                              'hash' : self.listHashBucket,
-                              'int' : self.listIntBucket,
-                              'null' : self.listNullBucket
+        self.bucketFns = {'term1': self.termBucket1,
+                          'term-1': self.termBucket_1,
+                          'term2': self.termBucket2,
+                          'term-2': self.termBucket_2,
+                          'hash': self.hashBucket,
+                          'int': self.intBucket,
+                          'null': self.nullBucket}
+        self.listBucketFns = {'term1': self.listTermBucket1,
+                              'term-1': self.listTermBucket1,
+                              'term2': self.listTermBucket2,
+                              'term-2': self.listTermBucket_2,
+                              'hash': self.listHashBucket,
+                              'int': self.listIntBucket,
+                              'null': self.listNullBucket
                               }
 
     def bucket_exists(self, b):
@@ -533,7 +597,6 @@ class SwitchingBdbConnection(object):
         else:
             return "other"
 
-
     def listTermBucket2(self):
         lets = [chr(x) for x in range(97, 123)]
         nums = [str(x) for x in range(10)]
@@ -561,9 +624,8 @@ class SwitchingBdbConnection(object):
             l.extend([let + x for x in lets])
         return l
 
-
     def hashBucket(self, key):
-        # essentially random division, constrained number of buckets
+        # Essentially random division, constrained number of buckets
         return str(hash(key) % self.maxBuckets)
 
     def listHashBucket(self):
@@ -573,15 +635,15 @@ class SwitchingBdbConnection(object):
         # constrained number of items per bucket
         # must be integer key!  (eg internal record id)
         if not type(key) in [int, long] and not key.isdigit():
-            raise ConfigFileException("Cannot use 'int' bucket method if keys are not numbers")
+            msg = "Cannot use 'int' bucket method if keys are not numbers"
+            raise ConfigFileException(msg)
         else:
             return str(long(key) / self.maxItemsPerBucket)
 
     def listIntBucket(self):
         # find out how many
         x = self.store.get_dbSize(self.session)
-        return [str(y) for y in range((x/self.maxItemsPerBucket)+1)]
-
+        return [str(y) for y in range((x / self.maxItemsPerBucket) + 1)]
 
     def nullBucket(self, key):
         # all in one bucket
@@ -591,7 +653,7 @@ class SwitchingBdbConnection(object):
         return ['0']
 
     def _open(self, b):
-        if self.cxns.has_key(b) and self.cxns[b] is not None:
+        if b in self.cxns and self.cxns[b] is not None:
             return self.cxns[b]
         else:
             cxn = bdb.db.DB()
@@ -630,7 +692,6 @@ class SwitchingBdbConnection(object):
         b = self.bucket(key)
         cxn = self._open(b)
         return cxn.delete(key)
-        
 
     def cursor(self):
         # create a switching cursor!
@@ -647,9 +708,11 @@ class SwitchingBdbConnection(object):
         # delay open until try to write
         self.basePath = what
         if flags == bdb.db.DB_CREATE:
-            self.store.createArgs[what] = {'flags' : flags, 'dbtype' : dbtype, 'mode' : mode}
+            self.store.createArgs[what] = {'flags': flags,
+                                           'dbtype': dbtype,
+                                           'mode': mode}
         elif flags:
-            self.openArgs = {'flags' : flags}
+            self.openArgs = {'flags': flags}
         return None
 
     def close(self):
@@ -663,8 +726,8 @@ class SwitchingBdbConnection(object):
         return None        
 
 
-
 class SwitchingBdbCursor(object):
+    """Cursor to handle switching between multiple BerkeleyDB connections."""
 
     def __init__(self, cxn, l):
         self.switch = cxn
@@ -681,7 +744,8 @@ class SwitchingBdbCursor(object):
             idx = self.buckets.index(b)
             self.currBucketIdx = idx
         except:
-            raise ValueError("%r is not a known bucket (%r)" % (b, self.buckets))
+            msg = "%r is not a known bucket (%r)" % (b, self.buckets)
+            raise ValueError(msg)
         cxn = self.switch._open(b)
         cur = cxn.cursor()
         if self.currCursor is not None:
@@ -698,7 +762,7 @@ class SwitchingBdbCursor(object):
             return cursor.first()
 
     def last(self, doff=-1, dlen=-1):
-        if self.currBucketIdx != len(self.buckets)-1:
+        if self.currBucketIdx != len(self.buckets) - 1:
             cursor = self.set_cursor(self.buckets[-1])
         else:
             cursor = self.currCursor
@@ -714,8 +778,8 @@ class SwitchingBdbCursor(object):
                 x = self.currCursor.next(doff=doff, dlen=dlen)
             else:
                 x = self.currCursor.next()
-            if x is None and self.currBucketIdx != len(self.buckets) -1:
-                c = self.set_cursor(self.buckets[self.currBucketIdx+1])
+            if x is None and self.currBucketIdx != len(self.buckets) - 1:
+                c = self.set_cursor(self.buckets[self.currBucketIdx + 1])
                 if dlen != -1:
                     return c.first(doff=doff, dlen=dlen)
                 else:
@@ -733,7 +797,7 @@ class SwitchingBdbCursor(object):
             else:
                 x = self.currCursor.prev()
             if x is None and self.currBucketIdx != 0:                
-                c = self.set_cursor(self.buckets[self.currBucketIdx-1])
+                c = self.set_cursor(self.buckets[self.currBucketIdx - 1])
                 if dlen != -1:
                     return c.last(doff=doff, dlen=dlen)
                 else:
@@ -766,20 +830,19 @@ class SwitchingBdbCursor(object):
             x = cursor.set_range(where)
         # at end of where bucket, step to next
 
-        if x is None and self.currBucketIdx != len(self.buckets) -1:
-            c = self.set_cursor(self.buckets[self.currBucketIdx+1])
+        if x is None and self.currBucketIdx != len(self.buckets) - 1:
+            c = self.set_cursor(self.buckets[self.currBucketIdx + 1])
             if dlen != -1:
                 return c.first(doff=doff, dlen=dlen)
             else:
                 return c.first()
         else:
-            # end of index
+            # End of index
             return x
 
 
-
 class BdbStore(SimpleStore):
-    """ Berkeley DB based storage """
+    """Berkeley DB based storage """
     cxns = {}
 
     def __init__(self, session, config, parent):
@@ -799,7 +862,8 @@ class BdbStore(SimpleStore):
             cxn = bdb.db.DB()
         cxn.set_flags(bdb.db.DB_RECNUM)
         try:
-            cxn.open(dbp, dbtype=bdb.db.DB_BTREE, flags = bdb.db.DB_CREATE, mode=0660)
+            cxn.open(dbp, dbtype=bdb.db.DB_BTREE, 
+                     flags=bdb.db.DB_CREATE, mode=0660)
         except:
             raise ValueError("Could not create: %s" % dbp)
         cxn.close()
@@ -808,7 +872,7 @@ class BdbStore(SimpleStore):
         dbp = self.get_path(session, dbType + "Path")
         if self.switching and dbType in self.get_noSwitchTypes(session):
             self.switching = False
-            rv =  self._verify(session, dbp)
+            rv = self._verify(session, dbp)
             self.switching = True
             return rv
         else:
@@ -834,8 +898,12 @@ class BdbStore(SimpleStore):
             if dbp is None:
                 self._initDb(session, dbType)
                 dbp = self.get_path(session, dbType + 'Path')
-            if os.path.exists(dbp) or dbType in self.storageTypes or (dbType[-7:] == 'Reverse' and dbType[:-7] in self.reverseMetadataTypes):
-                if self.switching and dbType in self.get_noSwitchTypes(session):
+            if (os.path.exists(dbp) or
+                dbType in self.storageTypes or
+                (dbType[-7:] == 'Reverse' and
+                 dbType[:-7] in self.reverseMetadataTypes)):
+                if (self.switching and
+                    dbType in self.get_noSwitchTypes(session)):
                     self.switching = False
                     cxn = self._open(session, dbp)
                     self.switching = True
@@ -844,7 +912,7 @@ class BdbStore(SimpleStore):
                 self.cxns[dbType] = cxn
                 return cxn
             else:
-                # trying to store something we don't care about
+                # Trying to store something we don't care about
                 return None
         else:
             return cxn
@@ -898,7 +966,7 @@ class BdbStore(SimpleStore):
             c = cxn.cursor()
             item = c.last()
             if item:
-                # might need to out normalise key
+                # Might need to out normalise key
                 key = item[0]
                 if self.outIdNormalizer:
                     key = self.outIdNormalizer.process_string(session, key)
@@ -913,7 +981,7 @@ class BdbStore(SimpleStore):
             else:
                 key = 0
         else:
-            key = self.currentId +1
+            key = self.currentId + 1
         self.currentId = key
         return key
 
@@ -940,7 +1008,7 @@ class BdbStore(SimpleStore):
         if type(data) == unicode:
             data = data.encode('utf-8')
         cxn.put(id, data)
-        
+
         for (m, val) in metadata.iteritems():
             self.store_metadata(session, id, m, val)
         return None
@@ -955,15 +1023,16 @@ class BdbStore(SimpleStore):
             id = str(id)
         data = cxn.get(id)
 
-        if data and data[:44] == "\0http://www.cheshire3.org/ns/status/DELETED:":
+        if (data and
+            data[:44] == "\0http://www.cheshire3.org/ns/status/DELETED:"):
             data = DeletedObject(self, id, data[41:])
-
+            
         if data and self.expires:
             # update touched
             expires = self.generate_expires(session)
             self.store_metadata(session, id, 'expires', expires)
         return data
-        
+    
     def delete_data(self, session, id):
         self._openAll(session)
         cxn = self._openDb(session, 'database')
@@ -975,7 +1044,7 @@ class BdbStore(SimpleStore):
         else:
             id = str(id)
 
-        # main database is a storageType now
+        # Main database is a storageType now
         for dbt in self.storageTypes:
             cxn = self._openDb(session, dbt)
             if cxn is not None:
@@ -991,13 +1060,14 @@ class BdbStore(SimpleStore):
         # Maybe store the fact that this object used to exist.
         if self.get_setting(session, 'storeDeletions', 0):
             cxn = self._openDb(session, 'database')
-            now = datetime.datetime.now(dateutil.tz.tzutc()).strftime("%Y-%m-%dT%H:%M:%S%Z").replace('UTC', 'Z')            
-            cxn.put(id, "\0http://www.cheshire3.org/ns/status/DELETED:%s" % now)
+            now = datetime.datetime.now(dateutil.tz.tzutc())
+            now = now.strftime("%Y-%m-%dT%H:%M:%S%Z").replace('UTC', 'Z')            
+            cxn.put(id,
+                    "\0http://www.cheshire3.org/ns/status/DELETED:%s" % now)
             cxn.sync()
 
-
     def fetch_metadata(self, session, id, mType):
-        if not mType.endswith("Reverse"):#mType[-7:] != "Reverse":
+        if not mType.endswith("Reverse"):
             if (self.idNormalizer is not None):
                 id = self.idNormalizer.process_string(session, id)
             elif type(id) == unicode:
@@ -1008,7 +1078,7 @@ class BdbStore(SimpleStore):
         if cxn is not None:
             data = cxn.get(id)
             if data:
-                if mType.endswith(("Count", "Position", "Amount", "Offset")):#mType[-5:] == "Count" or mType[-8:] == "Position" or mType[-6:] in ("Amount", 'Offset'):
+                if mType.endswith(("Count", "Position", "Amount", "Offset")):
                     data = long(data)
                 elif mType.endswith("Date"):
                     data = dateparser.parse(data)
@@ -1039,7 +1109,6 @@ class BdbStore(SimpleStore):
         for cxn in self.cxns.values():
             if cxn is not None:
                 cxn.sync()
-
                 
     def clear(self, session):
         self._closeAll(session)
@@ -1057,7 +1126,6 @@ class BdbStore(SimpleStore):
         return self
                 
     def clean(self, session):
-
         self._openAll(session)
         now = time.time()
         cxn = self._open(session, 'expiresReverse')
@@ -1086,6 +1154,7 @@ class BdbStore(SimpleStore):
                 break
         self._closeAll(session)        
         return self
+
 
 class FileSystemIter(object):
     store = None
@@ -1129,7 +1198,6 @@ class FileSystemStore(BdbStore):
     currFileHandle = None
     currFileName = ""
 
-
     def __iter__(self):
         return FileSystemIter(self.session, self)
 
@@ -1138,7 +1206,6 @@ class FileSystemStore(BdbStore):
 
     def get_reverseMetadataTypes(self, session):
         return ['digest', 'expires']
-
 
     def store_data(self, session, id, data, metadata={}):        
         dig = metadata.get('digest', "")
@@ -1156,8 +1223,11 @@ class FileSystemStore(BdbStore):
         else:
             id = str(id)
 
-        if not ('filename' in metadata and 'byteCount' in metadata and 'byteOffset' in metadata):
-            raise SomeException("Need file, byteOffset and byteCount to use FileSystemStore")
+        if not ('filename' in metadata and
+                'byteCount' in metadata and
+                'byteOffset' in metadata):
+            msg = "Need file, byteOffset and byteCount to use FileSystemStore"
+            raise ValueError(msg)
 
         for (m, val) in metadata.iteritems():
             self.store_metadata(session, id, m, val)
@@ -1187,7 +1257,8 @@ class FileSystemStore(BdbStore):
             self.currFileHandle.seek(start)
         data = self.currFileHandle.read(length)
 
-        if data and data[:44] == "\0http://www.cheshire3.org/ns/status/DELETED:":
+        if (data and
+            data[:44] == "\0http://www.cheshire3.org/ns/status/DELETED:"):
             data = DeletedObject(self, id, data[41:])
         elif self.outWorkflow:
             data = self.outWorkflow.process(session, data)
@@ -1212,12 +1283,12 @@ class FileSystemStore(BdbStore):
         start = self.fetch_metadata(session, id, 'byteOffset')
         length = self.fetch_metadata(session, id, 'byteCount')
 
-        # main database is a storageType now
+        # Main database is a storageType now
         for dbt in self.storageTypes:
             cxn = self._open(session, dbt)
             if cxn is not None:
                 if dbt in self.reverseMetadataTypes:
-                    # fetch value here, delete reverse
+                    # Fetch value here, delete reverse
                     data = cxn.get(id)
                     cxn2 = self._open(session, dbt + "Reverse")                
                     if cxn2 is not None:
@@ -1227,7 +1298,8 @@ class FileSystemStore(BdbStore):
 
         # Maybe store the fact that this object used to exist.
         if self.get_setting(session, 'storeDeletions', 0):
-            now = datetime.datetime.now(dateutil.tz.tzutc()).strftime("%Y-%m-%dT%H:%M:%S%Z").replace('UTC', 'Z')            
+            now = datetime.datetime.now(dateutil.tz.tzutc())
+            now = now.strftime("%Y-%m-%dT%H:%M:%S%Z").replace('UTC', 'Z')            
             out = "\0http://www.cheshire3.org/ns/status/DELETED:%s" % now
 
             if len(out) < length:
@@ -1236,6 +1308,6 @@ class FileSystemStore(BdbStore):
                 f.write(out)
                 f.close()
             else:
-                # Can't write deleted status as original doc is shorter than deletion info!
+                # Can't write deleted status as original doc is shorter than
+                # deletion info!
                 pass
-
