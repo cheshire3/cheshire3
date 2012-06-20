@@ -1,3 +1,4 @@
+"""Implementations for configured object stores."""
 
 from cheshire3.baseObjects import ObjectStore
 from cheshire3.configParser import C3Object
@@ -9,8 +10,9 @@ from cheshire3.baseStore import BdbIter
 
 
 class SimpleObjectStore(ObjectStore):
+
     def get_storageTypes(self, session):
-        # assume that we want to store wordCount, byteCount
+        # Assume that we want to store wordCount, byteCount
         types = ['database']
         if self.get_setting(session, 'digest'):
             types.append('digest')
@@ -22,7 +24,7 @@ class SimpleObjectStore(ObjectStore):
     def create_object(self, session, obj=None):
         # Need to implement object -> config xml for all objects!
         # Check doesn't exist, then call store_object
-        raise(NotImplementedError)
+        raise NotImplementedError
 
     def delete_object(self, session, id):
         return self.delete_record(session, id)
@@ -34,9 +36,9 @@ class SimpleObjectStore(ObjectStore):
             return object
         else:
             return None
-        
+
     def store_object(self, session, obj):
-        raise(NotImplementedError)
+        raise NotImplementedError
 
     def _processRecord(self, session, id, rec):
         # Split from fetch_object for Iterators
@@ -50,13 +52,17 @@ class SimpleObjectStore(ObjectStore):
         else:
             # LXML
             topNode = dom
-            
+
         object = dynamic.makeObjectFromDom(session, topNode, self)
         return object
 
 
 class BdbObjectIter(BdbIter):
-    # Get data from bdbIter and turn into record, then process reocrd into object
+    """Facilitate iterating through a BerkeleyDB based ObjectStore.
+
+    Get data from bdbIter and turn into record, then process record into
+    object.
+    """
 
     def next(self):
         d = BdbIter.next(self)
@@ -64,10 +70,12 @@ class BdbObjectIter(BdbIter):
         obj = self.store._processRecord(self.session, d[0], rec)
         return obj
 
-    
+
 class BdbObjectStore(BdbRecordStore, SimpleObjectStore):
-    # Store XML records in RecordStore
-    # Retrieve and instantiate
+    """BerkeleyDB based implementation of an ObjectStore.
+
+    Store XML records in RecordStore, retrieve and instantiate when requested.
+    """
 
     def __iter__(self):
         return BdbObjectIter(self.session, self)
