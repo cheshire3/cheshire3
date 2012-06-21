@@ -96,6 +96,11 @@ class BaseDocumentStream:
 
     def fetch_document(self, idx):
         if self.length and idx >= self.length:
+            try:
+                self.stream.close()
+            except:
+                # If loaded with cache == 2 will already have been closed
+                pass
             raise StopIteration
         if self.documents:
                 return self.documents[idx]
@@ -287,7 +292,10 @@ class XmlDocumentStream(BaseDocumentStream):
                     raise StopIteration
                 else:
                     break
-        self.stream.close()
+        if cache == 2:
+            # If cache == 1 , we'll need the file open later to actually read
+            # Documents from the identified offsets
+            self.stream.close()
         self.locations = locs
         self.documents = docs
         self.length = max(len(locs), len(docs))
@@ -320,7 +328,10 @@ class MarcDocumentStream(BaseDocumentStream):
             if (len(data) == dlen):
                 # Junk at end of file
                 data = ""
-        self.stream.close()
+        if cache == 2:
+            # If cache == 1 , we'll need the file open later to actually read
+            # Documents from the identified offsets
+            self.stream.close()
         self.locations = locs
         self.documents = docs
         self.length = max(len(locs), len(docs))
@@ -518,7 +529,7 @@ class ZipDocumentStream(DirectoryDocumentStream):
         return item
 
     def find_documents(self, session, cache=0):
-        #for info in self.stream.infolist():
+        # For info in self.stream.infolist():
         for info in self.stream.namelist():
             for doc in self._processFiles(session, [info], cache):
                 yield doc
@@ -738,7 +749,10 @@ class DocumentFactoryIter(object):
         self.session = factory.loadSession
 
     def next(self):
-        return self.factory.get_document(self.session)
+        try:
+            return self.factory.get_document(self.session)
+        except IndexError:
+            raise StopIteration
 
 
 streamHash = {"xml": XmlDocumentStream,
@@ -885,6 +899,12 @@ class SimpleDocumentFactory(DocumentFactory):
         # Store and call generator on first ping
         self.docStream = ds
         self.generator = ds.find_documents(session, cache=cache)
+        if cache:
+            # Need to run generator to completion to actually find the
+            # documents. Do this now rather than when 1st document requested
+            for doc in self.generator:
+                # Nothing to do, just populate df.locations or df.documents
+                pass
         self.previousIdx = -1
         self.cache = cache
         # Return self for workflows, mostly can ignore
@@ -900,15 +920,8 @@ class SimpleDocumentFactory(DocumentFactory):
         if self.cache == 0:
             # gen will yield, return
             return self.generator.next()
-        elif self.cache == 1:
+        else:
             return self.docStream.fetch_document(idx)
-        elif self.cache == 2:
-            if not self.docStream.documents and self.generator:
-                try:
-                    self.generator.next()
-                except StopIteration:
-                    pass
-            return self.docStream.documents[n]
 
 
 for (k, v) in streamHash.items():
