@@ -2,13 +2,14 @@
 from cheshire3.baseObjects import DocumentStore
 from cheshire3.exceptions import *
 from cheshire3.document import StringDocument
-from cheshire3.baseStore import BdbStore, BdbIter, FileSystemStore, DeletedObject
+from cheshire3.baseStore import BdbStore, BdbIter, FileSystemStore,\
+                                DeletedObject
 
 try:
-    # name when installed by hand
+    # Name when installed by hand
     import bsddb3 as bdb
 except:
-    # name that comes in python 2.3
+    # Name that comes in Python 2.3, though Python >= 2.6 required
     import bsddb as bdb
 
 
@@ -18,9 +19,16 @@ class SimpleDocumentStore(DocumentStore):
     inWorkflow = None
     outWorkflow = None
 
-    _possiblePaths = {'inPreParser' : {'docs' : "Identifier for a preParser through which to pass the documents being ingested."}
-                      , 'outPreParser' : {'docs' : "Identifier for a preParser through which to pass the documets being requested"}
-                      }
+    _possiblePaths = {
+        'inPreParser': {
+            'docs': ("Identifier for a preParser through which to pass the "
+                     "documents being ingested."
+        )},
+        'outPreParser': {
+            'docs': ("Identifier for a preParser through which to pass the "
+                     "documents being requested")
+        }
+    }
 
     def __init__(self, session, config, parent):
         if (not self.paths):
@@ -30,16 +38,17 @@ class SimpleDocumentStore(DocumentStore):
         self.inWorkflow = self.get_path(session, 'inWorkflow', None)
         self.outWorkflow = self.get_path(session, 'outWorkflow', None)
 
-
     def create_document(self, session, doc=None):
         p = self.permissionHandlers.get('info:srw/operation/1/create', None)
         if p:
             if not session.user:
-                raise PermissionException("Authenticated user required to create an object in %s" % self.id)
+                msg = ("Authenticated user required to create an object in "
+                       "%s" % self.id)
+                raise PermissionException(msg)
             okay = p.hasPermission(session, session.user)
             if not okay:
-                raise PermissionException("Permission required to create an object in %s" % self.id)
-
+                msg = "Permission required to create an object in %s" % self.id
+                raise PermissionException(msg)
         id = self.generate_id(session)
         if (doc is None):
             # Create a placeholder
@@ -47,7 +56,6 @@ class SimpleDocumentStore(DocumentStore):
         else:
             doc.id = id
         doc.documentStore = self.id
-
         try:
             self.store_document(session, doc)
         except ObjectAlreadyExistsException:
@@ -64,7 +72,7 @@ class SimpleDocumentStore(DocumentStore):
         if (self.inPreParser is not None):
             doc = self.inPreParser.process_document(session, doc)
         elif self.inWorkflow is not None:
-            doc = self.inWorkflow.process(session, doc)            
+            doc = self.inWorkflow.process(session, doc)
         data = doc.get_raw(session)
         md = {}
         if doc.wordCount:
@@ -83,11 +91,14 @@ class SimpleDocumentStore(DocumentStore):
         p = self.permissionHandlers.get('info:srw/operation/2/retrieve', None)
         if p:
             if not session.user:
-                raise PermissionException("Authenticated user required to retrieve an object from %s" % self.id)
+                msg = ("Authenticated user required to retrieve an object "
+                       "from %s" % self.id)
+                raise PermissionException(msg)
             okay = p.hasPermission(session, session.user)
             if not okay:
-                raise PermissionException("Permission required to retrieve an object from %s" % self.id)
-
+                msg = ("Permission required to retrieve an object from "
+                       "%s" % self.id)
+                raise PermissionException(msg)
         data = self.fetch_data(session, id)
         if (data):
             doc = StringDocument(data)
@@ -108,16 +119,19 @@ class SimpleDocumentStore(DocumentStore):
         p = self.permissionHandlers.get('info:srw/operation/1/delete', None)
         if p:
             if not session.user:
-                raise PermissionException("Authenticated user required to delete an object from %s" % self.id)
+                msg = ("Authenticated user required to delete an object from "
+                       "%s" % self.id)
+                raise PermissionException(msg)
             okay = p.hasPermission(session, session.user)
             if not okay:
-                raise PermissionException("Permission required to replace an object from %s" % self.id)
-        
+                msg = ("Permission required to replace an object from "
+                       "%s" % self.id)
+                raise PermissionException(msg)
+
         if isinstance(id, StringDocument):
             id = id.id
         self.delete_data(session, id)
-        
-              
+
     def _process_data(self, session, id, data, preParser=None):
         # Split from fetch record for Iterators
         if (preParser is not None):
@@ -135,7 +149,7 @@ class SimpleDocumentStore(DocumentStore):
         doc.id = id
         doc.documentStore = self.id
         return doc
-    
+
 
 class BdbDocIter(BdbIter):
     def next(self):
@@ -143,7 +157,7 @@ class BdbDocIter(BdbIter):
         doc = StringDocument(d[1])
         doc.id = d[0]
         return doc
-    
+
 
 class BdbDocumentStore(BdbStore, SimpleDocumentStore):
     # Instantiate some type of simple doc store
@@ -167,7 +181,3 @@ class FileSystemDocumentStore(FileSystemStore, SimpleDocumentStore):
         if self.get_setting(session, 'expires'):
             types.append('expires')
         return types
-    
-
-
-

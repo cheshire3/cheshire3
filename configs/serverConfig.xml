@@ -36,6 +36,7 @@
     <subConfig type="queryStore" id="defaultQueryStore">
       <objectType>cheshire3.queryStore.SimpleQueryStore</objectType>
       <paths>
+        <path type="defaultPath">defaults</path>
         <path type="databasePath">QueryStore.bdb</path>
       </paths>
     </subConfig>
@@ -43,6 +44,7 @@
     <subConfig type="resultSetStore" id="defaultResultSetStore">
       <objectType>cheshire3.resultSetStore.BdbResultSetStore2</objectType>
       <paths>
+        <path type="defaultPath">defaults</path>
         <path type="databasePath">RSetStore.bdb</path>
       </paths>
       <options>

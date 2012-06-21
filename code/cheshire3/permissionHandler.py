@@ -1,10 +1,15 @@
+"""PermissionHandler implementations."""
+
+from types import MethodType
 
 from cheshire3.utils import elementType, getFirstData
-from types import MethodType
 
 
 class PermissionHandler:
-    # Write ourselves some code to run to check permissions.
+    """Object to facilitate persmissions checking
+
+    Generate dynamic code to run for permissions checking.
+    """
 
     actionIdentifier = ""
     codeText = []
@@ -27,9 +32,14 @@ class PermissionHandler:
                     self._walkNode(c)
             self.code.append(":")
             cstring = " ".join(self.code)
-            fncode = "def handler(self, session, user):\n" + cstring + "\n    return True;\n  else:\n    return False"
+            fncode = '\n'.join(["def handler(self, session, user):",
+                                cstring,
+                                "    return True",
+                                "  else:",
+                                "    return False"])
             exec(fncode)
-            setattr(self, 'hasPermission', MethodType(locals()['handler'], self, self.__class__))
+            setattr(self, 'hasPermission',
+                    MethodType(locals()['handler'], self, self.__class__))
         elif node.localName in ["all", "any"]:
             if node.localName == "all":
                 bool = "and"
@@ -38,7 +48,7 @@ class PermissionHandler:
             self.code.append("(")
             for c in node.childNodes:
                 if c.nodeType == elementType:
-                    self._walkNode(c)                
+                    self._walkNode(c)
                     self.code.append(bool)
             self.code.pop()
             self.code.append(")")
@@ -51,4 +61,3 @@ class PermissionHandler:
         elif node.localName == "hostmask":
             e = getFirstData(node)
             self.code.append("user.connectedFrom(session, \"%s\")" % e)
-        

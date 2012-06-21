@@ -1,12 +1,14 @@
 
 from cheshire3.baseObjects import Document
 
-# Data:  data, creator, history, filename, offset, length, mimeType, parent
 # MARC mimetype is application/marc (RFC2220)
+
 
 class StringDocument(Document):
 
-    def __init__(self, data, creator="", history=[], mimeType="", parent=None, filename=None, tagName="", byteCount=0, byteOffset=0, wordCount=0):
+    def __init__(self, data, creator="", history=[], mimeType="",
+                 parent=None, filename=None, tagName="",
+                 byteCount=0, byteOffset=0, wordCount=0):
         self.id = None
         self.tagName = tagName
         self.size = 0
@@ -19,7 +21,7 @@ class StringDocument(Document):
         self.expires = 0
         self.metadata = {}
 
-	if (history):
+        if (history):
             self.processHistory = history
         else:
             self.processHistory = []
@@ -38,5 +40,5 @@ class StringDocument(Document):
         l = lines[line]
         chr = e._colnum
         start = min(0, chr - 10)
-        end = min(chr+70, len(l))
+        end = min(chr + 70, len(l))
         return l[start:end]
