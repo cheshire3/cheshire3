@@ -1433,7 +1433,12 @@ class BdbIndexStore(IndexStore):
                 kw = k['text']
                 if type(kw) != unicode:
                     try:
-                        kw = kw.decode('utf-8')
+                        try:
+                            kw = kw.decode('utf-8')
+                        except AttributeError:
+                            # kw is not a unicode object
+                            # Maybe it's an integer, e.g. wordCount, byteCount
+                            kw = unicode(kw).decode('utf-8')
                     except:
                         self.log_critical(session,
                                           "%s failed to decode "

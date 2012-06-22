@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 
 from cheshire3.baseObjects import DocumentFactory
 from cheshire3.document import StringDocument

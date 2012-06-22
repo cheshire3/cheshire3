@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 
 from cheshire3.configParser import C3Object
 from cheshire3.baseObjects import ResultSetStore

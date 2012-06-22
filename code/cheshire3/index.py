@@ -276,7 +276,7 @@ class SimpleIndex(Index):
             xp = None
             for child in node.childNodes:
                 if child.nodeType == elementType:
-                    if child.localName == "xpath":
+                    if child.localName in ["xpath", "selector"]:
                         if xp is None:
                             ref = child.getAttributeNS(None, 'ref')
                             if ref:
@@ -325,7 +325,7 @@ class SimpleIndex(Index):
             preprocess = None
             xp = None
             for child in node.iterchildren(tag=etree.Element):
-                if child.tag == "xpath":
+                if child.tag in ["xpath", "selector"]:
                     if xp is None:
                         ref = child.attrib.get('ref', '')
                         if ref:
@@ -1867,7 +1867,7 @@ class PassThroughIndex(SimpleIndex):
     
     def _handleLxmlConfigNode(self, session, node):
         # Source
-        if (node.tag == "xpath"):
+        if (node.tag in ["xpath", "selector"]):
             ref = node.attrib.get('ref', '')
             if ref:
                 xp = self.get_object(session, ref)
@@ -1878,7 +1878,7 @@ class PassThroughIndex(SimpleIndex):
 
     def _handleConfigNode(self, session, node):
         # Source
-        if (node.localname == "xpath"):
+        if (node.localname in ["xpath", "selector"]):
             ref = node.getAttributeNS('ref')
             if ref:
                 xp = self.get_object(session, ref)
