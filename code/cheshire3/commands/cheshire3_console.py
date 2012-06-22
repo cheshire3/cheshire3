@@ -29,6 +29,12 @@ class Cheshire3Console(InteractiveConsole):
     def push(self, line):
         if line.strip() == 'help':
             # Write some Cheshire3 help
+            self.write("Cheshire3 Documentation can be found in the `docs` "
+                       "folder of the distribution\n"
+                       "or online at:\n"
+                       "http://cheshire3.org/docs/\n")
+            self.write("Type help() for Python's interactive help, or "
+                       "help(object) for help about object.\n")
             return
         elif line.strip() == 'copyright':
             # Write Cheshire3 copyright info, before that of Python
