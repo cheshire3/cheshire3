@@ -107,12 +107,15 @@ class BaseDocumentStream:
         elif self.locations:
             self.stream.seek(self.locations[idx][0])
             data = self.stream.read(self.locations[idx][1])
-            return data
+            return StringDocument(data,
+                                  filename=self.streamLocation,
+                                  byteOffset=self.locations[idx][0],
+                                  byteCount=self.locations[idx][1])
         else:
             raise StopIteration
 
     def find_documents(self, session, cache=0):
-        raise(NotImplementedError)
+        raise NotImplementedError
 
 
 class FileDocumentStream(BaseDocumentStream):
