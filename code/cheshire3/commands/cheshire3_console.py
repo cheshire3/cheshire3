@@ -8,6 +8,8 @@ from code import InteractiveConsole
 from cheshire3.internal import cheshire3Version
 from cheshire3.commands.cmd_utils import Cheshire3ArgumentParser, \
                                          identify_database
+from cheshire3.licensing import cheshire3_license, cheshire3_license_text,\
+                                marc_utils_license
 
 
 class Cheshire3Console(InteractiveConsole):
@@ -41,7 +43,20 @@ class Cheshire3Console(InteractiveConsole):
             self.write('Cheshire3 is Copyright (c) 2005-2012, the University '
                        'of Liverpool.\n')
             self.write('All rights reserved.\n\n')
+        elif line.strip() == "license":
+            self.write(cheshire3_license() + '\n\n')
+            self.write("Type marc_utils_license() for marc_utils license\n")
+            self.write("Type python_license() for Python license\n")
+        elif line.strip() == "license()":
+            self.write(cheshire3_license_text() + '\n')
+            return
+        elif line.strip() == "marc_utils_license()":
+            self.write(marc_utils_license() + '\n')
+            return
+        elif line.strip() == "python_license()":
+            return InteractiveConsole.push(self, "license()")
         return InteractiveConsole.push(self, line)
+    
             
     def interact(self, banner=None):
         """Emulate the standard interactive Python console.
