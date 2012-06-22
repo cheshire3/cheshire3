@@ -253,20 +253,18 @@ class XmlDocumentStream(BaseDocumentStream):
                                 raise StopIteration
                             else:
                                 break
-
+                        doc = StringDocument(xpi + txt,
+                                             mimeType="text/xml",
+                                             tagName=self.tagName,
+                                             byteCount=byteCount,
+                                             byteOffset=start + offOffset,
+                                             filename=self.streamLocation)
                         if cache == 0:
-                            yield StringDocument(xpi + txt,
-                                                 mimeType="text/xml",
-                                                 tagName=self.tagName,
-                                                 byteCount=byteCount,
-                                                 byteOffset=start + offOffset,
-                                                 filename=self.streamLocation)
+                            yield doc
                         elif cache == 1:
                             locs.append((start, tlen))
                         elif cache == 2:
-                            docs.append(StringDocument(xpi + txt,
-                                                       mimeType="text/xml",
-                                                       tagName=self.tagName))
+                            docs.append(doc)
                         offOffset += (byteCount - tlen)
                     else:
                         strStart = len(line)
