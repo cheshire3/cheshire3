@@ -148,7 +148,7 @@ def create_defaultConfigIndexes():
                             'ref': "indexStore"}),
                 ),
                 E.source(
-                    E.selector({'ref': "identifierSelector"}),
+                    E.selector({'ref': "idSelector"}),
                     E.process(
                         E.object({'type': "extractor",
                                   'ref': "SimpleExtractor"}),
@@ -170,9 +170,9 @@ def create_defaultConfigIndexes():
                     E.process(
                         E.object({'type': "extractor",
                                   'ref': "SimpleExtractor"}),
-                        E.object({'type': "extractor",
+                        E.object({'type': "tokenizer",
                                   'ref': "DateTokenizer"}),
-                        E.object({'type': "extractor",
+                        E.object({'type': "tokenMerger",
                                   'ref': "SimpleTokenMerger"}),
                     ),
                 ),
@@ -199,9 +199,9 @@ def create_defaultConfigIndexes():
                     E.process(
                         E.object({'type': "extractor",
                                   'ref': "SimpleExtractor"}),
-                        E.object({'type': "extractor",
+                        E.object({'type': "tokenizer",
                                   'ref': "DateTokenizer"}),
-                        E.object({'type': "extractor",
+                        E.object({'type': "tokenMerger",
                                   'ref': "SimpleTokenMerger"}),
                     ),
                 ),
