@@ -56,7 +56,6 @@ class Cheshire3Console(InteractiveConsole):
         elif line.strip() == "python_license()":
             return InteractiveConsole.push(self, "license()")
         return InteractiveConsole.push(self, line)
-    
             
     def interact(self, banner=None):
         """Emulate the standard interactive Python console.
@@ -105,8 +104,7 @@ argparser.add_argument('-d', '--database', type=str,
                        action='store', dest='database',
                        default=None, metavar='DATABASE',
                        help="identifier of Cheshire3 database")
-#subparsers = argparser.add_subparsers(title='subcommands',
-#                                   description='valid subcommands')
+
 session = None
 server = None
 db = None
