@@ -66,11 +66,10 @@ class Cheshire3Console(InteractiveConsole):
         """
         if banner is None:
             c3_version = '.'.join([str(p) for p in cheshire3Version])
-            banner = """Python {} on {}
-Cheshire3 {} Interactive Console
-Type "help", "copyright", "credits" or "license" for more information.\
-""".format(sys.version, sys.platform, c3_version)
-#            banner = "Cheshire3 {} Interactive Console""".format(c3_version)
+            banner = ("Python {} on {}\n".format(sys.version, sys.platform),
+                      "Cheshire3 {} Interactive Console\n".format(c3_version),
+                      'Type "help", "copyright", "credits" or "license" for '
+                      'more information.')
         return InteractiveConsole.interact(self, banner)
         
 
@@ -95,7 +94,16 @@ def main(argv=None):
         dbline = 'db = server.get_object(session, "{}")'.format(dbid)
         console.push(dbline)
     
-    console.interact()
+    if args.script is not None:
+        with open(args.script, 'r') as fh:
+            retval = console.runsource(fh.read(), args.script)
+            if not args.interactive:
+                return retval
+            console.resetbuffer()
+            banner = ''
+    else:
+        banner = None
+    console.interact(banner)
     return 0
 
 
@@ -104,6 +112,15 @@ argparser.add_argument('-d', '--database', type=str,
                        action='store', dest='database',
                        default=None, metavar='DATABASE',
                        help="identifier of Cheshire3 database")
+argparser.add_argument('script', type=str,
+                       action='store', nargs='?',
+                       default=os.getcwd(),
+                       help="read and execute commands from script file")
+argparser.add_argument('-i', '--interactive',
+                       action="store_true", dest="interactive", default=False,
+                       help=("drop into interactive console after running "
+                             "script; if no script is provided, interactive "
+                             "mode is the default"))
 
 session = None
 server = None
