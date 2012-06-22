@@ -107,12 +107,15 @@ class BaseDocumentStream:
         elif self.locations:
             self.stream.seek(self.locations[idx][0])
             data = self.stream.read(self.locations[idx][1])
-            return data
+            return StringDocument(data,
+                                  filename=self.streamLocation,
+                                  byteOffset=self.locations[idx][0],
+                                  byteCount=self.locations[idx][1])
         else:
             raise StopIteration
 
     def find_documents(self, session, cache=0):
-        raise(NotImplementedError)
+        raise NotImplementedError
 
 
 class FileDocumentStream(BaseDocumentStream):
@@ -250,20 +253,18 @@ class XmlDocumentStream(BaseDocumentStream):
                                 raise StopIteration
                             else:
                                 break
-
+                        doc = StringDocument(xpi + txt,
+                                             mimeType="text/xml",
+                                             tagName=self.tagName,
+                                             byteCount=byteCount,
+                                             byteOffset=start + offOffset,
+                                             filename=self.streamLocation)
                         if cache == 0:
-                            yield StringDocument(xpi + txt,
-                                                 mimeType="text/xml",
-                                                 tagName=self.tagName,
-                                                 byteCount=byteCount,
-                                                 byteOffset=start + offOffset,
-                                                 filename=self.streamLocation)
+                            yield doc
                         elif cache == 1:
                             locs.append((start, tlen))
                         elif cache == 2:
-                            docs.append(StringDocument(xpi + txt,
-                                                       mimeType="text/xml",
-                                                       tagName=self.tagName))
+                            docs.append(doc)
                         offOffset += (byteCount - tlen)
                     else:
                         strStart = len(line)
