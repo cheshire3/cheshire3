@@ -223,7 +223,7 @@ class SaxContentHandler(ContentHandler):
             return
         self.currentLine += 1
         if (len(text) != 1 and len(prev) != 3 and
-            prev[0] == "3" and notprev[-1] in [' ', '-']):
+            prev[0] == "3" and not prev[-1] in [' ', '-']):
             # Adjacent lines of text, ensure spaces
             text = ' ' + text            
         self.currentText.append("3 %s" % (text))        
