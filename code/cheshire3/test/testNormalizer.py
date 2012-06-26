@@ -11,24 +11,33 @@ try:
 except ImportError:
     import unittest
 
+import os
 import string
 
+from tempfile import mkstemp
 from lxml import etree
 
 from cheshire3.normalizer import Normalizer, SimpleNormalizer, \
     DataExistsNormalizer, TermExistsNormalizer, CaseNormalizer, \
-    ReverseNormalizer
+    ReverseNormalizer, SpaceNormalizer, ArticleNormalizer,\
+    NumericEntityNormalizer, RegexpNormalizer, NamedRegexpNormalizer,\
+    IntNormalizer, StringIntNormalizer,\
+    StoplistNormalizer, TokenExpansionNormalizer,\
+    RegexpFilterNormalizer, PossessiveNormalizer, FileAssistedNormalizer
+    
 from cheshire3.test.testConfigParser import Cheshire3ObjectTestCase
 
 
 class NormalizerTestCase(Cheshire3ObjectTestCase):
     """Base Class for Cheshire3 Normalizer Test Cases.."""
     
+    @classmethod
     def _get_process_string_tests(self):
         # Return a list of 2-string tuples containing test pairs:
         # (string to be normalized, expected result)
         return []
     
+    @classmethod
     def _get_process_hash_tests(self):
         # Return a list of 2-dictionary tuples containing test pairs:
         # (dictionary to be normalized, expected result)
@@ -46,13 +55,20 @@ class NormalizerTestCase(Cheshire3ObjectTestCase):
         self.assertIsInstance(self.testObj, Normalizer)
 
     def test_process_string(self):
+        "Test output of process_string."
         if not self.process_string_tests:
             self.skipTest("No test data defined")
         for instring, expected in self.process_string_tests:
             output = self.testObj.process_string(self.session, instring) 
-            self.assertEqual(output, expected)
+            self.assertEqual(output, expected,
+                             u"'{0}' != '{1}' when normalizing '{2}'".format(
+                                                                  output,
+                                                                  expected,
+                                                                  instring)
+                             )
     
     def test_process_hash(self):
+        "Test output of process_hash"
         if not self.process_hash_tests:
             self.skipTest("No test data defined")
         for inhash, expected in self.process_hash_tests:
@@ -65,19 +81,24 @@ class SimpleNormalizerTestCase(NormalizerTestCase):
     not change the data in any way). 
     """
 
+    @classmethod
+    def _get_class(cls):
+        return SimpleNormalizer
+
     def _get_config(self):    
         return etree.XML('''\
-<subConfig type="normalizer" id="SimpleNormalizer">
-  <objectType>cheshire3.normalizer.SimpleNormalizer</objectType>
-</subConfig>
-''')
+        <subConfig type="normalizer" id="{0.__name__}">
+          <objectType>cheshire3.normalizer.{0.__name__}</objectType>
+        </subConfig>'''.format(self._get_class()))
     
+    @classmethod
     def _get_process_string_tests(self):
         return [
             (string.uppercase, string.uppercase),
             (string.lowercase, string.lowercase),
             (string.punctuation, string.punctuation)]
-        
+
+    @classmethod    
     def _get_process_hash_tests(self):
         return [
             ({'foo': {'text': 'foo', 
@@ -99,20 +120,19 @@ class SimpleNormalizerTestCase(NormalizerTestCase):
 
 class DataExistsNormalizerTestCase(SimpleNormalizerTestCase):
     
-    def _get_config(self):
-        return etree.XML('''\
-<subConfig type="normalizer" id="DataExistsNormalizer">
-    <objectType>cheshire3.normalizer.DataExistsNormalizer</objectType>
-</subConfig>
-''')
-    
+    @classmethod
+    def _get_class(cls):
+        return DataExistsNormalizer
+
+    @classmethod    
     def _get_process_string_tests(self):
         return [
             (string.uppercase, "1"),
             (string.lowercase, "1"),
             (string.punctuation, "1"),
             ("", "0")]
-        
+
+    @classmethod
     def _get_process_hash_tests(self):
         return [
             ({"foo": {"text": "foo", "occurences": 1},
@@ -129,23 +149,28 @@ class DataExistsNormalizerTestCase(SimpleNormalizerTestCase):
         
 class TermExistsNormalizerTestCase(SimpleNormalizerTestCase):
     
+    @classmethod
+    def _get_class(cls):
+        return TermExistsNormalizer
+
     def _get_config(self):
         return etree.XML('''\
-<subConfig type="normalizer" id="DataExistsNormalizer">
-    <objectType>cheshire3.normalizer.TermExistsNormalizer</objectType>
-    <options>
-        <setting type="termlist">foo bar</setting>
-    </options>
-</subConfig>
-''')
-        
+        <subConfig type="normalizer" id="{0.__name__}">
+            <objectType>cheshire3.normalizer.{0.__name__}</objectType>
+            <options>
+                <setting type="termlist">foo bar</setting>
+            </options>
+        </subConfig>'''.format(self._get_class()))
+
+    @classmethod
     def _get_process_string_tests(self):
-        return[
+        return [
             ('foo', "1"),
             ('bar', "1"),
             ('baz', "0")
         ]
-        
+
+    @classmethod
     def _get_process_hash_tests(self):
         return [
             ({
@@ -168,24 +193,25 @@ class TermExistsNormalizerTestCase(SimpleNormalizerTestCase):
         
         
 class TermExistsNormalizerFreqTestCase(TermExistsNormalizerTestCase):
-    
+
     def _get_config(self):
         return etree.XML('''\
-<subConfig type="normalizer" id="DataExistsNormalizer">
-    <objectType>cheshire3.normalizer.TermExistsNormalizer</objectType>
-    <options>
-        <setting type="termlist">foo bar</setting>
-        <setting type="frequency">1</setting>
-    </options>
-</subConfig>
-''')
-    
+        <subConfig type="normalizer" id="{0.__name__}">
+            <objectType>cheshire3.normalizer.{0.__name__}</objectType>
+            <options>
+                <setting type="termlist">foo bar</setting>
+                <setting type="frequency">1</setting>
+            </options>
+        </subConfig>'''.format(self._get_class()))
+
+    @classmethod
     def _get_process_string_tests(self):
         return [
             ('foo', "1"),
             ('bar', "1"),
             ('baz', "0")]
-        
+
+    @classmethod
     def _get_process_hash_tests(self):
         return[
             ({
@@ -205,7 +231,8 @@ class CaseNormalizerTestCase(SimpleNormalizerTestCase):
     <objectType>cheshire3.normalizer.CaseNormalizer</objectType>
 </subConfig>
 ''')
-    
+
+    @classmethod
     def _get_process_string_tests(self):
         return [
             ("FooBar", "foobar"),
@@ -213,7 +240,8 @@ class CaseNormalizerTestCase(SimpleNormalizerTestCase):
             (string.lowercase, string.lowercase),
             (string.punctuation, string.punctuation)
         ]
-        
+
+    @classmethod
     def _get_process_hash_tests(self):
         return [
             ({
@@ -234,34 +262,430 @@ class CaseNormalizerTestCase(SimpleNormalizerTestCase):
         self.assertIsInstance(self.testObj, CaseNormalizer)
 
 
-class ReverseNormalizerTestCase(NormalizerTestCase):
+class ReverseNormalizerTestCase(SimpleNormalizerTestCase):
     
-    def _get_config(self):
-        return etree.XML('''\
-<subConfig type="normalizer" id="DataExistsNormalizer">
-    <objectType>cheshire3.normalizer.ReverseNormalizer</objectType>
-</subConfig>
-''')
-        
+    @classmethod
+    def _get_class(cls):
+        return ReverseNormalizer
+
+    @classmethod
     def _get_process_string_tests(self):
-        return[
+        return [
             ("foo", "oof"),
             ("Hello World!", "!dlroW olleH"),
             ("madam", "madam"),
             ("A", "A")
         ]
-        
+
+    @classmethod
+    def _get_process_hash_tests(self):
+        return []
+
     def test_instance(self):
         self.assertIsInstance(self.testObj, ReverseNormalizer)
 
 
+class SpaceNormalizerTestCase(SimpleNormalizerTestCase):
+
+    @classmethod
+    def _get_class(cls):
+        return SpaceNormalizer
+
+    @classmethod
+    def _get_process_string_tests(self):
+        return [
+            ("This  is a       spacey sentence.",
+             "This is a spacey sentence."),
+            ("Spam\t&\teggs", "Spam & eggs"),
+            ("some\nnew\nlines", "some new lines"),
+            ("""
+            This
+            
+            is starting
+            
+            
+            to get
+            
+            
+            
+            silly!
+            """,
+            "This is starting to get silly!"
+            )
+        ]
+
+    @classmethod
+    def _get_process_hash_tests(self):
+        return []
+
+
+class ArticleNormalizerTestCase(SimpleNormalizerTestCase):
+
+    @classmethod
+    def _get_class(cls):
+        return ArticleNormalizer
+
+    @classmethod
+    def _get_process_string_tests(self):
+        return [("The spam", "spam"),
+                ("the spam", "spam"),
+                ("An egg", "egg"),
+                ("an egg", "egg"),
+                ("A chip", "chip"),
+                ("a chip", "chip")]
+
+    @classmethod
+    def _get_process_hash_tests(self):
+        return []
+
+
+class NumericEntityNormalizerTestCase(SimpleNormalizerTestCase):
+
+    @classmethod
+    def _get_class(cls):
+        return NumericEntityNormalizer
+
+    @classmethod
+    def _get_process_string_tests(self):
+        return [(u'\xa3', "&#163;"),   # GBP sign
+                (u'\xa9', "&#169;"),   # Copyright
+                (u'\xe9', "&#233;"),   # Lower-case e with acute accent
+                (u'\xe6', "&#230;"),   # Lower case ae dipthong
+                ]
+
+    @classmethod
+    def _get_process_hash_tests(self):
+        return []
+
+
+class RegexpNormalizerTestCase(SimpleNormalizerTestCase):
+
+    @classmethod
+    def _get_class(cls):
+        return RegexpNormalizer
+
+
+class RegexpNormalizerStripTestCase(RegexpNormalizerTestCase):
+
+    def _get_config(self):
+        return etree.XML('''\
+        <subConfig type="normalizer" id="{0.__name__}">
+            <objectType>cheshire3.normalizer.{0.__name__}</objectType>
+            <options>
+                <setting type="regexp">(?i)spam\\w*</setting>
+            </options>
+        </subConfig>'''.format(self._get_class()))
+
+    @classmethod
+    def _get_process_string_tests(self):
+        return [("spam", ""),
+                ("Some spam email", "Some  email"),  # N.B. double space
+                ("Spammage", ""),
+                ("Eggs", "Eggs")]
+
+    @classmethod
+    def _get_process_hash_tests(self):
+        return []
+
+
+class RegexpNormalizerSubTestCase(RegexpNormalizerTestCase):
+
+    def _get_config(self):
+        return etree.XML('''\
+        <subConfig type="normalizer" id="{0.__name__}">
+            <objectType>cheshire3.normalizer.{0.__name__}</objectType>
+            <docs>Replace all words (alpha only) with "spam"</docs>
+            <options>
+                <setting type="regexp">\\b[a-zA-Z]+?\\b</setting>
+                <setting type="char">spam</setting>
+            </options>
+        </subConfig>'''.format(self._get_class()))
+
+    @classmethod
+    def _get_process_string_tests(self):
+        return [("word", "spam"),
+                ("Some spam email", "spam spam spam"),
+                ("testing 1 2 3", "spam 1 2 3"),
+                ("Cheshire3", "Cheshire3")]
+
+    @classmethod
+    def _get_process_hash_tests(self):
+        return []
+
+
+class RegexpNormalizerKeepTestCase(RegexpNormalizerTestCase):
+
+    def _get_config(self):
+        return etree.XML('''\
+        <subConfig type="normalizer" id="{0.__name__}">
+            <objectType>cheshire3.normalizer.{0.__name__}</objectType>
+            <options>
+                <setting type="regexp">(?i)spam\w*</setting>
+                <setting type="keep">1</setting>
+            </options>
+        </subConfig>'''.format(self._get_class()))
+
+    @classmethod
+    def _get_process_string_tests(self):
+        return [("spam", "spam"),
+                ("Some spam email", "spam"),
+                ("Spammage", "Spammage"),
+                ("Eggs", "")]
+
+    @classmethod
+    def _get_process_hash_tests(self):
+        return []
+
+
+class NamedRegexpNormalizerTestCase(SimpleNormalizerTestCase):
+    
+    @classmethod
+    def _get_class(cls):
+        return NamedRegexpNormalizer
+
+    def _get_config(self):
+        return etree.XML('''\
+        <subConfig type="normalizer" id="{0.__name__}">
+            <objectType>cheshire3.normalizer.{0.__name__}</objectType>
+            <options>
+                <setting type="regexp">(?i)(?P&lt;spamword&gt;spam\\w*)</setting>
+                <setting type="template">--%(spamword)s--</setting>
+            </options>
+        </subConfig>'''.format(self._get_class()))
+
+    def _get_process_string_tests(self):
+        return [("spam", "--spam--"),
+                ("Spammage", "--Spammage--"),
+                ("Eggs", "")]
+
+    def _get_process_hash_tests(self):
+        return []
+
+
+class RegexpFilterKeepNormalizerTestCase(SimpleNormalizerTestCase):
+
+    @classmethod
+    def _get_class(cls):
+        return RegexpFilterNormalizer
+
+    def _get_config(self):
+        return etree.XML('''\
+        <subConfig type="normalizer" id="{0.__name__}">
+            <objectType>cheshire3.normalizer.{0.__name__}</objectType>
+            <options>
+                <setting type="regexp">(?i)spam\\w*?</setting>
+                <setting type="keep">1</setting>
+            </options>
+        </subConfig>'''.format(self._get_class()))
+
+    def _get_process_string_tests(self):
+        return [("spam", "spam"),
+                ("Some spam email", None),
+                ("Spammage", "Spammage"),
+                ("Eggs", None)]
+
+    def _get_process_hash_tests(self):
+        return []
+
+
+class RegexpFilterStripNormalizerTestCase(SimpleNormalizerTestCase):
+
+    @classmethod
+    def _get_class(cls):
+        return RegexpFilterNormalizer
+
+    def _get_config(self):
+        return etree.XML('''\
+        <subConfig type="normalizer" id="{0.__name__}">
+            <objectType>cheshire3.normalizer.{0.__name__}</objectType>
+            <options>
+                <setting type="regexp">(?i)spam\\w*?</setting>
+                <setting type="keep">0</setting>
+            </options>
+        </subConfig>'''.format(self._get_class()))
+
+    @classmethod
+    def _get_process_string_tests(self):
+        return [("spam", None),
+                ("Some spam email", "Some spam email"),
+                ("Spammage", None),
+                ("Eggs", "Eggs")]
+
+    @classmethod
+    def _get_process_hash_tests(self):
+        return []
+
+
+class PossessiveNormalizerTestCase(SimpleNormalizerTestCase):
+    
+    @classmethod
+    def _get_class(cls):
+        return PossessiveNormalizer
+
+    @classmethod
+    def _get_process_string_tests(self):
+        return [("man's", "man"),           # singular possessive
+                ("soldiers'", "soldiers"),  # plural possessive
+                ("women's", "women")]       # irregular plural possessive
+
+    @classmethod
+    def _get_process_hash_tests(self):
+        return []
+
+
+class IntNormalizerTestCase(SimpleNormalizerTestCase):
+
+    @classmethod
+    def _get_class(cls):
+        return IntNormalizer
+
+    @classmethod
+    def _get_process_string_tests(self):
+        return [("1", 1),
+                ("0000000000009", 9),
+                ("123321", 123321)]
+
+    @classmethod
+    def _get_process_hash_tests(self):
+        return []
+
+
+class StringIntNormalizerTestCase(SimpleNormalizerTestCase):
+
+    @classmethod
+    def _get_class(cls):
+        return StringIntNormalizer
+
+    @classmethod
+    def _get_process_string_tests(self):
+        return [(1, "000000000001"),
+                (9, "000000000009"),
+                (123321, "000000123321"),
+                ("spam", None)]
+
+    def _get_process_hash_tests(self):
+        return []
+
+
+class FileAssistedNormalizerTestCase(SimpleNormalizerTestCase):
+    
+    @classmethod
+    def _get_class(cls):
+        return FileAssistedNormalizer
+    
+    @classmethod
+    def _get_fileLines(cls):
+        return []
+
+    def setUp(self):
+        # Create a tempfile for the file assisted part
+        fileid, self.path = mkstemp(text=True)
+        with open(self.path, 'w') as fh:
+            for line in self._get_fileLines():
+                fh.write(line + '\n')
+        SimpleNormalizerTestCase.setUp(self)
+        
+    def tearDown(self):
+        SimpleNormalizerTestCase.tearDown(self)
+        # Remove tempfile
+        os.remove(self.path)
+
+
+class StoplistNormalizerTestCase(FileAssistedNormalizerTestCase):
+
+    @classmethod
+    def _get_class(cls):
+        return StoplistNormalizer
+
+    def _get_config(self):
+        return etree.XML('''\
+        <subConfig type="normalizer" id="{0.__name__}">
+            <objectType>cheshire3.normalizer.{0.__name__}</objectType>
+            <paths>
+                <path type="stoplist">{1}</path>
+            </paths>
+        </subConfig>'''.format(self._get_class(), self.path))
+
+    @classmethod
+    def _get_fileLines(cls):
+        return ["spam",
+                "eggs"]
+
+    @classmethod
+    def _get_process_string_tests(self):
+        return [("spam", None),
+                ("eggs", None),
+                ("ham", "ham"),
+                ("chips", "chips")]
+
+    @classmethod
+    def _get_process_hash_tests(self):
+        return []
+
+
+class TokenExpansionNormalizerTestCase(FileAssistedNormalizerTestCase):
+
+    @classmethod
+    def _get_class(cls):
+        return TokenExpansionNormalizer
+
+    def _get_config(self):
+        return etree.XML('''\
+        <subConfig type="normalizer" id="{0.__name__}">
+            <objectType>cheshire3.normalizer.{0.__name__}</objectType>
+            <paths>
+                <path type="expansions">{1}</path>
+            </paths>
+            <options>
+                <setting type="keepOriginal">1</setting>
+            </options>
+        </subConfig>'''.format(self._get_class(), self.path))
+
+    @classmethod
+    def _get_fileLines(cls):
+        return ["UK United Kingdom",
+                "USA United States of America",
+                "WWF World Wildlife Fund"]
+
+    @classmethod
+    def _get_process_string_tests(self):
+        return [l.split(' ', 1) for l in self._get_fileLines()]
+
+    @classmethod    
+    def _get_process_hash_tests(self):
+        # Check returned hash keeps original token
+        return [
+            ({'UK': {'text': 'UK'}},
+             {'UK': {'text': 'UK'},
+              'United': {'text': 'United'},
+              'Kingdom': {'text': 'Kingdom'}}
+             )]
+
+
+
 def load_tests(loader, tests, pattern):
-    suite = loader.loadTestsFromTestCase(SimpleNormalizerTestCase)
-    suite.addTests(loader.loadTestsFromTestCase(DataExistsNormalizerTestCase))
-    suite.addTests(loader.loadTestsFromTestCase(TermExistsNormalizerTestCase))
-    suite.addTests(loader.loadTestsFromTestCase(TermExistsNormalizerFreqTestCase))
-    suite.addTests(loader.loadTestsFromTestCase(CaseNormalizerTestCase))
-    suite.addTests(loader.loadTestsFromTestCase(ReverseNormalizerTestCase))
+    # Alias loader.loadTestsFromTestCase for sake of line lengths
+    ltc = loader.loadTestsFromTestCase 
+    suite = ltc(SimpleNormalizerTestCase)
+    suite.addTests(ltc(DataExistsNormalizerTestCase))
+    suite.addTests(ltc(TermExistsNormalizerTestCase))
+    suite.addTests(ltc(TermExistsNormalizerFreqTestCase))
+    suite.addTests(ltc(CaseNormalizerTestCase))
+    suite.addTests(ltc(ReverseNormalizerTestCase))
+    suite.addTests(ltc(SpaceNormalizerTestCase))
+    suite.addTests(ltc(ArticleNormalizerTestCase))
+    suite.addTests(ltc(NumericEntityNormalizerTestCase))
+    suite.addTests(ltc(RegexpNormalizerStripTestCase))
+    suite.addTests(ltc(RegexpNormalizerSubTestCase))
+    suite.addTests(ltc(RegexpNormalizerKeepTestCase))
+    suite.addTests(ltc(NamedRegexpNormalizerTestCase))
+    suite.addTests(ltc(RegexpFilterKeepNormalizerTestCase))
+    suite.addTests(ltc(RegexpFilterStripNormalizerTestCase))
+    suite.addTests(ltc(PossessiveNormalizerTestCase))
+    suite.addTests(ltc(IntNormalizerTestCase))
+    suite.addTests(ltc(StringIntNormalizerTestCase))
+    suite.addTests(ltc(StoplistNormalizerTestCase))
+    suite.addTests(ltc(TokenExpansionNormalizerTestCase))
     return suite
 
 
