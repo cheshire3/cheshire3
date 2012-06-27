@@ -26,6 +26,8 @@ def makeObjectFromDom(session, topNode, parentObject):
                 break
     if objectType is None:
         raise(ConfigFileException('No objectType set in config file.'))
+    else:
+        objectType = objectType.strip()
     return buildObject(session, objectType, [topNode, parentObject])
 
 
