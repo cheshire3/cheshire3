@@ -1,4 +1,5 @@
 # Setup file for cheshire3 package
+
 import sys
 import os
 import inspect
@@ -11,18 +12,26 @@ distribute_setup.use_setuptools()
 from setuptools import setup, find_packages
 
 # Check version
-if sys.version_info < (2,6):
-    warn("Python 2.6 or later required, some code may be incompatible with earlier versions.")
+py_version = getattr(sys, 'version_info', (0, 0, 0))
 
+if py_version < (2, 6):
+    warn("Cheshire3 requires Python 2.6 or later; some code may be incompatible with earlier versions.")
+
+# Requirements
+_install_requires = ['lxml >= 2.1', 'zopyx.txng3.ext == 3.3.1']
 # Determine python-dateutil version
-dateutilstr = 'python-dateutil == 1.5' if sys.version_info < (3,0) else 'python-dateutil >= 2.0'
+dateutilstr = 'python-dateutil == 1.5' if py_version < (3, 0) else 'python-dateutil >= 2.0'
+_install_requires.append(dateutilstr)
+if py_version < (2,7):
+    _install_requires.append('argparse')
+    _install_requires.append('unittest2')
 
 # Inspect to find current path
 setuppath = inspect.getfile(inspect.currentframe())
 setupdir = os.path.dirname(setuppath)
 
 _name = u'cheshire3'
-_version = '1.0.0b41'
+_version = '1.0.0b42'
 
 # Read any necessary bits from README.mdown
 try:
@@ -54,11 +63,8 @@ setup(
     package_dir = {'': 'code'},
     include_package_data = True,
     exclude_package_data = {'': ['README.mdown']},
-    requires=['lxml(>=2.1)', 'bsddb', 'dateutil', 'unittest2'],
-    install_requires=['lxml >= 2.1', 
-                      dateutilstr, 
-                      'zopyx.txng3.ext == 3.3.1',
-                      'unittest2'],
+    requires=['lxml(>=2.1)', 'bsddb', 'dateutil', 'argparse'],
+    install_requires=_install_requires,
     dependency_links = [
     	"http://labix.org/python-dateutil"
 	],
@@ -69,6 +75,15 @@ setup(
         'web': ['PyZ3950 >= 2.04']
     },
     test_suite = "cheshire3.test.testAll",
+    entry_points = {
+        'console_scripts': [
+            'cheshire3 = cheshire3.commands.cheshire3_console:main',
+            'cheshire3-init = cheshire3.commands.cheshire3_init:main',
+            'cheshire3-load = cheshire3.commands.cheshire3_load:main',
+            'cheshire3-search = cheshire3.commands.cheshire3_search:main',
+            'cheshire3-serve = cheshire3.commands.cheshire3_serve:main'
+        ],
+    },
     keywords = u"xml document search information retrieval engine data text",
     description = u'Cheshire3 Search and Retrieval Engine and Information Framework',
     long_description = _long_description,
@@ -94,4 +109,3 @@ setup(
     download_url = 'http://www.cheshire3.org/download/{0}/src/{1}-{2}.tar.gz'.format(
     _version[:5], _name, _version)
 )
-

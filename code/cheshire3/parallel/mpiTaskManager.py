@@ -1,5 +1,7 @@
 """MPI based parallel processing."""
 
+from __future__ import absolute_import
+
 import sys
 import time
 import commands

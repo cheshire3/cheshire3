@@ -1,19 +1,45 @@
+"""Cheshire3 Extractor Implementations."""
+
+import re
+import types
+import string
+import copy
+
+from lxml import etree, sax
 
 from cheshire3.baseObjects import Extractor
-
-import re, types, string, copy
+from cheshire3.record import SaxContentHandler
 
 
 class SimpleExtractor(Extractor):
-    """ Base extracter. Extracts exact text """
+    """Base extracter, extracts exact text."""
 
-    _possibleSettings = {'extraSpaceElements' : {'docs' : "Space separated list of elements after which to append a space so as to not run words together."},
-                         'prox' : {'docs' : ''},
-                         'parent' : {"docs" : "Should the parent element's identifier be used instead of the current element."},
-                         'reversable' : {"docs" : "Use a hopefully reversable identifier even when the record is a DOM tree. 1 = Yes (expensive), 0 = No (default)", 'type': int, 'options' : '0|1'},
-                         'stripWhitespace' : {'docs' : 'Should the extracter strip leading/trailing whitespace from extracted text. 1 = Yes, 0 = No (default)', 'type' : int, 'options' : '0|1'},
-                         
-                         }
+    _possibleSettings = {
+        'extraSpaceElements': {
+            'docs': ("Space separated list of elements after which to append "
+                     "a space so as to not run words together.")
+        },
+        'prox': {
+            'docs': ''
+        },
+        'parent': {
+            "docs": ("Should the parent element's identifier be used instead "
+                     "of the current element.")
+        },
+        'reversable': {
+            "docs": ("Use a hopefully reversable identifier even when the "
+                     "record is a DOM tree. 1 = Yes (expensive), 0 = No "
+                     "(default)"),
+            'type': int,
+            'options': '0|1'
+        },
+        'stripWhitespace': {
+            'docs': ('Should the extracter strip leading/trailing whitespace '
+                     'from extracted text. 1 = Yes, 0 = No (default)'),
+            'type': int,
+            'options': '0|1'
+        },
+    }
 
     def __init__(self, session, config, parent):
         Extractor.__init__(self, session, config, parent)
@@ -32,8 +58,7 @@ class SimpleExtractor(Extractor):
         for k in b.iterkeys():
             try:
                 a[k]['occurences'] += b[k]['occurences']
-                try: 
-                    # XXX Is this meaningful? Yes if extractor in chain
+                try:
                     a[k]['positions'].extend(b[k]['positions'])
                 except:
                     try:
@@ -63,7 +88,8 @@ class SimpleExtractor(Extractor):
                 walker = elem.getiterator()
             except AttributeError:
                 # lxml 1.3 or later
-                try: walker = elem.iter()
+                try:
+                    walker = elem.iter()
                 except:
                     # lxml smart string object
                     return elem
@@ -76,13 +102,11 @@ class SimpleExtractor(Extractor):
                     texts.append(c.tail)
                     if c.tag in self.extraSpaceElems:
                         texts.append(' ')
-                
         return ''.join(texts)
 
     def process_string(self, session, data):
-        # Accept just text and extract bits from it.
-        return {data: {'text' : data, 'occurences' : 1, 'proxLoc' : [-1]}}
-
+        """Accept just text and return appropriate data structure."""
+        return {data: {'text': data, 'occurences': 1, 'proxLoc': [-1]}}
 
     def _getProxLocNode(self, session, node):
         try:
@@ -91,17 +115,17 @@ class SimpleExtractor(Extractor):
             # lxml smart string result?
             node = node.getparent()
             tree = node.getroottree()
-            
+
         if self.get_setting(session, 'reversable', 0):
             root = tree.getroot()
-
             if root == self.cachedRoot:
                 lno = self.cachedElems[node]
             else:
                 lno = 0
                 self.cachedRoot = root
                 self.cachedElems = {}
-                try: walker = tree.getiterator()
+                try:
+                    walker = tree.getiterator()
                 except AttributeError:
                     # lxml 1.3 or later
                     walker = tree.iter()
@@ -113,9 +137,8 @@ class SimpleExtractor(Extractor):
             lno = abs(hash(tree.getpath(node)))
         return lno
 
-
     def process_node(self, session, data):
-        # Walk a DOM structure and extract
+        """Walk a DOM structure, extract and return."""
         txt = self._flattenTexts(data)
         # We MUST turn newlines into space or can't index
         txt = txt.replace('\n', ' ')
@@ -126,8 +149,7 @@ class SimpleExtractor(Extractor):
             lno = self._getProxLocNode(session, data)
         else:
             lno = -1
-        return {txt : {'text' : txt, 'occurences' : 1, 'proxLoc' : [lno]}}
-
+        return {txt: {'text': txt, 'occurences': 1, 'proxLoc': [lno]}}
 
     def _getProxLocEventList(self, session, events):
         if (self.get_setting(session, 'parent')):
@@ -137,7 +159,7 @@ class SimpleExtractor(Extractor):
         return lno
 
     def process_eventList(self, session, data):
-        # Step through a SAX event list and extract
+        """Process a list of SAX events serialized in C3 internal format."""
         txt = []
         for e in data:
             if (e[0] == "3"):
@@ -147,22 +169,27 @@ class SimpleExtractor(Extractor):
         txt = ''.join(txt)
         if self.strip:
             txt = self.spaceRe.sub(' ', txt)
-
         if self.get_setting(session, 'prox', 0):
             lno = self._getProxLocEventList(session, data)
         else:
             lno = -1
-        return {txt:{'text' : txt, 'occurences' : 1, 'proxLoc' : [lno]}}
-    
-    
+        return {txt: {'text': txt, 'occurences': 1, 'proxLoc': [lno]}}
+
     def process_xpathResult(self, session, data):
+        """Process the result of an XPath expression.
+
+        Convenience function to wrap the other process_* functions and do type
+        checking.
+        """
         new = {}
         for xp in data:
             for d in xp:
                 if (type(d) == types.ListType):
                     # SAX event
-                    new = self._mergeHash(new, self.process_eventList(session, d))
-                elif (type(d) in types.StringTypes or type(d) in [int, long, float, bool]):
+                    new = self._mergeHash(new,
+                                          self.process_eventList(session, d))
+                elif (type(d) in types.StringTypes or
+                      type(d) in [int, long, float, bool]):
                     # Attribute content
                     new = self._mergeHash(new, self.process_string(session, d))
                 else:
@@ -171,39 +198,42 @@ class SimpleExtractor(Extractor):
         return new
 
 
-from cheshire3.record import SaxContentHandler
-from lxml import etree, sax
-
 class TeiExtractor(SimpleExtractor):
 
-    _possibleSettings = {'imageSections' : {'docs' : 'put in {{ at each new image section', 'type' : int}}
+    _possibleSettings = {
+        'imageSections': {
+            'docs': 'put in {{ at each new image section',
+            'type': int
+        }
+    }
 
     def process_node(self, session, data):
+        """Walk a DOM structure, extract and return.
 
-        # Turn into SAX and process_eventList() for the mean time
+        Turn into SAX and process_eventList() for the mean time.
+        """
         handler = SaxContentHandler()
         sax.saxify(data, handler)
-        saxl= handler.currentText
+        saxl = handler.currentText
         return self.process_eventList(session, saxl)
-    
 
     def process_eventList(self, session, data):
-        # easy to find image sections
+        """Process a list of SAX events serialized in C3 internal format."""
+        # Easy to find image sections
         includeBraces = self.get_setting(session, 'imageSections', 0)
-
-        # Step through a SAX event list and extract
         attrRe = re.compile("u?['\"](.+?)['\"]\)?: u?['\"](.*?)['\"](, |})")
         txt = []
         # None == skip element.  Otherwise fn to call on txt
         processStack = []
+        # Step through a SAX event list and extract
         for e in data:
             if e[0] in ["1", '4']:
                 start = e.find("{")
-                name = e[2:start-1]                
+                name = e[2:start - 1]
                 sp = name.split(',')
                 if len(sp) == 4:
                     name = sp[1][2:-1]
-                if e[start+1] == '}':
+                if e[start + 1] == '}':
                     attrs = {}
                 else:
                     attrList = attrRe.findall(e[start:])
@@ -218,28 +248,30 @@ class TeiExtractor(SimpleExtractor):
                 elif name == "lc":
                     processStack.append((name, string.lower))
                 elif name == "sic":
-                    # replace contents with corr attribute
+                    # Replace contents with corr attribute
                     if 'corr' in attrs:
                         txt.append(attrs['corr'])
                     processStack.append((name, None))
                 elif name == "p":
                     txt.append(' ')
                 elif name == "abbr":
-                    # replace contents with expan attribute
+                    # Replace contents with expan attribute
                     if 'expan' in attrs:
                         txt.append(attrs['expan'])
                     processStack.append((name, None))
                 elif name == "figdesc":
                     processStack.append((name, None))
-            elif (e[0] == "2"):                
-                if processStack and processStack[-1][0] == e[2:len(processStack[-1][0])+2]:
+            elif (e[0] == "2"):
+                if (processStack and
+                    processStack[-1][0] == e[2:len(processStack[-1][0]) + 2]):
                     processStack.pop()
             elif e[0] == '5':
-                if processStack and processStack[-1][0] == e[9:len(processStack[-1][0])+9]:
+                if (processStack and
+                    processStack[-1][0] == e[9:len(processStack[-1][0]) + 9]):
                     processStack.pop()
-                
             elif (e[0] == "3"):
-                if (len(txt) and txt[-1] and txt[-1][-1] != ' ' and repr(e[2]).isalnum()):
+                if (len(txt) and txt[-1] and
+                    txt[-1][-1] != ' ' and repr(e[2]).isalnum()):
                     txt.append(' ')
                 bit = e[2:]
                 if processStack:
@@ -251,17 +283,16 @@ class TeiExtractor(SimpleExtractor):
         txt = ''.join(txt)
         txt = self.spaceRe.sub(' ', txt)
         txt = txt.replace('- ', '')
-        
         if self.get_setting(session, 'prox', 0):
             lno = self._getProxLocEventList(session, data)
         else:
             lno = -1
-        return {txt:{'text' : txt, 'occurences' : 1, 'proxLoc' : [lno]}}
+        return {txt: {'text': txt, 'occurences': 1, 'proxLoc': [lno]}}
 
 
 class SpanXPathExtractor(SimpleExtractor):
-    
-       
+    """Select all text that occurs between a pair of selections."""
+
     def process_xpathResult(self, session, data):
         new = {}
         root = None
@@ -307,5 +338,8 @@ class SpanXPathExtractor(SimpleExtractor):
                 lno = self._getProxLocNode(session, xp[0])
             else:
                 lno = -1
-            new = self._mergeHash(new, {txt : {'text' : txt, 'occurences' : 1, 'proxLoc' : [lno]}})  
+            new = self._mergeHash(new,
+                                  {txt: {'text': txt,
+                                         'occurences': 1,
+                                         'proxLoc': [lno]}})
         return new
