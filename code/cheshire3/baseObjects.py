@@ -974,7 +974,7 @@ class Record(object):
         if self.recordStore is not None:
             return "%s/%s" % (self.recordStore, self.id)            
         else:
-            return "%s-%s" % (str(self.__class__).split('.')[-1], self.id)
+            return "%s-%s" % (self.__class__.__name__, self.id)
 
     def get_dom(self, session):
         """Return the DOM document node for the record."""
