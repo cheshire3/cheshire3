@@ -32,16 +32,26 @@ class Cheshire3ObjectTestCase(unittest.TestCase):
         # Return a parsed config for the object to be tested
         raise NotImplementedError
     
+    def _get_dependencyConfigs(self):
+        # Generator of configs for objects on which this object depends
+        # e.g. an Index may depends on and IndexStore for storage, and
+        # Selectors, Extractors etc.
+        return
+        yield
+    
     def setUp(self):
         self.session = Session()
         serverConfig = os.path.join(cheshire3Root, 'configs', 'serverConfig.xml')
         self.server = SimpleServer(self.session, serverConfig)
+        for config in self._get_dependencyConfigs():
+            identifier = config.get('id')
+            self.server.subConfigs[identifier] = config
         # Disable stdout logging
         lgr = self.server.get_path(self.session, 'defaultLogger')
         lgr.minLevel = 60
         # Create object that will be tested
         config = self._get_config()
-        self.testObj = makeObjectFromDom(self.session, config, None)
+        self.testObj = makeObjectFromDom(self.session, config, self.server)
     
     def tearDown(self):
         pass
