@@ -101,7 +101,10 @@ class ComponentDocumentFactoryTestCase(DocumentFactoryTestCase):
                    )
 
     def test_componentExtraction(self):
+        i = 0
         for rec, expectedDocs in self._get_testDataAndExpected():
+            rec.id = format(i, "d>0")
+            i += 1 
             self.testObj.load(self.session, rec)
             docs = []
             for doc in self.testObj:
@@ -115,21 +118,111 @@ class ComponentDocumentFactoryTestCase(DocumentFactoryTestCase):
                 docstr = doc.get_raw(self.session)
                 self.assertRegexpMatches(
                      docstr,
-                     "<c3:?component.*?>\s+{0}\s+</c3:?component>".format(expected),
+                     "<c3:?component.*?>{0}</c3:?component>".format(expected),
                      )
     
 
 class SpanComponentDocumentFactoryTestCase(ComponentDocumentFactoryTestCase):
     """ComponentDocumentFactory Test Case with SpanXPathSelectors."""
     
+    def _get_dependencyConfigs(self):
+        yield etree.XML('''
+        <subConfig type="selector" id="spanXPath">
+            <objectType>cheshire3.selector.SpanXPathSelector</objectType>
+            <source>
+                <xpath>hr</xpath>
+                <xpath>hr</xpath>
+            </source>
+        </subConfig>''')
+
     def _get_config(self):
         # Return a parsed config for the object to be tested
-        return etree.XML('''\
-        ''')
+        return etree.XML('''
+        <subConfig type="documentFactory" id="componentDocumentFactory">
+          <objectType>
+            cheshire3.documentFactory.ComponentDocumentFactory
+          </objectType>
+          <source>
+            <xpath ref="spanXPath" />
+          </source>
+          <options>
+            <setting type="keepStart">0</setting>
+            <setting type="keepEnd">0</setting>
+            <default type="cache">0</default>
+            <default type="format">component</default>
+            <default type="codec">utf-8</default>
+          </options>
+        </subConfig>''')
 
+    def _get_testDataAndExpected(self):
+        # Simple example
+        yield (LxmlRecord(etree.XML("""
+        <div>
+            <hr/>
+            <p>
+                Some text.
+            </p>
+            <hr/>
+        </div>""")), ["""
+            <p>
+                Some text.
+            </p>"""])
+        # Simple example with tail text
+        yield (LxmlRecord(etree.XML("""
+        <div>
+            <hr/>
+            <p>
+                Some text.
+            </p> With tail text.
+            <hr/>
+        </div>""")), ["""
+            <p>
+                Some text.
+            </p> With tail text.
+        """])
+        # Example where endNode is not a sibling of startNode
+        # Tail text should be excluded now
+        yield (LxmlRecord(etree.XML("""
+        <div>
+            <hr/>
+            <p>
+                Some text.
+                <hr/>
+            </p> With tail text
+        </div>""")), ["""
+            <p>
+                Some text.
+            </p>
+        """])
+        # Example where endNode is sibling of startNode ancestor
+        yield (LxmlRecord(etree.XML("""
+        <div>
+            <p>Some text.
+               <hr/>
+            </p> With tail text
+            <hr/>
+        </div>""")), ["""
+            <p></p> With tail text
+        """])
+        # Namespaced example
+        yield (LxmlRecord(etree.XML("""
+        <div xmlns="http.cheshire3.org/schemas/tests">
+            <hr/>
+            <p>
+                Some text.
+            </p>
+            <hr/>
+        </div>""")), ["""
+            <p>
+                Some text.
+            </p>"""])
+        
 
 def load_tests(loader, tests, pattern):
-    suite = loader.loadTestsFromTestCase(ComponentDocumentFactoryTestCase)
+    # Alias loader.loadTestsFromTestCase for sake of line lengths
+    ltc = loader.loadTestsFromTestCase
+    suite = ltc(ComponentDocumentFactoryTestCase)
+    suite.addTests(ltc(SpanComponentDocumentFactoryTestCase))
     return suite
 
 
