@@ -32,6 +32,11 @@ class NormalizerTestCase(Cheshire3ObjectTestCase):
     """Base Class for Cheshire3 Normalizer Test Cases.."""
     
     @classmethod
+    @classmethod
+    def _get_class(cls):
+        return Normalizer
+    
+    @classmethod
     def _get_process_string_tests(self):
         # Return a list of 2-string tuples containing test pairs:
         # (string to be normalized, expected result)
@@ -51,9 +56,6 @@ class NormalizerTestCase(Cheshire3ObjectTestCase):
     def tearDown(self):
         pass
         
-    def test_instance(self):
-        self.assertIsInstance(self.testObj, Normalizer)
-
     def test_process_string(self):
         "Test output of process_string."
         if not self.process_string_tests:
@@ -114,9 +116,6 @@ class SimpleNormalizerTestCase(NormalizerTestCase):
                       }
               })]
         
-    def test_instance(self):
-        self.assertIsInstance(self.testObj, SimpleNormalizer)
-    
 
 class DataExistsNormalizerTestCase(SimpleNormalizerTestCase):
     
@@ -142,9 +141,6 @@ class DataExistsNormalizerTestCase(SimpleNormalizerTestCase):
              {"1": {"text": "1", "occurences": 3},
               "0": {"text": "0", "occurences": 10}
               })]
-        
-    def test_instance(self):
-        self.assertIsInstance(self.testObj, DataExistsNormalizer)
         
         
 class TermExistsNormalizerTestCase(SimpleNormalizerTestCase):
@@ -188,9 +184,6 @@ class TermExistsNormalizerTestCase(SimpleNormalizerTestCase):
             output = self.testObj.process_hash(self.session, inhash)
             self.assertEqual(output, expected)
             
-    def test_instance(self):
-        self.assertIsInstance(self.testObj, TermExistsNormalizer)
-        
         
 class TermExistsNormalizerFreqTestCase(TermExistsNormalizerTestCase):
 
@@ -225,13 +218,10 @@ class TermExistsNormalizerFreqTestCase(TermExistsNormalizerTestCase):
 
 class CaseNormalizerTestCase(SimpleNormalizerTestCase):
     
-    def _get_config(self):
-        return etree.XML('''\
-<subConfig type="normalizer" id="DataExistsNormalizer">
-    <objectType>cheshire3.normalizer.CaseNormalizer</objectType>
-</subConfig>
-''')
-
+    @classmethod
+    def _get_class(cls):
+        return CaseNormalizer
+    
     @classmethod
     def _get_process_string_tests(self):
         return [
@@ -257,9 +247,6 @@ class CaseNormalizerTestCase(SimpleNormalizerTestCase):
                 "baz": {"text": "baz", "occurences": 10}
              })
         ]
-    
-    def test_instance(self):
-        self.assertIsInstance(self.testObj, CaseNormalizer)
 
 
 class ReverseNormalizerTestCase(SimpleNormalizerTestCase):
@@ -280,9 +267,6 @@ class ReverseNormalizerTestCase(SimpleNormalizerTestCase):
     @classmethod
     def _get_process_hash_tests(self):
         return []
-
-    def test_instance(self):
-        self.assertIsInstance(self.testObj, ReverseNormalizer)
 
 
 class SpaceNormalizerTestCase(SimpleNormalizerTestCase):

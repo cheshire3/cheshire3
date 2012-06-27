@@ -48,10 +48,6 @@ class ParserTestCase(Cheshire3ObjectTestCase):
     def tearDown(self):
         pass
 
-    def test_instance(self):
-        "Check that Parser is an instance of expected class"
-        self.assertIsInstance(self.testObj, self._get_class())
-
     def test_process_document_returnType(self):
         "Check that Base Class raises NotImplementedError."
         self.assertRaises(NotImplementedError, 
@@ -244,7 +240,7 @@ class MinidomParserTestCase(XmlParserTestCase):
 
 def load_tests(loader, tests, pattern):
     # Alias loader.loadTestsFromTestCase for sake of line lengths
-    ltc = loader.loadTestsFromTestCase 
+    ltc = loader.loadTestsFromTestCase
     suite = ltc(ParserTestCase)
     suite.addTests(ltc(SaxParserTestCase))
     suite.addTests(ltc(NsSaxParserTestCase))

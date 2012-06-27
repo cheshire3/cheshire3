@@ -30,10 +30,6 @@ class SimpleQueryFactoryTestCase(Cheshire3ObjectTestCase):
             <objectType>cheshire3.queryFactory.{0.__name__}</objectType>
         </subConfig>'''.format(self._get_class()))
 
-    def test_instance(self):
-        "Check that instance correctly initialized."
-        self.assertIsInstance(self.testObj, self._get_class())
-
     def test_get_query_invalid(self):
         "Check that invalid/non-well-formed CQL raises appropriate Diagnostic."
         self.assertRaises(Diagnostic,

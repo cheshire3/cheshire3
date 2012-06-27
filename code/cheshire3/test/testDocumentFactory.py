@@ -20,9 +20,22 @@ ComponentDocumentFactory
 from cheshire3.test.testConfigParser import Cheshire3ObjectTestCase
 
 
-class SimpleDocumentFactoryTestCase(Cheshire3ObjectTestCase):
+class DocumentFactoryTestCase(Cheshire3ObjectTestCase):
+    
+    def _get_testData(self):
+        return []
+
+    def test_load(self):
+        # Test that load method of an instance returns the instance
+        for data in self._get_testData():
+            thing = self.testObj.load(self.session, data)
+            self.assertIsInstance(thing, self._get_class())
+
+
+class SimpleDocumentFactoryTestCase(DocumentFactoryTestCase):
     """Cheshire3 SimpleDocumentFactory Test Case."""
     
+    @classmethod
     def _get_class(self):
         return SimpleDocumentFactory
     
@@ -31,18 +44,6 @@ class SimpleDocumentFactoryTestCase(Cheshire3ObjectTestCase):
 <subConfig type="documentFactory" id="baseDocumentFactory">
     <objectType>cheshire3.documentFactory.{0}</objectType>
 </subConfig>'''.format(self._get_class().__name__))
-        
-    def _get_testData(self):
-        return []
-        
-    def test_instance(self):
-        self.assertIsInstance(self.testObj, self._get_class())
-    
-    def test_load(self):
-        # Test that load method of an instance returns the instance
-        for data in self._get_testData():
-            thing = self.testObj.load(self.session, data)
-            self.assertIsInstance(thing, self._get_class())
         
 
 class ComponentDocumentFactoryTestCase(DocumentFactoryTestCase):

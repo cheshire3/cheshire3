@@ -10,7 +10,7 @@ except ImportError:
 import string
 
 from cheshire3.baseObjects import Session
-from cheshire3.configParser import CaselessDictionary
+from cheshire3.configParser import C3Object, CaselessDictionary
 from cheshire3.dynamic import makeObjectFromDom
 from cheshire3.internal import cheshire3Root
 from cheshire3.server import SimpleServer
@@ -22,6 +22,11 @@ class Cheshire3ObjectTestCase(unittest.TestCase):
     Almost all objects in Cheshire3 require a Session, and a server as its 
     parent, so create these now.
     """
+
+    @classmethod
+    def _get_class(cls):
+        # Return class of object to test
+        return C3Object
     
     def _get_config(self):
         # Return a parsed config for the object to be tested
@@ -42,7 +47,12 @@ class Cheshire3ObjectTestCase(unittest.TestCase):
         pass
     
     def test_serverInstance(self):
+        "Check test case's Session instance."
         self.assertIsInstance(self.server, SimpleServer)
+        
+    def test_instance(self):
+        "Check that C3Object is an instance of the expected class."
+        self.assertIsInstance(self.testObj, self._get_class())
         
 
 class CaselessDictionaryTestCase(unittest.TestCase):

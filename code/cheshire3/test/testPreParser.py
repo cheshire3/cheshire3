@@ -57,10 +57,6 @@ class PreParserTestCase(Cheshire3ObjectTestCase):
         
     def tearDown(self):
         pass
-        
-    def test_instance(self):
-        "Check that PreParser is an instance of expected class"
-        self.assertIsInstance(self.testObj, self._get_class())
 
     def test_process_document_returnType(self):
         "Check that Base Class raises NotImplementedError."
