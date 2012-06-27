@@ -17,6 +17,7 @@ from lxml import etree
 
 from cheshire3.documentFactory import SimpleDocumentFactory, \
 ComponentDocumentFactory
+from cheshire3.record import LxmlRecord
 from cheshire3.test.testConfigParser import Cheshire3ObjectTestCase
 
 
@@ -49,26 +50,73 @@ class SimpleDocumentFactoryTestCase(DocumentFactoryTestCase):
 class ComponentDocumentFactoryTestCase(DocumentFactoryTestCase):
     """ComponentDocumentFactory Test Case with simple XPath selectors."""
     
+    @classmethod
     def _get_class(self):
         return ComponentDocumentFactory
     
     def _get_config(self):
         # Return a parsed config for the object to be tested
         return etree.XML('''\
-<subConfig type="documentFactory" id="componentDocumentFactory">
+<subConfig type="documentFactory" id="{0}">
     <objectType>cheshire3.documentFactory.{0}</objectType>
     <source>
-      <xpath>bar</xpath>
-      <xpath>baz</xpath>
+      <xpath>meal</xpath>
     </source>
     <options>
         <default type="cache">0</default>
         <default type="format">component</default>
     </options>
 </subConfig>'''.format(self._get_class().__name__))
+        
+    def _get_testData(self):
+        yield LxmlRecord(etree.XML("""
+        <menu>
+            <meal>
+                <egg/>
+                <bacon/>
+            </meal>
+            <meal>
+                <egg/>
+                <sausage/>
+                <bacon/>
+            </meal>
+            <meal>
+                <egg/>
+                <spam/>
+            </meal>
+            <meal>
+                <egg/>
+                <bacon/>
+                <spam/>
+            </meal>
+        </menu>
+        """))
+    
+    def _get_testDataAndExpected(self):
+        for rec in self._get_testData():
+            yield (rec,
+                   [etree.tostring(el)
+                    for el in
+                    rec.process_xpath(self.session, 'meal')]
+                   )
 
     def test_componentExtraction(self):
-        pass
+        for rec, expectedDocs in self._get_testDataAndExpected():
+            self.testObj.load(self.session, rec)
+            docs = []
+            for doc in self.testObj:
+                docs.append(doc)
+            # Check expected number of Documents generated
+            self.assertEqual(len(expectedDocs),
+                             len(docs),
+                             "Number of generated docs ({0}) not as expected"
+                             " ({1})".format(len(docs), len(expectedDocs)))
+            for doc, expected in zip(docs, expectedDocs):
+                docstr = doc.get_raw(self.session)
+                self.assertRegexpMatches(
+                     docstr,
+                     "<c3:?component.*?>\s+{0}\s+</c3:?component>".format(expected),
+                     )
     
 
 class SpanComponentDocumentFactoryTestCase(ComponentDocumentFactoryTestCase):
