@@ -59,7 +59,7 @@ class SimpleQueryFactoryTestCase(Cheshire3ObjectTestCase):
         query = self.testObj.get_query(
                    self.session,
                    u'cql.anywhere all/cql.stem/rel.algorithm=okapi "spam"')
-        self.assert_(len(query.relation.modifiers))
+        self.assertTrue(len(query.relation.modifiers))
         for mod in query.relation.modifiers:
             self.assertIsInstance(mod, ModifierClause)
         self.assertEqual(str(query.relation.modifiers[0].type),
@@ -99,7 +99,7 @@ class SimpleQueryFactoryTestCase(Cheshire3ObjectTestCase):
                                        u"cql.anywhere all spam"
                                        u" and/rel.combine=sum "
                                        u"cql.anywhere all eggs")
-        self.assert_(len(query.boolean.modifiers))
+        self.assertTrue(len(query.boolean.modifiers))
         for mod in query.boolean.modifiers:
             self.assertIsInstance(mod, ModifierClause)
         self.assertEqual(str(query.boolean.modifiers[0].type),
