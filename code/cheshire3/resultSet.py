@@ -1128,7 +1128,7 @@ class BitmapResultSet(ResultSet):
     bitfield = None
     currItems = None
     recordStore = None
-
+    fromStore = 0
     relevancy = 0
     termid = -1
     totalOccs = 0
