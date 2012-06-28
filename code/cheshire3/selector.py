@@ -178,7 +178,13 @@ class SpanXPathSelector(SimpleSelector):
     def process_record(self, session, record):
         vals = []
         startPath = self.sources[0][0]['string']
+        if not startPath.startswith('/'):
+            # Not absolute path, prepend //
+            startPath = '//{0}'.format(startPath)
         endPath = self.sources[0][1]['string']
+        if not endPath.startswith('/'):
+            # Not absolute path, prepend //
+            endPath = '//{0}'.format(endPath)
         if isinstance(record, LxmlRecord):
             # Avoid unnecessary re-parsing
             tree = record.get_dom(session)
