@@ -178,10 +178,12 @@ class SpanXPathSelector(SimpleSelector):
     def process_record(self, session, record):
         vals = []
         startPath = self.sources[0][0]['string']
+        startMaps = self.sources[0][0]['maps']
         if not startPath.startswith('/'):
             # Not absolute path, prepend //
             startPath = '//{0}'.format(startPath)
         endPath = self.sources[0][1]['string']
+        endMaps = self.sources[0][1]['maps']
         if not endPath.startswith('/'):
             # Not absolute path, prepend //
             endPath = '//{0}'.format(endPath)
@@ -192,7 +194,7 @@ class SpanXPathSelector(SimpleSelector):
             # Parse to an lxml.etree
             tree = etree.fromstring(record.get_xml(session))
         # Find all of the start nodes
-        startNodes = tree.xpath(startPath)
+        startNodes = tree.xpath(startPath, namespaces=startMaps)
         # Initialize empty startEndPair
         startEndPair = (None, None)
         if startPath == endPath:
@@ -226,7 +228,7 @@ class SpanXPathSelector(SimpleSelector):
             # as an end tag, this does not
             #
             # Find all the end nodes
-            endNodes = tree.xpath(endPath)
+            endNodes = tree.xpath(endPath, namespaces=endMaps)
             for elem in tree.iter():
                 if elem in startNodes:
                     # When we hit a node from the start node list
