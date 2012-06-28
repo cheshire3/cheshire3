@@ -23,7 +23,8 @@ from cheshire3.normalizer import Normalizer, SimpleNormalizer, \
     NumericEntityNormalizer, RegexpNormalizer, NamedRegexpNormalizer,\
     IntNormalizer, StringIntNormalizer,\
     StoplistNormalizer, TokenExpansionNormalizer,\
-    RegexpFilterNormalizer, PossessiveNormalizer, FileAssistedNormalizer
+    RegexpFilterNormalizer, PossessiveNormalizer, FileAssistedNormalizer,\
+    StemNormalizer, PhoneticNormalizer
     
 from cheshire3.test.testConfigParser import Cheshire3ObjectTestCase
 
@@ -561,6 +562,70 @@ class TokenExpansionNormalizerTestCase(FileAssistedNormalizerTestCase):
              )]
 
 
+class EnglishStemNormalizerTestCase(SimpleNormalizerTestCase):
+
+    @classmethod
+    def _get_class(cls):
+        return StemNormalizer
+
+    def _get_config(self):
+        return etree.XML('''
+        <subConfig type="normalizer" id="EnglishStemNormalizer">
+            <objectType>cheshire3.normalizer.{0.__name__}</objectType>
+            <options>
+                <setting type="language">english</setting>
+            </options>
+        </subConfig>'''.format(self._get_class()))
+
+    def _get_process_string_tests(self):
+        return [('nurse', 'nurs'),
+                ('nurses', 'nurs'),
+                ('nursing', 'nurs'),
+                ('nursery', 'nurseri')
+                ]
+
+
+class PhoneticNormalizerTestCase(SimpleNormalizerTestCase):
+
+    @classmethod
+    def _get_class(cls):
+        return PhoneticNormalizer
+
+    def _get_process_string_tests(self):
+        return [('bacon', 'b25'),
+                ('egg', 'e2'),
+                ('sausage', 's22'),
+                ('spam', 's15'),
+                ('antidisestablishmentarianism', 'a5332231425536525')]
+
+    def test_process_string_resultTermSizes(self):
+        maxLen = self.testObj.get_setting(self.session, 'termSize')
+        if not maxLen:
+            self.skipTest("No termSize setting on object configuration")
+        for instring, expected in self.process_string_tests:
+            output = self.testObj.process_string(self.session, instring)
+            self.assertLessEqual(len(output), maxLen)
+
+
+class FivePhoneticNormalizerTestCase(PhoneticNormalizerTestCase):
+
+    def _get_config(self):
+        return etree.XML('''
+         <subConfig type="normalizer" id="PhoneticNormalizer">
+            <objectType>cheshire3.normalizer.{0.__name__}</objectType>
+            <options>
+                <setting type="termSize">5</setting>
+            </options>
+        </subConfig>'''.format(self._get_class()))
+
+    def _get_process_string_tests(self):
+        return [('bacon', 'b2500'),
+                ('egg', 'e2000'),
+                ('sausage', 's2200'),
+                ('spam', 's1500'),
+                ('antidisestablishmentarianism',
+                 'a5332')]
+
 
 def load_tests(loader, tests, pattern):
     # Alias loader.loadTestsFromTestCase for sake of line lengths
@@ -585,6 +650,9 @@ def load_tests(loader, tests, pattern):
     suite.addTests(ltc(StringIntNormalizerTestCase))
     suite.addTests(ltc(StoplistNormalizerTestCase))
     suite.addTests(ltc(TokenExpansionNormalizerTestCase))
+    suite.addTests(ltc(EnglishStemNormalizerTestCase))
+    suite.addTests(ltc(PhoneticNormalizerTestCase))
+    suite.addTests(ltc(FivePhoneticNormalizerTestCase))
     return suite
 
 
