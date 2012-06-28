@@ -647,6 +647,58 @@ class ComponentDocumentStream(BaseDocumentStream):
 
     def open_stream(self, stream):
         return stream
+    
+    def _make_startTag(self, element, addText=True):
+        # Return a string representing the start tag for this element
+        if not isinstance(element, etree._Element):
+            raise TypeError("called _make_startTag on non-etree element")
+        if addText and element.text:
+            text = element.text
+        else:
+            text = ""
+        # Serialize attributes
+        attrs = ' '.join(['%s="%s"' % x
+                          for x in element.attrib.items()])
+        if attrs:
+            attrs = ' ' + attrs
+        if element.nsmap:
+            ns = element.tag[1:element.tag.find('}') + 1]
+            tag = element.tag[element.tag.find('}') + 1:]
+            for prefix, namespace in element.nsmap.iteritems():
+                if ns == namespace:
+                    break
+            if prefix is None:
+                return "<{0}{1}>{2}".format(tag, attrs, text)
+            else:
+                return "<{0}:{1}{2}>{3}".format(prefix, tag, attrs, text)
+        else:
+            return "<{0}{1}>{2}".format(element.tag,
+                                        attrs,
+                                        text
+                                        )
+    
+    def _make_endTag(self, element, addTail=True):
+        # Return a string representing the end tag for this element
+        if not isinstance(element, etree._Element):
+            raise TypeError("called _make_endTag on non-etree element")
+        if addTail and element.tail:
+            tail = element.tail
+        else:
+            tail = ""
+        if element.nsmap:
+            ns = element.tag[1:element.tag.find('}') + 1]
+            tag = element.tag[element.tag.find('}') + 1:]
+            for prefix, namespace in element.nsmap.iteritems():
+                if ns == namespace:
+                    break
+            if prefix is None:
+                return "</{0}>{1}".format(tag, tail)
+            else:
+                return "</{0}:{1}>{2}".format(prefix, tag, tail)
+        else:
+            return "</{0}>{1}".format(element.tag,
+                                        tail
+                                        )
 
     def find_documents(self, session, cache=0):
         # Should extract records by xpath or span and store as X/SGML
@@ -661,26 +713,91 @@ class ComponentDocumentStream(BaseDocumentStream):
                 if (isinstance(xp, tuple) and 
                     len(xp) == 2 and 
                     isinstance(xp[0], etree._Element)):
-                    # Result of a SpanXPathSelector (startNoe, endNode)
-                    r = xp[0]
-                    doc = [etree.tostring(r)]
-                    for x in r.itersiblings():
-                        if x == xp[1]:
+                    # Result of a SpanXPathSelector: (startNode, endNode)
+                    startNode, endNode = xp
+                    # Find common ancestor
+                    sancs = list(startNode.iterancestors())
+                    eancs = list(endNode.iterancestors())
+                    # Common ancestor must exist in the shorter of the 2 lists
+                    # Trim both to this size
+                    sancs.reverse()
+                    eancs.reverse()
+                    minlen = min(len(sancs), len(eancs))
+                    sancs = sancs[:minlen]
+                    eancs = eancs[:minlen]
+                    # Iterate through both, simultaneously
+                    for sanc, eanc in zip(sancs, eancs):
+                        if sanc == eanc:
+                            common_ancestor = sanc
                             break
-                        else:
-                            doc.append(etree.tostring(x))
+                    # Should include start and end tags
+                    includeStartTag = self.factory.get_setting(session,
+                                                               "keepStart",
+                                                               1)
+                    includeEndTag = self.factory.get_setting(session,
+                                                             "keepEnd",
+                                                             1)
+                    recording = False
+                    doc = []
+                    open = []
+                    closed = []
+                    # Walk events (start element, end element etc.)
+                    for evt, el in etree.iterwalk(common_ancestor,
+                                                  events=('start', 'end',
+                                                          'start-ns',
+                                                          'end-ns')):
+                        if (el == startNode and not recording):
+                            if (includeStartTag and
+                                evt in ['start', 'start-ns']):
+                                recording = True
+                            elif (not includeStartTag and 
+                                  evt in ['end', 'end-ns']):
+                                # No start node
+                                # Append tail and skip to next node
+                                recording = True
+                                if el.tail:
+                                    doc.append(el.tail)
+                                continue
+                        elif (el == endNode and 
+                              evt in ['start', 'start-ns']):
+                            if includeEndTag:
+                                doc.append(self._make_startTag(el))
+                                doc.append(self._make_endTag(el,
+                                                             addTail=False))
+                            break
+                        if recording and isinstance(el.tag, str):
+                            if evt in ['start', 'start-ns']:
+                                doc.append(self._make_startTag(el))
+                                open.append(el)
+                            else:
+                                doc.append(self._make_endTag(el))
+                                if el in open:
+                                    open.remove(el)
+                                else:
+                                    closed.append(el)
+                    # Close open things
+                    open.reverse()
+                    for el in open:
+                        doc.append(self._make_endTag(el, addTail=False))
+                    # Open closed things
+                    for el in closed:
+                        doc.insert(0, self._make_startTag(el, addText=False))
                     docstr = ''.join(doc)
+                    r = startNode
                     tree = r.getroottree()
                     path = tree.getpath(r)
                     if (r.nsmap):
                         namespaceList = []
                         for (pref, ns) in r.nsmap.iteritems():
-                            namespaceList.append("xmlns:%s=\"%s\"" % (pref, 
-                                                                      ns))
+                            if pref is None:
+                                namespaceList.append("xmlns=\"%s\"" % (ns))
+                            else:
+                                namespaceList.append("xmlns:%s=\"%s\"" % (pref, 
+                                                                          ns))
                         namespaces = " ".join(namespaceList)
                         docstr = """\
 <c3:component xmlns:c3="http://www.cheshire3.org/schemas/component/" \
-%s parent="%r" xpath="%s">%s</c3component>""" % (namespaces,
+%s parent="%r" xpath="%s">%s</c3:component>""" % (namespaces,
                                                  rec,
                                                  path,
                                                  docstr)
@@ -930,6 +1047,23 @@ for (k, v) in streamHash.items():
 
 
 class ComponentDocumentFactory(SimpleDocumentFactory):
+
+    _possibleSettings = {
+        'keepStart': {
+            'docs': ("Should the factory include the starting element of the "
+                     "selected span component in the output Document. "
+                     "Default: yes"),
+            'type': int,
+            'options': "0|1"
+        },
+        'keepEnd': {
+            'docs': ("Should the factory include the ending element of the "
+                     "selected span component in the output Document. "
+                     "Default: yes"),
+            'type': int,
+            'options': "0|1"
+        },
+    }
 
     def _handleConfigNode(self, session, node):
         # Source
