@@ -32,21 +32,31 @@ class NormalizerTestCase(Cheshire3ObjectTestCase):
     """Base Class for Cheshire3 Normalizer Test Cases.."""
     
     @classmethod
-    @classmethod
     def _get_class(cls):
         return Normalizer
     
-    @classmethod
     def _get_process_string_tests(self):
         # Return a list of 2-string tuples containing test pairs:
         # (string to be normalized, expected result)
         return []
     
-    @classmethod
     def _get_process_hash_tests(self):
         # Return a list of 2-dictionary tuples containing test pairs:
         # (dictionary to be normalized, expected result)
-        return []
+        for instring, expected in self.process_string_tests:
+            if expected is not None and expected:
+                yield ({instring: {'text': instring, 
+                                   'occurences': 1, 
+                                   'positions': [0, 0, 0], 
+                                   'proxLoc': [-1]
+                                   }
+                       },
+                       {expected: {'text': expected,
+                                   'occurences': 1, 
+                                   'positions': [0, 0, 0], 
+                                   'proxLoc': [-1]
+                                   }
+                        })
         
     def setUp(self):
         Cheshire3ObjectTestCase.setUp(self)
@@ -93,29 +103,12 @@ class SimpleNormalizerTestCase(NormalizerTestCase):
           <objectType>cheshire3.normalizer.{0.__name__}</objectType>
         </subConfig>'''.format(self._get_class()))
     
-    @classmethod
     def _get_process_string_tests(self):
         return [
             (string.uppercase, string.uppercase),
             (string.lowercase, string.lowercase),
             (string.punctuation, string.punctuation)]
 
-    @classmethod    
-    def _get_process_hash_tests(self):
-        return [
-            ({'foo': {'text': 'foo', 
-                      'occurences': 1, 
-                      'positions': [0, 0, 0], 
-                      'proxLoc': [-1]
-                      }
-              },
-             {'foo': {'text': 'foo', 
-                      'occurences': 1, 
-                      'positions': [0, 0, 0], 
-                      'proxLoc': [-1]
-                      }
-              })]
-        
 
 class DataExistsNormalizerTestCase(SimpleNormalizerTestCase):
     
@@ -123,7 +116,6 @@ class DataExistsNormalizerTestCase(SimpleNormalizerTestCase):
     def _get_class(cls):
         return DataExistsNormalizer
 
-    @classmethod    
     def _get_process_string_tests(self):
         return [
             (string.uppercase, "1"),
@@ -131,7 +123,6 @@ class DataExistsNormalizerTestCase(SimpleNormalizerTestCase):
             (string.punctuation, "1"),
             ("", "0")]
 
-    @classmethod
     def _get_process_hash_tests(self):
         return [
             ({"foo": {"text": "foo", "occurences": 1},
@@ -158,7 +149,6 @@ class TermExistsNormalizerTestCase(SimpleNormalizerTestCase):
             </options>
         </subConfig>'''.format(self._get_class()))
 
-    @classmethod
     def _get_process_string_tests(self):
         return [
             ('foo', "1"),
@@ -166,7 +156,6 @@ class TermExistsNormalizerTestCase(SimpleNormalizerTestCase):
             ('baz', "0")
         ]
 
-    @classmethod
     def _get_process_hash_tests(self):
         return [
             ({
@@ -197,14 +186,12 @@ class TermExistsNormalizerFreqTestCase(TermExistsNormalizerTestCase):
             </options>
         </subConfig>'''.format(self._get_class()))
 
-    @classmethod
     def _get_process_string_tests(self):
         return [
             ('foo', "1"),
             ('bar', "1"),
             ('baz', "0")]
 
-    @classmethod
     def _get_process_hash_tests(self):
         return[
             ({
@@ -222,7 +209,6 @@ class CaseNormalizerTestCase(SimpleNormalizerTestCase):
     def _get_class(cls):
         return CaseNormalizer
     
-    @classmethod
     def _get_process_string_tests(self):
         return [
             ("FooBar", "foobar"),
@@ -231,7 +217,6 @@ class CaseNormalizerTestCase(SimpleNormalizerTestCase):
             (string.punctuation, string.punctuation)
         ]
 
-    @classmethod
     def _get_process_hash_tests(self):
         return [
             ({
@@ -255,7 +240,6 @@ class ReverseNormalizerTestCase(SimpleNormalizerTestCase):
     def _get_class(cls):
         return ReverseNormalizer
 
-    @classmethod
     def _get_process_string_tests(self):
         return [
             ("foo", "oof"),
@@ -264,10 +248,6 @@ class ReverseNormalizerTestCase(SimpleNormalizerTestCase):
             ("A", "A")
         ]
 
-    @classmethod
-    def _get_process_hash_tests(self):
-        return []
-
 
 class SpaceNormalizerTestCase(SimpleNormalizerTestCase):
 
@@ -275,7 +255,6 @@ class SpaceNormalizerTestCase(SimpleNormalizerTestCase):
     def _get_class(cls):
         return SpaceNormalizer
 
-    @classmethod
     def _get_process_string_tests(self):
         return [
             ("This  is a       spacey sentence.",
@@ -298,10 +277,6 @@ class SpaceNormalizerTestCase(SimpleNormalizerTestCase):
             )
         ]
 
-    @classmethod
-    def _get_process_hash_tests(self):
-        return []
-
 
 class ArticleNormalizerTestCase(SimpleNormalizerTestCase):
 
@@ -309,7 +284,6 @@ class ArticleNormalizerTestCase(SimpleNormalizerTestCase):
     def _get_class(cls):
         return ArticleNormalizer
 
-    @classmethod
     def _get_process_string_tests(self):
         return [("The spam", "spam"),
                 ("the spam", "spam"),
@@ -318,10 +292,6 @@ class ArticleNormalizerTestCase(SimpleNormalizerTestCase):
                 ("A chip", "chip"),
                 ("a chip", "chip")]
 
-    @classmethod
-    def _get_process_hash_tests(self):
-        return []
-
 
 class NumericEntityNormalizerTestCase(SimpleNormalizerTestCase):
 
@@ -329,17 +299,12 @@ class NumericEntityNormalizerTestCase(SimpleNormalizerTestCase):
     def _get_class(cls):
         return NumericEntityNormalizer
 
-    @classmethod
     def _get_process_string_tests(self):
         return [(u'\xa3', "&#163;"),   # GBP sign
                 (u'\xa9', "&#169;"),   # Copyright
                 (u'\xe9', "&#233;"),   # Lower-case e with acute accent
                 (u'\xe6', "&#230;"),   # Lower case ae dipthong
                 ]
-
-    @classmethod
-    def _get_process_hash_tests(self):
-        return []
 
 
 class RegexpNormalizerTestCase(SimpleNormalizerTestCase):
@@ -360,16 +325,11 @@ class RegexpNormalizerStripTestCase(RegexpNormalizerTestCase):
             </options>
         </subConfig>'''.format(self._get_class()))
 
-    @classmethod
     def _get_process_string_tests(self):
         return [("spam", ""),
                 ("Some spam email", "Some  email"),  # N.B. double space
                 ("Spammage", ""),
                 ("Eggs", "Eggs")]
-
-    @classmethod
-    def _get_process_hash_tests(self):
-        return []
 
 
 class RegexpNormalizerSubTestCase(RegexpNormalizerTestCase):
@@ -385,16 +345,11 @@ class RegexpNormalizerSubTestCase(RegexpNormalizerTestCase):
             </options>
         </subConfig>'''.format(self._get_class()))
 
-    @classmethod
     def _get_process_string_tests(self):
         return [("word", "spam"),
                 ("Some spam email", "spam spam spam"),
                 ("testing 1 2 3", "spam 1 2 3"),
                 ("Cheshire3", "Cheshire3")]
-
-    @classmethod
-    def _get_process_hash_tests(self):
-        return []
 
 
 class RegexpNormalizerKeepTestCase(RegexpNormalizerTestCase):
@@ -409,16 +364,11 @@ class RegexpNormalizerKeepTestCase(RegexpNormalizerTestCase):
             </options>
         </subConfig>'''.format(self._get_class()))
 
-    @classmethod
     def _get_process_string_tests(self):
         return [("spam", "spam"),
                 ("Some spam email", "spam"),
                 ("Spammage", "Spammage"),
                 ("Eggs", "")]
-
-    @classmethod
-    def _get_process_hash_tests(self):
-        return []
 
 
 class NamedRegexpNormalizerTestCase(SimpleNormalizerTestCase):
@@ -441,9 +391,6 @@ class NamedRegexpNormalizerTestCase(SimpleNormalizerTestCase):
         return [("spam", "--spam--"),
                 ("Spammage", "--Spammage--"),
                 ("Eggs", "")]
-
-    def _get_process_hash_tests(self):
-        return []
 
 
 class RegexpFilterKeepNormalizerTestCase(SimpleNormalizerTestCase):
@@ -468,9 +415,6 @@ class RegexpFilterKeepNormalizerTestCase(SimpleNormalizerTestCase):
                 ("Spammage", "Spammage"),
                 ("Eggs", None)]
 
-    def _get_process_hash_tests(self):
-        return []
-
 
 class RegexpFilterStripNormalizerTestCase(SimpleNormalizerTestCase):
 
@@ -488,16 +432,11 @@ class RegexpFilterStripNormalizerTestCase(SimpleNormalizerTestCase):
             </options>
         </subConfig>'''.format(self._get_class()))
 
-    @classmethod
     def _get_process_string_tests(self):
         return [("spam", None),
                 ("Some spam email", "Some spam email"),
                 ("Spammage", None),
                 ("Eggs", "Eggs")]
-
-    @classmethod
-    def _get_process_hash_tests(self):
-        return []
 
 
 class PossessiveNormalizerTestCase(SimpleNormalizerTestCase):
@@ -506,15 +445,10 @@ class PossessiveNormalizerTestCase(SimpleNormalizerTestCase):
     def _get_class(cls):
         return PossessiveNormalizer
 
-    @classmethod
     def _get_process_string_tests(self):
         return [("man's", "man"),           # singular possessive
                 ("soldiers'", "soldiers"),  # plural possessive
                 ("women's", "women")]       # irregular plural possessive
-
-    @classmethod
-    def _get_process_hash_tests(self):
-        return []
 
 
 class IntNormalizerTestCase(SimpleNormalizerTestCase):
@@ -523,15 +457,10 @@ class IntNormalizerTestCase(SimpleNormalizerTestCase):
     def _get_class(cls):
         return IntNormalizer
 
-    @classmethod
     def _get_process_string_tests(self):
         return [("1", 1),
                 ("0000000000009", 9),
                 ("123321", 123321)]
-
-    @classmethod
-    def _get_process_hash_tests(self):
-        return []
 
 
 class StringIntNormalizerTestCase(SimpleNormalizerTestCase):
@@ -540,15 +469,11 @@ class StringIntNormalizerTestCase(SimpleNormalizerTestCase):
     def _get_class(cls):
         return StringIntNormalizer
 
-    @classmethod
     def _get_process_string_tests(self):
         return [(1, "000000000001"),
                 (9, "000000000009"),
                 (123321, "000000123321"),
                 ("spam", None)]
-
-    def _get_process_hash_tests(self):
-        return []
 
 
 class FileAssistedNormalizerTestCase(SimpleNormalizerTestCase):
@@ -557,8 +482,7 @@ class FileAssistedNormalizerTestCase(SimpleNormalizerTestCase):
     def _get_class(cls):
         return FileAssistedNormalizer
     
-    @classmethod
-    def _get_fileLines(cls):
+    def _get_fileLines(self):
         return []
 
     def setUp(self):
@@ -590,21 +514,15 @@ class StoplistNormalizerTestCase(FileAssistedNormalizerTestCase):
             </paths>
         </subConfig>'''.format(self._get_class(), self.path))
 
-    @classmethod
-    def _get_fileLines(cls):
+    def _get_fileLines(self):
         return ["spam",
                 "eggs"]
 
-    @classmethod
     def _get_process_string_tests(self):
         return [("spam", None),
                 ("eggs", None),
                 ("ham", "ham"),
                 ("chips", "chips")]
-
-    @classmethod
-    def _get_process_hash_tests(self):
-        return []
 
 
 class TokenExpansionNormalizerTestCase(FileAssistedNormalizerTestCase):
@@ -625,17 +543,14 @@ class TokenExpansionNormalizerTestCase(FileAssistedNormalizerTestCase):
             </options>
         </subConfig>'''.format(self._get_class(), self.path))
 
-    @classmethod
-    def _get_fileLines(cls):
+    def _get_fileLines(self):
         return ["UK United Kingdom",
                 "USA United States of America",
                 "WWF World Wildlife Fund"]
 
-    @classmethod
     def _get_process_string_tests(self):
         return [l.split(' ', 1) for l in self._get_fileLines()]
 
-    @classmethod    
     def _get_process_hash_tests(self):
         # Check returned hash keeps original token
         return [
