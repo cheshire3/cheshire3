@@ -24,11 +24,12 @@ from lxml import etree
 
 from cheshire3.document import Document, StringDocument
 from cheshire3.preParser import PreParser, UnicodeDecodePreParser, \
-    CmdLinePreParser, FileUtilPreParser, MagicRedirectPreParser, \
+    CmdLinePreParser, FileUtilPreParser,\
     HtmlSmashPreParser, RegexpSmashPreParser, SgmlPreParser, AmpPreParser, \
     MarcToXmlPreParser, MarcToSgmlPreParser, TxtToXmlPreParser,\
     PicklePreParser, UnpicklePreParser, \
-    B64EncodePreParser, B64DecodePreParser
+    B64EncodePreParser, B64DecodePreParser,\
+    CharacterEntityPreParser, DataChecksumPreParser
     
 from cheshire3.test.testConfigParser import Cheshire3ObjectTestCase
 
@@ -594,6 +595,59 @@ class B64DecodePreParserTestCase(ImplementedPreParserTestCase):
             u"Returned document content not as expected")
 
 
+class CharacterEntityPreParserTestCase(ImplementedPreParserTestCase):
+    
+    def setUp(self):
+        ImplementedPreParserTestCase.setUp(self)
+        self.maxDiff = None
+    
+    @classmethod
+    def _get_class(self):
+        return CharacterEntityPreParser
+
+    @classmethod
+    def _get_testUnicode(self):
+        return (u'&apos; &hellip; &ldquo; &lsqb; &rsqb; &sol; '
+                '&commat; &plus; &percnt; '
+                '&nbsp; &iexcl; &cent; &pound; &curren; &yen; &brvbar; &sect; '
+                '&uml; &copy; &ordf; &laquo; &not; &shy; &reg; &macr; &deg; '
+                '&plusmn; &sup2; &sup3; &acute; &micro; &para; &middot; '
+                '&cedil; &sup1; &ordm; &raquo; &frac14; &frac12; &frac34; '
+                '&iquest; &Agrave; &Aacute; &Acirc; &Atilde; &Auml; &Aring; '
+                '&AElig; &Ccedil; &Egrave; &Eacute; &Ecirc; &Euml; &Igrave; '
+                '&Iacute; &Icirc; &Iuml; &ETH; &Ntilde; &Ograve; &Oacute; '
+                '&Ocirc; &Otilde; &Ouml; &times; &Oslash; &Ugrave; &Uacute; '
+                '&Ucirc; &Uuml; &Yacute; &THORN; &szlig; &agrave; &aacute; '
+                '&acirc; &atilde; &auml; &aring; &aelig; &ccedil; &egrave; '
+                '&eacute; &ecirc; &euml; &igrave; &iacute; &icirc; &iuml; '
+                '&eth; &ntilde; &ograve; &oacute; &ocirc; &otilde; &ouml; '
+                '&divide; &oslash; &ugrave; &uacute; &ucirc; &uuml; &yacute; '
+                '&thorn; &yuml; '
+                '&frac58; '
+                '&123; ')
+
+    def test_process_document_returnContent(self):
+        if self.inDoc is None:
+            self.skipTest("No test Document available")
+        self.assertEqual(
+            self.outDoc.text,
+            (u"' ...  [ ] \\ @ + % "
+             '&#160; &#161; &#162; &#163; &#164; &#165; &#166; &#167; &#168; '
+             '&#169; &#170; &#171; &#172; &#173; &#174; &#175; &#176; &#177; '
+             '&#178; &#179; &#180; &#181; &#182; &#183; &#184; &#185; &#186; '
+             '&#187; &#188; &#189; &#190; &#191; &#192; &#193; &#194; &#195; '
+             '&#196; &#197; &#198; &#199; &#200; &#201; &#202; &#203; &#204; '
+             '&#205; &#206; &#207; &#208; &#209; &#210; &#211; &#212; &#213; '
+             '&#214; &#215; &#216; &#217; &#218; &#219; &#220; &#221; &#222; '
+             '&#223; &#224; &#225; &#226; &#227; &#228; &#229; &#230; &#231; '
+             '&#232; &#233; &#234; &#235; &#236; &#237; &#238; &#239; &#240; '
+             '&#241; &#242; &#243; &#244; &#245; &#246; &#247; &#248; &#249; '
+             '&#250; &#251; &#252; &#253; &#254; &#255; '
+             '5&#8260;8 '
+             '&#123; ')
+             )
+            
+
 def load_tests(loader, tests, pattern):
     # Alias loader.loadTestsFromTestCase for sake of line lengths
     ltc = loader.loadTestsFromTestCase 
@@ -619,6 +673,7 @@ def load_tests(loader, tests, pattern):
     suite.addTests(ltc(UnpicklePreParserTestCase))
     suite.addTests(ltc(B64EncodePreParserTestCase))
     suite.addTests(ltc(B64DecodePreParserTestCase))
+    suite.addTests(ltc(CharacterEntityPreParserTestCase))
     return suite
 
 
