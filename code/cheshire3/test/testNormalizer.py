@@ -16,6 +16,14 @@ import string
 
 from tempfile import mkstemp
 from lxml import etree
+from datetime import datetime
+
+try:
+    from pyuca import Collator
+except ImportError:
+    hasPyuca = False
+else:
+    hasPyuca = True
 
 from cheshire3.normalizer import Normalizer, SimpleNormalizer, \
     DataExistsNormalizer, TermExistsNormalizer, CaseNormalizer, \
@@ -24,8 +32,11 @@ from cheshire3.normalizer import Normalizer, SimpleNormalizer, \
     IntNormalizer, StringIntNormalizer,\
     StoplistNormalizer, TokenExpansionNormalizer,\
     RegexpFilterNormalizer, PossessiveNormalizer, FileAssistedNormalizer,\
-    StemNormalizer, PhoneticNormalizer
-    
+    StemNormalizer, PhoneticNormalizer,\
+    DateStringNormalizer, DateYearNormalizer,\
+    IdToFilenameNormalizer, FilenameToIdNormalizer,\
+    UnicodeCollationNormalizer, DiacriticNormalizer
+
 from cheshire3.test.testConfigParser import Cheshire3ObjectTestCase
 
 
@@ -627,6 +638,145 @@ class FivePhoneticNormalizerTestCase(PhoneticNormalizerTestCase):
                  'a5332')]
 
 
+class DateStringNormalizerTestCase(SimpleNormalizerTestCase):
+
+    @classmethod
+    def _get_class(cls):
+        return DateStringNormalizer
+
+    def _get_process_string_tests(self):
+        return [(datetime.utcfromtimestamp(0), '1970-01-01 00:00:00'),
+                (datetime(2000, 01, 01, 12, 04, 55), '2000-01-01 12:04:55'),
+                (datetime(2050, 01, 01) , '2050-01-01 00:00:00'),
+                ]
+
+
+class DateYearNormalizerTestCase(SimpleNormalizerTestCase):
+
+    @classmethod
+    def _get_class(cls):
+        return DateYearNormalizer
+    
+    def _get_process_string_tests(self):
+        return [('1970-01-01 00:00:00', '1970'),
+                ('2000-01-01 12:04:55', '2000'),
+                ('2050-01-01 00:00:00', '2050'),
+                ]
+
+
+class IdToFilenameNormalizerTestCase(SimpleNormalizerTestCase):
+
+    @classmethod
+    def _get_class(cls):
+        return IdToFilenameNormalizer
+
+    def _get_process_string_tests(self):
+        return [('foo', 'foo.xml'),
+                ('bar', 'bar.xml'),
+                ('baz', 'baz.xml'),
+                ]
+
+
+class TxtIdToFilenameNormalizerTestCase(IdToFilenameNormalizerTestCase):
+
+    def _get_config(self):
+        return etree.XML('''\
+        <subConfig type="normalizer" id="{0.__name__}">
+          <objectType>cheshire3.normalizer.{0.__name__}</objectType>
+          <options>
+            <setting type="extension">.txt</setting>
+          </options>
+        </subConfig>'''.format(self._get_class()))
+
+    def _get_process_string_tests(self):
+        return [('foo', 'foo.txt'),
+                ('bar', 'bar.txt'),
+                ('baz', 'baz.txt'),
+                ]
+
+
+class FilenameToIdNormalizerTestCase(SimpleNormalizerTestCase):
+    
+    @classmethod
+    def _get_class(cls):
+        return FilenameToIdNormalizer
+
+    def _get_process_string_tests(self):
+        return [('foo.xml', 'foo'),
+                ('bar.txt', 'bar'),
+                ('baz.pdf', 'baz'),
+                ]
+
+
+class UnicodeCollationNormalizerTestCase(SimpleNormalizerTestCase):
+
+    @classmethod
+    def _get_class(cls):
+        return UnicodeCollationNormalizer
+
+    def _get_process_string_tests(self):
+        return [('foo', ''),
+                ('bar', ''),
+                ('baz', '')]
+
+    def setUp(self):
+        if hasPyuca:
+            SimpleNormalizerTestCase.setUp(self)
+
+    @unittest.skipUnless(hasPyuca, "pyuca module unavailable")
+    def test_serverInstance(self):
+        SimpleNormalizerTestCase.test_serverInstance(self)
+
+    @unittest.skipUnless(hasPyuca, "pyuca module unavailable")
+    def test_instance(self):
+        SimpleNormalizerTestCase.test_instance(self)
+
+    @unittest.skipUnless(hasPyuca, "pyuca module unavailable")
+    def test_process_string(self):
+        SimpleNormalizerTestCase.test_process_string(self)
+
+    @unittest.skipUnless(hasPyuca, "pyuca module unavailable")
+    def test_process_hash(self):
+        SimpleNormalizerTestCase.test_process_hash(self)
+        
+
+class DiacriticNormalizerTestCase(SimpleNormalizerTestCase):
+
+    @classmethod
+    def _get_class(cls):
+        return DiacriticNormalizer
+
+    def _get_process_string_tests(self):
+        tests = []
+        tests.append((unichr(167), 'Section'))
+        tests.extend([(unichr(x), 'A') for x in range(192, 198)])
+        tests.append((unichr(198), 'AE'))
+        tests.append((unichr(199), 'C'))
+        tests.extend([(unichr(x), 'E') for x in range(200, 204)])
+        tests.extend([(unichr(x), 'I') for x in range(204, 208)])
+        tests.append((unichr(208), 'D'))
+        tests.append((unichr(209), 'N'))
+        tests.extend([(unichr(x), 'O') for x in range(210, 215)])
+        tests.append((unichr(215), 'x'))
+        tests.append((unichr(216), 'O'))
+        tests.extend([(unichr(x), 'U') for x in range(217, 221)])
+        tests.append((unichr(221), 'Y'))
+        tests.append((unichr(222), 'TH'))
+        tests.append((unichr(223), 'ss'))
+        tests.extend([(unichr(x), 'a') for x in range(224, 230)])
+        tests.append((unichr(230), 'ae'))
+        tests.append((unichr(231), 'c'))
+        tests.extend([(unichr(x), 'e') for x in range(232, 236)])
+        tests.extend([(unichr(x), 'i') for x in range(236, 240)])
+        tests.append((unichr(240), 'd'))
+        tests.append((unichr(241), 'n'))
+        tests.extend([(unichr(x), 'o') for x in range(242, 247)])
+        tests.append((unichr(248), 'o'))
+        tests.extend([(unichr(x), 'u') for x in range(249, 253)])
+        # There are many more, but these common ones should suffice for now
+        return tests
+
+
 def load_tests(loader, tests, pattern):
     # Alias loader.loadTestsFromTestCase for sake of line lengths
     ltc = loader.loadTestsFromTestCase 
@@ -653,6 +803,13 @@ def load_tests(loader, tests, pattern):
     suite.addTests(ltc(EnglishStemNormalizerTestCase))
     suite.addTests(ltc(PhoneticNormalizerTestCase))
     suite.addTests(ltc(FivePhoneticNormalizerTestCase))
+    suite.addTests(ltc(DateStringNormalizerTestCase))
+    suite.addTests(ltc(DateYearNormalizerTestCase))
+    suite.addTests(ltc(IdToFilenameNormalizerTestCase))
+    suite.addTests(ltc(TxtIdToFilenameNormalizerTestCase))
+    suite.addTests(ltc(FilenameToIdNormalizerTestCase))
+    suite.addTests(ltc(UnicodeCollationNormalizerTestCase))
+    suite.addTests(ltc(DiacriticNormalizerTestCase))
     return suite
 
 
