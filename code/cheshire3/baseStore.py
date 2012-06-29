@@ -1096,7 +1096,7 @@ class BdbStore(SimpleStore):
             cxn = self._openDb(session, mType)
 
         if cxn is not None:
-            if type(value) in (int, long, float):
+            if isinstance(value, (int, long, float, datetime.datetime)):
                 value = str(value)
             cxn.put(id, value)
             if mType in self.reverseMetadataTypes:
