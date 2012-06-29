@@ -1210,7 +1210,7 @@ class FileSystemStore(BdbStore):
     def store_data(self, session, id, data, metadata={}):        
         dig = metadata.get('digest', "")
         if dig:
-            cxn = self._open(session, 'digestReverse')
+            cxn = self._openDb(session, 'digestReverse')
             if cxn:
                 exists = cxn.get(dig)
                 if exists:
@@ -1244,6 +1244,10 @@ class FileSystemStore(BdbStore):
         filename = self.fetch_metadata(session, id, 'filename')
         start = self.fetch_metadata(session, id, 'byteOffset')
         length = self.fetch_metadata(session, id, 'byteCount')
+        
+        if filename is None and start is None and length is None:
+            # Data has been deleted
+            return None
 
         if filename != self.currFileName:
             if self.currFileHandle:
@@ -1285,12 +1289,12 @@ class FileSystemStore(BdbStore):
 
         # Main database is a storageType now
         for dbt in self.storageTypes:
-            cxn = self._open(session, dbt)
+            cxn = self._openDb(session, dbt)
             if cxn is not None:
                 if dbt in self.reverseMetadataTypes:
                     # Fetch value here, delete reverse
                     data = cxn.get(id)
-                    cxn2 = self._open(session, dbt + "Reverse")                
+                    cxn2 = self._openDb(session, dbt + "Reverse")                
                     if cxn2 is not None:
                         cxn2.delete(data)
                 cxn.delete(id)
