@@ -1,4 +1,3 @@
-from base64 import b64encode
 u"""Cheshire3 PreParser Unittests.
 
 PreParser configurations may be customized by the user. For the purposes of 
@@ -9,6 +8,7 @@ and tests carried out on those instances using data defined in this module.
 
 import binascii
 import re
+import hashlib
 
 try:
     import unittest2 as unittest
@@ -21,6 +21,7 @@ except ImportError:
     import pickle
 
 from lxml import etree
+from base64 import b64encode
 
 from cheshire3.document import Document, StringDocument
 from cheshire3.preParser import PreParser, UnicodeDecodePreParser, \
@@ -47,10 +48,10 @@ class PreParserTestCase(Cheshire3ObjectTestCase):
     @classmethod
     def _get_config(self):    
         return etree.XML('''\
-<subConfig type="preParser" id="{0.__name__}">
-  <objectType>cheshire3.preParser.{0.__name__}</objectType>
-</subConfig>
-'''.format(self._get_class()))
+        <subConfig type="preParser" id="{0.__name__}">
+          <objectType>{0.__module__}.{0.__name__}</objectType>
+        </subConfig>
+        '''.format(self._get_class()))
     
     def setUp(self):
         Cheshire3ObjectTestCase.setUp(self)
@@ -138,13 +139,13 @@ class UnicodeDecodePreParserTestCase(ImplementedPreParserTestCase):
     @classmethod
     def _get_config(self):
         return etree.XML('''\
-<subConfig type="preParser" id="{0.__name__}">
-  <objectType>cheshire3.preParser.{0.__name__}</objectType>
-  <options>
-    <setting type="codec">{1}</setting>
-  </options>
-</subConfig>
-'''.format(self._get_class(), self._get_codec()))
+        <subConfig type="preParser" id="{0.__name__}">
+          <objectType>{0.__module__}.{0.__name__}</objectType>
+          <options>
+            <setting type="codec">{1}</setting>
+          </options>
+        </subConfig>
+        '''.format(self._get_class(), self._get_codec()))
         
     def setUp(self):
         PreParserTestCase.setUp(self)
@@ -209,13 +210,13 @@ class CmdLinePreParserTestCase(ImplementedPreParserTestCase):
     @classmethod
     def _get_config(self):
         return etree.XML('''
-<subConfig type="preParser" id="{0.__name__}">
-  <objectType>cheshire3.preParser.{0.__name__}</objectType>
-  <paths>
-    <path type="executable">cat</path>
-  </paths>
-</subConfig>
-'''.format(self._get_class()))
+        <subConfig type="preParser" id="{0.__name__}">
+          <objectType>{0.__module__}.{0.__name__}</objectType>
+          <paths>
+            <path type="executable">cat</path>
+          </paths>
+        </subConfig>
+        '''.format(self._get_class()))
 
     def test_process_document_returnContent(self):
         "Check content of returned Document (should be unaltered)."
@@ -235,16 +236,16 @@ class CmdLinePreParserInDocTestCase(CmdLinePreParserTestCase):
     @classmethod
     def _get_config(self):
         return etree.XML('''
-<subConfig type="preParser" id="{0.__name__}">
-  <objectType>cheshire3.preParser.{0.__name__}</objectType>
-  <paths>
-    <path type="executable">cat</path>
-  </paths>
-  <options>
-    <setting type="commandLine">%INDOC%</setting>
-  </options>
-</subConfig>
-'''.format(self._get_class()))
+        <subConfig type="preParser" id="{0.__name__}">
+          <objectType>{0.__module__}.{0.__name__}</objectType>
+          <paths>
+            <path type="executable">cat</path>
+          </paths>
+          <options>
+            <setting type="commandLine">%INDOC%</setting>
+          </options>
+        </subConfig>
+        '''.format(self._get_class()))
 
 
 class CmdLinePreParserInOutDocTestCase(CmdLinePreParserTestCase):
@@ -258,16 +259,16 @@ class CmdLinePreParserInOutDocTestCase(CmdLinePreParserTestCase):
     @classmethod
     def _get_config(self):
         return etree.XML('''
-<subConfig type="preParser" id="{0.__name__}">
-  <objectType>cheshire3.preParser.{0.__name__}</objectType>
-  <paths>
-    <path type="executable">cat</path>
-  </paths>
-  <options>
-    <setting type="commandLine">%INDOC% > %OUTDOC%</setting>
-  </options>
-</subConfig>
-'''.format(self._get_class()))
+        <subConfig type="preParser" id="{0.__name__}">
+          <objectType>{0.__module__}.{0.__name__}</objectType>
+          <paths>
+            <path type="executable">cat</path>
+          </paths>
+          <options>
+            <setting type="commandLine">%INDOC% > %OUTDOC%</setting>
+          </options>
+        </subConfig>
+        '''.format(self._get_class()))
 
 
 class FileUtilPreParserTestCase(ImplementedPreParserTestCase):
@@ -307,14 +308,14 @@ class RegexpSmashPreParserTestCase(ImplementedPreParserTestCase):
     @classmethod
     def _get_config(self):
         return etree.XML('''
-<subConfig type="preParser" id="{0.__name__}">
-  <objectType>cheshire3.preParser.{0.__name__}</objectType>
-  <options>
-    <setting type="regexp"> </setting>
-    <setting type="char"> </setting>
-  </options>
-</subConfig>
-'''.format(self._get_class()))
+        <subConfig type="preParser" id="{0.__name__}">
+          <objectType>{0.__module__}.{0.__name__}</objectType>
+          <options>
+            <setting type="regexp"> </setting>
+            <setting type="char"> </setting>
+          </options>
+        </subConfig>
+        '''.format(self._get_class()))
 
     def test_process_document_returnContent(self):
         "Check content of returned Document (should be unaltered)."
@@ -334,13 +335,13 @@ class RegexpSmashPreParserStripTestCase(RegexpSmashPreParserTestCase):
     @classmethod
     def _get_config(self):
         return etree.XML('''
-<subConfig type="preParser" id="{0.__name__}">
-  <objectType>cheshire3.preParser.{0.__name__}</objectType>
-  <options>
-    <setting type="regexp">\sis</setting>
-  </options>
-</subConfig>
-'''.format(self._get_class()))
+        <subConfig type="preParser" id="{0.__name__}">
+          <objectType>{0.__module__}.{0.__name__}</objectType>
+          <options>
+            <setting type="regexp">\sis</setting>
+          </options>
+        </subConfig>
+        '''.format(self._get_class()))
 
     def test_process_document_returnContent(self):
         "Check content of returned Document (should lack 'is')."
@@ -361,14 +362,14 @@ class RegexpSmashPreParserSubTestCase(RegexpSmashPreParserTestCase):
     @classmethod
     def _get_config(self):
         return etree.XML('''
-<subConfig type="preParser" id="{0.__name__}">
-  <objectType>cheshire3.preParser.{0.__name__}</objectType>
-  <options>
-    <setting type="regexp">my</setting>
-    <setting type="char">your</setting>
-  </options>
-</subConfig>
-'''.format(self._get_class()))
+        <subConfig type="preParser" id="{0.__name__}">
+          <objectType>{0.__module__}.{0.__name__}</objectType>
+          <options>
+            <setting type="regexp">my</setting>
+            <setting type="char">your</setting>
+          </options>
+        </subConfig>
+        '''.format(self._get_class()))
 
     def test_process_document_returnContent(self):
         "Check content of returned Document ('my' -> 'your')."
@@ -389,15 +390,15 @@ class RegexpSmashPreParserKeepTestCase(RegexpSmashPreParserTestCase):
     @classmethod
     def _get_config(self):
         return etree.XML('''
-<subConfig type="preParser" id="{0.__name__}">
-  <objectType>cheshire3.preParser.{0.__name__}</objectType>
-  <options>
-    <setting type="regexp">document</setting>
-    <setting type="keep">1</setting>
-    
-  </options>
-</subConfig>
-'''.format(self._get_class()))
+        <subConfig type="preParser" id="{0.__name__}">
+          <objectType>{0.__module__}.{0.__name__}</objectType>
+          <options>
+            <setting type="regexp">document</setting>
+            <setting type="keep">1</setting>
+            
+          </options>
+        </subConfig>
+        '''.format(self._get_class()))
 
     def test_process_document_returnContent(self):
         "Check content of returned Document ('my' -> 'your')."
@@ -419,13 +420,13 @@ class SgmlPreParserTestCase(ImplementedPreParserTestCase):
     @classmethod
     def _get_config(self):
         return etree.XML('''
-<subConfig type="preParser" id="{0.__name__}">
-  <objectType>cheshire3.preParser.{0.__name__}</objectType>
-  <options>
-    <setting type="emptyElements">img</setting>
-  </options>
-</subConfig>
-'''.format(self._get_class()))
+        <subConfig type="preParser" id="{0.__name__}">
+          <objectType>{0.__module__}.{0.__name__}</objectType>
+          <options>
+            <setting type="emptyElements">img</setting>
+          </options>
+        </subConfig>
+        '''.format(self._get_class()))
 
     @classmethod
     def _get_testUnicode(self):
@@ -597,10 +598,6 @@ class B64DecodePreParserTestCase(ImplementedPreParserTestCase):
 
 class CharacterEntityPreParserTestCase(ImplementedPreParserTestCase):
     
-    def setUp(self):
-        ImplementedPreParserTestCase.setUp(self)
-        self.maxDiff = None
-    
     @classmethod
     def _get_class(self):
         return CharacterEntityPreParser
@@ -646,7 +643,74 @@ class CharacterEntityPreParserTestCase(ImplementedPreParserTestCase):
              '5&#8260;8 '
              '&#123; ')
              )
+
+
+class DataChecksumPreParserTestCase(ImplementedPreParserTestCase):
+
+    @classmethod
+    def _get_class(self):
+        return DataChecksumPreParser
+
+    @classmethod
+    def _get_testUnicode(self):
+        return u'This is my document'
+
+    @classmethod
+    def _get_checksumAlgorithm(self):
+        return 'md5'
+
+    def _get_config(self):
+        return etree.XML('''
+        <subConfig type="preParser" id="{0.__name__}">
+          <objectType>{0.__module__}.{0.__name__}</objectType>
+          <options>
+            <setting type="sumType">{1}</setting>
+          </options>
+        </subConfig>
+        '''.format(self._get_class(), self._get_checksumAlgorithm()))
             
+    def test_process_document_returnContent(self):
+        "Check Document data is unchanged."
+        if self.inDoc is None:
+            self.skipTest("No test Document available")
+        self.assertEqual(self.outDoc.text, self._get_testUnicode())
+
+    def test_process_document_metadata(self):
+        "Check Document metadata."
+        # Check Document.metadata['checksum'] exists
+        alg = self._get_checksumAlgorithm()
+        self.assertTrue(
+            self.outDoc.metadata,
+            "No items in returned Document metadata")
+        self.assertTrue(
+            'checksum' in self.outDoc.metadata,
+            "No checksum items in returned Document metadata")
+        # Check Document.metadata['checksum'][alg] exists
+        self.assertTrue(
+            alg in self.outDoc.metadata['checksum'],
+            "{0} checksum not in returned Document metadata".format(alg))
+        # Check Document.metadata[algorithm][alg] has correct value
+        h = hashlib.new(alg)
+        h.update(self._get_testUnicode())
+        self.assertEqual(
+            self.outDoc.metadata['checksum'][alg]['hexdigest'],
+            h.hexdigest(),
+            "incorrect {0} checksum in Document metadata".format(alg))
+
+
+class SHA1DataChecksumPreParserTestCase(DataChecksumPreParserTestCase):
+
+    @classmethod
+    def _get_checksumAlgorithm(self):
+        return 'sha1'
+
+
+class SHA256DataChecksumPreParserTestCase(DataChecksumPreParserTestCase):
+
+    @classmethod
+    def _get_checksumAlgorithm(self):
+        return 'sha256'
+
 
 def load_tests(loader, tests, pattern):
     # Alias loader.loadTestsFromTestCase for sake of line lengths
@@ -674,6 +738,9 @@ def load_tests(loader, tests, pattern):
     suite.addTests(ltc(B64EncodePreParserTestCase))
     suite.addTests(ltc(B64DecodePreParserTestCase))
     suite.addTests(ltc(CharacterEntityPreParserTestCase))
+    suite.addTests(ltc(DataChecksumPreParserTestCase))
+    suite.addTests(ltc(SHA1DataChecksumPreParserTestCase))
+    suite.addTests(ltc(SHA256DataChecksumPreParserTestCase))
     return suite
 
 
