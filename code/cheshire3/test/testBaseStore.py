@@ -48,7 +48,6 @@ class SimpleStoreTestCase(Cheshire3ObjectTestCase):
         # Create a tempfile placeholder
         self.defaultPath = mkdtemp()
         Cheshire3ObjectTestCase.setUp(self)
-        self.session.logger.minLevel = 0
 
     def tearDown(self):
         for root, dirs, files in os.walk(self.defaultPath, topdown=False):
