@@ -114,7 +114,7 @@ argparser.add_argument('-d', '--database', type=str,
                        help="identifier of Cheshire3 database")
 argparser.add_argument('script', type=str,
                        action='store', nargs='?',
-                       default=os.getcwd(),
+                       default=None,
                        help="read and execute commands from script file")
 argparser.add_argument('-i', '--interactive',
                        action="store_true", dest="interactive", default=False,
