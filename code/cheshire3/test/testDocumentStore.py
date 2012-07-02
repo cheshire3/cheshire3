@@ -28,7 +28,7 @@ class DocumentStoreTestCase(SimpleStoreTestCase):
         for data in self._get_test_data():
             yield StringDocument(data, byteCount=len(data))
 
-    def test_store_document(self):
+    def test_store_data(self):
         "Check that Doc is stored without corruption to copy in memory."
         for inDoc in self._get_test_docs():
             # Store the Document
@@ -38,7 +38,7 @@ class DocumentStoreTestCase(SimpleStoreTestCase):
                              inDoc.get_raw(self.session),
                              u"Returned document content not as expected")
 
-    def test_storeFetch_document(self):
+    def test_storeFetch_data(self):
         "Check that Doc is stored without corruption."
         for inDoc in self._get_test_docs():
             # Store the Document
@@ -70,7 +70,7 @@ class DocumentStoreTestCase(SimpleStoreTestCase):
             self.assertEqual(byteCount, len(inDoc.get_raw(self.session)))
             self.assertEqual(creationDate, now)
 
-    def test_storeDeleteFetch_document(self):
+    def test_storeDeleteFetch_data(self):
         "Check that Document is deleted."
         for inDoc in self._get_test_docs():
             # Store the Document
@@ -122,7 +122,7 @@ class DeletionsBdbDocumentStoreTestCase(BdbDocumentStoreTestCase):
           </options>
         </subConfig>'''.format(self._get_class(), self.defaultPath))
 
-    def test_storeDeleteFetch_document(self):
+    def test_storeDeleteFetch_data(self):
         "Check that data is deleted."
         for inDoc in self._get_test_docs():
             # Store the Document
