@@ -71,7 +71,7 @@ class DocumentStoreTestCase(SimpleStoreTestCase):
             self.assertEqual(creationDate, now)
 
     def test_storeDeleteFetch_document(self):
-        "Check that data is deleted."
+        "Check that Document is deleted."
         for inDoc in self._get_test_docs():
             # Store the Document
             inDoc = self.testObj.create_document(self.session, inDoc)
