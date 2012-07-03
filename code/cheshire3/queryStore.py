@@ -12,6 +12,7 @@ class SimpleQueryStore(BdbStore, QueryStore):
         if query is not None:
             query.id = id
             self.store_query(session, query)
+            return query
         else:
             data = ""
         self.store_data(session, id, data)
