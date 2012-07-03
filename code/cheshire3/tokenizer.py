@@ -170,30 +170,6 @@ class RegexpFindPunctuationOffsetTokenizer(RegexpFindOffsetTokenizer):
         return (tokens, positions)
 
 
-# XXX: This should be in TextMining, and NLTK should auto install
-try:
-    import nltk
-    class PunktWordTokenizer(SimpleTokenizer):
-
-        def __init__(self, session, config, parent):
-            SimpleTokenizer.__init__(self, session, config, parent)
-            self.punkt = nltk.tokenize.PunktWordTokenizer()
-
-        def process_string(self, session, data):
-            return self.punkt.tokenize(data)
-
-
-    class PunktSentenceTokenizer(SimpleTokenizer):
-        def __init__(self, session, config, parent):
-            SimpleTokenizer.__init__(self, session, config, parent)
-            self.punkt = nltk.data.load('tokenizers/punkt/english.pickle')
-
-        def process_string(self, session, data):
-            return self.punkt.tokenize(data)
-except:
-    pass
-
-
 # Was a text mining util, now should reformulate workflows
 class SentenceTokenizer(SimpleTokenizer):
 
