@@ -1,8 +1,8 @@
 
 from cheshire3.baseObjects import QueryStore
-from cheshire3.baseStore import BdbStore
+from cheshire3.baseStore import BdbStore, DeletedObject
 import cheshire3.cqlParser as cqlParser
-from cheshire3.exceptions import ObjectDoesNotExistException
+from cheshire3.exceptions import *
 
 class SimpleQueryStore(BdbStore, QueryStore):
 
@@ -24,7 +24,12 @@ class SimpleQueryStore(BdbStore, QueryStore):
     def fetch_query(self, session, id):
         """Fetch query data, parse it into a query object and return."""
         cql = self.fetch_data(session, id)
-        q = cqlParser.parse(cql)
+        if cql is not None and cql:
+            q = cqlParser.parse(cql)
+        elif (isinstance(cql, DeletedObject)):
+            raise ObjectDeletedException(cql)
+        else:
+            raise ObjectDoesNotExistException(id)
         q.id = id
         try:
             rsid = self.fetch_data(session, "__rset_%s" % id)
