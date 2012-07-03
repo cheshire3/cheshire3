@@ -19,7 +19,7 @@ class SimpleQueryStore(BdbStore, QueryStore):
         return id
 
     def delete_query(self, session, id):
-        self.delete_item(session, id)
+        self.delete_data(session, id)
 
     def fetch_query(self, session, id):
         """Fetch query data, parse it into a query object and return."""
