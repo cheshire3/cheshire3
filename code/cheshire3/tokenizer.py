@@ -233,7 +233,7 @@ class SentenceTokenizer(SimpleTokenizer):
         self.paraRe = re.compile('\n\n+', re.UNICODE)
         self.sentenceRe = re.compile(
                               '.+?(?<!\.\.)[\.!?:]["\'\)]?(?=\s+|$)(?![a-z])',
-                              re.UNICODE
+                              re.UNICODE | re.DOTALL
                           )
         self.abbrMashRe = re.compile('''
         (?xu)                                          # verbose, unicode
