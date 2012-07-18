@@ -16,7 +16,7 @@ from xml.sax.saxutils import escape
 from datetime import datetime
 from copy import deepcopy
 
-from cheshire3.extractor import Extractor, SimpleExtractor
+from cheshire3.extractor import Extractor, SimpleExtractor, SpanXPathExtractor
 
 from cheshire3.test.testConfigParser import Cheshire3ObjectTestCase
 
@@ -455,6 +455,98 @@ class ProxExtractorTestCase(SimpleExtractorTestCase):
         return tests
 
 
+class SpanXPathExtractorTestCase(Cheshire3ObjectTestCase):
+
+    @classmethod
+    def _get_class(cls):
+        return SpanXPathExtractor
+
+    def _get_config(self):
+        return etree.XML('''
+        <subConfig type="extractor" id="{0.__name__}">
+            <objectType>{0.__module__}.{0.__name__}</objectType>
+        </subConfig>
+        '''.format(self._get_class()))
+
+    def setUp(self):
+        Cheshire3ObjectTestCase.setUp(self)
+
+    def _get_process_xpathResult_tests(self):
+        tests = []
+        tree = etree.XML('<meal/>')
+        item1 = etree.SubElement(tree, "item")
+        item1.text = "spam"
+        item2 = etree.SubElement(tree, "item")
+        item2.text = "egg"
+        item3 = etree.SubElement(tree, "item")
+        item3.text = "sausage"
+        tests.append(
+                      ([[item1,
+                         item2]],
+                       {'spam': {
+                           'text': 'spam',
+                           'occurences': 1,
+                           'proxLoc': [-1]
+                           },
+                        })
+                     )
+        tests.append(
+                      ([[item1,
+                         item3]],
+                       {'spamegg': {
+                           'text': 'spamegg',
+                           'occurences': 1,
+                           'proxLoc': [-1]
+                           },
+                        })
+                     )
+        tree = etree.XML('<meal/>')
+        item1 = etree.SubElement(tree, "item")
+        item1.text = "spam"
+        item1.tail = ", "
+        item2 = etree.SubElement(tree, "item")
+        item2.text = "egg"
+        item2.tail = " and "
+        item3 = etree.SubElement(tree, "item")
+        item3.text = "sausage"
+        tests.append(
+                      ([[item1,
+                         item2]],
+                       {'spam, ': {
+                           'text': 'spam, ',
+                           'occurences': 1,
+                           'proxLoc': [-1]
+                           },
+                        })
+                     )
+        tests.append(
+                      ([[item1,
+                         item3]],
+                       {'spam, egg and': {
+                           'text': 'spam, egg and',
+                           'occurences': 1,
+                           'proxLoc': [-1]
+                           },
+                        })
+                     )
+        tests.append(
+                      ([[item1,
+                         None]],
+                       {'spam, egg and sausage': {
+                           'text': 'spam, egg and sausage',
+                           'occurences': 1,
+                           'proxLoc': [-1]
+                           },
+                        })
+                     )
+        return tests
+
+    def test_process_xpathResult(self):
+        for inp, expected in self._get_process_xpathResult_tests():
+            output = self.testObj.process_xpathResult(self.session, inp)
+            self.assertDictEqual(output, expected)
+
+
 def load_tests(loader, tests, pattern):
     # Alias loader.loadTestsFromTestCase for sake of line lengths
     ltc = loader.loadTestsFromTestCase 
@@ -463,6 +555,7 @@ def load_tests(loader, tests, pattern):
     suite.addTests(ltc(NoStripSimpleExtractorTestCase))
     suite.addTests(ltc(SpaceSimpleExtractorTestCase))
     suite.addTests(ltc(ProxExtractorTestCase))
+    suite.addTests(ltc(SpanXPathExtractorTestCase))
     return suite
 
 
