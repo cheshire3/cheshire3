@@ -63,6 +63,35 @@ class SimpleExtractorTestCase(Cheshire3ObjectTestCase):
                       'proxLoc': [-1]
                       }
                   })]
+        
+    def _get_process_xpathResult_tests(self):
+        tests = [([[inp]], expected)
+                for inp, expected
+                in self._get_process_node_tests()]
+        tests.extend([
+                      ([[etree.XML('<data>spam</data>'),
+                         etree.XML('<data>egg</data>')]],
+                       {'spam': {
+                           'text': 'spam',
+                           'occurences': 1,
+                           'proxLoc': [-1]
+                           },
+                        'egg': {
+                            'text': 'egg',
+                            'occurences': 1,
+                            'proxLoc': [-1]
+                            }
+                        }),
+                      ([[etree.XML('<data>spam</data>')],
+                        [etree.XML('<data2>spam</data2>')]],
+                       {'spam': {
+                           'text': 'spam',
+                           'occurences': 2,
+                           'proxLoc': [-1, -1]
+                           }
+                        })
+        ])
+        return tests
 
     def test_process_string(self):
         for inp, expected in self._get_process_string_tests():
@@ -72,6 +101,11 @@ class SimpleExtractorTestCase(Cheshire3ObjectTestCase):
     def test_process_node(self):
         for inp, expected in self._get_process_node_tests():
             output = self.testObj.process_node(self.session, inp)
+            self.assertDictEqual(output, expected)
+
+    def test_process_xpathResult(self):
+        for inp, expected in self._get_process_xpathResult_tests():
+            output = self.testObj.process_xpathResult(self.session, inp)
             self.assertDictEqual(output, expected)
 
     def test_mergeHash(self):
