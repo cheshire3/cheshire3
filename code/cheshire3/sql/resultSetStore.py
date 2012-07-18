@@ -112,11 +112,7 @@ class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
                 if (self.idNormalizer is not None):
                     id = self.idNormalizer.process_string(session, id)
                 query = "INSERT INTO %s (identifier, data, size, class, timeCreated, timeAccessed, expires) VALUES ('%s', E'%s', %s, '%s', '%s', '%s', '%s')" % (self.table, id, ndata, len(rset), cl, nowStr, nowStr, expiresStr)
-                try:
-                    self._query(query)
-                except pg.ProgrammingError:
-                    raise ValueError(ndata)
-                    
+                self._query(query)
             else:
                 raise ObjectAlreadyExistsException(self.id + '/' + id)
         return rset
