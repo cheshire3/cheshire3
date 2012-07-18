@@ -1,8 +1,14 @@
 
 import os
-import cPickle
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+    
 
 from cheshire3.baseObjects import TokenMerger
+from cheshire3.exceptions import ConfigFileException, FileDoesNotExistException
+
 
 class SimpleTokenMerger(TokenMerger):
 
@@ -17,19 +23,27 @@ class SimpleTokenMerger(TokenMerger):
                     if t in new:
                         new[t]['occurences'] += val['occurences']
                     else:
-                        # this will discard any second or further locations
+                        # This will discard any second or further locations
                         # -very- minor edge case when this will break things
-                        # if important, use ProximityTokenMerger.
+                        # If important, use ProximityTokenMerger.
                         try:
-                            new[t] = {'text' : t, 'occurences' : val['occurences'],
-                                      'proxLoc' : val['proxLoc']}
+                            new[t] = {
+                                'text': t,
+                                'occurences': val['occurences'],
+                                'proxLoc': val['proxLoc']
+                            }
                         except KeyError:
-                            # may already have been tokenized and merged
-                            new[t] = {'text' : t, 'occurences' : val['occurences'],
-                                      'positions' : val['positions']}            
+                            # May already have been tokenized and merged
+                            new[t] = {
+                                'text': t,
+                                'occurences': val['occurences'],
+                                'positions': val['positions']
+                            }            
         return new
 
+
 class ProximityTokenMerger(SimpleTokenMerger):
+
     def process_hash(self, session, data):
         new = {}
         for d, val in data.iteritems():
@@ -39,24 +53,33 @@ class ProximityTokenMerger(SimpleTokenMerger):
                     if t in new:
                         new[t]['occurences'] += val['occurences']
                         try:
-                            pls = [(pl,x) for pl in val['proxLoc']]
+                            pls = [(pl, x) for pl in val['proxLoc']]
                             for p in pls:
                                 new[t]['positions'].extend(p)
                         except KeyError:
                             new[t]['positions'].extend(val['positions'])
                     else:
                         try:
-                            pls = [(pl,x) for pl in val['proxLoc']]
-                            new[t] = {'text' : t, 'occurences' : len(pls), 'positions' : []}
+                            pls = [(pl, x) for pl in val['proxLoc']]
+                            new[t] = {
+                                'text': t,
+                                'occurences': len(pls),
+                                'positions': []
+                            }
                             for p in pls:
                                 new[t]['positions'].extend(p)
                         except KeyError:
-                            new[t] = {'text' : t, 'occurences' : val['occurences'],
-                                      'positions' : val['positions'][:]}
+                            new[t] = {
+                                'text': t,
+                                'occurences': val['occurences'],
+                                'positions': val['positions'][:]
+                            }
                     x += 1
         return new
 
+
 class OffsetProximityTokenMerger(ProximityTokenMerger):
+
     def process_hash(self, session, data):
         new = {}
         for d, val in data.iteritems():
@@ -72,12 +95,18 @@ class OffsetProximityTokenMerger(ProximityTokenMerger):
                     if t in new:
                         new[t]['occurences'] += val['occurences']
                     else:
-                        new[t] = {'text' : t, 'occurences' : val['occurences'], 'positions' : []}
+                        new[t] = {
+                            'text': t,
+                            'occurences': val['occurences'],
+                            'positions': []
+                        }
                     try:
                         if len(wordOffs):
-                            pls =[(pl,wordOffs[x], posns[x]) for pl in val['proxLoc']]
+                            pls = [(pl, wordOffs[x], posns[x])
+                                  for pl in val['proxLoc']
+                                  ]
                         else:
-                            pls =[(pl,x, posns[x]) for pl in val['proxLoc']]
+                            pls = [(pl, x, posns[x]) for pl in val['proxLoc']]
                         for p in pls:
                             new[t]['positions'].extend(p)
                     except KeyError:
@@ -88,10 +117,13 @@ class OffsetProximityTokenMerger(ProximityTokenMerger):
         
 class RangeTokenMerger(SimpleTokenMerger):
     
-    _possibleSettings = {'char' : {'docs' : 'Character to use as the interval designator. Defaults to forward slash (/) after ISO 8601.', 
-                                   'type': str
-                                   }
-                       }
+    _possibleSettings = {
+        'char': {
+            'docs': ('Character to use as the interval designator. Defaults '
+                     'to forward slash (/) after ISO 8601.'),
+            'type': str
+        }
+    }
     
     def __init__(self, session, config, parent):
         SimpleTokenMerger.__init__(self, session, config, parent)
@@ -111,9 +143,9 @@ class SequenceRangeTokenMerger(RangeTokenMerger):
             l = val['text']
             for x in range(0, len(l), 2):
                 try:
-                    newkey = "{0}{1}{2}".format(l[x], self.char, l[x+1])
+                    newkey = "{0}{1}{2}".format(l[x], self.char, l[x + 1])
                 except IndexError:
-                    # uneven number of points :/
+                    # Uneven number of points :/
                     newkey = "{0}{1}{0}".format(l[x], self.char)
                 if newkey in new:
                     new[newkey]['occurences'] += 1
@@ -144,7 +176,12 @@ class MinMaxRangeTokenMerger(RangeTokenMerger):
 
 class NGramTokenMerger(SimpleTokenMerger):
 
-    _possibleSettings = {'nValue' : {'docs' : '', 'type' : int}}
+    _possibleSettings = {
+        'nValue': {
+            'docs': '',
+            'type': int
+        }
+    }
 
     def __init__(self, session, config, parent):
         SimpleTokenMerger.__init__(self, session, config, parent)
@@ -155,14 +192,18 @@ class NGramTokenMerger(SimpleTokenMerger):
         n = self.n
         for k, val in data.iteritems():
             split = val['text']
-            for i in range(len(split)-(n-1)):
-                nGram = split[i:(i+n)]
+            for i in range(len(split) - (n - 1)):
+                nGram = split[i:(i + n)]
                 nGramStr = ' '.join(nGram)
                 if nGramStr in kw:
                     kw[nGramStr]['occurences'] += val['occurences']
                 else:
-                    kw[nGramStr] = {'text' : nGramStr, 'occurences' : val['occurences']}
+                    kw[nGramStr] = {
+                        'text': nGramStr,
+                        'occurences': val['occurences']
+                    }
         return kw
+
 
 class ReconstructTokenMerger(SimpleTokenMerger):
 
@@ -176,7 +217,8 @@ class ReconstructTokenMerger(SimpleTokenMerger):
             new = []
             for (w, word) in enumerate(val['text']):
                 if pl:
-                    new.append('%s%s' % (' ' * (val['charOffsets'][w] - currLen), word))
+                    space = ' ' * (val['charOffsets'][w] - currLen)
+                    new.append('%s%s' % (space, word))
                     currLen = val['charOffsets'][w] + len(word)
                 else:
                     new.append('%s ' % (word))
@@ -186,21 +228,29 @@ class ReconstructTokenMerger(SimpleTokenMerger):
             kw[k] = kval
         return kw
 
+
 class PhraseTokenMerger(ProximityTokenMerger):
-    _possiblePaths = {'mergeHashPickle' : {'docs' : 'Pickled hash of words to merge'}}
+
+    _possiblePaths = {
+        'mergeHashPickle': {
+            'docs': 'Pickled hash of words to merge'
+        }
+    }
 
     def __init__(self, session, config, parent):
         ProximityTokenMerger.__init__(self, session, config, parent)
         mp = self.get_path(session, 'mergeHashPickle', '')
         if not mp:
-            raise ConfigFileException("%s needs path: mergeHashPickle" % self.id)
+            msg = "%s needs path: mergeHashPickle" % self.id
+            raise ConfigFileException(msg)
         elif not os.path.exists(mp):
-            raise FileDoesNotExistException(" mergeHashPickle path on %s does not exist" % self.id)
+            msg = " mergeHashPickle path on %s does not exist" % self.id
+            raise FileDoesNotExistException(msg)
             
         inh = file(mp)
         data = inh.read()
         inh.close()
-        self.mergeHash = cPickle.loads(data)
+        self.mergeHash = pickle.loads(data)
 
     def process_hash(self, session, data):
         new = {}
@@ -209,11 +259,10 @@ class PhraseTokenMerger(ProximityTokenMerger):
                 x = 0
                 merging = []
                 for t in val['text']:
-
-                    # check if t in self.mergeHash
-                    if self.mergeHash.has_key(t) and len(val['text']) > x+1:
+                    # Check if t in self.mergeHash
+                    if self.mergeHash.has_key(t) and len(val['text']) > x + 1:
                         nexts = self.mergeHash[t]
-                        next = val['text'][x+1]
+                        next = val['text'][x + 1]
                         if next in nexts:
                             merging.append(t)
                             continue
@@ -225,23 +274,26 @@ class PhraseTokenMerger(ProximityTokenMerger):
                     if t in new:
                         new[t]['occurences'] += val['occurences']
                         try:
-                            pls = [(pl,x) for pl in val['proxLoc']]
+                            pls = [(pl, x) for pl in val['proxLoc']]
                             for p in pls:
                                 new[t]['positions'].extend(p)
                         except KeyError:
                             new[t]['positions'].extend(val['positions'])
                     else:
                         try:
-                            pls = [(pl,x) for pl in val['proxLoc']]
-                            new[t] = {'text' : t, 'occurences' : len(pls), 'positions' : []}
+                            pls = [(pl, x) for pl in val['proxLoc']]
+                            new[t] = {
+                                'text': t,
+                                'occurences': len(pls),
+                                'positions': []
+                            }
                             for p in pls:
                                 new[t]['positions'].extend(p)
                         except KeyError:
-                            new[t] = {'text' : t, 'occurences' : val['occurences'],
-                                      'positions' : val['positions'][:]}
+                            new[t] = {
+                                'text': t,
+                                'occurences': val['occurences'],
+                                'positions': val['positions'][:]
+                            }
                     x += 1
-
-
         return new
-
-    

@@ -22,7 +22,7 @@ class Cheshire3Console(InteractiveConsole):
            'from cheshire3.session import Session',
            'from cheshire3.server import SimpleServer',
            'session = Session()',
-           'server = SimpleServer(session, "{}")'.format(args.serverconfig),
+           'server = SimpleServer(session, "{0}")'.format(args.serverconfig),
         ]
         # Seed console with standard initialization code
         for line in init_code_lines:
@@ -66,8 +66,8 @@ class Cheshire3Console(InteractiveConsole):
         """
         if banner is None:
             c3_version = '.'.join([str(p) for p in cheshire3Version])
-            banner = ("Python {} on {}\n".format(sys.version, sys.platform),
-                      "Cheshire3 {} Interactive Console\n".format(c3_version),
+            banner = ("Python {0} on {1}\n".format(sys.version, sys.platform),
+                      "Cheshire3 {0} Interactive Console\n".format(c3_version),
                       'Type "help", "copyright", "credits" or "license" for '
                       'more information.')
         return InteractiveConsole.interact(self, banner)
@@ -91,7 +91,7 @@ def main(argv=None):
             dbid = None
         
     if dbid is not None:
-        dbline = 'db = server.get_object(session, "{}")'.format(dbid)
+        dbline = 'db = server.get_object(session, "{0}")'.format(dbid)
         console.push(dbline)
     
     if args.script is not None:
@@ -114,7 +114,7 @@ argparser.add_argument('-d', '--database', type=str,
                        help="identifier of Cheshire3 database")
 argparser.add_argument('script', type=str,
                        action='store', nargs='?',
-                       default=os.getcwd(),
+                       default=None,
                        help="read and execute commands from script file")
 argparser.add_argument('-i', '--interactive',
                        action="store_true", dest="interactive", default=False,

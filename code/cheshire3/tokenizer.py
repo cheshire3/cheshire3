@@ -1,24 +1,38 @@
+"""Cheshire3 Tokenizer Implementations.
 
-from cheshire3.baseObjects import Tokenizer
+A Tokenizer converts a string to a list of tokens. Lists aren't hashable so we
+maintain string key. Also we're very unlikely to duplicate at this point, and
+even if we do it's not important.
+
+A Tokenizer MUST be followed by a TokenMerger merge, however, as Normalizers
+won't know what to do with a list as data.
+"""
+
+
+import re
+import string
+# Python source code tokenizer from base libs
+import tokenize
+import keyword
+try:
+    import cStringIO as StringIO
+except ImportError:
+    import StringIO
 
 from dateutil import parser as dateparser
 from datetime import timedelta
-import re
 
-# Python source code tokenizer from base libs
-import tokenize, StringIO, keyword
-
-# swap a string over to a list of tokens
-# lists aren't hashable so we maintain string key
-# also we're very unlikely to duplicate at this point,
-#   and even if we do it's not important.
-# This MUST be followed by a merge, however.
-# as normalisers won't know what to do with a list as data
+from cheshire3.baseObjects import Tokenizer
 
 
 class SimpleTokenizer(Tokenizer):
     
-    _possibleSettings = {'char' : {'docs' : 'character to split with, or empty for default of whitespace'}}
+    _possibleSettings = {
+        'char': {
+            'docs': ('character to split with, or empty for default of '
+                     'whitespace')
+            }
+    }
 
     def __init__(self, session, config, parent):
         Tokenizer.__init__(self, session, config, parent)
@@ -38,6 +52,7 @@ class SimpleTokenizer(Tokenizer):
             kw[key] = nval
         return kw
 
+
 class OffsetTokenizer(Tokenizer):
 
     def process_hash(self, session, data):
@@ -52,15 +67,32 @@ class OffsetTokenizer(Tokenizer):
 
 
 class RegexpSubTokenizer(SimpleTokenizer):
-    u"""A Tokenizer that replaces regular expression matches in the data with a configurable character (defaults to whitespace), then splits the result at whitespace.."""
-    # pre = self.get_setting(session, 'regexp', u"((?<!\s)'|[-.,]((?=\s)|$)|(^|(?<=\s))[-.,']|[\".,'-][\".,'-]|[~`!@+=\#\&\^*()\[\]{}\\\|\":;<>?/\u2026\u2013\u2014\u2018\u2019\u201c\u201d])")
+    u"""Substitute regex matches with a character, then split on whitespace.
+    
+    A Tokenizer that replaces regular expression matches in the data with a
+    configurable character (defaults to whitespace), then splits the result at
+    whitespace.
+    """
 
-    _possibleSettings = {'regexp' : {'docs' : ''},
-                         'char' : {'docs' : ''}}
+    _possibleSettings = {
+        'regexp': {
+            'docs': ("Regular expression to match and replace with instances "
+                     "of 'char' before spltting on whitespace")
+        },
+        'char': {
+            'docs': ''
+        }
+    }
 
     def __init__(self, session, config, parent):
         SimpleTokenizer.__init__(self, session, config, parent)
-        pre = self.get_setting(session, 'regexp', u"""([-.,'\")}\]]+((?=\s)|$)|(^|(?<=\s))[-.,']+|[`~!@+=\#\&\^*()\[\]{}\\\|\":;<>?/\u2026\u2013\u2014\u2018\u2019\u201c\u201d]|\.\.\.)""")
+        pre = self.get_setting(session,
+                               'regexp',
+                               u"""(?x)([-.,'\")}\]]+((?=\s)|$)|(^|(?<=\s))
+                                [-.,']+|[`~!@+=\#\&\^*()\[\]{}\\\|\":;<>?
+                                /\u2026\u2013\u2014\u2018\u2019\u201c
+                                \u201d]|\.\.\.)"""
+                               )
         # all strings should be treated as unicode internally
         # this is default for lxml - primary Record implementation
         self.regexp = re.compile(pre, re.UNICODE)
@@ -74,11 +106,21 @@ class RegexpSubTokenizer(SimpleTokenizer):
 class RegexpSplitTokenizer(SimpleTokenizer):
     """A Tokenizer that simply splits at the regex matches."""
      
-    _possibleSettings = {'regexp' : {'docs' : 'Regular expression used to split string'}}
+    _possibleSettings = {
+        'regexp': {
+            'docs': 'Regular expression used to split string'
+        }
+    }
      
     def __init__(self, session, config, parent):
         SimpleTokenizer.__init__(self, session, config, parent)
-        pre = self.get_setting(session, 'regexp', u"""([-.,'\")}\]]+((?=\s)|$)|(^|(?<=\s))[-.,']+|[`~!@+=\#\&\^*()\[\]{}\\\|\":;<>?/\u2026\u2013\u2014\u2018\u2019\u201c\u201d]|\.\.\.)""")
+        pre = self.get_setting(session,
+                               'regexp',
+                               u"""(?x)([-.,'\")}\]]+((?=\s)|$)|(^|(?<=\s))
+                                [-.,']+|[`~!@+=\#\&\^*()\[\]{}\\\|\":;<>?
+                                /\u2026\u2013\u2014\u2018\u2019\u201c
+                                \u201d]|\.\.\.)"""
+                               )
         self.regexp = re.compile(pre, re.UNICODE)
 
     def process_string(self, session, data):
@@ -106,29 +148,39 @@ class RegexpFindTokenizer(SimpleTokenizer):
 
     # Require acronyms to have at least TWO letters Eg U.S not just J.
 
-    _possibleSettings = {'regexp' : {'docs' : 'Regular expression'},
-                         'gaps' : {'docs' : 'Does the regular expression specify the gaps between desired tokens. Defaults to 0 i.e. No, it specifies tokens to keep', 'type' : int, 'options' : "0|1"}
-                         }
+    _possibleSettings = {
+        'regexp': {
+            'docs': 'Regular expression to match when finding tokens.'
+        },
+        'gaps': {
+            'docs': ('Does the regular expression specify the gaps between '
+                     'desired tokens. Defaults to 0 i.e. No, it specifies '
+                     'tokens to keep'),
+            'type': int,
+            'options': "0|1"
+        }
+    }
 
     def __init__(self, session, config, parent):
         SimpleTokenizer.__init__(self, session, config, parent)
         pre = self.get_setting(session, 'regexp', u"""
-          (?xu)                                            #verbose, unicode
-          (?:
-            [a-zA-Z0-9!#$%*/?|^{}`~&'+-=_]+@[0-9a-zA-Z.-]+ #email
-           |(?:[\w+-]+)?[+-]/[+-]                          #alleles
-           |\w+(?:-\w+)+(?:'(?:t|ll've|ll|ve|s|d've|d|re))?  #hypenated word (maybe 'xx on the end)
-           |[$\xa3\xa5\u20AC]?[0-9]+(?:[.,:-][0-9]+)+[%]?  #date/num/money/time
-           |[$\xa3\xa5\u20AC][0-9]+                        #single money
-           |[0-9]+(?=[a-zA-Z]+)                            #split: 8am 1Million
-           |[0-9]+%                                        #single percentage 
-           |(?:[A-Z]\.)+[A-Z\.]                            #acronym
-           |[oOd]'[a-zA-Z]+                                #o'clock, O'brien, d'Artagnan   
-           |[a-zA-Z]+://[^\s]+                             #URI
-           |\w+'(?:d've|d|t|ll've|ll|ve|s|re)              #don't, we've
-           |(?:[hH]allowe'en|[mM]a'am|[Ii]'m|[fF]o'c's'le|[eE]'en|[sS]'pose)
-           |[\w+]+                                         #basic words, including +
-          )""")
+        (?xu)                                            # verbose, unicode
+        (?:
+         [a-zA-Z0-9!#$%*/?|^{}`~&'+-=_]+@[0-9a-zA-Z.-]+ # email
+         |(?:[\w+-]+)?[+-]/[+-]                         # genetic alleles
+         |\w+(?:-\w+)+                                  # hypenated word
+          (?:'(?:t|ll've|ll|ve|s|d've|d|re))?           # with/without 'suffix
+         |[$\xa3\xa5\u20AC]?[0-9]+(?:[.,:-][0-9]+)+[%]? # date/num/money/time
+         |[$\xa3\xa5\u20AC][0-9]+                       # single money
+         |[0-9]+(?=[a-zA-Z]+)                           # split: 8am 1Million
+         |[0-9]+%                                       # single percentage 
+         |(?:[A-Z]\.)+[A-Z\.]                           # acronym
+         |[oOd]'[a-zA-Z]+                       # o'clock, O'Brien, d'Artagnan   
+         |[a-zA-Z]+://[^\s]+                            # URI
+         |\w+'(?:d've|d|t|ll've|ll|ve|s|re)             # don't, we've
+         |(?:[hH]allowe'en|[mM]a'am|[Ii]'m|[fF]o'c's'le|[eE]'en|[sS]'pose)
+         |[\w+]+                                     # basic words, including +
+        )""")
 
         self.regexp = re.compile(pre, re.UNICODE)
         self.gaps = self.get_setting(session, 'gaps', 0)
@@ -141,7 +193,11 @@ class RegexpFindTokenizer(SimpleTokenizer):
 
 
 class RegexpFindOffsetTokenizer(OffsetTokenizer, RegexpFindTokenizer):
-    """A tokenizer that returns all words that match the regex, and also the character offset at which each word occurs."""
+    """Find tokens that match regex with character offsets.
+    
+    A Tokenizer that returns all words that match the regex, and also the 
+    character offset at which each word occurs.
+    """
     
     def __init__(self, session, config, parent):
         # Only init once!
@@ -163,35 +219,11 @@ class RegexpFindPunctuationOffsetTokenizer(RegexpFindOffsetTokenizer):
         positions = []
         for m in self.regexp.finditer(data):
             tokens.append(m.group())
-            i = m.start();
-            while i > 0 and data[i-1] in string.punctuation:
-                i = i-1
+            i = m.start()
+            while i > 0 and data[i - 1] in string.punctuation:
+                i = i - 1
             positions.append(i)
         return (tokens, positions)
-
-
-# XXX: This should be in TextMining, and NLTK should auto install
-try:
-    import nltk
-    class PunktWordTokenizer(SimpleTokenizer):
-
-        def __init__(self, session, config, parent):
-            SimpleTokenizer.__init__(self, session, config, parent)
-            self.punkt = nltk.tokenize.PunktWordTokenizer()
-
-        def process_string(self, session, data):
-            return self.punkt.tokenize(data)
-
-
-    class PunktSentenceTokenizer(SimpleTokenizer):
-        def __init__(self, session, config, parent):
-            SimpleTokenizer.__init__(self, session, config, parent)
-            self.punkt = nltk.data.load('tokenizers/punkt/english.pickle')
-
-        def process_string(self, session, data):
-            return self.punkt.tokenize(data)
-except:
-    pass
 
 
 # Was a text mining util, now should reformulate workflows
@@ -199,8 +231,20 @@ class SentenceTokenizer(SimpleTokenizer):
 
     def __init__(self, session, config, parent):
         self.paraRe = re.compile('\n\n+', re.UNICODE)
-        self.sentenceRe = re.compile('.+?(?<!\.\.)[\.!?:]["\'\)]?(?=\s+|$)(?![a-z])', re.UNICODE)
-        self.abbrMashRe = re.compile('(^|\s)([^\s]+?\.[a-zA-Z]+|Prof|Dr|Sr|Mr|Mrs|Ms|Jr|Capt|Gen|Col|Sgt|[ivxjCcl]+|[A-Z])\.(\s|$)', re.UNICODE)
+        self.sentenceRe = re.compile(
+                              '.+?(?<!\.\.)[\.!?:]["\'\)]?(?=\s+|$)(?![a-z])',
+                              re.UNICODE | re.DOTALL
+                          )
+        self.abbrMashRe = re.compile('''
+        (?xu)                                          # verbose, unicode
+        (^|\s)                                         # leading spaces
+        ([^\s]+?\.[a-zA-Z]+|
+            Prof|Dr|Sr|Mr|Mrs|Ms|Jr|Capt|Gen|Col|Sgt|  # commonly abbreviated
+            [ivxjCcl]+|[A-Z])\.                        # Acronyms?
+            (\s|$)                                     # trailing space
+            ''',
+            re.UNICODE
+        )
 
     def process_string(self, session, data):
         ps = self.paraRe.split(data)
@@ -227,11 +271,30 @@ class LineTokenizer(SimpleTokenizer):
 class DateTokenizer(SimpleTokenizer):
     """Tokenizer to identify date tokens, and return only these.
     
-    Capable of extracting multiple dates, but slowly and less reliably than single ones."""
+    Capable of extracting multiple dates, but slowly and less reliably than
+    single ones.
+    """
 
-    _possibleDefaults = {'datetime' : {"docs" : "Default datetime to use for values not supplied in the data"}}
-    _possibleSettings = {'fuzzy' : {"docs" : "Should the parser use fuzzy matching.", 'type' : int, 'options' : '0|1'}
-                        , 'dayfirst' : {"docs" : "Is the day before the month (when ambiguous). 1 = Yes, 0 = No (default)", 'type' : int, 'options' : '0|1'}}
+    _possibleDefaults = {
+        'datetime': {
+            "docs": ("Default datetime to use for values not supplied in the "
+                     "data")
+        }
+    }
+    
+    _possibleSettings = {
+        'fuzzy': {
+            "docs": "Should the parser use fuzzy matching.",
+            'type': int,
+            'options': '0|1'
+        },
+        'dayfirst': {
+            "docs": ("Is the day before the month (when ambiguous). "
+                     "1 = Yes, 0 = No (default)"),
+            'type': int,
+            'options': '0|1'
+        }
+    }
 
     def __init__(self, session, config, parent):
         SimpleTokenizer.__init__(self, session, config, parent)
@@ -243,15 +306,17 @@ class DateTokenizer(SimpleTokenizer):
         ([0-2]\d\d\d)        # match any year up to 2999
         (0[1-9]|1[0-2]|xx)?      # match any month 01-12 or xx
         (0[1-9]|[1-2][0-9]|3[0-1]|xx)?  # match any date up to 01-31 or xx
-        ''', re.VERBOSE|re.IGNORECASE|re.UNICODE)
+        ''', re.VERBOSE | re.IGNORECASE | re.UNICODE)
         if default:
-            self.default = dateparser.parse(default.encode('utf-8'), dayfirst=self.dayfirst, fuzzy=self.fuzzy)
+            self.default = dateparser.parse(default.encode('utf-8'),
+                                            dayfirst=self.dayfirst,
+                                            fuzzy=self.fuzzy)
         else:
             self.default = dateparser.parse('2000-01-01', fuzzy=True)
             
     def _convertIsoDates(self, mo):
         dateparts = [mo.group(1)]
-        for x in range(2,4):
+        for x in range(2, 4):
             if mo.group(x):
                 dateparts.append(mo.group(x))
         return '-'.join(dateparts)
@@ -259,7 +324,7 @@ class DateTokenizer(SimpleTokenizer):
     def _tokenize(self, data, default=None):
         if default is None:
             default = self.default
-        # deconstruct data word by word and feed to parser until success.
+        # Deconstruct data word by word and feed to parser until success.
         # Must be a better way to do this..., but for now...
         tks = []
         wds = data.split()
@@ -279,8 +344,8 @@ class DateTokenizer(SimpleTokenizer):
         return tks
 
     def process_string(self, session, data):
-        # convert ISO 8601 date elements to extended format (YYYY-MM-DD)
-        # for better recognition by date parser
+        # Convert ISO 8601 date elements to extended format (YYYY-MM-DD) for 
+        # better recognition by date parser
         data = self.isoDateRe.sub(self._convertIsoDates, data)
         if len(data):
             # a range?
@@ -291,11 +356,12 @@ class DateTokenizer(SimpleTokenizer):
             elif data.count('-') == 1 and (data.find('-') < len(data) - 4):
                 bits = data.split('-')
             if len(bits):
-                # use a new default, just under a year on for the end of the range
+                # Use a new default, just under a year on for the end of the
+                # range
                 td = timedelta(days=364, hours=23, minutes=59, seconds=59, 
                                microseconds=999999)
                 tks = self._tokenize(bits[0]) + \
-                    self._tokenize(bits[1], self.default+td)
+                    self._tokenize(bits[1], self.default + td)
             else:
                 tks = []
             if len(tks):
@@ -334,10 +400,10 @@ class DateRangeTokenizer(DateTokenizer):
         # use a new default, just under a year on for the end of the range
         td = timedelta(days=364, hours=23, minutes=59, seconds=59, 
                        microseconds=999999)
-        midpoint = len(data)/2
+        midpoint = len(data) / 2
         if data[midpoint] in ['/', '-', ' ']:
             startK = data[:midpoint]
-            endK = data[midpoint+1:]
+            endK = data[midpoint + 1:]
         elif len(data.split(' to ')) == 2:
             startK, endK = data.split(' to ')
         elif data.count('/') == 1:
@@ -347,7 +413,7 @@ class DateRangeTokenizer(DateTokenizer):
             startK, endK = data.split('-')
         else:
             startK = endK = data
-        return self._tokenize(startK) + self._tokenize(endK, self.default+td)
+        return self._tokenize(startK) + self._tokenize(endK, self.default + td)
         
 
 class PythonTokenizer(OffsetTokenizer):
@@ -355,7 +421,8 @@ class PythonTokenizer(OffsetTokenizer):
 
     def __init__(self, session, config, parent):
         OffsetTokenizer.__init__(self, session, config, parent)
-        self.ignoreTypes = [tokenize.INDENT, tokenize.DEDENT, tokenize.NEWLINE, tokenize.NL, tokenize.ENDMARKER]
+        self.ignoreTypes = [tokenize.INDENT, tokenize.DEDENT, tokenize.NEWLINE,
+                            tokenize.NL, tokenize.ENDMARKER]
 
     def process_string(self, session, data):
         io = StringIO.StringIO(data)
@@ -379,5 +446,4 @@ class PythonTokenizer(OffsetTokenizer):
                     toks.append("%s/%s" % (txt, tokenize.tok_name[ttype]))
                 posns.append(totalChrs + start[1])
         return (toks, posns)
-                
 
