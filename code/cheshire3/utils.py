@@ -4,6 +4,8 @@ import  types, re
 from xml.dom import Node
 from lxml import etree
 import math
+import commands
+import subprocess
 
 elementType = Node.ELEMENT_NODE
 textType = Node.TEXT_NODE
@@ -78,6 +80,25 @@ def getFirstElementByTagName(node, local):
             return recNode
     return None
 
+
+def getShellResult(cmd):
+    """Execute a command in the O/S shell and return the result.
+
+    Convenience function for use throughout Cheshire3 to cope with execution in different environments (e.g. iRODS Microservices.)
+    """
+    try:
+        result = commands.getoutput(cmd) # causes bug in iRODS
+    except IOError:
+        # *very* edge case; fails when run in a microservice under a delayExec rule in iRODS
+        pipe = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        result = pipe.stdout.read()
+        pipe.stdout.close()
+        pipe.stderr.close()
+        del pipe
+
+    return result
+
+
 try:
     # only in Python 2.5+
     import uuid
@@ -111,24 +132,6 @@ except:
                     uuidl.append('-')
                 uuidl.pop(-1)  # strip trailing -
                 return ''.join(uuidl)
-
-import commands, subprocess
-def getShellResult(cmd):
-    """Execute a command in the O/S shell and return the result.
-
-    Convenience function for use throughout Cheshire3 to cope with execution in different environments (e.g. iRODS Microservices.)
-    """
-    try:
-        result = commands.getoutput(cmd) # causes bug in iRODS
-    except IOError:
-        # *very* edge case; fails when run in a microservice under a delayExec rule in iRODS
-        pipe = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        result = pipe.stdout.read()
-        pipe.stdout.close()
-        pipe.stderr.close()
-        del pipe
-
-    return result
 
 
 def now():
