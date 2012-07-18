@@ -147,10 +147,322 @@ class SimpleExtractorTestCase(Cheshire3ObjectTestCase):
                 self.assertEqual(mergedval, av[sharedk] + bv[sharedk])
 
 
+class StripSimpleExtractorTestCase(SimpleExtractorTestCase):
+    "Test stripping leading/trailing whitespace."
+
+    @classmethod
+    def _get_class(cls):
+        return SimpleExtractor
+
+    def _get_config(self):
+        return etree.XML('''
+        <subConfig type="extractor" id="{0.__name__}">
+            <objectType>{0.__module__}.{0.__name__}</objectType>
+            <options>
+                <setting type="stripWhitespace">1</setting>
+            </options>
+        </subConfig>
+        '''.format(self._get_class()))
+
+    def setUp(self):
+        Cheshire3ObjectTestCase.setUp(self)
+
+    def _get_process_string_tests(self):
+        # Return a list of tuples containing test pairs:
+        # (string to be tokenized, expected tokens list)
+        return [('spam',
+                 {'spam': {
+                      'text': 'spam',
+                      'occurences': 1,
+                      'proxLoc': [-1]
+                      }
+                  }),
+                (' spam',
+                 {'spam': {
+                      'text': 'spam',
+                      'occurences': 1,
+                      'proxLoc': [-1]
+                      }
+                  }),
+                (u'spam ',
+                 {u'spam': {
+                      'text': u'spam',
+                      'occurences': 1,
+                      'proxLoc': [-1]
+                      }
+                 }),
+                (' spam ',
+                 {'spam': {
+                      'text': 'spam',
+                      'occurences': 1,
+                      'proxLoc': [-1]
+                      }
+                  })]
+
+    def _get_process_node_tests(self):
+        return [(etree.XML('<data>spam</data>'),
+                 {'spam': {
+                      'text': 'spam',
+                      'occurences': 1,
+                      'proxLoc': [-1]
+                      }
+                  }),
+                (etree.XML('<data> spam</data>'),
+                 {'spam': {
+                      'text': 'spam',
+                      'occurences': 1,
+                      'proxLoc': [-1]
+                      }
+                  }),
+                (etree.XML('<data>spam </data>'),
+                 {'spam': {
+                      'text': 'spam',
+                      'occurences': 1,
+                      'proxLoc': [-1]
+                      }
+                 }),
+                (etree.XML('<data> spam </data>'),
+                 {'spam': {
+                      'text': 'spam',
+                      'occurences': 1,
+                      'proxLoc': [-1]
+                      }
+                  })]
+
+
+class NoStripSimpleExtractorTestCase(SimpleExtractorTestCase):
+    "Test keeping leading/trailing whitespace."
+
+    @classmethod
+    def _get_class(cls):
+        return SimpleExtractor
+
+    def _get_config(self):
+        return etree.XML('''
+        <subConfig type="extractor" id="{0.__name__}">
+            <objectType>{0.__module__}.{0.__name__}</objectType>
+            <options>
+                <setting type="stripWhitespace">0</setting>
+            </options>
+        </subConfig>
+        '''.format(self._get_class()))
+
+    def setUp(self):
+        Cheshire3ObjectTestCase.setUp(self)
+
+    def _get_process_string_tests(self):
+        # Return a list of tuples containing test pairs:
+        # (string to be tokenized, expected tokens list)
+        return [('spam',
+                 {'spam': {
+                      'text': 'spam',
+                      'occurences': 1,
+                      'proxLoc': [-1]
+                      }
+                  }),
+                (' spam',
+                 {' spam': {
+                      'text': ' spam',
+                      'occurences': 1,
+                      'proxLoc': [-1]
+                      }
+                  }),
+                (u'spam ',
+                 {u'spam ': {
+                      'text': u'spam ',
+                      'occurences': 1,
+                      'proxLoc': [-1]
+                      }
+                 }),
+                (' spam ',
+                 {' spam ': {
+                      'text': ' spam ',
+                      'occurences': 1,
+                      'proxLoc': [-1]
+                      }
+                  })]
+
+    def _get_process_node_tests(self):
+        return [(etree.XML('<data>spam</data>'),
+                 {'spam': {
+                      'text': 'spam',
+                      'occurences': 1,
+                      'proxLoc': [-1]
+                      }
+                  }),
+                (etree.XML('<data> spam</data>'),
+                 {' spam': {
+                      'text': ' spam',
+                      'occurences': 1,
+                      'proxLoc': [-1]
+                      }
+                  }),
+                (etree.XML('<data>spam </data>'),
+                 {'spam ': {
+                      'text': 'spam ',
+                      'occurences': 1,
+                      'proxLoc': [-1]
+                      }
+                 }),
+                (etree.XML('<data> spam </data>'),
+                 {' spam ': {
+                      'text': ' spam ',
+                      'occurences': 1,
+                      'proxLoc': [-1]
+                      }
+                  })]
+
+
+class SpaceSimpleExtractorTestCase(SimpleExtractorTestCase):
+    "Test adding whitespace to named elements."
+
+    @classmethod
+    def _get_class(cls):
+        return SimpleExtractor
+
+    def _get_config(self):
+        return etree.XML('''
+        <subConfig type="extractor" id="{0.__name__}">
+            <objectType>{0.__module__}.{0.__name__}</objectType>
+            <options>
+                <setting type="extraSpaceElements">data2</setting>
+            </options>
+        </subConfig>
+        '''.format(self._get_class()))
+
+    def setUp(self):
+        Cheshire3ObjectTestCase.setUp(self)
+
+    def _get_process_node_tests(self):
+        return [(etree.XML('<data>spam</data>'),
+                 {'spam': {
+                      'text': 'spam',
+                      'occurences': 1,
+                      'proxLoc': [-1]
+                      }
+                  }),
+                (etree.XML('<data2>spam</data2>'),
+                 {'spam ': {
+                      'text': 'spam ',
+                      'occurences': 1,
+                      'proxLoc': [-1]
+                      }
+                  })]
+
+    def _get_process_xpathResult_tests(self):
+        tests = [([[inp]], expected)
+                for inp, expected
+                in self._get_process_node_tests()]
+        tests.extend([
+                      ([[etree.XML('<data>spam</data>'),
+                         etree.XML('<data>egg</data>')]],
+                       {'spam': {
+                           'text': 'spam',
+                           'occurences': 1,
+                           'proxLoc': [-1]
+                           },
+                        'egg': {
+                            'text': 'egg',
+                            'occurences': 1,
+                            'proxLoc': [-1]
+                            }
+                        }),
+                      ([[etree.XML('<data>spam</data>')],
+                        [etree.XML('<data2>spam</data2>')]],
+                       {'spam': {
+                           'text': 'spam',
+                           'occurences': 1,
+                           'proxLoc': [-1]
+                           },
+                        'spam ': {
+                            'text': 'spam ',
+                            'occurences': 1,
+                            'proxLoc': [-1]
+                            }
+                        })
+        ])
+        return tests
+
+
+class ProxExtractorTestCase(SimpleExtractorTestCase):
+
+    @classmethod
+    def _get_class(cls):
+        return SimpleExtractor
+
+    def _get_config(self):
+        return etree.XML('''
+        <subConfig type="extractor" id="{0.__name__}">
+            <objectType>{0.__module__}.{0.__name__}</objectType>
+            <options>
+                <setting type="prox">1</setting>
+                <setting type="reversable">1</setting>
+            </options>
+        </subConfig>
+        '''.format(self._get_class()))
+
+    def setUp(self):
+        Cheshire3ObjectTestCase.setUp(self)
+
+    def _get_process_node_tests(self):
+        return [(etree.XML('<data>spam</data>'),
+                 {'spam': {
+                      'text': 'spam',
+                      'occurences': 1,
+                      'proxLoc': [0]
+                      }
+                  })]
+
+    def _get_process_xpathResult_tests(self):
+        tests = [([[inp]], expected)
+                for inp, expected
+                in self._get_process_node_tests()]
+        tree = etree.XML('<record/>')
+        data = etree.SubElement(tree, "data")
+        data.text = "spam"
+        data2 = etree.SubElement(tree, "data")
+        data2.text = "egg"
+        tests.append(
+                      ([[data,
+                         data2]],
+                       {'spam': {
+                           'text': 'spam',
+                           'occurences': 1,
+                           'proxLoc': [1]
+                           },
+                        'egg': {
+                            'text': 'egg',
+                            'occurences': 1,
+                            'proxLoc': [2]
+                            }
+                        })
+                     )
+        tree = etree.XML('<record/>')
+        data = etree.SubElement(tree, "data")
+        data.text = "spam"
+        data2 = etree.SubElement(tree, "data")
+        data2.text = "spam"
+        tests.append(
+                      ([[data],
+                        [data2]],
+                       {'spam': {
+                           'text': 'spam',
+                           'occurences': 2,
+                           'proxLoc': [1, 2]
+                           }
+                        })
+                     )
+        return tests
+
+
 def load_tests(loader, tests, pattern):
     # Alias loader.loadTestsFromTestCase for sake of line lengths
     ltc = loader.loadTestsFromTestCase 
     suite = ltc(SimpleExtractorTestCase)
+    suite.addTests(ltc(StripSimpleExtractorTestCase))
+    suite.addTests(ltc(NoStripSimpleExtractorTestCase))
+    suite.addTests(ltc(SpaceSimpleExtractorTestCase))
+    suite.addTests(ltc(ProxExtractorTestCase))
     return suite
 
 
