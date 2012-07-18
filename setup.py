@@ -19,7 +19,7 @@ setuppath = inspect.getfile(inspect.currentframe())
 setupdir = os.path.dirname(setuppath)
 
 _name = u'cheshire3'
-_version = '1.0.0b42'
+_version = '1.0.0b43'
 
 # Read any necessary bits from README.mdown
 try:
