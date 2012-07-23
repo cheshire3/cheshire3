@@ -52,7 +52,12 @@ class SimpleWorkflow(Workflow):
                                 u'begin_logging', u'commit_logging',
                                 u'commit_metadata', u'shutdown']
         
-        self.singleInputFunctions = ['get_indexes', 'commit_parallelIndexing', 'get_idChunkGenerator']
+        self.singleInputFunctions = [u'get_indexes', 
+                                     u'commit_parallelIndexing', 
+                                     u'get_idChunkGenerator',
+                                     u'get_dom', u'get_sax', u'get_xml', #records
+                                     u'get_raw' # documents
+                                     ]
 
         Workflow.__init__(self, session, config, parent)
         # Somewhere at the top there must be a server
