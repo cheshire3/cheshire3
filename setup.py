@@ -18,7 +18,7 @@ if sys.version_info < (2,6):
 setuppath = inspect.getfile(inspect.currentframe())
 setupdir = os.path.dirname(setuppath)
 
-_name = u'cheshire3'
+_name = 'cheshire3'
 _version = '1.0.0b45'
 
 # Read any necessary bits from README.mdown
