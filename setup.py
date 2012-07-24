@@ -24,6 +24,7 @@ dateutilstr = 'python-dateutil == 1.5' if py_version < (3, 0) else 'python-dateu
 _install_requires.append(dateutilstr)
 if py_version < (2,7):
     _install_requires.append('argparse')
+    _install_requires.append('unittest2')
 
 # Inspect to find current path
 setuppath = inspect.getfile(inspect.currentframe())
@@ -73,6 +74,7 @@ setup(
         'sql': ['PyGreSQL >= 3.8.1'],
         'web': ['PyZ3950 >= 2.04']
     },
+    test_suite = "cheshire3.test.testAll",
     entry_points = {
         'console_scripts': [
             'cheshire3 = cheshire3.commands.cheshire3_console:main',
@@ -107,4 +109,3 @@ setup(
     download_url = 'http://www.cheshire3.org/download/{0}/src/{1}-{2}.tar.gz'.format(
     _version[:5], _name, _version)
 )
-
