@@ -29,8 +29,8 @@ class DocumentFactoryTestCase(Cheshire3ObjectTestCase):
 
     def test_load(self):
         # Test that load method of an instance returns the instance
-        for data in self._get_testData():
-            thing = self.testObj.load(self.session, data)
+        for args in self._get_testData():
+            thing = self.testObj.load(self.session, *args)
             self.assertIsInstance(thing, self._get_class())
 
 
@@ -70,7 +70,7 @@ class ComponentDocumentFactoryTestCase(DocumentFactoryTestCase):
 </subConfig>'''.format(self._get_class().__name__))
         
     def _get_testData(self):
-        yield LxmlRecord(etree.XML("""
+        yield (LxmlRecord(etree.XML("""
         <menu>
             <meal>
                 <egg/>
@@ -91,10 +91,11 @@ class ComponentDocumentFactoryTestCase(DocumentFactoryTestCase):
                 <spam/>
             </meal>
         </menu>
-        """))
+        """)),)
     
     def _get_testDataAndExpected(self):
-        for rec in self._get_testData():
+        for args in self._get_testData():
+            rec = args[0]
             yield (rec,
                    ["""(?L)^<c3:?component.*?>{0}</c3:?component>$""".format(
                                                              etree.tostring(el)
