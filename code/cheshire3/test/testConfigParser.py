@@ -41,7 +41,9 @@ class Cheshire3ObjectTestCase(unittest.TestCase):
     
     def setUp(self):
         self.session = Session()
-        serverConfig = os.path.join(cheshire3Root, 'configs', 'serverConfig.xml')
+        serverConfig = os.path.join(cheshire3Root,
+                                    'configs',
+                                    'serverConfig.xml')
         self.server = SimpleServer(self.session, serverConfig)
         for config in self._get_dependencyConfigs():
             identifier = config.get('id')
@@ -69,7 +71,8 @@ class CaselessDictionaryTestCase(unittest.TestCase):
     
     def setUp(self):
         # Set up a regular dictionary for quick init of caseless one in tests
-        self.d = d = dict([(char, i) for i, char in enumerate(string.uppercase)])
+        l = [(char, i) for i, char in enumerate(string.uppercase)]
+        self.d = d = dict(l)
         # Set up a caseless dictionary for non-mutating tests
         self.cd = CaselessDictionary(d)
     
@@ -77,9 +80,12 @@ class CaselessDictionaryTestCase(unittest.TestCase):
         pass
     
     def test_init(self):
-        self.assertIsInstance(CaselessDictionary(), CaselessDictionary)
-        self.assertIsInstance(CaselessDictionary(self.d), CaselessDictionary)
-        self.assertIsInstance(CaselessDictionary(self.d.items()), CaselessDictionary)
+        self.assertIsInstance(CaselessDictionary(),
+                              CaselessDictionary)
+        self.assertIsInstance(CaselessDictionary(self.d),
+                              CaselessDictionary)
+        self.assertIsInstance(CaselessDictionary(self.d.items()),
+                              CaselessDictionary)
         
     def test_contains(self):
         # Test contains each key

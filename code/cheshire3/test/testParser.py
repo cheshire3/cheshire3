@@ -123,7 +123,7 @@ class XmlParserTestCase(ParserTestCase):
         for data in self._get_data():
             rec = self.testObj.process_document(self.session,
                                                 StringDocument(data))
-            self.assertEqual(len(rec.processHistory),1)
+            self.assertEqual(len(rec.processHistory), 1)
             self.assertEqual(rec.processHistory[0],
                              self.testObj.id)
 

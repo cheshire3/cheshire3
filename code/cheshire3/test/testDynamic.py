@@ -20,7 +20,6 @@ from cheshire3.internal import cheshire3Root
 from cheshire3.server import SimpleServer
 
 
-
 class DynamicTestCase(unittest.TestCase):
     """Base Class for cheshire3.dynamic test cases."""
     

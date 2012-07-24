@@ -36,9 +36,13 @@ class Cheshire3SessionTestCase(unittest.TestCase):
     def test_sessionEnvironmentAssign(self):
         session = Session()
         session.environment = "apache"
-        self.assertEqual(session.environment, "apache", "session.environment assignment failed")
+        self.assertEqual(session.environment,
+                         "apache",
+                         "session.environment assignment failed")
         session.environment = "terminal"
-        self.assertEqual(session.environment, "terminal", "session.environment re-assignment failed")
+        self.assertEqual(session.environment,
+                         "terminal",
+                         "session.environment re-assignment failed")
         
     def test_sessionDatabaseInit(self):
         session = Session(database="db_test1")
@@ -47,9 +51,13 @@ class Cheshire3SessionTestCase(unittest.TestCase):
     def test_sessionDatabaseAssign(self):
         session = Session()
         session.database = "db_test1"
-        self.assertEqual(session.database, "db_test1", "session.database assignment failed")
+        self.assertEqual(session.database,
+                         "db_test1",
+                         "session.database assignment failed")
         session.database = "db_test2"
-        self.assertEqual(session.database, "db_test2", "session.database re-assignment failed")
+        self.assertEqual(session.database,
+                         "db_test2",
+                         "session.database re-assignment failed")
         
 
 def load_tests(loader, tests, pattern):

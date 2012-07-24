@@ -133,6 +133,7 @@ class BdbStoreTestCase(SimpleStoreTestCase):
             data2 = self.testObj.fetch_data(self.session, ident)
             self.assertFalse(data2)
 
+
 class UuidBdbStoreTestCase(BdbStoreTestCase):
     "BerkeleyDB based persistent storage mechanisms with UUID identifiers."
 

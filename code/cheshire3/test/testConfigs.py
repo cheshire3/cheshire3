@@ -17,7 +17,8 @@ class Cheshire3ServerConfigsTestCase(Cheshire3ObjectTestCase):
     
     def setUp(self):
         Cheshire3ObjectTestCase.setUp(self)
-        # Compile a regex for acceptable missing imports (i.e. optional features)
+        # Compile a regex for acceptable missing imports
+        # (i.e. optional features)
         self.importRegex = re.compile("""No\ module\ named\ (?:
             svm     # Support Vector Machine (datamining)
             |PyZ3950 # Z39.50 for Python (web)
@@ -35,7 +36,7 @@ class Cheshire3ServerConfigsTestCase(Cheshire3ObjectTestCase):
                      "An Object Identifier That Does Not Exist!!!")
         
     def generate_get_object_test(self, identifier):
-        """Generate and return a method to test get_object for the given identifier."""
+        "Generate and return method to test get_object for given identifier."
         def test(self):
             session = self.session
             serv = self.server
@@ -49,9 +50,12 @@ class Cheshire3ServerConfigsTestCase(Cheshire3ObjectTestCase):
                                         session, 
                                         identifier)
             else:
-                self.assertIsInstance(obj,
-                                      C3Object,
-                                      "Object {0} is not an instance of a C3Object sub-class!?".format(identifier))
+                self.assertIsInstance(
+                    obj,
+                    C3Object,
+                    "Object {0} is not an instance of a C3Object "
+                    "sub-class!?".format(identifier)
+                )
         return test
 
 

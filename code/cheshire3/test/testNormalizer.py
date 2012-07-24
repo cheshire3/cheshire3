@@ -392,11 +392,11 @@ class NamedRegexpNormalizerTestCase(SimpleNormalizerTestCase):
     def _get_config(self):
         return etree.XML('''\
         <subConfig type="normalizer" id="{0.__name__}">
-            <objectType>cheshire3.normalizer.{0.__name__}</objectType>
-            <options>
-                <setting type="regexp">(?i)(?P&lt;spamword&gt;spam\\w*)</setting>
-                <setting type="template">--%(spamword)s--</setting>
-            </options>
+          <objectType>cheshire3.normalizer.{0.__name__}</objectType>
+          <options>
+            <setting type="regexp">(?i)(?P&lt;spamword&gt;spam\\w*)</setting>
+            <setting type="template">--%(spamword)s--</setting>
+          </options>
         </subConfig>'''.format(self._get_class()))
 
     def _get_process_string_tests(self):
@@ -647,7 +647,7 @@ class DateStringNormalizerTestCase(SimpleNormalizerTestCase):
     def _get_process_string_tests(self):
         return [(datetime.utcfromtimestamp(0), '1970-01-01 00:00:00'),
                 (datetime(2000, 01, 01, 12, 04, 55), '2000-01-01 12:04:55'),
-                (datetime(2050, 01, 01) , '2050-01-01 00:00:00'),
+                (datetime(2050, 01, 01), '2050-01-01 00:00:00'),
                 ]
 
 

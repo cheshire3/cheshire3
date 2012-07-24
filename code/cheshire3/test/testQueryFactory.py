@@ -109,6 +109,7 @@ class SimpleQueryFactoryTestCase(Cheshire3ObjectTestCase):
         self.assertEqual(str(query.boolean.modifiers[0].value),
                          'sum')
 
+
 def load_tests(loader, tests, pattern):
     suite = loader.loadTestsFromTestCase(SimpleQueryFactoryTestCase)
     return suite

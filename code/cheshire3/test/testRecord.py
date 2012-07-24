@@ -109,6 +109,7 @@ class MinidomRecordTestCase(RecordTestCase):
                           self.session,
                           '/doc/el')
 
+
 class LxmlRecordTestCase(RecordTestCase):
     
     def _get_class(self):

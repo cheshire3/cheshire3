@@ -221,7 +221,7 @@ class ComponentDocumentFactoryTestCase(DocumentFactoryTestCase):
             for doc, expected in zip(docs, expectedDocs):
                 docstr = doc.get_raw(self.session)
                 self.assertRegexpMatches(docstr, expected)
-    
+
 
 class SpanComponentDocumentFactoryTestCase(ComponentDocumentFactoryTestCase):
     """ComponentDocumentFactory Test Case with SpanXPathSelectors."""
@@ -311,7 +311,8 @@ class SpanComponentDocumentFactoryTestCase(ComponentDocumentFactoryTestCase):
                 </c3:?component>$""", re.LOCALE)])
 
 
-class KSSpanComponentDocumentFactoryTestCase(SpanComponentDocumentFactoryTestCase):
+class KSSpanComponentDocumentFactoryTestCase(
+                                         SpanComponentDocumentFactoryTestCase):
     "ComponentDocumentFactory Test Case with SpanXPathSelectors + keepStart."
     
     def _get_config(self):
@@ -389,7 +390,8 @@ class KSSpanComponentDocumentFactoryTestCase(SpanComponentDocumentFactoryTestCas
                 </c3:?component>$""", re.LOCALE)])
 
 
-class KESpanComponentDocumentFactoryTestCase(SpanComponentDocumentFactoryTestCase):
+class KESpanComponentDocumentFactoryTestCase(
+                                         SpanComponentDocumentFactoryTestCase):
     "ComponentDocumentFactory Test Case with SpanXPathSelectors + keepStart."
     
     def _get_config(self):
@@ -467,7 +469,8 @@ class KESpanComponentDocumentFactoryTestCase(SpanComponentDocumentFactoryTestCas
                 <hr></hr></c3:?component>$""", re.LOCALE)])
 
 
-class KBSpanComponentDocumentFactoryTestCase(SpanComponentDocumentFactoryTestCase):
+class KBSpanComponentDocumentFactoryTestCase(
+                                         SpanComponentDocumentFactoryTestCase):
     "ComponentDocumentFactory Test Case with SpanXPathSelectors + keepStart."
     
     def _get_config(self):
