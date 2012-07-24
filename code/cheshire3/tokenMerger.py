@@ -221,7 +221,9 @@ class ReconstructTokenMerger(SimpleTokenMerger):
                     new.append('%s%s' % (space, word))
                     currLen = val['charOffsets'][w] + len(word)
                 else:
-                    new.append('%s ' % (word))
+                    new.append('%s' % (word))
+                    if w < len(val['text']) - 1:
+                        new.append(' ')
             txt = ''.join(new)
             kval = val.copy()
             kval['text'] = txt
