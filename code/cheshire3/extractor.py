@@ -299,37 +299,61 @@ class SpanXPathExtractor(SimpleExtractor):
         new = {}
         root = None
         for xp in data:
-            startNode = xp[0]
-            endNode = xp[1]
-            if root is None:
-                for n in startNode.iterancestors():
-                    root = n
+            startNode, endNode = xp
+            # Find common ancestor
+            sancs = list(startNode.iterancestors())
+            try:
+                eancs = list(endNode.iterancestors())
+            except AttributeError:
+                # Maybe endNode not matched
+                # Should continue to the end
+                common_ancestor = sancs[-1] 
+            else:
+                # Common ancestor must exist in the shorter of the 2 lists
+                # Trim both to this size
+                sancs.reverse()
+                eancs.reverse()
+                minlen = min(len(sancs), len(eancs))
+                sancs = sancs[:minlen]
+                eancs = eancs[:minlen]
+                # Iterate through both, simultaneously
+                for sanc, eanc in zip(sancs, eancs):
+                    if sanc == eanc:
+                        common_ancestor = sanc
+                        break
             inrange = False
             text = []
             extraSpaceNodes = []
-            for el in root.iter():
+            for evt, el in etree.iterwalk(common_ancestor,
+                                          events=('start', 'end',
+                                                  'start-ns', 'end-ns')):
                 if el.tag in self.extraSpaceElems:
                     iter = el.itersiblings()
                     try:
                         extraSpaceNodes.append(iter.next())
                     except:
                         pass
-                if el == startNode:
-                    inrange = True
-                    if el in extraSpaceNodes:
-                        text.append(' ')
-                    if el.text is not None:
-                        text.append(el.text)
+                if evt in ['start', 'start-ns']:
+                    if el == startNode:
+                        inrange = True
+                        if el in extraSpaceNodes:
+                            text.append(' ')
+                        if el.text is not None:
+                            text.append(el.text)
+                    elif el == endNode:
+                        inrange = False
+                        break
+                    elif inrange:
+                        if el in extraSpaceNodes:
+                            text.append(' ')
+                        if el.text is not None:
+                            text.append(el.text)
+                elif evt in ['end', 'end-ns'] and inrange:
                     if el.tail is not None:
+                        if el in extraSpaceNodes:
+                            text.append(' ')
                         text.append(el.tail)
-                elif el == endNode:
-                    inrange = False
-                    break
-                elif inrange == True:
-                    if el in extraSpaceNodes:
-                        text.append(' ')
-                    if el.text is not None:
-                        text.append(el.text)
+            
             txt = ''.join(text)
             # We MUST turn newlines into space or can't index
             txt = txt.replace('\n', ' ')
