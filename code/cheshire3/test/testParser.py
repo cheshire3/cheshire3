@@ -68,6 +68,10 @@ class XmlParserTestCase(ParserTestCase):
         return SaxRecord
 
     @classmethod
+    def _get_invalidDataExceptionClass(cls):
+        return SAXParseException
+
+    @classmethod
     def _get_data(cls):
         # Generator to yield data to be parsed into records
         yield ('<doc>'
@@ -98,7 +102,7 @@ class XmlParserTestCase(ParserTestCase):
         "Check that invalid/non-well-formed XML is rejected."
         # Will need to be subclassed for each Parser implementation, as they
         # will likely all return their own error class
-        self.assertRaises(ValueError,
+        self.assertRaises(self._get_invalidDataExceptionClass(),
                           self.testObj.process_document,
                           self.session,
                           StringDocument('<xml>'))
@@ -146,26 +150,9 @@ class SaxParserTestCase(XmlParserTestCase):
             if not 'xmlns' in data:
                 yield data
 
-    def test_process_document_invalid(self):
-        "Check that invalid/non-well-formed XML is rejected."
-        # Will need to be subclassed for each Parser implementation, as they
-        # will likely all return their own error class
-        self.assertRaises(SAXParseException,
-                          self.testObj.process_document,
-                          self.session,
-                          StringDocument('<xml>'))
 
-
-class NsSaxParserTestCase(XmlParserTestCase):
+class NsSaxParserTestCase(SaxParserTestCase):
     """Namespace aware SaxParser Tests."""
-
-    @classmethod
-    def _get_class(self):
-        return SaxParser
-
-    @classmethod
-    def _get_recordClass(cls):
-        return SaxRecord
 
     @classmethod
     def _get_config(self):    
@@ -196,12 +183,9 @@ class LxmlParserTestCase(XmlParserTestCase):
     def _get_recordClass(cls):
         return LxmlRecord
 
-    def test_process_document_invalid(self):
-        "Check that invalid/non-well-formed XML is rejected."
-        self.assertRaises(etree.XMLSyntaxError,
-                          self.testObj.process_document,
-                          self.session,
-                          StringDocument('<xml>'))
+    @classmethod
+    def _get_invalidDataExceptionClass(cls):
+        return etree.XMLSyntaxError
 
 
 class LxmlHtmlParserTestCase(LxmlParserTestCase):
@@ -230,12 +214,9 @@ class MinidomParserTestCase(XmlParserTestCase):
     def _get_recordClass(cls):
         return MinidomRecord
 
-    def test_process_document_invalid(self):
-        "Check that invalid/non-well-formed XML is rejected."
-        self.assertRaises(ExpatError,
-                          self.testObj.process_document,
-                          self.session,
-                          StringDocument('<xml>'))
+    @classmethod
+    def _get_invalidDataExceptionClass(cls):
+        return ExpatError
 
 
 def load_tests(loader, tests, pattern):
