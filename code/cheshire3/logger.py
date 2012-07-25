@@ -46,7 +46,10 @@ class SimpleLogger(Logger):
     def __init__(self, session, config, parent):
         Logger.__init__(self, session, config, parent)
         fp = self.get_path(session, 'filePath')
-        if fp in ["stdout", 'sys.stdout']:
+        if fp is None:
+            raise ConfigFileException("Missing path 'filePath' for "
+                                      "{0}.".format(self.id))
+        elif fp in ["stdout", 'sys.stdout']:
             self.fileh = sys.stdout
         elif fp in ["stderr", 'sys.stderr']:
             self.fileh = sys.stderr
@@ -277,6 +280,9 @@ class MultipleLogger(SimpleLogger):
     def __init__(self, session, config, parent):
         Logger.__init__(self, session, config, parent)
         loggerList = self.get_path(session, 'loggerList')
+        if loggerList is None:
+            raise ConfigFileException("Missing path 'loggerList' for "
+                                      "{0}.".format(self.id))
         getObj = self.parent.get_object
         self.loggers = [getObj(session, id) for id in loggerList.split(' ')]
 
