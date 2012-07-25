@@ -4,7 +4,6 @@ import os
 import re
 import time
 import string
-import binascii
 import glob
 import httplib
 import mimetypes
@@ -25,6 +24,7 @@ except ImportError:
 from xml.sax.saxutils import escape
 from warnings import warn
 from lxml import etree
+from base64 import b64encode, b64decode
 
 # Intra-package imports
 from cheshire3.baseObjects import PreParser
@@ -722,7 +722,7 @@ class B64EncodePreParser(PreParser):
 
     def process_document(self, session, doc):
         data = doc.get_raw(session)
-        new = binascii.a2b_base64(data)
+        new = b64encode(data)
         return StringDocument(new, self.id, doc.processHistory,
                               parent=doc.parent, filename=doc.filename)
 
@@ -732,7 +732,7 @@ class B64DecodePreParser(PreParser):
 
     def process_document(self, session, doc):
         data = doc.get_raw(session)
-        new = binascii.b2a_base64(data)
+        new = b64decode(data)
         return StringDocument(new, self.id, doc.processHistory,
                               parent=doc.parent, filename=doc.filename)
 

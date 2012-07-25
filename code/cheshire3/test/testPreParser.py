@@ -570,7 +570,7 @@ class B64EncodePreParserTestCase(ImplementedPreParserTestCase):
             self.skipTest("No test Document available")
         self.assertEqual(
             self.outDoc.text,
-            'N\x18\xac\x8a\xc9\xb2v\x87.\x99\xe9\xed',
+            'VGhpcyBpcyBteSBkb2N1bWVudA==',
             u"Returned document content not as expected")
 
 
@@ -585,7 +585,7 @@ class B64DecodePreParserTestCase(ImplementedPreParserTestCase):
 
     @classmethod
     def _get_testUnicode(self):
-        return 'N\x18\xac\x8a\xc9\xb2v\x87.\x99\xe9\xed'
+        return u'VGhpcyBpcyBteSBkb2N1bWVudA=='
 
     def test_process_document_returnContent(self):
         if self.inDoc is None:
