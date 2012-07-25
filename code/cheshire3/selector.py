@@ -1,3 +1,8 @@
+"""Cheshire3 Selector Implementations.
+
+possible location types:  'xpath', 'attribute', 'function', 'sparql' (in graph)
+"""
+
 import time
 
 from lxml import etree
@@ -6,12 +11,11 @@ from cheshire3.baseObjects import Selector
 from cheshire3.record import LxmlRecord
 from cheshire3.exceptions import ConfigFileException
 
-# location types:  'xpath', 'attribute', 'function', 'sparql' (in graph)
 
 class SimpleSelector(Selector):
 
     def _handleLocationNode(self, session, child):
-        data = {'maps': {}, 'string' : '', 'type': ''}
+        data = {'maps': {}, 'string': '', 'type': ''}
         xp = getFirstData(child)
         data['string'] = xp
 
@@ -21,7 +25,8 @@ class SimpleSelector(Selector):
             try:
                 data['type'] = child.getAttribute('type').lower()
             except:
-                raise ConfigFileException("Location element in {0} must have 'type' attribute".format(self.id))
+                raise ConfigFileException("Location element in {0} must have "
+                                          "'type' attribute".format(self.id))
             
         if data['type'] == 'xpath':
             for a in child.attributes.keys():
@@ -31,7 +36,8 @@ class SimpleSelector(Selector):
                     a = attrNode.name
                 if (a[:6] == "xmlns:"):
                     pref = a[6:]
-                    uri = child.getAttributeNS('http://www.w3.org/2000/xmlns/', pref)
+                    uri = child.getAttributeNS('http://www.w3.org/2000/xmlns/',
+                                               pref)
                     if not uri:
                         uri = child.getAttribute(a)
                     data['maps'][pref] = uri
@@ -40,7 +46,7 @@ class SimpleSelector(Selector):
         return data
 
     def _handleLxmlLocationNode(self, session, child):
-        data = {'maps': {}, 'string' : '', 'type': ''}
+        data = {'maps': {}, 'string': '', 'type': ''}
         data['string'] = child.text
 
         if child.tag == 'xpath':
@@ -49,7 +55,8 @@ class SimpleSelector(Selector):
             try:
                 data['type'] = child.attrib['type'].lower()
             except KeyError:
-                raise ConfigFileException("Location element in {0} must have 'type' attribute".format(self.id))
+                raise ConfigFileException("Location element in {0} must have "
+                                          "'type' attribute".format(self.id))
 
         if data['type'] in ['xpath', 'sparql']:
             for a in child.nsmap:
@@ -102,10 +109,14 @@ class TransformerSelector(SimpleSelector):
 
 
 class MetadataSelector(SimpleSelector):
-    u"""Selector that specifies an attribute or function to select data from Records."""
+    u"""Selector specifying and attribute or function.
+    
+    Selector that specifies an attribute or function to use to select data from
+    Records.
+    """
 
     def process_record(self, session, record):
-        u"""Extract the attribute, or run the specified function, return the resulting data."""
+        u"Extract the attribute, or run the specified function, return data."
         # Check name against record metadata
         vals = []
         for src in self.sources:
@@ -117,7 +128,7 @@ class MetadataSelector(SimpleSelector):
                     # handle old style
                     if hasattr(record, name):
                         vals.append([getattr(record, name)])
-                    elif name  == 'now':
+                    elif name == 'now':
                         # eg for lastModified/created etc
                         now = time.strftime("%Y-%m-%d %H:%M:%S")
                         vals.append([now])
@@ -132,9 +143,11 @@ class MetadataSelector(SimpleSelector):
                         vals.append([now])
                     else:
                         # nothing else defined?
-                        raise ConfigFileException("Unknown function: %s" % name)
+                        raise ConfigFileException("Unknown function: "
+                                                  "%s" % name)
                 else:
-                    raise ConfigFileException("Unknown metadata selector type: %s" % typ)
+                    raise ConfigFileException("Unknown metadata selector type:"
+                                              " %s" % typ)
 
         return vals
 
@@ -147,15 +160,18 @@ class XPathSelector(SimpleSelector):
         SimpleSelector.__init__(self, session, config, parent)
     
     def process_record(self, session, record):
-        """Select and return data from elements matching all configured XPaths."""
+        u"Select and return data from elements matching configured XPaths."
         if not isinstance(record, LxmlRecord):
-            raise TypeError("XPathSelector '{0}' only supports selection from LxmlRecords")
+            raise TypeError("XPathSelector '{0}' only supports selection from "
+                            "LxmlRecords")
         vals = []
         
         for src in self.sources:
             # list of {}s
             for xp in src:
-                vals.append(record.process_xpath(session, xp['string'], xp['maps']))
+                vals.append(record.process_xpath(session,
+                                                 xp['string'],
+                                                 xp['maps']))
         return vals    
     
 
@@ -172,8 +188,13 @@ class SpanXPathSelector(SimpleSelector):
     def __init__(self, session, config, parent):
         self.sources = []
         SimpleSelector.__init__(self, session, config, parent)
-        if len(self.sources[0]) != 2:
-            raise ConfigFileException("SpanXPathSelector '{0}' requires exactly two XPaths".format(self.id))
+        try:
+            if len(self.sources[0]) != 2:
+                raise ConfigFileException("SpanXPathSelector '{0}' requires "
+                                          "exactly two XPaths".format(self.id))
+        except IndexError:
+            raise ConfigFileException("SpanXPathSelector '{0}' requires "
+                                      "exactly 1 <source>".format(self.id))
         
     def process_record(self, session, record):
         vals = []
