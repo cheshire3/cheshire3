@@ -137,12 +137,17 @@ class BuildObjectTestCase(DynamicTestCase):
                 obj = buildObject(self.session,
                                   objectType,
                                   (config, self.server))
-            except:
-                self.assertRaises(ConfigFileException,
-                                  buildObject,
-                                  self.session,
-                                  objectType,
-                                  (config, self.server))
+            except Exception as e:
+                self.assertIsInstance(e,
+                                      (ConfigFileException,
+                                       NotImplementedError),
+                                      "When failing to buildObject of type "
+                                      "'{0}' {1} is raised. Should be one of: "
+                                      "ConfigFileException, "
+                                      "NotImplementedError"
+                                      "".format(objectType,
+                                                e.__class__.__name__)
+                                      )
             else:
                 modName = objectType.split('.')[1]
                 expCls = getattr(baseObjects, modName[0].upper() + modName[1:])
@@ -163,12 +168,17 @@ class MakeObjectFromDomTestCase(DynamicTestCase):
                 obj = makeObjectFromDom(self.session,
                                         config,
                                         self.server)
-            except:
-                self.assertRaises(ConfigFileException,
-                                  makeObjectFromDom,
-                                  self.session,
-                                  config,
-                                  self.server)
+            except Exception as e:
+                self.assertIsInstance(e,
+                                      (ConfigFileException,
+                                       NotImplementedError),
+                                      "When failing to makeObjectFromDom for "
+                                      "type '{0}' {1} is raised. Should be "
+                                      "one of: ConfigFileException, "
+                                      "NotImplementedError"
+                                      "".format(objectType,
+                                                e.__class__.__name__)
+                                      )
             else:
                 modName = objectType.split('.')[1]
                 expCls = getattr(baseObjects, modName[0].upper() + modName[1:])
