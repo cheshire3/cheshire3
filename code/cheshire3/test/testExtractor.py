@@ -522,8 +522,8 @@ class SpanXPathExtractorTestCase(Cheshire3ObjectTestCase):
         tests.append(
                       ([[item1,
                          item3]],
-                       {'spam, egg and': {
-                           'text': 'spam, egg and',
+                       {'spam, egg and ': {
+                           'text': 'spam, egg and ',
                            'occurences': 1,
                            'proxLoc': [-1]
                            },
