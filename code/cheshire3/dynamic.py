@@ -6,6 +6,8 @@ configurations.
 
 import sys
 
+from types import ModuleType
+
 from cheshire3.utils import getFirstData, elementType
 from cheshire3.exceptions import ConfigFileException
 
@@ -86,17 +88,21 @@ def importObject(session, objectType):
                 return importObject(session, "cheshire3.%s" % objectType)
             except:
                 pass
+        msg = "Module %s does not define class %s" % (modName, className)
         try:
-            raise e
+            raise ConfigFileException(msg)
         finally:
             try:
                 session.logger.log_lvl(session,
                                        50,
-                                       "Module %s does not define class "
-                                       "%s" % (modName, className))
+                                       msg)
             except AttributeError:
                 # Most likely session is None or session.logger is None
                 pass
+    else:
+        if isinstance(parentClass, ModuleType):
+            raise ConfigFileException("%s defines a module, should define a "
+                                      "class within a module" % objectType) 
     return parentClass
 
 
