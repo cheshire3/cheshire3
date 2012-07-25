@@ -272,6 +272,7 @@ cheshire3.formats package.'''.format(self.__class__.__name__),
                 mt = "text/xml"
             # Others include java, etc. but not very useful to us
         doc.mimeType = mt
+        doc.processHistory.append(self.id)
         return doc
 
 
@@ -1033,4 +1034,5 @@ class DataChecksumPreParser(PreParser):
             doc.metadata['checksum'].update(md)
         except KeyError:
             doc.metadata['checksum'] = md
+        doc.processHistory.append(self.id)
         return doc
