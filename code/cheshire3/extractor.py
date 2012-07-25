@@ -12,7 +12,7 @@ from cheshire3.record import SaxContentHandler
 
 
 class SimpleExtractor(Extractor):
-    """Base extracter, extracts exact text."""
+    """Base extractor, extracts exact text."""
 
     _possibleSettings = {
         'extraSpaceElements': {
@@ -106,6 +106,8 @@ class SimpleExtractor(Extractor):
 
     def process_string(self, session, data):
         """Accept just text and return appropriate data structure."""
+        if self.strip:
+            data = data.strip()
         return {data: {'text': data, 'occurences': 1, 'proxLoc': [-1]}}
 
     def _getProxLocNode(self, session, node):
