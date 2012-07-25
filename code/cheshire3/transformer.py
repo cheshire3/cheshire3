@@ -85,8 +85,15 @@ class LxmlXsltTransformer(Transformer):
     def __init__(self, session, config, parent):
         Transformer.__init__(self, session, config, parent)
         xfrPath = self.get_path(session, "xsltPath")
-        dfp = self.get_path(session, "defaultPath")
-        path = os.path.join(dfp, xfrPath)
+        if xfrPath is None:
+            raise ConfigFileException("Missing path 'xsltPath' for "
+                                      "{0}.".format(self.id))
+        
+        if os.path.isabs(xfrPath):
+            path = xfrPath
+        else:
+            dfp = self.get_path(session, "defaultPath")
+            path = os.path.join(dfp, xfrPath)
         
         ns = etree.FunctionNamespace('http://www.cheshire3.org/ns/function/xsl/')
         ns['now'] = myTimeFn
@@ -334,7 +341,12 @@ class TemplatedTransformer(Transformer):
             with open(path, 'r') as fh:
                 self.template = unicode(fh.read()) 
         else:
-            tmpl = self.get_setting(session, 'template')
+            tmpl = self.get_setting(session, 'template', '')
+            if not tmpl:
+                raise ConfigFileException("{0} requires either a "
+                                          "'templatePath' path or a "
+                                          "'template' setting."
+                                          "".format(self.id))
             self.template = unicode(tmpl)
             
     def process_record(self, session, rec):
