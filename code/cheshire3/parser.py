@@ -81,6 +81,9 @@ class SaxParser(BaseParser):
 
     def process_document(self, session, doc):
         xml = doc.get_raw(session)
+        if type(xml) == unicode:
+            # SAX parser cannot deal with unicode
+            xml = xml.encode('utf-8')
         self.inputSource.setByteStream(cStringIO.StringIO(xml))
         ch = self.contentHandler
         ch.reinit()
