@@ -11,6 +11,8 @@ try:
 except ImportError:
     import unittest
 
+import hashlib
+
 from lxml import etree
 from datetime import datetime
 
@@ -59,6 +61,19 @@ class DocumentStoreTestCase(SimpleStoreTestCase):
             # Get the current date and time
             now = datetime.utcnow()
             inDoc.metadata['creationDate'] = now
+            # Add a checksum
+            h = hashlib.new('md5')
+            h.update(inDoc.get_raw(self.session))
+            md = {
+                'md5': {
+                    'hexdigest': h.hexdigest(),
+                    'analysisDateTime': now
+                }
+            }
+            try:
+                inDoc.metadata['checksum'].update(md)
+            except KeyError:
+                inDoc.metadata['checksum'] = md
             # Store the data
             self.testObj.create_document(self.session, inDoc)
             # Fetch the metadata
@@ -66,9 +81,13 @@ class DocumentStoreTestCase(SimpleStoreTestCase):
                                                     'byteCount')
             creationDate = self.testObj.fetch_metadata(self.session, inDoc.id,
                                                     'creationDate')
+            checksums = self.testObj.fetch_metadata(self.session, inDoc.id,
+                                                    'checksum')
             # Check that stored and fetched metadata are the same
             self.assertEqual(byteCount, len(inDoc.get_raw(self.session)))
             self.assertEqual(creationDate, now)
+            self.assertDictEqual(checksums['md5'], md['md5'])
+            
 
     def test_storeDeleteFetch_data(self):
         "Check that Document is deleted."
