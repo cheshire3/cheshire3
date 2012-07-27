@@ -74,7 +74,7 @@ class SimpleDocumentStore(DocumentStore):
         elif self.inWorkflow is not None:
             doc = self.inWorkflow.process(session, doc)
         data = doc.get_raw(session)
-        md = {}
+        md = doc.metadata
         if doc.wordCount:
             md['wordCount'] = doc.wordCount
         if doc.byteCount:
