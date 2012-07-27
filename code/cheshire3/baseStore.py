@@ -6,6 +6,11 @@ import bsddb as bdb
 import datetime
 import dateutil.tz
 
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+
 from dateutil import parser as dateparser
 
 from cheshire3.exceptions import *
@@ -1074,11 +1079,17 @@ class BdbStore(SimpleStore):
                 id = id.encode('utf-8')
             elif type(id) != str:
                 id = str(id)
+#        self.log_debug(session, mType)
         cxn = self._openDb(session, mType)
+#        self.log_debug(session, cxn)
         if cxn is not None:
             data = cxn.get(id)
             if data:
-                if mType.endswith(("Count", "Position", "Amount", "Offset")):
+                if data.startswith("\0http://www.cheshire3.org/ns/"
+                                   "datatype/PICKLED:"):
+                    data = data.split(':', 2)[2]
+                    data = pickle.loads(data)
+                elif mType.endswith(("Count", "Position", "Amount", "Offset")):
                     data = long(data)
                 elif mType.endswith("Date"):
                     data = dateparser.parse(data)
@@ -1094,10 +1105,12 @@ class BdbStore(SimpleStore):
             self._initDb(session, mType)
             self._verifyDb(session, mType)
             cxn = self._openDb(session, mType)
-
         if cxn is not None:
             if isinstance(value, (int, long, float, datetime.datetime)):
                 value = str(value)
+            elif isinstance(value, (dict, list, tuple)):
+                value = ("\0http://www.cheshire3.org/ns/datatype/PICKLED:"
+                         "{0}".format(pickle.dumps(value)))
             cxn.put(id, value)
             if mType in self.reverseMetadataTypes:
                 cxn = self._openDb(session, mType + "Reverse")
