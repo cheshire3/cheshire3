@@ -536,7 +536,7 @@ class TokenExpansionNormalizer(FileAssistedNormalizer):
 
 
 try:
-    import txngstemmer as Stemmer
+    from zopyx.txng3.ext import stemmer as Stemmer
 except ImportError:
 
     class StemNormalizer(SimpleNormalizer):
