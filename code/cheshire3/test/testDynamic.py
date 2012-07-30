@@ -132,6 +132,9 @@ class BuildObjectTestCase(DynamicTestCase):
     def test_buildObject(self):
         "Check processing objects can be instantiated"
         for objectType in self._get_objectTypes():
+            if "Store" in objectType:
+                # Don't build Stores - creates empty BDB files
+                continue
             config = self._get_configFromObjectType(objectType)
             try:
                 obj = buildObject(self.session,
@@ -163,6 +166,9 @@ class MakeObjectFromDomTestCase(DynamicTestCase):
     def test_makeObjectFromDom(self):
         "Check processing objects can be created from a parsed configs."
         for objectType in self._get_objectTypes():
+            if "Store" in objectType:
+                # Don't build Stores - creates empty BDB files
+                continue
             config = self._get_configFromObjectType(objectType)
             try:
                 obj = makeObjectFromDom(self.session,
