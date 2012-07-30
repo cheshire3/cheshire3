@@ -18,7 +18,7 @@ if py_version < (2, 6):
     warn("Cheshire3 requires Python 2.6 or later; some code may be incompatible with earlier versions.")
 
 # Requirements
-_install_requires = ['lxml >= 2.1', 'zopyx.txng3.ext == 3.3.1']
+_install_requires = ['lxml >= 2.1', 'zopyx.txng3.ext >= 3.3.1']
 # Determine python-dateutil version
 dateutilstr = 'python-dateutil == 1.5' if py_version < (3, 0) else 'python-dateutil >= 2.0'
 _install_requires.append(dateutilstr)
