@@ -35,8 +35,10 @@ class SimpleStoreTestCase(Cheshire3ObjectTestCase):
           <objectType>cheshire3.baseStore.{0.__name__}</objectType>
           <paths>
               <path type="defaultPath">{1}</path>
+              <path type="databasePath">{0.__name__}.bdb</path>
           </paths>
-        </subConfig>'''.format(self._get_class(), self.defaultPath))
+        </subConfig>'''.format(self._get_class(),
+                               self.defaultPath))
     
     def _get_test_data(self):
         for x in range(5):
@@ -55,6 +57,7 @@ class SimpleStoreTestCase(Cheshire3ObjectTestCase):
                 os.remove(os.path.join(root, name))
             for name in dirs:
                 os.rmdir(os.path.join(root, name))
+        os.rmdir(self.defaultPath)
 
 
 class BdbStoreTestCase(SimpleStoreTestCase):
