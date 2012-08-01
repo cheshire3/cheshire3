@@ -23,7 +23,8 @@ if len(serv.databaseConfigs) < 25:
     # relatively few dbs - we can safely cache them
     serv._cacheDatabases(session)
     for db in serv.databases.itervalues():
-        if db.get_setting(session, 'SRW') or db.get_setting(session, 'srw'):
+        if (db.get_setting(session, 'SRW') or db.get_setting(session, 'srw') or
+            db.get_setting(session, 'SRU') or db.get_setting(session, 'sru')):
             db._cacheProtocolMaps(session)
             map = db.protocolMaps.get('http://www.loc.gov/zing/srw/', None)
             # check that there's a path and that it can actually be requested from this handler
@@ -36,7 +37,8 @@ else:
     for dbid, conf in serv.databaseConfigs.iteritems():
         db = serv.get_object(session, dbid)
         session.database = dbid
-        if db.get_setting(session, 'SRW') or db.get_setting(session, 'srw'):
+        if (db.get_setting(session, 'SRW') or db.get_setting(session, 'srw') or
+            db.get_setting(session, 'SRU') or db.get_setting(session, 'sru')):
             db._cacheProtocolMaps(session)
             pmap = db.protocolMaps.get('http://www.loc.gov/zing/srw/', None)
             if (pmap is not None):

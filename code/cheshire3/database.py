@@ -32,6 +32,11 @@ class SimpleDatabase(SummaryObject, Database):
             'type': int,
             'options': "0|1"
         },
+        'sru': {
+            'docs': 'Should the database be available via the SRU protocol',
+            'type': int,
+            'options': "0|1"
+        },
         'z3950': {
             'docs': 'Should the database be available via the Z39.50 protocol',
             'type': int,
