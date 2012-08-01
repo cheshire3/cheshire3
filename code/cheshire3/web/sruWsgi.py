@@ -4,16 +4,19 @@ from cgi import FieldStorage
 
 from sruHandler import *
 
+
 class SRUWsgiHandler(SRUProtocolHandler):
     """SRU Request Handling Class for WSGI."""
-    
+
     def __call__(self, environ, start_response):
         path = environ.get('PATH_INFO', '').strip('/')
-        out = [] 
-        if not configs.has_key(path):
-            # unknown endpoint
-            # no specification
-            out.append('<databases numberOfDatabases="{0}">'.format(len(configs)))
+        out = []
+        if path not in configs:
+            # Unknown endpoint
+            # No specification
+            out.append(
+                '<databases numberOfDatabases="{0}">'.format(len(configs))
+            )
             for k in sorted(configs.keys()):
                 out.append("<database><path>{0}</path></database>".format(k))
             out.append('</databases>')
@@ -22,14 +25,18 @@ class SRUWsgiHandler(SRUProtocolHandler):
             if isinstance(dbconf, tuple):
                 dbid = dbconf[0]
                 db = serv.get_object(session, dbid)
-                config = db.get_object(session, dbconf[1]['http://www.loc.gov/zing/srw/'])
+                config = db.get_object(
+                    session,
+                    dbconf[1]['http://www.loc.gov/zing/srw/']
+                )
             else:
                 config = dbconf['http://www.loc.gov/zing/srw/']
-            # check db hasn't changed since instantiated
+            # Check db hasn't changed since instantiated
             db = config.parent
-            fp = db.get_path(session, 'metadataPath')    # attempt to find filepath for db metadata
+            # Attempt to find filepath for db metadata
+            fp = db.get_path(session, 'metadataPath')
             if os.stat(fp).st_mtime > db.initTime:
-                # rediscover objects
+                # Rediscover objects
                 dbid = db.id
                 del db
                 try:
@@ -39,7 +46,7 @@ class SRUWsgiHandler(SRUProtocolHandler):
                 try:
                     del serv.databases[dbid]
                 except KeyError:
-                     pass
+                    pass
                 db = serv.get_object(session, dbid)
             session.path = "http://%s/%s" % (environ['HOSTNAME'], path)
             session.config = config
@@ -50,27 +57,35 @@ class SRUWsgiHandler(SRUProtocolHandler):
                     opts[qp.name] = int(qp.value)
                 else:
                     opts[qp.name] = qp.value
-                
             if not opts:
                 opts = {
-                    'operation' : 'explain',
-                    'version' : '1.2',
-                    'recordPacking' : 'xml'
+                    'operation': 'explain',
+                    'version': '1.2',
+                    'recordPacking': 'xml'
                     }
             if not 'operation' in opts:
-                err = self.diagnostic(7, msg="Mandatory parameter not supplied", details='operation')
+                err = self.diagnostic(7,
+                                      msg="Mandatory parameter not supplied",
+                                      details='operation')
                 result = self.processUnknownOperation(err, config)
-            elif not opts['operation'] in ['explain', 'searchRetrieve', 'scan']:
-                err = self.diagnostic(4, msg="Unsupported Operation", details=opts['operation'])
+            elif not opts['operation'] in ['explain',
+                                           'searchRetrieve',
+                                           'scan']:
+                err = self.diagnostic(4,
+                                      msg="Unsupported Operation",
+                                      details=opts['operation'])
                 result = self.processUnknownOperation(err, config)
             else:
                 respName = "%sResponse" % opts['operation']
                 result = getattr(elemFac, respName)()
                 v = elemFac.version('1.2')
                 result.append(v)
-                
                 if not 'version' in opts:
-                    err = self.diagnostic(7, msg="Mandatory parameter not supplied", details='version')
+                    err = self.diagnostic(
+                        7,
+                        msg="Mandatory parameter not supplied",
+                        details='version'
+                    )
                     dx = self.diagnosticToXml(err)
                     x = elemFac.diagnostics()
                     x.append(dx)
@@ -87,19 +102,25 @@ class SRUWsgiHandler(SRUProtocolHandler):
                     session.currentResultSet = None
             out.append('<?xml version="1.0"?>')
             if 'stylesheet' in opts:
-                out.append('<?xml-stylesheet type="text/xsl" href="{0}"?>'.format(opts['stylesheet'])) 
+                out.append(
+                    '<?xml-stylesheet type="text/xsl" '
+                    'href="{0}"?>'.format(opts['stylesheet'])
+                )
             out.append(etree.tostring(result, pretty_print=True))
-            if len(serv.databaseConfigs) >=25:
-                # cleanup memory
+            if len(serv.databaseConfigs) >= 25:
+                # Cleanup memory
                 try:
                     del serv.objects[config.parent.id]
                 except KeyError:
                     pass
-        response_headers = [('Content-Type', 'application/xml'),
-                            ('Content-Length', str(sum([len(d) for d in out])))]
+        response_headers = [('Content-Type',
+                             'application/xml'),
+                            ('Content-Length',
+                             str(sum([len(d) for d in out])))
+                            ]
         start_response("200 OK", response_headers)
         return out
-        
+
 
 def environment_application(environ, start_response):
     status = '200 OK'
@@ -131,8 +152,8 @@ http://{0}:{1}""".format(host, port)
     httpd.serve_forever()
 
 
-application = SRUWsgiHandler()    
+application = SRUWsgiHandler()
 
-    
+
 if __name__ == "__main__":
     sys.exit(main())
