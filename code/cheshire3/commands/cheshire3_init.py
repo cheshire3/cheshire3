@@ -298,6 +298,7 @@ def create_defaultZeerex(identifier, args):
                       'transport': "http"},
                      Z.host(host),
                      Z.port(port),
+                     Z.database('api/sru/{0}'.format(identifier)),
                  )
     # Assemble to complete ZeeRex base on created nodes
     zeerex = Z.explain(
