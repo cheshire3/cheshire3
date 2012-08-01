@@ -111,44 +111,39 @@ class SimpleIndex(Index):
     }
 
     _possibleSettings = {
-        'cori_constant0': {
-            "docs": "",
-            'type': float
-        },
-        'cori_constant1': {
-            "docs": "",
-            'type': float
-        },
-        'cori_constant2': {
-            "docs": "",
-            'type': float
-        },
         'lr_constant0': {
-            "docs": "",
+            "docs": ("Value for 1st constant in logistic regression relevance"
+                     "assignments. default: -3.7"),
             'type': float
         },
         'lr_constant1': {
-            "docs": "",
+            "docs": ("Value for 2nd constant in logistic regression relevance"
+                     "assignments. default: 1.269"),
             'type': float
         },
         'lr_constant2': {
-            "docs": "",
+            "docs": ("Value for 3rd constant in logistic regression relevance"
+                     "assignments. default: -0.31"),
             'type': float
         },
         'lr_constant3': {
-            "docs": "",
+            "docs": ("Value for 4th constant in logistic regression relevance"
+                     "assignments. default: 0.679"),
             'type': float
         },
         'lr_constant4': {
-            "docs": "",
+            "docs": ("Value for 5th constant in logistic regression relevance"
+                     "assignments. default: -0.021"),
             'type': float
         },
         'lr_constant5': {
-            "docs": "",
+            "docs": ("Value for 6th constant in logistic regression relevance"
+                     "assignments. default: 0.223"),
             'type': float
         },
         'lr_constant6': {
-            "docs": "",
+            "docs": ("Value for 7th constant in logistic regression relevance"
+                     "assignments. default: 4.01"),
             'type': float
         },
         'okapi_constant_b': {
