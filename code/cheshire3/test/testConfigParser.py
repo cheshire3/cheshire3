@@ -9,6 +9,8 @@ except ImportError:
     
 import string
 
+from lxml import etree
+
 from cheshire3.baseObjects import Session
 from cheshire3.configParser import C3Object, CaselessDictionary
 from cheshire3.dynamic import makeObjectFromDom
@@ -30,7 +32,11 @@ class Cheshire3ObjectTestCase(unittest.TestCase):
     
     def _get_config(self):
         # Return a parsed config for the object to be tested
-        raise NotImplementedError
+        return etree.XML('''
+        <subConfig id="{0.__name__}">
+            <objectType>{0.__module__}.{0.__name__}</objectType>
+        </subConfig>
+        '''.format(self._get_class()))
     
     def _get_dependencyConfigs(self):
         # Generator of configs for objects on which this object depends
@@ -65,7 +71,33 @@ class Cheshire3ObjectTestCase(unittest.TestCase):
     def test_instance(self):
         "Check that C3Object is an instance of the expected class."
         self.assertIsInstance(self.testObj, self._get_class())
-        
+
+
+class NamespacedCheshire3ObjectTestCase(Cheshire3ObjectTestCase):
+
+    def _get_config(self):
+        # Return a parsed config for the object to be tested
+        return etree.XML(
+            '<cfg:subConfig '
+            'xmlns:cfg="http://www.cheshire3.org/schemas/config/"'
+            ' id="{0.__name__}">'
+            '<cfg:objectType>{0.__module__}.{0.__name__}</cfg:objectType>'
+            '</cfg:subConfig>'.format(self._get_class())
+        )
+
+
+class DefaultNamespacedCheshire3ObjectTestCase(Cheshire3ObjectTestCase):
+
+    def _get_config(self):
+        # Return a parsed config for the object to be tested
+        return etree.XML(
+            '<subConfig '
+            'xmlns="http://www.cheshire3.org/schemas/config/" '
+            'id="{0.__name__}">'
+            '<objectType>{0.__module__}.{0.__name__}</objectType>'
+            '</subConfig>'.format(self._get_class())
+        )
+
 
 class CaselessDictionaryTestCase(unittest.TestCase):
     
@@ -147,7 +179,11 @@ class CaselessDictionaryTestCase(unittest.TestCase):
         
 
 def load_tests(loader, tests, pattern):
-    suite = loader.loadTestsFromTestCase(CaselessDictionaryTestCase)
+    ltc = loader.loadTestsFromTestCase
+    suite = ltc(CaselessDictionaryTestCase)
+    suite.addTests(ltc(Cheshire3ObjectTestCase))
+    suite.addTests(ltc(NamespacedCheshire3ObjectTestCase))
+    suite.addTests(ltc(DefaultNamespacedCheshire3ObjectTestCase))
     return suite
 
 
