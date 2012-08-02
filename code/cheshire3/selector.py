@@ -10,6 +10,7 @@ from lxml import etree
 from cheshire3.baseObjects import Selector
 from cheshire3.record import LxmlRecord
 from cheshire3.exceptions import ConfigFileException
+from cheshire3.internal import CONFIG_NS
 
 
 class SimpleSelector(Selector):
@@ -49,7 +50,7 @@ class SimpleSelector(Selector):
         data = {'maps': {}, 'string': '', 'type': ''}
         data['string'] = child.text
 
-        if child.tag == 'xpath':
+        if child.tag in ['xpath', '{%s}xpath' % CONFIG_NS]:
             data['type'] = 'xpath'
         else:
             try:
@@ -78,10 +79,11 @@ class SimpleSelector(Selector):
             self.sources.append(xpaths)
 
     def _handleLxmlConfigNode(self, session, node):    
-        if (node.tag == "source"):
+        if node.tag in ["source", '{%s}source' % CONFIG_NS]:
             xpaths = []
             for child in node.iterchildren(tag=etree.Element):
-                if child.tag in ["xpath", "location"]:
+                if child.tag in ["xpath", '{%s}xpath' % CONFIG_NS,
+                                 "location", '{%s}location' % CONFIG_NS]:
                     # add XPath
                     xp = self._handleLxmlLocationNode(session, child)
                     xpaths.append(xp)

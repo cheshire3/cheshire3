@@ -21,6 +21,7 @@ from cheshire3.workflow import CachingWorkflow
 from cheshire3.xpathProcessor import SimpleXPathProcessor
 from cheshire3.exceptions import FileDoesNotExistException, \
 ConfigFileException, PermissionException
+from cheshire3.internal import CONFIG_NS
 
 mimetypes.add_type('application/marc', '.marc')
 sliceRe = re.compile('^(.*)\[([0-9]+):([-0-9]+)\]$')
@@ -1083,12 +1084,15 @@ class ComponentDocumentFactory(SimpleDocumentFactory):
 
     def _handleLxmlConfigNode(self, session, node):
         # Source
-        if (node.tag == "source"):
+        if node.tag in ["source", '{%s}source' % CONFIG_NS]:
             xpaths = []
             for child in node.iterchildren(tag=etree.Element):
-                if child.tag == "xpath":
+                if child.tag in ["xpath", '{%s}xpath' % CONFIG_NS]:
                     # add XPath
-                    ref = child.attrib.get('ref', '')
+                    ref = child.attrib.get(
+                             'ref',
+                             child.attrib.get('{%s}ref' % CONFIG_NS, '')
+                    )
                     if ref:
                         xp = self.get_object(session, ref)
                     else:
@@ -1381,18 +1385,25 @@ temporarily during subsequent load() calls."""
             self.maps = maps
 
     def _handleLxmlConfigNode(self, session, node):
-        if (node.tag == "cluster"):
+        if node.tag in ["cluster", '{%s}cluster' % CONFIG_NS]:
             maps = []
             for child in node.iterchildren(tag=etree.Element):
-                if (child.tag == "map"):
-                    t = child.attrib.get('type', '')
+                if child.tag in ["map", '{%s}map' % CONFIG_NS]:
+                    t = child.attrib.get(
+                        'type',
+                        child.attrib.get('{%s}type' % CONFIG_NS, '')
+                    )  
                     map = []
                     for xpchild in child.iterchildren(tag=etree.Element):
-                        if (xpchild.tag == "xpath"):
+                        if xpchild.tag in ["xpath", '{%s}xpath' % CONFIG_NS]:
                             map.append(flattenTexts(xpchild).strip())
-                        elif (xpchild.tag == "process"):
+                        elif xpchild.tag in ["process",
+                                             '{%s}process' % CONFIG_NS]:
                             # turn xpath chain to workflow
-                            ref = xpchild.attrib.get('ref', None)
+                            ref = xpchild.attrib.get(
+                                'ref',
+                                xpchild.attrib.get('{%s}ref' % CONFIG_NS, None)
+                            ) 
                             if ref is not None:
                                 process = self.get_object(session, ref)
                             else:

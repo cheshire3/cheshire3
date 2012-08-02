@@ -45,13 +45,14 @@ class SpanXPathTaggedTermExtractor(SimpleExtractor):
             text = []
             for el in root.iter():
                 bits = {}
-                if el.tag != 'txt':
+                if el.tag not in ['txt', '{%s}txt' % CONFIG_NS]:
                     if el == startNode:
                         inrange = True
                     elif el == endNode:
                         inrange = False
                         break
-                    elif inrange == True and el.tag == 'w':                        
+                    elif inrange == True and el.tag in ['w',
+                                                        '{%s}w' % CONFIG_NS]:                        
                         if el.text is not None:
                             attr = el.attrib
                             bits['text'] = el.text

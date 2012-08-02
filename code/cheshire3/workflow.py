@@ -8,6 +8,7 @@ from cheshire3.baseObjects import Workflow, Server
 from cheshire3.configParser import C3Object
 from cheshire3.utils import elementType, flattenTexts
 from cheshire3.exceptions import C3Exception, ConfigFileException, ObjectDoesNotExistException
+from cheshire3.internal import CONFIG_NS
 
 
 class WorkflowException(C3Exception):
@@ -64,7 +65,7 @@ class SimpleWorkflow(Workflow):
         self.server = parent
 
     def _handleLxmlConfigNode(self, session, node):
-        if node.tag == 'workflow':
+        if node.tag in ['workflow', '{%s}workflow' % CONFIG_NS]:
             code = ['def handler(self, session, input=None):']
             sub = self._handleLxmlGlobals(node)
             for s in sub:
@@ -166,7 +167,7 @@ class SimpleWorkflow(Workflow):
     def _handleLxmlFlow(self, node):
         code = []
         for c in node.iterchildren(tag=etree.Element):
-            n = c.tag
+            n = c.tag[c.tag.find('}') + 1:]
             if n == "object":                    
                 code.extend(self._handleLxmlObject(c))
             elif n == "assign":
@@ -385,7 +386,7 @@ class SimpleWorkflow(Workflow):
     def _handleLxmlFork(self, node):
         code = []
         for c in node.iterchildren(tag=etree.Element):
-            if c.tag == "split":
+            if c.tag in ["split", '{%s}split' % CONFIG_NS]:
                 fname = self._handleLxmlSplit(c)
                 code.append("self.%s(session, input)" % fname)
         return code

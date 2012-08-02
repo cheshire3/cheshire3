@@ -29,6 +29,7 @@ from base64 import b64encode, b64decode
 # Intra-package imports
 from cheshire3.baseObjects import PreParser
 from cheshire3.document import StringDocument
+from cheshire3.internal import CONFIG_NS
 from cheshire3.marc_utils import MARC
 from cheshire3.utils import getShellResult
 from cheshire3.exceptions import ConfigFileException, ExternalSystemException
@@ -285,9 +286,9 @@ class MagicRedirectPreParser(TypedPreParser):
         #     <object mimeType="" ref=""/>
         #     ...
         # </hash>
-        if node.tag == "hash":
+        if node.tag in ['hash', '{%s}hash' % CONFIG_NS]:
             for c in node.iterchildren(tag=etree.Element):
-                if c.tag == "object":
+                if c.tag in ['object', '{%s}object' % CONFIG_NS]:
                     mt = c.attrib['mimeType']
                     ref = c.attrib['ref']
                     self.mimeTypeHash[mt] = ref

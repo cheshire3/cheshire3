@@ -102,14 +102,14 @@ class GrsMapTransformer(Transformer):
             self.maps = maps
 
     def _handleLxmlConfigNode(self,session, node):
-        if (node.tag == "transform"):
+        if node.tag in ["transform", '{%s}transform' % CONFIG_NS]:
             self.tagset = node.attrib.get('tagset', '')
             maps = []
             for child in node.iterchildren(tag=etree.Element):
-                if child.tag == 'map':
+                if child.tag in ['map', '{%s}map' % CONFIG_NS]:
                     map = []                    
                     for xpchild in child.iterchildren(tag=etree.Element):
-                        if xpchild.tag == "xpath":
+                        if xpchild.tag in ["xpath", '{%s}xpath' % CONFIG_NS]:
                             map.append(flattenTexts(xpchild))
                     if map[0][0] != "#":
                         vxp = [map[0]]

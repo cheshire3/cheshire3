@@ -8,6 +8,7 @@ import inspect
 
 from string import Template
 from types import MethodType
+from lxml import etree
 
 from cheshire3.session import Session
 from cheshire3 import dynamic
@@ -17,18 +18,14 @@ from cheshire3.bootstrap import BSLxmlParser
 from cheshire3.exceptions import *
 from cheshire3.permissionHandler import PermissionHandler
 from cheshire3.internal import defaultArchitecture, get_api, cheshire3Home,\
-                               cheshire3Root, cheshire3Dbs, cheshire3Www
-
+                               cheshire3Root, cheshire3Dbs, cheshire3Www,\
+                               CONFIG_NS
 
 cheshire3Paths = {'cheshire3Home': cheshire3Home,
                   'cheshire3Root': cheshire3Root,
                   'cheshire3Dbs': cheshire3Dbs,
                   'cheshire3Www': cheshire3Www
                   } 
-
-CONFIG_NS = "http://www.cheshire3.org/schemas/config/"
-
-from lxml import etree
 
 
 class CaselessDictionary(dict):
@@ -285,9 +282,11 @@ class C3Object(object):
 
     def _recurseLxmlSubConfigs(self, session, elem):
         for e in elem.iterchildren(tag=etree.Element):
-            if e.tag == 'subConfig':
-                id = e.attrib.get('id', '')
-                typ = e.attrib.get('type', '')
+            if e.tag in ['subConfig', '{%s}subConfig' % CONFIG_NS]:
+                id = e.attrib.get('id',
+                                  e.attrib.get('{%s}id' % CONFIG_NS, ''))
+                typ = e.attrib.get('type',
+                                   e.attrib.get('{%s}type' % CONFIG_NS, ''))
                 self.subConfigs[id] = e
                 if typ == 'index':
                     self.indexConfigs[id] = e
@@ -298,7 +297,7 @@ class C3Object(object):
                 elif typ == '':
                     msg = "Object must have a type attribute: %s" % id
                     raise ConfigFileException(msg)
-            elif e.tag == 'path':
+            elif e.tag in ['path', '{%s}path' % CONFIG_NS]:
                 typ = e.attrib.get('type', '')
                 if typ == 'includeConfigs':
                     if 'ref' in e.attrib:
@@ -368,11 +367,11 @@ class C3Object(object):
 
             walker = config.iterchildren(tag=etree.Element)
             for e in walker:
-                if e.tag == 'name':
+                if e.tag in ['name', '{%s}name' % CONFIG_NS]:
                     self.name = e.text
-                elif e.tag == 'objectType':
+                elif e.tag in ['objectType', '{%s}objectType' % CONFIG_NS]:
                     self.objectType = e.text
-                elif e.tag == 'checkSums':
+                elif e.tag in ['checkSums', '{%s}checkSums' % CONFIG_NS]:
                     for e2 in e.iterchildren(tag=etree.Element):
                         # Store checksum on self, and hash code against it
                         pt = e2.attrib.get('pathType', '__code__')
@@ -385,44 +384,44 @@ class C3Object(object):
                         else:
                             self.checkSums[ct] = e2.text
                     
-                elif e.tag == 'paths':
+                elif e.tag in ['paths', '{%s}paths' % CONFIG_NS]:
                     for e2 in e.iterchildren(tag=etree.Element):
                         try:
                             typ = e2.attrib['type']
                         except KeyError:
                             raise ConfigFileException("path must have type")
-                        if e2.tag == 'path':
+                        if e2.tag in ['path', '{%s}path' % CONFIG_NS]:
                             # Allow template strings in paths
                             # e.g. ${cheshire3Home}/foo/bar
                             pathTmpl = Template(e2.text)
                             sub = pathTmpl.safe_substitute
                             self.paths[typ] = sub(cheshire3Paths)
-                        elif e2.tag == 'object':
+                        elif e2.tag in ['object', '{%s}object' % CONFIG_NS]:
                             try:
                                 ref = e2.attrib['ref']
                             except KeyError:
                                 msg = "object must have ref"
                                 raise ConfigFileException(msg)
                             pathObjects[typ] = ref
-                elif e.tag == 'subConfigs':
+                elif e.tag in ['subConfigs', '{%s}subConfigs' % CONFIG_NS]:
                     # Recurse
                     self._recurseLxmlSubConfigs(session, e)
-                elif e.tag == 'options':
+                elif e.tag in ['options', '{%s}options' % CONFIG_NS]:
                     for e2 in e.iterchildren(tag=etree.Element):
                         try:
                             typ = e2.attrib['type']
                         except KeyError:
                             msg = "option (setting/default) must have type"
                             raise ConfigFileException(msg)
-                        if e2.tag == 'setting':
+                        if e2.tag in ['setting', '{%s}setting' % CONFIG_NS]:
                             value = self._verifySetting(typ, e2.text)
                             self.settings[typ] = value
-                        elif e2.tag == 'default':
+                        elif e2.tag in ['default', '{%s}default' % CONFIG_NS]:
                             value = self._verifyDefault(typ, e2.text)
                             self.defaults[typ] = value
-                elif e.tag == 'actions':
+                elif e.tag in ['actions', '{%s}actions' % CONFIG_NS]:
                     pass
-                elif e.tag == 'docs':
+                elif e.tag in ['docs', '{%s}docs' % CONFIG_NS]:
                     self.docstring = e.text
                 else:
                     self._handleLxmlConfigNode(session, e)

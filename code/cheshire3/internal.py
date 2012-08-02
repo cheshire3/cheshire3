@@ -32,6 +32,8 @@ cheshire3Code = os.path.join(cheshire3Root, "code", "extensions")
 cheshire3Dbs = os.path.join(cheshire3Root, "dbs")
 cheshire3Www = os.path.join(cheshire3Root, "www")
 
+CONFIG_NS = "http://www.cheshire3.org/schemas/config/"
+
 
 def get_api(object, all=False):
 

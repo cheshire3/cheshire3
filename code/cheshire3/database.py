@@ -18,6 +18,7 @@ from cheshire3.baseObjects import Database, Index, ProtocolMap, Record
 from cheshire3.baseStore import SummaryObject
 from cheshire3.exceptions import ConfigFileException,\
                                  ObjectDoesNotExistException, QueryException
+from cheshire3.internal import CONFIG_NS
 from cheshire3.bootstrap import BSParser, BootstrapDocument
 from cheshire3.resultSet import SimpleResultSet, BitmapResultSet
 import cheshire3.cqlParser as cql
@@ -120,10 +121,15 @@ class SimpleDatabase(SummaryObject, Database):
                                     self.indexes[id] = o
             else:
                 for c in dom.iterchildren(tag=etree.Element):
-                    if c.tag == 'paths':
+                    if c.tag in ['paths', '{%s}paths' % CONFIG_NS]:
                         for c2 in c.iterchildren(tag=etree.Element):
-                            if c2.tag == 'object':
-                                istore = c2.attrib['ref']
+                            if c2.tag in ['object', '{%s}object' % CONFIG_NS]:
+                                istore = c2.attrib.get('ref',
+                                                       c2.attrib.get(
+                                                         '{%s}ref' % CONFIG_NS,
+                                                         ''
+                                                       )
+                                )
                                 if istore in storeList:
                                     o = self.get_object(session, id)
                                     self.indexes[id] = o

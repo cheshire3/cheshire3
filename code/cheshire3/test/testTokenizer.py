@@ -30,12 +30,12 @@ class TokenizerTestCase(Cheshire3ObjectTestCase):
             <objectType>{0.__module__}.{0.__name__}</objectType>
         </subConfig>
         '''.format(self._get_class()))
-    
+
     def _get_process_string_tests(self):
         # Return a list of tuples containing test pairs:
         # (string to be tokenized, expected tokens list)
         return []
-    
+
     def _get_process_hash_tests(self):
         # Return a list of 2-dictionary tuples containing test pairs:
         # (dictionary to be normalized, expected result)
@@ -53,7 +53,7 @@ class TokenizerTestCase(Cheshire3ObjectTestCase):
                                    'proxLoc': [-1]
                                    }
                         })
-        
+
     def setUp(self):
         Cheshire3ObjectTestCase.setUp(self)
         self.process_string_tests = self._get_process_string_tests()
@@ -72,7 +72,7 @@ class TokenizerTestCase(Cheshire3ObjectTestCase):
                                                                    expected,
                                                                    instring)
                 )
-    
+
     def test_process_hash(self):
         "Check that process_hash returns expected hash."
         if not self.process_hash_tests:

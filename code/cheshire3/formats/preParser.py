@@ -205,14 +205,14 @@ class XmlParsingCmdLineMetadataDiscoveryPreParser(CmdLineMetadataDiscoveryPrePar
     
     def _handleLxmlConfigNode(self, session, node):
         # Source
-        if (node.tag == "source"):
+        if (node.tag in ['source', '{%s}source' % CONFIG_NS]):
             key = node.attrib.get('id', None)
             default = node.attrib.get('default', None)
             process = None
             preprocess = None
             xp = None
             for child in node.iterchildren(tag=etree.Element):
-                if child.tag == "xpath":
+                if child.tag in ['xpath', '{%s}xpath' % CONFIG_NS]:
                     if xp is None:
                         ref = child.attrib.get('ref', '')
                         if ref:
@@ -221,7 +221,7 @@ class XmlParsingCmdLineMetadataDiscoveryPreParser(CmdLineMetadataDiscoveryPrePar
                             node.set('id', self.id + '-xpath')
                             xp = SimpleXPathProcessor(session, node, self)
                             xp._handleLxmlConfigNode(session, node)
-                elif child.tag == "preprocess":
+                elif child.tag in ['preprocess', '{%s}preprocess' % CONFIG_NS]:
                     # turn preprocess chain to workflow
                     ref = child.attrib.get('ref', '')
                     if ref:
@@ -233,7 +233,7 @@ class XmlParsingCmdLineMetadataDiscoveryPreParser(CmdLineMetadataDiscoveryPrePar
                         e.set('id', self.id + "-preworkflow")
                         preprocess = CachingWorkflow(session, child, self)
                         preprocess._handleLxmlConfigNode(session, child)
-                elif child.tag == "process":
+                elif child.tag in ["process", '{%s}process' % CONFIG_NS]:
                     # turn xpath chain to workflow
                     ref = child.attrib.get('ref', '')
                     if ref:

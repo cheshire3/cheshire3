@@ -105,7 +105,7 @@ class CorpusPrepTransformer(Transformer):
                 # lxml 1.3 or later
                 walker = s.iter()           
             for c in walker:      
-                if c.tag != 's':
+                if c.tag not in ['s', '{%s}s' % CONFIG_NS]:
                     #deal with any .text content
                     if c.text:
                         t, o = self.rfot.process_string(self.session, c.text)

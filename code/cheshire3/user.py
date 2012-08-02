@@ -1,6 +1,7 @@
 
 from cheshire3.baseObjects import User
 from cheshire3.exceptions import ConfigFileException
+from cheshire3.internal import CONFIG_NS
 from cheshire3.utils import getFirstData, elementType, flattenTexts
 
 import crypt
@@ -9,7 +10,15 @@ import hashlib
 from lxml import etree
 
 class SimpleUser(User):
-    simpleNodes = ["username", "password", "email", "address", "tel", "realName", "description", "passwordType"]
+    simpleNodes = ["username", '{%s}username' % CONFIG_NS,
+                   "password", '{%s}password' % CONFIG_NS,
+                   "email", '{%s}email' % CONFIG_NS,
+                   "address", '{%s}address' % CONFIG_NS,
+                   "tel", '{%s}tel' % CONFIG_NS,
+                   "realName", '{%s}realName' % CONFIG_NS,
+                   "description", '{%s}description' % CONFIG_NS,
+                   "passwordType", '{%s}passwordType' % CONFIG_NS
+                   ]
     username = ""
     password = ""
     passwordType = ""
@@ -75,19 +84,21 @@ class SimpleUser(User):
         
     
     def _handleLxmlConfigNode(self, session, node):
-        if (node.tag in self.simpleNodes):
-            setattr(self, node.tag, flattenTexts(node).strip())
-        elif (node.tag == "flags"):
+        if node.tag in self.simpleNodes:
+            setattr(self,
+                    node.tag[node.tag.find('}') + 1:],
+                    flattenTexts(node).strip())
+        elif node.tag in ["flags", '{%s}flags' % CONFIG_NS]:
             # Extract Rights info
             # <flags> <flag> <object> <value> </flag> </flags>
             for c in node.iterchildren(tag=etree.Element):
-                if c.tag == "flag":
+                if c.tag in ["flag", '{%s}flag' % CONFIG_NS]:
                     obj = None
                     flag = None
                     for c2 in c.iterchildren(tag=etree.Element):
-                        if c2.tag == "object":
+                        if c2.tag in ["object", '{%s}object' % CONFIG_NS]:
                             obj = flattenTexts(c2).strip()
-                        elif c2.tag == "value":
+                        elif c2.tag in ["value", '{%s}value' % CONFIG_NS]:
                             flag = flattenTexts(c2).strip()
                             if (flag not in self.allFlags) and (flag[:4] != "c3fn"):
                                 raise ConfigFileException("Unknown flag: %s" % flag)
@@ -97,10 +108,10 @@ class SimpleUser(User):
                     if (obj):
                         f.append(obj)
                     self.flags[flag] = f
-        elif (node.tag == "history"):
+        elif node.tag in ["history", '{%s}history' % CONFIG_NS]:
             # Extract user history
             pass
-        elif (node.tag == "hostmask"):
+        elif node.tag in ["hostmask", '{%s}hostmask' % CONFIG_NS]:
             # Extract allowed hostmask list
             pass
     

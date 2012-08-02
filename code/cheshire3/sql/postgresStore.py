@@ -98,19 +98,19 @@ class PostgresStore(SimpleStore):
         #- end _handleConfigNode ------------------------------------------
 
     def _handleLxmlConfigNode(self, session, node):
-        if node.tag == 'relations':
+        if node.tag in ['relations', '{%s}relations' % CONFIG_NS]:
             self.relations = {}
             for rel in node.iterchildren(tag=etree.Element):
-                if rel.tag == 'relation':
+                if rel.tag in ['relation', '{%s}relation' % CONFIG_NS]:
                     relName = rel.attrib.get('name', None)
                     if relName is None:
                         raise ConfigFileException('Name not supplied for relation')
                     fields = []
                     for fld in rel.iterchildren(tag=etree.Element):
-                        if fld.tag == 'object':
+                        if fld.tag in ['object', '{%s}object' % CONFIG_NS]:
                             oid = flattenTexts(fld)
                             fields.append([oid, 'VARCHAR', oid])
-                        elif fld.tag == 'field':
+                        elif fld.tag in ['field', '{%s}field' % CONFIG_NS]:
                             fname = fld.attrib.get('name', None)
                             if fname is None:
                                  ConfigFileException('Name not supplied for field')

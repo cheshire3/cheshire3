@@ -18,6 +18,7 @@ from cheshire3.baseObjects import Index, Session
 from cheshire3.utils import elementType, flattenTexts, vectorSimilarity
 from cheshire3.exceptions import ConfigFileException, QueryException, \
                                  C3ObjectTypeError, PermissionException
+from cheshire3.internal import CONFIG_NS
 from cheshire3.resultSet import SimpleResultSet, SimpleResultSetItem
 from cheshire3.workflow import CachingWorkflow
 from cheshire3.xpathProcessor import SimpleXPathProcessor
@@ -313,25 +314,29 @@ class SimpleIndex(Index):
 
     def _handleLxmlConfigNode(self, session, node):
         # Source
-        if (node.tag == "source"):
-            modes = node.attrib.get('mode', 'data')
+        if node.tag in ["source", '{%s}source' % CONFIG_NS]:
+            modes = node.attrib.get('{%s}mode' % CONFIG_NS,
+                                    node.attrib.get('mode', 'data')) 
             modes = modes.split('|')
             process = None
             preprocess = None
             xp = None
             for child in node.iterchildren(tag=etree.Element):
-                if child.tag in ["xpath", "selector"]:
+                if child.tag in ['xpath', '{%s}xpath' % CONFIG_NS,
+                                 'selector', '{%s}selector' % CONFIG_NS]:
                     if xp is None:
-                        ref = child.attrib.get('ref', '')
+                        ref = child.attrib.get('{%s}ref' % CONFIG_NS,
+                                               child.attrib.get('ref', ''))
                         if ref:
                             xp = self.get_object(session, ref)
                         else:
                             node.set('id', self.id + '-xpath')
                             xp = SimpleXPathProcessor(session, node, self)
                             xp._handleLxmlConfigNode(session, node)
-                elif child.tag == "preprocess":
+                elif child.tag in ['preprocess', '{%s}preprocess' % CONFIG_NS]:
                     # turn preprocess chain to workflow
-                    ref = child.attrib.get('ref', '')
+                    ref = child.attrib.get('{%s}ref' % CONFIG_NS,
+                                           child.attrib.get('ref', ''))
                     if ref:
                         preprocess = self.get_object(session, ref)
                     else:
@@ -341,9 +346,10 @@ class SimpleIndex(Index):
                         e.set('id', self.id + "-preworkflow")
                         preprocess = CachingWorkflow(session, child, self)
                         preprocess._handleLxmlConfigNode(session, child)
-                elif child.tag == "process":
+                elif child.tag in ['process', '{%s}process' % CONFIG_NS]:
                     # turn xpath chain to workflow
-                    ref = child.attrib.get('ref', '')
+                    ref = child.attrib.get('{%s}ref' % CONFIG_NS,
+                                           child.attrib.get('ref', ''))
                     if ref:
                         process = self.get_object(session, ref)
                     else:
@@ -1862,8 +1868,10 @@ class PassThroughIndex(SimpleIndex):
     
     def _handleLxmlConfigNode(self, session, node):
         # Source
-        if (node.tag in ["xpath", "selector"]):
-            ref = node.attrib.get('ref', '')
+        if node.tag in ['xpath', '{%s}xpath' % CONFIG_NS,
+                         'selector', '{%s}selector' % CONFIG_NS]:
+            ref = node.attrib.get('{%s}ref' % CONFIG_NS,
+                                  node.attrib.get('ref', ''))
             if ref:
                 xp = self.get_object(session, ref)
             else:

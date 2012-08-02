@@ -10,6 +10,7 @@ from types import ModuleType
 
 from cheshire3.utils import getFirstData, elementType
 from cheshire3.exceptions import ConfigFileException
+from cheshire3.internal import CONFIG_NS
 
 
 def makeObjectFromDom(session, topNode, parentObject):
@@ -18,9 +19,15 @@ def makeObjectFromDom(session, topNode, parentObject):
     try:
         objectType = topNode.xpath('./objectType/text()')[0]
     except IndexError:
-        from lxml import etree
-        print etree.tostring(topNode)
+        # May have namespace
+        try:
+            objectType = topNode.xpath('./c3:objectType/text()', 
+                                       namespaces={'c3': CONFIG_NS})[0]
+        except IndexError:
+            from lxml import etree
+            print etree.tostring(topNode)
     except AttributeError:
+        # Not an Lxml config node
         for c in topNode.childNodes:
             if (c.nodeType == elementType and c.localName == "objectType"):
                 # Here's what we want to instantiate
