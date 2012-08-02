@@ -11,35 +11,25 @@ import distribute_setup
 distribute_setup.use_setuptools()
 from setuptools import setup, find_packages
 
-# Check version
+# Check Python version
 py_version = getattr(sys, 'version_info', (0, 0, 0))
 
 if py_version < (2, 6):
     warn("Cheshire3 requires Python 2.6 or later; some code may be "
          "incompatible with earlier versions.")
 
-# Requirements
-_install_requires = ['lxml >= 2.1', 'zopyx.txng3.ext >= 3.3.1']
-# Determine python-dateutil version
-if py_version < (3, 0):
-    dateutilstr = 'python-dateutil == 1.5'
-else:
-    'python-dateutil >= 2.0'
-_install_requires.append(dateutilstr)
-if py_version < (2, 7):
-    _install_requires.append('argparse')
-    _install_requires.append('unittest2')
-
-# Inspect to find current path
-setuppath = inspect.getfile(inspect.currentframe())
-setupdir = os.path.dirname(setuppath)
-
+# Basic information
 _name = u'cheshire3'
-_version = '1.0.0b45'
+_version = '1.0.0c1'
 _description = (u'Cheshire3 Search and Retrieval Engine and Information '
                 'Framework')
 _download_url = ('http://www.cheshire3.org/download/{0}/src/{1}-{2}.tar.gz'
                  ''.format(_version[:5], _name, _version))
+
+# More detailed description from README.mdown
+# Inspect to find current path
+setuppath = inspect.getfile(inspect.currentframe())
+setupdir = os.path.dirname(setuppath)
 # Read any necessary bits from README.mdown
 try:
     fh = open(os.path.join(setupdir, 'README.mdown'), 'r')
@@ -61,6 +51,18 @@ Authors
     # Process any further sections here
     # Delete file contents from memory
     del fstr
+
+# Requirements
+_install_requires = ['lxml >= 2.1', 'zopyx.txng3.ext >= 3.3.1']
+# Determine python-dateutil version
+if py_version < (3, 0):
+    dateutilstr = 'python-dateutil == 1.5'
+else:
+    'python-dateutil >= 2.0'
+_install_requires.append(dateutilstr)
+if py_version < (2, 7):
+    _install_requires.append('argparse')
+    _install_requires.append('unittest2')
 
 
 setup(
