@@ -126,89 +126,67 @@ class StoredSaxParser(BaseParser):
         return rec
 
 
-try:
-    from lxml import etree
-except ImportError:
-    # Define empty classes
-    class LxmlParser(Parser):
-        """lxml based Parser. Creates LxmlRecords."""
-        pass
+class LxmlParser(BaseParser):
+    """ lxml based Parser.  Creates LxmlRecords """
 
-
-    class LxmlSchemaParser(Parser):
-        pass
-
-
-    class LxmlRelaxNGParser(Parser):
-        pass
-
-
-    class LxmlHtmlParser(BaseParser):
-        """lxml based parser for HTML documents."""
-        pass
-
-else:
-    class LxmlParser(BaseParser):
-        """ lxml based Parser.  Creates LxmlRecords """
-
-        _possibleSettings = {
-            'validateDTD': {
-                'docs': ("Validate to DTD while parsing (if a DTD was "
-                         "referenced by the Document.)"),
-                'type': int,
-                'options': "0|1"
-            },
-            'allowNetwork': {
-                'docs': ("Allow network access to look up external documents "
-                         "(DTDs etc.)"),
-                'type': int,
-                'options': "0|1"
-            }
+    _possibleSettings = {
+        'validateDTD': {
+            'docs': ("Validate to DTD while parsing (if a DTD was "
+                     "referenced by the Document.)"),
+            'type': int,
+            'options': "0|1"
+        },
+        'allowNetwork': {
+            'docs': ("Allow network access to look up external documents "
+                     "(DTDs etc.)"),
+            'type': int,
+            'options': "0|1"
         }
+    }
 
-        def __init__(self, session, config, parent):
-            BaseParser.__init__(self, session, config, parent)
-            dtdVal = bool(self.get_setting(session, 'validateDTD', 0))
-            noNetwork = not self.get_setting(session, 'allowNetwork', 0)
-            self.parser = etree.XMLParser(dtd_validation=dtdVal,
-                                          no_network=noNetwork)
+    def __init__(self, session, config, parent):
+        BaseParser.__init__(self, session, config, parent)
+        dtdVal = bool(self.get_setting(session, 'validateDTD', 0))
+        noNetwork = not self.get_setting(session, 'allowNetwork', 0)
+        self.parser = etree.XMLParser(dtd_validation=dtdVal,
+                                      no_network=noNetwork)
 
-        def process_document(self, session, doc):
-            # Input must be string or stream
-            data = doc.get_raw(session)
-            try:
-                et = etree.parse(StringIO.StringIO(data), self.parser)
-            except AssertionError:
-                data = data.decode('utf8')
-                et = etree.parse(StringIO.StringIO(data), self.parser)
-            rec = LxmlRecord(et)
-            rec.byteCount = len(data)
-            self._copyData(doc, rec)
-            return rec
-
-
-    class LxmlSchemaParser(Parser):
-        pass
-
-
-    class LxmlRelaxNGParser(Parser):
-        pass
-
-
-    class LxmlHtmlParser(BaseParser):
-        """lxml based parser for HTML documents."""
-
-        def __init__(self, session, config, parent):
-            BaseParser.__init__(self, session, config, parent)
-            self.parser = etree.HTMLParser()
-
-        def process_document(self, session, doc):
-            data = doc.get_raw(session)
+    def process_document(self, session, doc):
+        # Input must be string or stream
+        data = doc.get_raw(session)
+        try:
             et = etree.parse(StringIO.StringIO(data), self.parser)
-            rec = LxmlRecord(et)
-            rec.byteCount = len(data)
-            self._copyData(doc, rec)
-            return rec
+        except AssertionError:
+            data = data.decode('utf8')
+            et = etree.parse(StringIO.StringIO(data), self.parser)
+        rec = LxmlRecord(et)
+        rec.byteCount = len(data)
+        self._copyData(doc, rec)
+        return rec
+
+
+class LxmlSchemaParser(Parser):
+    pass
+
+
+class LxmlRelaxNGParser(Parser):
+    pass
+
+
+class LxmlHtmlParser(BaseParser):
+    """lxml based parser for HTML documents."""
+
+    def __init__(self, session, config, parent):
+        BaseParser.__init__(self, session, config, parent)
+        self.parser = etree.HTMLParser()
+
+    def process_document(self, session, doc):
+        data = doc.get_raw(session)
+        et = etree.parse(StringIO.StringIO(data), self.parser)
+        rec = LxmlRecord(et)
+        rec.byteCount = len(data)
+        self._copyData(doc, rec)
+        return rec
 
 
 class PassThroughParser(BaseParser):
