@@ -1,13 +1,15 @@
+"""Cheshire3 User Implementations."""
+
+import crypt
+import hashlib
+
+from lxml import etree
 
 from cheshire3.baseObjects import User
 from cheshire3.exceptions import ConfigFileException
 from cheshire3.internal import CONFIG_NS
 from cheshire3.utils import getFirstData, elementType, flattenTexts
 
-import crypt
-import hashlib
-
-from lxml import etree
 
 class SimpleUser(User):
     simpleNodes = ["username", '{%s}username' % CONFIG_NS,
@@ -23,28 +25,32 @@ class SimpleUser(User):
     password = ""
     passwordType = ""
     email = ""
-    address =""
+    address = ""
     tel = ""
     realName = ""
     description = ""
     flags = {}
 
-    allFlags = {"c3r:administrator" : "Administrator flag. Inherits all others.",
-                "info:srw/operation/1/create" : "Create record within this store",
-                "info:srw/operation/1/replace" : "Replace existing record within store",
-                "info:srw/operation/1/delete" : "Delete existing record from store",
-                "info:srw/operation/1/metadata" : "Modify metadata of record within store",
-                "info:srw/operation/2/index" : "Run indexing process for this object",
-                "info:srw/operation/2/unindex" : "Run un-indexing process for this object",
-                "info:srw/operation/2/cluster" : "Run clustering process for this object",
-                "info:srw/operation/2/permissions" : "Permission to change permissions",
-                "info:srw/operation/2/search" : "Permission to search",
-                "info:srw/operation/2/retrieve" : "Permission to retrieve object",
-                "info:srw/operation/2/scan" : "Permission to scan",
-                "info:srw/operation/2/sort" : "Permission to sort result set",      
-                "info:srw/operation/2/transform" : "Permission to transform record"            
-                }
-    # Plus c3fn:(functionName) for function on object   
+    allFlags = {
+        "c3r:administrator": "Administrator flag. Inherits all others.",
+        "info:srw/operation/1/create": "Create record within this store",
+        "info:srw/operation/1/replace": "Replace existing record within store",
+        "info:srw/operation/1/delete": "Delete existing record from store",
+        "info:srw/operation/1/metadata": ("Modify metadata of record within "
+                                          "store"),
+        "info:srw/operation/2/index": "Run indexing process for this object",
+        "info:srw/operation/2/unindex": ("Run un-indexing process for this "
+                                         "object"),
+        "info:srw/operation/2/cluster": ("Run clustering process for this "
+                                         "object"),
+        "info:srw/operation/2/permissions": "Permission to change permissions",
+        "info:srw/operation/2/search": "Permission to search",
+        "info:srw/operation/2/retrieve": "Permission to retrieve object",
+        "info:srw/operation/2/scan": "Permission to scan",
+        "info:srw/operation/2/sort": "Permission to sort result set",
+        "info:srw/operation/2/transform": "Permission to transform record"
+    }
+    # Plus c3fn:(functionName) for function on object
 
     resultSetIds = []
 
@@ -64,10 +70,14 @@ class SimpleUser(User):
                                 obj = getFirstData(c2)
                             elif c2.localName == "value":
                                 flag = getFirstData(c2)
-                                if (flag not in self.allFlags) and (flag[:4] != "c3fn"):
-                                    raise ConfigFileException("Unknown flag: %s" % flag)
+                                if ((flag not in self.allFlags) and
+                                    (flag[:4] != "c3fn")):
+                                    msg = "Unknown flag: %s" % flag
+                                    raise ConfigFileException(msg)
                     if obj is None or flag is None:
-                        raise ConfigFileException("Missing object or value element for flag for user %s" % self.username)
+                        msg = ("Missing object or value element for flag for "
+                               "user %s" % self.username)
+                        raise ConfigFileException(msg)
                     if (obj):
                         f = self.flags.get(flag, [])
                         if f != "":
@@ -81,8 +91,7 @@ class SimpleUser(User):
         elif (node.localName == "hostmask"):
             # Extract allowed hostmask list
             pass
-        
-    
+
     def _handleLxmlConfigNode(self, session, node):
         if node.tag in self.simpleNodes:
             setattr(self,
@@ -100,10 +109,14 @@ class SimpleUser(User):
                             obj = flattenTexts(c2).strip()
                         elif c2.tag in ["value", '{%s}value' % CONFIG_NS]:
                             flag = flattenTexts(c2).strip()
-                            if (flag not in self.allFlags) and (flag[:4] != "c3fn"):
-                                raise ConfigFileException("Unknown flag: %s" % flag)
+                            if (flag not in self.allFlags and
+                                flag[:4] != "c3fn"):
+                                msg = "Unknown flag: %s" % flag
+                                raise ConfigFileException(msg)
                     if obj is None or flag is None:
-                        raise ConfigFileException("Missing object or value element for flag for user %s" % self.username)
+                        msg = ("Missing object or value element for flag for "
+                               "user %s" % self.username)
+                        raise ConfigFileException()
                     f = self.flags.get(flag, [])
                     if (obj):
                         f.append(obj)
@@ -114,12 +127,10 @@ class SimpleUser(User):
         elif node.tag in ["hostmask", '{%s}hostmask' % CONFIG_NS]:
             # Extract allowed hostmask list
             pass
-    
 
     def __init__(self, session, config, parent):
         self.flags = {}
         User.__init__(self, session, config, parent)
-
 
     def has_flag(self, session, flag, object=""):
         # Does the user have the flag for this object/all objects
@@ -131,10 +142,10 @@ class SimpleUser(User):
             f = self.flags.get("", [])
             if object in f:
                 return True
-            else :
+            else:
                 f = self.flags.get("c3r:administrator", [])
                 if object in f or f == "":
-                    return True                
+                    return True
                 return False
 
     def check_password(self, session, password):
