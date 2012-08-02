@@ -11,6 +11,7 @@ from cheshire3.baseObjects import Selector
 from cheshire3.record import LxmlRecord
 from cheshire3.exceptions import ConfigFileException
 from cheshire3.internal import CONFIG_NS
+from cheshire3.utils import getFirstData, elementType
 
 
 class SimpleSelector(Selector):
