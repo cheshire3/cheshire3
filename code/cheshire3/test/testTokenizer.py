@@ -245,6 +245,53 @@ class RegexpFindOffsetTokenizerTestCase(OffsetTokenizerTestCase):
                   [0]))
         ]
 
+    def _get_process_hash_tests(self):
+        # Return a list of 2-dictionary tuples containing test pairs:
+        # (dictionary to be normalized, expected result)
+        for instring, (expTokens, expOffsets) in self.process_string_tests:
+            if expTokens:
+                # Filter out empty tokens
+                toks = [et for et in expTokens if et]
+                # Truncate offsets
+                offs = expOffsets[:len(toks)]
+                yield ({instring: {'text': instring,
+                                   'occurences': 1,
+                                   'positions': [0, 0, 0],
+                                   'proxLoc': [-1]
+                                   }
+                       },
+                       {instring: {'text': toks,
+                                   'occurences': 1,
+                                   'positions': [0, 0, 0],
+                                   'charOffsets': offs,
+                                   'proxLoc': [-1]
+                                   }
+                        })
+
+    def test_process_string(self):
+        "Check that process_string returns the expected tokens and offsets."
+        if not self.process_string_tests:
+            self.skipTest("No test data defined")
+        for instring, (expTokens, expOffsets) in self.process_string_tests:
+            outTokens, outOffsets = self.testObj.process_string(self.session,
+                                                                instring)
+            self.assertIsInstance(outTokens, list)
+            self.assertIsInstance(outOffsets, list)
+            for outToken, expToken in zip(outTokens, expTokens):
+                self.assertEqual(
+                    outToken, expToken,
+                    u"'{0}' != '{1}' when tokenizing '{2}'".format(outTokens,
+                                                                   expTokens,
+                                                                   instring)
+                )
+            for outOffset, expOffset in zip(outOffsets, expOffsets):
+                self.assertEqual(
+                    outOffset, expOffset,
+                    u"'{0}' != '{1}' when tokenizing '{2}'".format(outOffsets,
+                                                                   expOffsets,
+                                                                   instring)
+                )
+
 
 class RegexpFindPunctuationOffsetTokenizerTestCase(
                                            RegexpFindOffsetTokenizerTestCase):
