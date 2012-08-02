@@ -5,6 +5,7 @@ import StringIO
 from xml.sax import make_parser, ErrorHandler
 from xml.sax import InputSource as SaxInput
 from xml.dom.minidom import parseString as domParseString
+from lxml import etree
 
 from cheshire3.baseObjects import Parser
 from cheshire3.record import SaxRecord, SaxContentHandler, MinidomRecord, \
