@@ -11,23 +11,26 @@ try:
     import cStringIO as StringIO
 except ImportError:
     import StringIO
-    
+
 from lxml import etree
 
+import cheshire3.cqlParser as cql
+
 from cheshire3.baseObjects import Index, Session
-from cheshire3.utils import elementType, flattenTexts, vectorSimilarity
+from cheshire3.utils import elementType, flattenTexts, vectorSimilarity,\
+                            SimpleBitfield
 from cheshire3.exceptions import ConfigFileException, QueryException, \
                                  C3ObjectTypeError, PermissionException
 from cheshire3.internal import CONFIG_NS
-from cheshire3.resultSet import SimpleResultSet, SimpleResultSetItem
+from cheshire3.resultSet import SimpleResultSet, SimpleResultSetItem,\
+                                BitmapResultSet
 from cheshire3.workflow import CachingWorkflow
 from cheshire3.xpathProcessor import SimpleXPathProcessor
-import cheshire3.cqlParser as cql
 
 
 class IndexIter(object):
     """Object to facilitate iterating over an Index."""
-    
+
     index = None
     session = None
 
@@ -61,7 +64,7 @@ class IndexIter(object):
                     self.nextData = ""
                 else:
                     self.nextData = nd
-                    
+
             return self.index.construct_resultSet(self.session, d[1],
                                                   queryHash={'text': d[0],
                                                              'occurences': 1,
@@ -316,7 +319,7 @@ class SimpleIndex(Index):
         # Source
         if node.tag in ["source", '{%s}source' % CONFIG_NS]:
             modes = node.attrib.get('{%s}mode' % CONFIG_NS,
-                                    node.attrib.get('mode', 'data')) 
+                                    node.attrib.get('mode', 'data'))
             modes = modes.split('|')
             process = None
             preprocess = None
@@ -377,14 +380,14 @@ class SimpleIndex(Index):
         self.astxRe = re.compile(r'(?<!\\)\*')
 
         Index.__init__(self, session, config, parent)
-        
+
         lss = self.get_setting(session, 'longSize')
         if lss:
             self.longStructSize = int(lss)
         else:
             #self.longStructSize = len(struct.pack('L', 1))
             self.longStructSize = struct.calcsize('l')
-        
+
         self.recordStoreSizes = self.get_setting(session,
                                                  'recordStoreSizes',
                                                  0)
@@ -419,7 +422,7 @@ class SimpleIndex(Index):
     def _regexify_wildcards(self, term):
         # Escape existing special regex chars
         term = term.replace('.', r'\.')
-        term = term[0] + self.caretRe.sub(r'\^', term[1:-1]) + term[-1] 
+        term = term[0] + self.caretRe.sub(r'\^', term[1:-1]) + term[-1]
         term = self.qmarkRe.sub('.', term)
         term = self.astxRe.sub('.*', term)
         if (term[-1] == '^') and (term[-2] != '\\'):
@@ -459,7 +462,6 @@ class SimpleIndex(Index):
             if not okay:
                 raise PermissionException("Permission required to add to "
                                           "index %s" % self.id)
-
         if 'sort' in self.sources:
             sortHash = self._processRecord(session, rec,
                                            self.sources[u'sort'][0])
@@ -473,7 +475,7 @@ class SimpleIndex(Index):
         for src in self.sources[u'data']:
             processed = self._processRecord(session, rec, src)
             if sortVal:
-                # Don't blank sortVal, or will be overwritten 
+                # Don't blank sortVal, or will be overwritten
                 # in subsequent iterations
                 k = processed.keys()[0]
                 processed[k]['sortValue'] = sortVal
@@ -509,7 +511,7 @@ class SimpleIndex(Index):
                 processed = self._processRecord(session, rec, src)
                 if (istore is not None):
                     istore.delete_terms(session, self, processed, rec)
-                
+
     def begin_indexing(self, session):
         # Find all indexStores
         p = self.permissionHandlers.get('info:srw/operation/2/index', None)
@@ -544,7 +546,7 @@ class SimpleIndex(Index):
             stores.append(istore)
         for s in stores:
             s.commit_indexing(session, self)
-            
+
     def commit_parallelIndexing(self, session):
         istore = self.get_path(session, 'indexStore')
         istore.commit_parallelIndexing(session, self)
@@ -569,7 +571,7 @@ class SimpleIndex(Index):
                                     self.sources.get(clause.relation.value,
                                                      self.sources[u'data'])):
             res.update(src[1].process(session, [[clause.term.value]]))
-            
+
         store = self.get_path(session, 'indexStore')
         matches = []
         rel = clause.relation
@@ -581,8 +583,8 @@ class SimpleIndex(Index):
                     rel.value = pm.defaultRelation
                 except AttributeError:
                     pass
-                
-        # While we're looking at the query, check if we should do blind 
+
+        # While we're looking at the query, check if we should do blind
         # relevance feedback on this clause
         feedback = 0
         for m in rel.modifiers:
@@ -595,15 +597,15 @@ class SimpleIndex(Index):
                         feedback = int(m.value)
                     except ValueError:
                         feedback = 1
-        
+
         construct_resultSet = self.construct_resultSet
-        if (rel.value in ['any', 'all', '=', 'exact', 'window'] and 
-            (rel.prefix == 'cql' or 
+        if (rel.value in ['any', 'all', '=', 'exact', 'window'] and
+            (rel.prefix == 'cql' or
              rel.prefixURI == 'info:srw/cql-context-set/1/cql-v1.1'
             )):
             for k, qHash in res.iteritems():
                 if k[0] == '^':
-                    k = k[1:]      
+                    k = k[1:]
                 firstMask = self._locate_firstMask(k)
                 while (firstMask > 0) and (k[firstMask - 1] == '\\'):
                     firstMask = self._locate_firstMask(k, firstMask + 1)
@@ -634,7 +636,7 @@ class SimpleIndex(Index):
                             mymatch = kRe.match
                             termList = filter(lambda t: mymatch(t[0]),
                                               termList)
-                    
+
                     maskBase = self.resultSetClass(
                                                session, [],
                                                recordStore=self.recordStore)
@@ -643,7 +645,7 @@ class SimpleIndex(Index):
                     if (clause.relation.value == u'='):
                         # tell combine to keep proxInfo
                         pass
-                            
+
                     try:
                         maskResultSets = [
                             construct_resultSet(session, t[1], qHash)
@@ -746,7 +748,7 @@ class SimpleIndex(Index):
 
     def facets(self, session, resultSet, nTerms=0):
         """Return a list of term facets for the resultSet.
-        
+
         Return a list of (term, termdata) tuples from this index which occur
         within the records in resultSet. Terms are returned in descending
         frequency (number of records) order.
@@ -765,10 +767,10 @@ class SimpleIndex(Index):
                     except:
                         termFreqs[t[0]] = t[1]
                         recordFreqs[t[0]] = 1
-                        
+
         # Sort list by descending frequency (decorate-sort-undecorate)
         # Use 1 / freq - keeps terms with same freq in alpha order
-        sortList = [(1.0 / v, k) 
+        sortList = [(1.0 / v, k)
                     for k, v
                     in recordFreqs.iteritems()]
         sortList.sort()
@@ -780,20 +782,20 @@ class SimpleIndex(Index):
             term = self.fetch_termById(session, termId)
             # (term, (termId, nRecs, freq))
             terms.append((term.decode('utf-8'),
-                          (termId, recordFreqs[termId], termFreqs[termId])))        
+                          (termId, recordFreqs[termId], termFreqs[termId])))
         return terms
 
     def searchByExamples(self, session, examples, clause, db, nTerms=20):
         """Return a ResultSet of items 'similar' to the given examples.
-        
+
         Identify most common terms in examples, create a new resultSet of
         results that contains any of these terms.
-        
+
         examples := iterable of example objects (e.g. ResultSet, list of
                     Records) to be used to search the index (i.e. by
                     identifying common terms)
         clause   := CQL clause (if examples is a resultSet this would the query
-                    used to generate it) 
+                    used to generate it)
         nTerms   := No. of most common (no. of records) terms to use to create
                     new resultSet
         """
@@ -824,13 +826,13 @@ class SimpleIndex(Index):
         rs = base.combine(session, matches, exClause, db)
         self.log_debug(session, "searchByExamples ResultSets combined")
         return rs
-    
+
     def _blindFeedback(self, session, rs, clause, db, nRecs=0, nTerms=20):
         """Expand ResultSet using blind/pseudo relevance feedback.
-        
+
         Carry out blind/pseudo relevance feedback on the resultSet, merge and
         return.
-        
+
         rs        := resultSet
         clause    := CQL clause that generated rs
         nRecs     := No. of top results to extract terms from
@@ -847,7 +849,7 @@ class SimpleIndex(Index):
         # Need to sort before slicing to get the 'good' results
         # Use the built-in sorted() to create a sorted iterable slice of top
         # results without changing original (otherwise combining with new
-        # results will end up with duplicates) 
+        # results will end up with duplicates)
         try:
             fbrs = self.searchByExamples(
                                  session,
@@ -859,7 +861,7 @@ class SimpleIndex(Index):
             self.log_warning(session,
                              "Unable to complete blind relevance feedback "
                              "loop: " + e.reason)
-            return rs 
+            return rs
         # Both resultSets now have scores assigned, so need to combine them
         # using a boolean
         fooQ = cql.parse(">rel=info:srw/cql-context-set/2/relevance-1.1 {0}"
@@ -869,13 +871,13 @@ class SimpleIndex(Index):
         base.recordStoreSizes = self.recordStoreSizes
         base.index = self
         return base.combine(session, [rs, fbrs], fooQ, db)
-    
+
     def similarity(self, session, record1, record2):
         """Calculate and return cosine similarity of records.
-        
+
         Calculate and return cosine similarity of vector representations of the
         two record arguments.
-        
+
         >>> self.similarity(session, rec, rec)
         1.0
         """
@@ -888,14 +890,14 @@ class SimpleIndex(Index):
             raise NotImplementedError  # ...but not yet
 
         return vectorSimilarity(dict(vector1[2]), dict(vector2[2]))
-    
+
     # Internal API for stores
 
     def serialize_term(self, session, termId, data, nRecs=0, nOccs=0):
         """Return a string serialization representing the term.
-               
-        Return a string serialization representing the term for storage 
-        purposes. Used as a callback from IndexStore to serialize a list of 
+
+        Return a string serialization representing the term for storage
+        purposes. Used as a callback from IndexStore to serialize a list of
         terms and document references to be stored.
 
         termId  := numeric ID of term being serialized
@@ -917,15 +919,15 @@ class SimpleIndex(Index):
                               'HINT: are you trying to put proximity '
                               'information into a SimpleIndex?\n')
             raise
-        
+
     def deserialize_term(self, session, data, nRecs=-1, prox=1):
         """Deserialize and return the internal representation of a term.
-        
-        Return the internal representation of a term as recreated from a 
-        string serialization from storage. Used as a callback from IndexStore 
-        to take serialized data and produce list of terms and document 
+
+        Return the internal representation of a term as recreated from a
+        string serialization from storage. Used as a callback from IndexStore
+        to take serialized data and produce list of terms and document
         references.
-        
+
         data  := string (usually retrieved from indexStore)
         nRecs := number of Records to deserialize (all by default)
         prox  := boolean flag to include proximity information
@@ -947,11 +949,11 @@ class SimpleIndex(Index):
     def merge_term(self, session, currentData, newData,
                    op="replace", nRecs=0, nOccs=0):
         """Merge newData into currentData and return the result.
-        
-        Merging takes the currentData and can add, replace or delete the data 
-        found in newData, and then returns the result. Used as a callback from 
+
+        Merging takes the currentData and can add, replace or delete the data
+        found in newData, and then returns the result. Used as a callback from
         IndexStore to take two sets of terms and merge them together.
-        
+
         currentData := output of deserialize_terms
         newData     := flat list
         op          := replace | add | delete
@@ -972,7 +974,7 @@ class SimpleIndex(Index):
         elif op == 'replace':
             for n in range(0, len(newData), 3):
                 docid = newData[n]
-                storeid = newData[n + 1]                
+                storeid = newData[n + 1]
                 replaced = 0
                 for x in range(3, len(currentData), 3):
                     if (currentData[x] == docid and
@@ -984,10 +986,10 @@ class SimpleIndex(Index):
                     currentData.extend([docid, storeid, newData[n + 2]])
             trecs = len(currentData) / 3
             toccs = sum(currentData[2::3])
-        elif op == 'delete':            
+        elif op == 'delete':
             for n in range(0, len(newData), 3):
                 docid = newData[n]
-                storeid = newData[n + 1]                
+                storeid = newData[n + 1]
                 for x in range(0, len(currentData), 3):
                     if (currentData[x] == docid and
                         currentData[x + 1] == storeid):
@@ -995,32 +997,30 @@ class SimpleIndex(Index):
                         break
             trecs = len(currentData) / 3
             toccs = sum(currentData[2::3])
-                    
         merged = [termid, trecs, toccs] + currentData
         return merged
 
     def construct_resultSet(self, session, terms, queryHash={}):
         """Create and return a ResultSet.
-        
+
         Take a list of the internal representation of terms, as stored in this
         Index, create and return an appropriate ResultSet object.
         """
         # in: unpacked
         # out: resultSet
-        l = len(terms)        
+        l = len(terms)
         ci = self.indexStore.construct_resultSetItem
-
         s = self.resultSetClass(session, [])
 #        rsilist = []
 #        for t in range(3,len(terms),3):
 #            item = ci(session, terms[t], terms[t+1], terms[t+2])
 #            item.resultSet = s
 #            rsilist.append(item)
-#            
+#
 #        s.fromList(rsilist)
         # Filter out duplicates
         rsis = {}
-        for t in range(3, len(terms), 3):        
+        for t in range(3, len(terms), 3):
             if terms[t] not in rsis:
                 item = ci(session, terms[t], terms[t + 1], terms[t + 2])
                 item.resultSet = s
@@ -1090,21 +1090,21 @@ class SimpleIndex(Index):
 
     def commit_centralIndexing(self, session, filename=""):
         return self.indexStore.commit_centralIndexing(session, self, filename)
-    
+
 
 class SingleRecordStoreIndex(SimpleIndex):
     """Index implementation that assumes there is only 1 RecordStore.
-    
+
     For single RecordStore cases this makes the index smaller and hence faster.
     Also enables compatibility with basic (non-proximity) Cheshire 2 index
     files.
     """
-    
+
     def serialize_term(self, session, termId, data, nRecs=0, nOccs=0):
         """Return a string serialization representing the term.
-               
-        Return a string serialization representing the term for storage 
-        purposes. Used as a callback from IndexStore to serialize a list of 
+
+        Return a string serialization representing the term for storage
+        purposes. Used as a callback from IndexStore to serialize a list of
         terms and document references to be stored.
 
         termId  := numeric ID of term being serialized
@@ -1129,15 +1129,15 @@ class SingleRecordStoreIndex(SimpleIndex):
                               'HINT: are you trying to put proximity '
                               'information into a SimpleIndex?\n')
             raise
-        
+
     def deserialize_term(self, session, data, nRecs=-1, prox=1):
         """Deserialize and return the internal representation of a term.
-        
-        Return the internal representation of a term as recreated from a 
-        string serialization from storage. Used as a callback from IndexStore 
-        to take serialized data and produce list of terms and document 
+
+        Return the internal representation of a term as recreated from a
+        string serialization from storage. Used as a callback from IndexStore
+        to take serialized data and produce list of terms and document
         references.
-        
+
         data  := string (usually retrieved from indexStore)
         nRecs := number of Records to deserialize (all by default)
         prox  := boolean flag to include proximity information
@@ -1154,20 +1154,20 @@ class SingleRecordStoreIndex(SimpleIndex):
         for x in range(4, 3 + (3 * (len(out[3:]) / 2)), 3):
             out.insert(x, 0)
         return out
-    
+
     def calc_sectionOffsets(self, session, start, nRecs, dataLen=0):
         # tid, recs, occs, (rec, freq)+
         a = (self.longStructSize * 3) + (self.longStructSize * start * 2)
         b = (self.longStructSize * 2 * nRecs)
         return [(a, b)]
-        
-        
+
+
 class ProximityIndex(SimpleIndex):
     """Index that can store term locations to enable proximity search.
-    
+
     An Index that can store element, word and character offset location
     information for term entries, enabling phrase, adjacency searches etc.
-    
+
     Need to use an Extractor with prox setting and a ProximityTokenMerger
     """
 
@@ -1197,7 +1197,7 @@ class ProximityIndex(SimpleIndex):
                               "%s failed to pack: %r" % (self.id, params))
             raise
         return val
-        
+
     def deserialize_term(self, session, data, nRecs=-1, prox=1):
         fmt = 'l' * (len(data) / self.longStructSize)
         flat = struct.unpack(fmt, data)
@@ -1216,7 +1216,7 @@ class ProximityIndex(SimpleIndex):
                    op="replace", nRecs=0, nOccs=0):
         # in: struct: deserialised, new: flag
         # out: flat
-        
+
         (termid, oldTotalRecs, oldTotalOccs) = currentData[0:3]
         currentData = list(currentData[3:])
 
@@ -1233,22 +1233,21 @@ class ProximityIndex(SimpleIndex):
             else:
                 # ...
                 trecs = oldTotalRecs + len(newData)
-                toccs = oldTotalOccs 
-                for t in newData:            
+                toccs = oldTotalOccs
+                for t in newData:
                     toccs = toccs + t[2]
                 raise ValueError("FIXME:  mergeTerms needs recs/occs params")
-        elif op == 'replace':
 
+        elif op == 'replace':
             recs = [(x[0], x[1]) for x in currentData]
             newOccs = 0
-
             idx = 0
             while idx < len(newData):
                 end = idx + 3 + (newData[idx + 2] * self.nProxInts)
                 new = list(newData[idx:end])
                 idx = end
                 docid = new[0]
-                storeid = new[1]                                
+                storeid = new[1]
                 if (docid, storeid) in recs:
                     loc = recs.index((docid, storeid))
                     # subtract old occs
@@ -1259,14 +1258,14 @@ class ProximityIndex(SimpleIndex):
                     currentData.append(new)
                 newOccs += new[2]
             trecs = len(currentData)
-            toccs = oldTotalOccs + newOccs            
+            toccs = oldTotalOccs + newOccs
             # now flatten currentData
             n = []
             for s in currentData:
                 n.extend(s)
             currentData = n
-                
-        elif op == 'delete':            
+
+        elif op == 'delete':
             delOccs = 0
             idx = 0
             while idx < len(newData):
@@ -1285,7 +1284,7 @@ class ProximityIndex(SimpleIndex):
             for t in currentData:
                 terms.extend(t)
             currentData = terms
-                    
+
         merged = [termid, trecs, toccs]
         merged.extend(currentData)
         return merged
@@ -1328,7 +1327,6 @@ class ProximityIndex(SimpleIndex):
             except:
                 # no queryPos?
                 pass
-            
         if (terms):
             s.termid = terms[0]
             s.totalRecs = terms[1]
@@ -1336,13 +1334,12 @@ class ProximityIndex(SimpleIndex):
         else:
             s.totalRecs = 0
             s.totalOccs = 0
-
         return s
 
 
 class XmlIndex(SimpleIndex):
     """Index to store terms as XML structure.
-    
+
     e.g.
     <rs tid="" recs="" occs="">
       <r i="DOCID" s="STORE" o="OCCS"/>
@@ -1366,10 +1363,10 @@ class XmlIndex(SimpleIndex):
             l = outDoc.tell()
             outDoc.seek(0)
             xmlstr = outDoc.read(l)
-            outDoc.close()        
+            outDoc.close()
         return compress + xmlstr
 
-    def _maybeUncompress(self, data):        
+    def _maybeUncompress(self, data):
         compress = int(data[0])
         xmlstr = data[1:]
         if compress:
@@ -1378,7 +1375,7 @@ class XmlIndex(SimpleIndex):
             zfile = gzip.GzipFile(mode='rb', fileobj=buff)
             xmlstr = zfile.read()
             zfile.close()
-            buff.close()        
+            buff.close()
         return xmlstr
 
     def serialize_term(self, session, termId, data, nRecs=0, nOccs=0):
@@ -1393,7 +1390,7 @@ class XmlIndex(SimpleIndex):
         data = self._maybeCompress(xmlstr)
         final = val + data
         return final
-        
+
     def deserialize_term(self, session, data, nRecs=-1, prox=1):
         lss3 = 3 * self.longStructSize
         fmt = 'lll'
@@ -1424,7 +1421,6 @@ class XmlIndex(SimpleIndex):
                     rsi.proxInfo = pi
                     rsilist.append(rsi)
                 vals = [int(x) for x in elem.attrib.values()]
-                
                 rsi = SimpleResultSetItem(session, *vals)
                 # rsi = ci(session, *vals)
                 rsi.resultSet = rs
@@ -1435,7 +1431,6 @@ class XmlIndex(SimpleIndex):
         if rsi:
             rsi.proxInfo = pi
             rsilist.append(rsi)
-
         rs.fromList(rsilist)
         rs.index = self
         if queryHash:
@@ -1461,7 +1456,7 @@ class XmlIndex(SimpleIndex):
 
 class XmlProximityIndex(XmlIndex):
     """ProximityIndex to store terms as XML structure.
-    
+
     e.g.
     <rs tid="" recs="" occs="">
       <r i="DOCID" s="STORE" o="OCCS">
@@ -1488,27 +1483,24 @@ class XmlProximityIndex(XmlIndex):
         # in: list of longs
         npi = self.get_setting(session, 'nProxInts', 2)
         val = struct.pack('lll', termId, nRecs, nOccs)
-
         xml = ['<rs tid="%s" recs="%s" occs="%s">' % (termId, nRecs, nOccs)]
         idx = 0
         while idx < len(data):
             xml.append('<r i="%s" s="%s" o="%s">' % tuple(data[idx:idx + 3]))
             if npi == 3:
                 for x in range(data[idx + 2]):
-                    xml.append('<p e="%s" w="%s" c="%s"/>' % 
+                    xml.append('<p e="%s" w="%s" c="%s"/>' %
                                tuple(data[idx + 3 + (x * 3):idx + 6 + (x * 3)])
                                )
                 idx = idx + idx + 6 + (x * 3)
             else:
                 for x in range(data[idx + 2]):
-                    p = tuple(data[idx + 3 + (x * 2):idx + 5 + (x * 2)])                    
+                    p = tuple(data[idx + 3 + (x * 2):idx + 5 + (x * 2)])
                     xml.append('<p e="%s" w="%s"/>' % p)
                 idx = idx + 5 + (x * 2)
             xml.append('</r>')
-            
         xml.append("</rs>")
         xmlstr = ''.join(xml)
-
         data = self._maybeCompress(xmlstr)
         final = val + data
         return final
@@ -1516,7 +1508,7 @@ class XmlProximityIndex(XmlIndex):
 
 class RangeIndex(SimpleIndex):
     """Index to enable searching over one-dimensional range (e.g. time).
-    
+
     Need to use a RangeTokenMerger
     """
     # 1 3 should match 1, 2, 3
@@ -1540,9 +1532,8 @@ class RangeIndex(SimpleIndex):
                 if not okay:
                     raise PermissionException("Permission required to search "
                                               "index %s" % self.id)
-    
             # Final destination. Process Term.
-            res = {}    
+            res = {}
             # Try to get process for relation/modifier, failing that relation,
             # fall back to that used for data
             for src in self.sources.get(
@@ -1551,19 +1542,16 @@ class RangeIndex(SimpleIndex):
                                                          self.sources[u'data'])
                                     ):
                 res.update(src[1].process(session, [[clause.term.value]]))
-    
             store = self.get_path(session, 'indexStore')
             matches = []
             rel = clause.relation
-
             if (len(res) != 1):
                 msg = "%s %s" % (clause.relation.toCQL(), clause.term.value)
                 raise QueryException(msg, 24)
-
             keys = res.keys()[0].split('/', 1)
             startK = keys[0]
             endK = keys[1]
-            rel = clause.relation.value 
+            rel = clause.relation.value
             if rel in ['encloses', '<', '<=']:
                 # RangeExtractor should already return the range in ascending
                 # order
@@ -1616,10 +1604,6 @@ class RangeIndex(SimpleIndex):
                 return rs
 
 
-from utils import SimpleBitfield
-from resultSet import BitmapResultSet
-
-
 class BitmapIndex(SimpleIndex):
     # store as hex -- fast to generate, 1 byte per 4 bits.
     # eval to go from hex to long for bit manipulation
@@ -1661,7 +1645,7 @@ class BitmapIndex(SimpleIndex):
         start = (dataLen - (start / 4) + 1) - (nRecs / 4)
         packing = dataLen - (start + (nRecs / 4) + 1)
         return [(start, (nRecs / 4) + 1, '0x', '0' * packing)]
-        
+
     def deserialize_term(self, session, data, nRecs=-1, prox=0):
         lsize = 3 * self.longStructSize
         longs = data[:lsize]
@@ -1677,7 +1661,7 @@ class BitmapIndex(SimpleIndex):
         if op in['add', 'replace']:
             for t in newData[1::3]:
                 oldBf[t] = 1
-        elif op == 'delete':            
+        elif op == 'delete':
             for t in newData[1::3]:
                 oldBf[t] = 0
         trecs = oldBf.lenTrueItems()
@@ -1713,7 +1697,7 @@ class BitmapIndex(SimpleIndex):
             s.totalRecs = 0
             s.totalOccs = 0
         return s
-        
+
 
 class RecordIdentifierIndex(Index):
 
@@ -1738,7 +1722,7 @@ class RecordIdentifierIndex(Index):
 
     def clear(self, session):
         pass
-    
+
     def scan(self, session, clause, nTerms, direction):
         raise NotImplementedError()
 
@@ -1748,22 +1732,22 @@ class RecordIdentifierIndex(Index):
         base = SimpleResultSet(session)
         if clause.relation.value in ['=', 'exact']:
             t = clause.term.value
-            if t.isdigit():                    
+            if t.isdigit():
                 t = long(t)
             if recordStore.fetch_metadata(session, t, 'wordCount') > -1:
                 item = SimpleResultSetItem(session)
                 item.id = t
                 item.recordStore = recordStore.id
                 item.database = db.id
-                items = [item]                
-            else: 
+                items = [item]
+            else:
                 items = []
         elif clause.relation.value == 'any':
             # split on whitespace
             terms = clause.term.value.split()
             items = []
             for t in terms:
-                if t.isdigit():                    
+                if t.isdigit():
                     t = long(t)
                 if recordStore.fetch_metadata(session, t, 'wordCount') > -1:
                     item = SimpleResultSetItem(session)
@@ -1778,7 +1762,7 @@ class RecordIdentifierIndex(Index):
                 terms = range(t)
             else:
                 terms = range(t + 1)
-                
+
             items = []
             for t in terms:
                 if recordStore.fetch_metadata(session, t, 'wordCount') > -1:
@@ -1790,7 +1774,7 @@ class RecordIdentifierIndex(Index):
         else:
             msg = '%s "%s"' % (clause.relation.toCQL(), clause.term.value)
             raise QueryException(msg, 24)
-        
+
         base.fromList(items)
         base.index = self
         return base
@@ -1837,14 +1821,14 @@ class ReverseMetadataIndex(Index):
         base = SimpleResultSet(session)
         if clause.relation.value in ['=', 'exact']:
             t = clause.term.value
-            rid = recordStore.fetch_metadata(session, t, mtype) 
+            rid = recordStore.fetch_metadata(session, t, mtype)
             if rid:
                 item = SimpleResultSetItem(session)
                 item.id = rid
                 item.recordStore = recordStore.id
                 item.database = db.id
-                items = [item]                
-            else: 
+                items = [item]
+            else:
                 items = []
         elif clause.relation.value == 'any':
             # Split on whitespace
@@ -1865,7 +1849,7 @@ class ReverseMetadataIndex(Index):
 
 class PassThroughIndex(SimpleIndex):
     """Special Index pull in search terms from another Database."""
-    
+
     def _handleLxmlConfigNode(self, session, node):
         # Source
         if node.tag in ['xpath', '{%s}xpath' % CONFIG_NS,
@@ -1876,7 +1860,7 @@ class PassThroughIndex(SimpleIndex):
                 xp = self.get_object(session, ref)
             else:
                 xp = SimpleXPathProcessor(session, node, self)
-                xp.sources = [[xp._handleLxmlLocationNode(session, node)]]         
+                xp.sources = [[xp._handleLxmlLocationNode(session, node)]]
             self.xpath = xp
 
     def _handleConfigNode(self, session, node):
@@ -1900,12 +1884,12 @@ class PassThroughIndex(SimpleIndex):
         db = session.server.get_object(session, dbStr)
         if not db:
             raise ConfigFileException("Unknown remote database given in "
-                                      "%s" % self.id)            
+                                      "%s" % self.id)
         self.database = db
 
         idxStr = self.get_path(session, 'remoteIndex', "")
         if not idxStr:
-            raise ConfigFileException("No remote index given in %s" % self.id)            
+            raise ConfigFileException("No remote index given in %s" % self.id)
         idx = db.get_object(session, idxStr)
         if not idx:
             msg = ("Unknown index %s in remote database %s for %s" %
@@ -1926,7 +1910,7 @@ class PassThroughIndex(SimpleIndex):
 
         idx = self.get_path(session, 'localIndex', None)
         if not idx:
-            raise ConfigFileException("No local index given in %s" % self.id)            
+            raise ConfigFileException("No local index given in %s" % self.id)
         self.localIndex = idx
 
     def search(self, session, clause, db):
@@ -1955,11 +1939,11 @@ class PassThroughIndex(SimpleIndex):
 
     def scan(self, session, clause, nTerms, direction=">="):
         """Scan remote index.
-        
+
         Note Well:  If term in remote doesn't appear, it's still included
         with trecs and toccs of 0.  termid is always -1 as it's meaningless
         in the local context -- could be multiple or 0
-        """            
+        """
         currDb = session.database
         session.database = self.database.id
         scans = self.remoteIndex.scan(session, clause, nTerms,
@@ -1970,7 +1954,7 @@ class PassThroughIndex(SimpleIndex):
         storeHash = {}
         end = 0
         endMarker = ''
-        while True:            
+        while True:
             for info in scans:
                 if len(info) == 3:
                     end = 1
