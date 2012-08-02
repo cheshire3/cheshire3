@@ -77,7 +77,7 @@ class SimpleSelector(Selector):
                         # add XPath Location
                         xp = self._handleLocationNode(session, child)
                         paths.append(xp)
-            self.sources.append(xpaths)
+            self.sources.append(paths)
 
     def _handleLxmlConfigNode(self, session, node):    
         if node.tag in ["source", '{%s}source' % CONFIG_NS]:
