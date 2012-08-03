@@ -68,8 +68,7 @@ if py_version < (2, 7):
 setup(
     name=_name,
     version=_version,
-    packages=find_packages('code'),
-    package_dir={'': 'code'},
+    packages=[_name],
     include_package_data=True,
     exclude_package_data={'': ['README.mdown']},
     data_files=[('configs',

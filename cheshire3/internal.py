@@ -34,7 +34,7 @@ cheshire3Home = os.environ.get(
                        'C3HOME',
                        resource_filename(Requirement.parse('cheshire3'), ''))
 cheshire3Root = os.path.join(cheshire3Home, "cheshire3")
-cheshire3Code = os.path.join(cheshire3Root, "code", "extensions")
+cheshire3Code = os.path.join(cheshire3Root)
 cheshire3Dbs = os.path.join(cheshire3Root, "dbs")
 cheshire3Www = os.path.join(cheshire3Root, "www")
 
