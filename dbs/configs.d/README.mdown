@@ -1,0 +1,15 @@
+This is the database plugin directory.
+
+You can plug your database into the Cheshire3 server by putting a file here,
+with content something very similar to:
+
+```
+<config>
+  <subConfigs>
+    <path type="database" id="db_foo">dbs/mydb/config.xml</path>
+  </subConfigs>
+</config>
+```
+
+A plugin will be created for you automatically when using the `cheshire3-init`
+command.

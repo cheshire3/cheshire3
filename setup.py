@@ -72,7 +72,7 @@ setup(
     package_dir={'': 'code'},
     include_package_data=True,
     exclude_package_data={'': ['README.mdown']},
-    data_files=[('configs',
+    data_files=[('cheshire3/configs',
                  ['configs/authStore.xml', 'configs/basicConfigs.xml',
                   'configs/configStore.xml', 'configs/serverConfig.xml',
                   'configs/workflow.xml', 'configs/zserver.xml',
@@ -80,8 +80,7 @@ setup(
                   'configs/extra/graph.xml', 'configs/extra/textmining.xml',
                   'configs/extra/web.xml']
                 ),
-                ('dbs', ['dbs/configs.d']),
-                ('www', ['www']),
+                ('cheshire3/dbs', ['dbs/configs.d/README.mdown'])
                 ],
     requires=['lxml(>=2.1)', 'bsddb', 'dateutil', 'argparse'],
     install_requires=_install_requires,
