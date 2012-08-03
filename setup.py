@@ -19,9 +19,9 @@ if py_version < (2, 6):
          "incompatible with earlier versions.")
 
 # Basic information
-_name = u'cheshire3'
+_name = 'cheshire3'
 _version = '1.0.0c1'
-_description = (u'Cheshire3 Search and Retrieval Engine and Information '
+_description = ('Cheshire3 Search and Retrieval Engine and Information '
                 'Framework')
 _download_url = ('http://www.cheshire3.org/download/{0}/src/{1}-{2}.tar.gz'
                  ''.format(_version[:5], _name, _version))
@@ -34,15 +34,15 @@ setupdir = os.path.dirname(setuppath)
 try:
     fh = open(os.path.join(setupdir, 'README.mdown'), 'r')
 except IOError:
-    _long_description = u''
+    _long_description = ''
 else:
     fstr = fh.read()
     fh.close()
     # Long Description
-    desc_st_str = u'''\
+    desc_st_str = '''\
 Description
 -----------'''
-    desc_end_str = u'''\
+    desc_end_str = '''\
 Authors
 -------'''
     desc_st = fstr.find(desc_st_str) + len(desc_st_str) + 1
@@ -93,13 +93,13 @@ setup(
             'cheshire3-serve = cheshire3.commands.cheshire3_serve:main'
         ],
     },
-    keywords=u"xml document search information retrieval engine data text",
+    keywords="xml document search information retrieval engine data text",
     description=_description,
     long_description=_long_description,
     author="Rob Sanderson, et al.",
     author_email="azaroth@liv.ac.uk",
     maintainer='John Harrison',
-    maintainer_email=u'john.harrison@liv.ac.uk',
+    maintainer_email='john.harrison@liv.ac.uk',
     license="BSD",
     classifiers=[
         "Intended Audience :: Developers",

@@ -26,6 +26,7 @@ modules = ['database', 'documentFactory', 'documentStore', 'extractor',
 
 cheshire3Version = (1, 0, 0)
 
+# Find Cheshire3 environment
 cheshire3Home = os.environ.get('C3HOME', os.path.expanduser('~'))
 cheshire3Root = os.path.join(cheshire3Home, "cheshire3")
 cheshire3Code = os.path.join(cheshire3Root, "code", "extensions")
