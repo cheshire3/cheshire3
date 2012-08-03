@@ -3,6 +3,7 @@ import os
 import inspect
 
 from setuptools import find_packages
+from pkg_resources import resource_filename
 
 import cheshire3
 
@@ -29,7 +30,8 @@ modules = ['database', 'documentFactory', 'documentStore', 'extractor',
 cheshire3Version = (1, 0, 0)
 
 # Find Cheshire3 environment
-cheshire3Home = os.environ.get('C3HOME', os.path.expanduser('~'))
+cheshire3Home = os.environ.get('C3HOME',
+                               resource_filename('cheshire3', '../../..'))
 cheshire3Root = os.path.join(cheshire3Home, "cheshire3")
 cheshire3Code = os.path.join(cheshire3Root, "code", "extensions")
 cheshire3Dbs = os.path.join(cheshire3Root, "dbs")

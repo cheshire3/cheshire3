@@ -72,6 +72,15 @@ setup(
     package_dir={'': 'code'},
     include_package_data=True,
     exclude_package_data={'': ['README.mdown']},
+    data_files=[('configs',
+                 ['authStore.xml', 'basicConfigs.xml', 'configStore.xml',
+                  'serverConfig.xml', 'workflow.xml', 'zserver.xml',
+                  'extra/datamining.xml', 'extra/formats.xml',
+                  'extra/graph.xml', 'extra/textmining.xml', 'extra/web.xml']
+                ),
+                ('dbs', ['configs.d']),
+                ('www', []),
+                ],
     requires=['lxml(>=2.1)', 'bsddb', 'dateutil', 'argparse'],
     install_requires=_install_requires,
     dependency_links=[
