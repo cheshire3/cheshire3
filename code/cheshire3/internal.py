@@ -2,6 +2,8 @@
 import os
 import inspect
 
+from setuptools import find_packages
+
 import cheshire3
 
 storeTypes = ['authStore', 'objectStore', 'configStore', 'recordStore',
@@ -72,14 +74,7 @@ def get_api(object, all=False):
 
 
 def get_subpackages():
-    sps = []
-    p = cheshire3.__path__[0]
-    files = os.listdir(p)
-    for f in files:
-        fd = os.path.join(p, f)
-        if os.path.isdir(fd):
-            sps.append(f)
-    return sps
+    return find_packages(cheshire3.__path__[0])
 
 
 class Architecture(object):
