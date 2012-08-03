@@ -84,6 +84,7 @@ setup(
         'web': ['PyZ3950 >= 2.04']
     },
     test_suite="cheshire3.test.testAll",
+    scripts=['scripts/DocumentConverter.py'],
     entry_points={
         'console_scripts': [
             'cheshire3 = cheshire3.commands.cheshire3_console:main',
