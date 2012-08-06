@@ -71,7 +71,7 @@ setup(
     packages=[_name],
     include_package_data=True,
     package_data={'cheshire3': ['configs/*.xml', 'configs/extra/*.xml']},
-    exclude_package_data={'': ['README.mdown']},
+    exclude_package_data={'': ['README.mdown', '.gitignore']},
     requires=['lxml(>=2.1)', 'bsddb', 'dateutil', 'argparse'],
     install_requires=_install_requires,
     setup_requires=['setuptools-git'],
