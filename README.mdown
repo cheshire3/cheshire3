@@ -16,8 +16,9 @@ Contents
 - Development
 - Bugs, Feature requests etc.
 - Licensing
-- Coding Examples
-    - Initialization
+- Usage Examples
+- Python Coding Examples
+    - Initializing Cheshire3 Architecture
     - Loading Data
         - Pre-Processing (PreParsing)
     - Searching
@@ -299,11 +300,59 @@ Software" should be understood to mean marc_utils.py.
 > of the copyright holder.
 
 
-Coding Examples
----------------
+Usage Examples
+--------------
 
-### Initialization
+Cheshire3 provides a number of commands to enable you to get started creating
+databases, indexing and searching your data really quickly. The commands are:
 
+ * `cheshire3 [script]`
+ 
+    Run the commands in the script inside the current cheshire3 environment.
+    
+    If script is not provided it will drop you into an interactive console
+    (very similar the the native Python interpreter.) You can also tell it to
+    drop into interactive mode after executing your script using the
+    `--interactive` option. When going into interactive mode, `session` and
+    `server` objects will be available, as will a `db` object if you ran the
+    script from inside a Cheshire3 database directory, or provided a database
+    identifier using the `--database` option.
+ 
+ * `cheshire3-init [database]`
+
+    Initialize a database with some generic configurations in the given
+    directory, or current directory if absent
+
+ * `cheshire3-load data`
+
+    Load data into the current Cheshire3 database
+
+ * `cheshire3-search query`
+
+    Search the current Cheshire3 database based on the parameters given in
+    query
+
+ * `cheshire3-serve`
+
+    Start a demo (probably not robust enough for production use) HTTP server to
+    serve configured databases via SRU
+
+
+All of these commands have full help available, including lists of available
+options which can be accessed using the `--help` option. e.g.
+`cheshire3 --help`
+
+
+Python Coding Examples
+----------------------
+
+This section contains examples of using the Cheshire3 API from within Python,
+for when the command-line interface is insufficient, for example embedding
+Cheshire3 services within a Python enabled web application framework, such as
+Django, CherryPy etc. 
+
+
+### Initializing Cheshire3 Architecture
 
 The first thing that we need to do is create a Session and build a Server. The 
 Session object will be passed around amongst the processing objects to 
@@ -316,11 +365,11 @@ identifier for the database.
     >>> session = Session()
 ```
 
-The Server looks after all of our objects, 
-databases, indexes ... everything.
+The Server looks after all of our objects, databases, indexes ... everything.
 
 Its constructor takes session and one argument, the filename of the top level 
-configuration file.  You can find it dynamically as follows:
+configuration file. You could supply your own, or you can find the filename of
+the default server configuration dynamically as follows:
 
 ```python
 
@@ -755,4 +804,3 @@ type.
 ```
 
 After token merging, the multiple terms are ready to be stored in the index!
-
