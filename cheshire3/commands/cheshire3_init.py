@@ -507,9 +507,9 @@ Please specify a different id using the --database option.""".format(dbid)
     serverDefaultPath = server.get_path(session,
                                         'defaultPath',
                                         cheshire3Root)
-    includesPath = os.path.join(serverDefaultPath, 
-                              'dbs', 
-                              'configs.d')
+    includesPath = os.path.join(serverDefaultPath,
+                                'configs',
+                                'databases')
     if os.path.exists(includesPath) and os.path.isdir(includesPath):
         plugin = E.config(
                      E.subConfigs(
