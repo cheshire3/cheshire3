@@ -185,9 +185,6 @@ So your workflow should be something like:
  4. Push your changes back to you github fork
  5. Issue a pull request
 
-If you're developing Cheshire3, and intend to create your own releases, you 
-may find it useful to install the package setuptools-git.
-
 Developed code for intended to be contributed back to Cheshire3 should follow 
 the recommendations made by the standard [Style Guide for Python Code][5] 
 (which includes the provision that guidelines may be ignored in situations 

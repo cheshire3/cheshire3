@@ -74,6 +74,7 @@ setup(
     exclude_package_data={'': ['README.mdown']},
     requires=['lxml(>=2.1)', 'bsddb', 'dateutil', 'argparse'],
     install_requires=_install_requires,
+    setup_requires=['setuptools-git'],
     dependency_links=[
         "http://labix.org/python-dateutil"
     ],
