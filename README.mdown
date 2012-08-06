@@ -107,9 +107,9 @@ choices:
 
    1. Download a source code archive from one of:
 
-   * <http://pypi.python.org/pypi/cheshire3>
-   * <http://cheshire3.org/download/lastest/src/>
-   * <http://github.com/cheshire3/cheshire3>
+    * <http://pypi.python.org/pypi/cheshire3>
+    * <http://cheshire3.org/download/lastest/src/>
+    * <http://github.com/cheshire3/cheshire3>
          
    2. Unpack it:
     
