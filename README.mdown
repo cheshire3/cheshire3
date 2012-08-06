@@ -106,17 +106,19 @@ choices:
  * Install from source:
 
    1. Download a source code archive from one of:
-
-    * <http://pypi.python.org/pypi/cheshire3>
-    * <http://cheshire3.org/download/lastest/src/>
-    * <http://github.com/cheshire3/cheshire3>
+   
+   <http://pypi.python.org/pypi/cheshire3>
+   
+   <http://cheshire3.org/download/lastest/src/>
+   
+   <http://github.com/cheshire3/cheshire3>
          
    2. Unpack it:
-    
+
    `tar -xzf cheshire3-1.0.0.tar.gz`
 
    3. Go into the unpacked directory:
-    
+
    `cd cheshire3-1.0.0`
     
    4. Install:
