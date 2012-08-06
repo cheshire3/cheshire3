@@ -35,8 +35,8 @@ cheshire3Home = os.environ.get(
                        resource_filename(Requirement.parse('cheshire3'), ''))
 cheshire3Root = os.path.join(cheshire3Home, "cheshire3")
 cheshire3Code = os.path.join(cheshire3Root)
-cheshire3Dbs = os.path.join(cheshire3Root, "dbs")
-cheshire3Www = os.path.join(cheshire3Root, "www")
+cheshire3Dbs = os.path.join(cheshire3Home, "dbs")
+cheshire3Www = os.path.join(cheshire3Home, "www")
 
 CONFIG_NS = "http://www.cheshire3.org/schemas/config/"
 
