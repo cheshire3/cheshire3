@@ -1,7 +1,7 @@
 Cheshire3
 =========
 
-28th February 2012 (2012-02-28)
+6th August 2012 (2012-08-06)
 
 Contents
 --------
@@ -67,22 +67,19 @@ Cheshire3 Team at the University of Liverpool <http://www.liv.ac.uk>:
 Latest Version
 --------------
 
-We are currently working towards a version 1.0 release for inclusion in PyPI.
-This effort will be mainly focused on distribution and installation 
-mechanisms; as previously mentioned, Cheshire3's API is stable and documented.
+The latest stable version of Cheshire3 is available from PyPi - the Python
+Package Index:
+http://pypi.python.org/pypi/cheshire3
 
-The latest stable version will be available from our website:
-http://www.cheshire3.org/download/
-
-Source code is under version control and available from:
+Bleeding edge source code is under version control and available from:
 http://github.com/cheshire3/cheshire3
 
 Previously, source code was available from our own Subversion server:
-http://cvs.cheshire3.org/repos/cheshire3
+http://svn.cheshire3.org/repos/cheshire3
 
 The SVN repository is being kept alive for the time being as read-only, and 
 best efforts will be made to keep it up-to-date with the master (i.e. 
-"production") branch from the Git repository.
+stable/production) branch from the Git repository.
 
 Previous versions, including code + dependency bundles, and auto-installation 
 scripts are available from:
@@ -92,31 +89,51 @@ http://www.cheshire3.org/download/
 Installation
 ------------
 
-As mentioned, we're currently working on the installation process to make it 
-easier for both lay-persons and developers to get started with Cheshire3.
-
 The following guidelines assume that you administrative privileges on the 
 machine you're installing on. If this is not the case, then you might need to 
 use the option ```--user```. For more details, see:
-http://docs.python.org/install/index.html#alternate-installation
+<http://docs.python.org/install/index.html#alternate-installation>
 
 
-**Users** (i.e. those not wanting to actually develop Cheshire3):
+**Users** (i.e. those not wanting to actually develop Cheshire3) have several
+choices:
 
-1. Clone cheshire3 repository from GitHub
+ * `pip install cheshire3`
 
-2. Run ```python setup.py install```
+ * `easy_install cheshire3`
+
+ * Install from source:
+
+    1. Download a source code archive from one of:
+    
+         * <http://pypi.python.org/pypi/cheshire3>
+         
+         * <http://cheshire3.org/download/lastest/src/>
+         
+         * <http://github.com/cheshire3/cheshire3>
+         
+    2. Unpack it:
+    
+    `tar -xzf cheshire3-1.0.0.tar.gz`
+
+    3. Go into the unpacked directory:
+    
+    `cd cheshire3-1.0.0`
+    
+    4. Install:
+    
+    `python setup.py install`
 
 
 **Developers**:
 
-1. Fork the cheshire3 repository in GitHub
+ 1. Fork the cheshire3 repository in GitHub
 
-2. Clone your fork of the cheshire3 repository from GitHub 
+ 2. Clone your fork of the cheshire3 repository from GitHub 
 
-3. Run ```python setup.py develop```
+ 3. Run ```python setup.py develop```
 
-4. Read the Development section of this README
+ 4. Read the Development section of this README
 
 
 Requirements / Dependencies
@@ -125,22 +142,19 @@ Requirements / Dependencies
 Cheshire3 requires Python 2.6.0 or later. It has not yet been verified as 
 Python 3 compliant.
 
-Python package dependencies should be resolved by the standard Python package 
-management mechanisms (setuptools, easy_install) so need not be discussed 
-here.
+As of the version 1.0 release Cheshire3's core dependencies *should* be resolved
+automatically by the standard Python package management mechanisms
+(e.g. pip, easy_install, distribute/setuptools).
 
-Cheshire3's extensive use of third party C-libraries (e.g. BerkeleyDB, libxml)
-may require installation of some pre-requisites, and we have historically 
-recommended that rather than just installing the pure Python package, you 
-should download the necessary Cheshire3 packages from: 
-http://www.cheshire3.org/download/ and install them using the scripts provided.
+However on some systems, for example if installing on a machine without network
+access, it may be necessary to manually install some 3rd party dependencies. In
+such cases we would encourage you to download the necessary Cheshire3 bundles
+from <http://www.cheshire3.org/download/> and install them using the automated 
+build scripts included. If the automated scripts fail on your system, they
+should at least provide hints on how to resolve the situation.
 
-We're trying to get away from this situation, so that Cheshire3 can be 
-installed as a pure Python package, but on some systems, you may still need to 
-download and install the dependencies. The bundles available from 
-http://www.cheshire3.org/download may continue to be a useful place to get 
-hold of the source code for these dependencies, with the build scripts 
-providing hints on how to compile and install them.
+If you experience problems with dependencies, please get in touch via the
+github issue tracker or wiki, and we'll do our best to help.
 
 
 ### Additional / Optional Features
@@ -150,16 +164,22 @@ additional dependencies (e.g. web APIs will require a web application server).
 We'll try to maintain an accurate list of these in the README file for each 
 sub-package.
 
+The bundles available from <http://www.cheshire3.org/download> should continue
+to be a useful place to get hold of the source code for these pre-requisites.
+
 
 Documentation
 -------------
 
-HTML Documentation is provided in the docs directory. There is additional 
-documentation for the source code in the form of comments and docstrings. 
-Documentation for most default object configurations can be found within 
-the `<docs>` tag in the config XML for each object. We would encourage 
-users to take advantage of this tag to provide documentation for their own 
-custom object configurations.
+Documentation is available on our website <http://cheshire3.org/docs/> .
+If you downloaded the source code, either as a tarball, or by checking out the
+repository, you'll find a copy of the HTML Documentation in the docs directory.
+
+There is additional documentation for the source code in the form of comments
+and docstrings. Documentation for most default object configurations can be
+found within the `<docs>` tag in the config XML for each object. We would
+encourage users to take advantage of this tag to provide documentation for
+their own custom object configurations.
 
 
 Development
@@ -180,22 +200,21 @@ this.
 So your workflow should be something like:
  1. Fork the GitHub repository
  2. Clone your forked repository onto you local development machine
- 3. Develop in the `develop` branch (or develop in you own `feature` branch 
-    and merge back into the `develop` branch.)
+ 3. Fix bugs in the `develop` branch, or develop new features in your own
+    `feature` branch and merge back into the `develop` branch.)
  4. Push your changes back to you github fork
  5. Issue a pull request
 
-Developed code for intended to be contributed back to Cheshire3 should follow 
-the recommendations made by the standard [Style Guide for Python Code][5] 
-(which includes the provision that guidelines may be ignored in situations 
-where following them would make the code less readable.)
+Developed code intended to be contributed back to Cheshire3 should follow the
+recommendations made by the standard [Style Guide for Python Code][5] (which
+includes the provision that guidelines may be ignored in situations where
+following them would make the code less readable.)
 
-Particular attention should be paid to documentation and source code 
-annotation (comments). All developed modules, functions, classes, and methods 
-should be documented in the source code. Newly configured objects at the 
-server level should be documented using the `<docs>` tag. Comments and 
-Documentation should be accurate and up-to-date, and should *never* contradict 
-the code itself.
+Particular attention should be paid to documentation and source code annotation
+(comments). All developed modules, functions, classes, and methods should be
+documented in the source code. Newly configured objects at the server level
+should be documented using the `<docs>` tag. Comments and Documentation should
+be accurate and up-to-date, and should *never* contradict the code itself.
 
   [1]: http://git-scm.com/ "Git"
   [2]: https://github.com/cheshire3/cheshire3 "Cheshire3 on github"
