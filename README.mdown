@@ -105,25 +105,23 @@ choices:
 
  * Install from source:
 
-    1. Download a source code archive from one of:
-    
-         * <http://pypi.python.org/pypi/cheshire3>
-         
-         * <http://cheshire3.org/download/lastest/src/>
-         
-         * <http://github.com/cheshire3/cheshire3>
-         
-    2. Unpack it:
-    
-    `tar -xzf cheshire3-1.0.0.tar.gz`
+   1. Download a source code archive from one of:
 
-    3. Go into the unpacked directory:
+   * <http://pypi.python.org/pypi/cheshire3>
+   * <http://cheshire3.org/download/lastest/src/>
+   * <http://github.com/cheshire3/cheshire3>
+         
+   2. Unpack it:
     
-    `cd cheshire3-1.0.0`
+   `tar -xzf cheshire3-1.0.0.tar.gz`
+
+   3. Go into the unpacked directory:
     
-    4. Install:
+   `cd cheshire3-1.0.0`
     
-    `python setup.py install`
+   4. Install:
+    
+   `python setup.py install`
 
 
 **Developers**:
@@ -304,7 +302,11 @@ Usage Examples
 --------------
 
 Cheshire3 provides a number of commands to enable you to get started creating
-databases, indexing and searching your data really quickly. The commands are:
+databases, indexing and searching your data really quickly. All of these
+commands have full help available, including lists of available options which
+can be accessed using the `--help` option. e.g. `cheshire3 --help`
+
+The commands are:
 
  * `cheshire3 [script]`
  
@@ -318,7 +320,7 @@ databases, indexing and searching your data really quickly. The commands are:
     script from inside a Cheshire3 database directory, or provided a database
     identifier using the `--database` option.
  
- * `cheshire3-init [database]`
+ * `cheshire3-init [database-directory]`
 
     Initialize a database with some generic configurations in the given
     directory, or current directory if absent
@@ -338,9 +340,7 @@ databases, indexing and searching your data really quickly. The commands are:
     serve configured databases via SRU
 
 
-All of these commands have full help available, including lists of available
-options which can be accessed using the `--help` option. e.g.
-`cheshire3 --help`
+
 
 
 Python Coding Examples
