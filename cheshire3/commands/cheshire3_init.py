@@ -439,6 +439,8 @@ def main(argv=None):
     session = Session()
     server = SimpleServer(session, args.serverconfig)
     if args.database is None:
+        if args.directory.endswith(os.path.sep):
+            args.directory = args.directory[:-1]
         # Find local database name to use as basis of database id
         dbid = "db_{0}".format(os.path.basename(args.directory))
         server.log_debug(session,
@@ -544,7 +546,7 @@ argparser.add_argument('-d', '--database', type=str,
                   action='store', dest='database',
                   default=None, metavar='DATABASE',
                   help=("identifier of Cheshire3 database to init. default: "
-                        "db_<current-working-dir>"))
+                        "db_<database-directory-name>"))
 argparser.add_argument('-t', '--title', type=str,
                   action='store', dest='title',
                   default="", metavar='TITLE',
