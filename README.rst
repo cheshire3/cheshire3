@@ -75,21 +75,26 @@ Latest Version
 --------------
 
 The latest stable version of Cheshire3 is available from `PyPi - the Python
-Package Index`_:
+Package Index`:
+
 http://pypi.python.org/cheshire3/
 
-Bleeding edge source code is under version control and available from:
+Bleeding edge source code is under version control and available from the
+`Cheshire3 GitHub repository`_:
+
 http://github.com/cheshire3/cheshire3
 
-Previously, source code was available from our own Subversion server:
-http://svn.cheshire3.org/repos/cheshire3
+Previously, source code was available from our own Subversion server. The SVN
+repository is being kept alive for the time being as read-only, and best
+efforts will be made to keep it up-to-date with the master (i.e.
+stable/production) branch from the `Cheshire3 Git repository`. It is available
+at:
 
-The SVN repository is being kept alive for the time being as read-only,
-and best efforts will be made to keep it up-to-date with the master
-(i.e. stable/production) branch from the `Cheshire3 Git repository`_.
+http://svn.cheshire3.org/repos/cheshire3
 
 Previous versions, including code + dependency bundles, and
 auto-installation scripts are available from the `Cheshire3 download site`_:
+
 http://www.cheshire3.org/download/
 
 
@@ -104,31 +109,31 @@ http://docs.python.org/install/index.html#alternate-installation
 **Users** (i.e. those not wanting to actually develop Cheshire3) have
 several choices:
 
-A. pip_: ``pip install cheshire3``
+- pip_: ``pip install cheshire3``
 
-B. easy\_install_: ``easy_install cheshire3``
+- `easy_install`_: ``easy_install cheshire3``
 
-C. Install from source:
+- Install from source:
 
-   1. Download a source code archive from one of:
+  1. Download a source code archive from one of:
 
-      http://pypi.python.org/pypi/cheshire3
+     http://pypi.python.org/pypi/cheshire3
 
-      http://cheshire3.org/download/lastest/src/
+     http://cheshire3.org/download/lastest/src/
 
-      http://github.com/cheshire3/cheshire3
+     http://github.com/cheshire3/cheshire3
 
-   2. Unpack it:
+  2. Unpack it:
 
-      ``tar -xzf cheshire3-1.0.0.tar.gz``
+     ``tar -xzf cheshire3-1.0.0.tar.gz``
 
-   3. Go into the unpacked directory:
+  3. Go into the unpacked directory:
 
-      ``cd cheshire3-1.0.0``
+     ``cd cheshire3-1.0.0``
 
-   4. Install:
+  4. Install:
 
-      ``python setup.py install``
+     ``python setup.py install``
 
 
 **Developers**:
@@ -150,15 +155,15 @@ as Python 3 compliant.
 
 As of the version 1.0 release Cheshire3's core dependencies *should* be
 resolved automatically by the standard Python package management
-mechanisms (e.g. pip_, easy\_install_, distribute_/setuptools_).
+mechanisms (e.g. pip_, `easy_install`_, distribute_/setuptools_).
 
 However on some systems, for example if installing on a machine without
 network access, it may be necessary to manually install some 3rd party
 dependencies. In such cases we would encourage you to download the
-necessary Cheshire3 bundles from the `Cheshire3 download site
-<http://www.cheshire3.org/download/>`_ and install them using the automated
-build scripts included. If the automated scripts fail on your system, they
-should at least provide hints on how to resolve the situation.
+necessary Cheshire3 bundles from the `Cheshire3 download site`_ and install
+them using the automated build scripts included. If the automated scripts
+fail on your system, they should at least provide hints on how to resolve
+the situation.
 
 If you experience problems with dependencies, please get in touch via
 the `GitHub issue tracker`_ or wiki_, and we'll do our best to help.
@@ -763,17 +768,17 @@ index!
 .. _Apache: http://httpd.apache.org 
 .. _`University of Liverpool`: http://www.liv.ac.uk
 .. _`Cheshire3 Information Framework`: http://cheshire3.org
+.. _`Cheshire3 download site`: http://www.cheshire3.org/download/
 .. _API: http://cheshire3.org/docs/api/
-.. _WSGI: http://wsgi.org
-.. _SRU: http://www.loc.gov/standards/sru/
-.. _OAI: http://www.openarchives.org/pmh/
-.. _`Cheshire3 download site`: http://www.cheshire3.org/download
 .. _`Cheshire3 GitHub repository`: http://github.com/cheshire3/cheshire3
 .. _`GitHub issue tracker`: http://github.com/cheshire3/cheshire3/issues
 .. _wiki: http://github.com/cheshire3/cheshire3/wiki
 .. _GitHub: http://github.com
 .. _pip: http://www.pip-installer.org/en/latest/index.html
 .. _distribute: http://packages.python.org/distribute/
-.. _easy\_install: http://packages.python.org/distribute/easy\_install.html
+.. _`easy_install`: http://packages.python.org/distribute/easy_install.html
 .. _setuptools: http://pypi.python.org/pypi/setuptools/
 .. _`Style Guide for Python Code`: http://www.python.org/dev/peps/pep-0008/
+.. _WSGI: http://wsgi.org
+.. _SRU: http://www.loc.gov/standards/sru/
+.. _OAI: http://www.openarchives.org/pmh/
