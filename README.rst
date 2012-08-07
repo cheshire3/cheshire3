@@ -77,7 +77,7 @@ Latest Version
 The latest stable version of Cheshire3 is available from `PyPi - the Python
 Package Index`:
 
-http://pypi.python.org/cheshire3/
+http://pypi.python.org/pypi/cheshire3/
 
 Bleeding edge source code is under version control and available from the
 `Cheshire3 GitHub repository`_:
