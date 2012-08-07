@@ -43,7 +43,7 @@ system.
 
 Standards are foremost, including SRU and CQL, as well as Z39.50 and
 OAI. It is highly modular and configurable, enabling very specific needs
-to be addressed with a minimum of effort. The API is stable and fully
+to be addressed with a minimum of effort. The API_ is stable and fully
 documented, allowing easy third party development of components.
 
 Given a set of documents records, Cheshire3 can extract data into one or
@@ -53,8 +53,8 @@ supports such operations as search, retrieve, browse and sort.
 
 The abstract protocolHandler allows integration of Cheshire3 into any
 environment that will support Python_. For example using Apache_ handlers
-or WSGI applications, any interface from standard APIs like SRU, Z39.50
-and OAI (all included by default in the cheshire3.web sub-package), to
+or WSGI_ applications, any interface from standard APIs like SRU_, Z39.50
+and OAI_ (all included by default in the cheshire3.web sub-package), to
 an online shop front can be provided.
 
 
@@ -76,22 +76,21 @@ Latest Version
 
 The latest stable version of Cheshire3 is available from `PyPi - the Python
 Package Index`_:
-__ http://pypi.python.org/cheshire3/
+http://pypi.python.org/cheshire3/
 
 Bleeding edge source code is under version control and available from:
-__ http://github.com/cheshire3/cheshire3
+http://github.com/cheshire3/cheshire3
 
 Previously, source code was available from our own Subversion server:
-__ http://svn.cheshire3.org/repos/cheshire3
+http://svn.cheshire3.org/repos/cheshire3
 
 The SVN repository is being kept alive for the time being as read-only,
 and best efforts will be made to keep it up-to-date with the master
 (i.e. stable/production) branch from the `Cheshire3 Git repository`_.
 
 Previous versions, including code + dependency bundles, and
-auto-installation scripts are available from the `Cheshire3 download site
-<http://www.cheshire3.org/download/>`_
-__ 
+auto-installation scripts are available from the `Cheshire3 download site`_:
+http://www.cheshire3.org/download/
 
 
 Installation
@@ -105,31 +104,31 @@ http://docs.python.org/install/index.html#alternate-installation
 **Users** (i.e. those not wanting to actually develop Cheshire3) have
 several choices:
 
--  pip_: ``pip install cheshire3``
+A. pip_: ``pip install cheshire3``
 
--  easy\_install_: ``easy_install cheshire3``
+B. easy\_install_: ``easy_install cheshire3``
 
--  Install from source:
+C. Install from source:
 
-    1.  Download a source code archive from one of:
+   1. Download a source code archive from one of:
 
-        - __ http://pypi.python.org/pypi/cheshire3
+      http://pypi.python.org/pypi/cheshire3
 
-        - __ http://cheshire3.org/download/lastest/src/
+      http://cheshire3.org/download/lastest/src/
 
-        - __ http://github.com/cheshire3/cheshire3
+      http://github.com/cheshire3/cheshire3
 
-    2. Unpack it:
+   2. Unpack it:
 
-       ``tar -xzf cheshire3-1.0.0.tar.gz``
+      ``tar -xzf cheshire3-1.0.0.tar.gz``
 
-    3. Go into the unpacked directory:
+   3. Go into the unpacked directory:
 
-       ``cd cheshire3-1.0.0``
+      ``cd cheshire3-1.0.0``
 
-    4. Install:
+   4. Install:
 
-       ``python setup.py install``
+      ``python setup.py install``
 
 
 **Developers**:
@@ -182,7 +181,7 @@ Documentation
 -------------
 
 Documentation is available on our website:
-__ http://cheshire3.org/docs/
+http://cheshire3.org/docs/
 
 If you downloaded the source code, either as a tarball, or by checking
 out the repository, you'll find a copy of the HTML Documentation in the
@@ -354,7 +353,7 @@ The commands are:
 Python API
 ~~~~~~~~~~
 
-This section contains examples of using the Cheshire3 API from within
+This section contains examples of using the Cheshire3 API_ from within
 Python, for when the command-line interface is insufficient, for example
 embedding Cheshire3 services within a Python enabled web application
 framework, such as Django, CherryPy etc.
@@ -764,13 +763,17 @@ index!
 .. _Apache: http://httpd.apache.org 
 .. _`University of Liverpool`: http://www.liv.ac.uk
 .. _`Cheshire3 Information Framework`: http://cheshire3.org
-.. _`Cheshire3 download site`_: http://www.cheshire3.org/download
+.. _API: http://cheshire3.org/docs/api/
+.. _WSGI: http://wsgi.org
+.. _SRU: http://www.loc.gov/standards/sru/
+.. _OAI: http://www.openarchives.org/pmh/
+.. _`Cheshire3 download site`: http://www.cheshire3.org/download
 .. _`Cheshire3 GitHub repository`: http://github.com/cheshire3/cheshire3
 .. _`GitHub issue tracker`: http://github.com/cheshire3/cheshire3/issues
-.. wiki_: http://github.com/cheshire3/cheshire3/wiki
+.. _wiki: http://github.com/cheshire3/cheshire3/wiki
 .. _GitHub: http://github.com
 .. _pip: http://www.pip-installer.org/en/latest/index.html
 .. _distribute: http://packages.python.org/distribute/
-.. _easy\_install: http://packages.python.org/distribute/easy_install.html
+.. _easy\_install: http://packages.python.org/distribute/easy\_install.html
 .. _setuptools: http://pypi.python.org/pypi/setuptools/
 .. _`Style Guide for Python Code`: http://www.python.org/dev/peps/pep-0008/
