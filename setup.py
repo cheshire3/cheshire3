@@ -26,31 +26,17 @@ _description = ('Cheshire3 Search and Retrieval Engine and Information '
 _download_url = ('http://www.cheshire3.org/download/{0}/src/{1}-{2}.tar.gz'
                  ''.format(_version[:5], _name, _version))
 
-# More detailed description from README.mdown
+# More detailed description from README
 # Inspect to find current path
 setuppath = inspect.getfile(inspect.currentframe())
 setupdir = os.path.dirname(setuppath)
-# Read any necessary bits from README.mdown
 try:
-    fh = open(os.path.join(setupdir, 'README.mdown'), 'r')
+    fh = open(os.path.join(setupdir, 'README.rst'), 'r')
 except IOError:
     _long_description = ''
 else:
-    fstr = fh.read()
+    _long_description = fh.read()
     fh.close()
-    # Long Description
-    desc_st_str = '''\
-Description
------------'''
-    desc_end_str = '''\
-Authors
--------'''
-    desc_st = fstr.find(desc_st_str) + len(desc_st_str) + 1
-    desc_end = fstr.find(desc_end_str) - 1
-    _long_description = fstr[desc_st:desc_end]
-    # Process any further sections here
-    # Delete file contents from memory
-    del fstr
 
 # Requirements
 _install_requires = ['lxml >= 2.1', 'zopyx.txng3.ext >= 3.3.1']
@@ -71,7 +57,7 @@ setup(
     packages=[_name],
     include_package_data=True,
     package_data={'cheshire3': ['configs/*.xml', 'configs/extra/*.xml']},
-    exclude_package_data={'': ['README.mdown', '.gitignore']},
+    exclude_package_data={'': ['README.*', '.gitignore']},
     requires=['lxml(>=2.1)', 'bsddb', 'dateutil', 'argparse'],
     install_requires=_install_requires,
     setup_requires=['setuptools-git'],
