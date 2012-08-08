@@ -6,30 +6,31 @@ Cheshire3
 Contents
 --------
 
--  Description
--  Authors
--  Latest Version
--  Installation
--  Requirements / Dependencies
+-  `Description`_
+-  `Authors`_
+-  `Latest Version`_
+-  `Installation`_
+-  `Requirements / Dependencies`_
 
-   -  Additional / Optional Features
+   -  `Additional / Optional Features`_
 
--  Documentation
--  Development
--  Bugs, Feature requests etc.
--  Licensing
--  Usage Examples
--  Python Coding Examples
-
-   -  Initializing Cheshire3 Architecture
-   -  Loading Data
-
-      -  Pre-Processing (PreParsing)
-
-   -  Searching
-   -  Retrieving
-   -  Transforming Records
-   -  Indexes (Looking Under The Hood)
+-  `Documentation`_
+-  `Development`_
+-  `Bugs, Feature requests etc.`_
+-  `Licensing`_
+-  `Examples`_
+    - `Command-line API`_
+    - `Python API`_
+    
+      -  `Initializing Cheshire3 Architecture`_
+      -  `Loading Data`_
+    
+         -  `Pre-Processing (PreParsing)`_
+    
+      -  `Searching`_
+      -  `Retrieving`_
+      -  `Transforming Records`_
+      -  `Indexes (Looking Under The Hood)`_
 
 
 Description
