@@ -1,7 +1,7 @@
 Cheshire3
 =========
 
-7th August 2012 (2012-08-07)
+8th August 2012 (2012-08-08)
 
 Contents
 --------
@@ -19,18 +19,27 @@ Contents
 -  `Bugs, Feature requests etc.`_
 -  `Licensing`_
 -  `Examples`_
-    - `Command-line API`_
-    - `Python API`_
+    -  `Command-line API`_
+       
+       -  `Creating a new Database`_
+       -  `Loading Data into the Database`_
+       -  `Searching the Database`_
+       -  `Exposing the Database via SRU`_
     
-      -  `Initializing Cheshire3 Architecture`_
-      -  `Loading Data`_
+    -  `Python API`_
     
-         -  `Pre-Processing (PreParsing)`_
+       -  `Initializing Cheshire3 Architecture`_
+       
+          - `Using the cheshire3 command`_
+          
+       -  `Loading Data`_
     
-      -  `Searching`_
-      -  `Retrieving`_
-      -  `Transforming Records`_
-      -  `Indexes (Looking Under The Hood)`_
+          -  `Pre-Processing (PreParsing)`_
+    
+       -  `Searching`_
+       -  `Retrieving`_
+       -  `Transforming Records`_
+       -  `Indexes (Looking Under The Hood)`_
 
 
 Description
@@ -42,8 +51,8 @@ rich, including support for XML namespaces, unicode, a distributable
 object oriented model and all the features expected of a digital library
 system.
 
-Standards are foremost, including SRU and CQL, as well as Z39.50 and
-OAI. It is highly modular and configurable, enabling very specific needs
+Standards are foremost, including SRU_ and CQL_, as well as Z39.50 and
+OAI_. It is highly modular and configurable, enabling very specific needs
 to be addressed with a minimum of effort. The API_ is stable and fully
 documented, allowing easy third party development of components.
 
@@ -324,83 +333,161 @@ Examples
 Command-line API
 ~~~~~~~~~~~~~~~~
 
-Cheshire3 provides a number of commands to enable you to get started
-creating databases, indexing and searching your data really quickly. All
-of these commands have full help available, including lists of available
-options which can be accessed using the ``--help`` option. e.g.
-``cheshire3 --help``
+Cheshire3 provides a number of command-line utilities to enable you to
+get started creating databases, indexing and searching your data quickly.
+All of these commands have full help available, including lists
+of available options which can be accessed using the ``--help`` option.
+e.g. ::
 
-The commands are:
+    ``cheshire3 --help``
 
-``cheshire3 [script]``
-   Run the commands in the script inside the current cheshire3
-   environment.
-
-   If script is not provided it will drop you into an interactive
-   console (very similar the the native Python interpreter.) You can
-   also tell it to drop into interactive mode after executing your
-   script using the ``--interactive`` option. When going into
-   interactive mode, ``session`` and ``server`` objects will be
-   available, as will a ``db`` object if you ran the script from inside
-   a Cheshire3 database directory, or provided a database identifier
-   using the ``--database`` option.
+Creating a new Database
+'''''''''''''''''''''''
 
 ``cheshire3-init [database-directory]``
    Initialize a database with some generic configurations in the given
    directory, or current directory if absent
 
+Example 1: create database in a new sub-directory ::
+
+    $ cheshire3-init mydb
+
+Example 2: create database in an existing directory ::
+
+    $ mkdir -p ~/dbs/mydb
+    $ cheshire3-init ~/dbs/mydb
+    
+Example 3: create database in current working directory ::
+
+    $ mkdir -p ~/dbs/mydb
+    $ cd ~/dbs/mydb
+    $ cheshire3-init
+
+Example 4: create database with descriptive information in a new
+sub-directory ::
+    
+    $ cheshire3-init --database=mydb --title="My Database" \
+    --description="A Database of Documents" mydb
+
+
+Loading Data into the Database
+''''''''''''''''''''''''''''''
+
 ``cheshire3-load data``
    Load data into the current Cheshire3 database
+   
+Example 1: load data from a file ::
+
+    $ cheshire3-load path/to/file.xml
+
+Example 2: load data from a directory ::
+
+    $ cheshire3-load path/to/directory
+
+Example 3: load data from a URL ::
+
+    $ cheshire3-load http://www.example.com/index.html
+
+
+Searching the Database
+''''''''''''''''''''''
 
 ``cheshire3-search query``
    Search the current Cheshire3 database based on the parameters given
    in query
 
+Example 1: search with a single keyword ::
+
+    $ cheshire3-search food
+
+Example 2: search with a complex CQL_ query ::
+
+    $ cheshire3-search "cql.anywhere all/relevant food and \
+    rec.creationDate > 2012-01-01"
+
+
+Exposing the Database via SRU
+'''''''''''''''''''''''''''''
+
 ``cheshire3-serve``
-   Start a demo (probably not robust enough for production use) HTTP
-   server to serve configured databases via SRU
+   Start a demo HTTP WSGI application server to serve configured databases
+   via SRU
+
+*Please Note* the HTTP server started is probably not sufficiently robust
+for production use. You should consider using something like `mod_wsgi`_.
+
+Example 1: start a demo HTTP WSGI server with default options ::
+
+    $ cheshire3-serve
+
+Example 2: start a demo HTTP WSGI server, specifying host name and port
+number ::
+
+    $ cheshire3-serve --host myhost.example.com --port 8080
 
 
 Python API
 ~~~~~~~~~~
 
 This section contains examples of using the Cheshire3 API_ from within
-Python, for when the command-line interface is insufficient, for example
-embedding Cheshire3 services within a Python enabled web application
-framework, such as Django, CherryPy etc.
+Python, for embedding Cheshire3 services within a Python enabled web
+application framework, such as Django, CherryPy, `mod_wsgi`_ etc. or when
+the command-line interface is simply insufficient.
 
 
 Initializing Cheshire3 Architecture
 '''''''''''''''''''''''''''''''''''
 
-The first thing that we need to do is create a Session and build a
-Server. The Session object will be passed around amongst the processing
-objects to maintain details of the current environment. It stores, for
-example, user and identifier for the database. ::
+Initializing the Cheshire3 Architecture consists primarily of creating
+instances of the following types within the `Cheshire3 Object Model`_:
+
+Session
+    An object representing the user session. It will be passed around amongst
+    the processing objects to maintain details of the current environment.
+    It stores, for example, user and identifier for the database currently in
+    use.
+    
+Server
+    A protocol neutral collection of databases, users and their dependent
+    objects. It acts as an inital entry point for all requests and handles
+    such things as user authentication, and global object configuration.
+
+
+The first thing that we need to do is create a Session and build a Server. ::
 
     >>> from cheshire3.baseObjects import Session
     >>> session = Session()
 
-
 The Server looks after all of our objects, databases, indexes ...
-everything.
-
-Its constructor takes session and one argument, the filename of the top
-level configuration file. You could supply your own, or you can find the
-filename of the default server configuration dynamically as follows: ::
+everything. Its constructor takes session and one argument, the filename
+of the top level configuration file. You could supply your own, or you can
+find the filename of the default server configuration dynamically as
+follows: ::
 
     >>> import os
     >>> from cheshire3.server import SimpleServer
     >>> from cheshire3.internal import cheshire3Root
     >>> serverConfig = os.path.join(cheshire3Root, 'configs', 'serverConfig.xml')
-    >>> serv = SimpleServer(session, serverConfig)
-    >>> serv
+    >>> server = SimpleServer(session, serverConfig)
+    >>> server
     <cheshire3.server.SimpleServer object...
 
 
-The next thing you'll probably want to do is get a database. ::
+Most often you'll also want to work within a Database:
 
-    >>> db = serv.get_object(session, 'db_test')
+Database
+    A virtual collection of Records which may be interacted with. A Database
+    includes Indexes, which contain data extracted from the Records as well
+    as configuration details. The Database is responsible for handling
+    queries which come to it, distributing the query amongst its component
+    Indexes and returning a ResultSet. The Database is also responsible for
+    maintaining summary metadata (e.g. number of items, total word count etc.)
+    that may be need for relevance ranking etc.
+
+
+To get a database. ::
+
+    >>> db = server.get_object(session, 'db_test')
     >>> db
     <cheshire3.database.SimpleDatabase object...
 
@@ -413,11 +500,32 @@ database, in this case 'db\_test': ::
 
 This is primarily for efficiency in the workflow processing (objects are
 cached by their identifier, which might be duplicated for different
-objects in different databases). More on workflows later.
+objects in different databases).
 
 Another useful path to know is the database's default path: ::
 
     >>> dfp = db.get_path(session, 'defaultPath')
+
+
+Using the ``cheshire3`` command
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+One way to ensure that Cheshire3 architecture is initialized is to use the
+Cheshire3 interpreter, which wraps the main Python interpreter, to run your
+script or just drop you into the interactive console.
+
+``cheshire3 [script]``
+   Run the commands in the script inside the current cheshire3
+   environment. If script is not provided it will drop you into an interactive
+   console (very similar the the native Python interpreter.) You can also tell
+   it to drop into interactive mode after executing your script using the
+   ``--interactive`` option.
+
+When initializing the architecture in this way, ``session`` and ``server``
+variables will be created, as will a ``db`` object if you ran the script from
+inside a Cheshire3 database directory, or provided a database identifier
+using the ``--database`` option. The variable will correspond to instances of
+Session, Server and Database respectively.
 
 
 Loading Data
@@ -774,6 +882,7 @@ index!
 .. _Apache: http://httpd.apache.org 
 .. _`University of Liverpool`: http://www.liv.ac.uk
 .. _`Cheshire3 Information Framework`: http://cheshire3.org
+.. _`Cheshire3 Object Model`: http://cheshire3.org/docs/objects/
 .. _`Cheshire3 download site`: http://www.cheshire3.org/download/
 .. _API: http://cheshire3.org/docs/objects/api/
 .. _`Cheshire3 GitHub repository`: http://github.com/cheshire3/cheshire3
@@ -786,5 +895,7 @@ index!
 .. _setuptools: http://pypi.python.org/pypi/setuptools/
 .. _`Style Guide for Python Code`: http://www.python.org/dev/peps/pep-0008/
 .. _WSGI: http://wsgi.org
+.. _`mod_wsgi`: http://code.google.com/p/modwsgi/
 .. _SRU: http://www.loc.gov/standards/sru/
+.. _CQL: http://www.loc.gov/standards/sru/specs/cql.html
 .. _OAI: http://www.openarchives.org/pmh/
