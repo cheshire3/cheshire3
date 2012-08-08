@@ -775,7 +775,7 @@ index!
 .. _`University of Liverpool`: http://www.liv.ac.uk
 .. _`Cheshire3 Information Framework`: http://cheshire3.org
 .. _`Cheshire3 download site`: http://www.cheshire3.org/download/
-.. _API: http://cheshire3.org/docs/api/
+.. _API: http://cheshire3.org/docs/objects/api/
 .. _`Cheshire3 GitHub repository`: http://github.com/cheshire3/cheshire3
 .. _`GitHub issue tracker`: http://github.com/cheshire3/cheshire3/issues
 .. _wiki: http://github.com/cheshire3/cheshire3/wiki
