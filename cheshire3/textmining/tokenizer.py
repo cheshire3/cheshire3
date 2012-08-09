@@ -1,4 +1,6 @@
 
+import nltk
+
 from cheshire3.tokenizer import SimpleTokenizer
 
 
@@ -92,26 +94,25 @@ class PhraseUnparsedGeniaTokenizer(UnparsedGeniaTokenizer):
         return results
         
 
-try:
-    import nltk
-except ImportError:
-    pass
-else:
-        
-    class PunktWordTokenizer(SimpleTokenizer):
+class NltkPunktWordTokenizer(SimpleTokenizer):
 
-        def __init__(self, session, config, parent):
-            SimpleTokenizer.__init__(self, session, config, parent)
-            self.punkt = nltk.tokenize.PunktWordTokenizer()
+    def __init__(self, session, config, parent):
+        SimpleTokenizer.__init__(self, session, config, parent)
+        self.punkt = nltk.tokenize.PunktWordTokenizer()
 
-        def process_string(self, session, data):
-            return self.punkt.tokenize(data)
+    def process_string(self, session, data):
+        return self.punkt.tokenize(data)
 
 
-    class PunktSentenceTokenizer(SimpleTokenizer):
-        def __init__(self, session, config, parent):
-            SimpleTokenizer.__init__(self, session, config, parent)
-            self.punkt = nltk.data.load('tokenizers/punkt/english.pickle')
+class NltkPunktSentenceTokenizer(SimpleTokenizer):
+    def __init__(self, session, config, parent):
+        SimpleTokenizer.__init__(self, session, config, parent)
+        self.punkt = nltk.data.load('tokenizers/punkt/english.pickle')
 
-        def process_string(self, session, data):
-            return self.punkt.tokenize(data)
+    def process_string(self, session, data):
+        return self.punkt.tokenize(data)
+
+
+# Backward compatibility
+PunktWordTokenizer = NltkPunktWordTokenizer
+PunktSentenceTokenizer = NltkPunktSentenceTokenizer
