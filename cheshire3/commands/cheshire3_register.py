@@ -11,7 +11,7 @@ don't need to re-register any time you make changes.
 from __future__ import with_statement
 
 import sys
-import os.path
+import os
 
 from lxml import etree
 from lxml.builder import ElementMaker
@@ -34,6 +34,8 @@ def main(argv=None):
         args = argparser.parse_args(argv)
     session = Session()
     server = SimpleServer(session, args.serverconfig)
+    # Make path to configfile absolute
+    args.configfile = os.path.abspath(os.path.expanduser(args.configfile))
     # Read in proposed config file
     with open(args.configfile, 'r') as fh:
         confdoc = BootstrapDocument(fh)
