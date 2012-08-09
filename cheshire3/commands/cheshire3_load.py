@@ -47,7 +47,8 @@ Please provide a different database identifier using the --database option.
         wf.process(session, docFac)
 
 
-argparser = Cheshire3ArgumentParser(conflict_handler='resolve')
+argparser = Cheshire3ArgumentParser(conflict_handler='resolve',
+                                    description=__doc__.splitlines()[0])
 argparser.add_argument('-d', '--database', type=str,
                        action='store', dest='database',
                        default=None, metavar='DATABASE',

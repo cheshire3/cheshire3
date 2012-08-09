@@ -2,6 +2,9 @@
 import os
 import inspect
 
+from setuptools import find_packages
+from pkg_resources import Requirement, resource_filename
+
 import cheshire3
 
 storeTypes = ['authStore', 'objectStore', 'configStore', 'recordStore',
@@ -26,11 +29,14 @@ modules = ['database', 'documentFactory', 'documentStore', 'extractor',
 
 cheshire3Version = (1, 0, 0)
 
-cheshire3Home = os.environ.get('C3HOME', os.path.expanduser('~'))
+# Find Cheshire3 environment
+cheshire3Home = os.environ.get(
+                       'C3HOME',
+                       resource_filename(Requirement.parse('cheshire3'), ''))
 cheshire3Root = os.path.join(cheshire3Home, "cheshire3")
-cheshire3Code = os.path.join(cheshire3Root, "code", "extensions")
-cheshire3Dbs = os.path.join(cheshire3Root, "dbs")
-cheshire3Www = os.path.join(cheshire3Root, "www")
+cheshire3Code = os.path.join(cheshire3Root)
+cheshire3Dbs = os.path.join(cheshire3Home, "dbs")
+cheshire3Www = os.path.join(cheshire3Home, "www")
 
 CONFIG_NS = "http://www.cheshire3.org/schemas/config/"
 
@@ -71,14 +77,7 @@ def get_api(object, all=False):
 
 
 def get_subpackages():
-    sps = []
-    p = cheshire3.__path__[0]
-    files = os.listdir(p)
-    for f in files:
-        fd = os.path.join(p, f)
-        if os.path.isdir(fd):
-            sps.append(f)
-    return sps
+    return find_packages(cheshire3.__path__[0])
 
 
 class Architecture(object):

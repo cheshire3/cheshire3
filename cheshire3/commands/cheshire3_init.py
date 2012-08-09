@@ -439,6 +439,8 @@ def main(argv=None):
     session = Session()
     server = SimpleServer(session, args.serverconfig)
     if args.database is None:
+        if args.directory.endswith(os.path.sep):
+            args.directory = args.directory[:-1]
         # Find local database name to use as basis of database id
         dbid = "db_{0}".format(os.path.basename(args.directory))
         server.log_debug(session,
@@ -507,9 +509,9 @@ Please specify a different id using the --database option.""".format(dbid)
     serverDefaultPath = server.get_path(session,
                                         'defaultPath',
                                         cheshire3Root)
-    includesPath = os.path.join(serverDefaultPath, 
-                              'dbs', 
-                              'configs.d')
+    includesPath = os.path.join(serverDefaultPath,
+                                'configs',
+                                'databases')
     if os.path.exists(includesPath) and os.path.isdir(includesPath):
         plugin = E.config(
                      E.subConfigs(
@@ -533,7 +535,8 @@ Please specify a different id using the --database option.""".format(dbid)
     return 0
 
 
-argparser = Cheshire3ArgumentParser(conflict_handler='resolve')
+argparser = Cheshire3ArgumentParser(conflict_handler='resolve',
+                                    description=__doc__.splitlines()[0])
 argparser.add_argument('directory', type=str,
                        action='store', nargs='?',
                        default=os.getcwd(),
@@ -544,7 +547,7 @@ argparser.add_argument('-d', '--database', type=str,
                   action='store', dest='database',
                   default=None, metavar='DATABASE',
                   help=("identifier of Cheshire3 database to init. default: "
-                        "db_<current-working-dir>"))
+                        "db_<database-directory-name>"))
 argparser.add_argument('-t', '--title', type=str,
                   action='store', dest='title',
                   default="", metavar='TITLE',

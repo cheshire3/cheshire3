@@ -11,12 +11,32 @@ import distribute_setup
 distribute_setup.use_setuptools()
 from setuptools import setup, find_packages
 
-# Check version
+# Check Python version
 py_version = getattr(sys, 'version_info', (0, 0, 0))
 
 if py_version < (2, 6):
     warn("Cheshire3 requires Python 2.6 or later; some code may be "
          "incompatible with earlier versions.")
+
+# Basic information
+_name = 'cheshire3'
+_version = '1.0.0'
+_description = ('Cheshire3 Search and Retrieval Engine and Information '
+                'Framework')
+_download_url = ('http://www.cheshire3.org/download/{0}/src/{1}-{2}.tar.gz'
+                 ''.format(_version[:5], _name, _version))
+
+# More detailed description from README
+# Inspect to find current path
+setuppath = inspect.getfile(inspect.currentframe())
+setupdir = os.path.dirname(setuppath)
+try:
+    fh = open(os.path.join(setupdir, 'README.rst'), 'r')
+except IOError:
+    _long_description = ''
+else:
+    _long_description = fh.read()
+    fh.close()
 
 # Requirements
 _install_requires = ['lxml >= 2.1', 'zopyx.txng3.ext >= 3.3.1']
@@ -30,48 +50,17 @@ if py_version < (2, 7):
     _install_requires.append('argparse')
     _install_requires.append('unittest2')
 
-# Inspect to find current path
-setuppath = inspect.getfile(inspect.currentframe())
-setupdir = os.path.dirname(setuppath)
-
-_name = u'cheshire3'
-_version = '1.0.0b45'
-_description = (u'Cheshire3 Search and Retrieval Engine and Information '
-                'Framework')
-_download_url = ('http://www.cheshire3.org/download/{0}/src/{1}-{2}.tar.gz'
-                 ''.format(_version[:5], _name, _version))
-# Read any necessary bits from README.mdown
-try:
-    fh = open(os.path.join(setupdir, 'README.mdown'), 'r')
-except IOError:
-    _long_description = u''
-else:
-    fstr = fh.read()
-    fh.close()
-    # Long Description
-    desc_st_str = u'''\
-Description
------------'''
-    desc_end_str = u'''\
-Authors
--------'''
-    desc_st = fstr.find(desc_st_str) + len(desc_st_str) + 1
-    desc_end = fstr.find(desc_end_str) - 1
-    _long_description = fstr[desc_st:desc_end]
-    # Process any further sections here
-    # Delete file contents from memory
-    del fstr
-
 
 setup(
     name=_name,
     version=_version,
-    packages=find_packages('code'),
-    package_dir={'': 'code'},
+    packages=[_name],
     include_package_data=True,
-    exclude_package_data={'': ['README.mdown']},
+    package_data={'cheshire3': ['configs/*.xml', 'configs/extra/*.xml']},
+    exclude_package_data={'': ['README.*', '.gitignore']},
     requires=['lxml(>=2.1)', 'bsddb', 'dateutil', 'argparse'],
     install_requires=_install_requires,
+    setup_requires=['setuptools-git'],
     dependency_links=[
         "http://labix.org/python-dateutil"
     ],
@@ -82,22 +71,24 @@ setup(
         'web': ['PyZ3950 >= 2.04']
     },
     test_suite="cheshire3.test.testAll",
+    scripts=['scripts/DocumentConverter.py'],
     entry_points={
         'console_scripts': [
             'cheshire3 = cheshire3.commands.cheshire3_console:main',
             'cheshire3-init = cheshire3.commands.cheshire3_init:main',
             'cheshire3-load = cheshire3.commands.cheshire3_load:main',
+            'cheshire3-register = cheshire3.commands.cheshire3_register:main',
             'cheshire3-search = cheshire3.commands.cheshire3_search:main',
             'cheshire3-serve = cheshire3.commands.cheshire3_serve:main'
         ],
     },
-    keywords=u"xml document search information retrieval engine data text",
+    keywords="xml document search information retrieval engine data text",
     description=_description,
     long_description=_long_description,
     author="Rob Sanderson, et al.",
     author_email="azaroth@liv.ac.uk",
     maintainer='John Harrison',
-    maintainer_email=u'john.harrison@liv.ac.uk',
+    maintainer_email='john.harrison@liv.ac.uk',
     license="BSD",
     classifiers=[
         "Intended Audience :: Developers",

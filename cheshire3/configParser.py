@@ -141,7 +141,7 @@ class C3Object(object):
         if not os.path.exists(fileName):
             raise FileDoesNotExistException(fileName)
         
-        f = file(fileName)
+        f = open(fileName, 'r')
         doc = BootstrapDocument(f)
 
         # Look on self for instantiated parser, otherwise use bootstrap

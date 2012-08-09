@@ -107,7 +107,8 @@ def main(argv=None):
     return 0
 
 
-argparser = Cheshire3ArgumentParser()
+argparser = Cheshire3ArgumentParser(conflict_handler='resolve',
+                                    description=__doc__.splitlines()[0])
 argparser.add_argument('-d', '--database', type=str,
                        action='store', dest='database',
                        default=None, metavar='DATABASE',
