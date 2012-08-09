@@ -1,0 +1,70 @@
+
+<config id="Cheshire3Server" type="server">
+
+  <paths>
+    <path type="defaultPath">${cheshire3Home}/cheshire3</path>
+    <path type="sortPath">/bin/sort</path>
+    <path type="zserverConfig">configs/zserver.xml</path>
+    <object type="defaultLogger" ref="stdoutLogger"/>
+    <object type="z3950Logger" ref="z3950Logger"/>
+    <object type="resultSetStore" ref="defaultResultSetStore"/>
+    <object type="extractor" ref="SimpleExtractor"/>
+  </paths>
+
+  <subConfigs>
+    <subConfig type="logger" id="functionLogger">
+      <objectType>cheshire3.logger.FunctionLogger</objectType>
+      <paths>
+        <path type="filePath">logs/functionLog.txt</path>
+      </paths>
+    </subConfig>
+
+    <subConfig type="logger" id="z3950Logger">
+      <objectType>cheshire3.logger.SimpleLogger</objectType>
+      <paths>
+        <path type="filePath">logs/z3950Log.txt</path>
+      </paths>
+    </subConfig>
+
+    <subConfig type="logger" id="stdoutLogger">
+      <objectType>cheshire3.logger.SimpleLogger</objectType>
+      <paths>
+        <path type="filePath">stdout</path>
+      </paths>
+    </subConfig>
+
+    <subConfig type="queryStore" id="defaultQueryStore">
+      <objectType>cheshire3.queryStore.SimpleQueryStore</objectType>
+      <paths>
+        <path type="defaultPath">defaults</path>
+        <path type="databasePath">QueryStore.bdb</path>
+      </paths>
+    </subConfig>
+
+    <subConfig type="resultSetStore" id="defaultResultSetStore">
+      <objectType>cheshire3.resultSetStore.BdbResultSetStore2</objectType>
+      <paths>
+        <path type="defaultPath">defaults</path>
+        <path type="databasePath">RSetStore.bdb</path>
+      </paths>
+      <options>
+        <default type="expires">604800</default>
+        <setting type="useUUID">1</setting>
+      </options>
+    </subConfig>
+
+    <path type="configStore" id="defaultConfigStore">configs/configStore.xml</path>
+    <path type="authStore" id="defaultAuthStore">configs/authStore.xml</path>
+    
+
+    <path type="includeConfigs" ref="defaultConfigStore"/>
+    <path type="includeConfigs">configs/basicConfigs.xml</path>
+    <path type="includeConfigs">configs/workflow.xml</path>
+    <path type="includeConfigs">configs/extra</path>
+    <path type="includeConfigs">configs/databases</path>
+
+  </subConfigs>
+
+</config>
+
+

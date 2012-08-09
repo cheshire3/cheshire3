@@ -1,0 +1,7 @@
+<config type="configStore" id="defaultConfigStore">
+  <objectType>cheshire3.objectStore.BdbObjectStore</objectType>
+  <paths>
+    <path type="defaultPath">defaults</path>
+    <path type="databasePath">configStore.bdb</path>
+  </paths>
+</config>

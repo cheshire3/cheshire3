@@ -1,0 +1,284 @@
+<config>
+  <subConfigs>
+
+    <subConfig type="documentFactory" id="normalizerDocumentFactory">
+      <objectType>documentFactory.SimpleDocumentFactory</objectType>
+      <options>
+        <default type="format">termHash</default>
+        <default type="cache">0</default>
+      </options>
+    </subConfig>
+
+    <subConfig type="normalizer" id="WordNetNormalizer">
+      <objectType>textmining.normalizer.WordNetNormalizer</objectType>
+    </subConfig>  
+
+    <subConfig type="normalizer" id="HypernymNormalizer">
+      <objectType>textmining.normalizer.HypernymNormalizer</objectType>
+    </subConfig>  
+
+    <!-- string with /POS tags -->
+    <subConfig type="normalizer" id="TsuPosNormalizer">
+      <objectType>textmining.normalizer.TsujiiPosNormalizer</objectType>
+     <paths>
+       <path type="taggerPath">/home/cheshire/cheshire3/code/textmining</path>
+     </paths>
+    </subConfig>  
+
+    <subConfig type="normalizer" id="PosTagStripNormalizer">
+      <objectType>normalizer.RegexpNormalizer</objectType>
+      <options>
+        <setting type="regexp">/[^/]+$</setting>
+      </options>
+    </subConfig>
+
+    <subConfig type="normalizer" id="PosTagKeepNormalizer">
+      <objectType>normalizer.RegexpNormalizer</objectType>
+      <options>
+        <setting type="regexp">([^ ]*)/</setting>
+      </options>
+    </subConfig>
+
+    <!-- string with XML for clauses -->
+    <subConfig type="normalizer" id="EnjuNormalizer">
+      <objectType>textmining.normalizer.EnjuNormalizer</objectType>
+       <paths>
+         <path type="enjuPath">/home/cheshire/install/bin/enju</path>
+       </paths>
+    </subConfig>  
+
+
+    <subConfig type="preParser" id="EnjuTextPreParser">
+      <objectType>textmining.preParser.EnjuTextPreParser</objectType>
+       <paths>
+         <path type="enjuPath">/home/cheshire/install/bin/enju</path>
+       </paths>
+    </subConfig>  
+
+    <!-- raw genia output -->
+    <subConfig type="normalizer" id="UnparsedGeniaNormalizer">
+       <objectType>textmining.normalizer.GeniaNormalizer</objectType>
+       <paths>
+         <path type="filePath">/home/cheshire/cheshire3/code/textmining</path>
+       </paths>
+    </subConfig>  
+
+    <subConfig type="normalizer" id="TokenizingUnparsedGeniaNormalizer">
+       <objectType>textmining.normalizer.GeniaNormalizer</objectType>
+       <paths>
+         <path type="filePath">/home/cheshire/cheshire3/code/textmining</path>
+       </paths>
+       <options>
+          <setting type="tokenize">1</setting>
+       </options>
+    </subConfig>  
+
+    <subConfig type="tokenizer" id="WordPosGeniaTokenizer">
+       <objectType>textmining.tokenizer.UnparsedGeniaTokenizer</objectType>
+       <options>
+         <setting type="pos">1</setting>
+       </options>
+    </subConfig>  
+
+
+    <subConfig type="tokenizer" id="PosOnlyGeniaTokenizer">
+       <objectType>textmining.tokenizer.UnparsedGeniaTokenizer</objectType>
+       <options>
+         <setting type="justPos">1</setting>
+       </options>
+    </subConfig>  
+
+    <subConfig type="tokenizer" id="PhraseGeniaTokenizer">
+       <objectType>textmining.tokenizer.PhraseUnparsedGeniaTokenizer</objectType>
+       <paths>
+         <path type="filePath">/home/cheshire/cheshire3/code/textmining</path>
+       </paths>
+    </subConfig>  
+
+
+    <!-- recombine into string -->
+    <subConfig type="normalizer" id="PosStringGeniaNormalizer">
+       <objectType>textmining.normalizer.ReconstructGeniaNormalizer</objectType>
+       <paths>
+         <path type="filePath">/home/cheshire/cheshire3/code/textmining</path>
+       </paths>
+       <options>
+         <setting type="pos">1</setting>
+       </options>
+    </subConfig> 
+
+    <!-- stems recombined -->
+    <subConfig type="normalizer" id="StemStringGeniaNormalizer">
+       <objectType>textmining.normalizer.ReconstructGeniaNormalizer</objectType>
+       <paths>
+         <path type="filePath">/home/cheshire/cheshire3/code/textmining</path>
+       </paths>
+       <options>
+         <setting type="useStem">1</setting>
+       </options>
+    </subConfig> 
+
+    <subConfig type="normalizer" id="StemPosStringGeniaNormalizer">
+       <objectType>textmining.normalizer.ReconstructGeniaNormalizer</objectType>
+       <paths>
+         <path type="filePath">/home/cheshire/cheshire3/code/textmining</path>
+       </paths>
+       <options>
+         <setting type="useStem">1</setting>
+         <setting type="pos">1</setting>
+       </options>
+    </subConfig> 
+
+    <subConfig type="normalizer" id="XmlStringGeniaNormalizer">
+       <objectType>textmining.normalizer.ReconstructGeniaNormalizer</objectType>
+       <paths>
+         <path type="filePath">/home/cheshire/cheshire3/code/textmining</path>
+       </paths>
+       <options>
+         <setting type="xml">1</setting>
+       </options>
+    </subConfig> 
+
+    <subConfig type="preParser" id="StemPosGeniaVerbSpanPreParser">
+       <objectType>textmining.preParser.GeniaVerbSpanPreParser</objectType>
+       <paths>
+         <path type="filePath">/home/cheshire/cheshire3/code/textmining</path>
+       </paths>
+       <options>
+         <setting type="useStem">1</setting>
+         <setting type="pos">1</setting>
+	 <setting type="requireNoun">1</setting>
+       </options>
+    </subConfig> 
+
+
+    <subConfig type="extractor" id="WordPosTaggedExtractor">
+       <objectType>textmining.extractor.TaggedExtractor</objectType>
+       <options>
+         <setting type="format">%(word)s/%(pos)s</setting>
+         <setting type="prox">1</setting>
+         <setting type="reversable">1</setting>
+       </options>
+    </subConfig> 
+
+    <subConfig type="extractor" id="StemPosTaggedExtractor">
+       <objectType>textmining.extractor.TaggedExtractor</objectType>
+       <options>
+         <setting type="format">%(stem)s/%(pos)s</setting>
+         <setting type="prox">1</setting>
+         <setting type="reversable">1</setting>
+       </options>
+    </subConfig> 
+
+    <subConfig type="extractor" id="WordTaggedExtractor">
+       <objectType>textmining.extractor.TaggedExtractor</objectType>
+       <options>
+         <setting type="format">%(word)s</setting>
+         <setting type="prox">1</setting>
+         <setting type="reversable">1</setting>
+       </options>
+    </subConfig> 
+
+    <subConfig type="extractor" id="StemTaggedExtractor">
+       <objectType>textmining.extractor.TaggedExtractor</objectType>
+       <options>
+         <setting type="format">%(stem)s</setting>
+         <setting type="prox">1</setting>
+         <setting type="reversable">1</setting>
+       </options>
+    </subConfig> 
+
+    <subConfig type="extractor" id="PosTaggedExtractor">
+       <objectType>textmining.extractor.TaggedExtractor</objectType>
+       <options>
+         <setting type="format">%(pos)s</setting>
+         <setting type="prox">1</setting>
+         <setting type="reversable">1</setting>
+       </options>
+    </subConfig> 
+
+
+    <!-- keyword, with 'stem' key in hash, /POS in term -->
+    <subConfig type="normalizer" id="KeywordGeniaNormalizer">
+       <objectType>textmining.normalizer.HashGeniaNormalizer</objectType>
+       <paths>
+         <path type="filePath">/home/cheshire/cheshire3/code/textmining</path>
+       </paths>
+    </subConfig> 
+
+
+    <subConfig type="normalizer" id="GeniaStemNormalizer">
+       <objectType>textmining.normalizer.StemGeniaNormalizer</objectType>
+    </subConfig>  
+
+
+    <!-- take POS tagged string and discover phrases -->
+    <subConfig type="normalizer" id="PosPhraseNormalizer">
+       <objectType>textmining.normalizer.PosPhraseNormalizer</objectType>
+       <options>
+         <setting type="pattern">JJ*NN+</setting>
+         <setting type="subPhrases">1</setting>
+         <setting type="minimumWords">2</setting>
+       </options>
+    </subConfig>  
+
+    <subConfig type="normalizer" id="PhraseStemNormalizer">
+       <objectType>normalizer.PhraseStemNormalizer</objectType>
+    </subConfig>  
+
+    <subConfig type="normalizer" id="NounVerbFilterNormalizer">
+       <objectType>textmining.normalizer.PosTypeNormalizer</objectType>
+       <options>
+         <setting type="posTypes">NN NNP NNS VB VBD VBZ VBG VBN VBP</setting>
+         <!-- Can keep the pos tags: -->
+         <!-- <setting type="pos">1</setting> -->
+       </options>
+    </subConfig>  
+
+    <subConfig type="normalizer" id="NounVerbAdjFilterNormalizer">
+       <objectType>textmining.normalizer.PosTypeNormalizer</objectType>
+       <options>
+         <setting type="posTypes">NN NNP NNS VB VBD VBZ VBG VBN VBP JJ JJR JJS</setting>
+         <!-- Can keep the pos tags: -->
+         <!-- <setting type="pos">1</setting> -->
+       </options>
+    </subConfig>  
+
+    <subConfig type="normalizer" id="NounFilterNormalizer">
+       <objectType>textmining.normalizer.PosTypeNormalizer</objectType>
+       <options>
+         <setting type="posTypes">NN NNP NNS</setting>
+         <!-- Can keep the pos tags: -->
+         <!-- <setting type="pos">1</setting> -->
+       </options>
+    </subConfig>  
+
+    <subConfig type="normalizer" id="VerbFilterNormalizer">
+       <objectType>textmining.normalizer.PosTypeNormalizer</objectType>
+       <options>
+         <setting type="posTypes">VB VBD VBZ VBG VBN VBP</setting>
+         <!-- Can keep the pos tags: -->
+         <!-- <setting type="pos">1</setting> -->
+       </options>
+    </subConfig>  
+    
+    <subConfig type="tokenizer" id="PunktTokenizer">
+      <objectType>tokenizer.PunktWordTokenizer</objectType>
+    </subConfig>
+    
+    <subConfig type="tokenizer" id="PunktSentenceTokenizer">
+      <objectType>tokenizer.PunktSentenceTokenizer</objectType>
+    </subConfig>
+
+  <subConfig type="transformer" id="TsuTransformer">
+      <objectType>textmining.transformer.TsujiiXPathTransformer</objectType>
+     <paths>
+       <path type="taggerPath">/home/cheshire/cheshire3/code/textmining</path>
+     </paths>
+     <xpath type="copy">PMID</xpath>
+     <xpath type="tag">ArticleTitle</xpath>
+     <xpath type="tag">AbstractText</xpath>
+  </subConfig>  
+
+  </subConfigs>
+</config>

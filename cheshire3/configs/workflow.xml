@@ -1,0 +1,49 @@
+<config>
+  <subConfigs>
+
+    <subConfig type="workflow" id="buildIndexWorkflow">
+      <objectType>cheshire3.workflow.SimpleWorkflow</objectType>
+      <workflow>
+        <!-- input type: documentFactory -->
+        <log level="info">Loading documents</log>
+        <object type="recordStore" function="begin_storing"/>
+        <object type="database" function="begin_indexing"/>
+        <for-each>
+          <log level="info">"Loading: " + input.filename</log>
+          <object type="workflow" ref="buildIndexSingleWorkflow"/>
+        </for-each>
+        <object type="recordStore" function="commit_storing"/>
+        <object type="database" function="commit_metadata"/>
+        <object type="database" function="commit_indexing"/>
+      </workflow>
+    </subConfig>
+
+    <subConfig type="workflow" id="buildIndexSingleWorkflow">
+      <objectType>cheshire3.workflow.SimpleWorkflow</objectType>
+      <workflow>
+        <!-- input type:  document -->
+        <object type="workflow" ref="PreParserWorkflow"/>
+        <try>
+          <object type="parser" ref="LxmlParser"/>
+        </try>
+        <except>
+          <log level="error">Unparsable Record</log>
+          <raise/>
+        </except>
+        <object type="recordStore" function="create_record"/>
+        <object type="database" function="add_record"/>
+        <object type="database" function="index_record"/>
+        <log level="info">Loaded Record</log>
+      </workflow>
+    </subConfig>
+
+    <subConfig type="workflow" id="PreParserWorkflow">
+      <objectType>cheshire3.workflow.SimpleWorkflow</objectType>
+      <workflow>
+        <!-- input type: document -->
+        <object type="parser" ref="SgmlPreParser"/>
+      </workflow>
+    </subConfig>
+  </subConfigs>
+
+</config>

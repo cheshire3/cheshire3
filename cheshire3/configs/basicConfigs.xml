@@ -1,0 +1,442 @@
+<config>
+  <subConfigs>
+
+	<subConfig type="documentFactory" id="defaultDocumentFactory">
+	  <objectType>cheshire3.documentFactory.SimpleDocumentFactory</objectType>
+	</subConfig>
+	<subConfig type="documentFactory" id="defaultAccumulatingDocumentFactory">
+	  <objectType>cheshire3.documentFactory.AccumulatingDocumentFactory</objectType>
+	</subConfig>
+	<subConfig type="documentFactory" id="ComponentDocumentFactory">
+	  <objectType>cheshire3.documentFactory.ComponentDocumentFactory</objectType>
+	</subConfig>
+	
+	<subConfig type="queryFactory" id="defaultQueryFactory">
+	  <objectType>cheshire3.queryFactory.SimpleQueryFactory</objectType>
+	</subConfig>
+
+	<!-- Parser objects -->
+
+	<subConfig type="parser" id="defaultParser">
+	  <objectType>cheshire3.parser.MinidomParser</objectType>
+	</subConfig>
+	<subConfig type="parser" id="SaxParser">
+	  <objectType>cheshire3.parser.SaxParser</objectType>
+	</subConfig>
+	<subConfig type="parser" id="NsSaxParser">
+	  <objectType>cheshire3.parser.SaxParser</objectType>
+	  <options>
+	    <setting type="namespaces">1</setting>
+	  </options>
+	</subConfig>
+	<subConfig type="parser" id="LxmlParser">
+	  <objectType>cheshire3.parser.LxmlParser</objectType>
+	</subConfig>
+	<subConfig type="parser" id="LxmlHtmlParser">
+	  <objectType>cheshire3.parser.LxmlHtmlParser</objectType>
+	</subConfig>
+	
+	
+	<!-- PreParser objects -->
+	
+	
+	<subConfig type="preParser" id="PrintableOnlyPreParser">
+	  <objectType>cheshire3.preParser.PrintableOnlyPreParser</objectType>
+	</subConfig>
+	<subConfig type="preParser" id="CharacterEntityPreParser">
+	  <objectType>cheshire3.preParser.CharacterEntityPreParser</objectType>
+	</subConfig>
+	<subConfig type="preParser" id="AmpPreParser">
+	  <objectType>cheshire3.preParser.AmpPreParser</objectType>
+	</subConfig>
+	
+	<subConfig type="preParser" id="SgmlPreParser">
+	  <objectType>cheshire3.preParser.SgmlPreParser</objectType>
+	  <options>
+	    <setting type="emptyElements">lb br hr</setting>
+	  </options>
+	</subConfig>
+	
+	<subConfig type="preParser" id="PicklePreParser">
+	  <objectType>cheshire3.preParser.PicklePreParser</objectType>
+	</subConfig>
+	<subConfig type="preParser" id="UnpicklePreParser">
+	  <objectType>cheshire3.preParser.UnpicklePreParser</objectType>
+	</subConfig>
+	
+	<subConfig type="preParser" id="GzipPreParser">
+	  <objectType>cheshire3.preParser.GzipPreParser</objectType>
+	</subConfig>
+	
+	<subConfig type="preParser" id="Bzip2PreParser">
+      <objectType>cheshire3.preParser.Bzip2PreParser</objectType>
+    </subConfig>
+	
+	<subConfig type="preParser" id="MarcToSgmlPreParser">
+	  <objectType>cheshire3.preParser.MarcToSgmlPreParser</objectType>
+	</subConfig>
+	<subConfig type="preParser" id="MarcToXmlPreParser">
+	  <objectType>cheshire3.preParser.MarcToXmlPreParser</objectType>
+	</subConfig>
+	<subConfig type="preParser" id="HtmlSmashPreParser">
+	  <objectType>cheshire3.preParser.HtmlSmashPreParser</objectType>
+	</subConfig>
+	
+	<subConfig type="preParser" id="Latin1PreParser">
+	   <objectType>cheshire3.preParser.UnicodeDecodePreParser</objectType>
+	   <options>
+	     <setting type="codec">latin_1</setting>
+	   </options>
+	</subConfig>
+	
+	<subConfig type="preParser" id="Utf8PreParser">
+	   <objectType>cheshire3.preParser.UnicodeDecodePreParser</objectType>
+	</subConfig>
+	
+	<subConfig type="preParser" id="FileUtilPreParser">
+	  <objectType>cheshire3.preParser.FileUtilPreParser</objectType>
+	</subConfig>
+	
+	<subConfig type="preParser" id="MagicRedirectPreParser">
+	  <objectType>cheshire3.preParser.MagicRedirectPreParser</objectType>
+	
+	  <!-- 
+	        need to set a hash of what to redirect to for each mime type
+	  <hash>
+	    <object type="preParser" mimeType="application/x-gzip" ref="GzipPreParser"/>
+	  </hash>
+	  -->
+	
+	</subConfig>
+	
+	
+	<subConfig type="preParser" id="PdfXmlPreParser">
+	   <objectType>cheshire3.preParser.CmdLinePreParser</objectType>
+	   <paths>
+	      <path type="executable">pdftohtml</path>
+	   </paths>
+	   <options>
+	     <setting type="outMimeType">text/xml</setting>
+	     <setting type="commandLine">-xml %INDOC% %OUTDOC%</setting>
+	   </options>
+	</subConfig>
+	
+	<subConfig type="preParser" id="PdfXmlFix1PreParser">
+	  <objectType>cheshire3.preParser.RegexpSmashPreParser</objectType>
+	  <options>
+	    <setting type="regexp">&lt;/?[ib]&gt;</setting>
+	  </options>
+	</subConfig>
+	
+	<subConfig type="preParser" id="PdfXmlFix2PreParser">
+	  <objectType>cheshire3.preParser.RegexpSmashPreParser</objectType>
+	  <options>
+	    <setting type="regexp">&lt;A</setting>
+	    <setting type="char">&lt;a</setting>
+	  </options>
+	</subConfig>
+	
+	<subConfig type="preParser" id="PdfXmlFix3PreParser">
+	  <objectType>cheshire3.preParser.RegexpSmashPreParser</objectType>
+	  <options>
+	    <setting type="regexp">Error: PDF version (.*?) \(continuing anyway\)\n</setting>
+	  </options>
+	</subConfig>
+	
+	<subConfig type="preParser" id="PdfXmlFix4PreParser">
+	  <objectType>cheshire3.preParser.RegexpSmashPreParser</objectType>
+	  <options>
+	    <setting type="regexp">&lt;\?xml(.*?)dtd"&gt;</setting>
+	  </options>
+	</subConfig>
+
+	
+	<subConfig type="preParser" id="PsPdfPreParser">
+	  <objectType>cheshire3.preParser.CmdLinePreParser</objectType>
+	  <paths>
+	     <path type="executable">ps2pdf</path>
+	  </paths>
+	  <options>
+	    <setting type="outMimeType">application/pdf</setting>
+	    <setting type="commandLine">- -</setting>
+	  </options>
+	</subConfig>
+	
+	
+	<subConfig type="preParser" id="PdfToTxtPreParser">
+	  <objectType>cheshire3.preParser.CmdLinePreParser</objectType>
+	  <paths>
+	    <path type="executable">pdftotext</path>
+	  </paths>
+	  <options>
+	    <setting type="outMimeType">text/plain</setting>
+	     <setting type="commandLine">-raw -nopgbrk %INDOC% %OUTDOC%</setting>
+	  </options>
+	</subConfig>
+
+	<subConfig type="preParser" id="PdfTxtFixPreParser">
+	  <objectType>cheshire3.preParser.RegexpSmashPreParser</objectType>
+	  <options>
+	    <setting type="regexp">\n[0-9]+\n</setting>
+	    <setting type="char"> </setting>
+	  </options>
+	</subConfig>
+	
+	<subConfig type="preParser" id="HtmlTidyPreParser">
+	   <objectType>cheshire3.preParser.CmdLinePreParser</objectType>
+	   <paths>
+	     <path type="executable">tidy</path>
+	   </paths>
+	   <options>
+	     <setting type="outMimeType">text/xml</setting>
+	     <setting type="commandLine">-asxml -i -o %OUTDOC% %INDOC%</setting>
+	   </options>
+	</subConfig>
+	
+	<subConfig type="preParser" id="TidyFixPreParser">
+	  <objectType>cheshire3.preParser.RegexpSmashPreParser</objectType>
+	  <options>
+	    <setting type="regexp">&lt;!doctype(.*?)&gt;</setting>
+	  </options>
+	</subConfig>
+
+	<subConfig type="preParser" id="TxtToXmlPreParser">
+	  <objectType>cheshire3.preParser.TxtToXmlPreParser</objectType>
+	</subConfig>
+	
+	<!-- Extractor objects -->
+	
+	<subConfig type="extractor" id="SimpleExtractor">
+	  <objectType>cheshire3.extractor.SimpleExtractor</objectType>
+	</subConfig>
+	
+	<subConfig type="extractor" id="ProxExtractor">
+	  <objectType>cheshire3.extractor.SimpleExtractor</objectType>
+	  <options>
+	    <setting type="prox">1</setting>
+	    <setting type="reversable">1</setting>
+	  </options>
+	</subConfig>
+	
+	<subConfig type="extractor" id="TeiExtractor">
+	  <objectType>cheshire3.extractor.TeiExtractor</objectType>
+	</subConfig>
+	
+	
+	<!-- Tokenizers -->
+	
+	<subConfig type="tokenizer" id="SimpleTokenizer">
+	  <objectType>cheshire3.tokenizer.SimpleTokenizer</objectType>
+	  <docs>A basic tokenizer that splits the given data at whitespace.</docs>
+	</subConfig>
+	
+	<subConfig type="tokenizer" id="RegexpSubTokenizer">
+	  <objectType>cheshire3.tokenizer.RegexpSubTokenizer</objectType>
+	  <docs>A tokenizer that replaces regular expression matches in the data with a configurable character (defaults to whitespace), 
+	       then splits the result at whitespace.</docs>
+	</subConfig>
+	
+	<subConfig type="tokenizer" id="RegexpSplitTokenizer">
+          <objectType>cheshire3.tokenizer.RegexpSplitTokenizer</objectType>
+          <docs>A tokenizer that splits the data at matches of a regular expression. 
+                By default each match (e.g. punctuation) is preserved in the result as a separate token.</docs>
+        </subConfig>
+	
+	<subConfig type="tokenizer" id="RegexpFindTokenizer">
+	  <objectType>cheshire3.tokenizer.RegexpFindTokenizer</objectType>
+	  <docs>A tokenizer that uses a regular expression to finds tokens.
+	       The default regular expression matches a large range commonly occurring tokens (e.g. simple words, email@addresses, £monetary $amounts, ti:me:s, percentages%, a.c.r.o.n.y.m.s., hyphen-ated and abbrev'd words etc.)</docs>
+	</subConfig>
+	
+	<subConfig type="tokenizer" id="RegexpFindOffsetTokenizer">
+	  <objectType>cheshire3.tokenizer.RegexpFindOffsetTokenizer</objectType>
+	  <docs>A tokenizer that uses a regular expression to finds tokens in the same way as RegexpFindTokenizer, 
+	       but also maintains the character offset where token occurred within the data (useful for proximity searching within N characters and search term highlighting.)</docs>
+	</subConfig>
+	
+	<subConfig type="tokenizer" id="SentenceTokenizer">
+	  <objectType>cheshire3.tokenizer.SentenceTokenizer</objectType>
+	  <docs>A tokenizer to split data into sentences.</docs>
+	</subConfig>
+	
+	<subConfig type="tokenizer" id="PythonTokenizer">
+	  <objectType>cheshire3.tokenizer.PythonTokenizer</objectType>
+	  <docs>A tokenizer to split and annotate tokens in the Python programming language.</docs>
+	</subConfig>
+	
+	<subConfig type="tokenizer" id="DateTokenizer">
+	  <objectType>cheshire3.tokenizer.DateTokenizer</objectType>
+	  <options>
+	  	<setting type="dayfirst">1</setting>
+	  </options>
+	</subConfig>
+	
+	<subConfig type="tokenizer" id="FuzzyDateTokenizer">
+	  <objectType>cheshire3.tokenizer.DateTokenizer</objectType>
+	  <options>
+	  	<setting type="dayfirst">1</setting>
+	  	<setting type="fuzzy">1</setting>
+	  </options>
+	</subConfig>	
+	
+	<subConfig type="tokenizer" id="PreserveMaskingTokenizer">
+	  <objectType>cheshire3.tokenizer.RegexpSubTokenizer</objectType>
+	  <docs>A keyword tokenizer which doesn't split at CQL masking characters (^*?). Especially useful when tokenizing incoming queries.</docs>
+	  <options>
+	    <setting type="regexp">((?&lt;!\s)'|[-.,]((?=\s)|$)|(^|(?&lt;=\s))[-.,']|[.,'-][.,'-]|[~`!@+=\#\&amp;()\[\]{}\\\|\":;&lt;&gt;/])</setting>
+	  </options>				
+	</subConfig>
+	
+	
+	<!-- TokenMerger -->
+	
+	<subConfig type="tokenMerger" id="SimpleTokenMerger">
+	  <objectType>cheshire3.tokenMerger.SimpleTokenMerger</objectType>
+	</subConfig>
+	
+	<subConfig type="tokenMerger" id="ProxTokenMerger">
+	  <objectType>cheshire3.tokenMerger.ProximityTokenMerger</objectType>
+	</subConfig>
+	
+	<subConfig type="tokenMerger" id="OffsetProxTokenMerger">
+	  <objectType>cheshire3.tokenMerger.OffsetProximityTokenMerger</objectType>
+	</subConfig>
+	
+	<subConfig type="tokenMerger" id="NGramTokenMerger">
+	  <objectType>cheshire3.tokenMerger.NGramTokenMerger</objectType>
+	</subConfig>
+	
+	<subConfig type="tokenMerger" id="SequenceRangeTokenMerger">
+	  <objectType>cheshire3.tokenMerger.SequenceRangeTokenMerger</objectType>
+	</subConfig>
+	
+	<subConfig type="tokenMerger" id="MinMaxRangeTokenMerger">
+	  <objectType>cheshire3.tokenMerger.MinMaxRangeTokenMerger</objectType>
+	</subConfig>
+	
+	<subConfig type="tokenMerger" id="ReconstructTokenMerger">
+	  <objectType>cheshire3.tokenMerger.ReconstructTokenMerger</objectType>
+	</subConfig>
+	
+	
+	<!-- Some 'Extractor' workflows -->
+	
+	<subConfig type="workflow" id="KeywordExtractorWorkflow">
+	  <objectType>cheshire3.workflow.SimpleWorkflow</objectType>
+	  <workflow>
+	    <object type="extractor" ref="SimpleExtractor"/>
+	    <object type="tokenizer" ref="RegexpSubTokenizer"/>
+	    <object type="tokenMerger" ref="SimpleTokenMerger"/>
+	  </workflow>
+	</subConfig>
+	
+	<subConfig type="workflow" id="ProxExtractorWorkflow">
+	  <objectType>cheshire3.workflow.SimpleWorkflow</objectType>
+	  <workflow>
+	    <object type="extractor" ref="ProxExtractor"/>
+	    <object type="tokenizer" ref="RegexpSubTokenizer"/>
+	    <object type="tokenMerger" ref="ProxTokenMerger"/>
+	  </workflow>
+	</subConfig>
+	
+	<subConfig type="workflow" id="ProxStoplistExtractorWorkflow">
+	  <objectType>cheshire3.workflow.CachingWorkflow</objectType>
+	  <workflow>
+	    <object type="extractor"  ref="ProxExtractor"/>
+	    <object type="normalizer" ref="CaseNormalizer"/>
+	    <object type="tokenizer"  ref="RegexpFindOffsetTokenizer"/>
+	    <object type="normalizer" ref="StoplistNormalizer"/>
+	    <object type="tokenMerger" ref="OffsetProxTokenMerger"/>
+	  </workflow>
+	</subConfig>
+	
+	
+	<!-- Normalizer Objects -->
+	
+	<subConfig type="normalizer" id="UndocumentNormalizer">
+	  <objectType>cheshire3.normalizer.UndocumentNormalizer</objectType>
+	</subConfig>
+	
+	<subConfig type="normalizer" id="DataExistsNormalizer">
+	  <objectType>cheshire3.normalizer.DataExistsNormalizer</objectType>
+	</subConfig>
+	<subConfig type="normalizer" id="CaseNormalizer">
+	  <objectType>cheshire3.normalizer.CaseNormalizer</objectType>
+	</subConfig>
+	<subConfig type="normalizer" id="SpaceNormalizer">
+	  <objectType>cheshire3.normalizer.SpaceNormalizer</objectType>
+	</subConfig>
+	<subConfig type="normalizer" id="ArticleNormalizer">
+	  <objectType>cheshire3.normalizer.ArticleNormalizer</objectType>
+	</subConfig>
+	<subConfig type="normalizer" id="StripperNormalizer">
+	  <objectType>cheshire3.normalizer.RegexpNormalizer</objectType>
+	  <options>
+	    <setting type="regexp">["%#@~!*{}]</setting>
+	  </options>
+	</subConfig>
+	<subConfig type="normalizer" id="PrintableNormalizer">
+	  <objectType>cheshire3.normalizer.RegexpNormalizer</objectType>
+	  <options>
+	    <setting type="regexp">([\x0e-\x1f]|[\x7b-\xff])</setting>
+	  </options>
+	</subConfig>
+	
+	<subConfig type="normalizer" id="PossessiveNormalizer">
+	  <objectType>cheshire3.normalizer.PossessiveNormalizer</objectType>
+	</subConfig>
+	<subConfig type="normalizer" id="DiacriticNormalizer">
+	  <objectType>cheshire3.normalizer.DiacriticNormalizer</objectType>
+	</subConfig>
+	<subConfig type="normalizer" id="IntNormalizer">
+	  <objectType>cheshire3.normalizer.IntNormalizer</objectType>
+	</subConfig>
+	<subConfig type="normalizer" id="StringIntNormalizer">
+	  <objectType>cheshire3.normalizer.StringIntNormalizer</objectType>
+	</subConfig>
+	<subConfig type="normalizer" id="EnglishStemNormalizer">
+	  <objectType>cheshire3.normalizer.StemNormalizer</objectType>
+	  <options>
+	    <setting type="language">english</setting>
+	  </options>
+	</subConfig>
+	
+	<subConfig type="normalizer" id="DateStringNormalizer">
+	  <objectType>cheshire3.normalizer.DateStringNormalizer</objectType>
+	</subConfig>
+	<subConfig type="normalizer" id="DateYearNormalizer">
+	  <objectType>cheshire3.normalizer.DateYearNormalizer</objectType>
+	</subConfig>
+	<subConfig type="normalizer" id="IdToFilenameNormalizer">
+		<docs>Turn an id into a filename with .xml extension.</docs>
+		<objectType>cheshire3.normalizer.IdToFilenameNormalizer</objectType>
+		<options>
+			<setting type="extension">.xml</setting>
+		</options>
+	</subConfig>
+	<subConfig type="normalizer" id="FilenameToIdNormalizer">
+		<docs>Turn a filename into an id by stripping off the filename extension.</docs>
+		<objectType>cheshire3.normalizer.FilenameToIdNormalizer</objectType>
+	</subConfig>	
+	<subConfig type="normalizer" id="UcaNormalizer">
+	  <objectType>cheshire3.normalizer.UnicodeCollationNormalizer</objectType>
+	</subConfig>
+	
+	
+	<!-- Transformer Objects -->
+	
+	<subConfig type="transformer" id="XmlTransformer">
+	  <objectType>cheshire3.transformer.XmlTransformer</objectType>
+	  <docs>A simple Transformer that returns a Document containing the raw XML for the Record.</docs>
+	</subConfig>
+	
+    <subConfig type="transformer" id="Bzip2XmlTransformer">
+      <objectType>cheshire3.transformer.Bzip2XmlTransformer</objectType>
+      <docs>A transformer to return a Document containing the raw XML string of the record, compressed using the bzip2 algorithm.</docs>
+    </subConfig>
+    
+
+  </subConfigs>
+
+</config>
+  
