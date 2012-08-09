@@ -41,7 +41,8 @@ try:
 except:
     hostname = 'localhost'
 
-argparser = Cheshire3ArgumentParser(conflict_handler='resolve')
+argparser = Cheshire3ArgumentParser(conflict_handler='resolve',
+                                    description=__doc__.splitlines()[0])
 argparser.add_argument('--hostname', type=str,
                   action='store', dest='hostname',
                   default=hostname, metavar='HOSTNAME',

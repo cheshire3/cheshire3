@@ -2,6 +2,10 @@
 
 Register a configuration for a Cheshire3 object (most common use case
 will be a Database) with the server.
+
+This process simply tells the server that it should include the
+configuration(s) in your file - it doesn't ingest your file - so you
+don't need to re-register any time you make changes.
 """
 
 from __future__ import with_statement
@@ -97,7 +101,8 @@ def main(argv=None):
     return 0
         
 
-argparser = Cheshire3ArgumentParser(conflict_handler='resolve')
+argparser = Cheshire3ArgumentParser(conflict_handler='resolve',
+                                    description=__doc__.splitlines()[0])
 
 argparser.add_argument('configfile', type=str,
                        action='store', nargs='?',

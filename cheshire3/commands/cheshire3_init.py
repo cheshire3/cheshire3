@@ -535,7 +535,8 @@ Please specify a different id using the --database option.""".format(dbid)
     return 0
 
 
-argparser = Cheshire3ArgumentParser(conflict_handler='resolve')
+argparser = Cheshire3ArgumentParser(conflict_handler='resolve',
+                                    description=__doc__.splitlines()[0])
 argparser.add_argument('directory', type=str,
                        action='store', nargs='?',
                        default=os.getcwd(),
