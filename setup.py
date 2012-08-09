@@ -20,7 +20,7 @@ if py_version < (2, 6):
 
 # Basic information
 _name = 'cheshire3'
-_version = '1.0.0c7'
+_version = '1.0.0'
 _description = ('Cheshire3 Search and Retrieval Engine and Information '
                 'Framework')
 _download_url = ('http://www.cheshire3.org/download/{0}/src/{1}-{2}.tar.gz'
