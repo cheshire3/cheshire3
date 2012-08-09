@@ -20,7 +20,7 @@ if py_version < (2, 6):
 
 # Basic information
 _name = 'cheshire3'
-_version = '1.0.0c6'
+_version = '1.0.0c7'
 _description = ('Cheshire3 Search and Retrieval Engine and Information '
                 'Framework')
 _download_url = ('http://www.cheshire3.org/download/{0}/src/{1}-{2}.tar.gz'
@@ -77,6 +77,7 @@ setup(
             'cheshire3 = cheshire3.commands.cheshire3_console:main',
             'cheshire3-init = cheshire3.commands.cheshire3_init:main',
             'cheshire3-load = cheshire3.commands.cheshire3_load:main',
+            'cheshire3-register = cheshire3.commands.cheshire3_register:main',
             'cheshire3-search = cheshire3.commands.cheshire3_search:main',
             'cheshire3-serve = cheshire3.commands.cheshire3_serve:main'
         ],
