@@ -39,9 +39,8 @@ else:
     fh.close()
 
 # Requirements
-_install_requires = ['lxml >= 2.1',
-                     'zopyx.txng3.ext >= 3.3.1',
-                     'nltk >= 2.0.2']
+with open(os.path.join(setupdir, 'requirements.txt'), 'r') as fh:
+    _install_requires = fh.readlines()
 # Determine python-dateutil version
 if py_version < (3, 0):
     dateutilstr = 'python-dateutil == 1.5'
