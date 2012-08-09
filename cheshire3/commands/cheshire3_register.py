@@ -90,6 +90,10 @@ def main(argv=None):
         # No database plugin directory
         server.log_warning(session, "No database plugin directory")
         raise ValueError("No database plugin directory")
+    server.log_info(session,
+                    "Database configured in {0} registerd with Cheshire3 "
+                    "Server configured in {1}".format(args.configfile,
+                                                      args.serverconfig))
     return 0
         
 
