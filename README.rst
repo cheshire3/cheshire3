@@ -1,7 +1,7 @@
 Cheshire3
 =========
 
-8th August 2012 (2012-08-08)
+9th August 2012 (2012-08-09)
 
 Contents
 --------
