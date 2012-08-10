@@ -1,3 +1,4 @@
+cheshire3
 lxml>=2.1
 nltk>=2.0.2
 numpy==1.6.2
