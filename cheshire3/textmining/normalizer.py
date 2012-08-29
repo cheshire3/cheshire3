@@ -2,6 +2,7 @@
 import os
 import types
 import re
+import nltk
 
 from cheshire3.configParser import C3Object
 from cheshire3.exceptions import ConfigFileException
@@ -204,6 +205,71 @@ class GeniaNormalizer(PosNormalizer, GeniaObject):
             if type(v['text']) == list and v['text'][0].find(' ') == -1:
                 data[k]['text'] = ' '.join(v['text'])
         return PosNormalizer.process_hash(self, session, data)
+
+
+class NltkPosNormalizer(PosNormalizer):
+    """Use NTLK to normalize tokens to parts of speech."""
+
+    _possibleSettings = {
+        'taggerClass': {
+            'docs': ("Class of NLTK Tagger to use for PoS tagging. "
+                     "If absent use NLTK's standard PoS tagger."),
+            'type': str
+        },
+        'justPos': {
+            "docs": ('Should the normalized value be just the PoS (0) '
+                     'or the original token annotated with a PoS tag '
+                     '(1 default)'),
+            'type': int,
+            'options': "0|1"
+        }
+    }
+
+    def __init__(self, session, node, parent):
+        PosNormalizer.__init__(self, session, node, parent)
+        cls = self.get_setting(session, 'taggerClass', None)
+        if cls is not None:
+            try:
+                taggerClass = getattr(nltk.tag, cls)
+            except AttributeError as e:
+                raise ConfigFileException("nltk.tag does not define class "
+                                          "{0} as specified in 'taggerClass' "
+                                          "setting for {1} object with id {2}"
+                                          "".format(cls,
+                                                    self.__class__.__name__,
+                                                    self.id))
+            else:
+                self.tagger = taggerClass()
+        else:
+            # Use standard tagger
+            try:
+                self.tagger = nltk.tag.load(nltk.tag._POS_TAGGER)
+            except LookupError:
+                nltk.download('maxent_treebank_pos_tagger')
+        self.justPos = self.get_setting(session, 'justPos', 0)
+
+    def process_string(self, session, data):
+        if isinstance(data, list):
+            tagged = self.tagger.tag(data)
+        else:
+            # Not yet tokenized / single token
+            # Tokenizing does no harm done if already tokenized
+            # Sentence tokenize
+            tagged = []
+            for sent in nltk.tokenize.sent_tokenize(data):
+                # Word tokenize
+                tokens = nltk.tokenize.word_tokenize(sent)
+                tagged.extend(self.tagger.tag(tokens))
+        # Are tagged tokens wanted, or just the tags themselves?
+        if self.justPos:
+            tagged = [tup[1] for tup in tagged]
+        else:
+            tagged =  [nltk.tag.util.tuple2str(tup) for tup in tagged]
+        # Outgoing should be same type as incoming, make it so
+        if isinstance(data, list):
+            return tagged
+        else:
+            return ' '.join(tagged)
 
 
 class ReconstructGeniaNormalizer(SimpleNormalizer):
