@@ -1,12 +1,16 @@
+"""Cheshire3 Textmining PreParser Implementations."""
+
+import os
+import re
+import commands
+
+from xml.sax.saxutils import escape
+from subprocess import Popen, PIPE
 
 from cheshire3.document import StringDocument
 from cheshire3.baseObjects import PreParser
-from cheshire3.utils import getFirstData, elementType
 from cheshire3.textmining.TsujiiC3 import TsujiiObject, EnjuObject, GeniaObject
-
-from xml.sax.saxutils import escape
-import os, re
-from subprocess import Popen, PIPE
+from cheshire3.exceptions import ConfigFileException
 
 
 class PosPreParser(PreParser):
@@ -20,8 +24,14 @@ class TsujiiChunkerPreParser(PreParser):
     inh = None
     outh = None
 
-    _possiblePaths = {'executablePath' : {'docs' : "Path to the directory where the chunker lives."},
-                      'executable' : {'docs' : 'Name of the executable'}}
+    _possiblePaths = {
+        'executablePath': {
+            'docs': "Path to the directory where the chunker lives."
+        },
+        'executable': {
+            'docs': 'Name of the executable'
+        }
+    }
 
     def __init__(self, session, node, parent):
         PreParser.__init__(self, session, node, parent)
@@ -29,17 +39,19 @@ class TsujiiChunkerPreParser(PreParser):
         exe = self.get_path(session, 'executable', './parser')
         if not tp:
             tp = commands.getoutput('which %s' % exe)
-	    tp = os.path.dirname(tp)
+            tp = os.path.dirname(tp)
         tp = os.path.join(tp, exe)
         if not tp:
-            raise ConfigFileException("%s requires the path: filePath" % self.id)
+            raise ConfigFileException("%s requires the path: filePath"
+                                      "" % self.id)
         o = os.getcwd()
         os.chdir(tp)
         o = os.getcwd()
         os.chdir(tp)
-        self.pipe = Popen(exe, shell=True, bufsize=1, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        self.pipe = Popen(exe, shell=True, bufsize=1,
+                          stdin=PIPE, stdout=PIPE, stderr=PIPE)
         os.chdir(o)
-        
+
     def process_document(self, session, doc):
         # Must be raw text after passed through tagger
         txt = doc.get_raw(session)
@@ -49,7 +61,7 @@ class TsujiiChunkerPreParser(PreParser):
             self.pipe.stdin.write(l)
             self.pipe.stdin.write("\n")
             self.pipe.stdin.flush()
-            tagd = self.pipe.stdout.readline()                
+            tagd = self.pipe.stdout.readline()
             all.append(tagd)
         return StringDocument('\n'.join(all))
 
@@ -65,7 +77,11 @@ class TsujiiXMLPosPreParser(PosPreParser, TsujiiObject):
         tt = self.tag(session, text, xml=1)
         ttj = '\n'.join(tt)
         ttj = "<text>" + ttj + "</text>"
-        return StringDocument(ttj, self.id, doc.processHistory, 'text/xml', doc.parent)
+        return StringDocument(ttj,
+                              self.id,
+                              doc.processHistory,
+                              'text/xml',
+                              doc.parent)
 
 
 class TsujiiTextPosPreParser(PosPreParser, TsujiiObject):
@@ -78,7 +94,11 @@ class TsujiiTextPosPreParser(PosPreParser, TsujiiObject):
         text = doc.get_raw(session)
         tt = self.tag(session, text, xml=0)
         tt = '\n'.join(tt)
-        return StringDocument(tt, self.id, doc.processHistory, 'text/plain', doc.parent)
+        return StringDocument(tt,
+                              self.id,
+                              doc.processHistory,
+                              'text/plain',
+                              doc.parent)
 
 
 class EnjuTextPreParser(PosPreParser, EnjuObject):
@@ -89,16 +109,31 @@ class EnjuTextPreParser(PosPreParser, EnjuObject):
     def process_document(self, session, doc):
         text = doc.get_raw(session)
         tt = self.tag(session, text)
-        tt= '\n'.join(tt)
+        tt = '\n'.join(tt)
         return StringDocument("<text>%s</text>" % tt)
 
 
 class GeniaTextPreParser(PreParser):
-    """ Take the full output from Genia and reconstruct the document, maybe with stems ('useStem') and/or PoS tags ('pos') """
+    """Take output from Genia and return a Document.
 
-    _possibleSettings = {'useStem' : {'docs' : "Should the document reconstruction use the stem (1) or the original word (0, default)", 'type' : int, 'options' : "0|1"},
-                         'pos' : {'docs' : "Should the PoS tag be added back to the word in the form word/POS (1) or not (0, default)", 'type' : int, 'options' : "0|1"}
-                         }
+    Take the full output from Genia and reconstruct the document, maybe with
+    stems ('useStem') and/or PoS tags ('pos').
+    """
+
+    _possibleSettings = {
+        'useStem': {
+            'docs': ("Should the document reconstruction use the stem (1) or "
+                     "the original word (0, default)"),
+            'type': int,
+            'options': "0|1"
+        },
+        'pos': {
+            'docs': ("Should the PoS tag be added back to the word in the "
+                     "form word/POS (1) or not (0, default)"),
+            'type': int,
+            'options': "0|1"
+        }
+    }
 
     def __init__(self, session, config, parent):
         PreParser.__init__(self, session, config, parent)
@@ -128,10 +163,17 @@ class GeniaTextPreParser(PreParser):
 
 
 class GeniaVerbSpanPreParser(GeniaTextPreParser):
-    # Take in unparsed genia and return spans between verb forms
+    """Take in unparsed genia and return spans between verb forms."""
 
-    _possibleSettings = {'requireNoun' : {'docs' : "Should the sections of text be required to have at least one noun (1) or not (0, default)", 'type' : int, 'options' : "0|1"}
-                         }
+    _possibleSettings = {
+        'requireNoun': {
+            'docs': ("Should the sections of text be required to have at "
+                     "least one noun (1) or not (0, default)"),
+            'type': int,
+            'options': "0|1"
+        }
+    }
+
     def __init__(self, session, config, parent):
         GeniaTextPreParser.__init__(self, session, config, parent)
         self.requireNoun = self.get_setting(session, 'requireNoun', 0)
@@ -142,14 +184,14 @@ class GeniaVerbSpanPreParser(GeniaTextPreParser):
         data = doc.get_raw(session)
         data = data.decode('utf-8')
         lines = data.split('\n')
-        chunks = []        
+        chunks = []
         words = []
         nounOkay = 0
         for l in lines:
             try:
                 (word, stem, pos, rest) = l.split('\t', 3)
             except:
-                # ignore whitespace lines
+                # Ignore whitespace lines
                 continue
             if pos[0] in ['V', '.']:
                 if not self.requireNoun or nounOkay:
@@ -169,7 +211,8 @@ class GeniaVerbSpanPreParser(GeniaTextPreParser):
         if not self.requireNoun or nounOkay:
             chunks.append(words)
         # serialise a bit into xml
-        xml = [u"""<document id="%s" docStore="%s">\n""" % (doc.id, doc.documentStore)]
+        xml = [u'<document id="%s" docStore="%s">\n' % (doc.id,
+                                                        doc.documentStore)]
         for c in chunks:
             if len(c) >= minWds:
                 try:

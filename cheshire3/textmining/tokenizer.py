@@ -7,12 +7,29 @@ from cheshire3.tokenizer import SimpleTokenizer
 class UnparsedGeniaTokenizer(SimpleTokenizer):
     # take tab delimmed lines and turn into list of words ?
 
-    _possibleSettings = {'useStem' : {"docs" : "Should the text be reconstructed with the stem (1) or not (0, default)", 'type': int, 'options' : "0|1"},
-                         'pos' : {"docs" : 'Should the text include the PoS tag', 'type': int, 'options' : "0|1"},
-                         'structuredOutput' : {'docs' : '', 'type' : int, 'options' : '0|1'},
-                         'justPos' : {"docs" : 'Should the text be JUST the PoS tag', 'type' : int, 'options' : "0|1"}
-                         }
-
+    _possibleSettings = {
+        'useStem': {
+            "docs": ("Should the text be reconstructed with the stem (1)"
+                     " or not (0, default)"),
+            'type': int,
+            'options': "0|1"
+        },
+        'pos': {
+            "docs": 'Should the text include the PoS tag',
+            'type': int,
+            'options': "0|1"
+        },
+        'structuredOutput': {
+            'docs': '',
+            'type': int,
+            'options': '0|1'
+        },
+        'justPos': {
+            "docs": 'Should the text be JUST the PoS tag',
+            'type': int,
+            'options': "0|1"
+        }
+    }
 
     def __init__(self, session, config, parent):
         SimpleTokenizer.__init__(self, session, config, parent)
@@ -29,7 +46,6 @@ class UnparsedGeniaTokenizer(SimpleTokenizer):
                     (word, stem, pos, phr, ner) = l.split('\t', 4)
                 except:
                     continue
-                
                 if self.structure:
                     txt = (word, stem, pos, phr)
                 else:
@@ -92,7 +108,7 @@ class PhraseUnparsedGeniaTokenizer(UnparsedGeniaTokenizer):
         if len(curr) >= self.minWords:
             results.append(' '.join(curr))
         return results
-        
+
 
 class NltkPunktWordTokenizer(SimpleTokenizer):
 
