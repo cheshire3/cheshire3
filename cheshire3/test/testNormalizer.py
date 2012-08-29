@@ -41,7 +41,7 @@ from cheshire3.test.testConfigParser import Cheshire3ObjectTestCase
 
 
 class NormalizerTestCase(Cheshire3ObjectTestCase):
-    """Base Class for Cheshire3 Normalizer Test Cases.."""
+    """Base Class for Cheshire3 Normalizer Test Cases."""
     
     @classmethod
     def _get_class(cls):
