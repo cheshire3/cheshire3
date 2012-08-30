@@ -10,6 +10,7 @@ Contents
 -  `Description`_
 -  `Authors`_
 -  `Latest Version`_
+-  `Installation`_
 -  `Requirements / Dependencies`_
 -  `Documentation`_
 -  `Bugs, Feature requests etc.`_
@@ -50,19 +51,39 @@ Bleeding edge source code is under version control and available from the
 http://github.com/cheshire3/cheshire3
 
 
+Installation
+------------
+
+The textmining sub-package is included by default as part of the main
+cheshire3 Python_ package. Details of how to install Cheshire3 can be found
+in the main Cheshire3 README file.
+
+Installation / Setup guidelines for any 3rd party dependencies can be found
+in the `Requirements / Dependencies`_ section of this README.
+
+
 Requirements / Dependencies
 ---------------------------
 
-Cheshire3 requires Python_ 2.6.0 or later. It has not yet been verified
-as Python 3 compliant.
+Certain Cheshire3 object implementations contained within this sub-package
+may require additional 3rd party components to be installed (e.g. Enju_
+and Genia_ part-of-speech taggers.)
 
-As of the version 1.0 release Cheshire3's core dependencies *should* be
-resolved automatically by the standard Python package management
-mechanisms (e.g. pip_, `easy_install`_, distribute_/setuptools_).
 
-However, certain Cheshire3 object implementations contained within this
-sub-package may require additional 3rd party components to be installed (e.g.
-Enju_ and Genia_ part-of-speech taggers.)
+Natural Language Toolkit
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+The `Natural Language Toolkit`_ (NLTK_) dependency should have been
+automatically resolved by the standard Python package management mechanisms
+(e.g. pip_, `easy_install`_, distribute_/setuptools_). If you find that you
+need to install it manually, it is available from:
+
+http://pypi.python.org/pypi/nltk
+
+Cheshire3's use of NLTK_ requires you to download some trained models etc. To
+download these, you can use the NLTK_ Downloader command-line tool: ::
+
+    $ python -m nltk.downloader all
 
 
 Documentation
@@ -130,7 +151,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .. _`Cheshire3 Information Framework`: http://cheshire3.org
 .. _`Cheshire3 GitHub repository`: http://github.com/cheshire3/cheshire3
 .. _`GitHub issue tracker`: http://github.com/cheshire3/cheshire3/issues
-.. _`Enju`
-.. _`Genia`
+.. _Enju: http://www.nactem.ac.uk/enju/
+.. _Genia: http://www.nactem.ac.uk/GENIA/tagger/
+.. _`Natural Language Toolkit`: http://nltk.org
+.. _NLTK: http://nltk.org
 
 
