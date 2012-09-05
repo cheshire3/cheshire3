@@ -247,7 +247,9 @@ class C3Object(object):
                     else:
                         # <path type="includeConfigs">path/to/file.xml</path>
                         path = getFirstData(mod)
-                        if  not os.path.isabs(path):
+                        # Expand user-specific paths
+                        path = os.path.expanduser(path)
+                        if not os.path.isabs(path):
                             path = os.path.join(
                                 self.get_path(session, 'defaultPath'), path)
                         if os.path.isdir(path):
@@ -259,6 +261,8 @@ class C3Object(object):
                             self._parseIncludes(session, path)
                 else:
                     path = getFirstData(mod)
+                    # Expand user-specific paths
+                    path = os.path.expanduser(path)
                     if  not os.path.isabs(path):
                         path = os.path.join(
                             self.get_path(session, 'defaultPath'), path)
@@ -304,6 +308,8 @@ class C3Object(object):
                         self._includeConfigStores.append(e.attrib['ref'])
                     else:
                         path = e.text
+                        # Expand user-specific paths
+                        path = os.path.expanduser(path)
                         if not os.path.isabs(path):
                             path = os.path.join(
                                 self.get_path(session, 'defaultPath'), path)
@@ -315,6 +321,8 @@ class C3Object(object):
                             self._parseLxmlIncludes(session, path)
                 else:
                     path = e.text
+                    # Expand user-specific paths
+                    path = os.path.expanduser(path)
                     if not os.path.isabs(path):
                         path = os.path.join(
                             self.get_path(session, 'defaultPath'), path)
