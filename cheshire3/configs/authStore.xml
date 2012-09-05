@@ -2,7 +2,7 @@
 <config type="authStore" id="defaultAuthStore">
   <objectType>cheshire3.objectStore.BdbObjectStore</objectType>
   <paths>
-     <path type="defaultPath">defaults</path>
+     <path type="defaultPath">~/.cheshire3-server/stores</path>
      <path type="databasePath">authStore.bdb</path>
   </paths>
 </config>
