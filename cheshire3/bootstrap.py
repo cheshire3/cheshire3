@@ -4,26 +4,35 @@
 # (Also to avoid import errors in Python)
 
 from xml.dom.minidom import parseString
+from xml.parsers.expat import ExpatError
 from lxml import etree
 
+from cheshire3.exceptions import XMLSyntaxError
 
 class BootstrapParser:
 
     def process_document(self, session, doc):
         xml = doc.get_raw(session)
-        dom = parseString(xml)
+        try:
+            dom = parseString(xml)
+        except ExpatError as e:
+            raise XMLSyntaxError(e.message)
         rec = BootstrapRecord(dom, xml)
         return rec
 
 
 class BootstrapLxmlParser:
+
     def process_document(self, session, doc):
         data = doc.get_raw(session)
         try:
-            et = etree.XML(data)
-        except AssertionError:
-            data = data.decode('utf8')
-            et = etree.XML(data)
+            try:
+                et = etree.XML(data)
+            except AssertionError:
+                data = data.decode('utf8')
+                et = etree.XML(data)
+        except etree.XMLSyntaxError as e:
+            raise XMLSyntaxError(e.message)
         return BootstrapRecord(et, data)
 
 

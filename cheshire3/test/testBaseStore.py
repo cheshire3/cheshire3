@@ -195,6 +195,37 @@ class DeletionsBdbStoreTestCase(BdbStoreTestCase):
                                   "Data deletion not stored")
 
 
+class UserPathBdbStoreTestCase(BdbStoreTestCase):
+    "BerkeleyDB storage with user home directory based file path."
+    
+    def _get_config(self):
+        return etree.XML('''\
+        <subConfig type="baseStore" id="{0.__name__}">
+          <objectType>cheshire3.baseStore.{0.__name__}</objectType>
+          <paths>
+              <path type="defaultPath">{1}</path>
+              <path type="databasePath">{0.__name__}.bdb</path>
+          </paths>
+        </subConfig>'''.format(self._get_class(), self.defaultPath))
+
+    def setUp(self):
+        # Create a tempfile placeholder
+        userPath = '~/.cheshire3-server'
+        tempPath = mkdtemp("", "test", os.path.expanduser(userPath))
+        self.defaultPath = os.path.join(userPath,
+                                        os.path.split(tempPath)[-1])
+        Cheshire3ObjectTestCase.setUp(self)
+
+    def tearDown(self):
+        defaultPath = os.path.expanduser(self.defaultPath)
+        for root, dirs, files in os.walk(defaultPath, topdown=False):
+            for name in files:
+                os.remove(os.path.join(root, name))
+            for name in dirs:
+                os.rmdir(os.path.join(root, name))
+        os.rmdir(defaultPath)
+
+
 class FileSystemStoreTestCase(SimpleStoreTestCase):
     "Tests for file system based store."
     
@@ -273,6 +304,7 @@ def load_tests(loader, tests, pattern):
     suite = ltc(BdbStoreTestCase)
     suite.addTests(ltc(UuidBdbStoreTestCase))
     suite.addTests(ltc(DeletionsBdbStoreTestCase))
+    suite.addTests(ltc(UserPathBdbStoreTestCase))
     suite.addTests(ltc(FileSystemStoreTestCase))
     return suite
 
