@@ -1,11 +1,10 @@
-"""Register a Cheshire3 configuration.
+"""Register a Cheshire3 Database config file.
 
-Register a configuration for a Cheshire3 object (most common use case
-will be a Database) with the server.
+Register a configuration file for a Cheshire3 Database with the server.
 
 This process simply tells the server that it should include the
-configuration(s) in your file - it doesn't ingest your file - so you
-don't need to re-register any time you make changes.
+configuration(s) in your file (it does not ingest your file) so you
+don't need to re-register when you make changes to the file.
 """
 
 from __future__ import with_statement
@@ -27,7 +26,7 @@ from cheshire3.commands.cmd_utils import Cheshire3ArgumentParser
 
 
 def main(argv=None):
-    """Register an object with the Cheshire3 Server."""
+    """Register a Database configuration file with the Cheshire3 Server."""
     global argparser, session, server
     if argv is None:
         args = argparser.parse_args()
