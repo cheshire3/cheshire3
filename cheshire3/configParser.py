@@ -646,9 +646,12 @@ class C3Object(object):
         if (id in self.paths):
             path = self.paths[id]
             # Special handling for defaultPath :/
-            if (id == "defaultPath" and not os.path.isabs(path)):
-                p1 = self.parent.get_path(session, id, default)
-                path = os.path.join(p1, path)
+            if id == "defaultPath":
+                # Handle user-relative paths
+                path = os.path.expanduser(path)
+                if not os.path.isabs(path):
+                    p1 = self.parent.get_path(session, id, default)
+                    path = os.path.join(p1, path)
             return path
         elif (id in self.unresolvedObjects):
             o = self.get_object(session, self.unresolvedObjects[id])
