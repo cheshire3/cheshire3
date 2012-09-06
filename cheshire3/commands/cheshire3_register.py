@@ -36,74 +36,8 @@ def main(argv=None):
     server = SimpleServer(session, args.serverconfig)
     # Make path to configfile absolute
     args.configfile = os.path.abspath(os.path.expanduser(args.configfile))
-    # Read in proposed config file
-    with open(args.configfile, 'r') as fh:
-        confdoc = BootstrapDocument(fh)
-        # Check it's parsable
-        try:
-            confrec = BSLxmlParser.process_document(session, confdoc)
-        except etree.XMLSyntaxError as e:
-            msg = ("Config file {0} is not well-formed and valid XML: "
-                   "{1}".format(args.configfile, e.message))
-            server.log_critical(session, msg)
-            raise ConfigFileException(msg)
-    # Extract the database identifier
-    confdom = confrec.get_dom(session)
-    dbid = confdom.attrib.get('id', None)
-    if dbid is None:
-        msg = ("Config file {0} must have an 'id' attribute at the top-level"
-               "".format(args.configfile))
-        server.log_critical(session, msg)
-        raise ConfigFileException(msg)
-    # Check that the identifier is not already in use by an existing database
-    try:
-        server.get_object(session, dbid)
-    except ObjectDoesNotExistException:
-        # Doesn't exists, so OK to init it
-        pass
-    else:
-        # TODO: check for --force ?
-        msg = ("Database with id '{0}' is already registered. "
-               "Please specify a different id in your configurations "
-               "file.".format(dbid))
-        server.log_critical(session, msg)
-        raise ConfigFileException(msg)
-    
-    # Generate plugin XML
-    plugin = E.config(
-                     E.subConfigs(
-                         E.path({'type': "database", 'id': dbid},
-                                args.configfile
-                         )
-                     )
-                 )
-    # Try to do this by writing config plugin file if possible
-    serverDefaultPath = server.get_path(session,
-                                        'defaultPath',
-                                        cheshire3Root)
-    userSpecificPath = os.path.join(os.path.expanduser('~'),
-                                    '.cheshire3-server')
-    pluginPath = os.path.join('configs',
-                              'databases',
-                              '{0}.xml'.format(dbid))
-    try:
-        pluginfh = open(os.path.join(serverDefaultPath, pluginPath), 'w')
-    except IOError:
-        try:
-            pluginfh = open(os.path.join(userSpecificPath, pluginPath), 'w')
-        except IOError:
-            msg = ("Database plugin directory {0} unavailable for writing"
-                   "".format(os.path.join(userSpecificPath, pluginPath)))
-            server.log_critical(session, msg)
-            raise PermissionException(msg)
-    pluginfh.write(etree.tostring(plugin,
-                            pretty_print=True,
-                            encoding="utf-8"))
-    pluginfh.close()
-    server.log_info(session,
-                    "Database configured in {0} registered with Cheshire3 "
-                    "Server configured in {1}".format(args.configfile,
-                                                      args.serverconfig))
+    # Tell the server to register the config file
+    server.register_databaseConfigFile(session, args.configfile)
     return 0
         
 
