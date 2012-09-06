@@ -22,6 +22,7 @@ from cheshire3.internal import cheshire3Root, CONFIG_NS
 from cheshire3.bootstrap import BSLxmlParser, BootstrapDocument
 from cheshire3.exceptions import ObjectDoesNotExistException
 from cheshire3.exceptions import ConfigFileException
+from cheshire3.exceptions import PermissionException
 from cheshire3.commands.cmd_utils import Cheshire3ArgumentParser
 
 
@@ -69,33 +70,37 @@ def main(argv=None):
         server.log_critical(session, msg)
         raise ConfigFileException(msg)
     
-    # Insert database into server configuration
-    pathEl = E.path({'type': "database",
-                     'id': dbid},
-                    args.configfile
-             )
+    # Generate plugin XML
+    plugin = E.config(
+                     E.subConfigs(
+                         E.path({'type': "database", 'id': dbid},
+                                args.configfile
+                         )
+                     )
+                 )
     # Try to do this by writing config plugin file if possible
     serverDefaultPath = server.get_path(session,
                                         'defaultPath',
                                         cheshire3Root)
-    includesPath = os.path.join(serverDefaultPath,
-                                'configs',
-                                'databases')
-    if os.path.exists(includesPath) and os.path.isdir(includesPath):
-        plugin = E.config(
-                     E.subConfigs(
-                         pathEl
-                     )
-                 )
-        pluginpath = os.path.join(includesPath, '{0}.xml'.format(dbid))
-        with open(pluginpath, 'w') as pluginfh:
-            pluginfh.write(etree.tostring(plugin,
-                                          pretty_print=True,
-                                          encoding="utf-8"))
-    else:
-        # No database plugin directory
-        server.log_warning(session, "No database plugin directory")
-        raise ValueError("No database plugin directory")
+    userSpecificPath = os.path.join(os.path.expanduser('~'),
+                                    '.cheshire3-server')
+    pluginPath = os.path.join('configs',
+                              'databases',
+                              '{0}.xml'.format(dbid))
+    try:
+        pluginfh = open(os.path.join(serverDefaultPath, pluginPath), 'w')
+    except IOError:
+        try:
+            pluginfh = open(os.path.join(userSpecificPath, pluginPath), 'w')
+        except IOError:
+            msg = ("Database plugin directory {0} unavailable for writing"
+                   "".format(os.path.join(userSpecificPath, pluginPath)))
+            server.log_critical(session, msg)
+            raise PermissionException(msg)
+    pluginfh.write(etree.tostring(plugin,
+                            pretty_print=True,
+                            encoding="utf-8"))
+    pluginfh.close()
     server.log_info(session,
                     "Database configured in {0} registered with Cheshire3 "
                     "Server configured in {1}".format(args.configfile,
