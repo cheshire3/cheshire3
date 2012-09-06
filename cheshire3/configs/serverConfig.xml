@@ -15,14 +15,14 @@
     <subConfig type="logger" id="functionLogger">
       <objectType>cheshire3.logger.FunctionLogger</objectType>
       <paths>
-        <path type="filePath">logs/functionLog.txt</path>
+        <path type="filePath">~/.cheshire3-server/logs/functionLog.txt</path>
       </paths>
     </subConfig>
 
     <subConfig type="logger" id="z3950Logger">
       <objectType>cheshire3.logger.SimpleLogger</objectType>
       <paths>
-        <path type="filePath">logs/z3950Log.txt</path>
+        <path type="filePath">~/.cheshire3-server/logs/z3950Log.txt</path>
       </paths>
     </subConfig>
 
@@ -36,7 +36,7 @@
     <subConfig type="queryStore" id="defaultQueryStore">
       <objectType>cheshire3.queryStore.SimpleQueryStore</objectType>
       <paths>
-        <path type="defaultPath">defaults</path>
+        <path type="defaultPath">~/.cheshire3-server/stores</path>
         <path type="databasePath">QueryStore.bdb</path>
       </paths>
     </subConfig>
@@ -44,7 +44,7 @@
     <subConfig type="resultSetStore" id="defaultResultSetStore">
       <objectType>cheshire3.resultSetStore.BdbResultSetStore2</objectType>
       <paths>
-        <path type="defaultPath">defaults</path>
+        <path type="defaultPath">~/.cheshire3-server/stores</path>
         <path type="databasePath">RSetStore.bdb</path>
       </paths>
       <options>
@@ -61,8 +61,11 @@
     <path type="includeConfigs">configs/basicConfigs.xml</path>
     <path type="includeConfigs">configs/workflow.xml</path>
     <path type="includeConfigs">configs/extra</path>
+    <!-- databases plugins directory -->
     <path type="includeConfigs">configs/databases</path>
-
+    <!-- user-specific databases plugins directory -->
+    <path type="includeConfigs">~/.cheshire3-server/configs/databases</path>
+    
   </subConfigs>
 
 </config>

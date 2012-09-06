@@ -20,11 +20,11 @@ if py_version < (2, 6):
 
 # Basic information
 _name = 'cheshire3'
-_version = '1.0.0'
+_version = '1.0.1'
 _description = ('Cheshire3 Search and Retrieval Engine and Information '
                 'Framework')
 _download_url = ('http://www.cheshire3.org/download/{0}/src/{1}-{2}.tar.gz'
-                 ''.format(_version[:5], _name, _version))
+                 ''.format(_version[:3], _name, _version))
 
 # More detailed description from README
 # Inspect to find current path
