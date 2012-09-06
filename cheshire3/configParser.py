@@ -645,6 +645,11 @@ class C3Object(object):
         """Return the named path"""
         if (id in self.paths):
             path = self.paths[id]
+            # Handle user-relative paths
+            try:
+                path = os.path.expanduser(path)
+            except (TypeError, AttributeError):
+                pass
             # Special handling for defaultPath :/
             if (id == "defaultPath" and not os.path.isabs(path)):
                 p1 = self.parent.get_path(session, id, default)
