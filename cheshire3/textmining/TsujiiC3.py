@@ -8,6 +8,7 @@ from subprocess import Popen, PIPE
 from cheshire3.baseObjects import DocumentFactory
 from cheshire3.document import StringDocument
 from cheshire3.utils import getFirstData, elementType, getShellResult
+from cheshire3.exceptions import ConfigFileException
 
 
 class TsujiiObject:
