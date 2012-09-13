@@ -2,13 +2,12 @@ from __future__ import absolute_import
 
 import os
 import re
-import commands
 
 from subprocess import Popen, PIPE
 
 from cheshire3.baseObjects import DocumentFactory
 from cheshire3.document import StringDocument
-from cheshire3.utils import getFirstData, elementType
+from cheshire3.utils import getFirstData, elementType, getShellResult
 
 
 class TsujiiObject:
@@ -87,7 +86,7 @@ class EnjuObject:
         tp = self.get_path(session, 'executablePath', '')
         exe = self.get_path(session, 'executable', 'enju')
         if not tp:
-            tp = commands.getoutput('which %s' % exe)
+            tp = getShellResult('which %s' % exe)
             tp = tp if not tp.startswith('which:') else exe
         else:
             tp = os.path.join(tp, exe)
@@ -154,7 +153,7 @@ class GeniaObject:
         tp = self.get_path(session, 'executablePath', '')
         exe = self.get_path(session, 'executable', 'geniatagger')
         if not tp:
-            tp = commands.getoutput('which %s' % exe)
+            tp = getShellResult('which %s' % exe)
             tp = os.path.dirname(tp)
         tpe = os.path.join(tp, exe)
         if not tp:
