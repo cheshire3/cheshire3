@@ -2,7 +2,7 @@
   <subConfigs>
 
     <subConfig type="documentFactory" id="normalizerDocumentFactory">
-      <objectType>documentFactory.SimpleDocumentFactory</objectType>
+      <objectType>cheshire3.documentFactory.SimpleDocumentFactory</objectType>
       <options>
         <default type="format">termHash</default>
         <default type="cache">0</default>
@@ -10,30 +10,30 @@
     </subConfig>
 
     <subConfig type="normalizer" id="WordNetNormalizer">
-      <objectType>textmining.normalizer.WordNetNormalizer</objectType>
+      <objectType>cheshire3.textmining.normalizer.WordNetNormalizer</objectType>
     </subConfig>  
 
     <subConfig type="normalizer" id="HypernymNormalizer">
-      <objectType>textmining.normalizer.HypernymNormalizer</objectType>
+      <objectType>cheshire3.textmining.normalizer.HypernymNormalizer</objectType>
     </subConfig>  
 
     <!-- string with /POS tags -->
     <subConfig type="normalizer" id="TsuPosNormalizer">
-      <objectType>textmining.normalizer.TsujiiPosNormalizer</objectType>
+      <objectType>cheshire3.textmining.normalizer.TsujiiPosNormalizer</objectType>
      <paths>
        <path type="executablePath">${cheshire3Root}/textmining</path>
      </paths>
     </subConfig>  
 
     <subConfig type="normalizer" id="PosTagStripNormalizer">
-      <objectType>normalizer.RegexpNormalizer</objectType>
+      <objectType>cheshire3.normalizer.RegexpNormalizer</objectType>
       <options>
         <setting type="regexp">/[^/]+$</setting>
       </options>
     </subConfig>
 
     <subConfig type="normalizer" id="PosTagKeepNormalizer">
-      <objectType>normalizer.RegexpNormalizer</objectType>
+      <objectType>cheshire3.normalizer.RegexpNormalizer</objectType>
       <options>
         <setting type="regexp">([^ ]*)/</setting>
       </options>
@@ -41,7 +41,7 @@
 
     <!-- string with XML for clauses -->
     <subConfig type="normalizer" id="EnjuNormalizer">
-      <objectType>textmining.normalizer.EnjuNormalizer</objectType>
+      <objectType>cheshire3.textmining.normalizer.EnjuNormalizer</objectType>
        <paths>
          <path type="executablePath">${cheshire3Home}/install/bin</path>
          <path type="executable">enju</path>
@@ -49,7 +49,7 @@
     </subConfig>  
 
     <subConfig type="preParser" id="EnjuTextPreParser">
-      <objectType>textmining.preParser.EnjuTextPreParser</objectType>
+      <objectType>cheshire3.textmining.preParser.EnjuTextPreParser</objectType>
        <paths>
          <path type="executablePath">${cheshire3Home}/install/bin</path>
          <path type="executable">enju</path>
@@ -58,14 +58,14 @@
 
     <!-- raw genia output -->
     <subConfig type="normalizer" id="UnparsedGeniaNormalizer">
-       <objectType>textmining.normalizer.GeniaNormalizer</objectType>
+       <objectType>cheshire3.textmining.normalizer.GeniaNormalizer</objectType>
        <paths>
          <path type="executablePath">${cheshire3Root}/textmining</path>
        </paths>
     </subConfig>  
 
     <subConfig type="normalizer" id="TokenizingUnparsedGeniaNormalizer">
-       <objectType>textmining.normalizer.GeniaNormalizer</objectType>
+       <objectType>cheshire3.textmining.normalizer.GeniaNormalizer</objectType>
        <paths>
          <path type="executablePath">${cheshire3Root}/textmining</path>
        </paths>
@@ -75,7 +75,7 @@
     </subConfig>  
 
     <subConfig type="tokenizer" id="WordPosGeniaTokenizer">
-       <objectType>textmining.tokenizer.UnparsedGeniaTokenizer</objectType>
+       <objectType>cheshire3.textmining.tokenizer.UnparsedGeniaTokenizer</objectType>
        <options>
          <setting type="pos">1</setting>
        </options>
@@ -83,14 +83,14 @@
 
 
     <subConfig type="tokenizer" id="PosOnlyGeniaTokenizer">
-       <objectType>textmining.tokenizer.UnparsedGeniaTokenizer</objectType>
+       <objectType>cheshire3.textmining.tokenizer.UnparsedGeniaTokenizer</objectType>
        <options>
          <setting type="justPos">1</setting>
        </options>
     </subConfig>  
 
     <subConfig type="tokenizer" id="PhraseGeniaTokenizer">
-       <objectType>textmining.tokenizer.PhraseUnparsedGeniaTokenizer</objectType>
+       <objectType>cheshire3.textmining.tokenizer.PhraseUnparsedGeniaTokenizer</objectType>
        <paths>
          <path type="executablePath">${cheshire3Root}/textmining</path>
        </paths>
@@ -99,7 +99,7 @@
 
     <!-- recombine into string -->
     <subConfig type="normalizer" id="PosStringGeniaNormalizer">
-       <objectType>textmining.normalizer.ReconstructGeniaNormalizer</objectType>
+       <objectType>cheshire3.textmining.normalizer.ReconstructGeniaNormalizer</objectType>
        <paths>
          <path type="executablePath">${cheshire3Root}/textmining</path>
        </paths>
@@ -110,7 +110,7 @@
 
     <!-- stems recombined -->
     <subConfig type="normalizer" id="StemStringGeniaNormalizer">
-       <objectType>textmining.normalizer.ReconstructGeniaNormalizer</objectType>
+       <objectType>cheshire3.textmining.normalizer.ReconstructGeniaNormalizer</objectType>
        <paths>
          <path type="executablePath">${cheshire3Root}/textmining</path>
        </paths>
@@ -120,7 +120,7 @@
     </subConfig> 
 
     <subConfig type="normalizer" id="StemPosStringGeniaNormalizer">
-       <objectType>textmining.normalizer.ReconstructGeniaNormalizer</objectType>
+       <objectType>cheshire3.textmining.normalizer.ReconstructGeniaNormalizer</objectType>
        <paths>
          <path type="executablePath">${cheshire3Root}/textmining</path>
        </paths>
@@ -131,7 +131,7 @@
     </subConfig> 
 
     <subConfig type="normalizer" id="XmlStringGeniaNormalizer">
-       <objectType>textmining.normalizer.ReconstructGeniaNormalizer</objectType>
+       <objectType>cheshire3.textmining.normalizer.ReconstructGeniaNormalizer</objectType>
        <paths>
          <path type="executablePath">${cheshire3Root}/textmining</path>
        </paths>
@@ -141,7 +141,7 @@
     </subConfig> 
 
     <subConfig type="preParser" id="StemPosGeniaVerbSpanPreParser">
-       <objectType>textmining.preParser.GeniaVerbSpanPreParser</objectType>
+       <objectType>cheshire3.textmining.preParser.GeniaVerbSpanPreParser</objectType>
        <paths>
          <path type="executablePath">${cheshire3Root}/textmining</path>
        </paths>
@@ -154,7 +154,7 @@
 
 
     <subConfig type="extractor" id="WordPosTaggedExtractor">
-       <objectType>textmining.extractor.TaggedExtractor</objectType>
+       <objectType>cheshire3.textmining.extractor.TaggedExtractor</objectType>
        <options>
          <setting type="format">%(word)s/%(pos)s</setting>
          <setting type="prox">1</setting>
@@ -163,7 +163,7 @@
     </subConfig> 
 
     <subConfig type="extractor" id="StemPosTaggedExtractor">
-       <objectType>textmining.extractor.TaggedExtractor</objectType>
+       <objectType>cheshire3.textmining.extractor.TaggedExtractor</objectType>
        <options>
          <setting type="format">%(stem)s/%(pos)s</setting>
          <setting type="prox">1</setting>
@@ -172,7 +172,7 @@
     </subConfig> 
 
     <subConfig type="extractor" id="WordTaggedExtractor">
-       <objectType>textmining.extractor.TaggedExtractor</objectType>
+       <objectType>cheshire3.textmining.extractor.TaggedExtractor</objectType>
        <options>
          <setting type="format">%(word)s</setting>
          <setting type="prox">1</setting>
@@ -181,7 +181,7 @@
     </subConfig> 
 
     <subConfig type="extractor" id="StemTaggedExtractor">
-       <objectType>textmining.extractor.TaggedExtractor</objectType>
+       <objectType>cheshire3.textmining.extractor.TaggedExtractor</objectType>
        <options>
          <setting type="format">%(stem)s</setting>
          <setting type="prox">1</setting>
@@ -190,7 +190,7 @@
     </subConfig> 
 
     <subConfig type="extractor" id="PosTaggedExtractor">
-       <objectType>textmining.extractor.TaggedExtractor</objectType>
+       <objectType>cheshire3.textmining.extractor.TaggedExtractor</objectType>
        <options>
          <setting type="format">%(pos)s</setting>
          <setting type="prox">1</setting>
@@ -201,7 +201,7 @@
 
     <!-- keyword, with 'stem' key in hash, /POS in term -->
     <subConfig type="normalizer" id="KeywordGeniaNormalizer">
-       <objectType>textmining.normalizer.HashGeniaNormalizer</objectType>
+       <objectType>cheshire3.textmining.normalizer.HashGeniaNormalizer</objectType>
        <paths>
          <path type="executablePath">${cheshire3Root}/textmining</path>
        </paths>
@@ -209,13 +209,13 @@
 
 
     <subConfig type="normalizer" id="GeniaStemNormalizer">
-       <objectType>textmining.normalizer.StemGeniaNormalizer</objectType>
+       <objectType>cheshire3.textmining.normalizer.StemGeniaNormalizer</objectType>
     </subConfig>  
 
 
     <!-- take POS tagged string and discover phrases -->
     <subConfig type="normalizer" id="PosPhraseNormalizer">
-       <objectType>textmining.normalizer.PosPhraseNormalizer</objectType>
+       <objectType>cheshire3.textmining.normalizer.PosPhraseNormalizer</objectType>
        <options>
          <setting type="pattern">JJ*NN+</setting>
          <setting type="subPhrases">1</setting>
@@ -224,11 +224,11 @@
     </subConfig>  
 
     <subConfig type="normalizer" id="PhraseStemNormalizer">
-       <objectType>normalizer.PhraseStemNormalizer</objectType>
+       <objectType>cheshire3.normalizer.PhraseStemNormalizer</objectType>
     </subConfig>  
 
     <subConfig type="normalizer" id="NounVerbFilterNormalizer">
-       <objectType>textmining.normalizer.PosTypeNormalizer</objectType>
+       <objectType>cheshire3.textmining.normalizer.PosTypeNormalizer</objectType>
        <options>
          <setting type="posTypes">NN NNP NNS VB VBD VBZ VBG VBN VBP</setting>
          <!-- Can keep the pos tags: -->
@@ -237,7 +237,7 @@
     </subConfig>  
 
     <subConfig type="normalizer" id="NounVerbAdjFilterNormalizer">
-       <objectType>textmining.normalizer.PosTypeNormalizer</objectType>
+       <objectType>cheshire3.textmining.normalizer.PosTypeNormalizer</objectType>
        <options>
          <setting type="posTypes">NN NNP NNS VB VBD VBZ VBG VBN VBP JJ JJR JJS</setting>
          <!-- Can keep the pos tags: -->
@@ -246,7 +246,7 @@
     </subConfig>  
 
     <subConfig type="normalizer" id="NounFilterNormalizer">
-       <objectType>textmining.normalizer.PosTypeNormalizer</objectType>
+       <objectType>cheshire3.textmining.normalizer.PosTypeNormalizer</objectType>
        <options>
          <setting type="posTypes">NN NNP NNS</setting>
          <!-- Can keep the pos tags: -->
@@ -255,7 +255,7 @@
     </subConfig>  
 
     <subConfig type="normalizer" id="VerbFilterNormalizer">
-       <objectType>textmining.normalizer.PosTypeNormalizer</objectType>
+       <objectType>cheshire3.textmining.normalizer.PosTypeNormalizer</objectType>
        <options>
          <setting type="posTypes">VB VBD VBZ VBG VBN VBP</setting>
          <!-- Can keep the pos tags: -->
@@ -264,15 +264,15 @@
     </subConfig>  
     
     <subConfig type="tokenizer" id="PunktTokenizer">
-      <objectType>tokenizer.PunktWordTokenizer</objectType>
+      <objectType>cheshire3.tokenizer.PunktWordTokenizer</objectType>
     </subConfig>
     
     <subConfig type="tokenizer" id="PunktSentenceTokenizer">
-      <objectType>tokenizer.PunktSentenceTokenizer</objectType>
+      <objectType>cheshire3.tokenizer.PunktSentenceTokenizer</objectType>
     </subConfig>
 
   <subConfig type="transformer" id="TsuTransformer">
-      <objectType>textmining.transformer.TsujiiXPathTransformer</objectType>
+      <objectType>cheshire3.textmining.transformer.TsujiiXPathTransformer</objectType>
      <paths>
        <path type="taggerPath">${cheshire3Root}/textmining</path>
      </paths>
