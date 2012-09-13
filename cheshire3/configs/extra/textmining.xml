@@ -43,7 +43,8 @@
     <subConfig type="normalizer" id="EnjuNormalizer">
       <objectType>textmining.normalizer.EnjuNormalizer</objectType>
        <paths>
-         <path type="enjuPath">/home/cheshire/install/bin/enju</path>
+         <path type="executablePath">/home/cheshire/install/bin</path>
+         <path type="executable">enju</path>
        </paths>
     </subConfig>  
 
@@ -51,7 +52,8 @@
     <subConfig type="preParser" id="EnjuTextPreParser">
       <objectType>textmining.preParser.EnjuTextPreParser</objectType>
        <paths>
-         <path type="enjuPath">/home/cheshire/install/bin/enju</path>
+         <path type="executablePath">/home/cheshire/install/bin</path>
+         <path type="executable">enju</path>
        </paths>
     </subConfig>  
 
