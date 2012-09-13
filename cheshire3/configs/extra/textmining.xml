@@ -21,7 +21,7 @@
     <subConfig type="normalizer" id="TsuPosNormalizer">
       <objectType>textmining.normalizer.TsujiiPosNormalizer</objectType>
      <paths>
-       <path type="taggerPath">/home/cheshire/cheshire3/code/textmining</path>
+       <path type="executablePath">/home/cheshire/cheshire3/code/textmining</path>
      </paths>
     </subConfig>  
 
