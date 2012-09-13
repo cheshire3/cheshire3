@@ -2,9 +2,10 @@
 import cStringIO
 import StringIO
 
-from xml.sax import make_parser, ErrorHandler
+from xml.sax import make_parser, ErrorHandler, SAXParseException
 from xml.sax import InputSource as SaxInput
 from xml.dom.minidom import parseString as domParseString
+from xml.parsers.expat import ExpatError
 from lxml import etree
 
 from cheshire3.baseObjects import Parser
@@ -12,6 +13,7 @@ from cheshire3.record import SaxRecord, SaxContentHandler, MinidomRecord, \
                              MarcRecord
 from cheshire3.record import LxmlRecord
 from cheshire3.utils import nonTextToken
+from exceptions import XMLSyntaxError
 
 
 class BaseParser(Parser):
@@ -33,7 +35,10 @@ class MinidomParser(BaseParser):
 
     def process_document(self, session, doc):
         xml = doc.get_raw(session)
-        dom = domParseString(xml)
+        try:
+            dom = domParseString(xml)
+        except ExpatError as e:
+            raise XMLSyntaxError(e.message)
         rec = MinidomRecord(dom, xml)
         self._copyData(doc, rec)
         return rec
@@ -90,7 +95,7 @@ class SaxParser(BaseParser):
         ch.reinit()
         try:
             self.parser.parse(self.inputSource)
-        except:
+        except SAXParseException as e:
             # Splat.  Reset self and reraise
             if self.keepError:
                 # Work out path
@@ -102,7 +107,7 @@ class SaxParser(BaseParser):
                 self.errorPath = '/'.join(path)
             else:
                 ch.reinit()
-            raise
+            raise XMLSyntaxError(str(e))
         rec = SaxRecord(ch.currentText, xml, wordCount=ch.recordWordCount)
         rec.elementHash = ch.elementHash
         rec.byteCount = len(xml)
@@ -156,10 +161,13 @@ class LxmlParser(BaseParser):
         # Input must be string or stream
         data = doc.get_raw(session)
         try:
-            et = etree.parse(StringIO.StringIO(data), self.parser)
-        except AssertionError:
-            data = data.decode('utf8')
-            et = etree.parse(StringIO.StringIO(data), self.parser)
+            try:
+                et = etree.parse(StringIO.StringIO(data), self.parser)
+            except AssertionError:
+                data = data.decode('utf8')
+                et = etree.parse(StringIO.StringIO(data), self.parser)
+        except etree.XMLSyntaxError as e:
+            raise XMLSyntaxError(e.message)
         rec = LxmlRecord(et)
         rec.byteCount = len(data)
         self._copyData(doc, rec)

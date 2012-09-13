@@ -1,7 +1,7 @@
 Cheshire3
 =========
 
-9th August 2012 (2012-08-09)
+6th September 2012 (2012-09-06)
 
 Contents
 --------
@@ -19,27 +19,28 @@ Contents
 -  `Bugs, Feature requests etc.`_
 -  `Licensing`_
 -  `Examples`_
-    -  `Command-line API`_
+
+   -  `Command-line UI`_
        
        -  `Creating a new Database`_
        -  `Loading Data into the Database`_
        -  `Searching the Database`_
        -  `Exposing the Database via SRU`_
     
-    -  `Python API`_
+   -  `Python API`_
     
-       -  `Initializing Cheshire3 Architecture`_
+      -  `Initializing Cheshire3 Architecture`_
        
-          - `Using the cheshire3 command`_
+         - `Using the cheshire3 command`_
           
-       -  `Loading Data`_
+      -  `Loading Data`_
     
-          -  `Pre-Processing (PreParsing)`_
+         -  `Pre-Processing (PreParsing)`_
     
-       -  `Searching`_
-       -  `Retrieving`_
-       -  `Transforming Records`_
-       -  `Indexes (Looking Under The Hood)`_
+      -  `Searching`_
+      -  `Retrieving`_
+      -  `Transforming Records`_
+      -  `Indexes (Looking Under The Hood)`_
 
 
 Description
@@ -330,8 +331,8 @@ file" and "the Software" should be understood to mean marc\_utils.py.
 Examples
 --------
 
-Command-line API
-~~~~~~~~~~~~~~~~
+Command-line UI
+~~~~~~~~~~~~~~~
 
 Cheshire3 provides a number of command-line utilities to enable you to
 get started creating databases, indexing and searching your data quickly.

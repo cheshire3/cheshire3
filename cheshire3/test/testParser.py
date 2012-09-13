@@ -11,11 +11,10 @@ try:
 except ImportError:
     import unittest
 
-from xml.parsers.expat import ExpatError
-from xml.sax import SAXParseException
 from lxml import etree
 
 from cheshire3.document import StringDocument
+from cheshire3.exceptions import XMLSyntaxError
 from cheshire3.parser import Parser, SaxParser, MinidomParser, LxmlParser,\
                              LxmlHtmlParser, PassThroughParser, MarcParser
 from cheshire3.record import Record, DomRecord, MinidomRecord, LxmlRecord,\
@@ -68,10 +67,6 @@ class XmlParserTestCase(ParserTestCase):
         return SaxRecord
 
     @classmethod
-    def _get_invalidDataExceptionClass(cls):
-        return SAXParseException
-
-    @classmethod
     def _get_data(cls):
         # Generator to yield data to be parsed into records
         yield ('<doc>'
@@ -102,7 +97,7 @@ class XmlParserTestCase(ParserTestCase):
         "Check that invalid/non-well-formed XML is rejected."
         # Will need to be subclassed for each Parser implementation, as they
         # will likely all return their own error class
-        self.assertRaises(self._get_invalidDataExceptionClass(),
+        self.assertRaises(XMLSyntaxError,
                           self.testObj.process_document,
                           self.session,
                           StringDocument('<xml>'))
@@ -183,10 +178,6 @@ class LxmlParserTestCase(XmlParserTestCase):
     def _get_recordClass(cls):
         return LxmlRecord
 
-    @classmethod
-    def _get_invalidDataExceptionClass(cls):
-        return etree.XMLSyntaxError
-
 
 class LxmlHtmlParserTestCase(LxmlParserTestCase):
     
@@ -213,10 +204,6 @@ class MinidomParserTestCase(XmlParserTestCase):
     @classmethod
     def _get_recordClass(cls):
         return MinidomRecord
-
-    @classmethod
-    def _get_invalidDataExceptionClass(cls):
-        return ExpatError
 
 
 def load_tests(loader, tests, pattern):

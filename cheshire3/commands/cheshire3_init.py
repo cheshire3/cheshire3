@@ -499,32 +499,6 @@ Please specify a different id using the --database option.""".format(dbid)
     path = os.path.join(c3_dir, 'configIndexes.xml')
     dbConfig = include_configByPath(dbConfig, path)
     xmlFilesToWrite[path] = indexConfig
-    
-    # Insert database into server configuration
-    pathEl = E.path({'type': "database",
-                     'id': dbid},
-                    dbConfigPath
-             )
-    # Try to do this by writing config plugin file if possible
-    serverDefaultPath = server.get_path(session,
-                                        'defaultPath',
-                                        cheshire3Root)
-    includesPath = os.path.join(serverDefaultPath,
-                                'configs',
-                                'databases')
-    if os.path.exists(includesPath) and os.path.isdir(includesPath):
-        plugin = E.config(
-                     E.subConfigs(
-                         pathEl
-                     )
-                 )
-        pluginpath = os.path.join(includesPath, '{0}.xml'.format(dbid))
-        xmlFilesToWrite[pluginpath] = plugin
-    else:
-        # No database plugin directory
-        server.log_warning(session, "No database plugin directory")
-        raise ValueError("No database plugin directory")
-
     # Write configs to files
     for path, node in xmlFilesToWrite.iteritems():
         with open(path, 'w') as conffh:
@@ -532,6 +506,8 @@ Please specify a different id using the --database option.""".format(dbid)
                                         pretty_print=True,
                                         encoding="utf-8"))
     
+    # Tell the server to register the config file
+    server.register_databaseConfigFile(session, dbConfigPath)
     return 0
 
 

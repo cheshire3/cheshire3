@@ -68,3 +68,11 @@ class IntegrityException(C3Exception):
 
 class ExternalSystemException(C3Exception):
     pass
+
+
+class FileSystemException(C3Exception):
+    pass
+
+
+class XMLSyntaxError(C3Exception):
+    pass
