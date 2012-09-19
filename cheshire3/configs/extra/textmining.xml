@@ -9,6 +9,31 @@
       </options>
     </subConfig>
 
+    <subConfig type="extractor" id="NamedEntityExtractor">
+      <objectType>cheshire3.textmining.extractor.NLTKNamedEntityExtractor</objectType>
+    </subConfig>
+    
+    <subConfig type="extractor" id="PersonNameExtractor">
+      <objectType>cheshire3.textmining.extractor.NLTKNamedEntityExtractor</objectType>
+      <options>
+        <setting type="entityTypes">PERSON</setting>
+      </options>
+    </subConfig>
+    
+    <subConfig type="extractor" id="PlaceNameExtractor">
+      <objectType>cheshire3.textmining.extractor.NLTKNamedEntityExtractor</objectType>
+      <options>
+        <setting type="entityTypes">PLACE</setting>
+      </options>
+    </subConfig>
+    
+    <subConfig type="extractor" id="OrganizationNameExtractor">
+      <objectType>cheshire3.textmining.extractor.NLTKNamedEntityExtractor</objectType>
+      <options>
+        <setting type="entityTypes">ORGANIZATION</setting>
+      </options>
+    </subConfig>
+
     <subConfig type="normalizer" id="WordNetNormalizer">
       <objectType>cheshire3.textmining.normalizer.WordNetNormalizer</objectType>
     </subConfig>  
