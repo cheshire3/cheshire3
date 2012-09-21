@@ -1,8 +1,8 @@
 u"""Cheshire3 Textmining Extractor Unittests.
 
-Extractor configurations may be customized by the user. For the purposes of 
+Extractor configurations may be customized by the user. For the purposes of
 unittesting, configuration files will be ignored and Extractor instances will
-be instantiated using configuration data defined within this testing module, 
+be instantiated using configuration data defined within this testing module,
 and tests carried out on instances.
 """
 
@@ -17,8 +17,9 @@ from cheshire3.exceptions import ConfigFileException
 from cheshire3.textmining.extractor import NLTKNamedEntityExtractor
 from cheshire3.test.testExtractor import SimpleExtractorTestCase
 
+
 class NLTKNamedEntityExtractorTestCase(SimpleExtractorTestCase):
-    
+
     text = """\
 Now, it is a fact, that there was nothing at all
 particular about the knocker on the door, except that it
@@ -46,7 +47,7 @@ process of change--not a knocker, but Marley's face.
     def _get_class(cls):
         return NLTKNamedEntityExtractor
 
-    def _get_config(self):    
+    def _get_config(self):
         return etree.XML('''\
         <subConfig type="extractor" id="{0.__name__}">
           <objectType>cheshire3.textmining.extractor.{0.__name__}</objectType>
@@ -123,8 +124,8 @@ process of change--not a knocker, but Marley's face.
 
 class NLTKPersonNameExtractorTestCase(NLTKNamedEntityExtractorTestCase):
     """Test a NamedEntityExtractor configured to extract only People."""
-    
-    def _get_config(self):    
+
+    def _get_config(self):
         return etree.XML('''\
         <subConfig type="extractor" id="{0.__name__}">
           <objectType>cheshire3.textmining.extractor.{0.__name__}</objectType>
@@ -163,10 +164,27 @@ class NLTKPersonNameExtractorTestCase(NLTKNamedEntityExtractorTestCase):
                       }
                   })]
 
+
+class NLTKPeopleNameExtractorTestCase(NLTKPersonNameExtractorTestCase):
+    """Test a NamedEntityExtractor configured to extract only People.
+
+    NLTKPersonNameExtractorTestCase but with variation in config.
+    """
+
+    def _get_config(self):
+        return etree.XML('''\
+        <subConfig type="extractor" id="{0.__name__}">
+          <objectType>cheshire3.textmining.extractor.{0.__name__}</objectType>
+          <options>
+            <setting type="entityTypes">people</setting>
+          </options>
+        </subConfig>'''.format(self._get_class()))
+
+
 class NLTKPlaceNameExtractorTestCase(NLTKNamedEntityExtractorTestCase):
     """Test a NamedEntityExtractor configured to extract only Places."""
-    
-    def _get_config(self):    
+
+    def _get_config(self):
         return etree.XML('''\
         <subConfig type="extractor" id="{0.__name__}">
           <objectType>cheshire3.textmining.extractor.{0.__name__}</objectType>
@@ -196,10 +214,26 @@ class NLTKPlaceNameExtractorTestCase(NLTKNamedEntityExtractorTestCase):
                   })]
 
 
+class NLTKGeoNameExtractorTestCase(NLTKPlaceNameExtractorTestCase):
+    """Test a NamedEntityExtractor configured to extract only Places.
+
+    As NLTKPlaceNameExtractorTestCase but with variation in config.
+    """
+
+    def _get_config(self):
+        return etree.XML('''\
+        <subConfig type="extractor" id="{0.__name__}">
+          <objectType>cheshire3.textmining.extractor.{0.__name__}</objectType>
+          <options>
+            <setting type="entityTypes">Geo</setting>
+          </options>
+        </subConfig>'''.format(self._get_class()))
+
+
 class NLTKOrganizationNameExtractorTestCase(NLTKNamedEntityExtractorTestCase):
     """Test a NamedEntityExtractor configured to extract only Organizations."""
-    
-    def _get_config(self):    
+
+    def _get_config(self):
         return etree.XML('''\
         <subConfig type="extractor" id="{0.__name__}">
           <objectType>cheshire3.textmining.extractor.{0.__name__}</objectType>
@@ -227,6 +261,22 @@ class NLTKOrganizationNameExtractorTestCase(NLTKNamedEntityExtractorTestCase):
                       'proxLoc': [-1] * self.text.count('Union')
                       }
                   })]
+
+
+class NLTKCompanyNameExtractorTestCase(NLTKOrganizationNameExtractorTestCase):
+    """Test a NamedEntityExtractor configured to extract only Organizations.
+
+    As NLTKOrganizationNameExtractorTestCase but with variation in config.
+    """
+
+    def _get_config(self):
+        return etree.XML('''\
+        <subConfig type="extractor" id="{0.__name__}">
+          <objectType>cheshire3.textmining.extractor.{0.__name__}</objectType>
+          <options>
+            <setting type="entityTypes">company</setting>
+          </options>
+        </subConfig>'''.format(self._get_class()))
 
 
 class NLTKInvalidNameExtractorTestCase(NLTKNamedEntityExtractorTestCase):
@@ -276,11 +326,14 @@ class NLTKInvalidNameExtractorTestCase(NLTKNamedEntityExtractorTestCase):
 
 def load_tests(loader, tests, pattern):
     # Alias loader.loadTestsFromTestCase for sake of line lengths
-    ltc = loader.loadTestsFromTestCase 
+    ltc = loader.loadTestsFromTestCase
     suite = ltc(NLTKNamedEntityExtractorTestCase)
     suite.addTests(ltc(NLTKPersonNameExtractorTestCase))
+    suite.addTests(ltc(NLTKPeopleNameExtractorTestCase))
     suite.addTests(ltc(NLTKPlaceNameExtractorTestCase))
+    suite.addTests(ltc(NLTKGeoNameExtractorTestCase))
     suite.addTests(ltc(NLTKOrganizationNameExtractorTestCase))
+    suite.addTests(ltc(NLTKCompanyNameExtractorTestCase))
     suite.addTests(ltc(NLTKInvalidNameExtractorTestCase))
     return suite
 
