@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://www.cheshire3.org/schemas/config/">
+  <subConfigs>
+  
+    <subConfig type="documentFactory" id="normalizerDocumentFactory">
+      <objectType>cheshire3.documentFactory.SimpleDocumentFactory</objectType>
+      <options>
+        <default type="format">termHash</default>
+        <default type="cache">0</default>
+      </options>
+    </subConfig>
+
+  </subConfigs>
+</config>

@@ -61,6 +61,10 @@
     <path type="includeConfigs">configs/basicConfigs.xml</path>
     <path type="includeConfigs">configs/workflow.xml</path>
     <path type="includeConfigs">configs/extra</path>
+    
+    <!-- textmining sub-package configurations -->
+    <path type="includeConfigs">configs/textmining</path>
+    
     <!-- databases plugins directory -->
     <path type="includeConfigs">configs/databases</path>
     <!-- user-specific databases plugins directory -->

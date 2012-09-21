@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://www.cheshire3.org/schemas/config/">
+  <subConfigs>
+  
+    <subConfig type="preParser" id="EnjuTextPreParser">
+      <objectType>cheshire3.textmining.preParser.EnjuTextPreParser</objectType>
+       <paths>
+         <path type="executablePath">${cheshire3Home}/install/bin</path>
+         <path type="executable">enju</path>
+       </paths>
+    </subConfig>
+
+    <subConfig type="preParser" id="StemPosGeniaVerbSpanPreParser">
+       <objectType>cheshire3.textmining.preParser.GeniaVerbSpanPreParser</objectType>
+       <paths>
+         <path type="executablePath">${cheshire3Root}/textmining</path>
+       </paths>
+       <options>
+         <setting type="useStem">1</setting>
+         <setting type="pos">1</setting>
+     <setting type="requireNoun">1</setting>
+       </options>
+    </subConfig>
+
+  </subConfigs>
+</config>
