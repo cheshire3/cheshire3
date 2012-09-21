@@ -207,7 +207,7 @@ class GeniaNormalizer(PosNormalizer, GeniaObject):
         return PosNormalizer.process_hash(self, session, data)
 
 
-class NltkPosNormalizer(PosNormalizer):
+class NLTKPosNormalizer(PosNormalizer):
     """Use NTLK to normalize tokens to parts of speech."""
 
     _possibleSettings = {

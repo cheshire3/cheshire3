@@ -5,6 +5,7 @@ import nltk
 from cheshire3.extractor import SimpleExtractor
 from cheshire3.exceptions import ConfigFileException
 
+
 class NLTKNamedEntityExtractor(SimpleExtractor):
     """Use NLTK to extract Named Entities.
     

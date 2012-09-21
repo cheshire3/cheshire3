@@ -51,11 +51,11 @@
     </subConfig>  
 
     <subConfig type="normalizer" id="NLTKPosTagNormalizer">
-      <objectType>cheshire3.textmining.normalizer.NltkPosNormalizer</objectType>
+      <objectType>cheshire3.textmining.normalizer.NLTKPosNormalizer</objectType>
     </subConfig>
     
     <subConfig type="normalizer" id="NLTKJustPosTagNormalizer">
-      <objectType>cheshire3.textmining.normalizer.NltkPosNormalizer</objectType>
+      <objectType>cheshire3.textmining.normalizer.NLTKPosNormalizer</objectType>
       <options>
         <setting type="justPos">1</setting>
       </options>
