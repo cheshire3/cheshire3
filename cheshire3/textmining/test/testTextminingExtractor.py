@@ -13,6 +13,7 @@ except ImportError:
 
 from lxml import etree
 
+from cheshire3.exceptions import ConfigFileException
 from cheshire3.textmining.extractor import NLTKNamedEntityExtractor
 from cheshire3.test.testExtractor import SimpleExtractorTestCase
 
@@ -227,6 +228,52 @@ class NLTKOrganizationNameExtractorTestCase(NLTKNamedEntityExtractorTestCase):
                       }
                   })]
 
+
+class NLTKInvalidNameExtractorTestCase(NLTKNamedEntityExtractorTestCase):
+    """Named Entity Extractor with an unsupported entityType."""
+
+    def _get_config(self):
+        return etree.XML('''\
+        <subConfig type="extractor" id="{0.__name__}">
+          <objectType>cheshire3.textmining.extractor.{0.__name__}</objectType>
+          <options>
+            <setting type="entityTypes">EVENT</setting>
+          </options>
+        </subConfig>'''.format(self._get_class()))
+
+    def setUp(self):
+        """Expected failure initializing object."""
+        self.assertRaises(ConfigFileException,
+                          NLTKNamedEntityExtractorTestCase.setUp,
+                          self)
+        self.testObj = None
+
+    @unittest.expectedFailure
+    def test_instance(self):
+        """Test case expected to fail due to configuration error."""
+        NLTKNamedEntityExtractorTestCase.test_instance(self)
+
+    @unittest.expectedFailure
+    def test_mergeHash(self):
+        """Test case expected to fail due to configuration error."""
+        NLTKNamedEntityExtractorTestCase.test_mergeHash(self)
+
+    @unittest.expectedFailure
+    def test_process_node(self):
+        """Test case expected to fail due to configuration error."""
+        NLTKNamedEntityExtractorTestCase.test_process_node(self)
+
+    @unittest.expectedFailure
+    def test_process_string(self):
+        """Test case expected to fail due to configuration error."""
+        NLTKNamedEntityExtractorTestCase.test_process_string(self)
+
+    @unittest.expectedFailure
+    def test_process_xpathResult(self):
+        """Test case expected to fail due to configuration error."""
+        NLTKNamedEntityExtractorTestCase.test_process_xpathResult(self)
+
+
 def load_tests(loader, tests, pattern):
     # Alias loader.loadTestsFromTestCase for sake of line lengths
     ltc = loader.loadTestsFromTestCase 
@@ -234,6 +281,7 @@ def load_tests(loader, tests, pattern):
     suite.addTests(ltc(NLTKPersonNameExtractorTestCase))
     suite.addTests(ltc(NLTKPlaceNameExtractorTestCase))
     suite.addTests(ltc(NLTKOrganizationNameExtractorTestCase))
+    suite.addTests(ltc(NLTKInvalidNameExtractorTestCase))
     return suite
 
 
