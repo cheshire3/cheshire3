@@ -2,8 +2,6 @@
 <config xmlns="http://www.cheshire3.org/schemas/config/">
   <subConfigs>
 
-	<!-- Transformers -->
-	
 	<subConfig type="transformer" id="RdfXmlTransformer">
         <objectType>cheshire3.graph.transformer.RdfXmlTransformer</objectType>
     </subConfig>
