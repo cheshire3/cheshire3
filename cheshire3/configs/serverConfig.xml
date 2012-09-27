@@ -62,6 +62,9 @@
     <path type="includeConfigs">configs/workflow.xml</path>
     <path type="includeConfigs">configs/extra</path>
     
+    <!-- datamining sub-package configurations -->
+    <path type="includeConfigs">configs/datamining</path>
+    
     <!-- textmining sub-package configurations -->
     <path type="includeConfigs">configs/textmining</path>
     
