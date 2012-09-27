@@ -67,6 +67,7 @@ setup(
     ],
     extras_require={
         'graph': ['rdflib'],
+        'datamining': ['svm'],
         'lucene': ['lucene'],
         'sql': ['PyGreSQL >= 3.8.1'],
         'textmining': ['numpy', 'nltk >= 2.0'],
