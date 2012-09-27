@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://www.cheshire3.org/schemas/config/">
+  <subConfigs>
+  
+    <subConfig type="parser" id="RdfGraphParser">
+        <docs>Parser to process RDF XML Documents, and return a GraphRecord.</docs>
+        <objectType>cheshire3.graph.parser.RdfGraphParser</objectType>
+    </subConfig>
+    
+    <subConfig type="parser" id="OreRdfGraphParser">
+        <docs>Parser to process OAI-ORE (RDF XML) Documents, and return an OreGraphRecord, complete with aggregation.</docs>
+        <objectType>cheshire3.graph.parser.OreRdfGraphParser</objectType>
+    </subConfig>
+  
+  </subConfigs>
+</config>
