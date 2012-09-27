@@ -16,7 +16,7 @@
       <objectType>datamining.preParser.TFPPreParser</objectType>
       <paths>
         <path type="filePath">${cheshire3Root}/datamining/apps/tfp2</path>
-        <path type="javaPath">/usr/local/jdk1.6.0_02/bin/java</path>
+        <path type="javaPath">/usr/bin/java</path>
       </paths>
       <options>
         <setting type="support">3</setting>
