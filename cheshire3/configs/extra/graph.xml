@@ -2,20 +2,6 @@
 <config xmlns="http://www.cheshire3.org/schemas/config/">
   <subConfigs>
 
-    <!-- Extractors -->
-      
-	<subConfig type="extractor" id="RdfExtractor">
-  		<objectType>cheshire3.graph.extractor.RdfExtractor</objectType>
-  	</subConfig>
-  
-	<subConfig type="extractor" id="RdfProxExtractor">
-	  <objectType>cheshire3.graph.extractor.RdfExtractor</objectType>
-	  <options>
-	    <setting type="prox">1</setting>
-	    <setting type="reversable">1</setting>
-	  </options>
-	</subConfig>
-	
 	<!-- Transformers -->
 	
 	<subConfig type="transformer" id="RdfXmlTransformer">
