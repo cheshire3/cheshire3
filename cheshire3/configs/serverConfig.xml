@@ -60,10 +60,12 @@
     <path type="includeConfigs" ref="defaultConfigStore"/>
     <path type="includeConfigs">configs/basicConfigs.xml</path>
     <path type="includeConfigs">configs/workflow.xml</path>
-    <path type="includeConfigs">configs/extra</path>
     
     <!-- datamining sub-package configurations -->
     <path type="includeConfigs">configs/datamining</path>
+
+    <!-- formats sub-package configurations -->
+    <path type="includeConfigs">configs/formats</path>
     
     <!-- graph sub-package configurations -->
     <path type="includeConfigs">configs/graph</path>
