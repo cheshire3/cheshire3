@@ -5,7 +5,7 @@
    <subConfig type="preParser" id="FimiPreParser">
       <objectType>datamining.preParser.Fimi1PreParser</objectType>
       <paths>
-        <path type="filePath">/home/cheshire/cheshire3/code/datamining/apps/fimi</path>
+        <path type="filePath">${cheshire3Root}/datamining/apps/fimi</path>
       </paths>
       <options>
         <setting type="support">0.03</setting>
@@ -15,7 +15,7 @@
    <subConfig type="preParser" id="TfpPreParser">
       <objectType>datamining.preParser.TFPPreParser</objectType>
       <paths>
-        <path type="filePath">/home/cheshire/cheshire3/code/datamining/apps/tfp2</path>
+        <path type="filePath">${cheshire3Root}/datamining/apps/tfp2</path>
         <path type="javaPath">/usr/local/jdk1.6.0_02/bin/java</path>
       </paths>
       <options>
