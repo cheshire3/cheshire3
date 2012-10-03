@@ -1,0 +1,7 @@
+This first available rough draft assembly of the human genome was completed by
+the Genome Bioinformatics Group at the University of California, Santa Cruz,
+primarily led by then graduate student Jim Kent. Ongoing sequencing led to
+the announcement of the essentially complete genome in April 2003, 2 years
+earlier than planned. In May 2006, another milestone was passed on the way to
+completion of the project, when the sequence of the last chromosome was
+published in the journal Nature.

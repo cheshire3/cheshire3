@@ -1,0 +1,5 @@
+A 1971 paper in the Journal of Molecular Biology by Kleppe and co-workers
+first described a method using an enzymatic assay to replicate a short DNA
+template with primers in vitro. However, this early manifestation of the basic
+PCR principle did not receive much attention, and the invention of the
+polymerase chain reaction in 1983 is generally credited to Kary Mullis.
