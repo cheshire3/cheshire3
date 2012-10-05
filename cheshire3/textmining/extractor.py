@@ -1,9 +1,14 @@
 """Cheshire3 Textmining Extractor Implementations."""
 
-import nltk
+from nltk.chunk import ne_chunk
+from nltk.tag import pos_tag
+from nltk.tokenize import (sent_tokenize as tokenize_sentences,
+                           word_tokenize as tokenize_words)
+from nltk.tree import Tree as NLTKParseTree
 
 from cheshire3.extractor import SimpleExtractor
 from cheshire3.exceptions import ConfigFileException
+
 
 
 class NLTKNamedEntityExtractor(SimpleExtractor):
@@ -64,15 +69,15 @@ class NLTKNamedEntityExtractor(SimpleExtractor):
             occs = simpleHash[data]['occurences']
             proxLoc = simpleHash[data]['proxLoc']
             # Tokenize sentences
-            for sent in nltk.tokenize.sent_tokenize(data):
+            for sent in tokenize_sentences(data):
                 # Tokenize words
-                tokens = nltk.tokenize.word_tokenize(sent)
+                tokens = tokenize_words(sent)
                 # Tag words with Parts of Speech
-                tagged = nltk.pos_tag(tokens)
+                tagged = pos_tag(tokens)
                 # Identify named entities
-                entities = nltk.chunk.ne_chunk(tagged)
+                entities = ne_chunk(tagged)
                 for ent in entities:
-                    if isinstance(ent, nltk.tree.Tree):
+                    if isinstance(ent, NLTKParseTree):
                         # Is it a wanted type?
                         if ent.node in self.types:
                             # Should we keep the PoS tag?
