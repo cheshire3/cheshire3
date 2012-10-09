@@ -1,0 +1,18 @@
+The                 DT      O
+funding             NN      O
+for                 IN      O
+Dolly               NNP     B-EVENT
+'s                  POS     I-EVENT
+cloning             NN      I-EVENT
+was                 VBD     O
+provided            VBN     O
+by                  IN      O
+PPL                 NNP     O
+Therapeutics        NNP     O
+and                 CC      O
+the                 DT      O
+Ministry            NNP     O
+of                  IN      O
+Agriculture         NNP     O
+.                   .       O
+
