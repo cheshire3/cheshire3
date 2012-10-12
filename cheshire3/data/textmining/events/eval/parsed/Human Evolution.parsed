@@ -1,0 +1,36 @@
+(TEXT
+  (S
+    In/IN
+    1994/CD
+    Meave/NNP
+    Leakey/NNP
+    discovered/VBD
+    Australopithecus/NNP
+    anamensis/NN
+    ,/,
+    but/CC
+    the/DT
+    find/NN
+    was/VBD
+    overshadowed/VBN
+    by/IN
+    the/DT
+    news/NN
+    of/IN
+    Tim/NNP
+    White/NNP
+    's/POS
+    (EVENT discovery/NN of/IN Ardipithecus/NNP ramidus/NN)
+    ,/,
+    which/WDT
+    pushed/VBD
+    back/RP
+    the/DT
+    fossil/NN
+    record/NN
+    to/TO
+    4.2/CD
+    million/CD
+    years/NNS
+    ago/IN
+    ./.))

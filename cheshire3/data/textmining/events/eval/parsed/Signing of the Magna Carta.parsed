@@ -1,0 +1,34 @@
+(TEXT
+  (S
+    The/DT
+    (EVENT baronial/JJ revolt/NN)
+    at/IN
+    the/DT
+    end/NN
+    of/IN
+    (EVENT King/NNP John/NNP 's/POS reign/NN)
+    led/VBD
+    to/TO
+    the/DT
+    (EVENT signing/NN of/IN the/DT Magna/NNP Carta/NNP)
+    ,/,
+    a/DT
+    document/NN
+    often/RB
+    considered/VBN
+    to/TO
+    be/VB
+    an/DT
+    early/JJ
+    step/NN
+    in/IN
+    the/DT
+    evolution/NN
+    of/IN
+    the/DT
+    constitution/NN
+    of/IN
+    the/DT
+    United/NNP
+    Kingdom/NNP
+    ./.))

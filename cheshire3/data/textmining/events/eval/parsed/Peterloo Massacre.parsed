@@ -1,0 +1,43 @@
+(TEXT
+  (S
+    The/DT
+    (EVENT Peterloo/NNP Massacre/NNP)
+    (/NNP
+    or/CC
+    (EVENT Battle/NNP of/IN Peterloo/NNP)
+    )/NNP
+    occurred/VBD
+    at/IN
+    St/NNP
+    Peter/NNP
+    's/POS
+    Field/NNP
+    ,/,
+    Manchester/NNP
+    ,/,
+    England/NNP
+    ,/,
+    on/IN
+    16/CD
+    August/NNP
+    1819/CD
+    ,/,
+    when/WRB
+    cavalry/NN
+    charged/VBD
+    into/IN
+    a/DT
+    crowd/NN
+    of/IN
+    60,000–80,000/CD
+    that/WDT
+    had/VBD
+    gathered/VBN
+    to/TO
+    demand/NN
+    the/DT
+    reform/NN
+    of/IN
+    parliamentary/JJ
+    representation/NN
+    ./.))

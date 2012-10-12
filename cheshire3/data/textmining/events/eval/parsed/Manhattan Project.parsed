@@ -1,0 +1,29 @@
+(TEXT
+  (S
+    The/DT
+    (EVENT Manhattan/NNP Project/NNP)
+    was/VBD
+    a/DT
+    research/NN
+    and/CC
+    development/NN
+    program/NN
+    by/IN
+    the/DT
+    United/NNP
+    States/NNPS
+    with/IN
+    the/DT
+    United/NNP
+    Kingdom/NNP
+    and/CC
+    Canada/NNP
+    that/IN
+    produced/VBN
+    the/DT
+    first/JJ
+    atomic/JJ
+    bomb/NN
+    during/IN
+    (EVENT World/NNP War/NNP II/NNP)
+    ./.))

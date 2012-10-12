@@ -1,0 +1,27 @@
+(TEXT
+  (S
+    The/DT
+    Ptolemaic/NNP
+    Kingdom/NNP
+    in/IN
+    and/CC
+    around/IN
+    Egypt/NNP
+    began/VBD
+    following/VBG
+    (EVENT Alexander/NNP the/DT Great/NNP 's/POS conquest/JJS)
+    in/IN
+    332/CD
+    BC/NNP
+    and/CC
+    ended/VBD
+    with/IN
+    the/DT
+    (EVENT death/NN of/IN Cleopatra/NNP VII/NNP)
+    and/CC
+    the/DT
+    (EVENT Roman/NNP conquest/NN)
+    in/IN
+    30/CD
+    BC/NNP
+    ./.))

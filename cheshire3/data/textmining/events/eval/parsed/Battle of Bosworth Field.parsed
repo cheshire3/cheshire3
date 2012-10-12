@@ -1,0 +1,44 @@
+(TEXT
+  (S
+    The/DT
+    (EVENT Battle/NNP of/IN Bosworth/NNP Field/NNP)
+    (/NNP
+    or/CC
+    the/DT
+    (EVENT Battle/NNP of/IN Bosworth/NNP)
+    )/NNP
+    was/VBD
+    the/DT
+    last/JJ
+    significant/JJ
+    battle/NN
+    of/IN
+    the/DT
+    (EVENT Wars/NNP of/IN the/DT Roses/NNP)
+    ,/,
+    the/DT
+    civil/NN
+    war/NN
+    between/IN
+    the/DT
+    House/NNP
+    of/IN
+    Lancaster/NNP
+    and/CC
+    the/DT
+    House/NNP
+    of/IN
+    York/NNP
+    that/IN
+    raged/JJ
+    across/NNS
+    England/NNP
+    in/IN
+    the/DT
+    latter/NN
+    half/NN
+    of/IN
+    the/DT
+    15th/JJ
+    century/NN
+    ./.))

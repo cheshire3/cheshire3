@@ -1,0 +1,31 @@
+(TEXT
+  (S
+    (EVENT World/NN War/NN II/NNP)
+    ,/,
+    or/CC
+    the/DT
+    (EVENT Second/NNP World/NNP War/NNP)
+    (/NNP
+    often/RB
+    abbreviated/VBN
+    as/IN
+    (EVENT WWII/NNP)
+    or/CC
+    (EVENT WW2/NNP)
+    )/:
+    ,/,
+    was/VBD
+    a/DT
+    global/JJ
+    war/NN
+    that/WDT
+    was/VBD
+    under/IN
+    way/NN
+    by/IN
+    1939/CD
+    and/CC
+    ended/VBD
+    in/IN
+    1945/CD
+    ./.))

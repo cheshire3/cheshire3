@@ -1,0 +1,22 @@
+(TEXT
+  (S
+    The/DT
+    (EVENT Punic/NNP Wars/NNP)
+    were/VBD
+    a/DT
+    series/NN
+    of/IN
+    three/CD
+    wars/NNS
+    fought/VBD
+    between/IN
+    Rome/NNP
+    and/CC
+    Carthage/NNP
+    from/IN
+    264/CD
+    BC/NNP
+    to/TO
+    146/CD
+    BC/NNP
+    ./.))
