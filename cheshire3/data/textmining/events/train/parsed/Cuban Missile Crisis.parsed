@@ -1,0 +1,50 @@
+(TEXT
+  (S
+    The/DT
+    (EVENT Cuban/NNP missile/NN crisis/NN)
+    -/:
+    known/VBN
+    as/IN
+    the/DT
+    (EVENT October/NNP crisis/NN)
+    in/IN
+    Cuba/NNP
+    and/CC
+    the/DT
+    (EVENT Caribbean/NNP crisis/NN)
+    in/IN
+    the/DT
+    USSR/NNP
+    -/:
+    was/VBD
+    a/DT
+    13-day/JJ
+    confrontation/NN
+    between/IN
+    the/DT
+    Soviet/NNP
+    Union/NNP
+    and/CC
+    Cuba/NNP
+    on/IN
+    one/CD
+    side/NN
+    and/CC
+    the/DT
+    United/NNP
+    States/NNPS
+    on/IN
+    the/DT
+    other/JJ
+    ;/:
+    the/DT
+    crisis/NN
+    occurred/VBD
+    in/IN
+    October/NNP
+    1962/CD
+    ,/,
+    during/IN
+    the/DT
+    (EVENT Cold/NNP War/NNP)
+    ./.))

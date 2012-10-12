@@ -1,0 +1,45 @@
+(TEXT
+  (S
+    The/DT
+    (EVENT ancient/JJ Olympic/NNP Games/NNP)
+    were/VBD
+    a/DT
+    series/NN
+    of/IN
+    athletic/JJ
+    competitions/NNS
+    among/IN
+    representatives/NNS
+    of/IN
+    various/JJ
+    city-states/NNS
+    of/IN
+    Ancient/NNP
+    Greece/NNP
+    ./.)
+  (S
+    During/IN
+    the/DT
+    celebration/NN
+    of/IN
+    the/DT
+    games/NNS
+    ,/,
+    an/DT
+    (EVENT Olympic/NNP Truce/NNP)
+    was/VBD
+    enacted/VBN
+    so/RB
+    that/IN
+    athletes/NNS
+    could/MD
+    travel/VB
+    from/IN
+    their/PRP$
+    countries/NNS
+    to/TO
+    the/DT
+    games/NNS
+    in/IN
+    safety/NN
+    ./.))

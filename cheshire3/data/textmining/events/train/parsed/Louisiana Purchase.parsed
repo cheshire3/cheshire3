@@ -1,0 +1,41 @@
+(TEXT
+  (S
+    The/DT
+    (EVENT Louisiana/NNP Purchase/NNP)
+    (/NNP
+    French/NNP
+    :/:
+    (EVENT Vente/NNP de/IN la/DT Louisiane/NNP)
+    ``/``
+    (EVENT Sale/NNP of/IN Louisiana/NNP)
+    ''/''
+    )/:
+    was/VBD
+    the/DT
+    acquisition/NN
+    by/IN
+    the/DT
+    United/NNP
+    States/NNPS
+    of/IN
+    America/NNP
+    in/IN
+    1803/CD
+    of/IN
+    828,000/CD
+    square/JJ
+    miles/NNS
+    (/:
+    2,140,000/CD
+    km2/NNP
+    )/NNP
+    of/IN
+    France/NNP
+    's/POS
+    claim/NN
+    to/TO
+    the/DT
+    territory/NN
+    of/IN
+    Louisiana/NNP
+    ./.))

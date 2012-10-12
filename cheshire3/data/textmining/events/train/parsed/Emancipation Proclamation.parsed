@@ -1,0 +1,29 @@
+(TEXT
+  (S
+    The/DT
+    (EVENT Emancipation/NNP Proclamation/NNP)
+    is/VBZ
+    an/DT
+    executive/NN
+    order/NN
+    issued/VBD
+    by/IN
+    United/NNP
+    States/NNPS
+    President/NNP
+    Abraham/NNP
+    Lincoln/NNP
+    on/IN
+    January/NNP
+    1/CD
+    ,/,
+    1863/CD
+    ,/,
+    during/IN
+    the/DT
+    (EVENT American/JJ Civil/NNP War/NNP)
+    using/VBG
+    his/PRP$
+    war/NN
+    powers/NNS
+    ./.))

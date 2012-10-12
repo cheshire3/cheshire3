@@ -1,0 +1,38 @@
+(TEXT
+  (S
+    The/DT
+    (EVENT Battle/NNP of/IN Thermopylae/NNP)
+    was/VBD
+    fought/VBN
+    between/IN
+    an/DT
+    alliance/NN
+    of/IN
+    Greek/NNP
+    city-states/NNP
+    ,/,
+    led/VBD
+    by/IN
+    King/NNP
+    Leonidas/NNP
+    of/IN
+    Sparta/NNP
+    ,/,
+    and/CC
+    the/DT
+    Persian/NNP
+    Empire/NNP
+    of/IN
+    Xerxes/NNP
+    I/NNP
+    over/IN
+    the/DT
+    course/NN
+    of/IN
+    three/CD
+    days/NNS
+    ,/,
+    during/IN
+    the/DT
+    (EVENT second/JJ Persian/NNP invasion/NN of/IN Greece/NNP)
+    ./.))

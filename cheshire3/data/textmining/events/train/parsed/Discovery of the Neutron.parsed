@@ -1,0 +1,28 @@
+(TEXT
+  (S
+    For/IN
+    (EVENT Chadwick/NNP 's/POS discovery/NN of/IN the/DT neutron/NN)
+    in/IN
+    1932/CD
+    ,/,
+    he/PRP
+    was/VBD
+    awarded/VBN
+    the/DT
+    Hughes/NNP
+    Medal/NNP
+    of/IN
+    the/DT
+    Royal/NNP
+    Society/NNP
+    in/IN
+    1932/CD
+    and/CC
+    the/DT
+    Nobel/NNP
+    Prize/NNP
+    in/IN
+    Physics/NNP
+    in/IN
+    1935/CD
+    ./.))

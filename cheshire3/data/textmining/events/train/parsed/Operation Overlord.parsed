@@ -1,0 +1,48 @@
+(TEXT
+  (S
+    (EVENT Operation/NN Overlord/NNP)
+    was/VBD
+    the/DT
+    code/NN
+    name/NN
+    for/IN
+    the/DT
+    (EVENT Battle/NNP of/IN Normandy/NNP)
+    ,/,
+    the/DT
+    operation/NN
+    that/IN
+    launched/JJ
+    the/DT
+    (EVENT
+      invasion/NN
+      of/IN
+      German-occupied/JJ
+      western/NN
+      Europe/NNP)
+    during/IN
+    (EVENT World/NNP War/NNP II/NNP)
+    by/IN
+    Allied/NNP
+    forces/NNS
+    ./.)
+  (S
+    The/DT
+    operation/NN
+    commenced/VBD
+    on/IN
+    6/CD
+    June/NNP
+    1944/CD
+    with/IN
+    the/DT
+    (EVENT Normandy/NNP landings/NNS)
+    (/:
+    (EVENT Operation/NNP Neptune/NNP)
+    ,/,
+    commonly/RB
+    known/VBN
+    as/IN
+    (EVENT D-Day/JJ)
+    )/NN
+    ./.))

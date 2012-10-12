@@ -1,0 +1,36 @@
+(TEXT
+  (S
+    The/DT
+    (EVENT American/NNP Civil/NNP War/NNP)
+    (/NNP
+    1861–1865/CD
+    )/CD
+    ,/,
+    in/IN
+    the/DT
+    United/NNP
+    States/NNPS
+    often/RB
+    referred/VBN
+    to/TO
+    as/RB
+    simply/RB
+    the/DT
+    (EVENT Civil/NNP War/NNP)
+    and/CC
+    sometimes/RB
+    called/VBN
+    the/DT
+    ``/``
+    (EVENT War/NNP Between/NNP the/DT States/NNPS)
+    ''/''
+    ,/,
+    was/VBD
+    a/DT
+    civil/JJ
+    war/NN
+    fought/NN
+    over/IN
+    the/DT
+    (EVENT secession/NN of/IN the/DT Confederate/NNP States/NNPS)
+    ./.))

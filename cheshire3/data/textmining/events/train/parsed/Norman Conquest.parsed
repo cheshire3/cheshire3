@@ -1,0 +1,32 @@
+(TEXT
+  (S
+    The/DT
+    (EVENT Battle/NNP of/IN Hastings/NNP)
+    occurred/VBD
+    on/IN
+    14/CD
+    October/NNP
+    1066/CD
+    during/IN
+    the/DT
+    (EVENT Norman/NNP conquest/JJS of/IN England/NNP)
+    ,/,
+    between/IN
+    the/DT
+    Norman-French/JJ
+    army/NN
+    of/IN
+    Duke/NNP
+    William/NNP
+    II/NNP
+    of/IN
+    Normandy/NNP
+    and/CC
+    the/DT
+    English/NNP
+    army/NN
+    under/IN
+    King/NNP
+    Harold/NNP
+    II/NNP
+    ./.))

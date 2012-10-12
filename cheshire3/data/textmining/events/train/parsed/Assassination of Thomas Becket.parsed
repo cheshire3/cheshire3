@@ -1,0 +1,37 @@
+(TEXT
+  (S
+    A/DT
+    pivotal/JJ
+    moment/NN
+    in/IN
+    the/DT
+    history/NN
+    of/IN
+    Canterbury/NNP
+    Cathedral/NNP
+    was/VBD
+    the/DT
+    (EVENT murder/NN of/IN Thomas/NNP Becket/NNP)
+    in/IN
+    the/DT
+    north-west/JJ
+    transept/NN
+    (/:
+    also/RB
+    known/VBN
+    as/IN
+    the/DT
+    (EVENT Martyrdom/NNP of/IN Thomas/NNP Becket/NNP)
+    )/NNP
+    on/IN
+    Tuesday/NNP
+    29/CD
+    December/NNP
+    1170/CD
+    by/IN
+    knights/NNS
+    of/IN
+    King/NNP
+    Henry/NNP
+    II/NNP
+    ./.))

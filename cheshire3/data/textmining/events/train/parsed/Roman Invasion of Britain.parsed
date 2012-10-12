@@ -1,0 +1,64 @@
+(TEXT
+  (S
+    Claudius/NNP
+    also/RB
+    proceeded/VBD
+    with/IN
+    the/DT
+    (EVENT conquest/JJS and/CC colonisation/NN of/IN Britain/NNP)
+    (/NNP
+    in/IN
+    43/CD
+    )/CD
+    ,/,
+    and/CC
+    incorporated/VBD
+    more/RBR
+    Eastern/NNP
+    provinces/NNS
+    into/IN
+    the/DT
+    empire/NN
+    ./.)
+  (S
+    After/IN
+    preliminary/JJ
+    low-scale/JJ
+    invasions/NNS
+    of/IN
+    Britain/NNP
+    ,/,
+    the/DT
+    Romans/NNPS
+    invaded/VBD
+    Britain/NNP
+    in/IN
+    force/NN
+    in/IN
+    43/CD
+    AD/NNP
+    ,/,
+    forcing/JJ
+    their/PRP$
+    way/NN
+    inland/NN
+    through/IN
+    several/JJ
+    battles/NNS
+    against/IN
+    British/JJ
+    tribes/NNS
+    ,/,
+    including/VBG
+    the/DT
+    (EVENT Battle/NNP of/IN the/DT Medway/NNP)
+    ,/,
+    the/DT
+    (EVENT Battle/NNP of/IN the/DT Thames/NNP)
+    ,/,
+    the/DT
+    (EVENT Battle/NNP of/IN Caer/NNP Caradoc/NNP)
+    and/CC
+    the/DT
+    (EVENT Battle/NNP of/IN Mona/NNP)
+    ./.))

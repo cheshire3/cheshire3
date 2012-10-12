@@ -1,0 +1,44 @@
+(TEXT
+  (S
+    The/DT
+    (EVENT Gunpowder/NNP Plot/NNP of/IN 1605/CD)
+    ,/,
+    in/IN
+    earlier/JJR
+    centuries/NNS
+    often/RB
+    called/VBN
+    the/DT
+    (EVENT Gunpowder/NNP Treason/NNP Plot/NNP)
+    or/CC
+    the/DT
+    (EVENT Jesuit/NNP Treason/NNP)
+    ,/,
+    was/VBD
+    a/DT
+    failed/VBN
+    (EVENT
+      assassination/NN
+      attempt/NN
+      against/IN
+      King/NNP
+      James/NNP
+      I/NNP
+      of/IN
+      England/NNP)
+    and/CC
+    VI/NNP
+    of/IN
+    Scotland/NNP
+    by/IN
+    a/DT
+    group/NN
+    of/IN
+    provincial/JJ
+    English/JJ
+    Catholics/NNS
+    led/VBN
+    by/IN
+    Robert/NNP
+    Catesby/NNP
+    ./.))

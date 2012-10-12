@@ -1,0 +1,24 @@
+(TEXT
+  (S
+    The/DT
+    United/NNP
+    States/NNPS
+    's/POS
+    Apollo/NNP
+    11/CD
+    was/VBD
+    the/DT
+    (EVENT
+      first/JJ
+      manned/VBN
+      mission/NN
+      to/TO
+      land/VB
+      on/IN
+      the/DT
+      Moon/NNP)
+    on/IN
+    20/CD
+    July/NNP
+    1969/CD
+    ./.))

@@ -1,0 +1,33 @@
+(TEXT
+  (S
+    The/DT
+    (EVENT Peasants/NNS '/POS Revolt/NNP)
+    ,/,
+    (EVENT Wat/NNP Tyler/NNP 's/POS Rebellion/NNP)
+    ,/,
+    or/CC
+    the/DT
+    (EVENT Great/NNP Rising/NNP of/IN 1381/CD)
+    was/VBD
+    one/CD
+    of/IN
+    a/DT
+    number/NN
+    of/IN
+    popular/JJ
+    revolts/NNS
+    in/IN
+    late/JJ
+    medieval/NN
+    Europe/NNP
+    and/CC
+    is/VBZ
+    a/DT
+    major/JJ
+    event/NN
+    in/IN
+    the/DT
+    history/NN
+    of/IN
+    England/NNP
+    ./.))

@@ -1,0 +1,31 @@
+(TEXT
+  (S
+    The/DT
+    (EVENT Cretaceous–Paleogene/JJ extinction/NN event/NN)
+    ,/,
+    often/RB
+    referred/VBD
+    to/TO
+    as/IN
+    the/DT
+    (EVENT Cretaceous–Tertiary/JJ extinction/NN event/NN)
+    ,/,
+    occurred/VBD
+    approximately/RB
+    65.5/CD
+    million/CD
+    years/NNS
+    ago/IN
+    (/CD
+    Ma/NNP
+    )/NNP
+    at/IN
+    the/DT
+    end/NN
+    of/IN
+    the/DT
+    (EVENT Maastrichtian/NNP age/NN)
+    of/IN
+    the/DT
+    (EVENT Cretaceous/NNP period/NN)
+    ./.))

@@ -1,0 +1,35 @@
+(TEXT
+  (S
+    The/DT
+    (EVENT Battle/NNP of/IN the/DT Allia/NNP)
+    was/VBD
+    a/DT
+    battle/NN
+    of/IN
+    the/DT
+    (EVENT first/JJ Gallic/NNP invasion/NN of/IN Rome/NNP)
+    ./.)
+  (S
+    The/DT
+    battle/NN
+    was/VBD
+    fought/VBN
+    near/JJ
+    the/DT
+    Allia/NNP
+    river/NN
+    :/:
+    the/DT
+    (EVENT defeat/NN of/IN the/DT Roman/JJ army/NN)
+    opened/VBD
+    the/DT
+    route/NN
+    for/IN
+    the/DT
+    Gauls/NNPS
+    to/TO
+    carry/VB
+    out/RP
+    the/DT
+    (EVENT first/JJ Sack/NNP of/IN Rome/NNP)
+    ./.))
