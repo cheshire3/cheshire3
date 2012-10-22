@@ -1,3 +1,4 @@
+"""Cheshire3 wrappers for Lucene vector space model."""
 
 __all__ = ['normalizer', 'tokenizer', 'workflow', 'wrapper', 'indexStore']
 
