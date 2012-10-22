@@ -1,3 +1,8 @@
+"""Cheshire3 support for the data grid.
+
+Data grid (SRB and iRODS) support for Cheshire3 XML Search, Retrieval and
+Information Analysis Engine.
+"""
 
 __all__ = ['mpiProtocolHandler', 'pvmProtocolHandler', 'documentFactory', 'irodsStore', 'irods_utils', 'user', 'srbDocStream', 'srbErrors', 'srbIndex', 'srbStore']
 
