@@ -164,7 +164,7 @@ Requirements / Dependencies
 Cheshire3 requires Python_ 2.6.0 or later. It has not yet been verified
 as Python 3 compliant.
 
-As of the version 1.0 release Cheshire3's core dependencies *should* be
+As of the version 1.0 release Cheshire3's python dependencies *should* be
 resolved automatically by the standard Python package management
 mechanisms (e.g. pip_, `easy_install`_, distribute_/setuptools_).
 
@@ -884,7 +884,7 @@ index!
 .. _`University of Liverpool`: http://www.liv.ac.uk
 .. _`Cheshire3 Information Framework`: http://cheshire3.org
 .. _`Cheshire3 Object Model`: http://cheshire3.org/docs/objects/
-.. _`Cheshire3 download site`: http://www.cheshire3.org/download/
+.. _`Cheshire3 download site`: http://download.cheshire3.org/
 .. _API: http://cheshire3.org/docs/objects/api/
 .. _`Cheshire3 GitHub repository`: http://github.com/cheshire3/cheshire3
 .. _`GitHub issue tracker`: http://github.com/cheshire3/cheshire3/issues
