@@ -185,8 +185,8 @@ Additional / Optional Features
 
 Certain features within the `Cheshire3 Information Framework`_ will have
 additional dependencies (e.g. web APIs will require a web application
-server). We'll try to maintain an accurate list of these in the README
-file for each sub-package.
+server). We'll try to maintain an accurate list of these in the module
+docstring of the ``__init__.py`` file in each sub-package.
 
 The bundles available from the `Cheshire3 download site`_ should
 continue to be a useful place to get hold of the source code for these
