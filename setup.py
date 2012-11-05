@@ -71,7 +71,7 @@ setup(
         'lucene': ['lucene'],
         'sql': ['PyGreSQL >= 3.8.1'],
         'textmining': ['numpy', 'nltk >= 2.0'],
-        'web': ['PyZ3950 >= 2.04']
+        'web': ['pyoai', 'PyZ3950 >= 2.04', 'ZSI < 2.0']
     },
     test_suite="cheshire3.test.testAll",
     scripts=['scripts/DocumentConverter.py'],
