@@ -2,6 +2,7 @@
 from cheshire3.configParser import C3Object
 from cheshire3.baseObjects import Transformer
 from cheshire3.document import StringDocument
+from cheshire3.internal import CONFIG_NS
 from cheshire3.utils import elementType, flattenTexts
 
 from PyZ3950 import z3950, grs1
