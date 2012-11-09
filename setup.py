@@ -20,7 +20,8 @@ if py_version < (2, 6):
 
 # Basic information
 _name = 'cheshire3'
-_version = '1.0.3'
+_version = (1, 0)
+_patch_version = (4,) 
 _description = ('Cheshire3 Search and Retrieval Engine and Information '
                 'Framework')
 _download_url = ('http://www.cheshire3.org/download/{0}/src/{1}-{2}.tar.gz'
@@ -53,7 +54,7 @@ if py_version < (2, 7):
 
 setup(
     name=_name,
-    version=_version,
+    version='.'.join(map(str, _version + _patch_version)),
     packages=[_name],
     include_package_data=True,
     package_data={'cheshire3': ['configs/*.xml', 'configs/extra/*.xml']},
