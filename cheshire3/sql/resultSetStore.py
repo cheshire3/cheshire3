@@ -4,6 +4,7 @@ import pg
 import time
 
 from cheshire3 import dynamic
+from cheshire3.exceptions import *
 from cheshire3.resultSetStore import SimpleResultSetStore
 from cheshire3.sql.postgresStore import PostgresIter, PostgresStore
 
