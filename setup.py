@@ -24,7 +24,7 @@ _name = 'cheshire3'
 _version = '.'.join(map(str, cheshire3Version))
 _description = ('Cheshire3 Search and Retrieval Engine and Information '
                 'Framework')
-_download_url = ('http://www.cheshire3.org/download/{0}/src/{1}-{2}.tar.gz'
+_download_url = ('http://download.cheshire3.org/{0}/src/{1}-{2}.tar.gz'
                  ''.format(_version[:3], _name, _version))
 
 # More detailed description from README
