@@ -10,6 +10,7 @@ from warnings import warn
 import distribute_setup
 distribute_setup.use_setuptools()
 from setuptools import setup, find_packages
+from cheshire3.internal import cheshire3Version
 
 # Check Python version
 py_version = getattr(sys, 'version_info', (0, 0, 0))
@@ -20,8 +21,7 @@ if py_version < (2, 6):
 
 # Basic information
 _name = 'cheshire3'
-_version = (1, 1)
-_patch_version = (0,) 
+_version = '.'.join(map(str, cheshire3Version))
 _description = ('Cheshire3 Search and Retrieval Engine and Information '
                 'Framework')
 _download_url = ('http://www.cheshire3.org/download/{0}/src/{1}-{2}.tar.gz'
@@ -55,7 +55,7 @@ if py_version < (2, 7):
 
 setup(
     name=_name,
-    version='.'.join(map(str, _version + _patch_version)),
+    version=_version,
     packages=[_name],
     include_package_data=True,
     package_data={'cheshire3': ['configs/*.xml', 'configs/extra/*.xml']},

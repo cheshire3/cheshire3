@@ -3,7 +3,7 @@ import os
 import inspect
 
 from setuptools import find_packages
-from pkg_resources import Requirement, resource_filename
+from pkg_resources import Requirement, resource_filename, get_distribution
 
 import cheshire3
 
@@ -27,7 +27,12 @@ modules = ['database', 'documentFactory', 'documentStore', 'extractor',
            'datamining.dmPreParser', 'datamining.dmTransformer',
            'grid.srbIndex', 'grid.srbStore']
 
-cheshire3Version = (1, 0, 0)
+_major_version = 1
+_minor_version = 1
+_patch_version = 0
+
+cheshire3Version = (_major_version, _minor_version, _patch_version)
+cheshireVersion = cheshire3Version   # Included for backward compatibility
 
 # Find Cheshire3 environment
 cheshire3Home = os.environ.get(
