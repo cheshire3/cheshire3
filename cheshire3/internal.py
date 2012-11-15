@@ -29,7 +29,7 @@ modules = ['database', 'documentFactory', 'documentStore', 'extractor',
 
 _major_version = 1
 _minor_version = 0
-_patch_version = 5
+_patch_version = 6
 
 cheshire3Version = (_major_version, _minor_version, _patch_version)
 cheshireVersion = cheshire3Version   # Included for backward compatibility
