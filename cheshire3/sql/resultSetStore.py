@@ -91,7 +91,7 @@ class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
 
         # Serialise and store
         srlz = rset.serialize(session)
-        cl = str(rset.__class__)
+        cl = '.'.join((rset.__class__.__module__, rset.__class__.__name__))
         data = srlz.replace('\x00', '\\\\000')
         try:
             ndata = pg.escape_bytea(data)
