@@ -149,13 +149,28 @@ several choices:
 
 **Developers**:
 
+We recommend that you use virtualenv_ to isolate your development environment
+from system Python and any packages that may be installed there.
+
 1. In GitHub_, fork the `Cheshire3 GitHub repository`_
 
-2. Locally clone your Cheshire3 GitHub fork
+2. Clone your fork of Cheshire3:
 
-3. Run ``python setup.py develop``
+	``git clone git@github.com:<username>/cheshire3.git``
 
-4. Read the Development section of this README
+3. Install dependencies[*]:
+
+	``pip install -r requirements.txt``
+
+4. Install Cheshire3 in develop / editable mode:
+
+    ``pip install -e .``
+
+5. Read the Development section of this README
+
+.. [*] While step 4 should theoretically resolve dependencies, we've found it
+	   more reliable to run this explicitly.
+
 
 
 Requirements / Dependencies
@@ -900,3 +915,4 @@ index!
 .. _SRU: http://www.loc.gov/standards/sru/
 .. _CQL: http://www.loc.gov/standards/sru/specs/cql.html
 .. _OAI: http://www.openarchives.org/pmh/
+.. _virtualenv: http://www.virtualenv.org/en/latest/
