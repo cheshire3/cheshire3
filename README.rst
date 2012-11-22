@@ -136,11 +136,11 @@ several choices:
 
   2. Unpack it:
 
-     ``tar -xzf cheshire3-1.0.7.tar.gz``
+     ``tar -xzf cheshire3-1.0.8.tar.gz``
 
   3. Go into the unpacked directory:
 
-     ``cd cheshire3-1.0.7``
+     ``cd cheshire3-1.0.8``
 
   4. Install:
 
