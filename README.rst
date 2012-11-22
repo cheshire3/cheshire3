@@ -1,7 +1,7 @@
 Cheshire3
 =========
 
-6th September 2012 (2012-09-06)
+22nd November 2012 (2012-11-22)
 
 Contents
 --------
@@ -136,11 +136,11 @@ several choices:
 
   2. Unpack it:
 
-     ``tar -xzf cheshire3-1.0.0.tar.gz``
+     ``tar -xzf cheshire3-1.0.8.tar.gz``
 
   3. Go into the unpacked directory:
 
-     ``cd cheshire3-1.0.0``
+     ``cd cheshire3-1.0.8``
 
   4. Install:
 
