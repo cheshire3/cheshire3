@@ -79,7 +79,7 @@ setup(
     entry_points={
         'console_scripts': [
             'cheshire3 = cheshire3.commands.cheshire3_console:main',
-            'cheshire3-init = cheshire3.commands.cheshire3_init:main',
+            'cheshire3-init = cheshire3.commands.init:main',
             'cheshire3-load = cheshire3.commands.cheshire3_load:main',
             'cheshire3-register = cheshire3.commands.cheshire3_register:main',
             'cheshire3-search = cheshire3.commands.cheshire3_search:main',
