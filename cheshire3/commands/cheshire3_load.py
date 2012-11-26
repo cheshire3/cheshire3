@@ -40,11 +40,13 @@ Please provide a different database identifier using the --database option.
         server.log_critical(session, msg)
         return 2
     else:
+        # Allow for multiple data arguments
         docFac = db.get_object(session, 'defaultDocumentFactory')
-        docFac.load(session, args.data, 
-                    args.cache, args.format, args.tagname, args.codec)
-        wf = db.get_object(session, 'buildIndexWorkflow')
-        wf.process(session, docFac)
+        for dataArg in args.data:
+            docFac.load(session, dataArg,
+                        args.cache, args.format, args.tagname, args.codec)
+            wf = db.get_object(session, 'buildIndexWorkflow')
+            wf.process(session, docFac)
 
 
 argparser = Cheshire3ArgumentParser(conflict_handler='resolve',
@@ -53,7 +55,7 @@ argparser.add_argument('-d', '--database', type=str,
                        action='store', dest='database',
                        default=None, metavar='DATABASE',
                        help="identifier of Cheshire3 database")
-argparser.add_argument('data', type=str, action='store',
+argparser.add_argument('data', type=str, action='store', nargs='+',
                        help="data to load into the Cheshire3 database.")
 argparser.add_argument('-l', '--cache-level', type=int, 
                    action='store', dest='cache',
