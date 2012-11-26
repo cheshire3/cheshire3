@@ -81,7 +81,7 @@ setup(
             'cheshire3 = cheshire3.commands.console:main',
             'cheshire3-init = cheshire3.commands.init:main',
             'cheshire3-load = cheshire3.commands.load:main',
-            'cheshire3-register = cheshire3.commands.cheshire3_register:main',
+            'cheshire3-register = cheshire3.commands.register:main',
             'cheshire3-search = cheshire3.commands.search:main',
             'cheshire3-serve = cheshire3.commands.cheshire3_serve:main'
         ],
