@@ -231,6 +231,10 @@ def create_defaultConfigIndexes():
                                   'ref': "RegexpFindTokenizer"}),
                         E.object({'type': "tokenMerger",
                                   'ref': "SimpleTokenMerger"}),
+                        E.object({'type': "normalizer",
+                                  'ref': "DiacriticNormalizer"}),
+                        E.object({'type': "normalizer",
+                                  'ref': "CaseNormalizer"}),
                     ),
                 ),
                 # Source when processing all, any, = queries
