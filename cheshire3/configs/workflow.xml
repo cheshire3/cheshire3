@@ -28,12 +28,18 @@
         </try>
         <except>
           <log level="error">Unparsable Record</log>
-          <raise/>
         </except>
-        <object type="recordStore" function="create_record"/>
-        <object type="database" function="add_record"/>
-        <object type="database" function="index_record"/>
-        <log level="info">Loaded Record</log>
+        <else>
+        	<try>
+	        	<object type="recordStore" function="create_record"/>
+		        <object type="database" function="add_record"/>
+		        <object type="database" function="index_record"/>
+		        <log level="info">Loaded Record</log>
+	        </try>
+	        <except>
+	        	<log level="error">"Record not loaded " + str(err)</log>
+	        </except>
+        </else>
       </workflow>
     </subConfig>
 
