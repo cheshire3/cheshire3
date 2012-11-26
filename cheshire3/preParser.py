@@ -334,7 +334,6 @@ class MagicRedirectPreParser(TypedPreParser):
                 if mts and mts[0]:
                     mt = mts[0]
         if mt in self.mimeTypeHash:
-            db = session.server.get_object(session, session.database)
             redirect = db.get_object(session, self.mimeTypeHash[mt])
             if isinstance(redirect, PreParser):
                 return redirect.process_document(session, doc)
