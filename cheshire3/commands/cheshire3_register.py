@@ -12,16 +12,8 @@ from __future__ import with_statement
 import sys
 import os
 
-from lxml import etree
-from lxml.builder import ElementMaker
-
 from cheshire3.server import SimpleServer
 from cheshire3.session import Session
-from cheshire3.internal import cheshire3Root, CONFIG_NS
-from cheshire3.bootstrap import BSLxmlParser, BootstrapDocument
-from cheshire3.exceptions import ObjectDoesNotExistException
-from cheshire3.exceptions import ConfigFileException
-from cheshire3.exceptions import PermissionException
 from cheshire3.commands.cmd_utils import Cheshire3ArgumentParser
 
 
@@ -51,9 +43,6 @@ argparser.add_argument('configfile', type=str,
                        help=("path to configuration file for the database to "
                              "register with the Cheshire3 server. Default: "
                              "config.xml"))
-
-# Set up ElementMaker for Cheshire3 config namespace
-E = ElementMaker(namespace=CONFIG_NS, nsmap={None: CONFIG_NS})
 
 session = None
 server = None
