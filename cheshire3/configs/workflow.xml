@@ -41,7 +41,7 @@
       <objectType>cheshire3.workflow.SimpleWorkflow</objectType>
       <workflow>
         <!-- input type: document -->
-        <object type="parser" ref="SgmlPreParser"/>
+        <object type="parser" ref="MagicRedirectPreParser"/>
       </workflow>
     </subConfig>
   </subConfigs>
