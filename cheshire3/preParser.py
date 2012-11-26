@@ -322,6 +322,7 @@ class MagicRedirectPreParser(TypedPreParser):
 
     def process_document(self, session, doc):
         mt = doc.mimeType
+        # Need Database from which to fetch potentially custom PreParsers
         db = session.server.get_object(session, session.database)
         if not mt:
             # Nasty kludge - use FileUtilPreParser to determine MIME type
@@ -338,10 +339,11 @@ class MagicRedirectPreParser(TypedPreParser):
             if isinstance(redirect, PreParser):
                 return redirect.process_document(session, doc)
             else:
-                # Only other thing is workflow
+                # Only other thing it could legitimately be is workflow
                 return redirect.process(session, doc)
         else:
-            # XXX: Should we return or raise?
+            # Return unaltered Document
+            # It may be that it is already the desired mime-type (e.g. XML)
             return doc
 
 
