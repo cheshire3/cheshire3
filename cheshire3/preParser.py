@@ -309,15 +309,23 @@ class MagicRedirectPreParser(TypedPreParser):
                     self.mimeTypeHash[mt] = ref
 
     def __init__(self, session, config, parent):
-        self.mimeTypeHash = {"application/x-gzip": "GunzipPreParser",
-                             "application/postscript": "PsPdfPreParser",
-                             "application/pdf": "PdfXmlPreParser",
-                             "text/html": "HtmlSmashPreParser",
-                             "text/plain": "TxtToXmlPreParser",
-                             "text/sgml": "SgmlPreParser",
-                             "application/x-bzip2": "BzipPreParser"
-                             # "application/x-zip": "single zip preparser ?"
-                             }
+        self.mimeTypeHash = {
+            "application/x-gzip": "GunzipPreParser",
+            "application/postscript": "PsPdfPreParser",
+            "application/pdf": "PdfXmlPreParser",
+            "text/html": "HtmlSmashPreParser",
+            "text/plain": "TxtToXmlPreParser",
+            "text/sgml": "SgmlPreParser",
+            "application/x-bzip2": "BzipPreParser",
+            "application/zip": "ZIPToMETSPreParser",
+            ("application/vnd.openxmlformats-officedocument."
+             "wordprocessingml.document"): "ZIPToMETSPreParser",    # Word
+            ("application/vnd.openxmlformats-officedocument."
+             "presentationml.presentation"): "ZIPToMETSPreParser",  # PPT
+            ("application/vnd.openxmlformats-officedocument."
+             "spreadsheetml.sheet"): "ZIPToMETSPreParser"           # Excel
+            # "application/x-zip": "single zip preparser ?"
+        }
 
         # Now override from config in init:
         TypedPreParser.__init__(self, session, config, parent)
