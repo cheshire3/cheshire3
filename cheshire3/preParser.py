@@ -1050,17 +1050,8 @@ class DataChecksumPreParser(PreParser):
         return doc
 
 
-class ZIPToMETSPreParser(TypedPreParser):
-    """PreParser to process a ZIP file to METS XML.
-    
-    As Office Open XML format Documents are based on ZIP files, this PreParser
-    can also be used to unpack them, and wrap their component parts in METS.
-
-    Office Open XML (a.k.a. OpenXML, OOXML) is the name for ECMA 376 office
-    file formats used by default in Microsoft Office 2007 onwards (.docx,
-    .xlsx , .pptx etc.) It is available as an import/export format in
-    LibreOffice, OpenOffice >= 3.2, Google Docs and more.
-    """
+class METSWrappingPreParser(TypedPreParser):
+    """PreParser to wrap any Document content in METS XML."""
     
     def __init__(self, session, config, parent):
         TypedPreParser.__init__(self, session, config, parent)
@@ -1068,24 +1059,14 @@ class ZIPToMETSPreParser(TypedPreParser):
         if not self.outMimeType:
             self.outMimeType = 'application/xml'
 
-    def process_document(self, session, doc):
+    def _get_metsWrapper(self, doc):
+        # Get a generic METS wrapper for the given Document
         # Find/Generate identifiers and labels
         objid = gen_uuid()
-        if doc.filename:
-            label = doc.filename
-        elif doc.id:
-            label = doc.id
-        # Create a METS dmdSec
-        dmdSec = METS.dmdSec()
-        # Create a METS amdSec
-        amdSec = METS.amdSec()
-        # Create a METS fileSec
-        fileSec = METS.fileSec()
         # Set up METS root and header
         mets = METS.mets(
             {'ID': '/'.join([objid, 'mets']),
              'OBJID': objid,
-             'LABEL': label,
              'TYPE': 'ZIPFILE'
              },
             METS.metsHdr(
@@ -1104,45 +1085,120 @@ class ZIPToMETSPreParser(TypedPreParser):
                     )
                 )
             ),
-            dmdSec,
-            amdSec,
-            fileSec
+            METS.dmdSec(),
+            METS.amdSec(),
+            METS.fileSec(
+                METS.fileGrp({'ID': '/'.join([objid, 'fileGrp', '0001'])})
+            )
         )
-        # Create a single METS fileGrp element to represent the ZIP file
-        fileGrp = METS.fileGrp({'ID': '/'.join([objid, 'fileGrp', '0001'])})
-        fileSec.append(fileGrp)
+        # Set a human readable label if possible
+        if doc.filename:
+            mets.set("LABEL", doc.filename)
+        elif doc.id:
+            mets.set("LABEL", doc.id)
+        return mets
+
+    def _get_metsFile(self, identifier, rawdata, size=0, mimeType=""):
+        # Get a METS file element for the given data
+        file_ = METS.file({'ID': identifier,
+                           }
+        )
+        # Create a METS FContent element
+        FContent = METS.FContent()
+        file_.append(FContent)
+        # Try to set size
+        if size:
+            file_.attrib["SIZE"] = str(size)
+        else:
+            file_.attrib["SIZE"] = str(len(rawdata))
+        # Attempt to add the MIME-Type
+        if mimeType == "text/xml":
+            # Fix broken MIME-Type
+            file_.attrib['MIMETYPE'] = 'application/xml'
+        elif mimeType:
+            file_.attrib['MIMETYPE'] = mimeType
+        # Add the content as either XML or binary (Base 64) data
+        try:
+            # Attempt to parse file content as XML
+            xmldata = etree.fromstring(rawdata)
+        except etree.XMLSyntaxError:
+            # Encode as Base64
+            FContent.append(METS.binData(b64encode(rawdata)))
+        else:
+            FContent.append(METS.xmlData(xmldata))
+        return file_
+
+    def process_document(self, session, doc):
+        global METS_NAMESPACES
+        mets = self._get_metsWrapper(doc)
+        objid = mets.get("OBJID")
+        # Get the fileSec element
+        fileGrp = mets.xpath('/mets:mets/mets:fileSec/mets:fileGrp[1]',
+                             namespaces=METS_NAMESPACES)[0]
+        file_ = self._get_metsFile(
+            '/'.join([objid,
+                      mets.attrib.get("LABEL", "file0001")
+                      ]),
+            doc.get_raw(session),
+            doc.byteCount,
+            doc.mimeType
+        )
+        # Append the file element to fileGrp
+        fileGrp.append(file_)
+        # Update last modification date
+        mets.attrib['LASTMODDATE'] = time.strftime('%Y-%m-%dT%H:%M:%S%Z')
+        # Serialize METS
+        data = etree.tostring(mets, pretty_print=True)
+        # Return a Document
+        return StringDocument(
+            data,
+            self.id,
+            doc.processHistory,
+            self.outMimeType,
+            parent=doc.parent,
+            filename=doc.filename,
+            byteCount=len(data),
+            byteOffset=0
+        )
+
+
+class ZIPToMETSPreParser(METSWrappingPreParser):
+    """PreParser to process a ZIP file to METS XML.
+    
+    As Office Open XML format Documents are based on ZIP files, this PreParser
+    can also be used to unpack them, and wrap their component parts in METS.
+
+    Office Open XML (a.k.a. OpenXML, OOXML) is the name for ECMA 376 office
+    file formats used by default in Microsoft Office 2007 onwards (.docx,
+    .xlsx , .pptx etc.) It is available as an import/export format in
+    LibreOffice, OpenOffice >= 3.2, Google Docs and more.
+    """
+
+    def process_document(self, session, doc):
+        global METS_NAMESPACES
+        mets = self._get_metsWrapper(doc)
+        objid = mets.get("OBJID")
+        # Get the fileSec element
+        fileGrp = mets.xpath('/mets:mets/mets:fileSec/mets:fileGrp[1]',
+                             namespaces=METS_NAMESPACES)[0]
         # Make raw data of incoming document file-like
         stringio = StringIO.StringIO(doc.get_raw(session))
         # Read file-like object as a ZIP file
         with ZipFile(stringio, 'r') as zf:
             # Iterate through the zipped files
             for zipinfo in zf.infolist():
-                pass
-                # Create a METS file element
-                file_ = METS.file({'ID': '/'.join([objid, zipinfo.filename]),
-                                   'SIZE': str(zipinfo.file_size)
-                                   }
-                )
-                # Create a METS FContent element
-                FContent = METS.FContent()
-                file_.append(FContent)
-                # Attempt to add the MIME-Type
+                # Attempt to get the MIME-Type
                 mts = mimetypes.guess_type(zipinfo.filename)
-                if mts and mts[0] == 'text/xml':
-                    # Fix broken MIME-Type
-                    file_.attrib['MIMETYPE'] = 'application/xml'
-                elif mts and mts[0]:
-                    file_.attrib['MIMETYPE'] = mts[0]
-                # Add the content as either XML or binary (Base 64) data
-                rawdata = zf.read(zipinfo)
-                try:
-                    # Parse file content as XML
-                    xmldata = etree.fromstring(rawdata)
-                except etree.XMLSyntaxError:
-                    # Encode as Base64
-                    FContent.append(METS.binData(b64encode(rawdata)))
+                if mts and mts[0]:
+                    mimeType = mts[0]
                 else:
-                    FContent.append(METS.xmlData(xmldata))
+                    mimeType = ""
+                file_ = self._get_metsFile(
+                    '/'.join([objid, zipinfo.filename]),
+                    zf.read(zipinfo),
+                    str(zipinfo.file_size),
+                    mimeType
+                )
                 # Append the file element to fileGrp
                 fileGrp.append(file_)
         # Update last modification date
@@ -1163,7 +1219,9 @@ class ZIPToMETSPreParser(TypedPreParser):
 
 
 # Set up ElementMaker for METS and XLink namespaces
-METS = ElementMaker(namespace="http://www.loc.gov/METS/",
-                    nsmap={'mets': "http://www.loc.gov/METS/",
-                           'xlink': "http://www.w3.org/1999/xlink"}
+METS_NAMESPACES = {'mets': "http://www.loc.gov/METS/",
+                   'xlink': "http://www.w3.org/1999/xlink"
+                   }
+METS = ElementMaker(namespace=METS_NAMESPACES['mets'],
+                    nsmap=METS_NAMESPACES
                     )

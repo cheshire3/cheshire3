@@ -204,6 +204,10 @@
 	  <objectType>cheshire3.preParser.TxtToXmlPreParser</objectType>
 	</subConfig>
 	
+	<subConfig type="preParser" id="METSWrappingPreParser">
+	  <objectType>cheshire3.preParser.METSWrappingPreParser</objectType>
+	</subConfig>
+	
 	<subConfig type="preParser" id="ZIPToMETSPreParser">
 	  <objectType>cheshire3.preParser.ZIPToMETSPreParser</objectType>
 	</subConfig>
