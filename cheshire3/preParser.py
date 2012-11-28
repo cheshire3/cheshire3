@@ -24,14 +24,16 @@ except ImportError:
 from xml.sax.saxutils import escape
 from warnings import warn
 from lxml import etree
+from lxml.builder import ElementMaker
 from base64 import b64encode, b64decode
+from zipfile import ZipFile
 
 # Intra-package imports
 from cheshire3.baseObjects import PreParser
 from cheshire3.document import StringDocument
 from cheshire3.internal import CONFIG_NS
 from cheshire3.marc_utils import MARC
-from cheshire3.utils import getShellResult
+from cheshire3.utils import getShellResult, gen_uuid
 from cheshire3.exceptions import ConfigFileException, ExternalSystemException
 
 
@@ -1038,3 +1040,122 @@ class DataChecksumPreParser(PreParser):
             doc.metadata['checksum'] = md
         doc.processHistory.append(self.id)
         return doc
+
+
+class ZIPToMETSPreParser(TypedPreParser):
+    """PreParser to process a ZIP file to METS XML.
+    
+    As Office Open XML format Documents are based on ZIP files, this PreParser
+    can also be used to unpack them, and wrap their component parts in METS.
+
+    Office Open XML (a.k.a. OpenXML, OOXML) is the name for ECMA 376 office
+    file formats used by default in Microsoft Office 2007 onwards (.docx,
+    .xlsx , .pptx etc.) It is available as an import/export format in
+    LibreOffice, OpenOffice >= 3.2, Google Docs and more.
+    """
+    
+    def __init__(self, session, config, parent):
+        TypedPreParser.__init__(self, session, config, parent)
+        # Over-ride if missing outgoing mime-type
+        if not self.outMimeType:
+            self.outMimeType = 'application/xml'
+
+    def process_document(self, session, doc):
+        # Find/Generate identifiers and labels
+        objid = gen_uuid()
+        if doc.filename:
+            label = doc.filename
+        elif doc.id:
+            label = doc.id
+        # Create a METS dmdSec
+        dmdSec = METS.dmdSec()
+        # Create a METS amdSec
+        amdSec = METS.amdSec()
+        # Create a METS fileSec
+        fileSec = METS.fileSec()
+        # Set up METS root and header
+        mets = METS.mets(
+            {'ID': '/'.join([objid, 'mets']),
+             'OBJID': objid,
+             'LABEL': label,
+             'TYPE': 'ZIPFILE'
+             },
+            METS.metsHdr(
+                {'ID': '/'.join([objid, 'metsHdr']),
+                 'CREATEDDATE': time.strftime('%Y-%m-%dT%H:%M:%S%Z')
+                 },
+                METS.agent(
+                    {'ROLE': "CREATOR",
+                     'TYPE': "OTHER",
+                     'OTHERTYPE': 'SOFTWARE'
+                     },
+                    METS.name("Cheshire3"),
+                    METS.note("METS instance was created by a Cheshire3 object"
+                              " of type {0} identified as {1}"
+                              "".format(type(self).__name__, self.id)
+                    )
+                )
+            ),
+            dmdSec,
+            amdSec,
+            fileSec
+        )
+        # Create a single METS fileGrp element to represent the ZIP file
+        fileGrp = METS.fileGrp({'ID': '/'.join([objid, 'fileGrp', '0001'])})
+        fileSec.append(fileGrp)
+        # Make raw data of incoming document file-like
+        stringio = StringIO.StringIO(doc.get_raw(session))
+        # Read file-like object as a ZIP file
+        with ZipFile(stringio, 'r') as zf:
+            # Iterate through the zipped files
+            for zipinfo in zf.infolist():
+                pass
+                # Create a METS file element
+                file_ = METS.file({'ID': '/'.join([objid, zipinfo.filename]),
+                                   'SIZE': str(zipinfo.file_size)
+                                   }
+                )
+                # Create a METS FContent element
+                FContent = METS.FContent()
+                file_.append(FContent)
+                # Attempt to add the MIME-Type
+                mts = mimetypes.guess_type(zipinfo.filename)
+                if mts and mts[0] == 'text/xml':
+                    # Fix broken MIME-Type
+                    file_.attrib['MIMETYPE'] = 'application/xml'
+                elif mts and mts[0]:
+                    file_.attrib['MIMETYPE'] = mts[0]
+                # Add the content as either XML or binary (Base 64) data
+                rawdata = zf.read(zipinfo)
+                try:
+                    # Parse file content as XML
+                    xmldata = etree.fromstring(rawdata)
+                except etree.XMLSyntaxError:
+                    # Encode as Base64
+                    FContent.append(METS.binData(b64encode(rawdata)))
+                else:
+                    FContent.append(METS.xmlData(xmldata))
+                # Append the file element to fileGrp
+                fileGrp.append(file_)
+        # Update last modification date
+        mets.attrib['LASTMODDATE'] = time.strftime('%Y-%m-%dT%H:%M:%S%Z')
+        # Serialize METS
+        data = etree.tostring(mets, pretty_print=True)
+        # Return a Document
+        return StringDocument(
+            data,
+            self.id,
+            doc.processHistory,
+            self.outMimeType,
+            parent=doc.parent,
+            filename=doc.filename,
+            byteCount=len(data),
+            byteOffset=0
+        )
+
+
+# Set up ElementMaker for METS and XLink namespaces
+METS = ElementMaker(namespace="http://www.loc.gov/METS/",
+                    nsmap={'mets': "http://www.loc.gov/METS/",
+                           'xlink': "http://www.w3.org/1999/xlink"}
+                    )
