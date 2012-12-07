@@ -7,11 +7,11 @@ import os
 from socket import gethostname
 from datetime import datetime
 from lxml import etree
-from lxml.builder import ElementMaker, E
+from lxml.builder import ElementMaker
 
 from cheshire3.server import SimpleServer
 from cheshire3.session import Session
-from cheshire3.internal import cheshire3Root
+from cheshire3.internal import cheshire3Root, CONFIG_NS
 from cheshire3.exceptions import ObjectDoesNotExistException
 from cheshire3.commands.cmd_utils import Cheshire3ArgumentParser
 
@@ -23,109 +23,109 @@ def create_defaultConfig(identifier, args):
     args := argparse.Namespace
     """
     defaultPath = args.directory
-    config = E.config(
+    config = CONF.config(
         {'id': identifier,
          'type': 'database'},
-        E.objectType("cheshire3.database.SimpleDatabase"),
+        CONF.objectType("cheshire3.database.SimpleDatabase"),
         # <paths>
-        E.paths(
-            E.path({'type': "defaultPath"}, os.path.abspath(defaultPath)),
+        CONF.paths(
+            CONF.path({'type': "defaultPath"}, os.path.abspath(defaultPath)),
             # subsequent paths may be relative to defaultPath
-            E.path({'type': "metadataPath"},
+            CONF.path({'type': "metadataPath"},
                    os.path.join('.cheshire3', 'stores', 'metadata.bdb')
                    ),
-            E.object({'type': "recordStore",
+            CONF.object({'type': "recordStore",
                       'ref': "recordStore"}),
-            E.object({'type': "protocolMap",
+            CONF.object({'type': "protocolMap",
                       'ref': "cqlProtocolMap"}),
-            E.path({'type': "indexStoreList"}, "indexStore"),
+            CONF.path({'type': "indexStoreList"}, "indexStore"),
         ),
-        E.subConfigs(
+        CONF.subConfigs(
             # recordStore
-            E.subConfig(
+            CONF.subConfig(
                 {'type': "recordStore",
                  'id': "recordStore"},
-                E.objectType("cheshire3.recordStore.BdbRecordStore"),
-                E.paths(
-                    E.path({'type': "defaultPath"},
+                CONF.objectType("cheshire3.recordStore.BdbRecordStore"),
+                CONF.paths(
+                    CONF.path({'type': "defaultPath"},
                            os.path.join('.cheshire3', 'stores')),
-                    E.path({'type': "databasePath"},
+                    CONF.path({'type': "databasePath"},
                            'recordStore.bdb'),
-                    E.object({'type': "idNormalizer",
+                    CONF.object({'type': "idNormalizer",
                               'ref': "StringIntNormalizer"}),
                 ),
-                E.options(
-                    E.setting({'type': "digest"}, 'md5'),
+                CONF.options(
+                    CONF.setting({'type': "digest"}, 'md5'),
                 ),
             ),
             # indexStore
-            E.subConfig(
+            CONF.subConfig(
                 {'type': "indexStore",
                  'id': "indexStore"},
-                E.objectType("cheshire3.indexStore.BdbIndexStore"),
-                E.paths(
-                    E.path({'type': "defaultPath"},
+                CONF.objectType("cheshire3.indexStore.BdbIndexStore"),
+                CONF.paths(
+                    CONF.path({'type': "defaultPath"},
                            os.path.join('.cheshire3', 'indexes')),
-                    E.path({'type': "tempPath"},
+                    CONF.path({'type': "tempPath"},
                            'temp'),
-                    E.path({'type': "recordStoreHash"},
+                    CONF.path({'type': "recordStoreHash"},
                            'recordStore'),
                 )
             ),
             # protocolMap
-            E.subConfig(
+            CONF.subConfig(
                 {'type': "protocolMap",
                  'id': "cqlProtocolMap"},
-                E.objectType("cheshire3.protocolMap.CQLProtocolMap"),
-                E.paths(
-                    E.path({'type': "zeerexPath"}, args.zeerexPath)
+                CONF.objectType("cheshire3.protocolMap.CQLProtocolMap"),
+                CONF.paths(
+                    CONF.path({'type': "zeerexPath"}, args.zeerexPath)
                 ),
             ),
         ),
     )
     # Add database docs if provided
     if args.title and args.description:
-        config.insert(0, E.docs("{0.title} - {0.description}".format(args)))
+        config.insert(0, CONF.docs("{0.title} - {0.description}".format(args)))
     elif args.title:
-        config.insert(0, E.docs(args.title))
+        config.insert(0, CONF.docs(args.title))
     elif args.description:
-        config.insert(0, E.docs(args.description))
+        config.insert(0, CONF.docs(args.description))
         
     return config
 
 
 def create_defaultConfigSelectors():
     """Create and return configuration for generic data selectors."""
-    config = E.config(
-        E.subConfigs(
+    config = CONF.config(
+        CONF.subConfigs(
             # Identifier Attribute Selector
-            E.subConfig(
+            CONF.subConfig(
                 {'type': "selector",
                  'id': "idSelector"},
-                E.docs("Record identifier attribute Selector"),
-                E.objectType("cheshire3.selector.MetadataSelector"),
-                E.source(
-                    E.location({'type': "attribute"}, "id"),
+                CONF.docs("Record identifier attribute Selector"),
+                CONF.objectType("cheshire3.selector.MetadataSelector"),
+                CONF.source(
+                    CONF.location({'type': "attribute"}, "id"),
                 ),
             ),
             # Current Time Function Selector
-            E.subConfig(
+            CONF.subConfig(
                 {'type': "selector",
                  'id': "nowTimeSelector"},
-                E.docs("Current time function Selector"),
-                E.objectType("cheshire3.selector.MetadataSelector"),
-                E.source(
-                    E.location({'type': "function"}, "now()"),
+                CONF.docs("Current time function Selector"),
+                CONF.objectType("cheshire3.selector.MetadataSelector"),
+                CONF.source(
+                    CONF.location({'type': "function"}, "now()"),
                 ),
             ),
             # Anywhere XPath Selector
-            E.subConfig(
+            CONF.subConfig(
                 {'type': "selector",
                  'id': "anywhereXPathSelector"},
-                E.docs("Anywhere XPath Selector"),
-                E.objectType("cheshire3.selector.XPathSelector"),
-                E.source(
-                    E.location({'type': "xpath"}, "/*"),
+                CONF.docs("Anywhere XPath Selector"),
+                CONF.objectType("cheshire3.selector.XPathSelector"),
+                CONF.source(
+                    CONF.location({'type': "xpath"}, "/*"),
                 ),
             ),
         ),
@@ -135,139 +135,139 @@ def create_defaultConfigSelectors():
 
 def create_defaultConfigIndexes():
     """Create and return configuration for generic indexes."""
-    config = E.config(
-        E.subConfigs(
+    config = CONF.config(
+        CONF.subConfigs(
             # Identifier Index
-            E.subConfig(
+            CONF.subConfig(
                 {'type': "index",
                  'id': "idx-identifier"},
-                E.docs("Identifier Index"),
-                E.objectType("cheshire3.index.SimpleIndex"),
-                E.paths(
-                    E.object({'type': "indexStore",
+                CONF.docs("Identifier Index"),
+                CONF.objectType("cheshire3.index.SimpleIndex"),
+                CONF.paths(
+                    CONF.object({'type': "indexStore",
                             'ref': "indexStore"}),
                 ),
-                E.source(
-                    E.selector({'ref': "idSelector"}),
-                    E.process(
-                        E.object({'type': "extractor",
+                CONF.source(
+                    CONF.selector({'ref': "idSelector"}),
+                    CONF.process(
+                        CONF.object({'type': "extractor",
                                   'ref': "SimpleExtractor"}),
                     ),
                 ),
             ),
             # Created Time Index
-            E.subConfig(
+            CONF.subConfig(
                 {'type': "index",
                  'id': "idx-creationDate"},
-                E.docs("Created Time Index"),
-                E.objectType("cheshire3.index.SimpleIndex"),
-                E.paths(
-                    E.object({'type': "indexStore",
+                CONF.docs("Created Time Index"),
+                CONF.objectType("cheshire3.index.SimpleIndex"),
+                CONF.paths(
+                    CONF.object({'type': "indexStore",
                             'ref': "indexStore"}),
                 ),
-                E.source(
-                    E.selector({'ref': "nowTimeSelector"}),
-                    E.process(
-                        E.object({'type': "extractor",
+                CONF.source(
+                    CONF.selector({'ref': "nowTimeSelector"}),
+                    CONF.process(
+                        CONF.object({'type': "extractor",
                                   'ref': "SimpleExtractor"}),
-                        E.object({'type': "tokenizer",
+                        CONF.object({'type': "tokenizer",
                                   'ref': "DateTokenizer"}),
-                        E.object({'type': "tokenMerger",
+                        CONF.object({'type': "tokenMerger",
                                   'ref': "SimpleTokenMerger"}),
                     ),
                 ),
-                E.options(
+                CONF.options(
                     # Don't index or unindex in db.[un]index_record()
-                    E.setting({'type': "noIndexDefault"}, "1"),
-                    E.setting({'type': "noUnindexDefault"}, "1"),
+                    CONF.setting({'type': "noIndexDefault"}, "1"),
+                    CONF.setting({'type': "noUnindexDefault"}, "1"),
                     # Need vectors to unindex these in future
-                    E.setting({'type': "vectors"}, "1"),
+                    CONF.setting({'type': "vectors"}, "1"),
                 ),
             ),
             # Modified Time Index
-            E.subConfig(
+            CONF.subConfig(
                 {'type': "index",
                  'id': "idx-modificationDate"},
-                E.docs("Modified Time Index"),
-                E.objectType("cheshire3.index.SimpleIndex"),
-                E.paths(
-                    E.object({'type': "indexStore",
+                CONF.docs("Modified Time Index"),
+                CONF.objectType("cheshire3.index.SimpleIndex"),
+                CONF.paths(
+                    CONF.object({'type': "indexStore",
                             'ref': "indexStore"}),
                 ),
-                E.source(
-                    E.selector({'ref': "nowTimeSelector"}),
-                    E.process(
-                        E.object({'type': "extractor",
+                CONF.source(
+                    CONF.selector({'ref': "nowTimeSelector"}),
+                    CONF.process(
+                        CONF.object({'type': "extractor",
                                   'ref': "SimpleExtractor"}),
-                        E.object({'type': "tokenizer",
+                        CONF.object({'type': "tokenizer",
                                   'ref': "DateTokenizer"}),
-                        E.object({'type': "tokenMerger",
+                        CONF.object({'type': "tokenMerger",
                                   'ref': "SimpleTokenMerger"}),
                     ),
                 ),
-                E.options(
+                CONF.options(
                     # Need vectors to unindex these in future
-                    E.setting({'type': "vectors"}, "1")
+                    CONF.setting({'type': "vectors"}, "1")
                 ),
             ),
             # Anywhere / Full-text Index
-            E.subConfig(
+            CONF.subConfig(
                 {'type': "index",
                  'id': "idx-anywhere"},
-                E.docs("Anywhere / Full-text Index"),
-                E.objectType("cheshire3.index.SimpleIndex"),
-                E.paths(
-                    E.object({'type': "indexStore",
+                CONF.docs("Anywhere / Full-text Index"),
+                CONF.objectType("cheshire3.index.SimpleIndex"),
+                CONF.paths(
+                    CONF.object({'type': "indexStore",
                             'ref': "indexStore"}),
                 ),
                 # Source when processing data
-                E.source(
+                CONF.source(
                     {'mode': "data"},
-                    E.selector({'ref': "anywhereXPathSelector"}),
-                    E.process(
-                        E.object({'type': "extractor",
+                    CONF.selector({'ref': "anywhereXPathSelector"}),
+                    CONF.process(
+                        CONF.object({'type': "extractor",
                                   'ref': "SimpleExtractor"}),
-                        E.object({'type': "tokenizer",
+                        CONF.object({'type': "tokenizer",
                                   'ref': "RegexpFindTokenizer"}),
-                        E.object({'type': "tokenMerger",
+                        CONF.object({'type': "tokenMerger",
                                   'ref': "SimpleTokenMerger"}),
-                        E.object({'type': "normalizer",
+                        CONF.object({'type': "normalizer",
                                   'ref': "DiacriticNormalizer"}),
-                        E.object({'type': "normalizer",
+                        CONF.object({'type': "normalizer",
                                   'ref': "CaseNormalizer"}),
                     ),
                 ),
                 # Source when processing all, any, = queries
-                E.source(
+                CONF.source(
                     {'mode': "all|any|="},
-                    E.process(
-                        E.object({'type': "extractor",
+                    CONF.process(
+                        CONF.object({'type': "extractor",
                                   'ref': "SimpleExtractor"}),
-                        E.object({'type': "tokenizer",
+                        CONF.object({'type': "tokenizer",
                                   'ref': "PreserveMaskingTokenizer"}),
-                        E.object({'type': "tokenMerger",
+                        CONF.object({'type': "tokenMerger",
                                   'ref': "SimpleTokenMerger"}),
-                        E.object({'type': "normalizer",
+                        CONF.object({'type': "normalizer",
                                   'ref': "DiacriticNormalizer"}),
-                        E.object({'type': "normalizer",
+                        CONF.object({'type': "normalizer",
                                   'ref': "CaseNormalizer"}),
                     ),
                 ),
                 # Source when processing exact queries
-                E.source(
+                CONF.source(
                     {'mode': "exact"},
-                    E.process(
-                        E.object({'type': "extractor",
+                    CONF.process(
+                        CONF.object({'type': "extractor",
                                   'ref': "SimpleExtractor"}),
-                        E.object({'type': "tokenizer",
+                        CONF.object({'type': "tokenizer",
                                   'ref': "PreserveMaskingTokenizer"}),
-                        E.object({'type': "tokenMerger",
+                        CONF.object({'type': "tokenMerger",
                                   'ref': "SimpleTokenMerger"}),
-                        E.object({'type': "normalizer",
+                        CONF.object({'type': "normalizer",
                                   'ref': "SpaceNormalizer"}),
-                        E.object({'type': "normalizer",
+                        CONF.object({'type': "normalizer",
                                   'ref': "DiacriticNormalizer"}),
-                        E.object({'type': "normalizer",
+                        CONF.object({'type': "normalizer",
                                   'ref': "CaseNormalizer"}),
                     ),
                 ),
@@ -422,10 +422,10 @@ def include_configByPath(config, path):
         subConfigs = config.xpath('/config/subConfigs')[-1]
     except IndexError:
         # Element for subConfigs does not exist - create it
-        subConfigs = E.subConfigs()
+        subConfigs = CONF.subConfigs()
         config.append(subConfigs)
         
-    subConfigs.append(E.path(
+    subConfigs.append(CONF.path(
                           {'type': "includeConfigs"},
                           path
                       )
@@ -542,6 +542,10 @@ argparser.add_argument('-p', '--port', type=int,
                   help=("Port on which Cheshire3 database will be served via "
                         "SRU."))
 
+
+# Set up ElementMaker for Cheshire3 config and METS namespaces
+CONF = ElementMaker(namespace=CONFIG_NS,
+                    nsmap={None: CONFIG_NS})
 
 # Set up ElementMaker for ZeeRex and Cheshire3 Explain namespaces
 Z = ElementMaker(namespace="http://explain.z3950.org/dtd/2.0/",
