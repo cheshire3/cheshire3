@@ -27,6 +27,7 @@ from lxml import etree
 from lxml.builder import ElementMaker
 from base64 import b64encode, b64decode
 from zipfile import ZipFile
+from docutils.core import publish_string
 
 # Intra-package imports
 from cheshire3.baseObjects import PreParser
@@ -315,6 +316,7 @@ class MagicRedirectPreParser(TypedPreParser):
             "application/pdf": "PdfXmlPreParser",
             "text/html": "HtmlSmashPreParser",
             "text/plain": "TxtToXmlPreParser",
+            "text/prs.fallenstein.rst": "RstToXmlPreParser",
             "text/sgml": "SgmlPreParser",
             "application/x-bzip2": "BzipPreParser",
             "application/zip": "ZIPToMETSPreParser",
@@ -621,6 +623,24 @@ class TxtToXmlPreParser(PreParser):
         return StringDocument(data, self.id, doc.processHistory,
                               mimeType='text/xml', parent=doc.parent,
                               filename=doc.filename)
+
+
+class RstToXmlPreParser(PreParser):
+    """Convert reStructuredText into Docutils-native XML."""
+
+    inMimeType = "text/prs.fallenstein.rst"
+    outMimeType = "application/xml"
+
+    def process_document(self, session, doc):
+        rst = doc.get_raw(session)
+        data = publish_string(rst, writer_name="xml")
+        return StringDocument(data,
+                              self.id,
+                              doc.processHistory,
+                              mimeType=self.outMimeType,
+                              parent=doc.parent,
+                              filename=doc.filename
+                              )
 
 
 #  --- Compression PreParsers ---
