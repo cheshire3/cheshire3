@@ -81,6 +81,22 @@ def create_defaultConfig(identifier, args):
                     CONF.path({'type': "zeerexPath"}, args.zeerexPath)
                 ),
             ),
+            # MagicRedirectPreParser
+            # Over-ride default behavior to preParse generic file types to METS
+            # so that it can be parsed and indexed as XML
+            CONF.subConfig(
+                {'type': "preParser",
+                 'id': "MagicRedirectPreParser"},
+                CONF.objectType("cheshire3.preParser.MagicRedirectPreParser"),
+                CONF.hash(
+                    CONF.object({'mimeType': "application/pdf",
+                              'ref': "PdfToMetsPreParserWorkflow"}),
+                    CONF.object({'mimeType': "text/prs.fallenstein.rst",
+                              'ref': "ReSTToMetsPreParserWorkflow"}),
+                    CONF.object({'mimeType': "*",
+                              'ref': "METSWrappingPreParser"}),
+                ),
+            ),
         ),
     )
     # Add database docs if provided
@@ -122,10 +138,12 @@ def create_defaultConfigSelectors():
             CONF.subConfig(
                 {'type': "selector",
                  'id': "anywhereXPathSelector"},
-                CONF.docs("Anywhere XPath Selector"),
+                CONF.docs("Anywhere XPath Selector. "
+                          "Select any node other than METS binary data."),
                 CONF.objectType("cheshire3.selector.XPathSelector"),
                 CONF.source(
-                    CONF.location({'type': "xpath"}, "/*"),
+                    CONF.location({'type': "xpath"},
+                                  "/mets:*[local-name()!='binData']"),
                 ),
             ),
         ),
@@ -545,7 +563,9 @@ argparser.add_argument('-p', '--port', type=int,
 
 # Set up ElementMaker for Cheshire3 config and METS namespaces
 CONF = ElementMaker(namespace=CONFIG_NS,
-                    nsmap={'c3': CONFIG_NS})
+                    nsmap={'c3': CONFIG_NS,
+                           'mets': "http://www.loc.gov/METS/",
+                           'xlink': "http://www.w3.org/1999/xlink"})
 
 # Set up ElementMaker for ZeeRex and Cheshire3 Explain namespaces
 Z = ElementMaker(namespace="http://explain.z3950.org/dtd/2.0/",
