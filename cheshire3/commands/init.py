@@ -545,11 +545,11 @@ argparser.add_argument('-p', '--port', type=int,
 
 # Set up ElementMaker for Cheshire3 config and METS namespaces
 CONF = ElementMaker(namespace=CONFIG_NS,
-                    nsmap={None: CONFIG_NS})
+                    nsmap={'c3': CONFIG_NS})
 
 # Set up ElementMaker for ZeeRex and Cheshire3 Explain namespaces
 Z = ElementMaker(namespace="http://explain.z3950.org/dtd/2.0/",
-                  nsmap={None: "http://explain.z3950.org/dtd/2.0/",
+                  nsmap={'zrx': "http://explain.z3950.org/dtd/2.0/",
                          'c3': "http://www.cheshire3.org/schemas/explain/"})
 
 session = None
