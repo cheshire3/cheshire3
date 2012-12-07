@@ -325,7 +325,15 @@ class MagicRedirectPreParser(TypedPreParser):
             ("application/vnd.openxmlformats-officedocument."
              "presentationml.presentation"): "ZIPToMETSPreParser",  # PPT
             ("application/vnd.openxmlformats-officedocument."
-             "spreadsheetml.sheet"): "ZIPToMETSPreParser"           # Excel
+             "spreadsheetml.sheet"): "ZIPToMETSPreParser",          # Excel
+            ("application/vnd.oasis.opendocument."
+             "text"): "ZIPToMETSPreParser",             # ODF Text
+            ("application/vnd.oasis.opendocument."
+             "presentation"): "ZIPToMETSPreParser",     # ODF Presentation
+            ("application/vnd.oasis.opendocument."
+             "spreadsheet"): "ZIPToMETSPreParser",      # ODF Spreadsheet(s)
+            ("application/vnd.oasis.opendocument."
+             "graphics"): "ZIPToMETSPreParser"          # ODF Graphic
             # "application/x-zip": "single zip preparser ?"
         }
 
