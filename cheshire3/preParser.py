@@ -1165,13 +1165,15 @@ class METSWrappingPreParser(TypedPreParser):
 class ZIPToMETSPreParser(METSWrappingPreParser):
     """PreParser to process a ZIP file to METS XML.
     
-    As Office Open XML format Documents are based on ZIP files, this PreParser
-    can also be used to unpack them, and wrap their component parts in METS.
+    As Office Open XML format and OpenDocument format Documents are based on
+    ZIP files, this PreParser can also be used to unpack them, and wrap their
+    component parts in METS.
 
     Office Open XML (a.k.a. OpenXML, OOXML) is the name for ECMA 376 office
     file formats used by default in Microsoft Office 2007 onwards (.docx,
     .xlsx , .pptx etc.) It is available as an import/export format in
     LibreOffice, OpenOffice >= 3.2, Google Docs and more.
+    
     """
 
     def process_document(self, session, doc):
