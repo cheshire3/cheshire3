@@ -354,7 +354,11 @@ class MagicRedirectPreParser(TypedPreParser):
                 mts = mimetypes.guess_type(doc.filename)
                 if mts and mts[0]:
                     mt = mts[0]
-        if mt in self.mimeTypeHash:
+        if mt in self.mimeTypeHash or "*" in self.mimeTypeHash:
+            if mt not in self.mimeTypeHash:
+                # There is a * mime-type
+                # Something to be done for any unmatched type
+                mt = '*'
             redirect = db.get_object(session, self.mimeTypeHash[mt])
             if isinstance(redirect, PreParser):
                 return redirect.process_document(session, doc)
