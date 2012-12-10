@@ -21,6 +21,7 @@ class Cheshire3Console(InteractiveConsole):
         init_code_lines = [
            'from cheshire3.session import Session',
            'from cheshire3.server import SimpleServer',
+           'from cheshire3.exceptions import *',
            'session = Session()',
            'server = SimpleServer(session, "{0}")'.format(args.serverconfig),
         ]
@@ -95,6 +96,16 @@ def main(argv=None):
     if dbid is not None:
         dbline = 'db = server.get_object(session, "{0}")'.format(dbid)
         console.push(dbline)
+        # Try to get main recordStore
+        recordStoreLines = [
+            "try:",
+            "    recordStore = db.get_object(session, 'recordStore')",
+            "except ObjectDoesNotExistException:",
+            "    recordStore = db.get_path(session, 'recordStore')",
+            "",
+        ]
+        for line in recordStoreLines:
+            console.push(line)
     
     if args.script is not None:
         with open(args.script, 'r') as fh:
