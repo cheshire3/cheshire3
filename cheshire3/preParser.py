@@ -1125,7 +1125,7 @@ class METSWrappingPreParser(TypedPreParser):
         )
         # Set a human readable label if possible
         if doc.filename:
-            mets.set("LABEL", doc.filename)
+            mets.set("LABEL", os.path.abspath(doc.filename))
         elif doc.id:
             mets.set("LABEL", doc.id)
         return mets
