@@ -538,10 +538,13 @@ script or just drop you into the interactive console.
    ``--interactive`` option.
 
 When initializing the architecture in this way, ``session`` and ``server``
-variables will be created, as will a ``db`` object if you ran the script from
-inside a Cheshire3 database directory, or provided a database identifier
-using the ``--database`` option. The variable will correspond to instances of
-Session, Server and Database respectively.
+variables will be created corresponding to instances of Session and Server 
+respectively.
+
+Additionally, if you ran the script from inside a Cheshire3 Database
+directory, or provided the Database identifier using the ``--database`` option,
+the Database will be available as ``db``. The default RecordStore will also be
+available as ``recordStore`` if it was possible to discover from the Database.
 
 
 Loading Data

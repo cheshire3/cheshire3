@@ -2,6 +2,7 @@
 
 import sys
 import os
+import readline
 
 from code import InteractiveConsole
 
@@ -21,6 +22,7 @@ class Cheshire3Console(InteractiveConsole):
         init_code_lines = [
            'from cheshire3.session import Session',
            'from cheshire3.server import SimpleServer',
+           'from cheshire3.exceptions import *',
            'session = Session()',
            'server = SimpleServer(session, "{0}")'.format(args.serverconfig),
         ]
@@ -66,10 +68,12 @@ class Cheshire3Console(InteractiveConsole):
         """
         if banner is None:
             c3_version = '.'.join([str(p) for p in cheshire3Version])
-            banner = ("Python {0} on {1}\n".format(sys.version, sys.platform),
-                      "Cheshire3 {0} Interactive Console\n".format(c3_version),
-                      'Type "help", "copyright", "credits" or "license" for '
-                      'more information.')
+            banner = ("\n".join(["Python {0} on {1}"
+                                 "".format(sys.version, sys.platform),
+                                 "Cheshire3 {0} Interactive Console"
+                                 "".format(c3_version),
+                                 'Type "help", "copyright", "credits" or '
+                                 '"license" for more information.']))
         return InteractiveConsole.interact(self, banner)
         
 
@@ -93,6 +97,16 @@ def main(argv=None):
     if dbid is not None:
         dbline = 'db = server.get_object(session, "{0}")'.format(dbid)
         console.push(dbline)
+        # Try to get main recordStore
+        recordStoreLines = [
+            "try:",
+            "    recordStore = db.get_object(session, 'recordStore')",
+            "except ObjectDoesNotExistException:",
+            "    recordStore = db.get_path(session, 'recordStore')",
+            "",
+        ]
+        for line in recordStoreLines:
+            console.push(line)
     
     if args.script is not None:
         with open(args.script, 'r') as fh:
