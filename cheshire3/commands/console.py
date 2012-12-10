@@ -2,6 +2,7 @@
 
 import sys
 import os
+import readline
 
 from code import InteractiveConsole
 
