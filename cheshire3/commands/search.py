@@ -21,9 +21,11 @@ def _formatResultSetItem(resultSetItem):
         title = ''
     else:
         titleData = sel.process_record(session, rec)
-        for title in ext.process_xpathResult(session, titleData).keys():
-            if title:
-                break
+        # Process result in order, to respect any preference in the config
+        for selRes in titleData:
+            for title in ext.process_xpathResult(session, [selRes]).keys():
+                if title:
+                    break
     # If still no title, revert to string representation of resultSetItem
     if not title:
         title = str(resultSetItem)
