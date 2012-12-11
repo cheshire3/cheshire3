@@ -14,18 +14,21 @@ def _formatResultSetItem(resultSetItem):
     rec = resultSetItem.fetch_record(session)
     # Try to get a title using a selector
     ext = db.get_object(session, 'SimpleExtractor')
+    title = None
     try:
         # Database caches object, so this is not as inefficient as it seems
         sel = db.get_object(session, 'titleXPathSelector')
     except ObjectDoesNotExistException:
-        title = ''
+        pass
     else:
         titleData = sel.process_record(session, rec)
         # Process result in order, to respect any preference in the config
         for selRes in titleData:
-            for title in ext.process_xpathResult(session, [selRes]).keys():
-                if title:
-                    break
+            if selRes:
+                for title in ext.process_xpathResult(session, [selRes]).keys():
+                    if title:
+                        break
+                break
     # If still no title, revert to string representation of resultSetItem
     if not title:
         title = str(resultSetItem)
