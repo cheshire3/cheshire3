@@ -28,7 +28,8 @@ def _formatResultSetItem(resultSetItem):
                 for title in ext.process_xpathResult(session, [selRes]).keys():
                     if title:
                         break
-                break
+                if title:
+                    break
     # If still no title, revert to string representation of resultSetItem
     if not title:
         title = str(resultSetItem)
