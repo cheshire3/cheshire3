@@ -146,6 +146,36 @@ def create_defaultConfigSelectors():
                                   "/mets:*[local-name()!='binData']"),
                 ),
             ),
+            CONF.subConfig(
+                {'type': "selector",
+                 'id': "titleXPathSelector"},
+                CONF.docs("Title XPath Selector. Select from a number of "
+                          "potential locations."),
+                CONF.objectType("cheshire3.selector.XPathSelector"),
+                CONF.source(
+                    etree.Comment("METS wrapped docutils-native XML (e.g. from"
+                                  " reStructured Text)"),
+                    CONF.location(
+                        {'type': "xpath"},
+                        "//mets:FContent/mets:xmlData/document/@title"
+                    ),
+                    etree.Comment("Generic Dublin-Core terms"),
+                    CONF.location(
+                        {'type': "xpath"},
+                        "//dcterms:title"
+                    ),
+                    etree.Comment("Generic Dublin-Core elements"),
+                    CONF.location(
+                        {'type': "xpath"},
+                        "//dc:title"
+                    ),
+                    etree.Comment("METS wrapped file @LABEL"),
+                    CONF.location(
+                        {'type': "xpath"},
+                        "/mets:mets/@LABEL"
+                    ),
+                ),
+            ),
         ),
     )
     return config
@@ -565,7 +595,9 @@ argparser.add_argument('-p', '--port', type=int,
 CONF = ElementMaker(namespace=CONFIG_NS,
                     nsmap={'c3': CONFIG_NS,
                            'mets': "http://www.loc.gov/METS/",
-                           'xlink': "http://www.w3.org/1999/xlink"})
+                           'xlink': "http://www.w3.org/1999/xlink",
+                           'dcterms': "http://purl.org/dc/terms/",
+                           'dc': "http://purl.org/dc/elements/1.1/"})
 
 # Set up ElementMaker for ZeeRex and Cheshire3 Explain namespaces
 Z = ElementMaker(namespace="http://explain.z3950.org/dtd/2.0/",
