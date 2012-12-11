@@ -320,6 +320,68 @@ def create_defaultConfigIndexes():
                     ),
                 ),
             ),
+            # Title Keyword Index
+            CONF.subConfig(
+                {'type': "index",
+                 'id': "idx-title-kwd"},
+                CONF.docs("Title Index"),
+                CONF.objectType("cheshire3.index.SimpleIndex"),
+                CONF.paths(
+                    CONF.object({'type': "indexStore",
+                                 'ref': "indexStore"}),
+                ),
+                # Source when processing data
+                CONF.source(
+                    {'mode': "data"},
+                    CONF.selector({'ref': "titleXPathSelector"}),
+                    CONF.process(
+                        CONF.object({'type': "extractor",
+                                  'ref': "SimpleExtractor"}),
+                        CONF.object({'type': "tokenizer",
+                                  'ref': "RegexpFindTokenizer"}),
+                        CONF.object({'type': "tokenMerger",
+                                  'ref': "SimpleTokenMerger"}),
+                        CONF.object({'type': "normalizer",
+                                  'ref': "DiacriticNormalizer"}),
+                        CONF.object({'type': "normalizer",
+                                  'ref': "CaseNormalizer"}),
+                    ),
+                ),
+                # Source when processing all, any, = queries
+                CONF.source(
+                    {'mode': "all|any|="},
+                    CONF.process(
+                        CONF.object({'type': "extractor",
+                                  'ref': "SimpleExtractor"}),
+                        CONF.object({'type': "tokenizer",
+                                  'ref': "PreserveMaskingTokenizer"}),
+                        CONF.object({'type': "tokenMerger",
+                                  'ref': "SimpleTokenMerger"}),
+                        CONF.object({'type': "normalizer",
+                                  'ref': "DiacriticNormalizer"}),
+                        CONF.object({'type': "normalizer",
+                                  'ref': "CaseNormalizer"}),
+                    ),
+                ),
+                # Source when processing exact queries
+                CONF.source(
+                    {'mode': "exact"},
+                    CONF.process(
+                        CONF.object({'type': "extractor",
+                                  'ref': "SimpleExtractor"}),
+                        CONF.object({'type': "tokenizer",
+                                  'ref': "PreserveMaskingTokenizer"}),
+                        CONF.object({'type': "tokenMerger",
+                                  'ref': "SimpleTokenMerger"}),
+                        CONF.object({'type': "normalizer",
+                                  'ref': "SpaceNormalizer"}),
+                        CONF.object({'type': "normalizer",
+                                  'ref': "DiacriticNormalizer"}),
+                        CONF.object({'type': "normalizer",
+                                  'ref': "CaseNormalizer"}),
+                    ),
+                ),
+            ),
         ),
     )
     return config
@@ -433,6 +495,20 @@ def create_defaultZeerex(identifier, args):
                          Z.title("Anywhere / Full-text Keywords"),
                          Z.map(
                              Z.name({'set': "cql"}, "anywhere"),
+                         ),
+                         Z.configInfo(
+                             Z.supports({'type': "relation"}, "="),
+                             Z.supports({'type': "relation"}, "any"),
+                             Z.supports({'type': "relation"}, "all"),
+                             Z.supports({'type': "relationModifier"}, "word"),
+                         ),
+                     ),
+                     Z.index(
+                         {'{http://www.cheshire3.org/schemas/explain/}index':
+                          "idx-title-kwd"},
+                         Z.title("Title Keywords"),
+                         Z.map(
+                             Z.name({'set': "dc"}, "title"),
                          ),
                          Z.configInfo(
                              Z.supports({'type': "relation"}, "="),
