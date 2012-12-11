@@ -10,8 +10,28 @@ from cheshire3.commands.cmd_utils import Cheshire3ArgumentParser, \
 identify_database
 
 
-def format_resultSet(resultSet, outStream=sys.stdout, 
-                     maximumRecords=10, startRecord=1):
+def _formatResultSetItem(resultSetItem):
+    rec = resultSetItem.fetch_record(session)
+    # Try to get a title using a selector
+    ext = db.get_object(session, 'SimpleExtractor')
+    try:
+        # Database caches object, so this is not as inefficient as it seems
+        sel = db.get_object(session, 'titleXPathSelector')
+    except ObjectDoesNotExistException:
+        title = ''
+    else:
+        titleData = sel.process_record(session, rec)
+        for title in ext.process_xpathResult(session, titleData).keys():
+            if title:
+                break
+    # If still no title, revert to string representation of resultSetItem
+    if not title:
+        title = str(resultSetItem)
+    return "{0} {1}\n".format(resultSetItem.resultSetPosition + 1, title)
+
+
+def _format_resultSet(resultSet, outStream=sys.stdout, 
+                      maximumRecords=10, startRecord=1):
     """Format and write resultSet to outstream.
     
     resultSet := instance of (sub-class of) cheshire3.baseObjects.ResultSet
@@ -28,7 +48,8 @@ def format_resultSet(resultSet, outStream=sys.stdout,
     end = min(startRecord + maximumRecords, hits)
     for rIdx in range(startRecord, end):
         resultSetItem = resultSet[rIdx]
-        outStream.write("{0} {1}\n".format(rIdx + 1, resultSetItem))
+        resultSetItem.resultSetPosition = rIdx
+        outStream.write(_formatResultSetItem(resultSetItem))
     outStream.flush()
     return 0
 
@@ -66,9 +87,9 @@ Please provide a different database identifier using the --database option.
         qFac = db.get_object(session, 'defaultQueryFactory')
         query = qFac.get_query(session, args.query, format=args.format)
         resultSet = db.search(session, query)
-        return format_resultSet(resultSet, 
-                                maximumRecords=args.maxRecs, 
-                                startRecord=args.startRec)
+        return _format_resultSet(resultSet,
+                                 maximumRecords=args.maxRecs,
+                                 startRecord=args.startRec)
 
 
 argparser = Cheshire3ArgumentParser(conflict_handler='resolve',
