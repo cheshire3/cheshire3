@@ -53,6 +53,10 @@ def create_defaultConfig(identifier, args):
                            'recordStore.bdb'),
                     CONF.object({'type': "idNormalizer",
                               'ref': "StringIntNormalizer"}),
+                    CONF.object({'type': "inWorkflow",
+                                 'ref': "XmlToLZ4Workflow"}),
+                    CONF.object({'type': "outWorkflow",
+                                 'ref': "LZ4ToLxmlWorkflow"}),
                 ),
                 CONF.options(
                     CONF.setting({'type': "digest"}, 'md5'),
