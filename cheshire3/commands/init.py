@@ -143,11 +143,11 @@ def create_defaultConfigSelectors():
                 {'type': "selector",
                  'id': "anywhereXPathSelector"},
                 CONF.docs("Anywhere XPath Selector. "
-                          "Select any node other than METS binary data."),
+                          "Select all mets:xmlData nodes."),
                 CONF.objectType("cheshire3.selector.XPathSelector"),
                 CONF.source(
                     CONF.location({'type': "xpath"},
-                                  "/mets:*[local-name()!='binData']"),
+                                  "//mets:xmlData"),
                 ),
             ),
             CONF.subConfig(
