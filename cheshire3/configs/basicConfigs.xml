@@ -76,6 +76,13 @@
       <objectType>cheshire3.preParser.Bzip2PreParser</objectType>
     </subConfig>
 	
+	<subConfig type="preParser" id="LZ4CompressPreParser">
+	  <objectType>cheshire3.preParser.LZ4CompressPreParser</objectType>
+	</subConfig>
+	<subConfig type="preParser" id="LZ4DecompressPreParser">
+	  <objectType>cheshire3.preParser.LZ4DecompressPreParser</objectType>
+	</subConfig>
+	
 	<subConfig type="preParser" id="MarcToSgmlPreParser">
 	  <objectType>cheshire3.preParser.MarcToSgmlPreParser</objectType>
 	</subConfig>
