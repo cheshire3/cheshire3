@@ -68,6 +68,10 @@
 	  <objectType>cheshire3.preParser.GzipPreParser</objectType>
 	</subConfig>
 	
+	<subConfig type="preParser" id="GunzipPreParser">
+	  <objectType>cheshire3.preParser.GunzipPreParser</objectType>
+	</subConfig>
+	
 	<subConfig type="preParser" id="Bzip2PreParser">
       <objectType>cheshire3.preParser.Bzip2PreParser</objectType>
     </subConfig>
