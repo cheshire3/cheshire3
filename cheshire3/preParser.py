@@ -10,6 +10,7 @@ import mimetypes
 import tempfile
 import hashlib
 import subprocess
+import lz4
 
 try:
     import cStringIO as StringIO
@@ -735,6 +736,26 @@ class B64DecodePreParser(PreParser):
     def process_document(self, session, doc):
         data = doc.get_raw(session)
         new = b64decode(data)
+        return StringDocument(new, self.id, doc.processHistory,
+                              parent=doc.parent, filename=doc.filename)
+
+
+class LZ4CompressPreParser(PreParser):
+    """Compress data using the lz4 algorithm."""
+
+    def process_document(self, session, doc):
+        data = doc.get_raw(session)
+        new = lz4.compress(data)
+        return StringDocument(new, self.id, doc.processHistory,
+                              parent=doc.parent, filename=doc.filename)
+
+
+class LZ4DecompressPreParser(PreParser):
+    """Decompress lz4 compressed data."""
+
+    def process_document(self, session, doc):
+        data = doc.get_raw(session)
+        new = lz4.decompress(data)
         return StringDocument(new, self.id, doc.processHistory,
                               parent=doc.parent, filename=doc.filename)
 
