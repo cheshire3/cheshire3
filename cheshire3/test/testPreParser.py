@@ -30,6 +30,7 @@ from cheshire3.preParser import PreParser, UnicodeDecodePreParser, \
     MarcToXmlPreParser, MarcToSgmlPreParser, TxtToXmlPreParser,\
     PicklePreParser, UnpicklePreParser, \
     B64EncodePreParser, B64DecodePreParser,\
+    LZ4CompressPreParser, LZ4DecompressPreParser,\
     CharacterEntityPreParser, DataChecksumPreParser
     
 from cheshire3.test.testConfigParser import Cheshire3ObjectTestCase
@@ -596,6 +597,48 @@ class B64DecodePreParserTestCase(ImplementedPreParserTestCase):
             u"Returned document content not as expected")
 
 
+class LZ4CompressPreParserTestCase(ImplementedPreParserTestCase):
+    """Cheshire3 LZ4CompressPreParser Unittests."""
+
+    @classmethod
+    def _get_class(self):
+        return LZ4CompressPreParser
+
+    @classmethod
+    def _get_testUnicode(self):
+        return u'red lorry, yellow lorry,' * 50
+
+    def test_process_document_returnContent(self):
+        if self.inDoc is None:
+            self.skipTest("No test Document available")
+        self.assertEqual(
+            self.outDoc.text,
+            '\xb0\x04\x00\x00\xf3\x02red lorry, yellow\x0e\x00\x0f\x18\x00'
+            '\xff\xff\xff\xff\x84Porry,',
+            u"Returned document content not as expected")
+
+
+class LZ4DecompressPreParserTestCase(ImplementedPreParserTestCase):
+    """Cheshire3 LZ4DecompressPreParser Unittests."""
+
+    @classmethod
+    def _get_class(self):
+        return LZ4DecompressPreParser
+
+    @classmethod
+    def _get_testUnicode(self):
+        return ('\xb0\x04\x00\x00\xf3\x02red lorry, yellow\x0e\x00\x0f\x18\x00'
+                '\xff\xff\xff\xff\x84Porry,')
+
+    def test_process_document_returnContent(self):
+        if self.inDoc is None:
+            self.skipTest("No test Document available")
+        self.assertEqual(
+            self.outDoc.text,
+            u'red lorry, yellow lorry,' * 50,
+            u"Returned document content not as expected")
+
+
 class CharacterEntityPreParserTestCase(ImplementedPreParserTestCase):
     
     @classmethod
@@ -737,6 +780,8 @@ def load_tests(loader, tests, pattern):
     suite.addTests(ltc(UnpicklePreParserTestCase))
     suite.addTests(ltc(B64EncodePreParserTestCase))
     suite.addTests(ltc(B64DecodePreParserTestCase))
+    suite.addTests(ltc(LZ4CompressPreParserTestCase))
+    suite.addTests(ltc(LZ4DecompressPreParserTestCase))
     suite.addTests(ltc(CharacterEntityPreParserTestCase))
     suite.addTests(ltc(DataChecksumPreParserTestCase))
     suite.addTests(ltc(SHA1DataChecksumPreParserTestCase))
