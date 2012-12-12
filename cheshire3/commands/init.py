@@ -387,6 +387,42 @@ def create_defaultConfigIndexes():
     return config
 
 
+def create_defaultConfigWorkflows():
+    """Create and return configuration for Workflows."""
+    config = CONF.config(
+        CONF.subConfigs(
+            CONF.subConfig(
+                {'type': "workflow",
+                 'id': "XmlToLZ4Workflow"},
+                CONF.docs("Workflow to take a Record and compress the XML data"
+                          " with the lz4 algorithm"),
+                CONF.objectType("cheshire3.workflow.CachingWorkflow"),
+                CONF.workflow(
+                    CONF.object({'type': "transformer",
+                                 'ref': "XmlTransformer"}),
+                    CONF.object({'type': "preParser",
+                                 'ref': "LZ4CompressPreParser"}),
+                ),
+            ),
+            CONF.subConfig(
+                {'type': "workflow",
+                 'id': "LZ4ToLxmlWorkflow"},
+                CONF.docs("Workflow to take a Document containing data "
+                          "compressed with the lz4 algorithm, decompress and "
+                          "parse into an LxmlRecord"),
+                CONF.objectType("cheshire3.workflow.CachingWorkflow"),
+                CONF.workflow(
+                    CONF.object({'type': "preParser",
+                                 'ref': "LZ4DecompressPreParser"}),
+                    CONF.object({'type': "parser",
+                                 'ref': "LxmlParser"}),
+                ),
+            ),
+        ),
+    )
+    return config
+
+
 def create_defaultZeerex(identifier, args):
     """Create and return ZeeRex (to be used for CQL + SRU protocolMap).
     
@@ -627,6 +663,13 @@ Please specify a different id using the --database option.""".format(dbid)
     path = os.path.join(c3_dir, 'configIndexes.xml')
     dbConfig = include_configByPath(dbConfig, path)
     xmlFilesToWrite[path] = indexConfig
+    
+    # Generate config for default Workflows
+    workflowConfig = create_defaultConfigWorkflows()
+    path = os.path.join(c3_dir, 'configWorkflows.xml')
+    dbConfig = include_configByPath(dbConfig, path)
+    xmlFilesToWrite[path] = workflowConfig
+    
     # Write configs to files
     for path, node in xmlFilesToWrite.iteritems():
         with open(path, 'w') as conffh:
