@@ -324,11 +324,39 @@ def create_defaultConfigIndexes():
                     ),
                 ),
             ),
+            # Title Index
+            CONF.subConfig(
+                {'type': "index",
+                 'id': "idx-title"},
+                CONF.docs("Title Index"),
+                CONF.objectType("cheshire3.index.SimpleIndex"),
+                CONF.paths(
+                    CONF.object({'type': "indexStore",
+                                 'ref': "indexStore"}),
+                ),
+                # Source when processing data and exact queries
+                CONF.source(
+                    CONF.selector({'ref': "titleXPathSelector"}),
+                    CONF.process(
+                        CONF.object({'type': "extractor",
+                                  'ref': "SimpleExtractor"}),
+                        CONF.object({'type': "normalizer",
+                                  'ref': "SpaceNormalizer"}),
+                        CONF.object({'type': "normalizer",
+                                  'ref': "DiacriticNormalizer"}),
+                        CONF.object({'type': "normalizer",
+                                  'ref': "CaseNormalizer"}),
+                    ),
+                ),
+                CONF.options(
+                    CONF.setting({'type': "sortStore"}, "1")
+                ),
+            ),
             # Title Keyword Index
             CONF.subConfig(
                 {'type': "index",
                  'id': "idx-title-kwd"},
-                CONF.docs("Title Index"),
+                CONF.docs("Title Keywords Index"),
                 CONF.objectType("cheshire3.index.SimpleIndex"),
                 CONF.paths(
                     CONF.object({'type': "indexStore",
@@ -353,7 +381,7 @@ def create_defaultConfigIndexes():
                 ),
                 # Source when processing all, any, = queries
                 CONF.source(
-                    {'mode': "all|any|="},
+                    {'mode': "all|any"},
                     CONF.process(
                         CONF.object({'type': "extractor",
                                   'ref': "SimpleExtractor"}),
@@ -369,7 +397,7 @@ def create_defaultConfigIndexes():
                 ),
                 # Source when processing exact queries
                 CONF.source(
-                    {'mode': "exact"},
+                    {'mode': "exact|="},
                     CONF.process(
                         CONF.object({'type': "extractor",
                                   'ref': "SimpleExtractor"}),
@@ -545,16 +573,36 @@ def create_defaultZeerex(identifier, args):
                      ),
                      Z.index(
                          {'{http://www.cheshire3.org/schemas/explain/}index':
-                          "idx-title-kwd"},
-                         Z.title("Title Keywords"),
+                          "idx-title"},
+                         Z.title("Title"),
                          Z.map(
                              Z.name({'set': "dc"}, "title"),
                          ),
                          Z.configInfo(
+                             Z.supports({'type': "relation"}, "exact"),
                              Z.supports({'type': "relation"}, "="),
-                             Z.supports({'type': "relation"}, "any"),
-                             Z.supports({'type': "relation"}, "all"),
-                             Z.supports({'type': "relationModifier"}, "word"),
+                             Z.supports(
+                                 {'type': "relation",
+                                  '{{{0}}}index'.format(Z._nsmap['c3']):
+                                  "idx-title-kwd"},
+                                 "any"),
+                             Z.supports(
+                                 {'type': "relation",
+                                  '{{{0}}}index'.format(Z._nsmap['c3']):
+                                  "idx-title-kwd"},
+                                 "all"),
+                             Z.supports({'type': "relationModifier"},
+                                        "string"),
+                             Z.supports(
+                                 {'type': "relationModifier",
+                                  '{{{0}}}index'.format(Z._nsmap['c3']):
+                                  "idx-title-kwd"},
+                                 "word"),
+                             Z.supports(
+                                 {'type': "relationModifier",
+                                  '{{{0}}}index'.format(Z._nsmap['c3']):
+                                  "idx-title-kwd"},
+                                 "stem"),
                          ),
                      ),
                  ),
