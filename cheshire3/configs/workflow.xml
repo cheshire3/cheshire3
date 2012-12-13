@@ -50,6 +50,47 @@
         <object type="parser" ref="MagicRedirectPreParser"/>
       </workflow>
     </subConfig>
+    
+    <subConfig type="workflow" id="ReSTToMetsPreParserWorkflow">
+    	<docs>Converts ReStructuredText to METS wrapped XML.</docs>
+    	<objectType>cheshire3.workflow.SimpleWorkflow</objectType>
+    	<workflow>
+    		<!-- input type: Document -->
+    		<object type="preParser" ref="RstToXmlPreParser"/>
+    		<object type="preParser" ref="METSWrappingPreParser"/>
+    	</workflow>
+    </subConfig>
+    
+    <subConfig type="workflow" id="PdfToMetsPreParserWorkflow">
+    	<docs>Converts PDF to METS wrapped XML.</docs>
+    	<objectType>cheshire3.workflow.SimpleWorkflow</objectType>
+    	<workflow>
+    		<!-- input type: Document -->
+    		<object type="preParser" ref="PdfXmlPreParser"/>
+    		<object type="preParser" ref="METSWrappingPreParser"/>
+    	</workflow>
+    </subConfig>
+    
+    <subConfig type="workflow" id="TxtToMetsPreParserWorkflow">
+    	<docs>Convert plain-text to METS wrapped XML</docs>
+    	<objectType>cheshire3.workflow.SimpleWorkflow</objectType>
+    	<workflow>
+    		<!-- input type: Document -->
+    		<object type="preParser" ref="TxtToXmlPreParser"/>
+    		<object type="preParser" ref="METSWrappingPreParser"/>
+    	</workflow>
+    </subConfig>
+    
+    <subConfig type="workflow" id="HtmlToMetsPreParserWorkflow">
+    	<docs>Convert HTML to METS wrapped XML</docs>
+    	<objectType>cheshire3.workflow.SimpleWorkflow</objectType>
+    	<workflow>
+    		<!-- input type: Document -->
+    		<object type="preParser" ref="HtmlFixupPreParser"/>
+    		<object type="preParser" ref="METSWrappingPreParser"/>
+    	</workflow>
+    </subConfig>
+    
   </subConfigs>
 
 </config>

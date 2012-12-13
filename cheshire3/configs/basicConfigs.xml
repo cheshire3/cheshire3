@@ -68,6 +68,10 @@
 	  <objectType>cheshire3.preParser.GzipPreParser</objectType>
 	</subConfig>
 	
+	<subConfig type="preParser" id="GunzipPreParser">
+	  <objectType>cheshire3.preParser.GunzipPreParser</objectType>
+	</subConfig>
+	
 	<subConfig type="preParser" id="Bzip2PreParser">
       <objectType>cheshire3.preParser.Bzip2PreParser</objectType>
     </subConfig>
@@ -87,6 +91,9 @@
 	</subConfig>
 	<subConfig type="preParser" id="HtmlSmashPreParser">
 	  <objectType>cheshire3.preParser.HtmlSmashPreParser</objectType>
+	</subConfig>
+	<subConfig type="preParser" id="HtmlFixupPreParser">
+	  <objectType>cheshire3.preParser.HtmlFixupPreParser</objectType>
 	</subConfig>
 	
 	<subConfig type="preParser" id="Latin1PreParser">
@@ -209,6 +216,18 @@
 
 	<subConfig type="preParser" id="TxtToXmlPreParser">
 	  <objectType>cheshire3.preParser.TxtToXmlPreParser</objectType>
+	</subConfig>
+	
+	<subConfig type="preParser" id="RstToXmlPreParser">
+	  <objectType>cheshire3.preParser.RstToXmlPreParser</objectType>
+	</subConfig>
+	
+	<subConfig type="preParser" id="METSWrappingPreParser">
+	  <objectType>cheshire3.preParser.METSWrappingPreParser</objectType>
+	</subConfig>
+	
+	<subConfig type="preParser" id="ZIPToMETSPreParser">
+	  <objectType>cheshire3.preParser.ZIPToMETSPreParser</objectType>
 	</subConfig>
 	
 	<!-- Extractor objects -->

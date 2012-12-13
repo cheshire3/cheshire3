@@ -123,12 +123,20 @@ class FileDocumentStream(BaseDocumentStream):
     u"""Reads in a single file."""
 
     def find_documents(self, session, cache=0):
+        doc = StringDocument(self.stream.read(),
+                             filename=self.streamLocation
+                             )
+        # Attempt to guess the mime-type
+        mimetype = mimetypes.guess_type(self.streamLocation, 0)
+        if mimetype[0]:
+            doc.mimeType = mimetype[0]
+        if mimetype[1]:
+            doc.compression = mimetype[1]
+        # Return/Yield Document
         if cache == 0:
-            yield StringDocument(self.stream.read(), 
-                                 filename=self.streamLocation)
+            yield doc
         elif cache == 2:
-            self.documents = [StringDocument(self.stream.read(), 
-                                             filename=self.streamLocation)]
+            self.documents = [doc]
 
 
 class TermHashDocumentStream(BaseDocumentStream):

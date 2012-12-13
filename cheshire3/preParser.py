@@ -25,14 +25,18 @@ except ImportError:
 from xml.sax.saxutils import escape
 from warnings import warn
 from lxml import etree
+from lxml import html
+from lxml.builder import ElementMaker
 from base64 import b64encode, b64decode
+from zipfile import ZipFile
+from docutils.core import publish_string
 
 # Intra-package imports
 from cheshire3.baseObjects import PreParser
 from cheshire3.document import StringDocument
 from cheshire3.internal import CONFIG_NS
 from cheshire3.marc_utils import MARC
-from cheshire3.utils import getShellResult
+from cheshire3.utils import getShellResult, gen_uuid
 from cheshire3.exceptions import ConfigFileException, ExternalSystemException
 
 
@@ -308,15 +312,32 @@ class MagicRedirectPreParser(TypedPreParser):
                     self.mimeTypeHash[mt] = ref
 
     def __init__(self, session, config, parent):
-        self.mimeTypeHash = {"application/x-gzip": "GunzipPreParser",
-                             "application/postscript": "PsPdfPreParser",
-                             "application/pdf": "PdfXmlPreParser",
-                             "text/html": "HtmlSmashPreParser",
-                             "text/plain": "TxtToXmlPreParser",
-                             "text/sgml": "SgmlPreParser",
-                             "application/x-bzip2": "BzipPreParser"
-                             # "application/x-zip": "single zip preparser ?"
-                             }
+        self.mimeTypeHash = {
+            "application/x-gzip": "GunzipPreParser",
+            "application/postscript": "PsPdfPreParser",
+            "application/pdf": "PdfXmlPreParser",
+            "text/html": "HtmlSmashPreParser",
+            "text/plain": "TxtToXmlPreParser",
+            "text/prs.fallenstein.rst": "RstToXmlPreParser",
+            "text/sgml": "SgmlPreParser",
+            "application/x-bzip2": "BzipPreParser",
+            "application/zip": "ZIPToMETSPreParser",
+            ("application/vnd.openxmlformats-officedocument."
+             "wordprocessingml.document"): "ZIPToMETSPreParser",    # Word
+            ("application/vnd.openxmlformats-officedocument."
+             "presentationml.presentation"): "ZIPToMETSPreParser",  # PPT
+            ("application/vnd.openxmlformats-officedocument."
+             "spreadsheetml.sheet"): "ZIPToMETSPreParser",          # Excel
+            ("application/vnd.oasis.opendocument."
+             "text"): "ZIPToMETSPreParser",             # ODF Text
+            ("application/vnd.oasis.opendocument."
+             "presentation"): "ZIPToMETSPreParser",     # ODF Presentation
+            ("application/vnd.oasis.opendocument."
+             "spreadsheet"): "ZIPToMETSPreParser",      # ODF Spreadsheet(s)
+            ("application/vnd.oasis.opendocument."
+             "graphics"): "ZIPToMETSPreParser"          # ODF Graphic
+            # "application/x-zip": "single zip preparser ?"
+        }
 
         # Now override from config in init:
         TypedPreParser.__init__(self, session, config, parent)
@@ -335,7 +356,11 @@ class MagicRedirectPreParser(TypedPreParser):
                 mts = mimetypes.guess_type(doc.filename)
                 if mts and mts[0]:
                     mt = mts[0]
-        if mt in self.mimeTypeHash:
+        if mt in self.mimeTypeHash or "*" in self.mimeTypeHash:
+            if mt not in self.mimeTypeHash:
+                # There is a * mime-type
+                # Something to be done for any unmatched type
+                mt = '*'
             redirect = db.get_object(session, self.mimeTypeHash[mt])
             if isinstance(redirect, PreParser):
                 return redirect.process_document(session, doc)
@@ -387,6 +412,26 @@ class HtmlSmashPreParser(PreParser):
         return StringDocument(data, self.id, doc.processHistory,
                               mimeType=doc.mimeType, parent=doc.parent,
                               filename=doc.filename) 
+
+
+class HtmlFixupPreParser(PreParser):
+    """Attempt to fix up HTML to make it complete and parseable XML.
+    
+    Uses the lxml.html package so as to preserve as much of the intended
+    structure as possible.
+    """
+
+    def process_document(self, session, doc):
+        root = html.document_fromstring(doc.get_raw(session))
+        try:
+            # Remove any xmlns to avoid duplication, and hence failed parsing
+            del root.attrib['xmlns']
+        except KeyError:
+            pass
+        data = etree.tostring(root)
+        return StringDocument(data, self.id, doc.processHistory,
+                              mimeType=doc.mimeType, parent=doc.parent,
+                              filename=doc.filename)
 
 
 class RegexpSmashPreParser(PreParser):
@@ -612,6 +657,24 @@ class TxtToXmlPreParser(PreParser):
         return StringDocument(data, self.id, doc.processHistory,
                               mimeType='text/xml', parent=doc.parent,
                               filename=doc.filename)
+
+
+class RstToXmlPreParser(PreParser):
+    """Convert reStructuredText into Docutils-native XML."""
+
+    inMimeType = "text/prs.fallenstein.rst"
+    outMimeType = "application/xml"
+
+    def process_document(self, session, doc):
+        rst = doc.get_raw(session)
+        data = publish_string(rst, writer_name="xml")
+        return StringDocument(data,
+                              self.id,
+                              doc.processHistory,
+                              mimeType=self.outMimeType,
+                              parent=doc.parent,
+                              filename=doc.filename
+                              )
 
 
 #  --- Compression PreParsers ---
@@ -1059,3 +1122,182 @@ class DataChecksumPreParser(PreParser):
             doc.metadata['checksum'] = md
         doc.processHistory.append(self.id)
         return doc
+
+
+class METSWrappingPreParser(TypedPreParser):
+    """PreParser to wrap any Document content in METS XML."""
+    
+    def __init__(self, session, config, parent):
+        TypedPreParser.__init__(self, session, config, parent)
+        # Over-ride if missing outgoing mime-type
+        if not self.outMimeType:
+            self.outMimeType = 'application/xml'
+
+    def _get_metsWrapper(self, doc):
+        # Get a generic METS wrapper for the given Document
+        # Find/Generate identifiers and labels
+        objid = gen_uuid()
+        # Set up METS root and header
+        mets = METS.mets(
+            {'ID': '/'.join([objid, 'mets']),
+             'OBJID': objid,
+             'TYPE': 'ZIPFILE'
+             },
+            METS.metsHdr(
+                {'ID': '/'.join([objid, 'metsHdr']),
+                 'CREATEDDATE': time.strftime('%Y-%m-%dT%H:%M:%S%Z')
+                 },
+                METS.agent(
+                    {'ROLE': "CREATOR",
+                     'TYPE': "OTHER",
+                     'OTHERTYPE': 'SOFTWARE'
+                     },
+                    METS.name("Cheshire3"),
+                    METS.note("METS instance was created by a Cheshire3 object"
+                              " of type {0} identified as {1}"
+                              "".format(type(self).__name__, self.id)
+                    )
+                )
+            ),
+            METS.dmdSec(),
+            METS.amdSec(),
+            METS.fileSec(
+                METS.fileGrp({'ID': '/'.join([objid, 'fileGrp', '0001'])})
+            )
+        )
+        # Set a human readable label if possible
+        if doc.filename:
+            mets.set("LABEL", os.path.abspath(doc.filename))
+        elif doc.id:
+            mets.set("LABEL", doc.id)
+        return mets
+
+    def _get_metsFile(self, identifier, rawdata, size=0, mimeType=""):
+        # Get a METS file element for the given data
+        file_ = METS.file({'ID': identifier,
+                           }
+        )
+        # Create a METS FContent element
+        FContent = METS.FContent()
+        file_.append(FContent)
+        # Try to set size
+        if size:
+            file_.attrib["SIZE"] = str(size)
+        else:
+            file_.attrib["SIZE"] = str(len(rawdata))
+        # Attempt to add the MIME-Type
+        if mimeType == "text/xml":
+            # Fix broken MIME-Type
+            file_.attrib['MIMETYPE'] = 'application/xml'
+        elif mimeType:
+            file_.attrib['MIMETYPE'] = mimeType
+        # Add the content as either XML or binary (Base 64) data
+        try:
+            # Attempt to parse file content as XML
+            xmldata = etree.fromstring(rawdata)
+        except etree.XMLSyntaxError:
+            # Encode as Base64
+            FContent.append(METS.binData(b64encode(rawdata)))
+        else:
+            FContent.append(METS.xmlData(xmldata))
+        return file_
+
+    def process_document(self, session, doc):
+        global METS_NAMESPACES
+        mets = self._get_metsWrapper(doc)
+        objid = mets.get("OBJID")
+        # Get the fileSec element
+        fileGrp = mets.xpath('/mets:mets/mets:fileSec/mets:fileGrp[1]',
+                             namespaces=METS_NAMESPACES)[0]
+        file_ = self._get_metsFile(
+            '/'.join([objid,
+                      mets.attrib.get("LABEL", "file0001")
+                      ]),
+            doc.get_raw(session),
+            doc.byteCount,
+            doc.mimeType
+        )
+        # Append the file element to fileGrp
+        fileGrp.append(file_)
+        # Update last modification date
+        mets.attrib['LASTMODDATE'] = time.strftime('%Y-%m-%dT%H:%M:%S%Z')
+        # Serialize METS
+        data = etree.tostring(mets, pretty_print=True)
+        # Return a Document
+        return StringDocument(
+            data,
+            self.id,
+            doc.processHistory,
+            self.outMimeType,
+            parent=doc.parent,
+            filename=doc.filename,
+            byteCount=len(data),
+            byteOffset=0
+        )
+
+
+class ZIPToMETSPreParser(METSWrappingPreParser):
+    """PreParser to process a ZIP file to METS XML.
+    
+    As Office Open XML format and OpenDocument format Documents are based on
+    ZIP files, this PreParser can also be used to unpack them, and wrap their
+    component parts in METS.
+
+    Office Open XML (a.k.a. OpenXML, OOXML) is the name for ECMA 376 office
+    file formats used by default in Microsoft Office 2007 onwards (.docx,
+    .xlsx , .pptx etc.) It is available as an import/export format in
+    LibreOffice, OpenOffice >= 3.2, Google Docs and more.
+    
+    """
+
+    def process_document(self, session, doc):
+        global METS_NAMESPACES
+        mets = self._get_metsWrapper(doc)
+        objid = mets.get("OBJID")
+        # Get the fileSec element
+        fileGrp = mets.xpath('/mets:mets/mets:fileSec/mets:fileGrp[1]',
+                             namespaces=METS_NAMESPACES)[0]
+        # Make raw data of incoming document file-like
+        stringio = StringIO.StringIO(doc.get_raw(session))
+        # Read file-like object as a ZIP file
+        with ZipFile(stringio, 'r') as zf:
+            # Iterate through the zipped files
+            for zipinfo in zf.infolist():
+                # Attempt to get the MIME-Type
+                mts = mimetypes.guess_type(zipinfo.filename)
+                if mts and mts[0]:
+                    mimeType = mts[0]
+                else:
+                    mimeType = ""
+                file_ = self._get_metsFile(
+                    '/'.join([objid, zipinfo.filename]),
+                    zf.read(zipinfo),
+                    str(zipinfo.file_size),
+                    mimeType
+                )
+                # Append the file element to fileGrp
+                fileGrp.append(file_)
+        # Update last modification date
+        mets.attrib['LASTMODDATE'] = time.strftime('%Y-%m-%dT%H:%M:%S%Z')
+        # Serialize METS
+        data = etree.tostring(mets, pretty_print=True)
+        # Return a Document
+        return StringDocument(
+            data,
+            self.id,
+            doc.processHistory,
+            self.outMimeType,
+            parent=doc.parent,
+            filename=doc.filename,
+            byteCount=len(data),
+            byteOffset=0
+        )
+
+
+# Set up ElementMaker for METS and XLink namespaces
+METS_NAMESPACES = {'mets': "http://www.loc.gov/METS/",
+                   'xlink': "http://www.w3.org/1999/xlink"
+                   }
+METS = ElementMaker(namespace=METS_NAMESPACES['mets'],
+                    nsmap=METS_NAMESPACES
+                    )

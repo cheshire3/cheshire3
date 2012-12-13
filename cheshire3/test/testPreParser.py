@@ -26,7 +26,8 @@ from base64 import b64encode
 from cheshire3.document import Document, StringDocument
 from cheshire3.preParser import PreParser, UnicodeDecodePreParser, \
     CmdLinePreParser, FileUtilPreParser,\
-    HtmlSmashPreParser, RegexpSmashPreParser, SgmlPreParser, AmpPreParser, \
+    HtmlSmashPreParser, HtmlFixupPreParser, RegexpSmashPreParser,\
+    SgmlPreParser, AmpPreParser, \
     MarcToXmlPreParser, MarcToSgmlPreParser, TxtToXmlPreParser,\
     PicklePreParser, UnpicklePreParser, \
     B64EncodePreParser, B64DecodePreParser,\
@@ -293,6 +294,29 @@ class HtmlSmashPreParserTestCase(ImplementedPreParserTestCase):
     @classmethod
     def _get_class(self):
         return HtmlSmashPreParser
+
+
+class HtmlFixupPreParserTestCase(ImplementedPreParserTestCase):
+    """Cheshire3 HtmlFixupPreParser Unittests.
+
+    An HtmlFixupPreParser attempts to fix up HTML to make it complete and
+    parseable XML.
+    """
+
+    @classmethod
+    def _get_class(self):
+        return HtmlFixupPreParser
+
+    @classmethod
+    def _get_testUnicode(self):
+        return u'<body>A Document with an <img alt=image></body>'
+
+    def test_process_document_returnContent(self):
+        if self.inDoc is None:
+            self.skipTest("No test Document available")
+        self.assertEqual(
+            self.outDoc.text,
+            u'<html><body>A Document with an <img alt="image"/></body></html>')
 
 
 class RegexpSmashPreParserTestCase(ImplementedPreParserTestCase):
@@ -767,6 +791,7 @@ def load_tests(loader, tests, pattern):
     suite.addTests(ltc(CmdLinePreParserInOutDocTestCase))
     suite.addTests(ltc(FileUtilPreParserTestCase))
     suite.addTests(ltc(HtmlSmashPreParserTestCase))
+    suite.addTests(ltc(HtmlFixupPreParserTestCase))
     suite.addTests(ltc(RegexpSmashPreParserTestCase))
     suite.addTests(ltc(RegexpSmashPreParserStripTestCase))
     suite.addTests(ltc(RegexpSmashPreParserSubTestCase))
