@@ -86,7 +86,7 @@
     	<objectType>cheshire3.workflow.SimpleWorkflow</objectType>
     	<workflow>
     		<!-- input type: Document -->
-    		<object type="preParser" ref="HtmlSmashPreParser"/>
+    		<object type="preParser" ref="HtmlFixupPreParser"/>
     		<object type="preParser" ref="METSWrappingPreParser"/>
     	</workflow>
     </subConfig>
