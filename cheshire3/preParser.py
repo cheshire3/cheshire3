@@ -25,6 +25,7 @@ except ImportError:
 from xml.sax.saxutils import escape
 from warnings import warn
 from lxml import etree
+from lxml import html
 from lxml.builder import ElementMaker
 from base64 import b64encode, b64decode
 from zipfile import ZipFile
@@ -411,6 +412,22 @@ class HtmlSmashPreParser(PreParser):
         return StringDocument(data, self.id, doc.processHistory,
                               mimeType=doc.mimeType, parent=doc.parent,
                               filename=doc.filename) 
+
+
+class HtmlFixupPreParser(PreParser):
+    """Attempt to fix up HTML to make it complete and parseable XML.
+    
+    Uses the lxml.html package so as to preserve as much of the intended
+    structure as possible.
+    """
+
+    def process_document(self, session, doc):
+        docstring = doc.get_raw(session)
+        root = html.document_fromstring(docstring)
+        data = etree.tostring(root)
+        return StringDocument(data, self.id, doc.processHistory,
+                              mimeType=doc.mimeType, parent=doc.parent,
+                              filename=doc.filename)
 
 
 class RegexpSmashPreParser(PreParser):
