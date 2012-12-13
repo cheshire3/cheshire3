@@ -99,6 +99,8 @@ def create_defaultConfig(identifier, args):
                               'ref': "ReSTToMetsPreParserWorkflow"}),
                     CONF.object({'mimeType': "text/plain",
                                  'ref': "TxtToMetsPreParserWorkflow"}),
+                    CONF.object({'mimeType': "text/html",
+                                 'ref': "HtmlToMetsPreParserWorkflow"}),
                     CONF.object({'mimeType': "*",
                                  'ref': "METSWrappingPreParser"}),
                 ),
