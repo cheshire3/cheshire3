@@ -1,3 +1,29 @@
+1.1.0 - TBC
+
+  ENHANCEMENTS
+  
+  * Improved out-of-the-box indexing capabilities.
+  
+  	* Support for a number of common file formats:
+  	
+      * PDF
+      * HTML
+      * plain-text
+      * OpenDocument Format (LibreOffice, OpenOffice 3+)
+      * Office Open XML (Microsoft Office 2007+ - docx, pptx, xlsx etc.)
+    
+      This is achieved by preParsing to XML where possible, and wrapping all
+      formats in METS.
+
+    * Attempts to create title index entries by default
+
+    * Faster retrieval[*]_ by compressing stored records using the lz4
+      algorithm to reduce read time from disk.
+
+.. [*] Faster retrieval assuming reasonable processing power (>=2.5GHz) and
+       non solid-state storage. 
+
+
 1.0.8 - Thursday 22 November 2012
 
   DOCUMENTATION
