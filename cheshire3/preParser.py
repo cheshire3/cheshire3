@@ -422,8 +422,12 @@ class HtmlFixupPreParser(PreParser):
     """
 
     def process_document(self, session, doc):
-        docstring = doc.get_raw(session)
-        root = html.document_fromstring(docstring)
+        root = html.document_fromstring(doc.get_raw(session))
+        try:
+            # Remove any xmlns to avoid duplication, and hence failed parsing
+            del root.attrib['xmlns']
+        except KeyError:
+            pass
         data = etree.tostring(root)
         return StringDocument(data, self.id, doc.processHistory,
                               mimeType=doc.mimeType, parent=doc.parent,
