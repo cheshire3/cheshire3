@@ -35,9 +35,17 @@ cheshire3Version = (_major_version, _minor_version, _patch_version)
 cheshireVersion = cheshire3Version   # Included for backward compatibility
 
 # Find Cheshire3 environment
-cheshire3Home = os.environ.get(
-                       'C3HOME',
-                       resource_filename(Requirement.parse('cheshire3'), ''))
+try:
+    cheshire3Home = resource_filename(Requirement.parse('cheshire3'), '')
+except:
+    # Cheshire3 not yet installed; maybe in a source distro/repo checkout
+    # Assume local directory
+    cheshire3Home = '.'
+
+# Allow cheshire3Home to be over-ridden by environmental variable
+# e.g. for source code distro/repo checkout
+cheshire3Home = os.environ.get('C3HOME', cheshire3Home)
+
 cheshire3Root = os.path.join(cheshire3Home, "cheshire3")
 cheshire3Code = os.path.join(cheshire3Root)
 cheshire3Dbs = os.path.join(cheshire3Home, "dbs")
