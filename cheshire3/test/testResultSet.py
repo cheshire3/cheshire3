@@ -68,9 +68,6 @@ class SimpleResultSetItemTestCase(unittest.TestCase):
                                      resultSet=None,
                                      numeric=None)
 
-    def tearDown(self):
-        del self.a, self.b, self.c, self.d
-
     def testEquality(self):
         """Test ResultSetItem equality"""
         self.assertEqual(self.a, self.b,
@@ -111,10 +108,112 @@ class SimpleResultSetItemTestCase(unittest.TestCase):
             etree.fromstring(s)
 
 
+class SimpleResultSetTestCase(unittest.TestCase):
+
+    def setUp(self):
+        """Setup some ResultsetItems and put them into ResultSets to evaluate.
+
+        N.B. a == b, other pairs should not evaluate as equal
+        """
+        self.session = session = Session()
+        # Set up same 4 ResultSetItems as for SimpleResultSetItemTestCase
+        self.rsi1 = SimpleResultSetItem(session,
+                                        id=0,
+                                        recStore="recordStore",
+                                        occs=0,
+                                        database="",
+                                        diagnostic=None,
+                                        weight=0.5,
+                                        resultSet=None,
+                                        numeric=None)
+        self.rsi2 = SimpleResultSetItem(session,
+                                        id=0,
+                                        recStore="recordStore",
+                                        occs=0,
+                                        database="",
+                                        diagnostic=None,
+                                        weight=0.5,
+                                        resultSet=None,
+                                        numeric=None)
+        self.rsi3 = SimpleResultSetItem(session,
+                                        id=1,
+                                        recStore="recordStore",
+                                        occs=0,
+                                        database="",
+                                        diagnostic=None,
+                                        weight=0.5,
+                                        resultSet=None,
+                                        numeric=None)
+        self.rsi4 = SimpleResultSetItem(session,
+                                        id=0,
+                                        recStore="recordStore2",
+                                        occs=0,
+                                        database="",
+                                        diagnostic=None,
+                                        weight=0.5,
+                                        resultSet=None,
+                                        numeric=None)
+        # Put identical (rsi1 and rsi2) into separate ResultSets
+        self.a = SimpleResultSet(session, [self.rsi1, self.rsi3], id="a")
+        self.b = SimpleResultSet(session, [self.rsi2, self.rsi4], id="b")
+
+    def testInit(self):
+        "Check initialization of ResultSet"
+        rs = SimpleResultSet(self.session)
+        # Check is instance of ResultSet
+        self.assertIsInstance(rs, ResultSet)
+        # Check is instance of SimpleResultSet
+        self.assertIsInstance(rs, SimpleResultSet)
+        # Check is empty
+        self.assertEqual(len(rs), 0)
+
+    def testInstance(self):
+        "Check that ResultSet instances are of expected class."
+        self.assertIsInstance(self.a, SimpleResultSet)
+        self.assertIsInstance(self.b, SimpleResultSet)
+
+    def testLen(self):
+        "Check that len(ResultSet) returns correct length."
+        self.assertEqual(len(self.a), 2)
+        self.assertEqual(len(self.b), 2)
+
+    def testGetitem(self):
+        "Check that built-in __getitem__ returns appropriate values"
+        self.assertEqual(self.a[0], self.rsi1)
+        self.assertEqual(self.a[1], self.rsi3)
+        self.assertEqual(self.b[0], self.rsi2)
+        self.assertEqual(self.b[1], self.rsi4)
+
+    def testFromList(self):
+        "Check population of SimpleResultSet using fromList method."
+        rs = SimpleResultSet(self.session)
+        self.assertEqual(len(rs), 0)
+        self.assertIsInstance(rs, SimpleResultSet)
+        rs.fromList([self.rsi1, self.rsi3])
+        for x, y in zip(self.a, rs):
+            self.assertEqual(x, y)
+
+    def testAppend(self):
+        rs = SimpleResultSet(self.session)
+        self.assertEqual(len(rs), 0)
+        rs.append(self.rsi1)
+        self.assertEqual(len(rs), 1)
+        self.assertEqual(rs[-1], self.rsi1)
+
+    def testExtend(self):
+        rs = SimpleResultSet(self.session)
+        self.assertEqual(len(rs), 0)
+        rs.extend([self.rsi1, self.rsi2])
+        self.assertEqual(len(rs), 2)
+        self.assertEqual(rs[0], self.rsi1)
+        self.assertEqual(rs[1], self.rsi2)
+        
+
 def load_tests(loader, tests, pattern):
     # Alias loader.loadTestsFromTestCase for sake of line lengths
     ltc = loader.loadTestsFromTestCase
     suite = ltc(SimpleResultSetItemTestCase)
+    suite.addTests(ltc(SimpleResultSetTestCase))
     return suite
 
 
