@@ -285,7 +285,7 @@ class SimpleResultSet(RankedResultSet):
         if (db):
             totalDocs = db.totalItems
             if totalDocs == 0:
-                raise ValueErorr("No documents in database?")
+                raise ValueError("No documents in database?")
         else:
             # Uhoh
             raise NameError("Database not supplied to relevancy algorithm")
