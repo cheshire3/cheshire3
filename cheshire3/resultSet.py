@@ -1341,7 +1341,7 @@ class BitmapResultSet(ResultSet):
         raise NotImplementedError()
 
     def retrieve(self, numReq, start, cache=0):
-        end = min(start + numrecs + 1, len(self))
+        end = min(start + numReq + 1, len(self))
         recs = []
         # XXX This should cache server, db and resultSet
         for r in range(start, end):
