@@ -1,3 +1,16 @@
+CHANGES
+=======
+
+1.0.9 - Tuesday 18 December 2012
+
+  BUG FIXES
+  
+  * Fixed typo in cheshire3.resultSet
+    ValueErorr -> ValueError
+
+  * Fixed mutable type default data argument to SimpleResultSet constructor  
+
+
 1.0.8 - Thursday 22 November 2012
 
   DOCUMENTATION
