@@ -26,9 +26,10 @@ srlz_typehash = {int: 'int',
                  long: 'long',
                  str: 'str',
                  unicode: 'unicode',
-                 bool: 'bool', 
-                 type(None): 'None', 
-                 float: 'float'}
+                 bool: 'bool',
+                 type(None): 'None',
+                 float: 'float'
+                 }
 
 dsrlz_typehash = {}
 for k, v in srlz_typehash.iteritems():
@@ -57,7 +58,9 @@ class RankedResultSet(ResultSet):
     def _normWeights(self, items, n):
         """Normalize the values and average them."""
         for i in items:
-            i.weight = i.weight * (i.resultSet.minWeight / i.resultSet.maxWeight)
+            i.weight = (i.weight *
+                        (i.resultSet.minWeight / i.resultSet.maxWeight)
+                        )
         return self._meanWeights(items, n)
 
     def  _cmbzWeights(self, a, b):
@@ -65,7 +68,7 @@ class RankedResultSet(ResultSet):
         a.weight = a.weight * (self.minWeight / self.maxWeight)
         if b:
             b.weight = b.weight * (self.minWeight / self.maxWeight)
-            a.weight = (a.weight + b.weight) *  2.0
+            a.weight = (a.weight + b.weight) * 2.0
         else:
             a.weight = a.weight / 2.0
 
@@ -74,18 +77,22 @@ class RankedResultSet(ResultSet):
         a.weight = a.weight * (self.minWeight / self.maxWeight)
         if b:
             b.weight = b.weight * (self.minWeight / self.maxWeight)
-            a.weight = (a.weight + b.weight) *  2.0
+            a.weight = (a.weight + b.weight) * 2.0
         else:
             # Leave high ranking ones high
             rlen = len(a.resultSet._list)
-            if (( rlen > 150 and item.resultSetPosition > 100)
-                or (rlen < 150 and item.resultSetPosition > rlen/2)):
-                a.weight = a.weight  / 2.0
+            # FIXME: item undefined
+            if (
+                    (rlen > 150 and item.resultSetPosition > 100) or
+                    (rlen < 150 and item.resultSetPosition > rlen / 2)):
+                a.weight = a.weight / 2.0
 
     def _pivotWeights(self, a, b):
-        """Determine which item is component set, and which item is from document set
-        If the component's parent document's id is the same as the one in the
-        full document list, then adjust
+        """Pivot weight of components if the document also occurs in the set.
+        
+        Determine which item is component set, and which item is from document
+        set. If the component's parent document's id is the same as the one in
+        the full document list, then adjust.
 
         Normalize min/max as above
         Pivot default is 0.7, but allow override
@@ -94,8 +101,8 @@ class RankedResultSet(ResultSet):
         If not in the list then just ((1-pivot) * componentScore)
         """
         raise NotImplementedError
-    
-    
+
+
 class SimpleResultSet(RankedResultSet):
     _list = []
 
@@ -123,13 +130,24 @@ class SimpleResultSet(RankedResultSet):
 
     def __init__(self, session, data=None, id="", recordStore=""):
         self.rsiConstructor = SimpleResultSetItem
-        self.attributesToSerialize = [('id', ''), ('termid', -1), ('totalOccs', 0),
-                     ('totalRecs', 0), ('expires', 0), ('queryTerm', ''),
-                     ('queryFreq', 0), ('queryPositions', []), ('relevancy', 0),
-                     ('maxWeight', 0), ('minWeight', 0), ('termWeight', 0.0),
-                     ('recordStore', ''), ('recordStoreSizes', 0), ('index', None),
-                     ('queryTime', 0.0), ('query', '')
-                     ]
+        self.attributesToSerialize = [('id', ''),
+                                      ('termid', -1),
+                                      ('totalOccs', 0),
+                                      ('totalRecs', 0),
+                                      ('expires', 0),
+                                      ('queryTerm', ''),
+                                      ('queryFreq', 0),
+                                      ('queryPositions', []),
+                                      ('relevancy', 0),
+                                      ('maxWeight', 0),
+                                      ('minWeight', 0),
+                                      ('termWeight', 0.0),
+                                      ('recordStore', ''),
+                                      ('recordStoreSizes', 0),
+                                      ('index', None),
+                                      ('queryTime', 0.0),
+                                      ('query', '')
+                                      ]
         if data is not None:
             self._list = list(data)
         else:
@@ -138,9 +156,9 @@ class SimpleResultSet(RankedResultSet):
         self.recordStore = recordStore
         
         self.relevanceContextSets = {
-        	"info:srw/cql-context-set/2/relevance-1.0": 1.0, 
-        	"info:srw/cql-context-set/2/relevance-1.1": 1.1, 
-        	"info:srw/cql-context-set/2/relevance-1.2": 1.2
+            "info:srw/cql-context-set/2/relevance-1.0": 1.0, 
+            "info:srw/cql-context-set/2/relevance-1.1": 1.1, 
+            "info:srw/cql-context-set/2/relevance-1.2": 1.2
         }
         
         self.termid = -1
@@ -184,14 +202,20 @@ class SimpleResultSet(RankedResultSet):
             val = getattr(self, a)
             if val != deft:
                 if type(val) in [dict, list, tuple]:
-                    valstr = pickle.dumps(val)#, pickle.HIGHEST_PROTOCOL) # use later version of pickle protocol to deal with new-style classes, unicode etc.
-                    xml.append(u'<d n="%s" t="pickle">%s</d>' % (a, ucescape(valstr)))
+                    # Use later version of pickle protocol to deal with
+                    # new-style classes, unicode etc.
+                    valstr = pickle.dumps(val)  # , pickle.HIGHEST_PROTOCOL) 
+                    xml.append(u'<d n="%s" t="pickle">%s</d>' %
+                               (a, ucescape(valstr)))
                 elif isinstance(val, Index):
-                    xml.append(u'<d n="%s" t="object">%s</d>' % (a, escape(val.id)))
+                    xml.append(u'<d n="%s" t="object">%s</d>' %
+                               (a, escape(val.id)))
                 elif a == 'query' and val:
-                    xml.append(u'<d n="%s" t="cql">%s</d>' % (a, escape(val.toCQL())))
+                    xml.append(u'<d n="%s" t="cql">%s</d>' %
+                               (a, escape(val.toCQL())))
                 else:
-                    xml.append(u'<d n="%s" t="%s">' % (a, srlz_typehash.get(type(val), '')))
+                    xml.append(u'<d n="%s" t="%s">' %
+                               (a, srlz_typehash.get(type(val), '')))
                     if type(val) in [int, long, float, bool, None]:
                         xml.append(escape(unicode(val)))
                     else:
@@ -201,7 +225,7 @@ class SimpleResultSet(RankedResultSet):
         for item in self:
             xml.append(item.serialize(session, pickleOk))
         xml.append(u'</resultSet>')
-        all =  u''.join(xml)
+        all = u''.join(xml)
         return all.encode('utf-8')
     
     # TODO: fix nasty rename hack
@@ -212,7 +236,11 @@ class SimpleResultSet(RankedResultSet):
         # This is blindingly fast compared to old version!
 
         def value_of(elem):
-            #typehash = {'int' : int, 'long' : long, 'bool' : bool, 'float' : float}
+            # typehash = {'int': int,
+            #             'long': long,
+            #             'bool': bool,
+            #             'float': float
+            #             }
             t = elem.attrib['t']
             txt = unescape(elem.text)
             if t == 'pickle':
@@ -284,7 +312,11 @@ class SimpleResultSet(RankedResultSet):
             self.append(i)
 
     def _lrAssign(self, session, others, clause, cql, db):
-        """Assign Logistic Regression weights and merge items in resultSets in others into self in a single method."""
+        """Assign Logistic Regression weights and combine items in others.
+        
+        Assign Logistic Regression weights and merge items in resultSets in
+        others into self in a single method.
+        """
         if (db):
             totalDocs = db.totalItems
             if totalDocs == 0:
@@ -346,11 +378,11 @@ class SimpleResultSet(RankedResultSet):
         # resultSets will be sorted by item already
         # Step through all concurrently
 
-        tmplist =  []
+        tmplist = []
         recStores = {}
         nors = len(others)
         lens = [len(o) for o in others]
-        oidxs = range(1,nors)
+        oidxs = range(1, nors)
         positions = [0] * nors
         all = cql.value in ['all', 'and', '=', 'prox', 'adj']
         maxWeight = -1
@@ -374,7 +406,8 @@ class SimpleResultSet(RankedResultSet):
                     if all:
                         # skip until equal or greater
                         positions[o] += 1
-                        while positions[o] < lens[o] and others[o][positions[o]] < items[0]:
+                        while (positions[o] < lens[o] and
+                               others[o][positions[o]] < items[0]):
                             positions[o] += 1
 
                     else:
@@ -383,7 +416,7 @@ class SimpleResultSet(RankedResultSet):
             for r in rspos:
                 positions[r] += 1
 
-            while others and positions[0] == len(others[0])-1:
+            while others and positions[0] == len(others[0]) - 1:
                 others.pop(0)
                 positions.pop(0)
             if not others:
@@ -392,7 +425,13 @@ class SimpleResultSet(RankedResultSet):
                 continue
 
             # sumLogDAF = sum(map(math.log, [x.occurences for x in items]))
-            sumLogDAF = sum([math.log(x) for x in [y.occurences for y in items]])
+            sumLogDAF = sum([math.log(x)
+                             for x
+                             in [y.occurences
+                                 for y
+                                 in items
+                                 ]
+                             ])
             sumIdx = sum([x.resultSet.idf for x in items])
 
             x1 = sumLogQueryFreq / float(n)
@@ -406,12 +445,19 @@ class SimpleResultSet(RankedResultSet):
                 db = session.server.get_object(session, session.database)
                 recStore = db.get_object(session, item.recordStore)
                 recStores[item.recordStore] = recStore
-            doclen = recStore.fetch_recordMetadata(session, item.id, 'wordCount')
+            doclen = recStore.fetch_recordMetadata(session,
+                                                   item.id,
+                                                   'wordCount')
             x4 = math.sqrt(doclen)
-            logodds = constants[0] + (constants[1] * x1) + (constants[2] * x2) + \
-                      (constants[3] * x3) + (constants[4] * x4) + (constants[5] * x5) + \
-                      (constants[6] * x6)
-            item.weight= 0.75 * (math.exp(logodds) / (1 + math.exp(logodds)))
+            logodds = (constants[0] +
+                       (constants[1] * x1) +
+                       (constants[2] * x2) +
+                       (constants[3] * x3) +
+                       (constants[4] * x4) +
+                       (constants[5] * x5) +
+                       (constants[6] * x6)
+                       )
+            item.weight = 0.75 * (math.exp(logodds) / (1 + math.exp(logodds)))
             tmplist.append(item)
             if item.weight > maxWeight:
                 maxWeight = item.weight
@@ -447,7 +493,9 @@ class SimpleResultSet(RankedResultSet):
                 rs.minWeight = 1.0
                 rs.maxWeight = -1.0
                 continue
-            I = math.log((totalDocs + 0.5) / matches) / math.log(totalDocs + 1.0)
+            I = (math.log((totalDocs + 0.5) / matches) /
+                 math.log(totalDocs + 1.0)
+                 )
             rs.minWeight = 1000000.0
             rs.maxWeight = -1.0
             for item in rs:
@@ -456,10 +504,12 @@ class SimpleResultSet(RankedResultSet):
                 if not recStore:
                     recStore = db.get_object(session, item.recordStore)
                     recStores[item.recordStore] = recStore
-                size = recStore.fetch_recordMetadata(session, item.id, 'wordCount')
+                size = recStore.fetch_recordMetadata(session,
+                                                     item.id,
+                                                     'wordCount')
                 if rsizes:
                     avgSize = recStore.meanWordCount
-                T = df / ( df + 50.0 + (( 150.0 * size) / avgSize))
+                T = df / (df + 50.0 + ((150.0 * size) / avgSize))
                 item.weight = 0.4 + (0.6 * T * I)
                 if item.weight > rs.maxWeight:
                     rs.maxWeight = item.weight
@@ -476,8 +526,7 @@ class SimpleResultSet(RankedResultSet):
             if not totalDocs:
                 raise ValueError("0 documents in database")
         else:
-                raise NameError("Database not supplied to relevancy algorithm")
-
+            raise NameError("Database not supplied to relevancy algorithm")
 
         for rs in others:
             matches = float(len(rs))
@@ -493,14 +542,14 @@ class SimpleResultSet(RankedResultSet):
         return 0
     
     def _okapiAssign(self, session, others, clause, cql, db):
-        """Assign Okapi BM-25 weighting to each item in each resultSet in others."""
+        """Assign Okapi BM-25 weighting to items in resultSets in others."""
         if (db):
             totalDocs = float(db.totalItems)
             avgSize = float(db.meanWordCount)
             if not totalDocs or not avgSize:
                 raise ValueError("0 documents in database")
         else:
-                raise NameError("Database not supplied to relevancy algorithm")
+            raise NameError("Database not supplied to relevancy algorithm")
             
         # tuning parameters [b, k1, k3]
         # default
@@ -550,7 +599,9 @@ class SimpleResultSet(RankedResultSet):
                 continue
             
             idf = math.log(totalDocs / matches)
-#            idf = max(0.0, math.log(totalDocs - matches + 0.5 / matches + 0.5)) # give it a floor of 0
+            # idf = max(0.0,
+            #           math.log(totalDocs - matches + 0.5 / matches + 0.5)
+            #           )  # give it a floor of 0
 
             qtw = ((k3 + 1) * rs.queryFreq) / (k3 + rs.queryFreq)
             
@@ -562,11 +613,15 @@ class SimpleResultSet(RankedResultSet):
                 if recStore is None:
                     recStore = db.get_object(session, item.recordStore)
                     recStores[item.recordStore] = recStore
-                size = recStore.fetch_recordMetadata(session, item.id, 'wordCount')
+                size = recStore.fetch_recordMetadata(session,
+                                                     item.id,
+                                                     'wordCount')
                 if rsizes:
                     avgSize = recStore.meanWordCount
                     
-                T = ((k1 + 1) * docFreq) / ((k1 * ((1 - b) + b * (size / avgSize))) + docFreq)
+                T = (((k1 + 1) * docFreq) /
+                     ((k1 * ((1 - b) + b * (size / avgSize))) + docFreq)
+                     )
                      
                 item.weight = idf * T * qtw
 
@@ -590,7 +645,8 @@ class SimpleResultSet(RankedResultSet):
 
         # XXX: To Configuration. How?
         relSets = self.relevanceContextSets
-        cqlSets = ["info:srw/cql-context-set/1/cql-v1.1", "info:srw/cql-context-set/1/cql-v1.2"]
+        cqlSets = ["info:srw/cql-context-set/1/cql-v1.1",
+                   "info:srw/cql-context-set/1/cql-v1.2"]
 
         relevancy = 0
         pi = 0
@@ -631,8 +687,10 @@ class SimpleResultSet(RankedResultSet):
                 if (hasattr(self, fname)):
                     fn = getattr(self, fname)
                 else:
-                    # we /could/ self inspect to sat what relevance algorithms are supported...
-                    raise NotImplementedError("Relevance algorithm '{0}' not implemented".format(algorithm))
+                    # We /could/ self inspect to sat what relevance algorithms
+                    # are supported...
+                    raise NotImplementedError("Relevance algorithm '{0}' not "
+                                              "implemented".format(algorithm))
                 finish = fn(session, others, clause, cql, db)
                 if finish:
                     return self
@@ -658,7 +716,7 @@ class SimpleResultSet(RankedResultSet):
                 raise NotImplementedError
 
         tmplist = []
-        oidxs = range(1,len(others))
+        oidxs = range(1, len(others))
         lens = [len(x) for x in others]
         nors = len(others)
         # Fast escapes
@@ -671,11 +729,12 @@ class SimpleResultSet(RankedResultSet):
             return others[int(lens[0] == 0)]
 
         positions = [0] * nors
-        cmpHash = {'<' : [-1],
-                   '<=' : [-1, 0],
-                   '=' : [0],
-                   '>=' : [0, 1],
-                   '>' : [1]}
+        cmpHash = {'<': [-1],
+                   '<=': [-1, 0],
+                   '=': [0],
+                   '>=': [0, 1],
+                   '>': [1]
+                   }
         distance = 1
         unit = "word"
         comparison = "="
@@ -727,14 +786,17 @@ class SimpleResultSet(RankedResultSet):
                         try:
                             nitem = others[o][positions[o]]
                         except IndexError:
-                            oidxs[o-1] = -1
+                            oidxs[o - 1] = -1
                             continue
                         if nitem < items[0]:
                             if all or cql.value == 'not':
                                 # skip until equal or greater
                                 while True:
                                     positions[o] += 1
-                                    if positions[o] >= lens[o] or others[o][positions[o]] >= items[0]:
+                                    if (
+                                        positions[o] >= lens[o] or
+                                        others[o][positions[o]] >= items[0]
+                                    ):
                                         break
                                 if positions[o] != lens[o]:
                                     nitem = others[o][positions[o]]
@@ -748,20 +810,23 @@ class SimpleResultSet(RankedResultSet):
             for r in rspos:
                 positions[r] += 1
 
-            while others and positions[0] > len(others[0])-1:
+            while others and positions[0] > len(others[0]) - 1:
                 others.pop(0)
                 positions.pop(0)
                 lens.pop(0)
-            if not others or ((cql.value == 'not' or all) and len(others) != nors):
+            if (
+                not others or
+                ((cql.value == 'not' or all) and len(others) != nors)
+            ):
                 cont = 0
             if (all and len(items) < nors):
                 continue
             elif cql.value == 'not' and len(items) != 1:
                 continue
             elif cql.value in ["prox", 'adj', '=', 'window']:
-                # proxInfo is hash of (docid, recStore) to list of locations in record
-                # sort items by query position. Repeat set at each posn
-
+                # proxInfo is hash of (docid, recStore) to list of locations in
+                # record
+                # Sort items by query position. Repeat set at each posn
                 if cql.value != "prox":
                     newItemHash = {}
                     rsiConstructor = self.rsiConstructor
@@ -772,10 +837,15 @@ class SimpleResultSet(RankedResultSet):
                         if len(i.queryPositions) > 1:
                             for qpi in i.queryPositions[1:]:
                                 # construct new rsi
-                                newi = rsiConstructor(session, id=i.id, recStore=i.recordStore,
-                                                           occs=i.occurences, database=i.database,
-                                                           weight=i.weight, resultSet=i.resultSet)
-                                newi.queryPositions =[qpi]
+                                newi = rsiConstructor(session,
+                                                      id=i.id,
+                                                      recStore=i.recordStore,
+                                                      occs=i.occurences,
+                                                      database=i.database,
+                                                      weight=i.weight,
+                                                      resultSet=i.resultSet
+                                                      )
+                                newi.queryPositions = [qpi]
                                 newi.queryTerm = i.queryTerm
                                 newi.proxInfo = i.proxInfo
                                 newItemHash[qpi] = newi
@@ -785,7 +855,7 @@ class SimpleResultSet(RankedResultSet):
                     newitems = [x[1] for x in ni]
                     items = newitems[:]
                 else:
-                    #ffs
+                    # Create a copy of items
                     newitems = items[:]
 
                 litem = items.pop(0)
@@ -818,7 +888,10 @@ class SimpleResultSet(RankedResultSet):
                                             roff = rpi[2]
                                         except IndexError:
                                             # no offset in index
-                                            raise ConfigFileException("Cannot do character proximity without offset information")
+                                            msg = ("Cannot do character "
+                                                   "proximity without offset "
+                                                   "information")
+                                            raise ConfigFileException(msg)
                                         piDistance = roff - loff
                                     else:
                                         # word proximity
@@ -835,20 +908,36 @@ class SimpleResultSet(RankedResultSet):
                                             d = lpiFull[:]
                                             # Check we're not the same word
                                             for r in rpiFull:
-                                                if cql.value == 'window' and len(d) > 1:
+                                                if (
+                                                    cql.value == 'window' and
+                                                    len(d) > 1
+                                                ):
                                                     wokay = 1
-                                                    # check that ALL in distance
+                                                    # Check that ALL in
+                                                    # distance
                                                     for wd in d:
                                                         if proxtype == 3:
-                                                            wpiDistance = roff - wd[2]
+                                                            wpiDistance = (
+                                                                roff - wd[2]
+                                                            )
                                                         else:
-                                                            wpiDistance = rwpos - wd[1]
-                                                        if ordered and wpiDistance < 0:
+                                                            wpiDistance = (
+                                                                rwpos - wd[1]
+                                                            )
+                                                        if (
+                                                            ordered and
+                                                            wpiDistance < 0
+                                                        ):
                                                             wokay = 0
                                                             break
                                                         else:
-                                                            wpiDistance = abs(wpiDistance)
-                                                            c = cmp(wpiDistance, distance)
+                                                            wpiDistance = abs(
+                                                                wpiDistance
+                                                            )
+                                                            c = cmp(
+                                                                wpiDistance,
+                                                                distance
+                                                            )
                                                             if not c in chitem:
                                                                 wokay = 0
                                                                 break
@@ -911,7 +1000,8 @@ class SimpleResultSet(RankedResultSet):
             self.maxWeight = maxWeight
         return self
 
-    def order(self, session, spec, ascending=None, missing=None, case=None, accents=None):
+    def order(self, session, spec,
+              ascending=None, missing=None, case=None, accents=None):
         """Re-order based on the given specification (spec) and arguments.
         
         spec can be:  index, xpath, workflow, item attribute
@@ -930,7 +1020,10 @@ class SimpleResultSet(RankedResultSet):
             # don't try to sort empty set
             return
 
-        if (isinstance(spec, Index) and spec.get_setting(session, 'sortStore')):
+        if (
+            isinstance(spec, Index) and
+            spec.get_setting(session, 'sortStore')
+        ):
             # check pre-processed db
             tmplist = [(spec.fetch_sortValue(session, x), x) for x in l]
         elif isinstance(spec, Index) and spec.get_setting(session, 'vectors'):
@@ -948,7 +1041,9 @@ class SimpleResultSet(RankedResultSet):
                 o = storeHash.get(store, spec.get_object(session, store))
                 storeHash[store] = o
                 recs.append(o.fetch_record(session, r.id))
-            tmplist = [(spec.extract_data(session, recs[x]), l[x]) for x in range(len(l))]
+            tmplist = [(spec.extract_data(session, recs[x]), l[x])
+                       for x
+                       in range(len(l))]
         elif isinstance(spec, Workflow):
             # process a workflow on records
             tmplist = []
@@ -956,13 +1051,13 @@ class SimpleResultSet(RankedResultSet):
                 rec = r.fetch_record(session)
                 tmplist.append((spec.process(session, rec), r))
         elif (type(spec) == str and hasattr(self[0], spec)):
-              # Sort by attribute of item
-              tmplist = [(getattr(x, spec), x) for x in l]
-              if ascending is None:
-                  if spec in ['id', 'numericId']:
-                      ascending = 1
-                  else:
-                      ascending = 0
+            # Sort by attribute of item
+            tmplist = [(getattr(x, spec), x) for x in l]
+            if ascending is None:
+                if spec in ['id', 'numericId']:
+                    ascending = 1
+                else:
+                    ascending = 0
         elif isinstance(spec, str):
             tmplist = []
             for r in l:
@@ -976,7 +1071,7 @@ class SimpleResultSet(RankedResultSet):
             if missing == -1:
                 val = '\x00'
             elif missing == 1:
-                val ='\xff'
+                val = '\xff'
             else:
                 val = missing
             fill = lambda x: x if x else val
@@ -996,8 +1091,7 @@ class SimpleResultSet(RankedResultSet):
             tmplist.sort(reverse=True)
         else:
             tmplist.sort()
-        self._list = [x for (key,x) in tmplist]
-
+        self._list = [x for (key, x) in tmplist]
 
     def reverse(self, session):
         self._list.reverse()
@@ -1012,7 +1106,9 @@ class SimpleResultSet(RankedResultSet):
         for rsi in self._list:
             rsi.scaledWeight = (rsi.weight - minw) * r
 
+
 class SimpleResultSetItem(ResultSetItem):
+
     id = 0
     numericId = None
     recordStore = ""
@@ -1024,9 +1120,16 @@ class SimpleResultSetItem(ResultSetItem):
     proxInfo = []
     attributesToSerialize = []
 
-    def __init__(self, session, id=0, recStore="", occs=0, database="", diagnostic=None, weight=0.5, resultSet = None, numeric=None):
-        self.attributesToSerialize = [('id', 0), ('numericId', None), ('recordStore', ''), ('database', ''),
-                     ('occurences', 0), ('weight', 0.5), ('scaledWeight', 0.5)]
+    def __init__(self, session, id=0, recStore="", occs=0, database="",
+                 diagnostic=None, weight=0.5, resultSet=None, numeric=None):
+        self.attributesToSerialize = [('id', 0),
+                                      ('numericId', None),
+                                      ('recordStore', ''),
+                                      ('database', ''),
+                                      ('occurences', 0),
+                                      ('weight', 0.5),
+                                      ('scaledWeight', 0.5)
+                                      ]
         self.id = id
         self.recordStore = recStore
         self.occurences = occs
@@ -1037,7 +1140,6 @@ class SimpleResultSetItem(ResultSetItem):
         self.proxInfo = []
         self.numericId = numeric
 
-
     def serialize(self, session, pickleOk=1):
         xml = [u'<item>']
         itemattrs = self.attributesToSerialize
@@ -1046,21 +1148,24 @@ class SimpleResultSetItem(ResultSetItem):
             if val != deft:
                 if type(val) in [dict, list, tuple]:
                     if pickleOk:
-                        # use latest version of pickle protocol to deal with new-style classes, unicode etc.
-                        # valstr = pickle.dumps(val), pickle.HIGHEST_PROTOCOL)
+                        # Use latest version of pickle protocol to deal with
+                        # new-style classes, unicode etc.
+                        # valstr = pickle.dumps(val, pickle.HIGHEST_PROTOCOL)
                         valstr = pickle.dumps(val)
-                        escaped_valstr =  ucescape(valstr)
-                        xml.append(u'<d n="{0}" t="pickle">{1}</d>'.format(a, 
-                                                                           escaped_valstr))
+                        escaped_valstr = ucescape(valstr)
+                        xml.append(u'<d n="{0}" t="pickle">{1}</d>'
+                                   u''.format(a, escaped_valstr))
                 else:
                     try:
                         valstr = unicode(val, 'utf-8')
                     except TypeError:
                         valstr = unicode(val)
                     escaped_valstr = escape(valstr)
-                    xml.append(u'<d n="{0}" t="{1}">{2}</d>'.format(a, 
-                                                                    srlz_typehash.get(type(val), ''), 
-                                                                    escaped_valstr))
+                    xml.append(u'<d n="{0}" t="{1}">{2}</d>'
+                               u''.format(a,
+                                          srlz_typehash.get(type(val), ''),
+                                          escaped_valstr)
+                               )
         val = getattr(self, 'proxInfo')
         if val:
             # serialize to XML
@@ -1069,15 +1174,19 @@ class SimpleResultSetItem(ResultSetItem):
                 xml.append(u'<hit>')
                 for w in hit:
                     if len(w) == 4:
-                        xml.append(u'<w e="%s" w="%s" o="%s" t="%s"/>' % tuple(w))
+                        xml.append(u'<w e="%s" w="%s" o="%s" t="%s"/>' %
+                                   tuple(w))
                     elif len(w) == 3:
-                        xml.append(u'<w e="%s" w="%s" o="%s"/>' % tuple(w))
+                        xml.append(u'<w e="%s" w="%s" o="%s"/>' %
+                                   tuple(w))
                     else:
                         try:
-                            xml.append(u'<w e="%s" w="%s"/>' % tuple(w))
+                            xml.append(u'<w e="%s" w="%s"/>' %
+                                       tuple(w))
                         except:
                             # should really error!
-                            xml.append(u'<w e="%s" w="%s" o="%s" t="%s"/>' % tuple(w[:4]))
+                            xml.append(u'<w e="%s" w="%s" o="%s" t="%s"/>' %
+                                       tuple(w[:4]))
                             
                 xml.append(u'</hit>')
             xml.append(u'</proxInfo>')
@@ -1096,13 +1205,15 @@ class SimpleResultSetItem(ResultSetItem):
 
     def __eq__(self, other):
         try:
-            return self.id == other.id and self.recordStore == other.recordStore
+            return (self.id == other.id and
+                    self.recordStore == other.recordStore)
         except:
-            # not comparing two RSIs
+            # Not comparing two RSIs
             return False
 
     def __str__(self):
         return "%s/%s" % (self.recordStore, self.id)
+
     def __repr__(self):
         return "Ptr:%s/%s" % (self.recordStore, self.id)
 
@@ -1124,7 +1235,6 @@ class SimpleResultSetItem(ResultSetItem):
     def __hash__(self):
         # Hash of recordstore + id
         return hash(str(self))
-
 
 
 class BitmapResultSet(ResultSet):
@@ -1157,7 +1267,10 @@ class BitmapResultSet(ResultSet):
     def __getitem__(self, k):
         if self.currItems is None:
             self.currItems = self.bitfield.trueItems()            
-        return SimpleResultSetItem(None, self.currItems[k], self.recordStore, 1)
+        return SimpleResultSetItem(None,
+                                   self.currItems[k],
+                                   self.recordStore,
+                                   1)
 
     def __len__(self):
         return self.bitfield.lenTrueItems()
@@ -1222,18 +1335,15 @@ class BitmapResultSet(ResultSet):
             # XXX Merging Bitmap with non bitmap
             pass
         return self
-
     
     def order(self, spec):
         # Reorder a bitmap?!
         raise NotImplementedError()
 
     def retrieve(self, numReq, start, cache=0):
-        end = min(start+numrecs+1, len(self))
+        end = min(start + numrecs + 1, len(self))
         recs = []
         # XXX This should cache server, db and resultSet
         for r in range(start, end):
             recs.append(self[r].fetch_record(session))
         return recs
-
-
