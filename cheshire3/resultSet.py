@@ -121,7 +121,7 @@ class SimpleResultSet(RankedResultSet):
     termIdHash = {}
     fromStore = 0
 
-    def __init__(self, session, data=[], id="", recordStore=""):
+    def __init__(self, session, data=None, id="", recordStore=""):
         self.rsiConstructor = SimpleResultSetItem
         self.attributesToSerialize = [('id', ''), ('termid', -1), ('totalOccs', 0),
                      ('totalRecs', 0), ('expires', 0), ('queryTerm', ''),
@@ -130,7 +130,10 @@ class SimpleResultSet(RankedResultSet):
                      ('recordStore', ''), ('recordStoreSizes', 0), ('index', None),
                      ('queryTime', 0.0), ('query', '')
                      ]
-        self._list = data
+        if data is not None:
+            self._list = list(data)
+        else:
+            self._list = []
         self.id = id
         self.recordStore = recordStore
         
@@ -285,7 +288,7 @@ class SimpleResultSet(RankedResultSet):
         if (db):
             totalDocs = db.totalItems
             if totalDocs == 0:
-                raise ValueErorr("No documents in database?")
+                raise ValueError("No documents in database?")
         else:
             # Uhoh
             raise NameError("Database not supplied to relevancy algorithm")
