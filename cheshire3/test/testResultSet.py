@@ -20,6 +20,7 @@ except ImportError:
 from lxml import etree
 
 from cheshire3.baseObjects import Session, ResultSet, ResultSetItem
+from cheshire3.cqlParser import parse as cqlparse
 from cheshire3.resultSet import SimpleResultSet, SimpleResultSetItem
 
 
@@ -185,7 +186,7 @@ class SimpleResultSetTestCase(unittest.TestCase):
         self.assertEqual(self.b[1], self.rsi4)
 
     def testFromList(self):
-        "Check population of SimpleResultSet using fromList method."
+        "Test population of SimpleResultSet using fromList method."
         rs = SimpleResultSet(self.session)
         self.assertEqual(len(rs), 0)
         self.assertIsInstance(rs, SimpleResultSet)
@@ -194,6 +195,7 @@ class SimpleResultSetTestCase(unittest.TestCase):
             self.assertEqual(x, y)
 
     def testAppend(self):
+        "Test appending a single item to a ResultSet"
         rs = SimpleResultSet(self.session)
         self.assertEqual(len(rs), 0)
         rs.append(self.rsi1)
@@ -201,13 +203,60 @@ class SimpleResultSetTestCase(unittest.TestCase):
         self.assertEqual(rs[-1], self.rsi1)
 
     def testExtend(self):
+        "Test appending multiple item to a ResultSet"
         rs = SimpleResultSet(self.session)
         self.assertEqual(len(rs), 0)
         rs.extend([self.rsi1, self.rsi2])
         self.assertEqual(len(rs), 2)
         self.assertEqual(rs[0], self.rsi1)
         self.assertEqual(rs[1], self.rsi2)
-        
+
+    def testCombineAll(self):
+        "Test combining ResultSets with 'all'"
+        # A clause / boolean is required to combine ResultSets
+        clause = cqlparse('my.index all "foo"')
+        # Create a new ResultSet to combine into 
+        rs = SimpleResultSet(self.session)
+        rs = rs.combine(self.session, [self.a, self.b], clause)
+        # Check return value is a Resultset
+        self.assertIsInstance(rs, SimpleResultSet)
+        # Check merged ResultSet has 1 item
+        self.assertEqual(len(rs), 1)
+        # Check that merged ResultSet contains the correct item
+        self.assertIn(self.rsi1, rs)
+
+    def testCombineAny(self):
+        "Test combining ResultSets with 'any'"
+        # A clause / boolean is required to combine ResultSets
+        clause = cqlparse('my.index any "foo"')
+        # Create a new ResultSet to combine into 
+        rs = SimpleResultSet(self.session)
+        rs = rs.combine(self.session, [self.a, self.b], clause)
+        # Check return value is a Resultset
+        self.assertIsInstance(rs, SimpleResultSet)
+        # Check merged ResultSet contains each ResultSetItem
+        self.assertIn(self.rsi1, rs)
+        self.assertIn(self.rsi2, rs)
+        self.assertIn(self.rsi3, rs)
+        self.assertIn(self.rsi4, rs)
+        # Check merged ResultSet has 3 items (as rsi1 and rsi2 are identical)
+        self.assertEqual(len(rs), 3)
+
+    def testCombineNot(self):
+        "Test combining ResultSets with 'not'"
+        # A clause / boolean is required to combine ResultSets
+        clause = cqlparse('my.index = foo not my.index = bar')
+        # Create a new ResultSet to combine into 
+        rs = SimpleResultSet(self.session)
+        rs = rs.combine(self.session, [self.a, self.b], clause)
+        # Check return value is a Resultset
+        self.assertIsInstance(rs, SimpleResultSet)
+        # Check merged ResultSet has 1 item
+        self.assertEqual(len(rs), 1)
+        # Check that merged ResultSet contains the correct item
+        self.assertNotIn(self.rsi1, rs)
+        self.assertIn(self.rsi3, rs)
+
 
 def load_tests(loader, tests, pattern):
     # Alias loader.loadTestsFromTestCase for sake of line lengths
