@@ -5,12 +5,12 @@ created in response to a search on a Database. ResultSets are also the return
 value when searching an IndexStore or Index and are merged internally to
 combine results when searching multiple Indexes with boolean operators.
 
-
-
 The behavior of ResultSets are entirely dependent on the indexes and databases
 from which they were created. This module creates some simple toy example
 ResultSets in order to test the fundamental operations of merging  etc.
 """
+
+import math
 
 try:
     import unittest2 as unittest
@@ -19,9 +19,57 @@ except ImportError:
 
 from lxml import etree
 
-from cheshire3.baseObjects import Session, ResultSet, ResultSetItem
+from cheshire3.baseObjects import Session, Database, RecordStore, ProtocolMap
 from cheshire3.cqlParser import parse as cqlparse
 from cheshire3.resultSet import SimpleResultSet, SimpleResultSetItem
+
+
+class TestDatabase(Database):
+    """Database specifically for unittesting relevance score calculations.
+
+    May be initialize with only the minimum information needed for calculating
+    ResultSet relevance etc.
+    """
+
+    def __init__(self, session, config, parent=None):
+        self.totalItems = 100
+        self.meanWordCount = 100
+
+    def get_object(self, session, identifier):
+        if identifier.startswith('recordStore'):
+            return TestRecordStore(session, None)
+
+    def get_path(self, session, path):
+        if path == 'protocolMap':
+            return TestProtocolMap(session, None)
+
+
+class TestRecordStore(RecordStore):
+    """RecordStore specifically for unittesting relevance score calculations.
+
+    Fulfil mimimum API required for calculating ResultSet relevance.
+    """
+
+    def __init__(self, session, config, parent=None):
+        pass
+    
+    def fetch_recordMetadata(self, session, identifier, mdType):
+        # Return an arbitrary value
+        if mdType == 'wordCount':
+            return 100
+
+
+class TestProtocolMap(ProtocolMap):
+    """ProtocolMap specifically for unittesting relevance score calculations.
+
+    Fulfil mimimum API required for calculating ResultSet relevance.
+    """
+
+    def __init__(self, session, config, parent=None):
+        pass
+
+    def resolveIndex(self, session, clause):
+        return None
 
 
 class SimpleResultSetItemTestCase(unittest.TestCase):
@@ -121,7 +169,7 @@ class SimpleResultSetTestCase(unittest.TestCase):
         self.rsi1 = SimpleResultSetItem(session,
                                         id=0,
                                         recStore="recordStore",
-                                        occs=0,
+                                        occs=5,
                                         database="",
                                         diagnostic=None,
                                         weight=0.5,
@@ -130,7 +178,7 @@ class SimpleResultSetTestCase(unittest.TestCase):
         self.rsi2 = SimpleResultSetItem(session,
                                         id=0,
                                         recStore="recordStore",
-                                        occs=0,
+                                        occs=3,
                                         database="",
                                         diagnostic=None,
                                         weight=0.5,
@@ -139,7 +187,7 @@ class SimpleResultSetTestCase(unittest.TestCase):
         self.rsi3 = SimpleResultSetItem(session,
                                         id=1,
                                         recStore="recordStore",
-                                        occs=0,
+                                        occs=1,
                                         database="",
                                         diagnostic=None,
                                         weight=0.5,
@@ -148,7 +196,7 @@ class SimpleResultSetTestCase(unittest.TestCase):
         self.rsi4 = SimpleResultSetItem(session,
                                         id=0,
                                         recStore="recordStore2",
-                                        occs=0,
+                                        occs=2,
                                         database="",
                                         diagnostic=None,
                                         weight=0.5,
@@ -161,8 +209,6 @@ class SimpleResultSetTestCase(unittest.TestCase):
     def testInit(self):
         "Check initialization of ResultSet"
         rs = SimpleResultSet(self.session)
-        # Check is instance of ResultSet
-        self.assertIsInstance(rs, ResultSet)
         # Check is instance of SimpleResultSet
         self.assertIsInstance(rs, SimpleResultSet)
         # Check is empty
@@ -256,6 +302,183 @@ class SimpleResultSetTestCase(unittest.TestCase):
         # Check that merged ResultSet contains the correct item
         self.assertNotIn(self.rsi1, rs)
         self.assertIn(self.rsi3, rs)
+
+    def testTfidf(self):
+        "Test combining with TF-IDF relevance ranking."
+        # A clause / boolean is required to combine ResultSets
+        clause = cqlparse('my.index all/rel.algorithm=tfidf "foo bar"')
+        clause.addPrefix('rel', "info:srw/cql-context-set/2/relevance-1.2")
+        # A Database is required for relevance ranking
+        db = TestDatabase(self.session, None, parent=None)
+        # Test self.a
+        # Create a new ResultSet to combine into
+        rs = SimpleResultSet(self.session)
+        rs = rs.combine(self.session, [self.a], clause, db)
+        self.assertEqual(len(rs), 2)
+        for rsi in rs:
+            # Check that each ResultSetItem has a score (weight)
+            self.assertTrue(hasattr(rsi, 'weight'))
+            # Check that each ResultSetItem has a scaled score less than 1
+            self.assertLessEqual(rsi.scaledWeight, 1.0)
+        # Check scores are correct and in order
+        matches = len(self.a)
+        self.assertListEqual([rsi.weight for rsi in rs],
+                             [5 * math.log(db.totalItems / matches),
+                              1 * math.log(db.totalItems / matches)]
+                             )
+        # Test self.b
+        # Create a new ResultSet to combine into
+        rs = SimpleResultSet(self.session)
+        rs = rs.combine(self.session, [self.b], clause, db)
+        self.assertEqual(len(rs), 2)
+        for rsi in rs:
+            # Check that each ResultSetItem has a score (weight)
+            self.assertTrue(hasattr(rsi, 'weight'))
+            # Check that each ResultSetItem has a scaled score less than 1
+            self.assertLessEqual(rsi.scaledWeight, 1.0)
+        # Check scores are correct and in order
+        matches = len(self.b)
+        self.assertListEqual([rsi.weight for rsi in rs],
+                             [3 * math.log(db.totalItems / matches),
+                              2 * math.log(db.totalItems / matches)]
+                             )
+
+    def testCori(self):
+        "Test combining with CORI relevance ranking."
+        # A clause / boolean is required to combine ResultSets
+        clause = cqlparse('my.index all/rel.algorithm=cori "foo bar"')
+        clause.addPrefix('rel', "info:srw/cql-context-set/2/relevance-1.2")
+        # A Database is required for relevance ranking
+        db = TestDatabase(self.session, None)
+        # A RecordStore is required for CORI score calculation
+        recStore = TestRecordStore(self.session, None)
+        # Test self.a
+        # Create a new ResultSet to combine into 
+        rs = SimpleResultSet(self.session)
+        rs = rs.combine(self.session, [self.a], clause, db)
+        self.assertEqual(len(rs), 2)
+        for rsi in rs:
+            # Check that each ResultSetItem has a score (weight)
+            self.assertTrue(hasattr(rsi, 'weight'))
+            # Check that each ResultSetItem has a scaled score less than 1
+            self.assertLessEqual(rsi.scaledWeight, 1.0)
+        # Check scores are correct and in order
+        matches = len(self.a)
+        # I is used in calculating score for each item
+        I = (math.log((db.totalItems + 0.5) / matches) /
+             math.log(db.totalItems + 1.0))
+        expectedScores = []
+        for rsi in [self.rsi1, self.rsi3]:
+            size = recStore.fetch_recordMetadata(self.session,
+                                                 rsi.id,
+                                                 'wordCount')
+            T = (rsi.occurences /
+                 (rsi.occurences + 50.0 + (( 150.0 * size) / db.meanWordCount))
+                 )
+            expectedScores.append(0.4 + (0.6 * T * I))
+        self.assertListEqual([rsi.weight for rsi in rs], expectedScores)
+        # Test self.b
+        # Create a new ResultSet to combine into 
+        rs = SimpleResultSet(self.session)
+        rs = rs.combine(self.session, [self.b], clause, db)
+        self.assertEqual(len(rs), 2)
+        for rsi in rs:
+            # Check that each ResultSetItem has a score (weight)
+            self.assertTrue(hasattr(rsi, 'weight'))
+            # Check that each ResultSetItem has a scaled score less than 1
+            self.assertLessEqual(rsi.scaledWeight, 1.0)
+        # Check scores are correct and in order
+        matches = len(self.b)
+        # I is used in calculating score for each item
+        I = (math.log((db.totalItems + 0.5) / matches) /
+             math.log(db.totalItems + 1.0))
+        expectedScores = []
+        for rsi in [self.rsi2, self.rsi4]:
+            size = recStore.fetch_recordMetadata(self.session,
+                                                 rsi.id,
+                                                 'wordCount')
+            T = (rsi.occurences /
+                 (rsi.occurences + 50.0 + (( 150.0 * size) / db.meanWordCount))
+                 )
+            expectedScores.append(0.4 + (0.6 * T * I))
+        self.assertListEqual([rsi.weight for rsi in rs], expectedScores)
+
+    def testOkapi(self):
+        "Test combining with OKAPI BM-25 relevance ranking."
+        # A clause / boolean is required to combine ResultSets
+        b, k1, k3 = [0.75, 1.5, 1.5]
+        clause = cqlparse('my.index all/rel.algorithm=okapi/'
+                          'rel.const0={0}/'
+                          'rel.const1={1}/'
+                          'rel.const2={2}'
+                          ' "foo bar"'.format(b, k1, k3))
+        clause.addPrefix('rel', "info:srw/cql-context-set/2/relevance-1.2")
+        # A Database is required for relevance ranking
+        db = TestDatabase(self.session, None)
+        # A RecordStore is required for CORI score calculation
+        recStore = TestRecordStore(self.session, None)
+        # Test self.a
+        # Create a new ResultSet to combine into 
+        rs = SimpleResultSet(self.session)
+        # Set ResultSet queryFrequency - required for OKAPI BM-25
+        self.a.queryFreq = 1
+        rs = rs.combine(self.session, [self.a], clause, db)
+        self.assertEqual(len(rs), 2)
+        for rsi in rs:
+            # Check that each ResultSetItem has a score (weight)
+            self.assertTrue(hasattr(rsi, 'weight'))
+#            self.assertTrue(rsi.weight)
+            # Check that each ResultSetItem has a scaled score less than 1
+            self.assertLessEqual(rsi.scaledWeight, 1.0)
+        # Check scores are correct and in order
+        matches = len(self.a)
+        idf = math.log(db.totalItems / matches)
+        qtw = ((k3 + 1) * 1) / (k3 + 1)
+        expectedScores = []
+        for rsi in [self.rsi1, self.rsi3]:
+            size = recStore.fetch_recordMetadata(self.session,
+                                                 rsi.id,
+                                                 'wordCount')
+            T = (((k1 + 1) * rsi.occurences) /
+                 ((k1 * ((1 - b) + b *
+                         (size / db.meanWordCount)
+                         )
+                   ) +
+                  rsi.occurences)
+                 )
+            expectedScores.append(idf * T * qtw)
+        self.assertListEqual([rsi.weight for rsi in rs], expectedScores)
+        # Test self.b
+        # Create a new ResultSet to combine into 
+        rs = SimpleResultSet(self.session)
+        # Set ResultSet queryFrequency - required for OKAPI BM-25
+        self.b.queryFreq = 1
+        rs = rs.combine(self.session, [self.b], clause, db)
+        self.assertEqual(len(rs), 2)
+        for rsi in rs:
+            # Check that each ResultSetItem has a score (weight)
+            self.assertTrue(hasattr(rsi, 'weight'))
+#            self.assertTrue(rsi.weight)
+            # Check that each ResultSetItem has a scaled score less than 1
+            self.assertLessEqual(rsi.scaledWeight, 1.0)
+        # Check scores are correct and in order
+        matches = len(self.a)
+        idf = math.log(db.totalItems / matches)
+        qtw = ((k3 + 1) * 1) / (k3 + 1)
+        expectedScores = []
+        for rsi in [self.rsi2, self.rsi4]:
+            size = recStore.fetch_recordMetadata(self.session,
+                                                 rsi.id,
+                                                 'wordCount')
+            T = (((k1 + 1) * rsi.occurences) /
+                 ((k1 * ((1 - b) + b *
+                         (size / db.meanWordCount)
+                         )
+                   ) +
+                  rsi.occurences)
+                 )
+            expectedScores.append(idf * T * qtw)
+        self.assertListEqual([rsi.weight for rsi in rs], expectedScores)
 
 
 def load_tests(loader, tests, pattern):
