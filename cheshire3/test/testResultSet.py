@@ -480,6 +480,74 @@ class SimpleResultSetTestCase(unittest.TestCase):
             expectedScores.append(idf * T * qtw)
         self.assertListEqual([rsi.weight for rsi in rs], expectedScores)
 
+    def testCombineMeanWeights(self):
+        "Test combining ResultSet scores by mean average."
+        # A clause / boolean is required to combine ResultSets
+        # Use TF-IDF because it's most simple to calculate
+        clause = cqlparse('my.index '
+                          'all/rel.algorithm=tfidf/rel.combine=mean '
+                          '"foo bar"')
+        
+        clause.addPrefix('rel', "info:srw/cql-context-set/2/relevance-1.2")
+        # A Database is required for relevance ranking
+        db = TestDatabase(self.session, None, parent=None)
+        # Create a new ResultSet to combine into
+        rs = SimpleResultSet(self.session)
+        rs = rs.combine(self.session, [self.a, self.b], clause, db)
+        # Check return value is a Resultset
+        self.assertIsInstance(rs, SimpleResultSet)
+        # Check merged ResultSet has 1 item
+        self.assertEqual(len(rs), 1)
+        # Check that merged ResultSet contains the correct item
+        self.assertIn(self.rsi1, rs)
+        for rsi in rs:
+            # Check that each ResultSetItem has a score (weight)
+            self.assertTrue(hasattr(rsi, 'weight'))
+            # Check that each ResultSetItem has a scaled score less than 1
+            self.assertLessEqual(rsi.scaledWeight, 1.0)
+        # Check combined scores correct
+        matches = len(self.b)
+        self.assertEqual(rs[0].weight,
+                         sum([5 * math.log(db.totalItems / matches),
+                              3 * math.log(db.totalItems / matches)
+                              ]
+                             ) / 2
+                         )
+
+    def testCombineSumWeights(self):
+        "Test combining ResultSet scores by summation."
+        # A clause / boolean is required to combine ResultSets
+        # Use TF-IDF because it's most simple to calculate
+        clause = cqlparse('my.index '
+                          'all/rel.algorithm=tfidf/rel.combine=sum '
+                          '"foo bar"')
+        
+        clause.addPrefix('rel', "info:srw/cql-context-set/2/relevance-1.2")
+        # A Database is required for relevance ranking
+        db = TestDatabase(self.session, None, parent=None)
+        # Create a new ResultSet to combine into
+        rs = SimpleResultSet(self.session)
+        rs = rs.combine(self.session, [self.a, self.b], clause, db)
+        # Check return value is a Resultset
+        self.assertIsInstance(rs, SimpleResultSet)
+        # Check merged ResultSet has 1 item
+        self.assertEqual(len(rs), 1)
+        # Check that merged ResultSet contains the correct item
+        self.assertIn(self.rsi1, rs)
+        for rsi in rs:
+            # Check that each ResultSetItem has a score (weight)
+            self.assertTrue(hasattr(rsi, 'weight'))
+            # Check that each ResultSetItem has a scaled score less than 1
+            self.assertLessEqual(rsi.scaledWeight, 1.0)
+        # Check combined scores correct
+        matches = len(self.b)
+        self.assertEqual(rs[0].weight,
+                         sum([5 * math.log(db.totalItems / matches),
+                              3 * math.log(db.totalItems / matches)
+                              ]
+                             )
+                         )
+
 
 def load_tests(loader, tests, pattern):
     # Alias loader.loadTestsFromTestCase for sake of line lengths
