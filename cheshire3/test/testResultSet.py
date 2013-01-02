@@ -24,7 +24,7 @@ from cheshire3.cqlParser import parse as cqlparse
 from cheshire3.resultSet import SimpleResultSet, SimpleResultSetItem
 
 
-class TestDatabase(Database):
+class FakeDatabase(Database):
     """Database specifically for unittesting relevance score calculations.
 
     May be initialize with only the minimum information needed for calculating
@@ -37,14 +37,14 @@ class TestDatabase(Database):
 
     def get_object(self, session, identifier):
         if identifier.startswith('recordStore'):
-            return TestRecordStore(session, None)
+            return FakeRecordStore(session, None)
 
     def get_path(self, session, path):
         if path == 'protocolMap':
-            return TestProtocolMap(session, None)
+            return FakeProtocolMap(session, None)
 
 
-class TestRecordStore(RecordStore):
+class FakeRecordStore(RecordStore):
     """RecordStore specifically for unittesting relevance score calculations.
 
     Fulfil mimimum API required for calculating ResultSet relevance.
@@ -59,7 +59,7 @@ class TestRecordStore(RecordStore):
             return 100
 
 
-class TestProtocolMap(ProtocolMap):
+class FakeProtocolMap(ProtocolMap):
     """ProtocolMap specifically for unittesting relevance score calculations.
 
     Fulfil mimimum API required for calculating ResultSet relevance.
@@ -309,7 +309,7 @@ class SimpleResultSetTestCase(unittest.TestCase):
         clause = cqlparse('my.index all/rel.algorithm=tfidf "foo bar"')
         clause.addPrefix('rel', "info:srw/cql-context-set/2/relevance-1.2")
         # A Database is required for relevance ranking
-        db = TestDatabase(self.session, None, parent=None)
+        db = FakeDatabase(self.session, None, parent=None)
         # Test self.a
         # Create a new ResultSet to combine into
         rs = SimpleResultSet(self.session)
@@ -349,9 +349,9 @@ class SimpleResultSetTestCase(unittest.TestCase):
         clause = cqlparse('my.index all/rel.algorithm=cori "foo bar"')
         clause.addPrefix('rel', "info:srw/cql-context-set/2/relevance-1.2")
         # A Database is required for relevance ranking
-        db = TestDatabase(self.session, None)
+        db = FakeDatabase(self.session, None)
         # A RecordStore is required for CORI score calculation
-        recStore = TestRecordStore(self.session, None)
+        recStore = FakeRecordStore(self.session, None)
         # Test self.a
         # Create a new ResultSet to combine into 
         rs = SimpleResultSet(self.session)
@@ -414,9 +414,9 @@ class SimpleResultSetTestCase(unittest.TestCase):
                           ' "foo bar"'.format(b, k1, k3))
         clause.addPrefix('rel', "info:srw/cql-context-set/2/relevance-1.2")
         # A Database is required for relevance ranking
-        db = TestDatabase(self.session, None)
+        db = FakeDatabase(self.session, None)
         # A RecordStore is required for CORI score calculation
-        recStore = TestRecordStore(self.session, None)
+        recStore = FakeRecordStore(self.session, None)
         # Test self.a
         # Create a new ResultSet to combine into 
         rs = SimpleResultSet(self.session)
@@ -490,7 +490,7 @@ class SimpleResultSetTestCase(unittest.TestCase):
         
         clause.addPrefix('rel', "info:srw/cql-context-set/2/relevance-1.2")
         # A Database is required for relevance ranking
-        db = TestDatabase(self.session, None, parent=None)
+        db = FakeDatabase(self.session, None, parent=None)
         # Create a new ResultSet to combine into
         rs = SimpleResultSet(self.session)
         rs = rs.combine(self.session, [self.a, self.b], clause, db)
@@ -524,7 +524,7 @@ class SimpleResultSetTestCase(unittest.TestCase):
         
         clause.addPrefix('rel', "info:srw/cql-context-set/2/relevance-1.2")
         # A Database is required for relevance ranking
-        db = TestDatabase(self.session, None, parent=None)
+        db = FakeDatabase(self.session, None, parent=None)
         # Create a new ResultSet to combine into
         rs = SimpleResultSet(self.session)
         rs = rs.combine(self.session, [self.a, self.b], clause, db)
