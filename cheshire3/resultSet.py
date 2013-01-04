@@ -188,13 +188,16 @@ class SimpleResultSet(RankedResultSet):
     def fromList(self, data):
         self._list = data
 
-    # TODO: fix nasty rename hack
     def serialise(self, session, pickleOk=1):
+        """Serialize and this ResultSet as XML, return a string (utf-8).
+
+        DEPRECATED by ``resultSet.serialize(session, pickleOk)``
+        """
         return self.serialize(session, pickleOk)
 
     def serialize(self, session, pickleOk=1):
-        # Turn into XML
-        # this is pretty fast, and generates better XML than previous
+        """Serialize and this ResultSet as XML, return a string (utf-8)."""
+        # This is pretty fast, and generates better XML than previous
         xml = [u'<resultSet>']
 
         rsetattrs = self.attributesToSerialize
@@ -228,11 +231,15 @@ class SimpleResultSet(RankedResultSet):
         all = u''.join(xml)
         return all.encode('utf-8')
     
-    # TODO: fix nasty rename hack
     def deserialise(self, session, data):
+        """Deserialize XML in ``data`` to return the populated ResultSet.
+
+        DEPRECATED by ``resultSet.deserialize(session, data)``
+        """
         return self.deserialize(session, data)
 
     def deserialize(self, session, data):
+        """Deserialize XML in ``data`` to return the populated ResultSet."""
         # This is blindingly fast compared to old version!
 
         def value_of(elem):
@@ -375,7 +382,7 @@ class SimpleResultSet(RankedResultSet):
                 rs.idf = math.log(totalDocs / float(n))
         x2 = math.sqrt(sumQueryFreq)
 
-        # resultSets will be sorted by item already
+        # ResultSets will be sorted by item already
         # Step through all concurrently
 
         tmplist = []
@@ -396,7 +403,7 @@ class SimpleResultSet(RankedResultSet):
                 try:
                     nitem = others[o][positions[o]]
                 except IndexError:
-                    # no more items in this rs
+                    # There are no more items in this rs
                     continue
                 
                 if nitem == items[0]:
@@ -1168,7 +1175,7 @@ class SimpleResultSetItem(ResultSetItem):
                                )
         val = getattr(self, 'proxInfo')
         if val:
-            # serialize to XML
+            # Serialize to XML
             xml.append(u'<proxInfo>')
             for hit in val:
                 xml.append(u'<hit>')
