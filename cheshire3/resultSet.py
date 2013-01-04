@@ -219,7 +219,7 @@ class SimpleResultSet(RankedResultSet):
                 else:
                     xml.append(u'<d n="%s" t="%s">' %
                                (a, srlz_typehash.get(type(val), '')))
-                    if type(val) in [int, long, float, bool, None]:
+                    if type(val) in [int, long, float, bool, type(None)]:
                         xml.append(escape(unicode(val)))
                     else:
                         xml.append(escape(val))
