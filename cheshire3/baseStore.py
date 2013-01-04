@@ -267,7 +267,6 @@ class SimpleStore(C3Object, SummaryObject):
 
         self.useUUID = self.get_setting(session, 'useUUID', 0)
         self.expires = self.get_default(session, 'expires', 0)
-
         for dbt in dbts:
             self._initDb(session, dbt)
             self._verifyDb(session, dbt)
@@ -902,6 +901,7 @@ class BdbStore(SimpleStore):
             dbp = self.get_path(session, dbType + 'Path')
             if dbp is None:
                 self._initDb(session, dbType)
+                self._verifyDb(session, dbType)
                 dbp = self.get_path(session, dbType + 'Path')
             if (os.path.exists(dbp) or
                 dbType in self.storageTypes or
