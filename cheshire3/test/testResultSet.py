@@ -548,6 +548,18 @@ class SimpleResultSetTestCase(unittest.TestCase):
                              )
                          )
 
+    def testSerialize(self):
+        for rs in [self.a, self.b]:
+            srlzd = rs.serialize(self.session)
+            self.assertIsInstance(srlzd, basestring,
+                                  u"ResultSet serialization not "
+                                  u"string or unicode."
+                                  )
+            try:
+                etree.fromstring(srlzd)
+            except etree.XMLSyntaxError:
+                self.fail(u"ResultSet serialization is not well-formed XML")
+
 
 def load_tests(loader, tests, pattern):
     # Alias loader.loadTestsFromTestCase for sake of line lengths
