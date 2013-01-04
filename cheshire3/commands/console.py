@@ -2,7 +2,11 @@
 
 import sys
 import os
-import readline
+try:
+    import readline
+except ImportError:
+    # Gracefully degrade command line UX
+    pass
 
 from code import InteractiveConsole
 
@@ -16,8 +20,8 @@ from cheshire3.licensing import cheshire3_license, cheshire3_license_text,\
 class Cheshire3Console(InteractiveConsole):
     """Cheshire3 Interactive Console."""
     
-    def __init__(self, args, locals=None, filename="<console>"):
-        InteractiveConsole.__init__(self, locals, filename)
+    def __init__(self, args, locals_=None, filename="<console>"):
+        InteractiveConsole.__init__(self, locals_, filename)
         # Standard Cheshire3 initialization code
         init_code_lines = [
            'from cheshire3.session import Session',

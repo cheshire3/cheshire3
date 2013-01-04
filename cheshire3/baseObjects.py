@@ -1,4 +1,11 @@
-"""Abstract Base Classes for Cheshire3 Objects."""
+"""Abstract Base Classes for Cheshire3 Objects.
+
+Defines the base classes of object in the Cheshire3 Object model, their
+API method and documentation.
+
+Functional implementations are contained in the module for each class e.g.
+Server in cheshire3.server etc.
+"""
 
 from cheshire3.session import Session
 from cheshire3.configParser import C3Object
@@ -914,13 +921,21 @@ class ResultSet(object):
         """Combine the ResultSets in 'others' into this ResultSet."""
         raise NotImplementedError
 
-    def retrieve(self, session, req):
-        """Resolve pointers to return a list of 'req' Records."""
+    def retrieve(self, session, nRecs, start=0):
+        """Return an iterable of ``nRecs`` Records starting at ``start``."""
         raise NotImplementedError
     
     def order(self, session, spec, 
               ascending=None, missing=None, case=None, accents=None):
         """Re-order in-place based on the given spec and arguments."""
+        raise NotImplementedError
+
+    def serialize(self, session):
+        """Return a string serialization of the ResultSet."""
+        raise NotImplementedError
+
+    def deserialize(self, session, data):
+        """Deserialize string in ``data`` to return the populated ResultSet."""
         raise NotImplementedError
 
 
@@ -934,6 +949,14 @@ class ResultSetItem(object):
     id = 0
     recordStore = ""
     occurences = 0
+
+    def fetch_record(self, session):
+        """Fetch and return the Record represented by the ResultSetItem."""
+        raise NotImplementedError
+
+    def serialize(self, session):
+        """Return a string serialization of the ResultSetItem."""
+        raise NotImplementedError
 
 
 class Record(object):
