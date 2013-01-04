@@ -85,7 +85,8 @@ class SimpleResultSetStore(ResultSetStore):
                                                         'proxInfo',
                                                         1)
                               )
-        cl = str(rset.__class__)
+        cl = '{0}.{1}'.format(rset.__class__.__module__,
+                              rset.__class__.__name__)
         data = cl + "||" + srlz
         expires = self.generate_expires(session, rset)
         if expires:
