@@ -46,20 +46,27 @@ class ResultSetStoreTestCase(SimpleStoreTestCase):
     def test_store_data(self):
         "Check that ResultSet is stored without alteration to copy in memory."
         for inRs in self._get_test_resultSets():
+            # Get a representation of the ResultSet
+            items = [(i.id, i.recordStore, i.occurences, i.weight)
+                     for i
+                     in inRs]
             # Store the ResultSet
-            outRs = self.testObj.create_resultSet(self.session, inRs)
+            self.testObj.create_resultSet(self.session, inRs)
             # Check that fetched ResultSet is unaltered
-            self.assertEqual(outRs.serialize(self.session),
-                             inRs.serialize(self.session),
-                             u"Returned ResultSet altered while storing")
+            new_items = [(i.id, i.recordStore, i.occurences, i.weight)
+                         for i
+                         in inRs]
+            self.assertListEqual(new_items,
+                                 items,
+                                 u"Returned ResultSet altered while storing")
 
     def test_storeFetch_data(self):
         "Check that Resultset is stored and retrieved without alteration."
         for inRs in self._get_test_resultSets():
             # Store the ResultSet
-            inRs = self.testObj.create_resultSet(self.session, inRs)
+            identifier = self.testObj.create_resultSet(self.session, inRs)
             # Fetch the ResultSet
-            outRs = self.testObj.fetch_resultSet(self.session, inRs.id)
+            outRs = self.testObj.fetch_resultSet(self.session, identifier)
             # Check returned object is instance of ResultSet
             self.assertIsInstance(outRs, ResultSet)
             # Check that returned doc content is unaltered
