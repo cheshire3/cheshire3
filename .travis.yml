@@ -3,10 +3,8 @@ python:
   - "2.6"
   - "2.7"
 # Install dependencies
-# including those that are dependent on Python version
 install:
   - "pip install -r requirements.txt --use-mirrors"
-  - "pip-2.6 install argparse --use-mirrors"
   - "pip install . --use-mirrors"
 # Run tests
 script: python setup.py test
