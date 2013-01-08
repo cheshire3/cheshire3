@@ -14,12 +14,13 @@ try:
 except ImportError:
     import unittest
 
-import os
+import os.path
 import random
 import string
 
 from datetime import datetime
 from tempfile import mkdtemp
+from shutil import rmtree
 from lxml import etree
 
 from cheshire3.baseStore import BdbStore, DeletedObject, FileSystemStore
@@ -44,20 +45,15 @@ class SimpleStoreTestCase(Cheshire3ObjectTestCase):
         for x in range(5):
             # Generate a random string of data
             l = random.randint(100, 100000)
-            yield ''.join([random.choice(string.printable) for x in range(l)])
+            yield ''.join([random.choice(string.printable) for y in range(l)])
             
     def setUp(self):
         # Create a tempfile placeholder
-        self.defaultPath = mkdtemp()
+        self.defaultPath = mkdtemp(prefix=self.__class__.__name__)
         Cheshire3ObjectTestCase.setUp(self)
 
     def tearDown(self):
-        for root, dirs, files in os.walk(self.defaultPath, topdown=False):
-            for name in files:
-                os.remove(os.path.join(root, name))
-            for name in dirs:
-                os.rmdir(os.path.join(root, name))
-        os.rmdir(self.defaultPath)
+        rmtree(self.defaultPath)
 
 
 class BdbStoreTestCase(SimpleStoreTestCase):
@@ -218,12 +214,7 @@ class UserPathBdbStoreTestCase(BdbStoreTestCase):
 
     def tearDown(self):
         defaultPath = os.path.expanduser(self.defaultPath)
-        for root, dirs, files in os.walk(defaultPath, topdown=False):
-            for name in files:
-                os.remove(os.path.join(root, name))
-            for name in dirs:
-                os.rmdir(os.path.join(root, name))
-        os.rmdir(defaultPath)
+        rmtree(defaultPath)
 
 
 class FileSystemStoreTestCase(SimpleStoreTestCase):
