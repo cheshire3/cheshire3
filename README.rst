@@ -1,7 +1,12 @@
 Cheshire3
 =========
 
-22nd November 2012 (2012-11-22)
+8th January 2013 (2013-01-08)
+
+.. image:: https://travis-ci.org/cheshire3/cheshire3.png?branch=develop
+   :target: https://travis-ci.org/cheshire3/cheshire3?branch=develop
+   :alt: Build Status
+
 
 Contents
 --------
