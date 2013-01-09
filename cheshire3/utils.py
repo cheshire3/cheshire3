@@ -143,7 +143,7 @@ def dotProduct(vector1, vector2):
     
     >>> dotProduct({1:1,2:2,3:3,4:4}, {2:2,3:3})
     13
-    >>> dotProduct({1:1,2:2,3:3,4:4, {2:2.0,3:3.0})
+    >>> dotProduct({1:1,2:2,3:3,4:4}, {2:2.0,3:3.0})
     13.0
     """
     # order doesn't affect result - just need to compare the two
