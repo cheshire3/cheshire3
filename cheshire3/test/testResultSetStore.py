@@ -32,7 +32,7 @@ class ResultSetStoreTestCase(SimpleStoreTestCase):
             for y in range(5):
                 occs = 5 - x
                 rs.append(SimpleResultSetItem(self.session,
-                                              id=x,
+                                              id=y,
                                               recStore="recordStore",
                                               occs=occs,
                                               database="",
