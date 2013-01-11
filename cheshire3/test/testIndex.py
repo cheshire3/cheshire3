@@ -28,6 +28,7 @@ class FakeDatabase(Database):
     Fulfil mimimum API required for Indexes to process Records.
     """
     pass
+        
 
 
 class FakeIndexStore(IndexStore):
@@ -45,6 +46,9 @@ class FakeIndexStore(IndexStore):
 
     def create_index(self, session, index):
         self.indexes[index.id] = {}
+
+    def store_terms(self, session, index, terms, rec):
+        self.indexes[index.id].update(terms)
 
 
 class SimpleIndexTestCase(Cheshire3ObjectTestCase):
@@ -72,12 +76,13 @@ class SimpleIndexTestCase(Cheshire3ObjectTestCase):
           </paths>
         </subConfig>'''.format(self._get_class()))
 
-    def _get_test_record(self):
-        return LxmlRecord(etree.XML('<record>'
-                                    '<title>Title</title>'
-                                    '<content>Record content.</content>'
-                                    '</record>')
-                          )
+    def _get_test_records(self):
+        for x in range(5):
+            yield LxmlRecord(etree.XML('<record>'
+                                       '<title>Title {0}</title>'
+                                       '<content>Record {0} content.</content>'
+                                       '</record>'.format(x))
+                             )
 
     def setUp(self):
         Cheshire3ObjectTestCase.setUp(self)
@@ -110,6 +115,54 @@ class SimpleIndexTestCase(Cheshire3ObjectTestCase):
         )
         self.assertEqual(regex, r'This is . search term. with a \^$')
 
+    def test_processRecord(self):
+        "Test processing a Record."
+        if not self.testObj.sources:
+            self.skipTest("Abstract class, no sources to test")
+        for i, rec in enumerate(self._get_test_records()):
+            data = self.testObj._processRecord(self.session,
+                                             rec,
+                                             self.testObj.sources[u'data'][0])
+            # Check that return value is a dict
+            self.assertIsInstance(data, dict)
+            # Check that the dict is exactly as expected
+            self.assertDictEqual(
+                data,
+                {'Title {0}'.format(i): {
+                    'text': 'Title {0}'.format(i),
+                    'occurences': 1,
+                    'proxLoc': [-1]
+                    }
+                }
+            )
+
+    def test_extract_data(self):
+        "Test extraction of data from a record."
+        if not self.testObj.sources:
+            self.skipTest("Abstract class, no sources to test")
+        for i, rec in enumerate(self._get_test_records()):
+            # Extract data and check expected value
+            data = self.testObj.extract_data(self.session, rec)
+            self.assertEqual(data, u'Title {0}'.format(i))
+
+    def test_index_record(self):
+        "Test indexing a Record results in terms being extracted and stored."
+        if not self.testObj.sources:
+            self.skipTest("Abstract class, no sources to test")
+        for i, rec in enumerate(self._get_test_records()):
+            # Index the Records
+            self.testObj.index_record(self.session, rec)
+            # Check that terms have been stored by the Index's IndexStore
+            self.assertDictContainsSubset(
+                {'Title {0}'.format(i): {
+                    'text': 'Title {0}'.format(i),
+                    'occurences': 1,
+                    'proxLoc': [-1]
+                    }
+                },
+                self.testObj.indexStore.indexes[self.testObj.id]
+            )
+
 
 class XPathSimpleIndexTestCase(SimpleIndexTestCase):
     """Test a SimpleIndex configured with an explicit XPath."""
@@ -129,23 +182,20 @@ class XPathSimpleIndexTestCase(SimpleIndexTestCase):
           </source>
         </subConfig>'''.format(self._get_class()))
 
-    def test_processRecord(self):
-        rec = self._get_test_record()
-        data = self.testObj._processRecord(self.session,
-                                         rec,
-                                         self.testObj.sources[u'data'][0])
-        self.assertIsInstance(data, dict)
-        self.assertIn('Title', data)
-        self.assertDictContainsSubset(
-            {'text': 'Title', 'occurences': 1},
-            data['Title']
-        )
-
-    def test_extract_data(self):
-        "Test extraction of data from a record."
-        rec = self._get_test_record()
-        data = self.testObj.extract_data(self.session, rec)
-        self.assertEqual(data, u'Title')
+    def test_sources(self):
+        "Test configured sources."
+        # Test that there are sources
+        self.assertTrue(self.testObj.sources,
+                        "No data sources")
+        # Test that there are no more or less than 1 source
+        self.assertEqual(len(self.testObj.sources),
+                         1,
+                         "More or less than 1 data source: "
+                         "{0!r}".format(self.testObj.sources))
+        # Test that there is a source designated for 'data'
+        self.assertIn(u'data',
+                      self.testObj.sources,
+                      "No u'data' source")
 
 
 class SelectorSimpleIndexTestCase(SimpleIndexTestCase):
@@ -177,24 +227,21 @@ class SelectorSimpleIndexTestCase(SimpleIndexTestCase):
           </source>
         </subConfig>'''.format(self._get_class()))
 
-    def test_processRecord(self):
-        rec = self._get_test_record()
-        data = self.testObj._processRecord(self.session,
-                                         rec,
-                                         self.testObj.sources[u'data'][0])
-        self.assertIsInstance(data, dict)
-        self.assertIn('Title', data)
-        self.assertDictContainsSubset(
-            {'text': 'Title', 'occurences': 1},
-            data['Title']
-        )
-
-    def test_extract_data(self):
-        "Test extraction of data from a record."
-        rec = self._get_test_record()
-        data = self.testObj.extract_data(self.session, rec)
-        self.assertEqual(data, u'Title')
-
+    def test_sources(self):
+        "Test configured sources."
+        # Test that there are sources
+        self.assertTrue(self.testObj.sources,
+                        "No data sources")
+        # Test that there are no more or less than 1 source
+        self.assertEqual(len(self.testObj.sources),
+                         1,
+                         "More or less than 1 data source: "
+                         "{0!r}".format(self.testObj.sources))
+        # Test that there is a source designated for 'data'
+        self.assertIn(u'data',
+                      self.testObj.sources,
+                      "No u'data' source")
+    
 
 def load_tests(loader, tests, pattern):
     # Alias loader.loadTestsFromTestCase for sake of line lengths
