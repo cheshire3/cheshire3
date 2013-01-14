@@ -48,7 +48,37 @@ class FakeIndexStore(IndexStore):
         self.indexes[index.id] = {}
 
     def store_terms(self, session, index, terms, rec):
-        self.indexes[index.id].update(terms)
+        for k in terms.itervalues():
+            term = k['text']
+            newData = [rec.id, rec.recordStore, k['occurences']]
+            # Handle proximity
+            try:
+                newData.extend(k['positions'])
+            except KeyError:
+                pass
+            currentData = self.indexes[index.id].get(
+                term,
+                [len(self.indexes[index.id]), 0, 0]
+            )
+            (termid, totalRecs, totalOccs) = currentData[:3]
+            currentData = currentData[3:]
+            totalRecs += 1
+            totalOccs += k['occurences']
+            for n in range(0, len(newData), 3):
+                docid = newData[n]
+                storeid = newData[n + 1]
+                replaced = 0
+                for x in range(3, len(currentData), 3):
+                    if (currentData[x] == docid and
+                        currentData[x + 1] == storeid
+                        ):
+                        currentData[x + 2] = newData[n + 2]
+                        replaced = 1
+                        break
+                if not replaced:
+                    currentData.extend([docid, storeid, newData[n + 2]])
+            mergedData = [termid, totalRecs, totalOccs] + currentData
+            self.indexes[index.id][term] = mergedData
 
 
 class SimpleIndexTestCase(Cheshire3ObjectTestCase):
@@ -81,7 +111,8 @@ class SimpleIndexTestCase(Cheshire3ObjectTestCase):
             yield LxmlRecord(etree.XML('<record>'
                                        '<title>Title {0}</title>'
                                        '<content>Record {0} content.</content>'
-                                       '</record>'.format(x))
+                                       '</record>'.format(x)),
+                             docId=x
                              )
 
     def setUp(self):
@@ -146,21 +177,26 @@ class SimpleIndexTestCase(Cheshire3ObjectTestCase):
             self.assertEqual(data, u'Title {0}'.format(i))
 
     def test_index_record(self):
-        "Test indexing a Record results in terms being extracted and stored."
+        """Test indexing a Record.
+        
+        Check results in terms being extracted and stored.
+        """
         if not self.testObj.sources:
             self.skipTest("Abstract class, no sources to test")
         for i, rec in enumerate(self._get_test_records()):
+            # Assign store identifier
+            rec.recordStore = 0
             # Index the Records
             self.testObj.index_record(self.session, rec)
+            # Check that term occurs in IndexStore
+            self.assertIn('Title {0}'.format(rec.id),
+                          self.testObj.indexStore.indexes[self.testObj.id],
+                          "Term not stored")
             # Check that terms have been stored by the Index's IndexStore
             self.assertDictContainsSubset(
-                {'Title {0}'.format(i): {
-                    'text': 'Title {0}'.format(i),
-                    'occurences': 1,
-                    'proxLoc': [-1]
-                    }
-                },
-                self.testObj.indexStore.indexes[self.testObj.id]
+                {'Title {0}'.format(rec.id): [i, 1, 1, rec.id, 0, 1]},
+                self.testObj.indexStore.indexes[self.testObj.id],
+                "Stored term structure not as expected"
             )
 
 
