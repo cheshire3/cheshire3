@@ -80,6 +80,30 @@ class FakeIndexStore(IndexStore):
             mergedData = [termid, totalRecs, totalOccs] + currentData
             self.indexes[index.id][term] = mergedData
 
+    def delete_terms(self, session, index, terms, rec):
+        for k in terms.keys():
+            currentData = self.indexes[index.id].get(k)
+            if (currentData is not None):
+                gone = [rec.id, rec.recordStore, terms[k]['occurences']]
+                (termid, oldTotalRecs, oldTotalOccs) = currentData[0:3]
+                currentData = list(currentData[3:])
+                for n in range(0, len(gone), 3):
+                    docid = gone[n]
+                    storeid = gone[n + 1]
+                    for x in range(0, len(currentData), 3):
+                        if (currentData[x] == docid and
+                            currentData[x + 1] == storeid):
+                            del currentData[x:(x + 3)]
+                            break
+                trecs = len(currentData) / 3
+                toccs = sum(currentData[2::3])
+                mergedData = [termid, trecs, toccs] + currentData
+                if not mergedData[1]:
+                    # All terms deleted
+                    del self.indexes[index.id][k]
+                else:
+                    self.indexes[index.id][k] = mergedData
+
 
 class SimpleIndexTestCase(Cheshire3ObjectTestCase):
 
@@ -198,6 +222,29 @@ class SimpleIndexTestCase(Cheshire3ObjectTestCase):
                 self.testObj.indexStore.indexes[self.testObj.id],
                 "Stored term structure not as expected"
             )
+
+    def test_delete_record(self):
+        """Test deleting (unindexing) a Record.
+
+        Check deleting a Record results in terms being extracted and removed
+        from the IndexStore.
+        """
+        if not self.testObj.sources:
+            self.skipTest("Abstract class, no sources to test")
+        # Initialize IndexStore with some data
+        terms = self.testObj.indexStore.indexes[self.testObj.id]
+        for i in range(5):
+            terms["Title {0}".format(i)] = [i, 1, 1, i, 0, 1]
+
+        for i, rec in enumerate(self._get_test_records()):
+            # Assign store identifier
+            rec.recordStore = 0
+            # Delete the Record
+            self.testObj.delete_record(self.session, rec)
+            # Check that term no longer occurs in IndexStore
+            self.assertNotIn('Title {0}'.format(rec.id),
+                          self.testObj.indexStore.indexes[self.testObj.id],
+                          "Term not deleted")
 
 
 class XPathSimpleIndexTestCase(SimpleIndexTestCase):
