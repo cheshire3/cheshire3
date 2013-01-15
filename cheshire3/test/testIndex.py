@@ -114,6 +114,15 @@ class FakeIndexStore(IndexStore):
                                    numeric=numericId
                                    )
 
+    def fetch_term(self, session, index, term, summary=False, prox=True):
+        try:
+            unpacked = self.indexes[index.id][term]
+        except KeyError:
+            unpacked = []
+        if summary:
+            unpacked = unpacked[:3]
+        return unpacked
+
 
 class SimpleIndexTestCase(Cheshire3ObjectTestCase):
     """Test a SimpleIndex configured with an explicit XPath.
@@ -288,28 +297,88 @@ class SimpleIndexTestCase(Cheshire3ObjectTestCase):
         indexData[2] = totalOccs
         self.assertTrue(indexData[2] is not None and indexData[2] >= 0,
                         "Incorrect definition of test data: totalRecs")
+
+        # Construct ResultSet
         rs = self.testObj.construct_resultSet(self.session,
                                               indexData,
                                               {})
         # Check return value
         self.assertIsInstance(rs, SimpleResultSet)
         # Test ResultSet summary data
-        self.assertEqual(rs.termid, 0, "ResultSet.termid not as expected (0)")
         self.assertEqual(rs.totalRecs,
                          totalRecs,
                          "ResultSet.totalRecs not as expected ({0})"
                          "".format(totalRecs)
-                         )
-        self.assertEqual(rs.totalOccs,
-                         totalOccs,
-                         "ResultSet.totalOccs not as expected ({0})"
-                         "".format(totalOccs)
                          )
         # Test len(ResultSet)
         self.assertEqual(len(rs),
                          totalRecs,
                          "ResultSet length not as expected ({0})"
                          "".format(totalRecs)
+                         )
+        self.assertEqual(rs.termid, 0, "ResultSet.termid not as expected (0)")
+        self.assertEqual(rs.totalOccs,
+                         totalOccs,
+                         "ResultSet.totalOccs not as expected ({0})"
+                         "".format(totalOccs)
+                         )
+        # Check items
+        for rsi in rs:
+            self.assertIsInstance(rsi, SimpleResultSetItem)
+        # Check identifiers
+        self.assertEqual(rs[0].id, 0)
+        self.assertEqual(rs[1].id, 1)
+        # Check occurences (sic)
+        self.assertEqual(rs[0].occurences, 3)
+        self.assertEqual(rs[1].occurences, 2)
+        # Check resultSet raise appropriate error when outside bounds
+        with self.assertRaises(IndexError):
+            rs[2]
+
+    def test_search(self):
+        """Test a simple search of the Index."""
+        # Initialize IndexStore with some data
+        indexData = [0, None, None, 0, 0, 3, 1, 0, 2]
+        # Calculate total Records, total Occurences
+        totalRecs = len(indexData[3:]) / 3    # length of records part / 3
+        indexData[1] = totalRecs
+        self.assertTrue(indexData[1] is not None and indexData[1] >= 0,
+                        "Incorrect definition of test data: totalRecs")
+        totalOccs = sum(indexData[3:][2::3])  # sum of record occurences
+        indexData[2] = totalOccs
+        self.assertTrue(indexData[2] is not None and indexData[2] >= 0,
+                        "Incorrect definition of test data: totalRecs")
+        self.testObj.indexStore.indexes[self.testObj.id]['bar'] = indexData
+        # Parse a query
+        query = cqlparse('c3.foo = bar')
+        # Fetch a Database object
+        db = self.server.get_object(self.session, self.session.database)
+
+        # Carry out the search
+        rs = self.testObj.search(self.session, query, db)
+        # Check return value
+        self.assertIsInstance(rs, SimpleResultSet)
+
+        # Test ResultSet summary data
+        self.assertEqual(rs.totalRecs,
+                         totalRecs,
+                         "ResultSet.totalRecs not as expected: {0} != {1}"
+                         "".format(rs.totalRecs, totalRecs)
+                         )
+        # Test len(ResultSet)
+        self.assertEqual(len(rs),
+                         totalRecs,
+                         "ResultSet length not as expected ({0})"
+                         "".format(totalRecs)
+                         )
+        self.assertEqual(rs.termid,
+                         indexData[0],
+                         "ResultSet.termid not as expected: {0} != {1}"
+                         "".format(rs.termid, indexData[0]))
+        self.assertEqual(rs.totalOccs,
+                         totalOccs,
+                         "ResultSet.totalOccs not as expected: {0} != {1}"
+                         "".format(rs.totalOccs, totalOccs)
                          )
         # Check items
         for rsi in rs:
