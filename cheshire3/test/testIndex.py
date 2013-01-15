@@ -17,6 +17,7 @@ except ImportError:
 from lxml import etree
 
 from cheshire3.baseObjects import Database, IndexStore
+from cheshire3.cqlParser import parse as cqlparse
 from cheshire3.index import SimpleIndex
 from cheshire3.record import LxmlRecord
 from cheshire3.test.testConfigParser import Cheshire3ObjectTestCase
@@ -28,7 +29,6 @@ class FakeDatabase(Database):
     Fulfil mimimum API required for Indexes to process Records.
     """
     pass
-        
 
 
 class FakeIndexStore(IndexStore):
@@ -106,6 +106,11 @@ class FakeIndexStore(IndexStore):
 
 
 class SimpleIndexTestCase(Cheshire3ObjectTestCase):
+    """Test a SimpleIndex configured with an explicit XPath.
+
+    Also acts as base class for testing SimpleIndexes with varying
+    configurations.
+    """
 
     @classmethod
     def _get_class(cls):
@@ -128,6 +133,12 @@ class SimpleIndexTestCase(Cheshire3ObjectTestCase):
           <paths>
             <object type="indexStore" ref="indexStore"/>
           </paths>
+          <source>
+            <xpath>title</xpath>
+            <process>
+                <object type="extractor" ref="SimpleExtractor"/>
+            </process>
+          </source>
         </subConfig>'''.format(self._get_class()))
 
     def _get_test_records(self):
@@ -142,6 +153,21 @@ class SimpleIndexTestCase(Cheshire3ObjectTestCase):
     def setUp(self):
         Cheshire3ObjectTestCase.setUp(self)
         self.session.database = "db_testIndexes"
+
+    def test_sources(self):
+        "Test configured sources."
+        # Test that there are sources
+        self.assertTrue(self.testObj.sources,
+                        "No data sources")
+        # Test that there are no more or less than 1 source
+        self.assertEqual(len(self.testObj.sources),
+                         1,
+                         "More or less than 1 data source: "
+                         "{0!r}".format(self.testObj.sources))
+        # Test that there is a source designated for 'data'
+        self.assertIn(u'data',
+                      self.testObj.sources,
+                      "No u'data' source")
 
     def test_locate_firstMask(self):
         """Check identification of masking (wildcard) characters."""
@@ -172,8 +198,6 @@ class SimpleIndexTestCase(Cheshire3ObjectTestCase):
 
     def test_processRecord(self):
         "Test processing a Record."
-        if not self.testObj.sources:
-            self.skipTest("Abstract class, no sources to test")
         for i, rec in enumerate(self._get_test_records()):
             data = self.testObj._processRecord(self.session,
                                              rec,
@@ -193,8 +217,6 @@ class SimpleIndexTestCase(Cheshire3ObjectTestCase):
 
     def test_extract_data(self):
         "Test extraction of data from a record."
-        if not self.testObj.sources:
-            self.skipTest("Abstract class, no sources to test")
         for i, rec in enumerate(self._get_test_records()):
             # Extract data and check expected value
             data = self.testObj.extract_data(self.session, rec)
@@ -205,8 +227,6 @@ class SimpleIndexTestCase(Cheshire3ObjectTestCase):
         
         Check results in terms being extracted and stored.
         """
-        if not self.testObj.sources:
-            self.skipTest("Abstract class, no sources to test")
         for i, rec in enumerate(self._get_test_records()):
             # Assign store identifier
             rec.recordStore = 0
@@ -229,8 +249,6 @@ class SimpleIndexTestCase(Cheshire3ObjectTestCase):
         Check deleting a Record results in terms being extracted and removed
         from the IndexStore.
         """
-        if not self.testObj.sources:
-            self.skipTest("Abstract class, no sources to test")
         # Initialize IndexStore with some data
         terms = self.testObj.indexStore.indexes[self.testObj.id]
         for i in range(5):
@@ -245,40 +263,6 @@ class SimpleIndexTestCase(Cheshire3ObjectTestCase):
             self.assertNotIn('Title {0}'.format(rec.id),
                           self.testObj.indexStore.indexes[self.testObj.id],
                           "Term not deleted")
-
-
-class XPathSimpleIndexTestCase(SimpleIndexTestCase):
-    """Test a SimpleIndex configured with an explicit XPath."""
-    
-    def _get_config(self):
-        return etree.XML('''\
-        <subConfig type="" id="{0.__name__}">
-          <objectType>{0.__module__}.{0.__name__}</objectType>
-          <paths>
-            <object type="indexStore" ref="indexStore"/>
-          </paths>
-          <source>
-            <xpath>title</xpath>
-            <process>
-                <object type="extractor" ref="SimpleExtractor"/>
-            </process>
-          </source>
-        </subConfig>'''.format(self._get_class()))
-
-    def test_sources(self):
-        "Test configured sources."
-        # Test that there are sources
-        self.assertTrue(self.testObj.sources,
-                        "No data sources")
-        # Test that there are no more or less than 1 source
-        self.assertEqual(len(self.testObj.sources),
-                         1,
-                         "More or less than 1 data source: "
-                         "{0!r}".format(self.testObj.sources))
-        # Test that there is a source designated for 'data'
-        self.assertIn(u'data',
-                      self.testObj.sources,
-                      "No u'data' source")
 
 
 class SelectorSimpleIndexTestCase(SimpleIndexTestCase):
@@ -310,27 +294,11 @@ class SelectorSimpleIndexTestCase(SimpleIndexTestCase):
           </source>
         </subConfig>'''.format(self._get_class()))
 
-    def test_sources(self):
-        "Test configured sources."
-        # Test that there are sources
-        self.assertTrue(self.testObj.sources,
-                        "No data sources")
-        # Test that there are no more or less than 1 source
-        self.assertEqual(len(self.testObj.sources),
-                         1,
-                         "More or less than 1 data source: "
-                         "{0!r}".format(self.testObj.sources))
-        # Test that there is a source designated for 'data'
-        self.assertIn(u'data',
-                      self.testObj.sources,
-                      "No u'data' source")
-    
 
 def load_tests(loader, tests, pattern):
     # Alias loader.loadTestsFromTestCase for sake of line lengths
     ltc = loader.loadTestsFromTestCase 
     suite = ltc(SimpleIndexTestCase)
-    suite.addTests(ltc(XPathSimpleIndexTestCase))
     suite.addTests(ltc(SelectorSimpleIndexTestCase))
     return suite
 
