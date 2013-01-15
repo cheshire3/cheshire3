@@ -20,6 +20,7 @@ from cheshire3.baseObjects import Database, IndexStore
 from cheshire3.cqlParser import parse as cqlparse
 from cheshire3.index import SimpleIndex
 from cheshire3.record import LxmlRecord
+from cheshire3.resultSet import SimpleResultSet, SimpleResultSetItem
 from cheshire3.test.testConfigParser import Cheshire3ObjectTestCase
 
 
@@ -103,6 +104,15 @@ class FakeIndexStore(IndexStore):
                     del self.indexes[index.id][k]
                 else:
                     self.indexes[index.id][k] = mergedData
+
+    def construct_resultSetItem(self, session, recId,
+                                recStoreId, nOccs, rsiType=None):
+        numericId = recId
+        recStore = ["recordStore"][recStoreId]
+        return SimpleResultSetItem(session, recId, recStore,
+                                   nOccs, session.database,
+                                   numeric=numericId
+                                   )
 
 
 class SimpleIndexTestCase(Cheshire3ObjectTestCase):
@@ -263,6 +273,56 @@ class SimpleIndexTestCase(Cheshire3ObjectTestCase):
             self.assertNotIn('Title {0}'.format(rec.id),
                           self.testObj.indexStore.indexes[self.testObj.id],
                           "Term not deleted")
+
+    def test_construct_resultSet(self):
+        """Test ResultSet construction."""
+        # Create some fake Index data, data structure:
+        # [termId, totalRecs, totalOccs, recId, recRecordStore, recOccs, ...]
+        indexData = [0, None, None, 0, 0, 3, 1, 0, 2]
+        # Calculate total Records, total Occurences
+        totalRecs = len(indexData[3:]) / 3    # length of records part / 3
+        indexData[1] = totalRecs
+        self.assertTrue(indexData[1] is not None and indexData[1] >= 0,
+                        "Incorrect definition of test data: totalRecs")
+        totalOccs = sum(indexData[3:][2::3])  # sum of record occurences
+        indexData[2] = totalOccs
+        self.assertTrue(indexData[2] is not None and indexData[2] >= 0,
+                        "Incorrect definition of test data: totalRecs")
+        rs = self.testObj.construct_resultSet(self.session,
+                                              indexData,
+                                              {})
+        # Check return value
+        self.assertIsInstance(rs, SimpleResultSet)
+        # Test ResultSet summary data
+        self.assertEqual(rs.termid, 0, "ResultSet.termid not as expected (0)")
+        self.assertEqual(rs.totalRecs,
+                         totalRecs,
+                         "ResultSet.totalRecs not as expected ({0})"
+                         "".format(totalRecs)
+                         )
+        self.assertEqual(rs.totalOccs,
+                         totalOccs,
+                         "ResultSet.totalOccs not as expected ({0})"
+                         "".format(totalOccs)
+                         )
+        # Test len(ResultSet)
+        self.assertEqual(len(rs),
+                         totalRecs,
+                         "ResultSet length not as expected ({0})"
+                         "".format(totalRecs)
+                         )
+        # Check items
+        for rsi in rs:
+            self.assertIsInstance(rsi, SimpleResultSetItem)
+        # Check identifiers
+        self.assertEqual(rs[0].id, 0)
+        self.assertEqual(rs[1].id, 1)
+        # Check occurences (sic)
+        self.assertEqual(rs[0].occurences, 3)
+        self.assertEqual(rs[1].occurences, 2)
+        # Check resultSet raise appropriate error when outside bounds
+        with self.assertRaises(IndexError):
+            rs[2]
 
 
 class SelectorSimpleIndexTestCase(SimpleIndexTestCase):
