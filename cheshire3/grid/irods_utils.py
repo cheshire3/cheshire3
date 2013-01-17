@@ -1,4 +1,5 @@
 
+
 def icatValToPy(val, un):
     if un in ['int', 'long']:
         return long(val)
@@ -8,6 +9,7 @@ def icatValToPy(val, un):
         return float(val)
     else:
         return val
+
 
 def pyValToIcat(val):
     x = type(val)

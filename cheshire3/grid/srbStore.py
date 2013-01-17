@@ -1,16 +1,31 @@
-
-from c3errors import *
-from baseStore import BdbStore
-from configParser import C3Object
-import os, md5, sha, time
-from baseObjects import Session
-from random import Random
+import os
+import md5
+import sha
+import time
 import string
+import types
+import base64
+try:
+    import cStringIO as StringIO
+except ImportError:
+    import StringIO
+
+from random import Random
+from tarfile import *
+    
 try:
     from Ft.Lib.Uuid import GenerateUuid, UuidAsString
-    use4Suite = 1
 except:
     use4Suite = 0
+else:
+    use4Suite = 1
+
+# Cheshire3 imports
+from cheshire3.configParser import C3Object
+from cheshire3.baseObjects import Database, Session
+from cheshire3.baseStore import BdbStore
+from cheshire3.exceptions import *
+
 
 randomGen = Random(time.time())
 asciiChars = string.ascii_letters + string.digits + "@%#!-=."
@@ -18,10 +33,11 @@ asciiChars = string.ascii_letters + string.digits + "@%#!-=."
 
 try:
     from srboo import SrbConnection, SrbException
-    from baseObjects import Database
-    from tarfile import *
-    import cStringIO, StringIO, types, base64    
+        
     from utils import parseSrbUrl
+except:
+    pass
+else:
 
     class SrbStore(C3Object):
         """ Storage Resource Broker based storage """
@@ -41,7 +57,7 @@ try:
 
         def __init__(self, session, config, parent):
             C3Object.__init__(self, session, config, parent)
-	    self.idNormaliser = self.get_path(session, 'idNormaliser')
+            self.idNormaliser = self.get_path(session, 'idNormaliser')
             self.checkSumHash = {}
             self.currentId = -1
             # Now find our info
@@ -52,7 +68,7 @@ try:
                 raise ConfigFileException("No srbServer to connect to.")
             else:
                 info = parseSrbUrl(uri)
-                for (a,v) in self.info.items():
+                for (a, v) in self.info.items():
                     setattr(self, a, v)
 
                 if (isinstance(parent, Database)):
@@ -62,7 +78,11 @@ try:
                 self.subcollection = info['path'] + "/cheshire3/" + sc
 
                 try:
-                    self.connection = SrbConnection(self.host, self.port, self.domain, user = self.user, passwd = self.passwd)
+                    self.connection = SrbConnection(self.host, self.port,
+                                                    self.domain,
+                                                    user=self.user,
+                                                    passwd=self.passwd
+                                                    )
                     self.connection.resource = self.resource
                 except SrbException:
                     # Couldn't connect :/
@@ -85,7 +105,13 @@ try:
         def _openContainer(self, session):
             if self.connection is None:
                 try:                    
-                    self.connection = SrbConnection(self.host, self.port, self.domain, user = self.user, passwd = self.passwd, dn = self.dn)
+                    self.connection = SrbConnection(self.host,
+                                                    self.port,
+                                                    self.domain,
+                                                    user=self.user,
+                                                    passwd=self.passwd,
+                                                    dn=self.dn
+                                                    )
                     self.connection.resource = self.resource
                 except SrbException:
                     # Couldn't connect :/
@@ -112,11 +138,12 @@ try:
                 if (n == 0):
                     self.currentId = 0
                 else:
-                    name = self.connection.object_metadata(n-1)
+                    name = self.connection.object_metadata(n - 1)
                     if (name.isdigit()):
                         self.currentId = int(name) + 1
                     else:
-                        raise ValueError("XXX: Can't generate new ids for non int stores")
+                        raise ValueError("XXX: Can't generate new ids for non "
+                                         "int stores")
             else:
                 self.currentId = self.currentId + 1
             return self.currentId
@@ -168,7 +195,6 @@ try:
                 f.close()
                 self.connection.up_collection()
 
-
         def fetch_idList(self, session, numReq=-1, start=""):
             self._openContainer(session)
             (scs, objs) = self.connection.walk_names()
@@ -182,7 +208,8 @@ try:
                 elif (digest == 'sha'):
                     dmod = sha
                 else:
-                    raise ConfigFileException("Unknown digest type: %s" % digest)
+                    raise ConfigFileException("Unknown digest type: %s"
+                                              "" % digest)
                 m = dmod.new()
                 data = data.encode('utf-8')
                 m.update(data)               
@@ -193,7 +220,7 @@ try:
                     self.connection.open_collection('d2i')
                     try:
                         f = self.connection.open(digest)
-                        data = f.read();
+                        data = f.read()
                         f.close()
                         raise ObjectAlreadyExistsException(data)
                     except:
@@ -213,7 +240,6 @@ try:
             data = f.get_umetadata('digest')
             f.close()
             return data
-
 
         def fetch_size(self, session, id):
             self._open_container(session)
@@ -308,9 +334,9 @@ try:
             # Cache most recent chunk as likely to be pulled back in order
             SrbStore._openContainer(self, session)
             sid = str(id)                        
-            startid = id/self.maxRecords*self.maxRecords
+            startid = id / self.maxRecords * self.maxRecords
             startsid = str(startid)
-            end = startid + self.maxRecords -1
+            end = startid + self.maxRecords - 1
             endsid = str(end)
             if (self.idNormaliser <> None):
                 sid = self.idNormaliser.process_string(session, sid)
@@ -350,7 +376,10 @@ try:
 
         def store_data(self, session, id, data, size=0):        
             # Cache until X items then push
-            if (len(self.incomingRecords) == 1 and id != self.incomingRecords[-1][0] +1):
+            if (
+                    len(self.incomingRecords) == 1 and
+                    id != self.incomingRecords[-1][0] + 1
+            ):
                 # Write single
                 self._writeSingle(session, self.incomingRecords[0])
                 self.incomingRecords = [(id, data)]
@@ -364,7 +393,6 @@ try:
 
         def _writeCache(self, session):
             # Called from commit and store_data
-
             if (len(self.incomingRecords) == 1):
                 return self._writeSingle(session, self.incomingRecords)
 
@@ -375,10 +403,10 @@ try:
                 if (self.idNormaliser is not None):
                     sid = self.idNormaliser.process_string(session, sid)
                 ti = TarInfo(sid)
-                if type(data) == types.UnicodeType:
+                if isinstance(data, types.UnicodeType):
                     data = data.encode('utf-8')
                 ti.size = len(data)
-                buff = cStringIO.StringIO(data)
+                buff = StringIO.StringIO(data)
                 buff.seek(0)
                 tar.addfile(ti, buff)
                 buff.close()
@@ -393,7 +421,7 @@ try:
 
             # Now store tar in SRB
             startsid = str(self.incomingRecords[0][0])
-            endsid = str(self.incomingRecords[0][0] + self.maxRecords -1)
+            endsid = str(self.incomingRecords[0][0] + self.maxRecords - 1)
 
             if (self.idNormaliser is not None):
                 startsid = self.idNormaliser.process_string(session, startsid)
@@ -416,7 +444,7 @@ try:
 
             (id, recdata) = info
             sid = str(id)            
-            startsid = str(id/100*100)
+            startsid = str(id / 100 * 100)
             end = id + self.maxRecords
             endsid = str(end)
             if (self.idNormaliser <> None):
@@ -435,10 +463,10 @@ try:
 
             # Put file into tar
 
-            tarbuffer = cStringIO.StringIO(data)
+            tarbuffer = StringIO.StringIO(data)
             tar = TarFile.open(mode="w|", fileobj=tarbuffer)
             ti = TarInfo(sid)
-            buff = cStringIO.StringIO(recdata)
+            buff = StringIO.StringIO(recdata)
             ti.frombuf(buff)
             ti.size = len(recdata)
             buff.seek(0)
@@ -469,7 +497,7 @@ try:
     class SrbRecordStore(SimpleRecordStore, SrbStore):
 
         def __init__(self, session, config, parent):
-            SrbStore.__init__(self,session,config,parent)
+            SrbStore.__init__(self, session, config, parent)
             SimpleRecordStore.__init__(self, session, config, parent)
 
 
@@ -478,16 +506,17 @@ try:
         # Probably more expensive than finding records in a larger chunk
         
         def __init__(self, session, config, parent):
-            SrbBdbCombineStore.__init__(self,session,config,parent)
+            SrbBdbCombineStore.__init__(self, session, config, parent)
             SimpleRecordStore.__init__(self, session, config, parent)
 
 
-    class CachingSrbRemoteWriteRecordStore(SimpleRecordStore, SrbBdbCombineStore):
+    class CachingSrbRemoteWriteRecordStore(SimpleRecordStore,
+                                           SrbBdbCombineStore):
         # Storing/fetching lots of small records is expensive
         # Probably more expensive than finding records in a larger chunk
 
         def __init__(self, session, config, parent):
-            SrbBdbCombineStore.__init__(self,session,config,parent)
+            SrbBdbCombineStore.__init__(self, session, config, parent)
             SimpleRecordStore.__init__(self, session, config, parent)
             
         def store_data_remote(self, session, data, size):
@@ -495,12 +524,3 @@ try:
             id = self.generate_id(session)
             self.store_data(session, id, data, size)
             return id
-
-
-
-except:
-    pass
-            
-
-
-

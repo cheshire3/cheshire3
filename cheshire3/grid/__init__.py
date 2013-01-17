@@ -4,11 +4,17 @@ Data grid (SRB and iRODS) support for Cheshire3 XML Search, Retrieval and
 Information Analysis Engine.
 """
 
-__all__ = ['mpiProtocolHandler', 'pvmProtocolHandler', 'documentFactory', 'irodsStore', 'irods_utils', 'user', 'srbDocStream', 'srbErrors', 'srbIndex', 'srbStore']
+__all__ = ['mpiProtocolHandler', 'pvmProtocolHandler', 'documentFactory',
+           'irodsStore', 'irods_utils', 'user',
+           'srbDocStream', 'srbErrors', 'srbIndex', 'srbStore']
 
-# Register our streams with main docFac
-# register_stream is an @classmethod
-from cheshire3.grid.documentFactory import streamHash
 from cheshire3.documentFactory import SimpleDocumentFactory
-for (k,v) in streamHash.items():
-    SimpleDocumentFactory.register_stream(k, v)
+
+from cheshire3.grid.documentFactory import streamHash
+
+# Register sub-package streams with base Factories
+
+# DocumentStreams
+for format_ in streamHash:
+    # register_stream is an @classmethod
+    SimpleDocumentFactory.register_stream(format_, streamHash[format_])
