@@ -5,7 +5,8 @@ import os
 
 from cheshire3.server import SimpleServer
 from cheshire3.session import Session
-from cheshire3.exceptions import ObjectDoesNotExistException
+from cheshire3.exceptions import ObjectDoesNotExistException,\
+    MissingDependencyException
 from cheshire3.commands.cmd_utils import Cheshire3ArgumentParser, \
                                          identify_database
 
@@ -43,8 +44,14 @@ Please provide a different database identifier using the --database option.
         # Allow for multiple data arguments
         docFac = db.get_object(session, 'defaultDocumentFactory')
         for dataArg in args.data:
-            docFac.load(session, dataArg,
-                        args.cache, args.format, args.tagname, args.codec)
+            try:
+                docFac.load(session, dataArg,
+                            args.cache, args.format, args.tagname, args.codec)
+            except MissingDependencyException as e:
+                server.log_critical(session, e.reason)
+                missingDependencies =  e.dependencies
+                raise MissingDependencyException('cheshire3-load script',
+                                                 missingDependencies)
             wf = db.get_object(session, 'buildIndexWorkflow')
             wf.process(session, docFac)
 
