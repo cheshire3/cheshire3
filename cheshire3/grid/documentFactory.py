@@ -1,53 +1,68 @@
 import os
-import irods
-import irods_error
 
 from cheshire3.document import StringDocument
 from cheshire3.documentFactory import MultipleDocumentStream
 from cheshire3.documentFactory import FileDocumentStream
 from cheshire3.exceptions import ConfigFileException
+from cheshire3.exceptions import MissingDependencyException
 
 from cheshire3.grid.irods_utils import icatValToPy
 
+try:
+    import irods
+    import irods_error
+except ImportError:
+    
+    class IrodsStream(object):
+        u"""Base class DocumentStream to load from iRODS."""
+    
+        def __init__(self, session, stream):
+            raise MissingDependencyException(
+                '{0.__module__}.{0.__class__.__name__}'.format(self),
+                'irods (PyRods)'
+            )
 
-class IrodsStream(object):
-    u"""Base class DocumentStream to load from iRODS."""
+else:
 
-    def __init__(self, session, stream):
-        myEnv, status = irods.getRodsEnv()
-        conn, errMsg = irods.rcConnect(myEnv.getRodsHost(),
-                                       myEnv.getRodsPort(),
-                                       myEnv.getRodsUserName(),
-                                       myEnv.getRodsZone())
-        status = irods.clientLogin(conn)
-        if status:
-            raise ConfigFileException("Cannot connect to iRODS: ({0}) {0}"
-                                      "".format(status, errMsg)
-                                      )
-        home = myEnv.getRodsHome()
-        c = irods.irodsCollection(conn, home)
-        self.cxn = conn
-        self.coll = c
-        instream = stream
-        # check if abs path to home dir
-        if stream.startswith(home):
-            stream = stream[len(home):]
-            if stream[0] == "/":
-                stream = stream[1:]
-        colls = stream.split('/')
-        for i, cln in enumerate(colls):
-            exit_status = c.openCollection(cln)
-            if exit_status < 0:
-                if (
+    class IrodsStream(object):
+        u"""Base class DocumentStream to load from iRODS."""
+    
+        def __init__(self, session, stream):
+            myEnv, status = irods.getRodsEnv()
+            conn, errMsg = irods.rcConnect(myEnv.getRodsHost(),
+                                           myEnv.getRodsPort(),
+                                           myEnv.getRodsUserName(),
+                                           myEnv.getRodsZone())
+            status = irods.clientLogin(conn)
+            if status:
+                raise ConfigFileException("Cannot connect to iRODS: ({0}) {1}"
+                                          "".format(status, errMsg)
+                                          )
+            home = myEnv.getRodsHome()
+            c = irods.irodsCollection(conn, home)
+            self.cxn = conn
+            self.coll = c
+            instream = stream
+            # Check if abs path to home dir
+            if stream.startswith(home):
+                stream = stream[len(home):]
+                if stream[0] == "/":
+                    stream = stream[1:]
+            colls = stream.split('/')
+            for i, cln in enumerate(colls):
+                exit_status = c.openCollection(cln)
+                if exit_status < 0:
+                    if (
                         (i < len(colls) - 1) or
                         (cln not in [obj[0] for obj in c.getObjects()])
-                ):
-                    raise IOError("When opening {0}: {1} does not exists in "
-                                  "collection {2}".format(instream,
-                                                          cln,
-                                                          c.getCollName()
-                                                          )
-                                  )
+                    ):
+                        raise IOError("When opening {0}: {1} does not exists "
+                                      "in collection {2}"
+                                      "".format(instream,
+                                                cln,
+                                                c.getCollName()
+                                                )
+                                      )
 
 
 class IrodsFileDocumentStream(IrodsStream, FileDocumentStream):
