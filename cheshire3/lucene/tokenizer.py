@@ -1,23 +1,36 @@
 
 from cheshire3.tokenizer import SimpleTokenizer
-import lucene
+from cheshire3.exceptions import MissingDependencyException
 
-class LuceneTokenizer(SimpleTokenizer):
+try:
+    import lucene
+except ImportError:
 
-    _possibleSettings = {'tokenizer' : {'docs' : ''}}
+    class LuceneTokenizer(SimpleTokenizer):
+    
+        _possibleSettings = {'tokenizer': {'docs': ''}}
+    
+        def __init__(self, session, config, parent):
+            SimpleTokenizer.__init__(self, session, config, parent)
+            raise MissingDependencyException(self.objectType, "lucene")
 
-    def __init__(self, session, config, parent):
-        SimpleTokenizer.__init__(self, session, config, parent)
-        tknr = self.get_setting(session, 'tokenizer')
-        if tknr[-9:] == 'Tokenizer' and hasattr(lucene, tknr):            
-            self.tokenizer = getattr(lucene, tknr)
-        else:
-            raise ConfigFileException("Unknown Lucene Tokenizer")
-        
-    def process_string(self, session, data):
-        rdr = lucene.StringReader(data)
-        toks = self.tokenizer(rdr)
-        return [t.term() for t in toks]
+else:
+    class LuceneTokenizer(SimpleTokenizer):
+    
+        _possibleSettings = {'tokenizer': {'docs': ''}}
+    
+        def __init__(self, session, config, parent):
+            SimpleTokenizer.__init__(self, session, config, parent)
+            tknr = self.get_setting(session, 'tokenizer')
+            if tknr[-9:] == 'Tokenizer' and hasattr(lucene, tknr):            
+                self.tokenizer = getattr(lucene, tknr)
+            else:
+                raise ConfigFileException("Unknown Lucene Tokenizer")
+            
+        def process_string(self, session, data):
+            rdr = lucene.StringReader(data)
+            toks = self.tokenizer(rdr)
+            return [t.term() for t in toks]
 
 
 # This doesn't work as expected!
@@ -30,7 +43,6 @@ class LuceneOffsetTokenizer(LuceneTokenizer):
         rdr = lucene.StringReader(data)
         toks = self.tokenizer(rdr)
         return zip([(t.term(), t.startOffset()) for t in toks])
-        
 
 
 ### Current Tokenizers:    
