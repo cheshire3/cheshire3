@@ -10,10 +10,10 @@ class C3Exception(Exception):
         self.reason = text
 
     def __str__(self):
-        return str(self.__class__) + ": " + self.reason
+        return "{0.__class__.__name__}: {0.reason}".format(self)
 
     def __repr__(self):
-        return str(self.__class__) + ": " + self.reason
+        return "{0.__class__.__name__}: {0.reason}".format(self)
 
 
 class C3ObjectTypeError(C3Exception):
