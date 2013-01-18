@@ -280,7 +280,7 @@ tracker: https://github.com/cheshire3/cheshire3/issues
 Licensing
 ---------
 
-Copyright © 2005-2012, the `University of Liverpool`_. All rights reserved.
+Copyright © 2005-2013, the `University of Liverpool`_. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
