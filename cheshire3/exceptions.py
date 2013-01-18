@@ -76,3 +76,18 @@ class FileSystemException(C3Exception):
 
 class XMLSyntaxError(C3Exception):
     pass
+
+
+class MissingDependencyException(C3Exception):
+    
+    def __init__(self, objectType="Unknown", dependencies=None):
+        if isinstance(dependencies, list):
+            self.dependencies = dependencies
+        elif isinstance(dependencies, basestring):
+            self.dependencies = [dependencies]
+        else:
+            self.dependencies = ['Unknown']
+        depStr = ", ".join(["'{0}'".format(d) for d in self.dependencies])
+        self.reason = ("Missing dependency/dependencies {0} for object of "
+                       "type '{1}'".format(depStr, objectType)
+                       )
