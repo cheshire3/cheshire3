@@ -90,17 +90,22 @@ import sys, os
 from warnings import filterwarnings
 filterwarnings('ignore', 'the md5 module is deprecated; use hashlib instead',  DeprecationWarning, 'yacc')
 
+import cheshire3.internal
+
 home = os.environ.get("C3HOME")
 
 __name__ = "cheshire3"
 __package__ = "cheshire3"
 
-__all__ = ['cqlParser', 'database', 'document', 'documentFactory', 'documentStore',
-           'exceptions', 'extractor', 'index', 'indexStore', 'internal', 'logger', 
-           'normalizer', 'objectStore', 'parser', 'permissionsHandler', 'preParser', 'protocolMap', 
-           'queryFactory', 'queryStore', 'record', 'recordStore', 'resultSet', 'resultSetStore',
-           'selector', 'server', 'session', 'tokenizer', 'tokenMerger', 'transformer', 'user',
-           'utils', 'workflow', 'xpathProcessor']
+__all__ = ['cqlParser', 'database', 'document', 'documentFactory',
+           'documentStore', 'exceptions', 'extractor', 'index', 'indexStore',
+           'internal', 'logger', 'normalizer', 'objectStore', 'parser',
+           'permissionsHandler', 'preParser', 'protocolMap', 'queryFactory',
+           'queryStore', 'record', 'recordStore', 'resultSet',
+           'resultSetStore', 'selector', 'server', 'session', 'tokenizer',
+           'tokenMerger', 'transformer', 'user', 'utils', 'workflow',
+           'xpathProcessor'
+           ]
 
 
 # Check for user-specific Cheshire3 server directory
@@ -115,15 +120,10 @@ if not os.path.exists(_user_cheshire3_dir):
     os.makedirs(os.path.join(_user_cheshire3_dir, 'logs'))
 
 
-import cheshire3.internal
-# sps = cheshire3.internal.get_subpackages()
-
-sps= ['web', 'formats']
-
-for sp in sps:
-    # call import for on init hooks
-    try:
-        __import__("cheshire3.%s" % sp)
-    except:
-        pass
-           
+# Import sub-packages to initiate on-init hooks
+# e.g. to add DocumentStreams, QueryStreams to base factories
+for sp in cheshire3.internal.get_subpackages():
+    # Don't catch errors here. Each sub-package is responsible for degrading
+    # gracefully in absence of dependencies (i.e. don't fail until missing
+    # functionality is explicitly called).
+    __import__("cheshire3.%s" % sp)
