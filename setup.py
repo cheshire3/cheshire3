@@ -1,4 +1,5 @@
-# Setup file for cheshire3 package
+"""Setup file for cheshire3 package."""
+from __future__ import with_statement
 
 import sys
 import os
@@ -10,7 +11,6 @@ from warnings import warn
 import distribute_setup
 distribute_setup.use_setuptools()
 from setuptools import setup, find_packages
-from cheshire3.internal import cheshire3Version
 
 # Check Python version
 py_version = getattr(sys, 'version_info', (0, 0, 0))
@@ -19,18 +19,36 @@ if py_version < (2, 6):
     warn("Cheshire3 requires Python 2.6 or later; some code may be "
          "incompatible with earlier versions.")
 
+# Inspect to find current path
+setuppath = inspect.getfile(inspect.currentframe())
+setupdir = os.path.dirname(setuppath)
+
 # Basic information
 _name = 'cheshire3'
-_version = '.'.join(map(str, cheshire3Version))
 _description = ('Cheshire3 Search and Retrieval Engine and Information '
                 'Framework')
+# Discover version number
+vfn = 'VERSION.txt'
+try:
+    # Try to import version number from cheshire3.internal
+    from cheshire3.internal import cheshire3Version
+except ImportError:
+    # Missing dependencies, e.g. source distribution
+    # Read from version file instead    
+    with open(os.path.join(setupdir, vfn), 'r') as vfh:
+        _version = vfh.read()
+else:
+    # Turn version tuple into a string
+    _version = '.'.join(map(str, cheshire3Version))
+    # Write version number to file for source distributions
+    with open(os.path.join(setupdir, vfn), 'w') as vfh:
+        vfh.write(_version)
+
 _download_url = ('http://download.cheshire3.org/{0}/src/{1}-{2}.tar.gz'
                  ''.format(_version[:3], _name, _version))
 
 # More detailed description from README
-# Inspect to find current path
-setuppath = inspect.getfile(inspect.currentframe())
-setupdir = os.path.dirname(setuppath)
+
 try:
     fh = open(os.path.join(setupdir, 'README.rst'), 'r')
 except IOError:
