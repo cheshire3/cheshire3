@@ -11,6 +11,7 @@ from warnings import warn
 import distribute_setup
 distribute_setup.use_setuptools()
 from setuptools import setup, find_packages
+from pkg_resources import DistributionNotFound
 
 # Check Python version
 py_version = getattr(sys, 'version_info', (0, 0, 0))
@@ -32,7 +33,7 @@ vfn = 'VERSION.txt'
 try:
     # Try to import version number from cheshire3.internal
     from cheshire3.internal import cheshire3Version
-except ImportError:
+except (ImportError, DistributionNotFound):
     # Missing dependencies, e.g. source distribution
     # Read from version file instead    
     with open(os.path.join(setupdir, vfn), 'r') as vfh:
