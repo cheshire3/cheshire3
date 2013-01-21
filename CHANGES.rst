@@ -1,13 +1,14 @@
 CHANGES
 =======
 
-1.0.10 - Monday 21 January 2013
--------------------------------
+1.0.9, 1.0.10, 1.0.11 - Monday 21 January 2013
+----------------------------------------------
 
 BUG FIXES
 ~~~~~~~~~
 
-* Fixed potential bug when discovering version number in setup.py
+* Eventually fixed bugs when discovering version number in setup.py
+  Read in version from VERSION.txt instead of trying to import from package
 
 
 1.0.9 - Tuesday 18 December 2012
