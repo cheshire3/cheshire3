@@ -1,6 +1,15 @@
 CHANGES
 =======
 
+1.0.10 - Monday 21 January 2013
+-------------------------------
+
+BUG FIXES
+~~~~~~~~~
+
+* Fixed potential bug when discovering version number in setup.py
+
+
 1.0.9 - Tuesday 18 December 2012
 --------------------------------
 
