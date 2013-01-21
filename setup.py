@@ -28,28 +28,14 @@ setupdir = os.path.dirname(setuppath)
 _name = 'cheshire3'
 _description = ('Cheshire3 Search and Retrieval Engine and Information '
                 'Framework')
-# Discover version number
-vfn = 'VERSION.txt'
-try:
-    # Try to import version number from cheshire3.internal
-    from cheshire3.internal import cheshire3Version
-except (ImportError, DistributionNotFound):
-    # Missing dependencies, e.g. source distribution
-    # Read from version file instead    
-    with open(os.path.join(setupdir, vfn), 'r') as vfh:
-        _version = vfh.read()
-else:
-    # Turn version tuple into a string
-    _version = '.'.join(map(str, cheshire3Version))
-    # Write version number to file for source distributions
-    with open(os.path.join(setupdir, vfn), 'w') as vfh:
-        vfh.write(_version)
+# Discover version number from file    
+with open(os.path.join(setupdir, 'VERSION.txt'), 'r') as vfh:
+    _version = vfh.read()
 
 _download_url = ('http://download.cheshire3.org/{0}/src/{1}-{2}.tar.gz'
                  ''.format(_version[:3], _name, _version))
 
 # More detailed description from README
-
 try:
     fh = open(os.path.join(setupdir, 'README.rst'), 'r')
 except IOError:
