@@ -82,7 +82,8 @@ setup(
     install_requires=_install_requires,
     setup_requires=['setuptools-git'],
     dependency_links=[
-        "http://labix.org/python-dateutil"
+        "http://labix.org/python-dateutil",
+        "http://download.cheshire3.org/latest/reqs/"
     ],
     extras_require={
         'graph': ['rdflib'],
