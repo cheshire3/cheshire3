@@ -46,15 +46,17 @@ else:
 
 # Requirements
 _install_requires = ['lxml >= 2.1', 'zopyx.txng3.ext >= 3.3.1']
+_tests_require = []
 # Determine python-dateutil version
 if py_version < (3, 0):
     dateutilstr = 'python-dateutil == 1.5'
+    if py_version < (2, 7):
+        _install_requires.append('argparse')
+        _tests_require.append('unittest2')
 else:
-    'python-dateutil >= 2.0'
+    dateutilstr = 'python-dateutil >= 2.0'
+
 _install_requires.append(dateutilstr)
-if py_version < (2, 7):
-    _install_requires.append('argparse')
-    _install_requires.append('unittest2')
 
 
 setup(
@@ -65,6 +67,7 @@ setup(
     package_data={'cheshire3': ['configs/*.xml', 'configs/extra/*.xml']},
     exclude_package_data={'': ['README.*', '.gitignore']},
     requires=['lxml(>=2.1)', 'bsddb', 'dateutil', 'argparse'],
+    tests_require=_tests_require,
     install_requires=_install_requires,
     setup_requires=['setuptools-git'],
     dependency_links=[
@@ -76,7 +79,7 @@ setup(
         'sql': ['PyGreSQL >= 3.8.1'],
         'web': ['PyZ3950 >= 2.04']
     },
-    test_suite="cheshire3.test.testAll",
+    test_suite="cheshire3.test.testAll.suite",
     scripts=['scripts/DocumentConverter.py'],
     entry_points={
         'console_scripts': [
