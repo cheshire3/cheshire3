@@ -28,28 +28,14 @@ setupdir = os.path.dirname(setuppath)
 _name = 'cheshire3'
 _description = ('Cheshire3 Search and Retrieval Engine and Information '
                 'Framework')
-# Discover version number
-vfn = 'VERSION.txt'
-try:
-    # Try to import version number from cheshire3.internal
-    from cheshire3.internal import cheshire3Version
-except (ImportError, DistributionNotFound):
-    # Missing dependencies, e.g. source distribution
-    # Read from version file instead    
-    with open(os.path.join(setupdir, vfn), 'r') as vfh:
-        _version = vfh.read()
-else:
-    # Turn version tuple into a string
-    _version = '.'.join(map(str, cheshire3Version))
-    # Write version number to file for source distributions
-    with open(os.path.join(setupdir, vfn), 'w') as vfh:
-        vfh.write(_version)
+# Discover version number from file    
+with open(os.path.join(setupdir, 'VERSION.txt'), 'r') as vfh:
+    _version = vfh.read()
 
 _download_url = ('http://download.cheshire3.org/{0}/src/{1}-{2}.tar.gz'
                  ''.format(_version[:3], _name, _version))
 
 # More detailed description from README
-
 try:
     fh = open(os.path.join(setupdir, 'README.rst'), 'r')
 except IOError:
@@ -60,15 +46,17 @@ else:
 
 # Requirements
 _install_requires = ['lxml >= 2.1', 'zopyx.txng3.ext >= 3.3.1']
+_tests_require = []
 # Determine python-dateutil version
 if py_version < (3, 0):
     dateutilstr = 'python-dateutil == 1.5'
+    if py_version < (2, 7):
+        _install_requires.append('argparse')
+        _tests_require.append('unittest2')
 else:
-    'python-dateutil >= 2.0'
+    dateutilstr = 'python-dateutil >= 2.0'
+
 _install_requires.append(dateutilstr)
-if py_version < (2, 7):
-    _install_requires.append('argparse')
-    _install_requires.append('unittest2')
 
 
 setup(
@@ -79,6 +67,7 @@ setup(
     package_data={'cheshire3': ['configs/*.xml', 'configs/extra/*.xml']},
     exclude_package_data={'': ['README.*', '.gitignore']},
     requires=['lxml(>=2.1)', 'bsddb', 'dateutil', 'argparse'],
+    tests_require=_tests_require,
     install_requires=_install_requires,
     setup_requires=['setuptools-git'],
     dependency_links=[
@@ -90,7 +79,7 @@ setup(
         'sql': ['PyGreSQL >= 3.8.1'],
         'web': ['PyZ3950 >= 2.04']
     },
-    test_suite="cheshire3.test.testAll",
+    test_suite="cheshire3.test.testAll.suite",
     scripts=['scripts/DocumentConverter.py'],
     entry_points={
         'console_scripts': [

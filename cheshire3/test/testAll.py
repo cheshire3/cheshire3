@@ -34,6 +34,10 @@ def load_tests(loader, tests, pattern):
     return suite
 
 
+def suite():
+    return load_tests(unittest.defaultTestLoader, [], 'test*.py')
+
+
 if __name__ == '__main__':
     tr = unittest.TextTestRunner(verbosity=2)
     tr.run(load_tests(unittest.defaultTestLoader, [], 'test*.py'))

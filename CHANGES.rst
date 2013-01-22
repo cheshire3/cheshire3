@@ -1,13 +1,22 @@
 CHANGES
 =======
 
-1.0.10 - Monday 21 January 2013
--------------------------------
+1.0.11 - Tuesday 22 January 2013
+--------------------------------
+
+* Eventually fixed build bugs when discovering version number in setup.py
+  Read in version from VERSION.txt instead of trying to import from package
+
+* ``python setup.py test`` now works with Python 2.6
+
+
+1.0.9, 1.0.10 - Monday 21 January 2013
+--------------------------------------
 
 BUG FIXES
 ~~~~~~~~~
 
-* Fixed potential bug when discovering version number in setup.py
+* Attempts to fix build bugs when discovering version number in setup.py
 
 
 1.0.9 - Tuesday 18 December 2012
