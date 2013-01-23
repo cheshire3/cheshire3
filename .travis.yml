@@ -6,5 +6,5 @@ python:
 install:
   - "pip install . --use-mirrors"
 # Run tests
-script: python setup.py test
+script: python -m cheshire3.test.testAll
 
