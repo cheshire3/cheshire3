@@ -5,8 +5,10 @@ import codecs
 import mimetypes
 import zipfile
 import tarfile
+import urlparse
 
 from lxml import etree
+from xml.sax.saxutils import escape
 try:
     from cStringIO import StringIO
 except ImportError:
