@@ -27,10 +27,10 @@ Contents
 
    -  `Command-line UI`_
        
-       -  `Creating a new Database`_
-       -  `Loading Data into the Database`_
-       -  `Searching the Database`_
-       -  `Exposing the Database via SRU`_
+      -  `Creating a new Database`_
+      -  `Loading Data into the Database`_
+      -  `Searching the Database`_
+      -  `Exposing the Database via SRU`_
     
    -  `Python API`_
     
@@ -923,7 +923,4 @@ index!
 .. _SRU: http://www.loc.gov/standards/sru/
 .. _CQL: http://www.loc.gov/standards/sru/specs/cql.html
 .. _OAI: http://www.openarchives.org/pmh/
-<<<<<<< HEAD
 .. _virtualenv: http://www.virtualenv.org/en/latest/
-=======
->>>>>>> 1.0.10
