@@ -37,7 +37,8 @@ from cheshire3.document import StringDocument
 from cheshire3.internal import CONFIG_NS
 from cheshire3.marc_utils import MARC
 from cheshire3.utils import getShellResult, gen_uuid
-from cheshire3.exceptions import ConfigFileException, ExternalSystemException
+from cheshire3.exceptions import ConfigFileException, ExternalSystemException,\
+    MissingDependencyException
 
 
 # TODO: All PreParsers should set mimetype, and record in/out mimetype
@@ -492,8 +493,8 @@ except ImportError:
     class HtmlTidyPreParser(PreParser):
 
         def __init__(self, session, config, parent):
-            raise NotImplementedError("""\
-HtmlTidyPreParser not supported due to a missing library on your system.""")
+            raise MissingDependencyException(self.__class__.__name__,
+                                             "tidy")
 
 else:
     class HtmlTidyPreParser(PreParser):
@@ -709,16 +710,14 @@ except ImportError:
     class GzipPreParser(PreParser):
         """Gzip a not-gzipped document."""
         def __init__(self, session, config, parent):
-            raise NotImplementedError('''\
-Compression by gzip is not supported due to a missing library in your system.\
-''')
+            raise MissingDependencyException(self.__class__.__name__,
+                                             "gzip")
 
     class GunzipPreParser(PreParser):
         """Gunzip a gzipped document."""
         def __init__(self, session, config, parent):
-            raise NotImplementedError('''\
-Decompression by gzip is not supported due to a missing library in your \
-system.''')
+            raise MissingDependencyException(self.__class__.__name__,
+                                             "gzip")
 
 else:
     class GzipPreParser(PreParser):
@@ -769,9 +768,8 @@ except ImportError:
     class Bzip2PreParser(PreParser):
         """Unzip a bz2 zipped document."""
         def __init__(self, session, config, parent):
-            raise NotImplementedError('''\
-Decompression by bzip2 is not supported due to a missing library in your \
-system.''')
+            raise MissingDependencyException(self.__class__.__name__,
+                                             "bzip2")
 
 else:
     class Bzip2PreParser(PreParser):
