@@ -248,7 +248,7 @@ class SimpleWorkflow(Workflow):
         else:
             code.append("object = db.get_path(session, 'defaultLogger')")
         text = flattenTexts(node)
-        if text[0] != '"':
+        if not text.startswith('"'):
             text = repr(text)
 
         lvl = node.getAttributeNS(None, 'level')
@@ -271,7 +271,7 @@ class SimpleWorkflow(Workflow):
         else:
             code.append("object = db.get_path(session, 'defaultLogger')")
         text = flattenTexts(node)
-        if text[0] != '"':
+        if not text.startswith('"'):
             text = repr(text)
         lvl = node.attrib.get('level', '')
         if (lvl):
@@ -456,7 +456,7 @@ class CachingWorkflow(SimpleWorkflow):
 
     def _handleLog(self, node):
         text = flattenTexts(node)
-        if text[0] != '"':
+        if not text.startswith('"'):
             text = repr(text)
         ref = node.getAttributeNS(None, 'ref')
         lvl = node.getAttributeNS(None, 'level')
@@ -477,7 +477,7 @@ class CachingWorkflow(SimpleWorkflow):
 
     def _handleLxmlLog(self, node):
         text = flattenTexts(node)
-        if text[0] != '"':
+        if not text.startswith('"'):
             text = repr(text)
         ref = node.attrib.get('ref', '')
         lvl = node.attrib.get('level', '')
