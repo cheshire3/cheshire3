@@ -409,7 +409,7 @@ You could try using zip.'''
         s = self._fetchStream(item)
         if trip[0] == 'stream':
             cls = trip[1]
-            nstream = cls(session, s, format=trip[2], 
+            nstream = cls(session, s, format_=trip[2], 
                           tagName=self.tagName, 
                           codec=self.codec, 
                           factory=self.factory)
