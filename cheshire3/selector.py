@@ -62,7 +62,8 @@ class SimpleSelector(Selector):
 
         if data['type'] in ['xpath', 'sparql']:
             for a in child.nsmap:
-                data['maps'][a] = child.nsmap[a]
+                if a is not None:
+                    data['maps'][a] = child.nsmap[a]
         for a in child.attrib:
             if not a in ['type', 'maps', 'string']:
                 data[a] = child.attrib['a']
