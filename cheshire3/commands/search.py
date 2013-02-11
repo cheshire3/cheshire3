@@ -15,12 +15,17 @@ def _formatResultSetItem(resultSetItem):
     # Try to get a title using a selector
     ext = db.get_object(session, 'SimpleExtractor')
     title = None
+    sel = None
     try:
         # Database caches object, so this is not as inefficient as it seems
         sel = db.get_object(session, 'titleXPathSelector')
     except ObjectDoesNotExistException:
-        pass
-    else:
+        try:
+            # Database caches object, so this is not as inefficient as it seems
+            sel = db.get_object(session, 'titleSelector')
+        except ObjectDoesNotExistException:
+            pass
+    if sel is not None:
         titleData = sel.process_record(session, rec)
         # Process result in order, to respect any preference in the config
         for selRes in titleData:
@@ -29,6 +34,8 @@ def _formatResultSetItem(resultSetItem):
                     if title:
                         break
                 if title:
+                    # Strip leading/trailing whitespace
+                    title = title.strip()
                     break
     # If still no title, revert to string representation of resultSetItem
     if not title:
