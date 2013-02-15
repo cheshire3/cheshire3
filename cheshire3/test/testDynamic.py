@@ -16,6 +16,7 @@ from lxml import etree
 from cheshire3 import baseObjects
 from cheshire3.dynamic import importObject, buildObject, makeObjectFromDom
 from cheshire3.exceptions import ConfigFileException
+from cheshire3.exceptions import MissingDependencyException
 from cheshire3.internal import cheshire3Root
 from cheshire3.server import SimpleServer
 
@@ -143,11 +144,13 @@ class BuildObjectTestCase(DynamicTestCase):
             except Exception as e:
                 self.assertIsInstance(e,
                                       (ConfigFileException,
-                                       NotImplementedError),
+                                       NotImplementedError,
+                                       MissingDependencyException),
                                       "When failing to buildObject of type "
                                       "'{0}' {1} is raised. Should be one of: "
                                       "ConfigFileException, "
-                                      "NotImplementedError"
+                                      "NotImplementedError, "
+                                      "MissingDependencyException"
                                       "".format(objectType,
                                                 e.__class__.__name__)
                                       )
@@ -177,11 +180,13 @@ class MakeObjectFromDomTestCase(DynamicTestCase):
             except Exception as e:
                 self.assertIsInstance(e,
                                       (ConfigFileException,
-                                       NotImplementedError),
+                                       NotImplementedError,
+                                       MissingDependencyException),
                                       "When failing to makeObjectFromDom for "
                                       "type '{0}' {1} is raised. Should be "
                                       "one of: ConfigFileException, "
-                                      "NotImplementedError"
+                                      "NotImplementedError, "
+                                      "MissingDependencyException"
                                       "".format(objectType,
                                                 e.__class__.__name__)
                                       )
