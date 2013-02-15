@@ -16,7 +16,10 @@ from cheshire3.exceptions import ConfigFileException
 
 
 class FilepathTransformer(Transformer):
-    """ Returns record.id as an identifier, in raw SAX events. For use as the inTransformer of a recordStore """
+    """Returns record.id as an identifier, in raw SAX events.
+    
+    For use as the inTransformer of a recordStore.
+    """
     def process_record(self, session, rec):
         sax = ['1 identifier {}', '3 ' + str(rec.id), '2 identifier']
         data = nonTextToken.join(sax)
@@ -26,12 +29,16 @@ class FilepathTransformer(Transformer):
 # Simplest transformation ...
 class XmlTransformer(Transformer):
     """ Return a Document containing the raw XML string of the record """
-    def process_record(self,session, rec):
+    def process_record(self, session, rec):
         return StringDocument(rec.get_xml(session))
 
 
 class Bzip2XmlTransformer(Transformer):
-    """Return a Document containing the raw XML string of the record, compressed using the bzip2 algorithm."""
+    """Return a Document containing bzip2 compressed XML.
+    
+    Return a Document containing the raw XML string of the record, compressed
+    using the bzip2 algorithm.
+    """
     
     def process_record(self, session, rec):
         data = rec.get_xml(session)
@@ -64,6 +71,7 @@ class WorkflowTransformer(Transformer):
         
         return output
 
+
 # --- XSLT Transformers ---
 
 
@@ -76,11 +84,21 @@ def myTimeFn(dummy):
 class LxmlXsltTransformer(Transformer):
     """XSLT transformer using Lxml implementation. Requires LxmlRecord.
     
-    Use Record's resultSetItem's proximity information to highlight query term matches."""
+    Use Record's resultSetItem's proximity information to highlight query term
+    matches.
+    """
 
-    _possiblePaths = {'xsltPath' : {'docs' : "Path to the XSLT file to use."}}
+    _possiblePaths = {
+        'xsltPath': {
+            'docs': "Path to the XSLT file to use."
+        }
+    }
     
-    _possibleSettings = {'parameter' : {'docs' : "Parameters to be passed to the transformer."}}
+    _possibleSettings = {
+        'parameter': {
+            'docs': "Parameters to be passed to the transformer."
+        }
+    }
 
     def __init__(self, session, config, parent):
         Transformer.__init__(self, session, config, parent)
@@ -95,7 +113,9 @@ class LxmlXsltTransformer(Transformer):
             dfp = self.get_path(session, "defaultPath")
             path = os.path.join(dfp, xfrPath)
         
-        ns = etree.FunctionNamespace('http://www.cheshire3.org/ns/function/xsl/')
+        ns = etree.FunctionNamespace(
+            'http://www.cheshire3.org/ns/function/xsl/'
+        )
         ns['now'] = myTimeFn
         self.functionNamespace = ns
         self.parsedXslt = etree.parse(path)
@@ -108,7 +128,6 @@ class LxmlXsltTransformer(Transformer):
             for pair in kv:
                 (k, v) = pair.split(':')
                 self.params[k] = '"%s"' % v
-                
 
     def process_record(self, session, rec):
         # return StringDocument
@@ -124,19 +143,34 @@ class LxmlXsltTransformer(Transformer):
 
 
 class LxmlQueryTermHighlightingTransformer(Transformer):
-    """Query term highlighting transformer based on Lxml implementation. Abstract Class."""
+    "Abstract Class for query term highlighting Transformers for LxmlRecords."
     
-    _possibleSettings = {'highlightTag': {'docs' : 'Tag to indicate highlighted section (will be inserted into output document as: <highlightTag>blah blah</highlightTag>)'}
-                        ,'tagAttrList': {'docs': 'Space separated list of attribute name="value" pairs (will be inserted into output document as: <highlightTag name="value">blah blah</highlightTag>)'}
-                        ,'breakElementsList': {'docs': 'Space separated list of element names to break at when tagging Query Terms. This can be useful when a speedy response is more important than complete tagging.'}
-                        }
+    HIGHLIGHT_NS = "http://www.cheshire3.org/schemas/highlight/"
+    
+    _possibleSettings = {
+        'highlightTag': {
+            'docs': ("Tag to indicate highlighted section (will be inserted "
+                     "into output document as: "
+                     "<highlightTag>blah blah</highlightTag>)")
+        },
+        'tagAttrList': {
+            'docs': ('Space separated list of attribute name="value" pairs '
+                     '(will be inserted into output document as: '
+                     '<highlightTag name="value">blah blah</highlightTag>)')
+        },
+        'breakElementsList': {
+            'docs': ('Space separated list of element names to break at when '
+                     'tagging Query Terms. This can be useful when a speedy '
+                     'response is more important than complete tagging.')
+        }
+    }
     
     def __init__(self, session, config, parent):
         Transformer.__init__(self, session, config, parent)
         htag = self.get_setting(session, 'highlightTag', None)
         if htag is None:
             self.highlightTag = 'c3:highlight'
-            self.attrs = {'xmlns:c3': "http://www.cheshire3.org/schemas/highlight/"}
+            self.attrs = {'xmlns:c3': self.HIGHLIGHT_NS}
         else:
             self.highlightTag = htag 
             self.attrs = {}
@@ -149,7 +183,9 @@ class LxmlQueryTermHighlightingTransformer(Transformer):
                 v = bits[1][1:-1]    # strip off "s
                 self.attrs[k] = v
                 
-        self.breakElements = self.get_setting(session, 'breakElementsList', '').split(' ')
+        self.breakElements = self.get_setting(session,
+                                              'breakElementsList',
+                                              '').split(' ')
         
     def _insertHighlightElement(self, element, located, start, end):
         text = getattr(element, located)
@@ -160,22 +196,35 @@ class LxmlQueryTermHighlightingTransformer(Transformer):
         hel.tail = text[end:]
         return hel
 
-class LxmlPositionQueryTermHighlightingTransformer(LxmlQueryTermHighlightingTransformer):
-    """Use word position from Record's resultSetItem's proximity information to highlight query term matches.
+
+LxmlHighlighTxr = LxmlQueryTermHighlightingTransformer
+
+
+class LxmlPositionQueryTermHighlightingTransformer(LxmlHighlighTxr):
+    """Return Document with search hits higlighted based on word position.
     
-    Note Well: this can be unreliable when used in conjunction with stoplists."""
+    Use word position from Record's resultSetItem's proximity information to
+    highlight query term matches.
+    
+    Note Well: this can be unreliable when used in conjunction with stoplists.
+    """
 
     def __init__(self, session, config, parent):
         raise NotImplementedError
 
 
-class LxmlOffsetQueryTermHighlightingTransformer(LxmlQueryTermHighlightingTransformer):
-    """Use character offsets from Record's resultSetItem's proximity information to highlight query term matches."""
-    
+class LxmlOffsetQueryTermHighlightingTransformer(LxmlHighlighTxr):
+    """Return Document with search hits higlighted based on character offsets.
+
+    Use character offsets from Record's resultSetItem's proximity information
+    to highlight query term matches.
+    """
+
     def __init__(self, session, config, parent):
-        LxmlQueryTermHighlightingTransformer.__init__(self, session, config, parent)
+        LxmlHighlighTxr.__init__(self, session, config, parent)
         try:
-            # try to get database's own version of RegexpFindOffsetTokenizer in case config is non-default
+            # Try to get database's own version of RegexpFindOffsetTokenizer in
+            # case config is non-default
             db = session.server.get_object(session, session.database)
         except:
             self.wordRe = re.compile(u"""
@@ -196,24 +245,31 @@ class LxmlOffsetQueryTermHighlightingTransformer(LxmlQueryTermHighlightingTransf
                |[\w+]+                                         #basic words, including +
               )""")
         else:
-            self.wordRe = db.get_object(session, 'RegexpFindOffsetTokenizer').regexp
-        
+            self.wordRe = db.get_object(session,
+                                        'RegexpFindOffsetTokenizer').regexp
+
     def process_record(self, session, rec):
         recDom = rec.get_dom(session)
-        if (rec.resultSetItem is not None) and (rec.resultSetItem.proxInfo is not None) and (len(rec.resultSetItem.proxInfo) > 0):
+        if (
+            (rec.resultSetItem is not None) and
+            (rec.resultSetItem.proxInfo is not None) and
+            (len(rec.resultSetItem.proxInfo) > 0)
+        ):
             # munge proxInfo into more useable form
             proxInfo = rec.resultSetItem.proxInfo
             proxInfo2 = set()
             # for each group of proxInfo (i.e. from each query clause)
             for pig in proxInfo:
-                # for each item of proxInfo: [nodeIdx, wordIdx, offset, termId(?)] NB termId from spoke indexes so useless to us :(
+                # for each item of proxInfo:
+                # [nodeIdx, wordIdx, offset, termId(?)]
                 for pi in pig:
                     # values must be strings for sets to work
                     proxInfo2.add('%d %d' % (pi[0], pi[2]))
             proxInfo = [map(int, pis.split(' ')) for pis in proxInfo2]
             nodeIdxs = []
             wordOffsets = []
-            # sort proxInfo so that nodeIdxs are sorted descending (so that offsets don't get upset when modifying text)
+            # sort proxInfo so that nodeIdxs are sorted descending (so that
+            # offsets don't get upset when modifying text)
             for x in sorted(proxInfo, reverse=True):
                 nodeIdxs.append(x[0])
                 wordOffsets.append(x[1])
@@ -231,10 +287,12 @@ class LxmlOffsetQueryTermHighlightingTransformer(LxmlQueryTermHighlightingTransf
                 try:
                     xp = xps[ni]
                 except KeyError:
-                    continue # no XPath
+                    # No XPath
+                    continue
                 el = xpathfn(xp)[0]
                 located = None
-                for ci, c in enumerate(el.iter()): # ignore comments processing instructions etc.
+                for ci, c in enumerate(el.iter()):
+                    # Ignore comments processing instructions etc.
                     if c.text:
                         text = c.text
                         if len(c.text) > offset:
@@ -242,19 +300,25 @@ class LxmlOffsetQueryTermHighlightingTransformer(LxmlQueryTermHighlightingTransf
                             try:
                                 end = self.wordRe.search(text, start).end()
                             except:
-                                pass # well I still... haven't found... what I'm looking for!
+                                # Well I still...
+                                # haven't found...
+                                # what I'm looking for!
+                                pass
                             else:
                                 located = 'text'
                                 if not (c.tag == self.highlightTag):
-                                    hel = self._insertHighlightElement(c, located, start, end)
+                                    hel = self._insertHighlightElement(c,
+                                                                       located,
+                                                                       start,
+                                                                       end)
                                     try:
                                         c.insert(0, hel)
                                     except TypeError:
-                                        # immutable element (comment!?)
+                                        # Immutable element (?)
                                         break
                                 break
                         else:
-                            # adjust offset accordingly
+                            # Adjust offset accordingly
                             offset -= len(text)
                     if c != el and c.tail and located is None:
                         text = c.tail
@@ -263,28 +327,37 @@ class LxmlOffsetQueryTermHighlightingTransformer(LxmlQueryTermHighlightingTransf
                             try:
                                 end = self.wordRe.search(text, start).end()
                             except:
-                                pass # well I still haven't found, what I'm looking for!
+                                # Well I still...
+                                # haven't found...
+                                # what I'm looking for!
+                                pass
                             else:
                                 if end == -1:
                                     end = len(text)
                                 located = 'tail'
                                 if not (c.tag == self.highlightTag):
-                                    hel = self._insertHighlightElement(c, located, start, end)
+                                    hel = self._insertHighlightElement(c,
+                                                                       located,
+                                                                       start,
+                                                                       end)
                                     p = c.getparent()
                                     try:
-                                        p.insert(p.index(c)+1, hel)
+                                        p.insert(p.index(c) + 1, hel)
                                     except TypeError:
-                                        # immutable element (comment!?)
+                                        # Immutable element (?)
                                         break
                                 break
                         else:
-                            # adjust offset accordingly
+                            # Adjust offset accordingly
                             offset -= len(text)
         return StringDocument(etree.tostring(recDom))
 
 
 class TemplatedTransformer(Transformer):
-    """Transformer to insert the output of a Selector into a template string containing place-holders.
+    """Trasnform a Record using a Selector and a Python string.Template.
+    
+    Transformer to insert the output of a Selector into a template string
+    containing place-holders.
     
     Template can be specified directly in the configuration using the 
     template setting (whitespace is respected), or in a file using the 
@@ -323,12 +396,29 @@ class TemplatedTransformer(Transformer):
     
     """
     
-    _possiblePaths = {'selector': {'docs': "Selector to use to get data from the record."},
-                      'extractor': {'docs': "An Extractor to use on each data item returned by the Selector. The Extractor used must be able to handle the output from the Selector (e.g. A SPARQL Selector would require an RDF Extractor). Default is SimpleExtractor"},
-                      'templatePath': {'docs': "Path to the file containing the template for the output Document with place-holders for the selected data items."}
-                     }
+    _possiblePaths = {
+        'selector': {
+            'docs': "Selector to use to get data from the record."
+        },
+        'extractor': {
+            'docs': ("An Extractor to use on each data item returned by the "
+                     "Selector. The Extractor used must be able to handle the "
+                     "output from the Selector (e.g. A SPARQL Selector would "
+                     "require an RDF Extractor). Default is SimpleExtractor")
+        },
+        'templatePath': {
+            'docs': ("Path to the file containing the template for the output "
+                     "Document with place-holders for the selected data items."
+                     )
+        }
+    }
     
-    _possibleSettings = {'template': {'docs': "A string representing the template for the output Document with place-holders for selected data items."}}
+    _possibleSettings = {
+        'template': {
+            'docs': ("A string representing the template for the output "
+                     "Document with place-holders for selected data items.")
+        }
+    }
     
     def __init__(self, session, config, parent):
         Transformer.__init__(self, session, config, parent)
@@ -358,13 +448,16 @@ class TemplatedTransformer(Transformer):
         for location in data:
             vals2 = []
             for match in location:
-                if (type(match) == types.ListType):
+                if isinstance(match, types.ListType):
                     # SAX event
                     vals2.append(process_eventList(session, match).keys()[0])
-                elif (type(match) in types.StringTypes or type(match) in [int, long, float, bool]):
+                elif (
+                    type(match) in types.StringTypes or
+                    type(match) in [int, long, float, bool]
+                ):
                     # Attribute content or function result (e.g. count())
                     vals2.append(process_string(session, match).keys()[0])
-                elif type(match) == types.TupleType:
+                elif isinstance(match, types.TupleType):
                     # RDF graph results (?)
                     vals3 = [] 
                     for item in match:
@@ -386,7 +479,9 @@ class TemplatedTransformer(Transformer):
                 session.logger.log_error(session, tmpl)
             except AttributeError:
                 pass
-            raise ConfigFileException('Template contained a place-holder for which data was not selected by the selector.')
+            raise ConfigFileException('Template contained a place-holder for '
+                                      'which data was not selected by the '
+                                      'selector.')
 
 
 class MarcTransformer(Transformer):
