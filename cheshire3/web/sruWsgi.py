@@ -1,5 +1,6 @@
 """SRU WSGI Application."""
 
+from urllib import quote
 from cgi import FieldStorage
 
 from sruHandler import *
@@ -7,6 +8,38 @@ from sruHandler import *
 
 class SRUWsgiHandler(SRUProtocolHandler):
     """SRU Request Handling Class for WSGI."""
+
+    def _app_base(self, environ):
+        scheme = environ['wsgi.url_scheme']
+        url = [scheme]
+        url.append('://')
+        try:
+            url.append(environ['HTTP_HOST'])
+        except KeyError:
+            url.append(environ['SERVER_NAME'])
+            if scheme == 'httpd':
+                if environ['SERVER_PORT'] != '443':
+                    url.append(':')
+                    url.append(environ['SERVER_PORT'])
+            else:
+                if environ['SERVER_PORT'] != '80':
+                    url.append(':')
+                    url.append(environ['SERVER_PORT'])
+
+        url.append(quote(environ.get('SCRIPT_NAME', '')))
+        return ''.join(url)
+
+    def _path_base(self, environ):
+        url = [self._app_base(environ)]
+        url.append(quote(environ.get('PATH_INFO', '')))
+        return ''.join(url)
+
+    def _reconstruct_url(self, environ):
+        url = [self._path_base(environ)]
+        if environ.get('QUERY_STRING'):
+            url.append('?')
+            url.append(environ['QUERY_STRING'])
+        return ''.join(url)
 
     def __call__(self, environ, start_response):
         path = environ.get('PATH_INFO', '').strip('/')
@@ -48,7 +81,7 @@ class SRUWsgiHandler(SRUProtocolHandler):
                 except KeyError:
                     pass
                 db = serv.get_object(session, dbid)
-            session.path = "http://%s/%s" % (environ['HOSTNAME'], path)
+            session.path = self._path_base(environ)
             session.config = config
             store = FieldStorage(fp=environ['wsgi.input'], environ=environ)
             opts = {}
