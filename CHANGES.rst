@@ -1,6 +1,17 @@
 CHANGES
 =======
 
+1.0.12 - Monday 4 March 2013
+----------------------------
+
+BUG FIXES
+~~~~~~~~~
+
+* Fixed ResultSet ordering by XPath
+
+* Fixed IndexError when Workflows log a zero-length message
+
+
 1.0.11 - Tuesday 22 January 2013
 --------------------------------
 
