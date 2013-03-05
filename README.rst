@@ -528,6 +528,10 @@ Another useful path to know is the database's default path: ::
     >>> dfp = db.get_path(session, 'defaultPath')
 
 
+**Note:** You can often avoid having to type all of the above boiler-plate code,
+by `Using the cheshire3 command`_
+
+
 Using the ``cheshire3`` command
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -785,24 +789,6 @@ And you can get the data from the document with get\_raw(): ::
 This transformer uses XSLT, which is common, but other transformers are
 equally possible.
 
-It is also possible to iterate through stores. This is useful for adding
-new indexes or otherwise processing all of the data without reloading
-it.
-
-First find our index, and the indexStore: ::
-
-    >>> idx = db.get_object(session, 'idx-creationDate')
-
-
-Then start indexing for just that index, step through each record, and
-then commit the terms extracted. ::
-
-    >>> idxStore.begin_indexing(session, idx)
-    >>> for rec in recStore:
-    ...     idx.index_record(session, rec)
-    recordStore/...   
-    >>> idxStore.commit_indexing(session, idx)
-
 
 Indexes (Looking Under the Hood)
 ''''''''''''''''''''''''''''''''
@@ -899,6 +885,33 @@ the locations of that type. ::
 
 After token merging, the multiple terms are ready to be stored in the
 index!
+
+
+It is also possible to iterate through stores. This is useful for adding
+new indexes or otherwise processing all of the data without reloading
+it.
+
+First find our index, and the indexStore: ::
+
+    >>> idx = db.get_object(session, 'idx-modificationDate')
+    >>> idxStore = idx.get_path(session, 'indexStore')
+
+
+Then start indexing for just that index, step through each record, and
+then commit the terms extracted. ::
+
+    >>> idxStore.begin_indexing(session, idx)
+    >>> for rec in recStore:
+    ...     idx.index_record(session, rec)
+    recordStore/...   
+    >>> idxStore.commit_indexing(session, idx)
+
+
+This example will have the effect of 'touching' each Record, as if it had
+been updated. This might be useful if for example, you knew that your Database
+was being harvested periodically using OAI-PMH, and you wanted to indicate that
+all Records should be reharvested next time.
+
 
 .. Links
 .. _Python: http://www.python.org/
