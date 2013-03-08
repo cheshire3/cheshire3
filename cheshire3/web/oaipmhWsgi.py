@@ -17,14 +17,13 @@ class OAIPMHWsgiApplication(object):
         if path not in configs:
             # Unknown endpoint
             # No specification
-            
+            # TODO: send proper OAI error?
             out.extend([
                 '<c3:error xmlns:c3="http://www.cheshire3.org/schemas/error">'
                 '<c3:details>{0}</c3:details>'.format(path),
-                '<databases numberOfDatabases="{0}">'.format(len(configs)),
                 ('<c3:message>Incomplete or incorrect baseURL, requires a '
                  'database path from:'),
-                '<c3:databases>'
+                '<c3:databases numberOfDatabases="{0}">'.format(len(configs))
             ])
             out.extend(['<c3:database>{0}</c3:database>'.format(dbp)
                         for dbp
@@ -35,7 +34,6 @@ class OAIPMHWsgiApplication(object):
                 '</c3:message>',
                 '</c3:error>'
             ])
-            # TODO: send proper OAI error?
             start_response('404 NOT FOUND', response_headers)
             return out
         else:
@@ -95,8 +93,35 @@ class OAIPMHWsgiApplication(object):
                     '</c3:error>'
                 ]
             response_headers.append(('Content-Length',
-                                     str(sum([len(d) for d in out])
-                                     ))
+                                     str(sum([len(d) for d in out]))
+                                     )
+                                    )
             start_response('200 OK', response_headers)
             return out
-            self.send_xml(xmlresp, req)
+
+def main():
+    """Start up a simple app server to serve the SRU application."""
+    from wsgiref.simple_server import make_server
+    try:
+        host = sys.argv[1]
+    except IndexError:
+        try:
+            import socket
+            host = socket.gethostname()
+        except:
+            host = 'localhost'
+    try:
+        port = int(sys.argv[2])
+    except IndexError, ValueError:
+        port = 8000
+    httpd = make_server(host, port, application)
+    print """You will be able to access the application at:
+http://{0}:{1}""".format(host, port)
+    httpd.serve_forever()
+
+
+application = OAIPMHWsgiApplication()
+
+
+if __name__ == "__main__":
+    sys.exit(main())
