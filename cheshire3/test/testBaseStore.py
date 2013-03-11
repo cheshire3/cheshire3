@@ -114,6 +114,23 @@ class SimpleStoreTestCase(Cheshire3ObjectTestCase):
             data2 = self.testObj.fetch_data(self.session, ident)
             self.assertFalse(data2)
 
+    def test_clear(self):
+        "Check that clear method empties the store."
+        for data in self._get_test_data():
+            # Assign an identifier
+            ident = self.testObj.generate_id(self.session)
+            # Store the data
+            self.testObj.store_data(self.session, ident, data)
+            # Fetch the data
+            data2 = self.testObj.fetch_data(self.session, ident)
+            # Check that generated and fetched are the same
+            self.assertEqual(data2, data, "Retrieved data != stored data")
+            # Clear the data
+            self.testObj.clear(self.session)
+            # Check that deleted data no longer exists / evaluates as false
+            data2 = self.testObj.fetch_data(self.session, ident)
+            self.assertFalse(data2)
+
 
 class BdbStoreTestCase(SimpleStoreTestCase):
     "Base Class for BerkeleyDB based persistent storage mechanisms tests."
@@ -312,6 +329,36 @@ class FileSystemStoreTestCase(SimpleStoreTestCase):
             # Check that stored and fetched metadata are the same
             self.assertEqual(byteCount, len(data))
             self.assertEqual(creationDate, now)
+
+    def test_clear(self):
+        "Check that clear method empties the store."
+        for data in self._get_test_data():
+            # Assign a random identifier
+            ident = ''.join([random.choice(string.lowercase)
+                             for x in range(10)])
+            # Write the data to the file
+            # N.B. FileSystemDataStore assumes file already exists
+            filepath = os.path.join(self.defaultPath, ident)
+            with open(filepath, 'w') as fh:
+                fh.write(data)
+            # Store the data
+            self.testObj.begin_storing(self.session)
+            self.testObj.store_data(self.session, ident, data,
+                                    metadata={
+                                        'filename': filepath,
+                                        'byteCount': len(data),
+                                        'byteOffset': 0,
+                                    })
+            self.testObj.commit_storing(self.session)
+            # Fetch the data
+            data2 = self.testObj.fetch_data(self.session, ident)
+            # Check that generated and fetched are the same
+            self.assertEqual(data2, data, "Retrieved data != stored data")
+            # Clear the data
+            self.testObj.clear(self.session)
+            # Check that deleted data no longer exists / evaluates as false
+            data2 = self.testObj.fetch_data(self.session, ident)
+            self.assertFalse(data2)
 
 
 def load_tests(loader, tests, pattern):
