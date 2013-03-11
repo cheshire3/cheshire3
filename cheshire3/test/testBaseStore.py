@@ -55,26 +55,8 @@ class SimpleStoreTestCase(Cheshire3ObjectTestCase):
     def tearDown(self):
         rmtree(self.defaultPath)
 
-
-class BdbStoreTestCase(SimpleStoreTestCase):
-    "Base Class for BerkeleyDB based persistent storage mechanisms tests."
-
-    @classmethod
-    def _get_class(cls):
-        return BdbStore
-    
-    def _get_config(self):
-        return etree.XML('''\
-        <subConfig type="baseStore" id="{0.__name__}">
-          <objectType>cheshire3.baseStore.{0.__name__}</objectType>
-          <paths>
-              <path type="defaultPath">{1}</path>
-              <path type="databasePath">{0.__name__}.bdb</path>
-          </paths>
-        </subConfig>'''.format(self._get_class(), self.defaultPath))
-
     # Test methods
-    
+
     def test_generate_id(self):
         "Check identifier generation."
         for data in self._get_test_data():
@@ -92,7 +74,7 @@ class BdbStoreTestCase(SimpleStoreTestCase):
             data2 = self.testObj.fetch_data(self.session, ident)
             # Check that generated and fetched are the same
             self.assertEqual(data2, data, "Retrieved data != stored data")
-        
+
     def test_storeFetch_metadata(self):
         "Check that data is stored and fetched without corruption."
         for data in self._get_test_data():
@@ -131,6 +113,24 @@ class BdbStoreTestCase(SimpleStoreTestCase):
             # Check that deleted data no longer exists / evaluates as false
             data2 = self.testObj.fetch_data(self.session, ident)
             self.assertFalse(data2)
+
+
+class BdbStoreTestCase(SimpleStoreTestCase):
+    "Base Class for BerkeleyDB based persistent storage mechanisms tests."
+
+    @classmethod
+    def _get_class(cls):
+        return BdbStore
+    
+    def _get_config(self):
+        return etree.XML('''\
+        <subConfig type="baseStore" id="{0.__name__}">
+          <objectType>cheshire3.baseStore.{0.__name__}</objectType>
+          <paths>
+              <path type="defaultPath">{1}</path>
+              <path type="databasePath">{0.__name__}.bdb</path>
+          </paths>
+        </subConfig>'''.format(self._get_class(), self.defaultPath))
 
 
 class UuidBdbStoreTestCase(BdbStoreTestCase):
@@ -225,7 +225,32 @@ class FileSystemStoreTestCase(SimpleStoreTestCase):
         return FileSystemStore
 
     # Test methods
-    
+
+    def test_storeFetch_data(self):
+        "Check that data is stored and fetched without corruption."
+        for data in self._get_test_data():
+            # Assign a random identifier
+            ident = ''.join([random.choice(string.lowercase)
+                             for x in range(10)])
+            # Write the data to the file
+            # N.B. FileSystemDataStore assumes file already exists
+            filepath = os.path.join(self.defaultPath, ident)
+            with open(filepath, 'w') as fh:
+                fh.write(data)
+            # Store the data
+            self.testObj.begin_storing(self.session)
+            self.testObj.store_data(self.session, ident, data,
+                                    metadata={
+                                        'filename': filepath,
+                                        'byteCount': len(data),
+                                        'byteOffset': 0,
+                                    })
+            self.testObj.commit_storing(self.session)
+            # Fetch the data
+            data2 = self.testObj.fetch_data(self.session, ident)
+            # Check that generated and fetched are the same
+            self.assertEqual(data2, data, "Retrieved data != stored data")
+
     def test_storeDeleteFetch_data(self):
         "Check that data is stored, fetched and deleted."
         for data in self._get_test_data():
