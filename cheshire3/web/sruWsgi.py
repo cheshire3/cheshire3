@@ -42,7 +42,11 @@ class SRUWsgiHandler(SRUProtocolHandler):
         return ''.join(url)
 
     def __call__(self, environ, start_response):
-        path = environ.get('PATH_INFO', '').strip('/')
+        session = self.session
+        path = '/'.join([
+                         environ.get('SCRIPT_NAME', '').strip('/'),
+                         environ.get('PATH_INFO', '').strip('/')
+                         ])
         out = []
         if path not in configs:
             # Unknown endpoint
@@ -185,7 +189,8 @@ http://{0}:{1}""".format(host, port)
     httpd.serve_forever()
 
 
-application = SRUWsgiHandler()
+configs = get_configsFromServer(session, serv)
+application = SRUWsgiHandler(session, configs)
 
 
 if __name__ == "__main__":
