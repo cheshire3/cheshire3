@@ -1135,7 +1135,7 @@ class BdbStore(SimpleStore):
             p = self.get_path(session, "%sReversePath" % t)
             self._remove(session, p)
             self._initDb(session, "%sReverse" % t)
-            self._verifyDatabase(session, "%sReverse" % t)
+            self._verifyDb(session, "%sReverse" % t)
         return self
                 
     def clean(self, session):
