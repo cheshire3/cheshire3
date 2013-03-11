@@ -7,14 +7,22 @@ from oaipmhHandler import *
 
 
 class OAIPMHWsgiApplication(object):
-    
+
+    def __init__(self, session, configs, dbs):
+        self.session = session
+        self.configs = configs
+        self.dbs = dbs
+
     def __call__(self, environ, start_response):
         global configs, oaiDcReader, c3OaiServers
         response_headers = [('Content-Type',
                              'application/xml')]
-        path = environ.get('PATH_INFO', '').strip('/')
+        path = '/'.join([
+                         environ.get('SCRIPT_NAME', '').strip('/'),
+                         environ.get('PATH_INFO', '').strip('/')
+                         ])
         out = []
-        if path not in configs:
+        if path not in self.configs:
             # Unknown endpoint
             # No specification
             # TODO: send proper OAI error?
@@ -23,11 +31,12 @@ class OAIPMHWsgiApplication(object):
                 '<c3:details>{0}</c3:details>'.format(path),
                 ('<c3:message>Incomplete or incorrect baseURL, requires a '
                  'database path from:'),
-                '<c3:databases numberOfDatabases="{0}">'.format(len(configs))
+                '<c3:databases numberOfDatabases="{0}">'
+                ''.format(len(self.configs))
             ])
             out.extend(['<c3:database>{0}</c3:database>'.format(dbp)
                         for dbp
-                        in configs
+                        in self.configs
                         ])
             out.extend([
                 '</c3:databases>',
@@ -37,37 +46,8 @@ class OAIPMHWsgiApplication(object):
             start_response('404 NOT FOUND', response_headers)
             return out
         else:
-            dbconf = configs[path]
-            if isinstance(dbconf, tuple):
-                dbid = dbconf[0]
-                db = serv.get_object(session, dbid)
-                config = db.get_object(
-                    session,
-                    dbconf[1]['http://www.loc.gov/zing/srw/']
-                )
-            else:
-                config = dbconf['http://www.loc.gov/zing/srw/']
-            # Check db hasn't changed since instantiated
-            db = config.parent
-            # Attempt to find filepath for db metadata
-            fp = db.get_path(session, 'metadataPath')
-            if os.stat(fp).st_mtime > db.initTime:
-                # Rediscover objects
-                dbid = db.id
-                del db
-                try:
-                    del serv.objects[dbid]
-                except KeyError:
-                    pass
-                try:
-                    del serv.databases[dbid]
-                except KeyError:
-                    pass
-                db = serv.get_object(session, dbid)
-            session.path = self._path_base(environ)
-            session.config = config
             args = {}
-            # parse options out of req
+            # Parse options out of request environ
             store = FieldStorage(fp=environ['wsgi.input'], environ=environ)            
             for qp in store.list:
                 args[qp.name] = qp.value
@@ -75,18 +55,19 @@ class OAIPMHWsgiApplication(object):
                 oaixml = MinimalOaiServer(c3OaiServers[path],
                                           c3OaiServers[path].metadataRegistry)
             except KeyError:
-                oai = Cheshire3OaiServer(path)
+                oai = Cheshire3OaiServer(self.session, self.configs,
+                                         self.dbs, path)
                 c3OaiServers[path] = oai
                 oaixml = MinimalOaiServer(oai, oai.metadataRegistry)
             try:
-                xmlresp = [oaixml.handleRequest(args)]
+                out.append(oaixml.handleRequest(args))
             except DatestampError:
                 try:
                     raise BadArgumentError('Invalid date format supplied.')
                 except:
-                    xmlresp = [oaixml.handleException(args, sys.exc_info())]
+                    out.append(oaixml.handleException(args, sys.exc_info()))
             except C3Exception, e:
-                xmlresp = [
+                out = [
                     '<c3:error xmlns:c3="http://www.cheshire3.org/schemas/error"',
                     'code="{0}">'.format(str(e.__class__.__name__).split('.')[-1]),
                     e.reason,
@@ -120,7 +101,7 @@ http://{0}:{1}""".format(host, port)
     httpd.serve_forever()
 
 
-application = OAIPMHWsgiApplication()
+application = OAIPMHWsgiApplication(session, configs, dbs)
 
 
 if __name__ == "__main__":

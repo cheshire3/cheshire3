@@ -34,7 +34,7 @@ class reqHandler(object):
         req.write(text)
         
     def dispatch(self, req):
-        global configs, oaiDcReader, c3OaiServers
+        global session, configs, dbs, oaiDcReader, c3OaiServers
         path = req.uri[1:]
         if (path[-1] == "/"):
             path = path[:-1]
@@ -48,7 +48,7 @@ class reqHandler(object):
             try:
                 oaixml = MinimalOaiServer(c3OaiServers[path], c3OaiServers[path].metadataRegistry)
             except KeyError:
-                oai = Cheshire3OaiServer(path)
+                oai = Cheshire3OaiServer(session, configs, dbs, path)
                 c3OaiServers[path] = oai
                 oaixml = MinimalOaiServer(oai, oai.metadataRegistry)
             try:
@@ -76,15 +76,11 @@ class reqHandler(object):
     </c3:message>
 </c3:error>'''.format(path, '\n\t'.join(dbps)), req)
                     
-#- end reqHandler -------------------------------------------------------------
-    
-#from dateutil.tz import *
-# OAI-PMH friendly ISO8601 UTCdatetime obtained with the following
-# datetime.datetime.now(datetime.tzutc()).strftime('%Y-%m-%dT%H:%M:%S%Z').replace('UTC', 'Z')
+    #- end reqHandler -------------------------------------------------------------
 
-h = reqHandler()
 
 def handler(req):
+    global h
     # Do stuff
     try:
         h.dispatch(req)
@@ -94,4 +90,11 @@ def handler(req):
         cgitb.Hook(file = req).handle()
     else:
         return apache.OK
-# Add AuthHandler here when necesary ------------------------------------------
+    # Add AuthHandler here when necesary ------------------------------------------
+
+
+#from dateutil.tz import *
+# OAI-PMH friendly ISO8601 UTCdatetime obtained with the following
+# datetime.datetime.now(datetime.tzutc()).strftime('%Y-%m-%dT%H:%M:%S%Z').replace('UTC', 'Z')
+
+h = reqHandler()
