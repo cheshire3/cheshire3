@@ -13,91 +13,13 @@ from cheshire3 import cqlParser
 from cheshire3.internal import cheshire3Version, cheshire3Root
 from cheshire3 import exceptions as c3errors
 
-session = Session()
-session.environment = "apache"
-serv = SimpleServer(session, os.path.join(cheshire3Root,
-                                          'configs',
-                                          'serverConfig.xml'))
-
-# find configs for databases permitted to be served by SRU
-configs = {}
-if len(serv.databaseConfigs) < 25:
-    # relatively few dbs - we can safely cache them
-    serv._cacheDatabases(session)
-    for db in serv.databases.itervalues():
-        if (db.get_setting(session, 'SRW') or db.get_setting(session, 'srw') or
-            db.get_setting(session, 'SRU') or db.get_setting(session, 'sru')):
-            db._cacheProtocolMaps(session)
-            map = db.protocolMaps.get('http://www.loc.gov/zing/srw/', None)
-            # Check that there's a path and that it can actually be requested
-            # from this handler
-            if (map is not None):
-                map2 = db.protocolMaps.get(
-                    'http://www.loc.gov/zing/srw/update/',
-                    None
-                )
-                configs[map.databaseUrl] = {
-                    'http://www.loc.gov/zing/srw/': map,
-                    'http://www.loc.gov/zing/srw/update/': map2
-                }
-else:
-    # too many dbs to cache in memory
-    for dbid, conf in serv.databaseConfigs.iteritems():
-        db = serv.get_object(session, dbid)
-        session.database = dbid
-        if (db.get_setting(session, 'SRW') or db.get_setting(session, 'srw') or
-            db.get_setting(session, 'SRU') or db.get_setting(session, 'sru')):
-            db._cacheProtocolMaps(session)
-            pmap = db.protocolMaps.get('http://www.loc.gov/zing/srw/', None)
-            if (pmap is not None):
-                configs[pmap.databaseUrl] = (
-                    dbid,
-                    {'http://www.loc.gov/zing/srw/': pmap.id}
-                )
-                pmap2 = db.protocolMaps.get(
-                    'http://www.loc.gov/zing/srw/update/',
-                    None
-                )
-                if pmap2 is not None:
-                    configs[pmap.databaseUrl][1].update(
-                        {'http://www.loc.gov/zing/srw/update/': pmap2.id}
-                    )
-        # remove cached db object
-        try:
-            del serv.objects[dbid]
-        except KeyError:
-            pass
-
-    del dbid, db, pmap, pmap2
-
-
-protocolMap = {
-    'sru': 'http://www.loc.gov/zing/srw/',
-    'diag': 'http://www.loc.gov/zing/srw/diagnostic/'
-}
-
-recordMap = {
-    'dc': 'info:srw/schema/1/dc-v1.1',
-    'diag': 'info:srw/schema/1/diagnostic-v1.1',
-    'mods': 'info:srw/schema/1/mods-v3.0',
-    'onix': 'info:srw/schema/1/onix-v2.0',
-    'marcxml': 'info:srw/schema/1/marcxml-v1.1',
-    'ead': 'info:srw/schema/1/ead-2002',
-    'ccg': 'http://srw.o-r-g.org/schemas/ccg/1.0/',
-    'marcsgml': 'http://srw.o-r-g.org/schemas/marcsgml/12.0/',
-    'zthes': 'http://zthes.z3950.org/xml/zthes-05.dtd',
-    'zeerex': 'http://explain.z3950.org/dtd/2.0/',
-    'rec': 'info:srw/schema/2/rec-1.0',
-}
-
-
-elemFac = ElementMaker(namespace=protocolMap['sru'], nsmap=protocolMap)
-diagElemFac = ElementMaker(namespace=protocolMap['diag'], nsmap=protocolMap)
-xmlVerRe = re.compile("[ ]*<\?xml[^>]+>")
-
 
 class SRUProtocolHandler(object):
     """SRU Protocol Handling Abstract Base Class."""
+
+    def __init__(self, session, configs):
+        self.session = session
+        self.configs = configs
 
     def record(self, schema="", packing="",
                data="", identifier="", position=""):
@@ -146,7 +68,7 @@ class SRUProtocolHandler(object):
             for x, e in enumerate(extras):
                 # find real name from config
                 try:
-                    (ns, nm) = session.config.sruExtensionMap[e[0]][:2]
+                    (ns, nm) = self.session.config.sruExtensionMap[e[0]][:2]
                 except KeyError:
                     # diagnostic for unsupported extension?
                     continue
@@ -155,10 +77,11 @@ class SRUProtocolHandler(object):
                 node = etree.XML(txt)
                 extra.append(node)
             echo.append(extra)
-        echo.append(elemFac.baseUrl(session.path))
+        echo.append(elemFac.baseUrl(self.session.path))
         return echo
 
     def extraData(self, eType, opts, result, *args):
+        session = self.session
         nodes = []
         for (k, v) in opts.iteritems():
             if k[:2] == "x-":
@@ -224,6 +147,7 @@ class SRUProtocolHandler(object):
         return result
 
     def process_explain(self, opts, result):
+        session = self.session
         p = session.config.get_path(session, 'zeerexPath')
         if (not os.path.isabs(p)):
             p2 = session.config.get_path(session, 'defaultPath')
@@ -291,6 +215,7 @@ class SRUProtocolHandler(object):
         return result
 
     def process_searchRetrieve(self, opts, result):
+        session = self.session
         if 'query' in opts:
             q = cqlParser.parse(opts['query'])
             q.config = session.config
@@ -394,6 +319,7 @@ class SRUProtocolHandler(object):
         return result
 
     def process_scan(self, opts, result):
+        session = self.session
         db = session.config.parent
         session.database = db.id
         if 'scanClause' in opts:
@@ -438,3 +364,89 @@ class SRUProtocolHandler(object):
             terms.append(t)
         result.append(terms)
         return result
+
+
+def get_configsFromServer(session, serv):
+    # Find configs for databases permitted to be served by SRU
+    configs = {}
+    if len(serv.databaseConfigs) < 25:
+        # Relatively few dbs - we can safely cache them
+        serv._cacheDatabases(session)
+        for db in serv.databases.itervalues():
+            if (db.get_setting(session, 'SRW') or db.get_setting(session, 'srw') or
+                db.get_setting(session, 'SRU') or db.get_setting(session, 'sru')):
+                db._cacheProtocolMaps(session)
+                map = db.protocolMaps.get('http://www.loc.gov/zing/srw/', None)
+                # Check that there's a path and that it can actually be requested
+                # from this handler
+                if (map is not None):
+                    map2 = db.protocolMaps.get(
+                        'http://www.loc.gov/zing/srw/update/',
+                        None
+                    )
+                    configs[map.databaseUrl] = {
+                        'http://www.loc.gov/zing/srw/': map,
+                        'http://www.loc.gov/zing/srw/update/': map2
+                    }
+    else:
+        # Too many dbs to cache in memory
+        for dbid, conf in serv.databaseConfigs.iteritems():
+            db = serv.get_object(session, dbid)
+            session.database = dbid
+            if (db.get_setting(session, 'SRW') or db.get_setting(session, 'srw') or
+                db.get_setting(session, 'SRU') or db.get_setting(session, 'sru')):
+                db._cacheProtocolMaps(session)
+                pmap = db.protocolMaps.get('http://www.loc.gov/zing/srw/', None)
+                if (pmap is not None):
+                    configs[pmap.databaseUrl] = (
+                        dbid,
+                        {'http://www.loc.gov/zing/srw/': pmap.id}
+                    )
+                    pmap2 = db.protocolMaps.get(
+                        'http://www.loc.gov/zing/srw/update/',
+                        None
+                    )
+                    if pmap2 is not None:
+                        configs[pmap.databaseUrl][1].update(
+                            {'http://www.loc.gov/zing/srw/update/': pmap2.id}
+                        )
+            # Remove cached db object
+            try:
+                del serv.objects[dbid]
+            except KeyError:
+                pass
+    
+        del dbid, db, pmap, pmap2
+    return configs
+
+
+# Cheshire3 architecture
+session = Session()
+session.environment = "apache"
+serv = SimpleServer(session, os.path.join(cheshire3Root,
+                                          'configs',
+                                          'serverConfig.xml'))
+
+protocolMap = {
+    'sru': 'http://www.loc.gov/zing/srw/',
+    'diag': 'http://www.loc.gov/zing/srw/diagnostic/'
+}
+
+recordMap = {
+    'dc': 'info:srw/schema/1/dc-v1.1',
+    'diag': 'info:srw/schema/1/diagnostic-v1.1',
+    'mods': 'info:srw/schema/1/mods-v3.0',
+    'onix': 'info:srw/schema/1/onix-v2.0',
+    'marcxml': 'info:srw/schema/1/marcxml-v1.1',
+    'ead': 'info:srw/schema/1/ead-2002',
+    'ccg': 'http://srw.o-r-g.org/schemas/ccg/1.0/',
+    'marcsgml': 'http://srw.o-r-g.org/schemas/marcsgml/12.0/',
+    'zthes': 'http://zthes.z3950.org/xml/zthes-05.dtd',
+    'zeerex': 'http://explain.z3950.org/dtd/2.0/',
+    'rec': 'info:srw/schema/2/rec-1.0',
+}
+
+
+elemFac = ElementMaker(namespace=protocolMap['sru'], nsmap=protocolMap)
+diagElemFac = ElementMaker(namespace=protocolMap['diag'], nsmap=protocolMap)
+xmlVerRe = re.compile("[ ]*<\?xml[^>]+>")
