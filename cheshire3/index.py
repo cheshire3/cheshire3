@@ -347,8 +347,8 @@ class SimpleIndex(Index):
                         e = etree.XML(etree.tostring(child))
                         e.tag = 'workflow'
                         e.set('id', self.id + "-preworkflow")
-                        preprocess = CachingWorkflow(session, child, self)
-                        preprocess._handleLxmlConfigNode(session, child)
+                        preprocess = CachingWorkflow(session, e, self)
+                        preprocess._handleLxmlConfigNode(session, e)
                 elif child.tag in ['process', '{%s}process' % CONFIG_NS]:
                     # turn xpath chain to workflow
                     ref = child.attrib.get('{%s}ref' % CONFIG_NS,
