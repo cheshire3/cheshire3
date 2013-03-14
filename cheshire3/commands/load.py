@@ -57,7 +57,8 @@ Please provide a different database identifier using the --database option.
 
 
 argparser = Cheshire3ArgumentParser(conflict_handler='resolve',
-                                    description=__doc__.splitlines()[0])
+                                    description=__doc__.splitlines()[0]
+                                    )
 argparser.add_argument('-d', '--database', type=str,
                        action='store', dest='database',
                        default=None, metavar='DATABASE',
@@ -65,35 +66,41 @@ argparser.add_argument('-d', '--database', type=str,
 argparser.add_argument('data', type=str, action='store', nargs='+',
                        help="data to load into the Cheshire3 database.")
 argparser.add_argument('-l', '--cache-level', type=int, 
-                   action='store', dest='cache',
-                   default=0, metavar='CACHE',
-                   help="""level of in memory caching to use when reading \
-documents in. For details, see: \
-https://github.com/cheshire3/cheshire3#loading-data"""
+                       action='store', dest='cache',
+                       default=0, metavar='CACHE',
+                       help=(
+                           "level of in memory caching to use when reading "
+                           "documents in. For details, see:\n"
+                           "http://github.com/cheshire3/cheshire3#loading-data"
+                           )
                        )
 argparser.add_argument('-f', '--format', type=str,
-                  action='store', dest='format',
-                  default=None, metavar='FORMAT',
-                  help="""format of the data parameter. For details, see: \
-https://github.com/cheshire3/cheshire3#loading-data"""
+                       action='store', dest='format',
+                       default=None, metavar='FORMAT',
+                       help=(
+                           "format of the data parameter. For details, see:" 
+                           "http://github.com/cheshire3/cheshire3#loading-data"
+                           )
                        )
 argparser.add_argument('-t', '--tagname', type=str,
-                   action='store', dest='tagname',
-                   default=None, metavar='TAGNAME',
-                   help="""the name of the tag which starts (and ends!) a \
-record. This is useful for extracting sections of documents and ignoring the \
-rest of the XML in the file."""
+                       action='store', dest='tagname',
+                       default=None, metavar='TAGNAME',
+                       help=("the name of the tag which starts (and ends!) a "
+                             "record. This is useful for extracting sections "
+                             "of files as Documents and ignoring the rest of "
+                             "the XML in the file.")
                        )
 argparser.add_argument('-c', '--codec', type=str,
-                   action='store', dest='codec',
-                   default=None, metavar='CODEC',
-                   help=("the name of the codec in which the data is encoded. "
-                         "Commonly 'ascii' or 'utf-8'")
-                   )
+                       action='store', dest='codec',
+                       default=None, metavar='CODEC',
+                       help=("the name of the codec in which the data is "
+                             "encoded. Commonly 'ascii' or 'utf-8'"
+                           )
+                       )
 
 session = None
 server = None
 db = None
 
 if __name__ == '__main__':
-    main(sys.argv)
+    sys.exit(main())
