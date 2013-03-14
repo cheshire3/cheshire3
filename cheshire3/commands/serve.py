@@ -30,7 +30,7 @@ def main(argv=None):
         args = argparser.parse_args(argv)
     c3_session = Session()
     c3_server = SimpleServer(c3_session, args.serverconfig)
-    # Init SRU Ppp
+    # Init SRU App
     sru_configs = get_configsFromServer(c3_session, c3_server)
     sru_app = SRUWsgiHandler(c3_session, sru_configs)
     # Init OAI-PMH App
