@@ -20,6 +20,7 @@ class BaseParser(Parser):
 
     def _copyData(self, doc, rec):
         # Utility function to update data on record from document
+        rec.id = doc.id
         rec.filename = doc.filename
         rec.tagName = doc.tagName
         rec.processHistory = doc.processHistory
