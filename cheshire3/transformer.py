@@ -8,7 +8,7 @@ import bz2
 from lxml import etree
 
 from cheshire3.configParser import C3Object
-from cheshire3.baseObjects import Transformer, Record
+from cheshire3.baseObjects import Transformer, Record, Database, Server
 from cheshire3.document import StringDocument
 from cheshire3.utils import nonTextToken
 from cheshire3.marc_utils import MARC
@@ -70,6 +70,54 @@ class WorkflowTransformer(Transformer):
             output = StringDocument(output.get_xml(session))
         
         return output
+
+
+class ComponentParentFetchingTransformer(Transformer):
+    """Given a Cheshire3 component, fetch and return the parent Document.
+    
+    Given a Cheshire3 component Record, fetch and return the data for its
+    parent in a new Document.
+    """
+    
+    def process_record(self, session, record):
+        # Get RecordStore and identifier of parent record
+        try:
+            parentId = record.process_xpath(session, '/c3component/@parent')[0]
+        except IndexError:
+            parentId = record.process_xpath(
+                session,
+                '/c3:component/@c3:parent',
+                maps={'c3': "http://www.cheshire3.org/schemas/component/"}
+            )[0]
+        recStoreId, parentId = parentId.split('/', 1)
+        # Get RecordStore object
+        if isinstance(self.parent, Database):
+            db = self.parent
+        elif isinstance(self.parent, Server) and session.database:
+            db = self.parent.get_object(session, session.database)
+        elif (
+                session.server and
+                isinstance(session.server, Server) and
+                session.database
+        ):
+            db = session.server.get_object(session, session.database)
+        elif not session.server:
+            raise ValueError("No session.server")
+        else:
+            raise ValueError("No session.database")
+        recStore = db.get_object(session, recStoreId)
+        # Fetch parent record
+        parentRec = recStore.fetch_record(session, parentId)
+        # Return a new Document with parent data and identifier
+        data = parentRec.get_xml(session)
+        doc = StringDocument(
+            data,
+            self.id,
+            byteCount=len(data),
+            byteOffset=0
+        )
+        doc.id = parentId
+        return doc
 
 
 # --- XSLT Transformers ---

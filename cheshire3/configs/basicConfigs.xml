@@ -461,6 +461,10 @@
       <docs>A transformer to return a Document containing the raw XML string of the record, compressed using the bzip2 algorithm.</docs>
     </subConfig>
     
+    <subConfig type="transformer" id="ComponentParentTransformer">
+        <objectType>cheshire3.transformer.ComponentParentFetchingTransformer</objectType>
+        <docs>A Transformer to fetch and return the data for a given component Record's parent.</docs>
+    </subConfig>
 
   </subConfigs>
 
