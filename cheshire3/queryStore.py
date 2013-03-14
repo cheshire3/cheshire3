@@ -4,7 +4,8 @@ from cheshire3.baseStore import BdbStore, DeletedObject
 import cheshire3.cqlParser as cqlParser
 from cheshire3.exceptions import *
 
-class SimpleQueryStore(BdbStore, QueryStore):
+
+class SimpleQueryStore(QueryStore):
 
     def create_query(self, session, query=None):
         """Create a record like <query> text </query>."""
@@ -56,3 +57,6 @@ class SimpleQueryStore(BdbStore, QueryStore):
         self.store_data(session, id, data)
         return query
 
+
+class BdbQueryStore(BdbStore, SimpleQueryStore):
+    pass
