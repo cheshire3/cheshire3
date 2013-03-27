@@ -2,6 +2,7 @@
 
 from urllib import quote
 from cgi import FieldStorage
+from xml.sax.saxutils import escape
 
 from oaipmhHandler import *
 
@@ -67,11 +68,12 @@ class OAIPMHWsgiApplication(object):
                 except:
                     out.append(oaixml.handleException(args, sys.exc_info()))
             except C3Exception, e:
-                out = [
-                    '<c3:error xmlns:c3="http://www.cheshire3.org/schemas/error"',
-                    'code="{0}">'.format(str(e.__class__.__name__).split('.')[-1]),
-                    e.reason,
-                    '</c3:error>'
+                out = ['<c3:error '
+                       'xmlns:c3="http://www.cheshire3.org/schemas/error" ',
+                       'code="{0}">'
+                       ''.format(str(e.__class__.__name__).split('.')[-1]),
+                       escape(e.reason),
+                       '</c3:error>'
                 ]
             response_headers.append(('Content-Length',
                                      str(sum([len(d) for d in out]))
