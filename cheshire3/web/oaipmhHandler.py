@@ -229,7 +229,10 @@ class Cheshire3OaiServer(object):
             datestamp = datetime.datetime.strptime(term, '%Y-%m-%dT%H:%M:%S')
         except ValueError:
             datestamp = datetime.datetime.strptime(term, '%Y-%m-%d %H:%M:%S')
-        return (Header(str(r.id), datestamp, [], None), rec, None)    
+        # Handle non-ascii characters in identifier
+        identifier = unicode(r.id, 'utf-8')
+        identifier = identifier.encode('ascii', 'xmlcharrefreplace')
+        return (Header(identifier, datestamp, [], None), rec, None)    
     
     def identify(self):
         """Return an Identify object describing the repository."""
@@ -334,7 +337,10 @@ class Cheshire3OaiServer(object):
                 if i < cursor:
                     i+=1
                     continue
-                headers.append(Header(str(r.id), datestamp, [], None))
+                # Handle non-ascii characters in identifier
+                identifier = unicode(r.id, 'utf-8')
+                identifier = identifier.encode('ascii', 'xmlcharrefreplace')
+                headers.append(Header(identifier, datestamp, [], None))
                 i+=1
                 if (len(headers) >= batch_size):
                     return headers
@@ -441,7 +447,12 @@ class Cheshire3OaiServer(object):
                     i+=1
                     continue
                 rec = r.fetch_record(session)
-                records.append((Header(str(r.id), datestamp, [], None), rec, None))
+                # Handle non-ascii characters in identifier
+                identifier = unicode(r.id, 'utf-8')
+                identifier = identifier.encode('ascii', 'xmlcharrefreplace')
+                records.append((Header(identifier, datestamp, [], None),
+                                rec,
+                                None))
                 i+=1
                 if (len(records) == batch_size):
                     return records
