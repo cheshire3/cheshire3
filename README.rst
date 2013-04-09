@@ -163,7 +163,7 @@ from system Python and any packages that may be installed there.
 
 	``git clone git@github.com:<username>/cheshire3.git``
 
-3. Install dependencies[*]:
+3. Install dependencies [#]_:
 
 	``pip install -r requirements.txt``
 
@@ -173,9 +173,8 @@ from system Python and any packages that may be installed there.
 
 5. Read the Development section of this README
 
-.. [*] While step 4 should theoretically resolve dependencies, we've found it
-	   more reliable to run this explicitly.
-
+.. [#] While step 4 should theoretically resolve dependencies, we've found it 
+   more reliable to run this explicitly.
 
 
 Requirements / Dependencies
@@ -358,9 +357,7 @@ Cheshire3 provides a number of command-line utilities to enable you to
 get started creating databases, indexing and searching your data quickly.
 All of these commands have full help available, including lists
 of available options which can be accessed using the ``--help`` option.
-e.g. ::
-
-    ``cheshire3 --help``
+e.g. ``cheshire3 --help``
 
 Creating a new Database
 '''''''''''''''''''''''
