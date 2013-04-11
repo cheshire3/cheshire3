@@ -1057,15 +1057,17 @@ class SimpleResultSet(RankedResultSet):
             for r in l:
                 rec = r.fetch_record(session)
                 tmplist.append((spec.process(session, rec), r))
-        elif (isinstance(spec, str) and hasattr(self[0], spec)):
+        elif (isinstance(spec, basestring) and hasattr(self[0], spec)):
             # Sort by attribute of item
             tmplist = [(getattr(x, spec), x) for x in l]
             if ascending is None:
-                if spec in ['id', 'numericId']:
+                # Check if default sort order should be ascending
+                # Allow for str vs unicode
+                if str(spec) in ['id', 'numericId']:
                     ascending = 1
                 else:
                     ascending = 0
-        elif isinstance(spec, str):
+        elif isinstance(spec, basestring):
             tmplist = []
             for r in l:
                 rec = r.fetch_record(session)
