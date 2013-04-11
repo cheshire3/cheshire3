@@ -492,7 +492,9 @@ try:
             global prefixRe
             if (isinstance(xpath, list)):
                 xpath = repr(xpath[0])
-            if xpath[0] != "/" and xpath[-1] != ')':
+            if not any([xpath.startswith('/'),
+                        xpath.endswith(')')]
+            ):
                 xpath = "//" + xpath
             if maps:
                 retval = self.dom.xpath(xpath, namespaces=maps)
