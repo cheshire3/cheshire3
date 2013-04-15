@@ -150,8 +150,11 @@ class SimpleUser(User):
 
     def check_password(self, session, password):
         # Check password type
-        if self.passwordType == 'md5':
-            m = hashlib.md5(password)
-            return m.hexdigest() == self.password
-        else:
+        try:
+            h = hashlib.new(self.passwordType)
+        except ValueError:
+            # Not a hashlib supported algorithm
             return crypt.crypt(password, self.password[:2]) == self.password
+        else:
+            h.update(password)
+            return h.hexdigest() == self.password
