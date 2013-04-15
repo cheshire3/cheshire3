@@ -5,6 +5,8 @@ import hashlib
 
 from lxml import etree
 
+from paste.auth.digest import digest_password as http_digest_password
+
 from cheshire3.baseObjects import User
 from cheshire3.exceptions import ConfigFileException
 from cheshire3.internal import CONFIG_NS
@@ -154,7 +156,15 @@ class SimpleUser(User):
             h = hashlib.new(self.passwordType)
         except ValueError:
             # Not a hashlib supported algorithm
-            return crypt.crypt(password, self.password[:2]) == self.password
+            if self.passwordType == 'http':
+                # HTTP Digest algorithm
+                return http_digest_password('cheshire3',
+                                            self.username,
+                                            password) == self.password
+            else:
+                #  UNIX-style salted password encryption
+                cryptedpasswd = crypt.crypt(password, self.password[:2]) 
+                return cryptedpasswd == self.password
         else:
             h.update(password)
             return h.hexdigest() == self.password
