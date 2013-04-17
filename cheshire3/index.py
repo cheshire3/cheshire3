@@ -40,9 +40,13 @@ class IndexIter(object):
         self.session = Session()
         self.summary = 0
         # populate with first term
-        self.nextData = self.indexStore.fetch_termList(self.session,
-                                                       self.index,
-                                                       "", 1)[0]
+        try:
+            self.nextData = self.indexStore.fetch_termList(self.session,
+                                                           self.index,
+                                                           "",
+                                                           1)[0]
+        except IndexError:
+            self.nextData = None
 
     def __iter__(self):
         return self
