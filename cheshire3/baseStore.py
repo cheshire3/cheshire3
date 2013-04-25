@@ -1,3 +1,4 @@
+from __future__ import with_statement
 
 import os
 import time
@@ -6,6 +7,7 @@ import bsddb as bdb
 import datetime
 import dateutil.tz
 
+from urllib import quote
 try:
     import cPickle as pickle
 except ImportError:
@@ -448,9 +450,29 @@ class DirectoryStore(SimpleStore):
     possibly sub-directories). An important thing to remember is that
     files may be added/modified/deleted by an external entity.
     """
+    
+    _possibleSettings = {
+        'createSubDir': {
+            'docs': ('Should a sub-directory/sub-collection be used for this '
+                     'store'),
+            'type': int,
+            'options' : "0|1"
+        },
+        'allowStoreSubDirs': {
+            'docs': ('Allow Store to create sub-directories if it encounters '
+                     'an operating system path separator in an identifier. If'
+                     ' false (0) operating system path separators are escaped.'
+                     ),
+            'type': int,
+            'options' : '0|1'
+        }
+    }
 
     def __init__(self, session, config, parent):
         SimpleStore.__init__(self, session, config, parent)
+        self.allowStoreSubDirs = self.get_setting(session,
+                                                  'allowStoreSubDirs',
+                                                  1)
 
     def _initDb(self, session, dbt):
         dbp = dbt + "Path"
@@ -494,6 +516,33 @@ class DirectoryStore(SimpleStore):
         """Return number of items in storage."""
         databasePath = self.get_path(session, 'databasePath')
         return sum([len(t[2]) for t in os.walk(databasePath)])
+
+    def fetch_data(self, session, identifier):
+        """Return data stored against identifier."""
+        if (self.idNormalizer != None):
+            identifier = self.idNormalizer.process_string(session, identifier)
+        elif type(id) == unicode:
+            identifier = identifier.encode('utf-8')
+        else:
+            identifier = str(identifier)
+        
+        if os.path.sep in identifier and not self.allowStoreSubDirs:
+            # Escape os path separator
+            identifier = quote(identifier)
+        try:
+            with open(identifier) as fh:
+                data = fh.read()
+        except IOError:
+            # No file
+            data = None
+        if (data and
+            data.startswith("\0http://www.cheshire3.org/ns/status/DELETED:")
+            ):
+            data = DeletedObject(self, id, data[41:])
+        if data and self.expires:
+            expires = self.generate_expires(session)
+            self.store_metadata(session, id, 'expires', expires)
+        return data
 
 
 class BdbIter(object):
