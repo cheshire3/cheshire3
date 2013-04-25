@@ -441,6 +441,56 @@ class SimpleStore(C3Object, SummaryObject):
         raise NotImplementedError
 
 
+class DirectoryStore(SimpleStore):
+    """Store Objects as files in a directory on the filesystem.
+
+    Really simple Store to store Objects as files within a directory (and
+    possibly sub-directories). An important thing to remember is that
+    files may be added/modified/deleted by an external entity.
+    """
+
+    def __init__(self, session, config, parent):
+        SimpleStore.__init__(self, session, config, parent)
+
+    def _initDb(self, session, dbt):
+        dbp = dbt + "Path"
+        databasePath = self.get_path(session, dbp, "")
+        if (not databasePath):
+            databasePath = self.id
+        if (not os.path.isabs(databasePath)):
+            # Prepend defaultPath from parents
+            dfp = self.get_path(session, 'defaultPath')
+            if not dfp:
+                msg = ("Store has relative path, and no visible "
+                       "defaultPath.")
+                raise ConfigFileException(msg)
+            databasePath = os.path.join(dfp, databasePath)
+        self.paths[dbp] = databasePath
+
+    def _verifyDb(self, session, dbType):
+        dbp = self.get_path(session, dbType + "Path")
+        if dbType == 'database':
+            # Simply the directory in which to store data
+            # Ensure that it exists (including any intermediate dirs)
+            if not os.path.exists(dbp):
+                os.makedirs(dbp)
+        else:
+            self._verify(session, dbp)
+
+    def _verify(self, session, dbp):
+        if not os.path.exists(dbp):
+            # We don't exist, try and instantiate new database
+            self._create(session, dbp)
+        else:
+            cxn = bdb.db.DB()
+            try:
+                cxn.open(dbp)
+                cxn.close()
+            except:
+                # try to recreate
+                self._create(session, dbp)
+
+
 class BdbIter(object):
     store = None
     cursor = None
