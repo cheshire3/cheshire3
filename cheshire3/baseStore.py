@@ -477,8 +477,10 @@ class DirectoryStore(SimpleStore):
     def _initDb(self, session, dbt):
         dbp = dbt + "Path"
         databasePath = self.get_path(session, dbp, "")
-        if (not databasePath):
+        if not databasePath:
             databasePath = self.id
+        elif self.get_setting(session, 'createSubDir', 0):
+            databasePath = os.path.join(databasePath, self.id)
         if (not os.path.isabs(databasePath)):
             # Prepend defaultPath from parents
             dfp = self.get_path(session, 'defaultPath')
