@@ -514,6 +514,23 @@ class DirectoryStore(SimpleStore):
                 # try to recreate
                 self._create(session, dbp)
 
+    def _normalizeIdentifier(self, session, identifier):
+        # Apply any necessary normalization to the identifier 
+        if (self.idNormalizer != None):
+            identifier = self.idNormalizer.process_string(session, identifier)
+        elif type(id) == unicode:
+            identifier = identifier.encode('utf-8')
+        else:
+            identifier = str(identifier)
+        return identifier
+
+    def _getFilePath(self, session, identifier):
+        if os.path.sep in identifier and not self.allowStoreSubDirs:
+            # Escape os path separator
+            identifier = quote(identifier)
+        databasePath = self.get_path(session, 'databasePath')
+        return os.path.join(databasePath, identifier)
+            
     def get_dbSize(self, session):
         """Return number of items in storage."""
         databasePath = self.get_path(session, 'databasePath')
@@ -521,18 +538,10 @@ class DirectoryStore(SimpleStore):
 
     def fetch_data(self, session, identifier):
         """Return data stored against identifier."""
-        if (self.idNormalizer != None):
-            identifier = self.idNormalizer.process_string(session, identifier)
-        elif type(id) == unicode:
-            identifier = identifier.encode('utf-8')
-        else:
-            identifier = str(identifier)
-        
-        if os.path.sep in identifier and not self.allowStoreSubDirs:
-            # Escape os path separator
-            identifier = quote(identifier)
+        identifier = self._normalizeIdentifier(session, identifier)
+        filepath = self._getFilePath(session, identifier)
         try:
-            with open(identifier) as fh:
+            with open(filepath) as fh:
                 data = fh.read()
         except IOError:
             # No file
@@ -540,10 +549,10 @@ class DirectoryStore(SimpleStore):
         if (data and
             data.startswith("\0http://www.cheshire3.org/ns/status/DELETED:")
             ):
-            data = DeletedObject(self, id, data[41:])
+            data = DeletedObject(self, identifier, data[41:])
         if data and self.expires:
             expires = self.generate_expires(session)
-            self.store_metadata(session, id, 'expires', expires)
+            self.store_metadata(session, identifier, 'expires', expires)
         return data
 
 
