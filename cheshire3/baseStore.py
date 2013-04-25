@@ -490,6 +490,11 @@ class DirectoryStore(SimpleStore):
                 # try to recreate
                 self._create(session, dbp)
 
+    def get_dbSize(self, session):
+        """Return number of items in storage."""
+        databasePath = self.get_path(session, 'databasePath')
+        return sum([len(t[2]) for t in os.walk(databasePath)])
+
 
 class BdbIter(object):
     store = None
