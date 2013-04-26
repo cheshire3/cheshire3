@@ -563,6 +563,34 @@ class DirectoryStore(BdbStore):
             self.store_metadata(session, identifier, 'expires', expires)
         return data
 
+    def store_data(self, session, identifier, data, metadata):
+        """Store data against identifier."""
+        dig = metadata.get('digest', "")
+        if dig:
+            cxn = self._openDb(session, 'digestReverse')
+            if cxn:
+                exists = cxn.get(dig)
+                if exists:
+                    raise ObjectAlreadyExistsException(exists)
+        # Should always have an id by now, but just in case
+        if identifier is None:
+            identifier = self.generate_id(session)
+        identifier = self._normalizeIdentifier(session, identifier)
+        filepath = self._getFilePath(session, identifier)
+        # Check for subdirectories
+        if os.path.sep in identifier and self.allowStoreSubDirs:
+            # Create necessary sub-directories
+            directory, filename = os.path.split(filepath)
+            os.makedirs(directory)
+        # Encode data if necessary
+        if type(data) == unicode:
+            data = data.encode('utf-8')
+        with open(filepath, 'w') as fh:
+            fh.write(data)
+        for (m, val) in metadata.iteritems():
+            self.store_metadata(session, id, m, val)
+        return None
+
 
 class BdbIter(object):
     store = None
