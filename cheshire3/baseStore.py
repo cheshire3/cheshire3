@@ -470,6 +470,9 @@ class DirectoryStore(SimpleStore):
 
     def __init__(self, session, config, parent):
         SimpleStore.__init__(self, session, config, parent)
+        if self.switching:
+            raise ConfigFileException('Switching not supported by {0}'
+                                      ''.format(self.__class__.__name__))
         self.allowStoreSubDirs = self.get_setting(session,
                                                   'allowStoreSubDirs',
                                                   1)
