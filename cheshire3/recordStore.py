@@ -3,8 +3,9 @@ import string
 import time
 
 from cheshire3.configParser import C3Object
-from cheshire3.baseObjects import RecordStore, Record, ResultSetItem
+from cheshire3.baseObjects import RecordStore, Record, ResultSetItem, Session
 from cheshire3.baseStore import SimpleStore, BdbStore, DeletedObject
+from cheshire3.baseStore import DirectoryStore, directoryStoreIter
 from cheshire3.record import SaxRecord
 from cheshire3.exceptions import *
 from cheshire3.document import StringDocument
@@ -390,3 +391,27 @@ class RemoteSlaveRecordStore(BdbRecordStore):
 
     def fetch_record(self, session, id, parser=None):
         raise NotImplementedError
+
+
+class DirectoryRecordStore(DirectoryStore, SimpleRecordStore):
+    def __init__(self, session, config, parent):
+        DirectoryStore.__init__(self, session, config, parent)
+        SimpleRecordStore.__init__(self, session, config, parent)
+
+    def get_storageTypes(self, session):
+        types = ['database', 'wordCount', 'byteCount']
+        if self.get_setting(session, 'digest'):
+            types.append('digest')
+        if self.get_setting(session, 'expires'):
+            types.append('expires')
+        return types
+
+    def __iter__(self):
+        # return an iter object
+        return directoryRecordStoreIter(self)
+
+
+def directoryRecordStoreIter(store):
+    session = Session()
+    for id_, data in directoryStoreIter(store):
+        yield store._process_data(session, id_, data)

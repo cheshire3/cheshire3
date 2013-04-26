@@ -23,6 +23,7 @@ from tempfile import mkdtemp
 from lxml import etree
 
 from cheshire3.baseStore import BdbStore, DeletedObject, FileSystemStore
+from cheshire3.baseStore import DirectoryStore
 from cheshire3.test.testConfigParser import Cheshire3ObjectTestCase
 
 
@@ -48,7 +49,7 @@ class SimpleStoreTestCase(Cheshire3ObjectTestCase):
             
     def setUp(self):
         # Create a tempfile placeholder
-        self.defaultPath = mkdtemp()
+        self.defaultPath = mkdtemp(prefix="test")
         Cheshire3ObjectTestCase.setUp(self)
 
     def tearDown(self):
@@ -98,7 +99,7 @@ class BdbStoreTestCase(SimpleStoreTestCase):
             self.assertEqual(data2, data, "Retrieved data != stored data")
         
     def test_storeFetch_metadata(self):
-        "Check that data is stored and fetched without corruption."
+        "Check that metadata is stored and fetched without corruption."
         for data in self._get_test_data():
             # Assign an identifier
             ident = self.testObj.generate_id(self.session)
@@ -266,7 +267,7 @@ class FileSystemStoreTestCase(SimpleStoreTestCase):
             self.assertFalse(data3)
             
     def test_storeFetch_metadata(self):
-        "Check that data is stored and fetched without corruption."
+        "Check that metadata is stored and fetched without corruption."
         for data in self._get_test_data():
             # Assign a random identifier
             ident = ''.join([random.choice(string.lowercase)
@@ -298,6 +299,24 @@ class FileSystemStoreTestCase(SimpleStoreTestCase):
             self.assertEqual(creationDate, now)
 
 
+class DirectoryStoreTestCase(BdbStoreTestCase):
+    "Tests for simple file system directory based store."
+
+    @classmethod
+    def _get_class(cls):
+        return DirectoryStore
+
+    def _get_config(self):
+        return etree.XML('''\
+        <subConfig type="baseStore" id="{0.__name__}">
+          <objectType>cheshire3.baseStore.{0.__name__}</objectType>
+          <paths>
+              <path type="defaultPath">{1}</path>
+              <path type="databasePath">{1}/store</path>
+          </paths>
+        </subConfig>'''.format(self._get_class(), self.defaultPath))
+
+
 def load_tests(loader, tests, pattern):
     # Alias loader.loadTestsFromTestCase for sake of line lengths
     ltc = loader.loadTestsFromTestCase
@@ -306,6 +325,7 @@ def load_tests(loader, tests, pattern):
     suite.addTests(ltc(DeletionsBdbStoreTestCase))
     suite.addTests(ltc(UserPathBdbStoreTestCase))
     suite.addTests(ltc(FileSystemStoreTestCase))
+    suite.addTests(ltc(DirectoryStoreTestCase))
     return suite
 
 if __name__ == '__main__':
