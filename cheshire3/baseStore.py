@@ -6,8 +6,10 @@ import hashlib
 import bsddb as bdb
 import datetime
 import dateutil.tz
+import shutil
 
 from urllib import quote
+
 try:
     import cPickle as pickle
 except ImportError:
@@ -642,6 +644,27 @@ class DirectoryStore(BdbStore):
     def clean(self, session):
         """Delete expired data objects."""
         return BdbStore.clear(self, session)
+
+    def clear(self, session):
+        """Delete all the data out of self."""
+        self._closeAll(session)
+        self.cxns = {}
+        for t in self.get_storageTypes(session):
+            p = self.get_path(session, "%sPath" % t)
+            if t == 'database':
+                # Simply the directory in which to store data
+                # Clear the entire directory
+                shutil.rmtree(p)
+            else:
+                self._remove(session, p)
+            self._initDb(session, t)
+            self._verifyDb(session, t)
+        for t in self.get_reverseMetadataTypes(session):
+            p = self.get_path(session, "%sReversePath" % t)
+            self._remove(session, p)
+            self._initDb(session, "%sReverse" % t)
+            self._verifyDb(session, "%sReverse" % t)
+        return self
 
     def flush(self, session):
         """Ensure all data is flushed to disk."""
