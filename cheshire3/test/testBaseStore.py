@@ -48,7 +48,7 @@ class SimpleStoreTestCase(Cheshire3ObjectTestCase):
             
     def setUp(self):
         # Create a tempfile placeholder
-        self.defaultPath = mkdtemp()
+        self.defaultPath = mkdtemp(prefix="test")
         Cheshire3ObjectTestCase.setUp(self)
 
     def tearDown(self):
@@ -98,7 +98,7 @@ class BdbStoreTestCase(SimpleStoreTestCase):
             self.assertEqual(data2, data, "Retrieved data != stored data")
         
     def test_storeFetch_metadata(self):
-        "Check that data is stored and fetched without corruption."
+        "Check that metadata is stored and fetched without corruption."
         for data in self._get_test_data():
             # Assign an identifier
             ident = self.testObj.generate_id(self.session)
@@ -266,7 +266,7 @@ class FileSystemStoreTestCase(SimpleStoreTestCase):
             self.assertFalse(data3)
             
     def test_storeFetch_metadata(self):
-        "Check that data is stored and fetched without corruption."
+        "Check that metadata is stored and fetched without corruption."
         for data in self._get_test_data():
             # Assign a random identifier
             ident = ''.join([random.choice(string.lowercase)
