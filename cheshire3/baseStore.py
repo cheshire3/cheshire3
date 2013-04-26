@@ -1506,11 +1506,11 @@ class DirectoryStore(BdbStore):
                 if cxn is not None:
                     if dbt in self.reverseMetadataTypes:
                         # Fetch value here, delete reverse
-                        data = cxn.get(id)
+                        data = cxn.get(identifier)
                         cxn2 = self._openDb(session, dbt + "Reverse")
                         if cxn2 is not None:
                             cxn2.delete(data)
-                    cxn.delete(id)
+                    cxn.delete(identifier)
                     cxn.sync()
 
         # Maybe store the fact that this object used to exist.
@@ -1566,7 +1566,7 @@ class DirectoryStore(BdbStore):
         with open(filepath, 'w') as fh:
             fh.write(data)
         for (m, val) in metadata.iteritems():
-            self.store_metadata(session, id, m, val)
+            self.store_metadata(session, identifier, m, val)
         return None
 
     def fetch_metadata(self, session, identifier, mType):
