@@ -1,10 +1,10 @@
 
-from cheshire3.baseObjects import DocumentStore
+from cheshire3.baseObjects import DocumentStore, Session
 from cheshire3.exceptions import *
 from cheshire3.document import StringDocument
-from cheshire3.baseStore import BdbStore, BdbIter, FileSystemStore,\
-                                DeletedObject
-
+from cheshire3.baseStore import BdbStore, BdbIter, FileSystemStore
+from cheshire3.baseStore import DeletedObject
+from cheshire3.baseStore import DirectoryStore, directoryStoreIter
 try:
     # Name when installed by hand
     import bsddb3 as bdb
@@ -181,3 +181,21 @@ class FileSystemDocumentStore(FileSystemStore, SimpleDocumentStore):
         if self.get_setting(session, 'expires'):
             types.append('expires')
         return types
+
+
+class DirectoryDocumentStore(DirectoryStore, SimpleDocumentStore):
+    # Instantiate some type of simple doc store
+    def __init__(self, session, config, parent):
+        DirectoryStore.__init__(self, session, config, parent)
+        SimpleDocumentStore.__init__(self, session, config, parent)
+
+    def __iter__(self):
+        return directoryDocumentStoreIter(self.session, self)
+
+
+def directoryDocumentStoreIter(store):
+    session = Session()
+    for id_, data in directoryStoreIter(store):
+        doc = StringDocument(data)
+        doc.id = id_
+        yield doc
