@@ -445,232 +445,6 @@ class SimpleStore(C3Object, SummaryObject):
         raise NotImplementedError
 
 
-class DirectoryStore(BdbStore):
-    """Store Objects as files in a directory on the filesystem.
-
-    Really simple Store to store Objects as files within a directory (and
-    possibly sub-directories). An important thing to remember is that
-    files may be added/modified/deleted by an external entity.
-    """
-    
-    _possibleSettings = {
-        'createSubDir': {
-            'docs': ('Should a sub-directory/sub-collection be used for this '
-                     'store'),
-            'type': int,
-            'options' : "0|1"
-        },
-        'allowStoreSubDirs': {
-            'docs': ('Allow Store to create sub-directories if it encounters '
-                     'an operating system path separator in an identifier. If'
-                     ' false (0) operating system path separators are escaped.'
-                     ),
-            'type': int,
-            'options' : '0|1'
-        }
-    }
-
-    def __init__(self, session, config, parent):
-        BdbStore.__init__(self, session, config, parent)
-        if self.switching:
-            raise ConfigFileException('Switching not supported by {0}'
-                                      ''.format(self.__class__.__name__))
-        self.allowStoreSubDirs = self.get_setting(session,
-                                                  'allowStoreSubDirs',
-                                                  1)
-        # TODO: Refresh metadata in case files have changed
-
-    def _initDb(self, session, dbt):
-        dbp = dbt + "Path"
-        databasePath = self.get_path(session, dbp, "")
-        if not databasePath:
-            databasePath = self.id
-        elif self.get_setting(session, 'createSubDir', 0):
-            databasePath = os.path.join(databasePath, self.id)
-        if (not os.path.isabs(databasePath)):
-            # Prepend defaultPath from parents
-            dfp = self.get_path(session, 'defaultPath')
-            if not dfp:
-                msg = ("Store has relative path, and no visible "
-                       "defaultPath.")
-                raise ConfigFileException(msg)
-            databasePath = os.path.join(dfp, databasePath)
-        self.paths[dbp] = databasePath
-
-    def _verifyDb(self, session, dbType):
-        dbp = self.get_path(session, dbType + "Path")
-        if dbType == 'database':
-            # Simply the directory in which to store data
-            # Ensure that it exists (including any intermediate dirs)
-            if not os.path.exists(dbp):
-                os.makedirs(dbp)
-        else:
-            return BdbStore._verify(self, session, dbp)
-
-    def _openDb(self, session, dbType):
-        if dbType == 'database':
-            # Simply the directory in which to store data
-            # Ensure that it exists
-            dbp = self.get_path(session, dbType + 'Path')
-            if dbp is None:
-                self._initDb(session, dbType)
-                self._verifyDb(session, dbType)
-        else:
-            return BdbStore._openDb(self, session, dbType)
-
-    def _closeDb(self, session, dbType):
-        if dbType == 'database':
-            # Simply the directory in which to store data - do nothing
-            pass
-        else:
-            return BdbStore._closeDb(self, session, dbType)
-
-    def _normalizeIdentifier(self, session, identifier):
-        # Apply any necessary normalization to the identifier 
-        if (self.idNormalizer != None):
-            identifier = self.idNormalizer.process_string(session, identifier)
-        elif type(id) == unicode:
-            identifier = identifier.encode('utf-8')
-        else:
-            identifier = str(identifier)
-        return identifier
-
-    def _getFilePath(self, session, identifier):
-        if os.path.sep in identifier and not self.allowStoreSubDirs:
-            # Escape os path separator
-            identifier = quote(identifier)
-        databasePath = self.get_path(session, 'databasePath')
-        return os.path.join(databasePath, identifier)
-
-    def get_storageTypes(self, session):
-        return ['database']
-
-    def get_reverseMetadataTypes(self, session):
-        return ['digest']
-
-    def get_dbSize(self, session):
-        """Return number of items in storage."""
-        databasePath = self.get_path(session, 'databasePath')
-        return sum([len(t[2]) for t in os.walk(databasePath)])
-
-    def delete_data(self, session, identifier):
-        """Delete data stored against id."""
-        self._openAll(session)
-        identifier = self._normalizeIdentifier(session, identifier)
-        filepath = self._getFilePath(session, identifier)
-
-        # Main database is a storageType now
-        for dbt in self.storageTypes:
-            if dbt == 'database':
-                # Simply the directory in which to store data
-                # Delete the file
-                os.remove(filepath)
-            else:
-                cxn = self._openDb(session, dbt)
-                if cxn is not None:
-                    if dbt in self.reverseMetadataTypes:
-                        # Fetch value here, delete reverse
-                        data = cxn.get(id)
-                        cxn2 = self._openDb(session, dbt + "Reverse")
-                        if cxn2 is not None:
-                            cxn2.delete(data)
-                    cxn.delete(id)
-                    cxn.sync()
-
-        # Maybe store the fact that this object used to exist.
-        if self.get_setting(session, 'storeDeletions', 0):
-            now = datetime.datetime.now(dateutil.tz.tzutc())
-            now = now.strftime("%Y-%m-%dT%H:%M:%S%Z").replace('UTC', 'Z')
-            with open(filepath, 'w') as fh:
-                fh.write("\0http://www.cheshire3.org/ns/status/DELETED:{0}"
-                         "".format(now)
-                         )
-
-    def fetch_data(self, session, identifier):
-        """Return data stored against identifier."""
-        identifier = self._normalizeIdentifier(session, identifier)
-        filepath = self._getFilePath(session, identifier)
-        try:
-            with open(filepath) as fh:
-                data = fh.read()
-        except IOError:
-            # No file
-            data = None
-        if (data and
-            data.startswith("\0http://www.cheshire3.org/ns/status/DELETED:")
-            ):
-            data = DeletedObject(self, identifier, data[41:])
-        if data and self.expires:
-            expires = self.generate_expires(session)
-            self.store_metadata(session, identifier, 'expires', expires)
-        return data
-
-    def store_data(self, session, identifier, data, metadata):
-        """Store data against identifier."""
-        dig = metadata.get('digest', "")
-        if dig:
-            cxn = self._openDb(session, 'digestReverse')
-            if cxn:
-                exists = cxn.get(dig)
-                if exists:
-                    raise ObjectAlreadyExistsException(exists)
-        # Should always have an id by now, but just in case
-        if identifier is None:
-            identifier = self.generate_id(session)
-        identifier = self._normalizeIdentifier(session, identifier)
-        filepath = self._getFilePath(session, identifier)
-        # Check for subdirectories
-        if os.path.sep in identifier and self.allowStoreSubDirs:
-            # Create necessary sub-directories
-            directory, filename = os.path.split(filepath)
-            os.makedirs(directory)
-        # Encode data if necessary
-        if type(data) == unicode:
-            data = data.encode('utf-8')
-        with open(filepath, 'w') as fh:
-            fh.write(data)
-        for (m, val) in metadata.iteritems():
-            self.store_metadata(session, id, m, val)
-        return None
-
-    def fetch_metadata(self, session, identifier, mType):
-        """Return mType metadata stored against identifier."""
-        return BdbStore.fetch_metadata(self, session, identifier, mType)
-
-    def store_metadata(self, session, identifier, mType, value):
-        """Store value for mType metadata against identifier."""
-        return BdbStore.store_metadata(self, session, identifier, mType, value)
-
-    def clean(self, session):
-        """Delete expired data objects."""
-        return BdbStore.clear(self, session)
-
-    def clear(self, session):
-        """Delete all the data out of self."""
-        self._closeAll(session)
-        self.cxns = {}
-        for t in self.get_storageTypes(session):
-            p = self.get_path(session, "%sPath" % t)
-            if t == 'database':
-                # Simply the directory in which to store data
-                # Clear the entire directory
-                shutil.rmtree(p)
-            else:
-                self._remove(session, p)
-            self._initDb(session, t)
-            self._verifyDb(session, t)
-        for t in self.get_reverseMetadataTypes(session):
-            p = self.get_path(session, "%sReversePath" % t)
-            self._remove(session, p)
-            self._initDb(session, "%sReverse" % t)
-            self._verifyDb(session, "%sReverse" % t)
-        return self
-
-    def flush(self, session):
-        """Ensure all data is flushed to disk."""
-        return BdbStore.flush(self, session)
-
-
 class BdbIter(object):
     store = None
     cursor = None
@@ -1558,3 +1332,230 @@ class FileSystemStore(BdbStore):
                 # Can't write deleted status as original doc is shorter than
                 # deletion info!
                 pass
+
+
+class DirectoryStore(BdbStore):
+    """Store Objects as files in a directory on the filesystem.
+
+    Really simple Store to store Objects as files within a directory (and
+    possibly sub-directories). An important thing to remember is that
+    files may be added/modified/deleted by an external entity.
+    """
+    
+    _possibleSettings = {
+        'createSubDir': {
+            'docs': ('Should a sub-directory/sub-collection be used for this '
+                     'store'),
+            'type': int,
+            'options' : "0|1"
+        },
+        'allowStoreSubDirs': {
+            'docs': ('Allow Store to create sub-directories if it encounters '
+                     'an operating system path separator in an identifier. If'
+                     ' false (0) operating system path separators are escaped.'
+                     ),
+            'type': int,
+            'options' : '0|1'
+        }
+    }
+
+    def __init__(self, session, config, parent):
+        BdbStore.__init__(self, session, config, parent)
+        if self.switching:
+            raise ConfigFileException('Switching not supported by {0}'
+                                      ''.format(self.__class__.__name__))
+        self.allowStoreSubDirs = self.get_setting(session,
+                                                  'allowStoreSubDirs',
+                                                  1)
+        # TODO: Refresh metadata in case files have changed
+        
+    def _initDb(self, session, dbt):
+        dbp = dbt + "Path"
+        databasePath = self.get_path(session, dbp, "")
+        if not databasePath:
+            databasePath = self.id
+        elif self.get_setting(session, 'createSubDir', 0):
+            databasePath = os.path.join(databasePath, self.id)
+        if (not os.path.isabs(databasePath)):
+            # Prepend defaultPath from parents
+            dfp = self.get_path(session, 'defaultPath')
+            if not dfp:
+                msg = ("Store has relative path, and no visible "
+                       "defaultPath.")
+                raise ConfigFileException(msg)
+            databasePath = os.path.join(dfp, databasePath)
+        self.paths[dbp] = databasePath
+
+    def _verifyDb(self, session, dbType):
+        dbp = self.get_path(session, dbType + "Path")
+        if dbType == 'database':
+            # Simply the directory in which to store data
+            # Ensure that it exists (including any intermediate dirs)
+            if not os.path.exists(dbp):
+                os.makedirs(dbp)
+        else:
+            return BdbStore._verify(self, session, dbp)
+
+    def _openDb(self, session, dbType):
+        if dbType == 'database':
+            # Simply the directory in which to store data
+            # Ensure that it exists
+            dbp = self.get_path(session, dbType + 'Path')
+            if dbp is None:
+                self._initDb(session, dbType)
+                self._verifyDb(session, dbType)
+        else:
+            return BdbStore._openDb(self, session, dbType)
+
+    def _closeDb(self, session, dbType):
+        if dbType == 'database':
+            # Simply the directory in which to store data - do nothing
+            pass
+        else:
+            return BdbStore._closeDb(self, session, dbType)
+
+    def _normalizeIdentifier(self, session, identifier):
+        # Apply any necessary normalization to the identifier 
+        if (self.idNormalizer != None):
+            identifier = self.idNormalizer.process_string(session, identifier)
+        elif type(id) == unicode:
+            identifier = identifier.encode('utf-8')
+        else:
+            identifier = str(identifier)
+        return identifier
+
+    def _getFilePath(self, session, identifier):
+        if os.path.sep in identifier and not self.allowStoreSubDirs:
+            # Escape os path separator
+            identifier = quote(identifier)
+        databasePath = self.get_path(session, 'databasePath')
+        return os.path.join(databasePath, identifier)
+
+    def get_storageTypes(self, session):
+        return ['database']
+
+    def get_reverseMetadataTypes(self, session):
+        return ['digest']
+
+
+    def get_dbSize(self, session):
+        """Return number of items in storage."""
+        databasePath = self.get_path(session, 'databasePath')
+        return sum([len(t[2]) for t in os.walk(databasePath)])
+
+    def delete_data(self, session, identifier):
+        """Delete data stored against id."""
+        self._openAll(session)
+        identifier = self._normalizeIdentifier(session, identifier)
+        filepath = self._getFilePath(session, identifier)
+
+        # Main database is a storageType now
+        for dbt in self.storageTypes:
+            if dbt == 'database':
+                # Simply the directory in which to store data
+                # Delete the file
+                os.remove(filepath)
+            else:
+                cxn = self._openDb(session, dbt)
+                if cxn is not None:
+                    if dbt in self.reverseMetadataTypes:
+                        # Fetch value here, delete reverse
+                        data = cxn.get(id)
+                        cxn2 = self._openDb(session, dbt + "Reverse")
+                        if cxn2 is not None:
+                            cxn2.delete(data)
+                    cxn.delete(id)
+                    cxn.sync()
+
+        # Maybe store the fact that this object used to exist.
+        if self.get_setting(session, 'storeDeletions', 0):
+            now = datetime.datetime.now(dateutil.tz.tzutc())
+            now = now.strftime("%Y-%m-%dT%H:%M:%S%Z").replace('UTC', 'Z')
+            with open(filepath, 'w') as fh:
+                fh.write("\0http://www.cheshire3.org/ns/status/DELETED:{0}"
+                         "".format(now)
+                         )
+
+    def fetch_data(self, session, identifier):
+        """Return data stored against identifier."""
+        identifier = self._normalizeIdentifier(session, identifier)
+        filepath = self._getFilePath(session, identifier)
+        try:
+            with open(filepath) as fh:
+                data = fh.read()
+        except IOError:
+            # No file
+            data = None
+        if (data and
+            data.startswith("\0http://www.cheshire3.org/ns/status/DELETED:")
+            ):
+            data = DeletedObject(self, identifier, data[41:])
+        if data and self.expires:
+            expires = self.generate_expires(session)
+            self.store_metadata(session, identifier, 'expires', expires)
+        return data
+
+    def store_data(self, session, identifier, data, metadata):
+        """Store data against identifier."""
+        dig = metadata.get('digest', "")
+        if dig:
+            cxn = self._openDb(session, 'digestReverse')
+            if cxn:
+                exists = cxn.get(dig)
+                if exists:
+                    raise ObjectAlreadyExistsException(exists)
+        # Should always have an id by now, but just in case
+        if identifier is None:
+            identifier = self.generate_id(session)
+        identifier = self._normalizeIdentifier(session, identifier)
+        filepath = self._getFilePath(session, identifier)
+        # Check for subdirectories
+        if os.path.sep in identifier and self.allowStoreSubDirs:
+            # Create necessary sub-directories
+            directory, filename = os.path.split(filepath)
+            os.makedirs(directory)
+        # Encode data if necessary
+        if type(data) == unicode:
+            data = data.encode('utf-8')
+        with open(filepath, 'w') as fh:
+            fh.write(data)
+        for (m, val) in metadata.iteritems():
+            self.store_metadata(session, id, m, val)
+        return None
+
+    def fetch_metadata(self, session, identifier, mType):
+        """Return mType metadata stored against identifier."""
+        return BdbStore.fetch_metadata(self, session, identifier, mType)
+
+    def store_metadata(self, session, identifier, mType, value):
+        """Store value for mType metadata against identifier."""
+        return BdbStore.store_metadata(self, session, identifier, mType, value)
+
+    def clean(self, session):
+        """Delete expired data objects."""
+        return BdbStore.clear(self, session)
+
+    def clear(self, session):
+        """Delete all the data out of self."""
+        self._closeAll(session)
+        self.cxns = {}
+        for t in self.get_storageTypes(session):
+            p = self.get_path(session, "%sPath" % t)
+            if t == 'database':
+                # Simply the directory in which to store data
+                # Clear the entire directory
+                shutil.rmtree(p)
+            else:
+                self._remove(session, p)
+            self._initDb(session, t)
+            self._verifyDb(session, t)
+        for t in self.get_reverseMetadataTypes(session):
+            p = self.get_path(session, "%sReversePath" % t)
+            self._remove(session, p)
+            self._initDb(session, "%sReverse" % t)
+            self._verifyDb(session, "%sReverse" % t)
+        return self
+
+    def flush(self, session):
+        """Ensure all data is flushed to disk."""
+        return BdbStore.flush(self, session)
