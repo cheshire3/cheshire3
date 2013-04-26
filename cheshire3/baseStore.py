@@ -476,6 +476,7 @@ class DirectoryStore(BdbStore):
         self.allowStoreSubDirs = self.get_setting(session,
                                                   'allowStoreSubDirs',
                                                   1)
+        # TODO: Refresh metadata in case files have changed
 
     def _initDb(self, session, dbt):
         dbp = dbt + "Path"
@@ -538,11 +539,50 @@ class DirectoryStore(BdbStore):
             identifier = quote(identifier)
         databasePath = self.get_path(session, 'databasePath')
         return os.path.join(databasePath, identifier)
-            
+
+    def get_storageTypes(self, session):
+        return ['database']
+
+    def get_reverseMetadataTypes(self, session):
+        return ['digest']
+
     def get_dbSize(self, session):
         """Return number of items in storage."""
         databasePath = self.get_path(session, 'databasePath')
         return sum([len(t[2]) for t in os.walk(databasePath)])
+
+    def delete_data(self, session, identifier):
+        """Delete data stored against id."""
+        self._openAll(session)
+        identifier = self._normalizeIdentifier(session, identifier)
+        filepath = self._getFilePath(session, identifier)
+
+        # Main database is a storageType now
+        for dbt in self.storageTypes:
+            if dbt == 'database':
+                # Simply the directory in which to store data
+                # Delete the file
+                os.remove(filepath)
+            else:
+                cxn = self._openDb(session, dbt)
+                if cxn is not None:
+                    if dbt in self.reverseMetadataTypes:
+                        # Fetch value here, delete reverse
+                        data = cxn.get(id)
+                        cxn2 = self._openDb(session, dbt + "Reverse")
+                        if cxn2 is not None:
+                            cxn2.delete(data)
+                    cxn.delete(id)
+                    cxn.sync()
+
+        # Maybe store the fact that this object used to exist.
+        if self.get_setting(session, 'storeDeletions', 0):
+            now = datetime.datetime.now(dateutil.tz.tzutc())
+            now = now.strftime("%Y-%m-%dT%H:%M:%S%Z").replace('UTC', 'Z')
+            with open(filepath, 'w') as fh:
+                fh.write("\0http://www.cheshire3.org/ns/status/DELETED:{0}"
+                         "".format(now)
+                         )
 
     def fetch_data(self, session, identifier):
         """Return data stored against identifier."""
