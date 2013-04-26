@@ -17,11 +17,12 @@ from lxml import etree
 from datetime import datetime
 
 from cheshire3.document import Document, StringDocument
-from cheshire3.documentStore import BdbDocumentStore
+from cheshire3.documentStore import BdbDocumentStore, DirectoryDocumentStore
 from cheshire3.exceptions import ObjectAlreadyExistsException,\
                                  ObjectDoesNotExistException,\
                                  ObjectDeletedException
 from cheshire3.test.testBaseStore import SimpleStoreTestCase, BdbStoreTestCase
+from cheshire3.test.testBaseStore import DirectoryStoreTestCase
 
 
 class DocumentStoreTestCase(SimpleStoreTestCase):
@@ -160,11 +161,31 @@ class DeletionsBdbDocumentStoreTestCase(BdbDocumentStoreTestCase):
                               self.session, inDoc.id)
 
 
+class DirectoryDocumentStoreTestCase(DocumentStoreTestCase,
+                                     DirectoryStoreTestCase):
+    "Tests for simple file system directory based DocumentStore."
+
+    @classmethod
+    def _get_class(cls):
+        return DirectoryDocumentStore
+
+    def _get_config(self):
+        return etree.XML('''\
+        <subConfig type="documentStore" id="{0.__name__}">
+          <objectType>{0.__module__}.{0.__name__}</objectType>
+          <paths>
+              <path type="defaultPath">{1}</path>
+              <path type="databasePath">{1}/store</path>
+          </paths>
+        </subConfig>'''.format(self._get_class(), self.defaultPath))
+
+
 def load_tests(loader, tests, pattern):
     # Alias loader.loadTestsFromTestCase for sake of line lengths
     ltc = loader.loadTestsFromTestCase 
     suite = ltc(BdbDocumentStoreTestCase)
     suite.addTests(ltc(DeletionsBdbDocumentStoreTestCase))
+    suite.addTests(ltc(DirectoryDocumentStoreTestCase))
     return suite
 
 
