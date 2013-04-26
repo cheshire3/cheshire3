@@ -503,7 +503,7 @@ class DirectoryStore(BdbStore):
             if not os.path.exists(dbp):
                 os.makedirs(dbp)
         else:
-            BdbStore._verify(self, session, dbp)
+            return BdbStore._verify(self, session, dbp)
 
     def _openDb(self, session, dbType):
         if dbType == 'database':
@@ -514,14 +514,14 @@ class DirectoryStore(BdbStore):
                 self._initDb(session, dbType)
                 self._verifyDb(session, dbType)
         else:
-            BdbStore._openDb(self, session, dbType)
+            return BdbStore._openDb(self, session, dbType)
 
     def _closeDb(self, session, dbType):
         if dbType == 'database':
             # Simply the directory in which to store data - do nothing
             pass
         else:
-            BdbStore._closeDb(self, session, dbType)
+            return BdbStore._closeDb(self, session, dbType)
 
     def _normalizeIdentifier(self, session, identifier):
         # Apply any necessary normalization to the identifier 
@@ -630,6 +630,22 @@ class DirectoryStore(BdbStore):
         for (m, val) in metadata.iteritems():
             self.store_metadata(session, id, m, val)
         return None
+
+    def fetch_metadata(self, session, identifier, mType):
+        """Return mType metadata stored against identifier."""
+        return BdbStore.fetch_metadata(self, session, identifier, mType)
+
+    def store_metadata(self, session, identifier, mType, value):
+        """Store value for mType metadata against identifier."""
+        return BdbStore.store_metadata(self, session, identifier, mType, value)
+
+    def clean(self, session):
+        """Delete expired data objects."""
+        return BdbStore.clear(self, session)
+
+    def flush(self, session):
+        """Ensure all data is flushed to disk."""
+        return BdbStore.flush(self, session)
 
 
 class BdbIter(object):
