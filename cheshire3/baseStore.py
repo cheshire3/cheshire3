@@ -8,7 +8,7 @@ import datetime
 import dateutil.tz
 import shutil
 
-from urllib import quote
+from urllib import quote, unquote
 
 try:
     import cPickle as pickle
@@ -1334,6 +1334,45 @@ class FileSystemStore(BdbStore):
                 pass
 
 
+def directoryStoreIter(store):
+    session = Session()
+    databasePath = store.get_path(session, 'databasePath')
+    for root, dirs, files in os.walk(databasePath):
+        for name in files:
+            filepath = os.path.join(root, name)
+            # Split off identifier
+            id_ = filepath[len(databasePath) + 1:]
+            # De-normalize id
+            if not store.allowStoreSubDirs:
+                id_ = unquote(id_)
+            if store.outIdNormalizer is not None:
+                id_ = store.outIdNormalizer.process_string(session, id_)
+            # Read in data
+            with open(filepath, 'r') as fh:
+                data = fh.read()
+            # Check for DeletedObject
+            if (
+                data and
+                data.startswith("\0http://www.cheshire3.org/ns/status/"
+                                "DELETED:")
+            ):
+                data = DeletedObject(self, id, data[41:])
+
+            # Update expires
+            if data and store.expires:
+                expires = store.generate_expires(session)
+                store.store_metadata(session, id, 'expires', expires)
+
+            yield (id_, data)
+        # By default don't iterate over VCS directories
+        for vcs in ['CVS', '.git', '.hg', '.svn']:
+            try:
+                dirs.remove(vcs)
+            except:
+                # This VCS isn't there, so no need to remove
+                continue
+
+
 class DirectoryStore(BdbStore):
     """Store Objects as files in a directory on the filesystem.
 
@@ -1368,7 +1407,10 @@ class DirectoryStore(BdbStore):
                                                   'allowStoreSubDirs',
                                                   1)
         # TODO: Refresh metadata in case files have changed
-        
+
+    def __iter__(self):
+        return directoryStoreIter(self)
+
     def _initDb(self, session, dbt):
         dbp = dbt + "Path"
         databasePath = self.get_path(session, dbp, "")
