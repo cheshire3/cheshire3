@@ -1473,6 +1473,10 @@ class DirectoryStore(BdbStore):
         databasePath = self.get_path(session, 'databasePath')
         return os.path.join(databasePath, identifier)
 
+    def generate_id(self, session):
+        """Generate and return a new unique identifier."""
+        return self.get_dbSize(session)
+
     def get_storageTypes(self, session):
         return ['database']
 
@@ -1537,7 +1541,7 @@ class DirectoryStore(BdbStore):
             self.store_metadata(session, identifier, 'expires', expires)
         return data
 
-    def store_data(self, session, identifier, data, metadata):
+    def store_data(self, session, identifier, data, metadata={}):
         """Store data against identifier."""
         dig = metadata.get('digest', "")
         if dig:
