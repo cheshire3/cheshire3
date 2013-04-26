@@ -443,7 +443,7 @@ class SimpleStore(C3Object, SummaryObject):
         raise NotImplementedError
 
 
-class DirectoryStore(SimpleStore):
+class DirectoryStore(BdbStore):
     """Store Objects as files in a directory on the filesystem.
 
     Really simple Store to store Objects as files within a directory (and
@@ -469,7 +469,7 @@ class DirectoryStore(SimpleStore):
     }
 
     def __init__(self, session, config, parent):
-        SimpleStore.__init__(self, session, config, parent)
+        BdbStore.__init__(self, session, config, parent)
         if self.switching:
             raise ConfigFileException('Switching not supported by {0}'
                                       ''.format(self.__class__.__name__))
@@ -502,20 +502,25 @@ class DirectoryStore(SimpleStore):
             if not os.path.exists(dbp):
                 os.makedirs(dbp)
         else:
-            self._verify(session, dbp)
+            BdbStore._verify(self, session, dbp)
 
-    def _verify(self, session, dbp):
-        if not os.path.exists(dbp):
-            # We don't exist, try and instantiate new database
-            self._create(session, dbp)
+    def _openDb(self, session, dbType):
+        if dbType == 'database':
+            # Simply the directory in which to store data
+            # Ensure that it exists
+            dbp = self.get_path(session, dbType + 'Path')
+            if dbp is None:
+                self._initDb(session, dbType)
+                self._verifyDb(session, dbType)
         else:
-            cxn = bdb.db.DB()
-            try:
-                cxn.open(dbp)
-                cxn.close()
-            except:
-                # try to recreate
-                self._create(session, dbp)
+            BdbStore._openDb(self, session, dbType)
+
+    def _closeDb(self, session, dbType):
+        if dbType == 'database':
+            # Simply the directory in which to store data - do nothing
+            pass
+        else:
+            BdbStore._closeDb(self, session, dbType)
 
     def _normalizeIdentifier(self, session, identifier):
         # Apply any necessary normalization to the identifier 
