@@ -179,6 +179,21 @@ class DirectoryDocumentStoreTestCase(DocumentStoreTestCase,
           </paths>
         </subConfig>'''.format(self._get_class(), self.defaultPath))
 
+    def test_store_data(self):
+        "Check that Doc is stored without corruption to copy in memory."
+        theoreticalSize = 0
+        for inDoc in self._get_test_docs():
+            # Store the Document
+            outDoc = self.testObj.create_document(self.session, inDoc)
+            theoreticalSize += 1
+            # Check that Store returns the correct size
+            self.assertEqual(self.testObj.get_dbSize(self.session),
+                             theoreticalSize)
+            # Check that returned doc is unaltered
+            self.assertEqual(outDoc.get_raw(self.session),
+                             inDoc.get_raw(self.session),
+                             u"Returned document content not as expected")
+
 
 def load_tests(loader, tests, pattern):
     # Alias loader.loadTestsFromTestCase for sake of line lengths
