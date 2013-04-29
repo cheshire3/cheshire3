@@ -347,7 +347,7 @@ class SimpleStore(C3Object, SummaryObject):
         return None
 
     def commit_storing(self, session):
-        """Finalize storing, e.g. commit to peristent storage."""
+        """Finalize storing, e.g. commit to persistent storage."""
         self._closeAll(session)
         self.commit_metadata(session)
         return None
