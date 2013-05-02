@@ -316,6 +316,24 @@ class DirectoryStoreTestCase(BdbStoreTestCase):
           </paths>
         </subConfig>'''.format(self._get_class(), self.defaultPath))
 
+    def test_slashIdentifier(self):
+        """Test storing to an identifier containing a slash.
+
+        Test storing to an identifier containing a character that could be
+        interpreted as a path separator by the OS filesystem.
+        """
+        for data in self._get_test_data():
+            # Assign an identifier
+            ident = self.testObj.generate_id(self.session)
+            # Put an os path separator in the identifier
+            ident = os.path.join(str(ident), '1')
+            # Store the data
+            self.testObj.store_data(self.session, ident, data)
+            # Fetch the data
+            data2 = self.testObj.fetch_data(self.session, ident)
+            # Check that generated and fetched are the same
+            self.assertEqual(data2, data, "Retrieved data != stored data")
+
 
 def load_tests(loader, tests, pattern):
     # Alias loader.loadTestsFromTestCase for sake of line lengths
