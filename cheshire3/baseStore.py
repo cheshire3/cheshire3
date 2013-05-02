@@ -1483,7 +1483,6 @@ class DirectoryStore(BdbStore):
     def get_reverseMetadataTypes(self, session):
         return ['digest']
 
-
     def get_dbSize(self, session):
         """Return number of items in storage."""
         databasePath = self.get_path(session, 'databasePath')
