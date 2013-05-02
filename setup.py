@@ -73,6 +73,7 @@ setup(
     setup_requires=['setuptools-git'],
     dependency_links=[
         "http://labix.org/python-dateutil",
+        "http://www.panix.com/~asl2/software/PyZ3950/",
         "http://download.cheshire3.org/latest/reqs/"
     ],
     extras_require={
