@@ -192,10 +192,20 @@ class DirectoryDocumentStore(DirectoryStore, SimpleDocumentStore):
     def __iter__(self):
         return directoryDocumentStoreIter(self)
 
+    def fetch_document(self, session, id_):
+        # Fetch the document
+        doc = SimpleDocumentStore.fetch_document(self, session, id_)
+        # Assign the filename attribute
+        internalId = self._normalizeIdentifier(session, id_)
+        doc.filename = self._getFilePath(session, internalId)
+        return doc
+
 
 def directoryDocumentStoreIter(store):
     session = Session()
     for id_, data in directoryStoreIter(store):
         doc = StringDocument(data)
         doc.id = id_
+        internalId = store._normalizeIdentifier(session, id_)
+        doc.filename = store._getFilePath(session, internalId)
         yield doc
