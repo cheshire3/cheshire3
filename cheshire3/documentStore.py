@@ -190,7 +190,7 @@ class DirectoryDocumentStore(DirectoryStore, SimpleDocumentStore):
         SimpleDocumentStore.__init__(self, session, config, parent)
 
     def __iter__(self):
-        return directoryDocumentStoreIter(self.session, self)
+        return directoryDocumentStoreIter(self)
 
 
 def directoryDocumentStoreIter(store):
