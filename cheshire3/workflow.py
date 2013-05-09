@@ -133,7 +133,11 @@ class SimpleWorkflow(Workflow):
                     for s in sub:
                         code.append("    " + s)
                 elif n == "except":
-                    code.append("except Exception as err:")
+                    type_ = node.getAttributeNS(None, 'type')
+                    if type_:
+                        code.append("except {0} as err:".format(type_))
+                    else:
+                        code.append("except Exception as err:")
                     sub = self._handleFlow(c)
                     for s in sub:
                         code.append("    " + s)
@@ -211,7 +215,11 @@ class SimpleWorkflow(Workflow):
                 for s in sub:
                     code.append("    " + s)
             elif n == "except":
-                code.append("except Exception as err:")
+                type_ = node.attrib.get('type', '')
+                if type_:
+                    code.append("except {0} as err:".format(type_))
+                else:
+                    code.append("except Exception as err:")
                 sub = self._handleLxmlFlow(c)
                 for s in sub:
                     code.append("    " + s)
