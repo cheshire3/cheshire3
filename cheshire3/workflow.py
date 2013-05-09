@@ -139,8 +139,11 @@ class SimpleWorkflow(Workflow):
                     else:
                         code.append("except Exception as err:")
                     sub = self._handleFlow(c)
-                    for s in sub:
-                        code.append("    " + s)
+                    if sub:
+                        for s in sub:
+                            code.append("    " + s)
+                    else:
+                        code.append("    pass")
                 elif n == "else":
                     code.append("else:")
                     sub = self._handleFlow(c)
@@ -221,8 +224,11 @@ class SimpleWorkflow(Workflow):
                 else:
                     code.append("except Exception as err:")
                 sub = self._handleLxmlFlow(c)
-                for s in sub:
-                    code.append("    " + s)
+                if sub:
+                    for s in sub:
+                        code.append("    " + s)
+                else:
+                    code.append("    pass")
             elif n == "else":
                 code.append("else:")
                 sub = self._handleLxmlFlow(c)
