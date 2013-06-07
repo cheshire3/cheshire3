@@ -1046,7 +1046,7 @@ class SimpleIndex(Index):
                                 rsiType="SimpleResultSetItem"):
         return self.indexStore.construct_resultSetItem(session, term[0],
                                                        term[1], term[2],
-                                                       rsitype)
+                                                       rsiType)
 
     def clear(self, session):
         self.indexStore.clear_index(session, self)
