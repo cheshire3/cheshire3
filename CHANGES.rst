@@ -1,6 +1,17 @@
 CHANGES
 =======
 
+1.0.13 - Friday 7 June 2013
+---------------------------
+
+BUG FIXES
+~~~~~~~~~
+
+* Fixed typo in ``index.SimpleIndex.construct_resultSetItem``
+    
+  rsitype -> rsiType
+
+
 1.0.12 - Monday 4 March 2013
 ----------------------------
 
