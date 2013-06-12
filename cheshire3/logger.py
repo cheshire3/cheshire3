@@ -276,7 +276,7 @@ class DateTimeFileLogger(SimpleLogger):
 
     def _logLine(self, lvl, line, *args, **kw):
         # Templating for individual log entries
-        now = time.gmtime()
+        now = time.localtime()
         if (now[:self.dateTimeLevel]) > self.lastLogTime[:self.dateTimeLevel]:
             self._flush()
         # Set last log time to correct level
