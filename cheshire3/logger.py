@@ -57,6 +57,8 @@ class SimpleLogger(Logger):
             if not os.path.isabs(fp):
                 dfp = self.get_path(session, 'defaultPath')
                 fp = os.path.join(dfp, fp)
+                # Absolutize path
+                fp = os.path.abspath(fp)
             self.fileh = open(fp, 'a')
         self.cacheLen = self.get_setting(session, 'cacheLength', 0)
         self.minLevel = self.get_setting(session, 'minLevel', 0)
@@ -234,9 +236,11 @@ class DateTimeFileLogger(SimpleLogger):
         # We don't actually want to open a file until there's something to log
         # just find log base path
         fp = self.get_path(session, 'filePath', self.id)
-        if (not os.path.isabs(fp)):
+        if not os.path.isabs(fp):
             dfp = self.get_path(session, 'defaultPath')
             fp = os.path.join(dfp, fp)
+            # Absolutize path
+            fp = os.path.abspath(fp)
         self.logBasePath = fp
 
     def _close(self):
