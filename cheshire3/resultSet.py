@@ -249,6 +249,8 @@ class SimpleResultSet(RankedResultSet):
             #             'float': float
             #             }
             t = elem.attrib['t']
+            if not elem.text:
+                return elem.text
             txt = unescape(elem.text)
             if t == 'pickle':
                 val = pickle.loads(txt.encode('utf-8'))
