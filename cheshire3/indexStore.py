@@ -344,7 +344,13 @@ class BdbIndexStore(IndexStore):
             self.identifierMapCxn[recordStore] = cxn
         identifier = "%015d" % identifier        
         data = cxn.get("__i2s_%s" % identifier)
-        if (data):
+        if data:
+            return data
+        elif data is not None:
+            # We shouldn't raise DoesNotExistException, but we we probably
+            # shouldn't return an empty string either.
+            # However, returning anything other than the real identifier
+            # (i.e. the empty string) results in errors further down the line
             return data
         else:
             msg = "%s/%s" % (recordStore, identifier)
