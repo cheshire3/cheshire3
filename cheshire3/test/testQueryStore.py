@@ -14,7 +14,7 @@ except ImportError:
 from lxml import etree
 
 from cheshire3.cqlParser import parse as cqlParse, PrefixableObject as Query
-from cheshire3.queryStore import QueryStore, SimpleQueryStore
+from cheshire3.queryStore import QueryStore, BdbQueryStore
 from cheshire3.exceptions import ObjectAlreadyExistsException,\
                                  ObjectDoesNotExistException,\
                                  ObjectDeletedException
@@ -81,7 +81,7 @@ class BdbQueryStoreTestCase(QueryStoreTestCase, BdbStoreTestCase):
 
     @classmethod
     def _get_class(cls):
-        return SimpleQueryStore
+        return BdbQueryStore
 
     def _get_config(self):
         return etree.XML('''\
