@@ -706,7 +706,7 @@ class IndexStore(C3Object):
         raise NotImplementedError
 
     def construct_resultSetItem(self, session, recId,
-                                recStoreId, nOccs, rsiType):
+                                recStoreId, nOccs, rsiType=None):
         """Create and return a ResultSetItem.
         
         Take the internal representation of a term, as stored in this Index, 

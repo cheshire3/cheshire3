@@ -3,7 +3,8 @@ python:
   - "2.7"
 # Install dependencies
 install:
+  - "pip install -r requirements.txt --use-mirrors"
   - "pip install . --use-mirrors"
 # Run tests
-script: python -m cheshire3.test.testAll
+script: python setup.py test
 
