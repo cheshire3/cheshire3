@@ -407,11 +407,17 @@ class BdbIndexStore(IndexStore):
             raise(ConfigFileException('TempPath is not a directory.'))
 
         if self.dirPerIndex:
+            indexDirPath = os.path.join(temp, index.id)
             try:
-                os.mkdir(os.path.join(temp, index.id))
+                os.mkdir(indexDirPath)
             except OSError:
+                # Already exists
                 pass
             except:
+                self.log_critical(session,
+                                  "Could not create {0}"
+                                  "".format(indexDirPath)
+                                  )
                 raise
 
         basename = os.path.join(temp, self._generateFilename(index))
