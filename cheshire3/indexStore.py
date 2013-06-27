@@ -432,11 +432,9 @@ class BdbIndexStore(IndexStore):
                                                'xmlcharrefreplace')
             if (index.get_setting(session, "sortStore")):
                 # Store in db for faster sorting
-                if (session.task):
-                    # Need to tempify
-                    raise NotImplementedError
                 dfp = self.get_path(session, "defaultPath")
                 name = self._generateFilename(index) + "_VALUES"
+
                 fullname = os.path.join(dfp, name)
 
                 if self.vectorSwitching:
@@ -452,7 +450,8 @@ class BdbIndexStore(IndexStore):
                                                     maxItemsPerBucket=vmi)
                 else:
                     cxn = bdb.db.DB()
-                if session.environment == "apache":
+                if session.environment == "apache" or session.task:
+                    # Do not memory map in multiprocess environments
                     cxn.open(fullname, flags=bdb.db.DB_NOMMAP)
                 else:
                     cxn.open(fullname)
