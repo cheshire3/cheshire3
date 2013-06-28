@@ -8,6 +8,7 @@ import time
 import glob
 import re
 import random
+import fileinput
 
 try:
     # Python 2.3 vs 2.2
@@ -547,8 +548,21 @@ class BdbIndexStore(IndexStore):
             msg = "Didn't sort %s" % index.id
             self.log_error(session, msg)
             raise ValueError(msg)
+        # Merge multiple _TEMP files into a single _TEMP file
+        baseGlob = os.path.join(temp, "%s*_TEMP" % basename)
+        tempFileList = glob.glob(baseGlob)
+        self.log_debug(session,
+                       "Concatenating {0} parallel _TEMP files for {1}"
+                       "".format(len(tempFileList), index.id)
+                       )
+        mergedFn = os.path.join(temp, "%s_TEMP" % basename)
+        # Merge natively in Python. This takes longer than using `cat` but is
+        # more reliable and should work cross-platform
+        with open(mergedFn, 'wb') as outfh:
+            for line in fileinput.input(tempFileList, mode='rb'):
+                outfh.write(line)
         # Clean up
-        for tsfn in sortFileList:
+        for tsfn in sortFileList + tempFileList:
             os.remove(tsfn)
         return self.commit_centralIndexing(session, index, sorted)
 
