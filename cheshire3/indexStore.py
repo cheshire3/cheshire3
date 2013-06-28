@@ -8,6 +8,7 @@ import time
 import glob
 import re
 import random
+import fileinput
 
 try:
     # Python 2.3 vs 2.2
@@ -432,11 +433,9 @@ class BdbIndexStore(IndexStore):
                                                'xmlcharrefreplace')
             if (index.get_setting(session, "sortStore")):
                 # Store in db for faster sorting
-                if (session.task):
-                    # Need to tempify
-                    raise NotImplementedError
                 dfp = self.get_path(session, "defaultPath")
                 name = self._generateFilename(index) + "_VALUES"
+
                 fullname = os.path.join(dfp, name)
 
                 if self.vectorSwitching:
@@ -452,7 +451,8 @@ class BdbIndexStore(IndexStore):
                                                     maxItemsPerBucket=vmi)
                 else:
                     cxn = bdb.db.DB()
-                if session.environment == "apache":
+                if session.environment == "apache" or session.task:
+                    # Do not memory map in multiprocess environments
                     cxn.open(fullname, flags=bdb.db.DB_NOMMAP)
                 else:
                     cxn.open(fullname)
@@ -498,11 +498,12 @@ class BdbIndexStore(IndexStore):
 
         for db in self.identifierMapCxn.values():
             db.sync()
-        
+
+        # Sort the  _TEMP file written during indexing into a _SORT file
         basename = self._generateFilename(index)
         if (hasattr(session, 'task')):
             basename += str(session.task)
-       
+
         basename = os.path.join(temp, basename)
         tempfile = basename + "_TEMP"
         sorted = basename + "_SORT"
@@ -510,7 +511,9 @@ class BdbIndexStore(IndexStore):
         getShellResult(cmd)
         # Sorting might fail.
         if (not os.path.exists(sorted)):
-            raise ValueError("Failed to sort %s" % tempfile)
+            msg = "Failed to sort {0}".format(tempfile)
+            self.log_critical(session, msg)
+            raise ValueError(msg)
         if not index.get_setting(session, 'vectors'):
             os.remove(tempfile)
         if ((hasattr(session, 'task') and session.task) or 
@@ -526,6 +529,11 @@ class BdbIndexStore(IndexStore):
         dfp = self.get_path(session, 'defaultPath')
         if not os.path.isabs(temp):
             temp = os.path.join(dfp, temp)
+        # Merge multiple _SORT files into a single _SORT file for finalizing
+        self.log_debug(session,
+                       "Merging parallel sort files for {0}"
+                       "".format(index.id)
+                       )
         if (not os.path.exists(sort)):
             msg = "Sort executable for %s does not exist" % self.id
             raise ConfigFileException(msg)
@@ -537,8 +545,24 @@ class BdbIndexStore(IndexStore):
         cmd = "%s -m -T %s -o %s %s" % (sort, temp, sorted, sortFiles)
         out = getShellResult(cmd)
         if not os.path.exists(sorted):
-            raise ValueError("Didn't sort %s" % index.id)
-        for tsfn in sortFileList:
+            msg = "Didn't sort %s" % index.id
+            self.log_error(session, msg)
+            raise ValueError(msg)
+        # Merge multiple _TEMP files into a single _TEMP file
+        baseGlob = os.path.join(temp, "%s*_TEMP" % basename)
+        tempFileList = glob.glob(baseGlob)
+        self.log_debug(session,
+                       "Concatenating {0} parallel _TEMP files for {1}"
+                       "".format(len(tempFileList), index.id)
+                       )
+        mergedFn = os.path.join(temp, "%s_TEMP" % basename)
+        # Merge natively in Python. This takes longer than using `cat` but is
+        # more reliable and should work cross-platform
+        with open(mergedFn, 'wb') as outfh:
+            for line in fileinput.input(tempFileList, mode='rb'):
+                outfh.write(line)
+        # Clean up
+        for tsfn in sortFileList + tempFileList:
             os.remove(tsfn)
         return self.commit_centralIndexing(session, index, sorted)
 
@@ -618,8 +642,6 @@ class BdbIndexStore(IndexStore):
             if tidcxn is None:
                 self._openVectors(session, index)
                 tidcxn = self.termIdCxn.get(index, None)
-        
-        f = file(filePath)
 
         nTerms = 0
         nRecs = 0
@@ -628,7 +650,8 @@ class BdbIndexStore(IndexStore):
         maxNRecs = 0
         maxNOccs = 0
         
-        start = time.time()
+        # Finalize sorted data in _SORT into Index file(s)
+        f = file(filePath)
         while(l):
             l = f.readline()[:-1]
             data = l.split(nonTextToken)
