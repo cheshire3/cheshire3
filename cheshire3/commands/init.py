@@ -13,6 +13,7 @@ from cheshire3.server import SimpleServer
 from cheshire3.session import Session
 from cheshire3.internal import cheshire3Root, CONFIG_NS
 from cheshire3.exceptions import ObjectDoesNotExistException
+from cheshire3.utils import getShellResult
 from cheshire3.commands.cmd_utils import Cheshire3ArgumentParser
 
 
@@ -107,6 +108,20 @@ def create_defaultConfig(identifier, args):
             ),
         ),
     )
+    # Check sortPath and fix up if necessary
+    serverSortPath = server.get_path(session, 'sortPath')
+    if not os.path.exists(serverSortPath):
+        # Attempt to fix locally for default IndexStore
+        sortPath = getShellResult('which sort')
+        if 'which: no sort in' not in sortPath:
+            # Found a sort executable - can add to configuration
+            storePathsNode = config.xpath(
+                '//c3:subConfig[@id="indexStore"]/c3:paths',
+                namespaces={'c3': CONFIG_NS}
+            )[0]
+            storePathsNode.append(
+                CONF.path({'type': "sortPath"}, sortPath)
+            )
     # Add database docs if provided
     if args.title and args.description:
         config.insert(0, CONF.docs("{0.title} - {0.description}".format(args)))
