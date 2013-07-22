@@ -9,10 +9,10 @@ Welcome to Cheshire3's documentation!
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
-   install
-   tutorial
+   Installation <install>
+   Tutorial <tutorial>
    troubleshooting
 
 
