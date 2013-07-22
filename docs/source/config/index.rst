@@ -4,9 +4,9 @@ Cheshire3 Configuration
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
-   
+   common
 
 Introduction
 ------------
@@ -70,6 +70,8 @@ This element may be used to provide configured object level documentation.
 e.g. to explain that a particular :py:class:`~cheshire3.baseObjects.Tokenizer`
 splits data into sentences based on some pre-defined pattern.
 
+
+.. _config-paths:
 
 ``<paths>``
 -----------
