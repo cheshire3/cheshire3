@@ -14,6 +14,7 @@ Contents:
    Installation <install>
    Command-line UI <commands>
    Tutorial <tutorial>
+   Configuration <config/index>
    troubleshooting
 
 
