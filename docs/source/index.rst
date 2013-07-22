@@ -12,6 +12,7 @@ Contents:
    :maxdepth: 1
 
    Installation <install>
+   Command-line UI <commands>
    Tutorial <tutorial>
    troubleshooting
 
