@@ -12,8 +12,8 @@ Contents:
    :maxdepth: 2
 
    install
+   tutorial
    troubleshooting
-   
 
 
 Capabilities
