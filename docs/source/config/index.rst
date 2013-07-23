@@ -178,6 +178,52 @@ to the system to actually instantiate the object from the configuration.
    instantiate objects with long spin-up times at the server level.
 
 
+.. _config-example1:
+
+Example 1
+---------
+
+::
+
+    <config type="database" id="db_l5r">
+        <objectType>database.SimpleDatabase</objectType>
+        <paths>
+            <path type="defaultPath">/home/cheshire/c3/cheshire3/l5r</path>
+            <path type="metadataPath">metadata.bdb</path>
+            <object type="recordStore" ref="l5rRecordStore"/>
+        </paths>
+        <options>
+            <setting type="log">handle_search</setting>
+        </options>
+        <subConfigs>
+            <subConfig type="parser" id="l5rAttrParser">
+                <objectType>parser.SaxParser</objectType>
+                <options>
+                    <setting type="attrHash">text@type</setting>
+                </options>
+            </subConfig>
+            <subConfig id = "l5r-idx-1">
+                <objectType>index.SimpleIndex</objectType>
+                <paths>
+                    <object type="indexStore" ref="l5rIndexStore"/>
+                </paths>
+                <source>
+                    <xpath>/card/name</xpath>
+                    <process>
+                        <object type="extractor" ref="ExactExtractor"/>
+                        <object type="normalizer" ref="CaseNormalizer"/>
+                    </process>
+                </source>
+            </subConfig>
+            <path type="index" id="l5r-idx-2">configs/idx2-cfg.xml<path>
+        </subConfigs>
+        <objects>
+            <path ref="l5RAttrParser"/>
+            <path ref="l5r-idx-1"/>
+        </objects>
+    </config>
+
+
 .. Links
 .. _Python: http://www.python.org/
 .. _`Cheshire3 Object Model`: http://cheshire3.org/docs/objects/
