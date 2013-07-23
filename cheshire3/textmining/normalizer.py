@@ -1,8 +1,11 @@
 
+import os
+import types
+import re
+import nltk
+
 from cheshire3.configParser import C3Object
 from cheshire3.exceptions import ConfigFileException
-import types, re, os
-
 from cheshire3.normalizer import SimpleNormalizer
 from cheshire3.textmining.TsujiiC3 import TsujiiObject, GeniaObject, EnjuObject
 
@@ -11,22 +14,29 @@ from cheshire3.textmining.TsujiiC3 import TsujiiObject, GeniaObject, EnjuObject
 # Use our own hacked pyWordNet
 try:
     from wn import wordnet, wntools
+except ImportError:
+    pass
+else:
 
     class WordNetNormalizer(SimpleNormalizer):
-        """ Use Wordnet to expand terms """
+        """Use Wordnet to expand terms."""
 
-        _possibleSettings = {'prox' : {'docs' : "Should the normalizer maintain proximity information", 'type' : int, 'options' : "0|1"}}
+        _possibleSettings = {
+            'prox': {
+                'docs': "Should the normalizer maintain proximity information",
+                'type': int,
+                'options': "0|1"
+            }
+        }
 
         def process_string(self, session, data):
             # Assume that string is of the form word/POS if / in data
             # Then reduce and look up, otherwise look up in all
-            
             try:
                 (word, pos) = data.rsplit('/', 1)
             except:
                 word = data
                 pos = ""
-
             if pos:
                 if pos[0] == "N":
                     # Noun
@@ -57,20 +67,21 @@ try:
                         if has(t):
                             kw[t]['occurences'] += 1
                         else:
-                            kw[t] = {'text' : t, 'occurences' : 1}
+                            kw[t] = {'text': t,
+                                     'occurences': 1}
             return kw
-            
 
         def process_hash(self, session, data):
             kw = {}
             vals = data.values()
             if not vals:
                 return {}
-            prox = (vals[0].has_key('positions')) or self.get_setting(session, 'prox')
-            pos = vals[0].has_key('pos')
+            prox = ('positions' in vals[0] or
+                    self.get_setting(session, 'prox'))
+            pos = 'pos' in vals[0]
             process = self.process_string
             has = kw.has_key
-            for d in vals:                
+            for d in vals:
                 if pos:
                     d['text'] = "%s/%s" % (d['text'], d['pos'])
                 new = process(session, d['text'])
@@ -144,11 +155,9 @@ try:
                             if has(t):
                                 kw[t]['occurences'] += 1
                             else:
-                                kw[t] = {'text' : t, 'occurences' : 1}
+                                kw[t] = {'text': t,
+                                         'occurences': 1}
             return kw
-            
-except:
-    pass
 
 
 class PosNormalizer(SimpleNormalizer):
@@ -196,17 +205,103 @@ class GeniaNormalizer(PosNormalizer, GeniaObject):
             if type(v['text']) == list and v['text'][0].find(' ') == -1:
                 data[k]['text'] = ' '.join(v['text'])
         return PosNormalizer.process_hash(self, session, data)
-        
+
+
+class NLTKPosNormalizer(PosNormalizer):
+    """Use NTLK to normalize tokens to parts of speech."""
+
+    _possibleSettings = {
+        'taggerClass': {
+            'docs': ("Class of NLTK Tagger to use for PoS tagging. "
+                     "If absent use NLTK's standard PoS tagger."),
+            'type': str
+        },
+        'justPos': {
+            "docs": ('Should the normalized value be just the PoS (0) '
+                     'or the original token annotated with a PoS tag '
+                     '(1 default)'),
+            'type': int,
+            'options': "0|1"
+        }
+    }
+
+    def __init__(self, session, node, parent):
+        PosNormalizer.__init__(self, session, node, parent)
+        cls = self.get_setting(session, 'taggerClass', None)
+        if cls is not None:
+            try:
+                taggerClass = getattr(nltk.tag, cls)
+            except AttributeError as e:
+                raise ConfigFileException("nltk.tag does not define class "
+                                          "{0} as specified in 'taggerClass' "
+                                          "setting for {1} object with id {2}"
+                                          "".format(cls,
+                                                    self.__class__.__name__,
+                                                    self.id))
+            else:
+                self.tagger = taggerClass()
+        else:
+            # Use standard tagger
+            try:
+                self.tagger = nltk.tag.load(nltk.tag._POS_TAGGER)
+            except LookupError:
+                nltk.download('maxent_treebank_pos_tagger')
+        self.justPos = self.get_setting(session, 'justPos', 0)
+
+    def process_string(self, session, data):
+        if isinstance(data, list):
+            tagged = self.tagger.tag(data)
+        else:
+            # Not yet tokenized / single token
+            # Tokenizing does no harm done if already tokenized
+            # Sentence tokenize
+            tagged = []
+            for sent in nltk.tokenize.sent_tokenize(data):
+                # Word tokenize
+                tokens = nltk.tokenize.word_tokenize(sent)
+                tagged.extend(self.tagger.tag(tokens))
+        # Are tagged tokens wanted, or just the tags themselves?
+        if self.justPos:
+            tagged = [tup[1] for tup in tagged]
+        else:
+            tagged =  [nltk.tag.util.tuple2str(tup) for tup in tagged]
+        # Outgoing should be same type as incoming, make it so
+        if isinstance(data, list):
+            return tagged
+        else:
+            return ' '.join(tagged)
 
 
 class ReconstructGeniaNormalizer(SimpleNormalizer):
-    """ Take the unparsed output from Genia and reconstruct the document, maybe with stems ('useStem') and/or PoS tags ('pos') """
+    """Reconstruct Document with stems and/or PoS tags.
 
-    _possibleSettings = {'useStem' : {"docs" : "Should the text be reconstructed with the stem (1) or not (0, default)", 'type': int, 'options' : "0|1"},
-                         'pos' : {"docs" : 'Should the text include the PoS tag', 'type': int, 'options' : "0|1"},
-                         'justPos' : {"docs" : 'Should the text be JUST the PoS tag', 'type' : int, 'options' : "0|1"},
-                         'xml' : {'docs' : '', 'type' : int, 'options' : '0|1'}
-                         }
+    Take the unparsed output from Genia and reconstruct the document,
+    maybe with stems ('useStem' setting) and/or PoS tags ('pos' setting).
+    """
+
+    _possibleSettings = {
+        'useStem': {
+            "docs": ("Should the text be reconstructed with the stem (1) or"
+                     " not (0, default)"),
+            'type': int,
+            'options': "0|1"
+        },
+        'pos': {
+            "docs": 'Should the text include the PoS tag?',
+            'type': int,
+            'options': "0|1"
+        },
+        'justPos': {
+            "docs": 'Should the text be JUST the PoS tag?',
+            'type': int,
+            'options': "0|1"
+        },
+        'xml': {
+            'docs': 'Output the results as XML.',
+            'type': int,
+            'options': '0|1'
+        }
+    }
 
     def __init__(self, session, config, parent):
         SimpleNormalizer.__init__(self, session, config, parent)
@@ -231,9 +326,12 @@ class ReconstructGeniaNormalizer(SimpleNormalizer):
                     w = pos
                 elif self.xml:
                     if stem == word:
-                        w = """<w p="%s" t="%s">%s</w>""" % (pos, phr, word)
+                        w = '<w p="{0}" t="{1}">{2}</w>'.format(pos, phr, word)
                     else:
-                        w = """<w p="%s" l="%s" t="%s">%s</w>""" % (pos, stem, phr, word)
+                        w = '<w p="{0}" l="{1}" t="{2}">{3}</w>'.format(pos,
+                                                                        stem,
+                                                                        phr,
+                                                                        word)
                 else:
                     if self.stem:
                         w = stem
@@ -248,25 +346,44 @@ class ReconstructGeniaNormalizer(SimpleNormalizer):
 
 
 class StemGeniaNormalizer(SimpleNormalizer):
-    """ Take output from HashGeniaNormalizer and return stems as terms """
+    """Take output from HashGeniaNormalizer and return stems as terms."""
     def process_hash(self, session, data):
-	results = {}
-	for d in data.values():
-	    try:
-		results[d['stem']]['occurences'] += d['occurences']
-	    except:
-		results[d['stem']] = {'text': d['stem'], 'occurences' : 1}
-	return results
+        results = {}
+        for d in data.itervalues():
+            try:
+                results[d['stem']]['occurences'] += d['occurences']
+            except:
+                results[d['stem']] = {'text': d['stem'],
+                                      'occurences': 1}
+        return results
 
 
 class PosPhraseNormalizer(SimpleNormalizer):
-    """ Extract statistical multi-word noun phrases from full pos tagged text. Default phrase is one or more nouns preceded by zero or more adjectives. Don't tokenize first. """
+    """Extract statistical multi-word noun phrases from full pos tagged text.
 
-    _possibleSettings = {'regexp' : {'docs' : 'Regular expression to match phrases'},
-                         'pattern' : {'docs' : 'Pattern to match phrases. Possible components: JJ NN * + ?'},
-                         'minimumWords' : {'docs' : "Minimum number of words that constitute a phrase.", 'type' : int, 'options' : "0|1|2|3|4|5"},
-                         'subPhrases' : {'docs' : "Extract all sub-phrases (1) or not (0, default)", 'type' : int, 'options' : "0|1"}
-                         }
+    Default phrase is one or more nouns preceded by zero or more adjectives.
+    Don't tokenize first.
+    """
+
+    _possibleSettings = {
+        'regexp': {
+            'docs': 'Regular expression to match phrases'
+        },
+        'pattern': {
+            'docs': ('Pattern to match phrases. Possible components: '
+                    ' JJ NN * + ?')
+        },
+        'minimumWords': {
+            'docs': "Minimum number of words that constitute a phrase.",
+            'type': int,
+            'options': "0|1|2|3|4|5"
+        },
+        'subPhrases': {
+            'docs': "Extract all sub-phrases (1) or not (0, default)",
+            'type': int,
+            'options': "0|1"
+        }
+    }
 
     def __init__(self, session, config, parent):
         SimpleNormalizer.__init__(self, session, config, parent)
@@ -278,7 +395,7 @@ class PosPhraseNormalizer(SimpleNormalizer):
             else:
                 match = match.replace('*', '*)')
                 match = match.replace('+', '+)')
-                match = match.replace('?', '?)')        
+                match = match.replace('?', '?)')
                 match = match.replace('JJ', '((?:[ ][^\\s]+/JJ[SR]?)')
                 match = match.replace('NN', '((?:[ ][^\\s]+/NN[SP]*)')
         self.pattern = re.compile(match)
@@ -306,10 +423,10 @@ class PosPhraseNormalizer(SimpleNormalizer):
                 # find all minimum+ length sub phrases that include a noun
                 words = phrase.split()
                 idx = 0
-                while idx < len(words)+1:
-                    idx2 = idx+1
-                    while idx2 < len(words)+1:
-                        curr = words[idx:idx2]                        
+                while idx < len(words) + 1:
+                    idx2 = idx + 1
+                    while idx2 < len(words) + 1:
+                        curr = words[idx:idx2]
                         phrase = ' '.join(curr)
                         noun = (phrase.find('/NN') > -1)
                         if len(curr) >= minm and noun:
@@ -323,22 +440,37 @@ class PosPhraseNormalizer(SimpleNormalizer):
                 phrase = strp('', phrase)
                 phrase = phrase.replace("  ", ' ')
                 phrase = phrase.strip()
-                if not minm or phrase.count(' ') >= (minm -1):
+                if not minm or phrase.count(' ') >= (minm - 1):
                     if has(phrase):
                         kw[phrase]['occurences'] += 1
                     else:
-                        kw[phrase] = {'text' : phrase, 'occurences' : 1, 'positions' : []}
+                        kw[phrase] = {'text': phrase,
+                                      'occurences': 1,
+                                      'positions': []}
         return kw
-        
+
 
 class PosTypeNormalizer(SimpleNormalizer):
-    """ Filter by part of speech tags.  Default to keeping only nouns """
+    """Normalizer to filter by part of speech tags.
+
+    Default: keep only nouns.
+    """
 
     types = []
     keepPos = 0
 
-    _possibleSettings = {'posTypes' : {'docs' : "Space separated list of PoS tags to keep. Defaults to 'NN NNP NNS'"},
-                         'pos' : {'docs' : "Should the PoS tag be kept (1) or thrown away (0, default)", 'type' : int, 'options' : "0|1"}}
+    _possibleSettings = {
+        'posTypes': {
+            'docs': ("Space separated list of PoS tags to keep. Defaults to "
+                     "'NN NNP NNS'")
+        },
+        'pos': {
+            'docs': ("Should the PoS tag be kept (1) or thrown away "
+                     "(0)? Default: 0"),
+            'type': int,
+            'options': "0|1"
+        }
+    }
 
     def __init__(self, session, config, parent):
         SimpleNormalizer.__init__(self, session, config, parent)
@@ -365,5 +497,3 @@ class PosTypeNormalizer(SimpleNormalizer):
                 return w
         else:
             return ""
-
-

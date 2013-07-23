@@ -1,9 +1,17 @@
+"""Cheshire3 Textmining TokenMerger Implementations."""
 
 from cheshire3.tokenMerger import SimpleTokenMerger
 
+
 class PosPhraseTokenMerger(SimpleTokenMerger):
 
-    _possibleSettings = {'nonPhrases' : {'docs' : '', 'type' : int, 'options' : '0|1'}}
+    _possibleSettings = {
+        'nonPhrases': {
+            'docs': '',
+            'type': int,
+            'options': '0|1'
+        }
+    }
 
     def __init__(self, session, config, parent):
         SimpleTokenMerger.__init__(self, session, config, parent)
@@ -22,7 +30,7 @@ class PosPhraseTokenMerger(SimpleTokenMerger):
                 posns = val.get('charOffsets', [])
                 acc = []
                 hasNoun = 0
-                lvt = len(val['text']) -1
+                lvt = len(val['text']) - 1
                 for (vt, t) in enumerate(val['text']):
                     try:
                         (wd, pos) = t.split('/')
@@ -30,14 +38,16 @@ class PosPhraseTokenMerger(SimpleTokenMerger):
                         print t
                         (wd, pos) = t.rsplit('/', 1)
                     pos = pos.lower()
-                    if vt != lvt and ( pos.startswith('jj') or pos.startswith('nn')):   
+                    if (vt != lvt and
+                        (pos.startswith('jj') or pos.startswith('nn'))
+                        ):
                         # XXX should split jj nn jj nn into two
                         if pos.startswith('nn'):
                             hasNoun = 1
                         acc.append(wd)
                         continue
                     elif acc:
-                        # merge wds
+                        # Merge wds
                         if (pos.startswith('jj') or pos.startswith('nn')):
                             if pos.startswith('nn'):
                                 hasNoun = 1
@@ -61,15 +71,14 @@ class PosPhraseTokenMerger(SimpleTokenMerger):
                         if has(w):
                             new[w]['occurences'] += val['occurences']
                         else:
-                            new[w] = {'text' : w, 'occurences' : val['occurences'], 'positions' : []}
+                            new[w] = {'text': w,
+                                      'occurences': val['occurences'],
+                                      'positions': []}
                         try:
-                            pls =[(pl,x, posns[x]) for pl in val['proxLoc']]
+                            pls = [(pl, x, posns[x]) for pl in val['proxLoc']]
                             for p in pls:
                                 new[w]['positions'].extend(p)
                         except KeyError:
                             new[w]['positions'].extend(val['positions'])
                         x += 1
         return new
-
-        
-    
