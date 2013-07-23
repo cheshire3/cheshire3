@@ -8,6 +8,7 @@ Contents:
 
    common
    Index Configuration <indexes>
+   Workflow Configuration <workflows>
 
 
 Introduction

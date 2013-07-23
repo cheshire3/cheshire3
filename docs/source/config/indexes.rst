@@ -61,8 +61,7 @@ expression will be processed by the process chain (as described below).
 If the XPath makes use of XML namespaces, then the mappings for the namespace
 prefixes must be present on the XPath element. This can be seen in `Example 1`_.
 
-.. _`\<process\>`:
-.. _`\<preprocess\>`:
+.. _`\<process\> and \<preprocess\>`:
 
 ``<process>`` and ``<preprocess>``
 ----------------------------------
