@@ -7,6 +7,8 @@ Contents:
    :maxdepth: 1
 
    common
+   Index Configuration <indexes>
+
 
 Introduction
 ------------
