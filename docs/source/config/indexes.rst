@@ -1,6 +1,8 @@
 Cheshire3 Configuration - Indexes
 =================================
 
+.. highlight:: guess
+
 Introduction
 ------------
 

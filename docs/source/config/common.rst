@@ -1,6 +1,9 @@
 Common Configurations
 =====================
 
+.. highlight:: guess
+
+
 Introduction
 ------------
 

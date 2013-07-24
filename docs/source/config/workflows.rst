@@ -1,6 +1,8 @@
 Cheshire3 Configuration - Workflows
 ===================================
 
+.. highlight:: guess
+
 Introduction
 ------------
 

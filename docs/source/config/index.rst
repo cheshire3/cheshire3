@@ -11,6 +11,8 @@ Contents:
    Workflow Configuration <workflows>
 
 
+.. highlight:: guess
+
 Introduction
 ------------
 
@@ -38,6 +40,7 @@ configuration handler.
 
 The main elements will be described here, the specialized elements and values
 will be described in object specific pages.
+
 
 ``<config>``
 ------------
