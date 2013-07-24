@@ -8,6 +8,7 @@ Contents:
 
    common
    Index Configuration <indexes>
+   ProtocolMap Configuration <protocolMap>
    Workflow Configuration <workflows>
 
 
