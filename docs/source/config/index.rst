@@ -1,6 +1,9 @@
 Cheshire3 Configuration
 =======================
 
+.. highlight:: xml
+   :linenothreshold: 5
+
 Contents:
 
 .. toctree::
@@ -10,9 +13,6 @@ Contents:
    Index Configuration <indexes>
    ProtocolMap Configuration <protocolMap>
    Workflow Configuration <workflows>
-
-
-.. highlight:: guess
 
 Introduction
 ------------

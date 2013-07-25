@@ -1,7 +1,8 @@
 Cheshire3 Configuration - Workflows
 ===================================
 
-.. highlight:: guess
+.. highlight:: xml
+   :linenothreshold: 5
 
 Introduction
 ------------

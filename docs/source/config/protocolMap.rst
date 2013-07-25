@@ -1,6 +1,9 @@
 Cheshire3 Configuration - Protocol Map
 ======================================
 
+.. highlight:: xml
+   :linenothreshold: 5
+
 Introduction
 ------------
 
@@ -32,8 +35,6 @@ possible. These mappings are all handled by a ProtocolMap.
 
 Examples
 --------
-
-.. highlight:: guess
 
 ``<subConfig>`` within the main :py:class:`~cheshire3.baseObjects.Database`
 configuration (see :doc:`index` for details.)::

@@ -1,8 +1,8 @@
 Common Configurations
 =====================
 
-.. highlight:: guess
-
+.. highlight:: xml
+   :linenothreshold: 5
 
 Introduction
 ------------
