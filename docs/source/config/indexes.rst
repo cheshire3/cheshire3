@@ -49,20 +49,32 @@ workflow of objects to process the incoming term with is required.
 `\<xpath\>`_ and `\<preprocess\>`_ elements will be ignored.
 
 
-``<xpath>``
------------
+``<xpath>`` or ``<selector>``
+-----------------------------
 
-This element contains either an XPath expression (`Example 1`_) or a
-reference to a configured XPathProcessor (`Example 2`_), to use in extracting
-data from a record.
+These elements specify a way to select data from a
+:py:class:`~cheshire3.baseObject.Record`. They can contain either a simple
+XPath expression as CDATA (as in `Example 1`_) or have a ``ref`` attribute
+containing a reference to a configured
+:py:class:`~cheshire3.baseObject.Selector` object within the configuration
+hierarchy (as in `Example 2`_).
 
-It may appear more than once, but not when using a reference to a configured
-:py:class:`~cheshire3.selector.XPathProcessor`; these may themselves specify
-multiple XPath expressions. When the element is repeated, the results of each
-expression will be processed by the process chain (as described below).
+While it is possible to use either element in either way, it is considered best
+practice to use the convention of ``<xpath>`` for explicit CDATA XPaths and
+``<selector>`` when referencing a configured
+:py:class:`~cheshire3.baseObject.Selector`.
 
-If the XPath makes use of XML namespaces, then the mappings for the namespace
-prefixes must be present on the XPath element. This can be seen in `Example 1`_.
+These elements may not appear more than once within a given `\<source\>`_
+, however a :py:class:`~cheshire3.baseObjects.Selector` may itself specify
+multiple ``<xpath>`` or ``<location>`` elements. When the a configured
+:py:class:`~cheshire3.baseObjects.Selector` contains multiple ``<xpath>`` or
+``<location>`` elements, the results of each expression will be processed by
+the `process chain <\<process\> and \<preprocess\>>`_ (as described below).
+
+If an XPath makes use of XML namespaces, then the mappings for the namespace
+prefixes must be present on the XPath element. This can be seen in
+`Example 1`_.
+
 
 .. _`\<process\> and \<preprocess\>`:
 
@@ -212,8 +224,8 @@ Example 2
 
 ::
 
-    <subConfig type="XPathProcessor" id="indexXPath">
-        <objectType>xpathProcessor.SimpleXPathProcessor</objectType>
+    <subConfig type="selector" id="indexXPath">
+        <objectType>cheshire3.selector.XPathSelector</objectType>
         <source>
             <xpath>/explain/indexInfo/index/title</xpath>
             <xpath>/explain/indexInfo/index/description</xpath>
@@ -226,7 +238,7 @@ Example 2
             <object type="indexStore" ref="zrxIndexStore"/>
         </paths> 
         <source mode="data">
-            <xpath ref="indexXPath"/>
+            <selector ref="indexXPath"/>
             <process>
                 <object type="extractor" ref="ProximityExtractor"/>
                 <object type="normalizer" ref="CaseNormalizer"/>
