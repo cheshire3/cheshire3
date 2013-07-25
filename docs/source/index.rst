@@ -12,8 +12,7 @@ Contents:
    :maxdepth: 1
 
    Installation <install>
-   Command-line UI <commands>
-   Tutorial <tutorial>
+   Tutorials <tutorial/index>
    Configuration <config/index>
    Objects <objects/index>
    troubleshooting

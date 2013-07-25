@@ -1,5 +1,5 @@
-Cheshire3 Commands
-==================
+Cheshire3 Tutorials - Command-line UI
+=====================================
 
 Cheshire3 provides a number of command-line utilities to enable you to
 get started creating databases, indexing and searching your data quickly.
@@ -8,6 +8,7 @@ of available options which can be accessed using the ``--help`` option.
 e.g. ::
 
     ``cheshire3 --help``
+
 
 Creating a new Database
 '''''''''''''''''''''''
@@ -20,16 +21,19 @@ Example 1: create database in a new sub-directory ::
 
     $ cheshire3-init mydb
 
+
 Example 2: create database in an existing directory ::
 
     $ mkdir -p ~/dbs/mydb
     $ cheshire3-init ~/dbs/mydb
-    
+
+
 Example 3: create database in current working directory ::
 
     $ mkdir -p ~/dbs/mydb
     $ cd ~/dbs/mydb
     $ cheshire3-init
+
 
 Example 4: create database with descriptive information in a new
 sub-directory ::
@@ -43,16 +47,18 @@ Loading Data into the Database
 
 ``cheshire3-load data``
    Load data into the current Cheshire3 database
-   
-Example 1: load data from a file ::
+
+Example 1: load data from a file::
 
     $ cheshire3-load path/to/file.xml
 
-Example 2: load data from a directory ::
+
+Example 2: load data from a directory::
 
     $ cheshire3-load path/to/directory
 
-Example 3: load data from a URL ::
+
+Example 3: load data from a URL::
 
     $ cheshire3-load http://www.example.com/index.html
 
@@ -67,6 +73,7 @@ Searching the Database
 Example 1: search with a single keyword ::
 
     $ cheshire3-search food
+
 
 Example 2: search with a complex CQL_ query ::
 
@@ -87,6 +94,7 @@ for production use. You should consider using something like `mod_wsgi`_.
 Example 1: start a demo HTTP WSGI server with default options ::
 
     $ cheshire3-serve
+
 
 Example 2: start a demo HTTP WSGI server, specifying host name and port
 number ::
