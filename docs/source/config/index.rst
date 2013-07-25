@@ -14,6 +14,7 @@ Contents:
    ProtocolMap Configuration <protocolMap>
    Workflow Configuration <workflows>
 
+
 Introduction
 ------------
 
@@ -45,6 +46,15 @@ will be described in object specific pages.
 
 Configuration Elements
 ----------------------
+
+XML namespace is optional, but if used it must be::
+
+    http://www.cheshire3.org/schemas/config/
+
+If you wish to generate configurations in Python_ and have Cheshire3 installed,
+then you can import the configuration namespace from
+:py:const:`cheshire3.internal.CONFIG_NS`
+
 
 ``<config>``
 ~~~~~~~~~~~~
