@@ -70,6 +70,8 @@ If the configuration file is not for the top level
 `\<paths\>`_, `\<subConfigs\>`_,  `\<objects\>`_  and `\<options\>`_ .
 
 
+.. _config-objectType:
+
 ``<objectType>``
 ~~~~~~~~~~~~~~~~
 
@@ -100,6 +102,8 @@ This element may contain `\<path\>`_ and/or `\<object\>`_ elements to be stored
 when building the object in the system.
 
 
+.. _config-path:
+
 ``<path>``
 ~~~~~~~~~~
 
@@ -125,6 +129,8 @@ required by the object and has several attributes to govern this:
 .. note:: A ``<path>`` element may only occur within a `\<paths\>`_ ,
    `\<subConfigs\>`_ or `\<objects\>`_ element.
 
+
+.. _config-object:
 
 ``<object>``
 ~~~~~~~~~~~~
@@ -163,6 +169,8 @@ default types.
    `\<options\>`_ element.
 
 
+.. _config-subConfigs:
+
 ``<subConfigs>``
 ~~~~~~~~~~~~~~~~
 
@@ -177,6 +185,8 @@ will be instantiated when required by the system, or when requested from their
 parent object in a script.
 
 
+.. _config-subConfig:
+
 ``<subConfig>``
 ~~~~~~~~~~~~~~~
 
@@ -184,6 +194,8 @@ This element has the same model as the `\<config\>`_ element to allow for
 nested configurations. ``id`` and ``type`` attributes are mandatory for this
 element.
 
+
+.. _config-objects:
 
 ``<objects>``
 ~~~~~~~~~~~~~
