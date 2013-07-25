@@ -15,6 +15,7 @@ Contents:
    Command-line UI <commands>
    Tutorial <tutorial>
    Configuration <config/index>
+   Objects <objects/index>
    troubleshooting
 
 
