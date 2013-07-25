@@ -7,7 +7,7 @@ Cheshire3 Configuration
 Contents:
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    common
    Index Configuration <indexes>
@@ -43,8 +43,11 @@ The main elements will be described here, the specialized elements and values
 will be described in object specific pages.
 
 
+Configuration Elements
+----------------------
+
 ``<config>``
-------------
+~~~~~~~~~~~~
 
 The top level element of any configuration file is the config element, and
 contains at least one object to construct. It should have an ``id`` attribute
@@ -58,7 +61,7 @@ If the configuration file is not for the top level
 
 
 ``<objectType>``
-----------------
+~~~~~~~~~~~~~~~~
 
 This element contains the module and class to use when instantiating the
 object, using the standard :py:class:`package.module.class` Python_ syntax.
@@ -70,7 +73,7 @@ the public API defined therein.
 
 
 ``<docs>``
-----------
+~~~~~~~~~~
 
 This element may be used to provide configured object level documentation.
 
@@ -81,14 +84,14 @@ splits data into sentences based on some pre-defined pattern.
 .. _config-paths:
 
 ``<paths>``
------------
+~~~~~~~~~~~
 
 This element may contain `\<path\>`_ and/or `\<object\>`_ elements to be stored
 when building the object in the system.
 
 
 ``<path>``
-----------
+~~~~~~~~~~
 
 This element is used to refer to a path to a resource (usually a filepath)
 required by the object and has several attributes to govern this:
@@ -114,7 +117,7 @@ required by the object and has several attributes to govern this:
 
 
 ``<object>``
-------------
+~~~~~~~~~~~~
 
 Object elements are used to create references to other objects in the system by
 their identifier, for example the default
@@ -126,7 +129,7 @@ object's identifier.
 
 
 ``<options>``
--------------
+~~~~~~~~~~~~~
 
 This section may include one or more `\<setting\>`_ (a value that can't be
 changed) and/or `\<default\>`_ (a value that can be overridden in a request)
@@ -137,7 +140,7 @@ elements.
 .. _`\<default\>`:
 
 ``<setting>`` and ``<default>``
--------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ``<setting>`` and ``<default>`` have a ``type`` attribute to specify which
 setting/default the value is for and the contents of the element is the value
@@ -151,12 +154,12 @@ default types.
 
 
 ``<subConfigs>``
-----------------
+~~~~~~~~~~~~~~~~
 
 This wrapper element contains one or more `\<subConfig\>`_ elements. Each
 `\<subConfig\>`_ has the same model as the `\<config\>`_, and hence a nested
 tree of configurations and subConfigurations can be constructed. It may also
-contain &lt;path&gt; elements with a file path to another file to read in and
+contain `\<path\>`_ elements with a file path to another file to read in and
 treat as further subConfigurations.
 
 Cheshire3 employs 'Just In Time' instantiation of objects. That is to say they
@@ -165,7 +168,7 @@ parent object in a script.
 
 
 ``<subConfig>``
----------------
+~~~~~~~~~~~~~~~
 
 This element has the same model as the `\<config\>`_ element to allow for
 nested configurations. ``id`` and ``type`` attributes are mandatory for this
@@ -173,7 +176,7 @@ element.
 
 
 ``<objects>``
--------------
+~~~~~~~~~~~~~
 
 The objects element contains one or more path elements, each with a reference
 to an identifier for a `\<subConfig\>`_ ). This reference acts as an instruction
@@ -185,10 +188,10 @@ to the system to actually instantiate the object from the configuration.
    instantiate objects with long spin-up times at the server level.
 
 
-.. _config-example1:
+.. _config-example:
 
-Example 1
----------
+Example
+-------
 
 ::
 

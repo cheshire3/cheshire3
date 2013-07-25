@@ -31,6 +31,53 @@ schema and a :py:class:`~cheshire3.baseObjects.Transformer` object are also
 possible. These mappings are all handled by a ProtocolMap.
 
 
+ZeeRex Elements/Attributes of Particular Significance for Cheshire3
+-------------------------------------------------------------------
+
+``<database>``
+~~~~~~~~~~~~~~
+
+If you plan to make your database available over
+:abbr:`SRU (Search and Retrieve via URL)`, then the contents of the field MUST
+correspond with that which has been configured as the mount point for the
+:abbr:`SRU (Search and Retrieve via URL)` web application in Apache (or an
+alternative Python_ web framework), i.e. if you configured with mapping
+/api/sru/ to the :py:mod:`~cheshire3.web.sruApacheHandler` code, then the
+first part of the database MUST be api/sru/.
+
+Obviously the rest of the information in serverInfo should be correct as well,
+but without the database field being correct, it won't be available over
+:abbr:`SRU (Search and Retrieve via URL)`.
+
+
+``c3:index``
+~~~~~~~~~~~~
+
+This attribute may be present on an index element, or a supports element within
+``<configInfo>`` within an ``<index>``. It maps that particular index, or the
+use of the index with a ``<relation>`` or ``<relationModifier>``, to the
+:py:class:`~cheshire3.baseObjects.Index` object with the given id.
+``<relationModifiers>`` and ``<relations>`` will override the index as
+appropriate.
+
+
+``c3:transformer``
+~~~~~~~~~~~~~~~~~~
+
+Similar to c3:index, this can be present on a ``<schema>`` element and maps
+that schema to the :py:class:`~cheshire3.baseObjects.Transformer` used to
+process the internal schema into the requested one. If the schema is the one
+used internally, then the attribute should not be present.
+
+
+Paths
+-----
+
+zeerexPath
+    In the configuration for the ProtocolMap object, this contains the path to
+    the ZeeRex file to read.
+
+
 .. _config-indexes-examples:
 
 Examples
@@ -86,55 +133,6 @@ Contents of the :file:`sru_zeerex.xml` file::
             </schema>
         </schemaInfo>
     </explain>
-
-
-
-
-ZeeRex Elements/Attributes of Particular Significance for Cheshire3
--------------------------------------------------------------------
-
-``<database>``
-~~~~~~~~~~~~~~
-
-If you plan to make your database available over
-:abbr:`SRU (Search and Retrieve via URL)`, then the contents of the field MUST
-correspond with that which has been configured as the mount point for the
-:abbr:`SRU (Search and Retrieve via URL)` web application in Apache (or an
-alternative Python_ web framework), i.e. if you configured with mapping
-/api/sru/ to the :py:mod:`~cheshire3.web.sruApacheHandler` code, then the
-first part of the database MUST be api/sru/.
-
-Obviously the rest of the information in serverInfo should be correct as well,
-but without the database field being correct, it won't be available over
-:abbr:`SRU (Search and Retrieve via URL)`.
-
-
-``c3:index``
-~~~~~~~~~~~~
-
-This attribute may be present on an index element, or a supports element within
-``<configInfo>`` within an ``<index>``. It maps that particular index, or the
-use of the index with a ``<relation>`` or ``<relationModifier>``, to the
-:py:class:`~cheshire3.baseObjects.Index` object with the given id.
-``<relationModifiers>`` and ``<relations>`` will override the index as
-appropriate.
-
-
-``c3:transformer``
-~~~~~~~~~~~~~~~~~~
-
-Similar to c3:index, this can be present on a ``<schema>`` element and maps
-that schema to the :py:class:`~cheshire3.baseObjects.Transformer` used to
-process the internal schema into the requested one. If the schema is the one
-used internally, then the attribute should not be present.
-
-
-Paths
------
-
-zeerexPath
-    In the configuration for the ProtocolMap object, this contains the path to
-    the ZeeRex file to read.
 
 
 .. Links
