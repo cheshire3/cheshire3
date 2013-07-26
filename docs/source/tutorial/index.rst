@@ -14,7 +14,7 @@ Tutorials:
    Command-line UI <commands>
    Python API <python>
    Configuring Databases <database>
-
+   Configuring Stores <stores>
 
 .. Links
 .. _Python: http://www.python.org/

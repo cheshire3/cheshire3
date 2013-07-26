@@ -14,6 +14,8 @@ Cheshire3 configuration files.
 Paths
 -----
 
+.. _config-common-defaultPath:
+
 defaultPath
     A default path to be prepended to all other paths in the object and below
 
