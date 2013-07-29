@@ -99,20 +99,20 @@ class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
             # insufficient PyGreSQL version - do the best we can
             ndata = data.replace("'", "\\'")
             
-        query = "INSERT INTO %s (identifier, data, size, class, timeCreated, timeAccessed, expires) VALUES ('%s', E'%s', %s, '%s', '%s', '%s', '%s')" % (self.table, id, ndata, len(rset), cl, nowStr, nowStr, expiresStr)
+        query = "INSERT INTO %s (identifier, data, size, class, timeCreated, timeAccessed, expires) VALUES ('%s', '%s', %s, '%s', '%s', '%s', '%s')" % (self.table, id, ndata, len(rset), cl, nowStr, nowStr, expiresStr)
         try:
             self._query(query)
         except pg.ProgrammingError as e:
             # already exists, retry for overwrite, create
             if self.get_setting(session, 'overwriteOkay', 0):
-                query = "UPDATE %s SET data = E'%s', size = %s, class = '%s', timeAccessed = '%s', expires = '%s' WHERE identifier = '%s';" % (self.table, ndata, len(rset), cl, nowStr, expiresStr, id)
+                query = "UPDATE %s SET data = '%s', size = %s, class = '%s', timeAccessed = '%s', expires = '%s' WHERE identifier = '%s';" % (self.table, ndata, len(rset), cl, nowStr, expiresStr, id)
                 self._query(query)
             elif hasattr(rset, 'retryOnFail'):
                 # generate new id, re-store
                 id = self.generate_id(session)
                 if (self.idNormalizer is not None):
                     id = self.idNormalizer.process_string(session, id)
-                query = "INSERT INTO %s (identifier, data, size, class, timeCreated, timeAccessed, expires) VALUES ('%s', E'%s', %s, '%s', '%s', '%s', '%s')" % (self.table, id, ndata, len(rset), cl, nowStr, nowStr, expiresStr)
+                query = "INSERT INTO %s (identifier, data, size, class, timeCreated, timeAccessed, expires) VALUES ('%s', '%s', %s, '%s', '%s', '%s', '%s')" % (self.table, id, ndata, len(rset), cl, nowStr, nowStr, expiresStr)
                 self._query(query)
             else:
                 raise ObjectAlreadyExistsException(self.id + '/' + id)

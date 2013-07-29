@@ -235,9 +235,9 @@ class PostgresStore(SimpleStore):
                 else:
                     extra.append("%s = '%s'" % (n,v))
             extraq = ', '.join(extra)
-            query = "UPDATE %s SET data = E'%s', %s, timeModified = '%s' WHERE identifier = '%s';" % (self.table, ndata, extraq, now, id)
+            query = "UPDATE %s SET data = '%s', %s, timeModified = '%s' WHERE identifier = '%s';" % (self.table, ndata, extraq, now, id)
         else:
-            query = "UPDATE %s SET data = E'%s', timeModified = '%s' WHERE  identifier = '%s';" % (self.table, ndata, now, id)
+            query = "UPDATE %s SET data = '%s', timeModified = '%s' WHERE  identifier = '%s';" % (self.table, ndata, now, id)
 
         try:
             self._query(query)
@@ -345,7 +345,7 @@ class PostgresStore(SimpleStore):
         for (name, value) in kw.iteritems():
             fields.append(name)
             if isinstance(value, basestring) and value.find("'") > -1:
-                values.append("E'{0}'".format(value.replace("'", r"\'")))
+                values.append("'{0}'".format(value.replace("'", r"\'")))
             else:
                 values.append(repr(value))
 
