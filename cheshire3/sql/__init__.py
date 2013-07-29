@@ -10,4 +10,7 @@ Should also allow existing PostgreSQL databases to be used as a source of
 documents for ingest via PostgresDocumentFactory, and PostgresDocumentStream.
 """
 
-all = ['documentFactory', 'documentStore', 'index', 'indexStore', 'objectStore', 'postgres', 'postgresStore', 'queryStore', 'recordStore', 'resultSetStore', 'sqlite']
+all = ['documentFactory', 'documentStore', 'index', 'indexStore',
+       'objectStore', 'postgres', 'postgresStore', 'queryStore', 'recordStore',
+       'resultSetStore', 'sqlite'
+       ]

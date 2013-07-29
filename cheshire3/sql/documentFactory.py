@@ -11,19 +11,28 @@ class PostgresDocumentStream(BaseDocumentStream):
 
     def find_documents(self, cache=0):
         pass
-    
+
+
 class PostgresDocumentFactory(SimpleDocumentFactory):
     database = ''
     host = ''
     port = 0
 
-    _possibleSettings = {'databaseName' : {'docs' : 'Name of the database in which to find the data'}
-                         , 'host' : {'docs' : 'Host for where the SQL database is'}
-                         , 'port'  : {'docs' : 'Port for where the SQL database is'}}
+    _possibleSettings = {
+        'databaseName': {
+            'docs': 'Name of the database in which to find the data'
+        },
+        'host': {
+            'docs': 'Host for where the SQL database is'
+        },
+        'port': {
+            'docs': 'Port for where the SQL database is'
+        }
+    }
 
-    def __init__(self, session, config, parent):        
+    def __init__(self, session, config, parent):
         SimpleDocumentFactory.__init__(self, session, config, parent)
         self.database = self.get_setting(session, 'databaseName', '')
         self.host = self.get_setting(session, 'host', 'localhost')
         self.port = int(self.get_setting(session, 'port', '5432'))
-        # query info to come in .load()
+        # Query info to come in .load()
