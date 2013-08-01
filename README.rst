@@ -46,9 +46,10 @@ Contents
       -  `Retrieving`_
       -  `Transforming Records`_
       -  `Indexes`_
+
          - `Browsing`_
          - `Facets and Filtering`_
-         - `Looking Under The Hood)`_
+         - `Looking Under The Hood`_
 
 
 Description
