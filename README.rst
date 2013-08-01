@@ -45,7 +45,10 @@ Contents
       -  `Searching`_
       -  `Retrieving`_
       -  `Transforming Records`_
-      -  `Indexes (Looking Under The Hood)`_
+      -  `Indexes`_
+         - `Browsing`_
+         - `Facets and Filtering`_
+         - `Looking Under The Hood)`_
 
 
 Description
@@ -786,9 +789,91 @@ then commit the terms extracted. ::
     >>> idxStore.commit_indexing(session, idx)
 
 
-Indexes (Looking Under the Hood)
-''''''''''''''''''''''''''''''''
+Indexes
+'''''''
 
+While `Searching`_ is the primary use of an Index, there are other API methods
+that can be used to get information from an Index in slightly different forms
+that can be useful when developing a user interface. This section describes
+those API methods and then shows how to *really* get your hands dirty by
+`Looking Under the Hood`_ and getting direct access to some of the object types
+that are used to process data within an Index.
+
+
+Browsing
+^^^^^^^^
+
+It is possible to browse through all terms in an index, just like reading the
+index in a book. This is usualy done through ``scan`` method of a Database
+object, so as to make use of the normal Index resolution machinery::
+
+    >>> qf = db.get_object(session, 'defaultQueryFactory')
+    >>> query = qf.get_query(session, 'dc.title = ""')
+    >>> terms = db.scan(session, query, nTerms=25, direction=">=")
+
+
+``terms`` will be a list of no more than 25 items representing the terms
+from the start of the Index that was resolved from the context `dc.title`
+(by convention the Dublin-Core definition of "title"; the title of a piece of
+work.) Each item in ``terms`` is a 2-item list:
+
+0. The unicode representation of the term
+1. A 3-item list:
+   0. internal numeric term id
+   1. number of records the term appears in
+   2. total number of occurrences of the term across the database
+
+e.g.::
+
+    [u"zen and the art of motorcycle maintenance", [12345, 2, 3]]
+
+
+It is also possible to use the `scan` method of an Index object directly::
+
+    >>> idx = db.get_object(session, 'idx-title')
+    >>> terms = idx.scan(session, query, nTerms=25, direction=">=")
+
+
+The resulting ``terms`` will be the same as when obtained through the ``scan``
+method of the Database object.
+
+
+Facets and Filtering
+^^^^^^^^^^^^^^^^^^^^
+
+Assuming that you have configured your Index with the setting `vectors` set to
+`1`, it is possible to obtain search facets for the Index. That is to say that
+given a ResultSet obtained from a `Search`_, one can obtain a list of the terms
+that occur within the Records in that ResultSet. This list can be used to
+present a search user with options for refining their search.
+::
+
+    >>> qf = db.get_object(session, 'defaultQueryFactory')
+    >>> query = qf.get_query(session, 'c3.idx-text-kwd any "compute"')
+    >>> rs = db.search(session, query)
+    >>> idx = db.get_object(session, 'idx-author')
+    >>> facets = idx.facets(session, rs, nTerms=5)
+
+
+The resulting ``facets`` will be a list representing the 5 terms that occur in
+the highest number of Records within the ResultSet. Setting ``nTerms`` to ``0``
+(or omitting it) will return all terms within the Index for the Records within
+the ResultSet. Each item in ``terms`` is a 2-item list:
+
+0. The unicode representation of the term
+1. A 3-item list:
+   0. internal numeric term id
+   1. number of records the term appears in
+   2. total number of occurrences of the term across the database 
+
+e.g.::
+
+    [u"Crichton, Michael", [54321, 3, 24]]
+
+
+Looking Under the Hood
+^^^^^^^^^^^^^^^^^^^^^^
+ 
 Configuring Indexes, and the processing required to populate them
 requires some further object types, such as Selectors, Extractors,
 Tokenizers and TokenMergers. Of course, one would normally configure
