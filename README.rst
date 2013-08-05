@@ -756,7 +756,7 @@ Transforming Records
 ''''''''''''''''''''
 
 Records can be processed back into documents, typically in a different
-form, using Transformers:::
+form, using Transformers::
 
     >>> dctxr = db.get_object(session, 'DublinCoreTxr')
     >>> doc = dctxr.process_record(session, rec)
@@ -846,8 +846,7 @@ Assuming that you have configured your Index with the setting `vectors` set to
 `1`, it is possible to obtain search facets for the Index. That is to say that
 given a ResultSet obtained from a `Search`_, one can obtain a list of the terms
 that occur within the Records in that ResultSet. This list can be used to
-present a search user with options for refining their search.
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+present a search user with options for refining their search.::
 
     >>> qf = db.get_object(session, 'defaultQueryFactory')
     >>> query = qf.get_query(session, 'c3.idx-text-kwd any "compute"')
