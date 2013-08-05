@@ -1340,10 +1340,12 @@ class ProximityIndex(SimpleIndex):
 class XmlIndex(SimpleIndex):
     """Index to store terms as XML structure.
 
-    e.g.
-    <rs tid="" recs="" occs="">
-      <r i="DOCID" s="STORE" o="OCCS"/>
-    </rs>
+    e.g.::
+
+        <rs tid="" recs="" occs="">
+            <r i="DOCID" s="STORE" o="OCCS"/>
+        </rs>
+
     """
 
     def __init__(self, session, config, parent):
@@ -1457,12 +1459,14 @@ class XmlIndex(SimpleIndex):
 class XmlProximityIndex(XmlIndex):
     """ProximityIndex to store terms as XML structure.
 
-    e.g.
-    <rs tid="" recs="" occs="">
-      <r i="DOCID" s="STORE" o="OCCS">
-        <p e="ELEM" w="WORDNUM" c="CHAROFFSET"/>
-      </r>
-    </rs>
+    e.g.::
+
+        <rs tid="" recs="" occs="">
+          <r i="DOCID" s="STORE" o="OCCS">
+            <p e="ELEM" w="WORDNUM" c="CHAROFFSET"/>
+          </r>
+        </rs>
+
     """
 
     _possibleSettings = {

@@ -8,9 +8,9 @@ Cheshire3 Tutorials - Configuring Databases
 Introduction
 ------------
 
-Databases are primarily collections of
-:py:class:`~cheshire3.baseObjects.Records` and
-:py:class:`~cheshire3.baseObjects.Indexes` along with the associated metadata
+:py:class:`~cheshire3.baseObjects.Database`\ s are primarily collections of
+:py:class:`~cheshire3.baseObjects.Record`\ s and
+:py:class:`~cheshire3.baseObjects.Index`\ es along with the associated metadata
 and objects required for processing the data.
 
 Configuration is typically done in a single file, with all of the dependent
@@ -47,12 +47,13 @@ An example :py:class:`~cheshire3.baseObjects.Database` configuration::
 Explanation
 -----------
 
-In line 1 we open a new object, of type ``database`` with an identifier of
-``db_ead``. You should replace ``db_ead`` with the identifier you want for your
-database.
+In line 1 we open a new object, of type
+:py:class:`~cheshire3.baseObjects.Database` with an identifier of ``db_ead``.
+You should replace ``db_ead`` with the identifier you want for your
+:py:class:`~cheshire3.baseObjects.Database`.
 
 Line 2 defines the :ref:`config-objectType` of the
-:py:class:`~cheshire3.baseObject.Database` (which will normally be a class from
+:py:class:`~cheshire3.baseObjects.Database` (which will normally be a class from
 the :py:mod:`cheshire3.database` module). There is currently only one
 recommended implementation, :py:class:`cheshire3.database.SimpleDatabase`, so
 this line should be copied in verbatim, unless you have defined your own
@@ -72,7 +73,7 @@ metadataPath
     and so forth. As it's a file path, it would end up being
     :file:`dbs/ead/metdata.bdb` -- in other words, in the same directory as the
     rest of the database files.
-    
+
 indexStoreList
     a space separated list of references to all
     :py:class:`~cheshire3.baseObjects.IndexStore`\ s the
@@ -81,8 +82,8 @@ indexStoreList
     it tells the :py:class:`~cheshire3.baseObjects.Database` which
     :py:class:`~cheshire3.baseObjects.IndexStore`\ s to register the
     :py:class:`~cheshire3.baseObjects.Record` in.
-    
-The :ref:`config-object` element refers to an object called 'eadRecordStore'
+
+The :ref:`config-object` element refers to an object called ``eadRecordStore``
 which is an instance of a :py:class:`~cheshire3.baseObjects.RecordStore`. This
 is important for future :py:class:`~cheshire3.baseObjects.Workflow`\ s, so that
 the :py:class:`~cheshire3.baseObjects.Database` knows which

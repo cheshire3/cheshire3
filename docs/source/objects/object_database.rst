@@ -11,6 +11,14 @@ API
 Implementations
 ---------------
 
+.. autoclass:: cheshire3.database.SimpleDatabase
+
+.. autoclass:: cheshire3.database.OptimisingDatabase
+
+
+Configurations
+--------------
+
 There are no pre-configured databases as this is totally application specific.
 Configuring a database it your primary task when beginning to use Cheshire3 for
 your data. There are some example databases including configuration available
