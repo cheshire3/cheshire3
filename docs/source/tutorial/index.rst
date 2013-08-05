@@ -13,7 +13,7 @@ Tutorials:
 
    Command-line UI <commands>
    Python API <python>
-   Configuring Databases <database>
+   Configuring Databases <databases>
    Configuring Stores <stores>
 
 .. Links
