@@ -15,6 +15,7 @@ Tutorials:
    Python API <python>
    Configuring Databases <databases>
    Configuring Stores <stores>
+   Configuring Workflows <workflows>
 
 .. Links
 .. _Python: http://www.python.org/
