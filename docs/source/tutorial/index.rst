@@ -14,6 +14,7 @@ Tutorials:
    Command-line UI <commands>
    Python API <python>
    Configuring Databases <databases>
+   Configuring Indexes <indexes>
    Configuring Stores <stores>
    Configuring Workflows <workflows>
 
