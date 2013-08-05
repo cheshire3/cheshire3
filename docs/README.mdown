@@ -1,7 +1,7 @@
 Cheshire3 Documentation
 =======================
 
-27th February 2012 (2012-02-27)
+5th August 2013 (2013-08-05)
 
 Contents
 --------
@@ -10,7 +10,7 @@ Contents
 - Authors
 - Latest Version
 - Documentation
-- Errors, ommisions etc.
+- Errors, omissions etc.
 - Licensing, Copyright and Legal
 
 
@@ -53,23 +53,14 @@ best efforts will be made to keep it up-to-date with the GitHub repository.
 
 Documentation
 -------------
-
-```xslt
-<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-    <xsl:output method="text"/>
-    <xsl:template match="/">
-    	<xsl:apply-templates select="/"/>
-    </xsl:template>
-</xsl:stylesheet>
-```
    
-This is documentation, there's no documentation for it ;-)
+Documentation is written in Sphinx http://sphinx-doc.org
 
 
-Errors, ommisions etc.
+Errors, omissions etc.
 ----------------------
 
-Errors or ommisions in the documentation should be reported using the GitHub 
+Errors or omissions in the documentation should be reported using the GitHub 
 issue tracker for this repository:
 https://github.com/cheshire3/cheshire3-docs/issues
 
@@ -86,5 +77,3 @@ Documentation is Copyright of the University of Liverpool, 2005-2012.
 All software, scripts and documentation are provided without any expressed or 
 implied warranty, and with no guarantee of fitness for any purpose. It is 
 downloaded, installed, and used entirely at the user's own risk.
-
-

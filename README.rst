@@ -1,7 +1,7 @@
 Cheshire3
 =========
 
-21st January 2013 (2013-01-21)
+5th August 2013 (2013-08-05)
 
 .. image:: https://travis-ci.org/cheshire3/cheshire3.png?branch=master,develop
    :target: https://travis-ci.org/cheshire3/cheshire3?branch=master,develop
@@ -26,22 +26,22 @@ Contents
 -  `Examples`_
 
    -  `Command-line UI`_
-       
-      -  `Creating a new Database`_
-      -  `Loading Data into the Database`_
-      -  `Searching the Database`_
-      -  `Exposing the Database via SRU`_
-    
+
+       -  `Creating a new Database`_
+       -  `Loading Data into the Database`_
+       -  `Searching the Database`_
+       -  `Exposing the Database via SRU`_
+
    -  `Python API`_
-    
+
       -  `Initializing Cheshire3 Architecture`_
-       
+
          - `Using the cheshire3 command`_
-          
+
       -  `Loading Data`_
-    
+
          -  `Pre-Processing (PreParsing)`_
-    
+
       -  `Searching`_
       -  `Retrieving`_
       -  `Transforming Records`_
@@ -265,7 +265,7 @@ follow the recommendations made by the standard `Style Guide for Python
 Code`_ (which includes the provision that guidelines may be ignored in
 situations where following them would make the code less readable.)
 
-Particular attention should be paid to documentation and source code 
+Particular attention should be paid to documentation and source code
 annotation (comments). All developed modules, functions, classes, and
 methods should be documented in the source code. Newly configured
 objects at the server level should be documented using the ``<docs>``
@@ -361,7 +361,10 @@ Cheshire3 provides a number of command-line utilities to enable you to
 get started creating databases, indexing and searching your data quickly.
 All of these commands have full help available, including lists
 of available options which can be accessed using the ``--help`` option.
-e.g. ``cheshire3 --help``
+e.g.::
+
+    ``cheshire3 --help``
+
 
 Creating a new Database
 '''''''''''''''''''''''
@@ -370,23 +373,23 @@ Creating a new Database
    Initialize a database with some generic configurations in the given
    directory, or current directory if absent
 
-Example 1: create database in a new sub-directory ::
+Example 1: create database in a new sub-directory::
 
     $ cheshire3-init mydb
 
-Example 2: create database in an existing directory ::
+Example 2: create database in an existing directory::
 
     $ mkdir -p ~/dbs/mydb
     $ cheshire3-init ~/dbs/mydb
     
-Example 3: create database in current working directory ::
+Example 3: create database in current working directory::
 
     $ mkdir -p ~/dbs/mydb
     $ cd ~/dbs/mydb
     $ cheshire3-init
 
 Example 4: create database with descriptive information in a new
-sub-directory ::
+sub-directory::
     
     $ cheshire3-init --database=mydb --title="My Database" \
     --description="A Database of Documents" mydb
@@ -397,16 +400,16 @@ Loading Data into the Database
 
 ``cheshire3-load data``
    Load data into the current Cheshire3 database
-   
-Example 1: load data from a file ::
+
+Example 1: load data from a file::
 
     $ cheshire3-load path/to/file.xml
 
-Example 2: load data from a directory ::
+Example 2: load data from a directory::
 
     $ cheshire3-load path/to/directory
 
-Example 3: load data from a URL ::
+Example 3: load data from a URL::
 
     $ cheshire3-load http://www.example.com/index.html
 
@@ -418,11 +421,11 @@ Searching the Database
    Search the current Cheshire3 database based on the parameters given
    in query
 
-Example 1: search with a single keyword ::
+Example 1: search with a single keyword::
 
     $ cheshire3-search food
 
-Example 2: search with a complex CQL_ query ::
+Example 2: search with a complex CQL_ query::
 
     $ cheshire3-search "cql.anywhere all/relevant food and \
     rec.creationDate > 2012-01-01"
@@ -438,12 +441,12 @@ Exposing the Database via SRU
 *Please Note* the HTTP server started is probably not sufficiently robust
 for production use. You should consider using something like `mod_wsgi`_.
 
-Example 1: start a demo HTTP WSGI server with default options ::
+Example 1: start a demo HTTP WSGI server with default options::
 
     $ cheshire3-serve
 
 Example 2: start a demo HTTP WSGI server, specifying host name and port
-number ::
+number::
 
     $ cheshire3-serve --host myhost.example.com --port 8080
 
@@ -468,14 +471,14 @@ Session
     the processing objects to maintain details of the current environment.
     It stores, for example, user and identifier for the database currently in
     use.
-    
+
 Server
     A protocol neutral collection of databases, users and their dependent
     objects. It acts as an inital entry point for all requests and handles
     such things as user authentication, and global object configuration.
 
 
-The first thing that we need to do is create a Session and build a Server. ::
+The first thing that we need to do is create a Session and build a Server.::
 
     >>> from cheshire3.baseObjects import Session
     >>> session = Session()
@@ -484,7 +487,7 @@ The Server looks after all of our objects, databases, indexes ...
 everything. Its constructor takes session and one argument, the filename
 of the top level configuration file. You could supply your own, or you can
 find the filename of the default server configuration dynamically as
-follows: ::
+follows:::
 
     >>> import os
     >>> from cheshire3.server import SimpleServer
@@ -507,7 +510,7 @@ Database
     that may be need for relevance ranking etc.
 
 
-To get a database. ::
+To get a database.::
 
     >>> db = server.get_object(session, 'db_test')
     >>> db
@@ -515,7 +518,7 @@ To get a database. ::
 
 
 After this you MUST set session.database to the identifier for your
-database, in this case 'db\_test': ::
+database, in this case 'db\_test':::
 
     >>> session.database = 'db_test'
 
@@ -524,7 +527,7 @@ This is primarily for efficiency in the workflow processing (objects are
 cached by their identifier, which might be duplicated for different
 objects in different databases).
 
-Another useful path to know is the database's default path: ::
+Another useful path to know is the database's default path:::
 
     >>> dfp = db.get_path(session, 'defaultPath')
 
@@ -548,7 +551,7 @@ script or just drop you into the interactive console.
    ``--interactive`` option.
 
 When initializing the architecture in this way, ``session`` and ``server``
-variables will be created corresponding to instances of Session and Server 
+variables will be created corresponding to instances of Session and Server
 respectively.
 
 Additionally, if you ran the script from inside a Cheshire3 Database
@@ -564,7 +567,7 @@ In order to load data into your database you'll need a document factory
 to find your documents, a parser to parse the XML and a record store to
 put the parsed XML into. The most commonly used are
 defaultDocumentFactory and LxmlParser. Each database needs its own
-record store. ::
+record store.::
 
     >>> df = db.get_object(session, "defaultDocumentFactory")
     >>> parser = db.get_object(session, "LxmlParser")
@@ -572,7 +575,7 @@ record store. ::
 
 
 Before we get started, we need to make sure that the stores are all
-clear. ::
+clear.::
 
     >>> recStore.clear(session)
     <cheshire3.recordStore.BdbRecordStore object...
@@ -581,14 +584,14 @@ clear. ::
 
 First you should call db.begin\_indexing() in order to let the database
 initialise anything it needs to before indexing starts. Ditto for the
-record store. ::
+record store.::
 
     >>> db.begin_indexing(session)
     >>> recStore.begin_storing(session)
 
 
 Then you'll need to tell the document factory where it can find your
-data: ::
+data:::
 
     >>> df.load(session, 'data', cache=0, format='dir')
     <cheshire3.documentFactory.SimpleDocumentFactory object...
@@ -645,7 +648,7 @@ codec
 
 You'll note above that the call to load returns itself. This is because
 the document factory acts as an iterator. The easiest way to get to your
-documents is to loop through the document factory: ::
+documents is to loop through the document factory:::
 
     >>> for doc in df:
     ...    rec = parser.process_document(session, doc)  # [1]
@@ -669,13 +672,13 @@ In this loop, we:
 4. Index the record against all indexes known to the database - typically all
    indexes in the indexStore in the database's 'indexStore' path setting.
 
-Then we need to ensure this data is commited to disk: ::
+Then we need to ensure this data is commited to disk:::
 
     >>> recStore.commit_storing(session)
     >>> db.commit_metadata(session)
 
 
-And, potentially taking longer, merge any temporary index files created: ::
+And, potentially taking longer, merge any temporary index files created:::
 
     >>> db.commit_indexing(session)
 
@@ -689,7 +692,7 @@ want them in. To do this, there are PreParser objects which take a
 document and transform it into another document.
 
 The simplest preParser takes raw text, escapes the entities and wraps it
-in a element: ::
+in a element:::
 
     >>> from cheshire3.document import StringDocument
     >>> doc = StringDocument("This is some raw text with an & and a < and a >.")
@@ -704,21 +707,21 @@ Searching
 
 In order to allow for translation between query languages (if possible)
 we have a query factory, which defaults to CQL (SRU's query language,
-and our internal language). ::
+and our internal language).::
 
     >>> qf = db.get_object(session, 'defaultQueryFactory')
     >>> qf
     <cheshire3.queryFactory.SimpleQueryFactory object ...
 
 
-We can then use this factory to build queries for us: ::
+We can then use this factory to build queries for us:::
 
     >>> q = qf.get_query(session, 'c3.idx-text-kwd any "compute"')
     >>> q
     <cheshire3.cqlParser.SearchClause ...
 
 
-And then use this parsed query to search the database: ::
+And then use this parsed query to search the database:::
 
     >>> rs = db.search(session, q)
     >>> rs
@@ -729,7 +732,7 @@ And then use this parsed query to search the database: ::
 
 The 'rs' object here is a result set which acts much like a list. Each
 entry in the result set is a ResultSetItem, which is a pointer to a
-record. ::
+record.::
 
     >>> rs[0]
     Ptr:recordStore/1
@@ -738,32 +741,32 @@ record. ::
 Retrieving
 ''''''''''
 
-Each result set item can fetch its record: ::
+Each result set item can fetch its record:::
 
     >>> rec = rs[0].fetch_record(session)
     >>> rec.recordStore, rec.id
     ('recordStore', 1)
 
 
-Records can expose their data as xml: ::
+Records can expose their data as xml:::
 
     >>> rec.get_xml(session)
     '<record>...
 
 
-As SAX events: ::
+As SAX events:::
 
     >>> rec.get_sax(session)
     ["4 None, 'record', 'record', {}...
 
 
-Or as DOM nodes, in this case using the Lxml Etree API: ::
+Or as DOM nodes, in this case using the Lxml Etree API:::
 
     >>> rec.get_dom(session)
     <Element record at ...
 
 
-You can also use XPath expressions on them: ::
+You can also use XPath expressions on them:::
 
     >>> rec.process_xpath(session, '/record/header/identifier')
     [<Element identifier at ...
@@ -775,13 +778,13 @@ Transforming Records
 ''''''''''''''''''''
 
 Records can be processed back into documents, typically in a different
-form, using Transformers: ::
+form, using Transformers:::
 
     >>> dctxr = db.get_object(session, 'DublinCoreTxr')
     >>> doc = dctxr.process_record(session, rec)
 
 
-And you can get the data from the document with get\_raw(): ::
+And you can get the data from the document with get\_raw():::
 
     >>> doc.get_raw(session)
     '<?xml version="1.0"?>...
@@ -847,8 +850,7 @@ Assuming that you have configured your Index with the setting `vectors` set to
 `1`, it is possible to obtain search facets for the Index. That is to say that
 given a ResultSet obtained from a `Search`_, one can obtain a list of the terms
 that occur within the Records in that ResultSet. This list can be used to
-present a search user with options for refining their search.
-::
+present a search user with options for refining their search.::
 
     >>> qf = db.get_object(session, 'defaultQueryFactory')
     >>> query = qf.get_query(session, 'c3.idx-text-kwd any "compute"')
@@ -866,7 +868,7 @@ the ResultSet. Each item in ``terms`` is a 2-item list:
 1. A 3-item list:
    0. internal numeric term id
    1. number of records the term appears in
-   2. total number of occurrences of the term across the database 
+   2. total number of occurrences of the term across the database
 
 e.g.::
 
@@ -875,7 +877,7 @@ e.g.::
 
 Looking Under the Hood
 ^^^^^^^^^^^^^^^^^^^^^^
- 
+
 Configuring Indexes, and the processing required to populate them
 requires some further object types, such as Selectors, Extractors,
 Tokenizers and TokenMergers. Of course, one would normally configure
@@ -888,7 +890,7 @@ why things didn't work as expected, and Cheshire3 makes this possible.
 Selector objects are configured with one or more locations from which
 data should be selected from the Record. Most commonly (for XML data at
 least) these will use XPaths. A selector returns a list of lists, one
-for each configured location. ::
+for each configured location.::
 
     >>> xp1 = db.get_object(session, 'identifierXPathSelector')
     >>> rec = recStore.fetch_record(session, 1)
@@ -899,7 +901,7 @@ for each configured location. ::
 However we need the text from the matching elements rather than the XML
 elements themselves. This is achieved using an Extractor, which
 processes the list of lists returned by a Selector and returns a
-doctionary a.k.a an associative array or hash: ::
+doctionary a.k.a an associative array or hash:::
 
     >>> extr = db.get_object(session, 'SimpleExtractor')
     >>> hash = extr.process_xpathResult(session, elems)
@@ -908,7 +910,7 @@ doctionary a.k.a an associative array or hash: ::
 
 
 And then we'll want to normalize the results a bit. For example we can
-make everything lowercase: ::
+make everything lowercase:::
 
     >>> n = db.get_object(session, 'CaseNormalizer')
     >>> h2 = n.process_hash(session, h)
@@ -916,7 +918,7 @@ make everything lowercase: ::
     {'oai:citeseerpsu:2 ': {'text': 'oai:citeseerpsu:2 ', ...
 
 
-And note the extra space on the end of the identifier... ::
+And note the extra space on the end of the identifier...::
 
     >>> s = db.get_object(session, 'SpaceNormalizer')
     >>> h3 = s.process_hash(session, h2)
@@ -928,7 +930,7 @@ index!
 
 This is fine if you want to just store strings, but most searches will
 probably be at word or token level. Let's get the abstract text from the
-record: ::
+record:::
 
     >>> xp2 = db.get_object(session, 'textXPathSelector')
     >>> elems = xp2.process_record(session, rec)
@@ -937,7 +939,7 @@ record: ::
 
 
 Note the {...} bit ... that's lxml's representation of a namespace, and
-needs to be included in the configuration for the xpath in the Selector. ::
+needs to be included in the configuration for the xpath in the Selector.::
 
     >>> extractor = db.get_object(session, 'ProxExtractor')
     >>> hash = extractor.process_xpathResult(session, elems)
@@ -947,7 +949,7 @@ needs to be included in the configuration for the xpath in the Selector. ::
 
 ProxExtractor records where in the record the text came from, but
 otherwise just extracts the text from the elements. We now need to split
-it up into words, a process called tokenization. ::
+it up into words, a process called tokenization.::
 
     >>> tokenizer = db.get_object(session, 'RegexpFindTokenizer')
     >>> hash2 = tokenizer.process_hash(session, hash)
@@ -958,7 +960,7 @@ it up into words, a process called tokenization. ::
 Although the key at the beginning looks the same, the value is now a
 list of tokens from the key, in order. We then have to merge those
 tokens together, such that we have 'the' as the key, and the value has
-the locations of that type. ::
+the locations of that type.::
 
     >>> tokenMerger = db.get_object(session, 'ProxTokenMerger')
     >>> hash3 = tokenMerger.process_hash(session, hash2)
@@ -974,14 +976,14 @@ It is also possible to iterate through stores. This is useful for adding
 new indexes or otherwise processing all of the data without reloading
 it.
 
-First find our index, and the indexStore: ::
+First find our index, and the indexStore:::
 
     >>> idx = db.get_object(session, 'idx-modificationDate')
     >>> idxStore = idx.get_path(session, 'indexStore')
 
 
 Then start indexing for just that index, step through each record, and
-then commit the terms extracted. ::
+then commit the terms extracted.::
 
     >>> idxStore.begin_indexing(session, idx)
     >>> for rec in recStore:

@@ -670,13 +670,17 @@ class IndexStore(C3Object):
                        nTerms=0, relation="", end="", summary=0, reverse=0):
         """Fetch and return a list of terms for an Index.
         
-        numReq   := how many terms are wanted.
-        relation := which order to scan through the index.
-        end      := a point to end at (eg between A and B)
-        summary  := only return frequency info, not the pointers to matching 
-                    records.
-        reverse  := use the reversed index if available (eg 'xedni' not 
-                    'index').
+        :param numReq: how many terms are wanted.
+        :type numReq: integer
+        :param relation: which order to scan through the index.
+        :param end: a point to end at (e.g. between A and B)
+        :param summary: only return frequency info, not the pointers to
+        matching records.
+        :type summary: boolean (or something that can be evaluated as True or
+        False)
+        :param reverse: use the reversed index if available (eg 'xedni' not
+        'index').
+        :rtype: list
         """
         raise NotImplementedError
 
