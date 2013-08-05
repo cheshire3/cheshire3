@@ -149,6 +149,11 @@ class SimpleUser(User):
                 return False
 
     def check_password(self, session, password):
+        """Check the supplied en-clair password.
+        
+        Check the supplied en-clair password by obfuscating it using the same
+        algorithm and comparing it with the stored version. Return True/False. 
+        """
         # Check password type
         if self.passwordType == 'md5':
             m = hashlib.md5(password)
