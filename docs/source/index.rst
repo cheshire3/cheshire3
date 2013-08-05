@@ -13,6 +13,7 @@ Contents:
 
    Installation <install>
    Tutorials <tutorial/index>
+   Commands <commands>
    Configuration <config/index>
    Objects <objects/index>
    troubleshooting
@@ -30,7 +31,7 @@ What Cheshire3 can do:
   :py:class:`~cheshire3.baseObjects.Database`, and allow you to define your own
   :py:class:`~cheshire3.baseObject.Index` of specific fields within each
   structured or semi-structured :py:class:`~cheshire3.baseObjects.Document` .
-  
+
 * Set up each :py:class:`~cheshire3.baseObject.Index` to extract and normalize
   the data exactly the way you need (e.g. make an index of people's names as
   keywords, strip off possessive apostrophes, treat all names as lowercase)

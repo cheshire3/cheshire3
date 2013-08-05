@@ -84,6 +84,8 @@ they will inherit from a base class in the `Cheshire3 Object Model`_
 the public API defined therein.
 
 
+.. _config-docs:
+
 ``<docs>``
 ~~~~~~~~~~
 
@@ -114,7 +116,7 @@ required by the object and has several attributes to govern this:
   is. This is somewhat context dependent, but is either an object type (e.g.
   'database', 'index') or a description of a file path (e.g. 'defaultPath',
   'metadataPath').
-  
+
 - For configurations which are being included as an external file, the path
   element should have the same ``id`` attribute as the included configuration.
 

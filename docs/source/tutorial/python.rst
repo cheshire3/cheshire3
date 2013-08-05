@@ -65,7 +65,7 @@ Database
     that may be need for relevance ranking etc.
 
 
-To get a database. ::
+To get a database.::
 
     >>> db = server.get_object(session, 'db_test')
     >>> db
@@ -108,6 +108,8 @@ using the ``--database`` option. The variable will correspond to instances of
 Session, Server and Database respectively.
 
 
+.. _tutorial-python-loadingdata:
+
 Loading Data
 ''''''''''''
 
@@ -115,7 +117,7 @@ In order to load data into your database you'll need a document factory
 to find your documents, a parser to parse the XML and a record store to
 put the parsed XML into. The most commonly used are
 defaultDocumentFactory and LxmlParser. Each database needs its own
-record store. ::
+record store.::
 
     >>> df = db.get_object(session, "defaultDocumentFactory")
     >>> parser = db.get_object(session, "LxmlParser")
@@ -405,7 +407,7 @@ make everything lowercase::
     {'oai:citeseerpsu:2 ': {'text': 'oai:citeseerpsu:2 ', ...
 
 
-And note the extra space on the end of the identifier... ::
+And note the extra space on the end of the identifier...::
 
     >>> s = db.get_object(session, 'SpaceNormalizer')
     >>> h3 = s.process_hash(session, h2)
