@@ -86,7 +86,9 @@ class SimpleWorkflow(Workflow):
                 code.append("    " + s)
             code.append('    return input')
             self.code = "\n".join(code)
-            exec(self.code)
+            filename = self.__class__.__name__ + ': ' + self.id
+            compiled = compile(self.code, filename=filename, mode='exec')
+            exec(compiled)
             setattr(self,
                     'process',
                     MethodType(locals()['handler'], self, self.__class__))
@@ -104,7 +106,9 @@ class SimpleWorkflow(Workflow):
                 code.append("    " + s)
             code.append('    return input')
             self.code = "\n".join(code)
-            exec(self.code)
+            filename = self.__class__.__name__ + ': ' + self.id
+            compiled = compile(self.code, filename=filename, mode='exec')
+            exec(compiled)
             setattr(self,
                     'process',
                     MethodType(locals()['handler'], self, self.__class__))
