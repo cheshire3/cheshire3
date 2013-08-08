@@ -370,7 +370,7 @@ class BdbIndexStore(IndexStore):
 
         (term, val) = cursor.first(doff=0, dlen=dataLen)
         while (val):
-            (termid, recs, occs) = struct.unpack('lll', val)
+            (termid, recs, occs) = struct.unpack('<lll', val)
             terms.append({'t': term, 'i': termid, 'r': recs, 'o': occs})
             try:
                 (term, val) = cursor.next(doff=0, dlen=dataLen)
@@ -741,7 +741,7 @@ class BdbIndexStore(IndexStore):
 
         if metadataCxn:
             # LLLLLL:  nTerms, nRecs, nOccs, maxRecs, maxOccs, totalChars
-            val = struct.pack("LLLLLL", nTerms, nRecs, nOccs,
+            val = struct.pack("<LLLLLL", nTerms, nRecs, nOccs,
                               maxNRecs, maxNOccs, totalChars)
             metadataCxn.put(index.id.encode('utf8'), val)
             self._closeMetadata(session)
@@ -764,7 +764,7 @@ class BdbIndexStore(IndexStore):
             try:
                 (term, val) = cursor.first(doff=0, dlen=dataLen)
                 while (val):
-                    (termid, recs, occs) = struct.unpack('lll', val)
+                    (termid, recs, occs) = struct.unpack('<lll', val)
                     terms.append({'i': termid, 'r': recs, 'o': occs})
                     try:
                         (term, val) = cursor.next(doff=0, dlen=dataLen)
@@ -777,7 +777,7 @@ class BdbIndexStore(IndexStore):
 
                     cxn = self._openTermFreq(session, index, 'rec')
                     for (t, term) in enumerate(terms):
-                        termidstr = struct.pack('ll', term['i'], term['r'])
+                        termidstr = struct.pack('<ll', term['i'], term['r'])
                         cxn.put("%012d" % t, termidstr)
                     self._closeTermFreq(session, index, 'rec')
 
@@ -787,7 +787,7 @@ class BdbIndexStore(IndexStore):
                     #cxn = bdb.db.DB()
                     #cxn.open(dbname + "_FREQ_OCC")
                     for (t, term) in enumerate(terms):
-                        termidstr = struct.pack('ll', term['i'], term['o'])
+                        termidstr = struct.pack('<ll', term['i'], term['o'])
                         cxn.put("%012d" % t, termidstr)
                     self._closeTermFreq(session, index, 'occ')
                     
@@ -859,7 +859,7 @@ class BdbIndexStore(IndexStore):
                 docArray.sort()
                 flat = []
                 [flat.extend(x) for x in docArray]
-                fmt = "L" * len(flat)                    
+                fmt = '<' + "L" * len(flat)                    
                 packed = struct.pack(fmt, *flat)
                 cxn.put(str("%s|%s" % (currStore, currDoc.encode('utf8'))),
                         packed)
@@ -867,7 +867,7 @@ class BdbIndexStore(IndexStore):
                 if proxVectors:
                     pdocid = long(currDoc)
                     for (elem, parr) in proxHash.iteritems():
-                        proxKey = struct.pack('LL', pdocid, elem)
+                        proxKey = struct.pack('<LL', pdocid, elem)
                         if elem < 0 or elem > 4294967295:
                             raise ValueError(elem)
 
@@ -875,7 +875,7 @@ class BdbIndexStore(IndexStore):
                         parr.sort()
                         flat = []
                         [flat.extend(x) for x in parr]
-                        proxVal = struct.pack('L' * len(flat), *flat)
+                        proxVal = struct.pack('<' + 'L' * len(flat), *flat)
                         proxCxn.put(proxKey, proxVal)
                     proxHash = {}                        
             currDoc = docid
@@ -942,18 +942,18 @@ class BdbIndexStore(IndexStore):
             # Put in total terms, total occurences
             flat = []
             [flat.extend(x) for x in docArray]
-            fmt = "L" * len(flat)
+            fmt = '<' + "L" * len(flat)
             packed = struct.pack(fmt, *flat)
             cxn.put(str("%s|%s" % (storeid, docid.encode('utf8'))), packed)
             if proxVectors:
                 pdocid = long(currDoc)
                 for (elem, parr) in proxHash.iteritems():
-                    proxKey = struct.pack('LL', pdocid, elem)
+                    proxKey = struct.pack('<LL', pdocid, elem)
                     proxKey = "%s|%s" % (storeid.encode('utf8'), proxKey)
                     parr.sort()
                     flat = []
                     [flat.extend(x) for x in parr]
-                    proxVal = struct.pack('L' * len(flat), *flat)
+                    proxVal = struct.pack('<' + 'L' * len(flat), *flat)
                     proxCxn.put(proxKey, proxVal)
                 proxCxn.close()
                 self.proxVectorCxn[index] = None
@@ -1039,7 +1039,7 @@ class BdbIndexStore(IndexStore):
         else:
             data = cxn.get(docid)
         if data:
-            flat = struct.unpack('L' * (len(data) / index.longStructSize),
+            flat = struct.unpack('<' + 'L' * (len(data) / index.longStructSize),
                                  data)
             lf = len(flat)
             unflatten = [(flat[x], flat[x + 1]) for x in xrange(0, lf, 2)]
@@ -1073,14 +1073,14 @@ class BdbIndexStore(IndexStore):
         longStructSize = index.longStructSize
 
         def unpack(data):
-            flat = struct.unpack('L' * (len(data) / longStructSize), data)
+            flat = struct.unpack('<' + 'L' * (len(data) / longStructSize), data)
             lf = len(flat)
             unflat = [flat[x:x + nProxInts] for x in range(0, lf, nProxInts)]
             return unflat
 
         if elemId == -1:
             # fetch all for this record
-            key = struct.pack('LL', docid, 0)
+            key = struct.pack('<LL', docid, 0)
             keyid = key[:4]
             key = str(self.storeHashReverse[rec.recordStore]) + "|" + key
             c = cxn.cursor()
@@ -1088,7 +1088,7 @@ class BdbIndexStore(IndexStore):
             vals = {}
             # XXX won't work for > 9 recordStores...
             while k[2:6] == keyid:
-                elemId = struct.unpack('L', k[6:])[0]
+                elemId = struct.unpack('<L', k[6:])[0]
                 vals[elemId] = unpack(v)
                 try:
                     (k, v) = c.next()
@@ -1097,7 +1097,7 @@ class BdbIndexStore(IndexStore):
             return vals
             
         else:
-            key = struct.pack('LL', docid, elemId)
+            key = struct.pack('<LL', docid, elemId)
             # now add in store
             key = str(self.storeHashReverse[rec.recordStore]) + "|" + key
             data = cxn.get(key)
@@ -1193,7 +1193,7 @@ class BdbIndexStore(IndexStore):
             else:
                 next = c.next
             while len(freqs) < nTerms:
-                (tid, fr) = struct.unpack('ll', v)
+                (tid, fr) = struct.unpack('<ll', v)
                 freqs.append((int(t), tid, fr))
                 try:
                     (t, v) = next()
@@ -1208,7 +1208,7 @@ class BdbIndexStore(IndexStore):
             # LLLLLL:  nTerms, nRecs, nOccs, maxRecs, maxOccs, totalChars
             keys = ('nTerms', 'nRecs', 'nOccs',
                     'maxRecs', 'maxOccs', 'totalChars')
-            vals = struct.unpack('LLLLLL', data)
+            vals = struct.unpack('<LLLLLL', data)
             return dict(zip(keys, vals))
             return vals
         else:

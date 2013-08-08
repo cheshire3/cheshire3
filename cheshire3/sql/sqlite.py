@@ -284,14 +284,14 @@ class TrivialSqliteResultSetStore(ResultSetStore, SQLiteStore):
 
     def _serialise(self, session, rset):
         ids = [x.id for x in rset]
-        format = 'l' * len(ids)
+        format = '<' + 'l' * len(ids)
         data = struct.pack(format, *ids)
         data = data.encode('string_escape')
         return data
 
     def _deserialise(self, session, data, size, id_):
         data = data.decode('string_escape')
-        fmt = 'l' * size
+        fmt = '<' + 'l' * size
         ids = struct.unpack(fmt, data)
         # can't use bitfield, as need to preserve order
         rset = SimpleResultSet(session)

@@ -914,7 +914,7 @@ class SimpleIndex(Index):
             nRecs = len(data) / 3
         if not nOccs:
             nOccs = sum(data[2::3])
-        fmt = 'lll' * (nRecs + 1)
+        fmt = '<' + 'lll' * (nRecs + 1)
         params = [fmt, termId, nRecs, nOccs] + data
         try:
             return struct.pack(*params)
@@ -937,10 +937,10 @@ class SimpleIndex(Index):
         prox  := boolean flag to include proximity information
         """
         if nRecs == -1:
-            fmt = 'lll' * (len(data) / (3 * self.longStructSize))
+            fmt = '<' + 'lll' * (len(data) / (3 * self.longStructSize))
             return struct.unpack(fmt, data)
         else:
-            fmt = "lll" * (nRecs + 1)
+            fmt = '<' + "lll" * (nRecs + 1)
             endpoint = (nRecs + 1) * 3 * self.longStructSize
             return struct.unpack(fmt, data[:endpoint])
 
@@ -1123,7 +1123,7 @@ class SingleRecordStoreIndex(SimpleIndex):
             nOccs = sum(data[2::3])
         # strip out RecordStore pointer
         del data[1::3]
-        fmt = 'lll' + ('ll' * nRecs)
+        fmt = '<' + 'lll' + ('ll' * nRecs)
         params = [fmt, termId, nRecs, nOccs] + data
         try:
             return struct.pack(*params)
@@ -1148,10 +1148,10 @@ class SingleRecordStoreIndex(SimpleIndex):
         """
         lss = self.longStructSize
         if nRecs == -1:
-            fmt = 'l' * (len(data) / lss)
+            fmt = '<' + 'l' * (len(data) / lss)
             out = list(struct.unpack(fmt, data))
         else:
-            fmt = "lll" + "ll" * nRecs
+            fmt = '<' + "lll" + "ll" * nRecs
             endpoint = (3 * lss) + (nRecs * 2 * lss)
             out = list(struct.unpack(fmt, data[:endpoint]))
         # Insert assumed RecordStore pointers
@@ -1192,7 +1192,7 @@ class ProximityIndex(SimpleIndex):
 
     def serialize_term(self, session, termId, data, nRecs=0, nOccs=0):
         # in: list of longs
-        fmt = 'l' * (len(data) + 3)
+        fmt = '<' + 'l' * (len(data) + 3)
         params = [fmt, termId, nRecs, nOccs] + data
         try:
             val = struct.pack(*params)
@@ -1203,7 +1203,7 @@ class ProximityIndex(SimpleIndex):
         return val
 
     def deserialize_term(self, session, data, nRecs=-1, prox=1):
-        fmt = 'l' * (len(data) / self.longStructSize)
+        fmt = '<' + 'l' * (len(data) / self.longStructSize)
         flat = struct.unpack(fmt, data)
         (termid, totalRecs, totalOccs) = flat[:3]
         idx = 3
@@ -1386,7 +1386,7 @@ class XmlIndex(SimpleIndex):
 
     def serialize_term(self, session, termId, data, nRecs=0, nOccs=0):
         # in: list of longs
-        val = struct.pack('lll', termId, nRecs, nOccs)
+        val = struct.pack('<lll', termId, nRecs, nOccs)
         xml = ['<rs tid="%s" recs="%s" occs="%s">' % (termId, nRecs, nOccs)]
         idx = 0
         for i in range(0, len(data), 3):
@@ -1399,7 +1399,7 @@ class XmlIndex(SimpleIndex):
 
     def deserialize_term(self, session, data, nRecs=-1, prox=1):
         lss3 = 3 * self.longStructSize
-        fmt = 'lll'
+        fmt = '<lll'
         (termid, totalRecs, totalOccs) = struct.unpack(fmt, data[:lss3])
         xmlstr = self._maybeUncompress(data[lss3:])
         return [termid, totalRecs, totalOccs, xmlstr]
@@ -1490,7 +1490,7 @@ class XmlProximityIndex(XmlIndex):
     def serialize_term(self, session, termId, data, nRecs=0, nOccs=0):
         # in: list of longs
         npi = self.get_setting(session, 'nProxInts', 2)
-        val = struct.pack('lll', termId, nRecs, nOccs)
+        val = struct.pack('<lll', termId, nRecs, nOccs)
         xml = ['<rs tid="%s" recs="%s" occs="%s">' % (termId, nRecs, nOccs)]
         idx = 0
         while idx < len(data):
@@ -1643,7 +1643,7 @@ class BitmapIndex(SimpleIndex):
             bf = SimpleBitfield()
             for item in data[::3]:
                 bf[item] = 1
-        pack = struct.pack('lll', termId, nRecs, nOccs)
+        pack = struct.pack('<lll', termId, nRecs, nOccs)
         val = pack + str(bf)
         return val
 
@@ -1657,7 +1657,7 @@ class BitmapIndex(SimpleIndex):
     def deserialize_term(self, session, data, nRecs=-1, prox=0):
         lsize = 3 * self.longStructSize
         longs = data[:lsize]
-        terms = list(struct.unpack('lll', longs))
+        terms = list(struct.unpack('<lll', longs))
         if len(data) > lsize:
             bf = SimpleBitfield(data[lsize:])
             terms.append(bf)
