@@ -30,7 +30,7 @@ _description = ('Cheshire3 Search and Retrieval Engine and Information '
                 'Framework')
 # Discover version number from file    
 with open(os.path.join(setupdir, 'VERSION.txt'), 'r') as vfh:
-    _version = vfh.read()
+    _version = vfh.read().strip()
 
 _download_url = ('http://download.cheshire3.org/{0}/src/{1}-{2}.tar.gz'
                  ''.format(_version[:3], _name, _version))
