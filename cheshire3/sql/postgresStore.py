@@ -203,11 +203,11 @@ class PostgresStore(SimpleStore):
             del self.cxn
             self.cxn = None
 
-    def _query(self, query):
+    def _query(self, query, *args):
         if self.cxn is None:
             self.cxn = pg.connect(self.database)
         query = query.encode('utf-8')
-        res = self.cxn.query(query)
+        res = self.cxn.query(query, args)
         return res
 
     def begin_storing(self, session):
@@ -244,9 +244,10 @@ class PostgresStore(SimpleStore):
         data = data.replace(nonTextToken, '\\\\000\\\\001')
 
         query = ("INSERT INTO %s (identifier, timeCreated) VALUES "
-                 "('%s', '%s');" % (self.table, id, now))
+                 "($1, $2);" % (self.table))
+        args = (id, now)
         try:
-            self._query(query)
+            self._query(query, *args)
         except:
             # Already exists
             pass
@@ -256,29 +257,33 @@ class PostgresStore(SimpleStore):
             # Insufficient PyGreSQL version
             ndata = data.replace("'", "\\'")
 
-        if metadata:
-            extra = []
-            for (n, v) in metadata.iteritems():
-                if type(v) in (int, long):
-                    extra.append('%s = %s' % (n, v))
-                else:
-                    extra.append("%s = '%s'" % (n, v))
-            extraq = ', '.join(extra)
-            query = ("UPDATE %s SET data = '%s', %s, timeModified = '%s' "
-                     "WHERE identifier = '%s';" %
-                     (self.table, ndata, extraq, now, id)
-                     )
-        else:
-            query = ("UPDATE %s SET data = '%s', timeModified = '%s' "
-                     "WHERE  identifier = '%s';" %
-                     (self.table, ndata, now, id)
-                     )
+        query = ("UPDATE %s SET data = $1, timeModified = $2 "
+                 "WHERE  identifier = $3;" %
+                 (self.table)
+                 )
+        args = (ndata, now, id)
         try:
-            self._query(query)
+            self._query(query, *args)
         except pg.ProgrammingError:
             # Uhhh...
             print query
             raise
+        if metadata:
+            extra = []
+            args = []
+            for (n, v) in metadata.iteritems():
+                args.append(v)
+                extra.append('%s = $%d' % (n, len(args)))
+            query = ("UPDATE %s SET %s"
+                     "WHERE identifier = '%s';" %
+                     (self.table, ', '.join(extra))
+                     )
+            try:
+                self._query(query, *args)
+            except pg.ProgrammingError:
+                # Uhhh...
+                print query
+                raise
         return None
 
     def fetch_data(self, session, id):
@@ -286,10 +291,10 @@ class PostgresStore(SimpleStore):
         sid = str(id)
         if (self.idNormalizer is not None):
             sid = self.idNormalizer.process_string(session, sid)
-        query = ("SELECT data FROM %s WHERE identifier = '%s';" %
-                 (self.table, sid)
+        query = ("SELECT data FROM %s WHERE identifier = $1;" %
+                 (self.table)
                  )
-        res = self._query(query)
+        res = self._query(query, sid)
         try:
             data = res.dictresult()[0]['data']
         except IndexError:
@@ -309,8 +314,8 @@ class PostgresStore(SimpleStore):
         sid = str(id)
         if (self.idNormalizer is not None):
             sid = self.idNormalizer.process_string(session, str(id))
-        query = "DELETE FROM %s WHERE identifier = '%s';" % (self.table, sid)
-        self._query(query)
+        query = "DELETE FROM %s WHERE identifier = $1;" % (self.table)
+        self._query(query, sid)
         return None
 
     def fetch_metadata(self, session, id, mType):
@@ -321,14 +326,14 @@ class PostgresStore(SimpleStore):
         else:
             id = str(id)
         self._openContainer(session)
-        query = ("SELECT %s FROM %s WHERE identifier = '%s';" %
-                 (mType, self.table, id)
+        query = ("SELECT %s FROM %s WHERE identifier = $1;" %
+                 (mType, self.table)
                  )
-        res = self._query(query)
+        res = self._query(query, id)
         try:
-            data = res.dictresult()[0][mtype]
+            data = res.dictresult()[0][mType]
         except:
-            if mtype.endswith(("Count", "Position", "Amount", "Offset")):
+            if mType.endswith(("Count", "Position", "Amount", "Offset")):
                 return 0
             return None
         return data
@@ -341,11 +346,12 @@ class PostgresStore(SimpleStore):
         else:
             id = str(id)
         self._openContainer(session)
-        query = ("UPDATE %s SET %s = %r WHERE identifier = '%s';" %
-                 (self.table, mType, value, id)
+        query = ("UPDATE %s SET %s = $1 WHERE identifier = $2;" %
+                 (self.table, mType)
                  )
+        args = (value, id)
         try:
-            self._query(query)
+            self._query(query, *args)
         except:
             return None
         return value
@@ -359,8 +365,8 @@ class PostgresStore(SimpleStore):
         # here is where sql is nice...
         self._openContainer(session)
         nowStr = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(time.time()))
-        query = "DELETE FROM %s WHERE expires < '%s';" % (self.table, nowStr)
-        self._query(query)
+        query = "DELETE FROM %s WHERE expires < $1;" % (self.table)
+        self._query(query, nowStr)
 
     def get_dbSize(self, session):
         query = "SELECT count(identifier) AS count FROM %s;" % (self.table)
@@ -381,24 +387,27 @@ class PostgresStore(SimpleStore):
             oid = obj.id
             if (self.idNormalizer):
                 oid = self.idNormalizer.process_string(session, oid)
-            values.append(repr(oid))
+            values.append(oid)
         for (name, value) in kw.iteritems():
             fields.append(name)
-            if isinstance(value, basestring) and value.find("'") > -1:
-                values.append("'{0}'".format(value.replace("'", r"\'")))
-            else:
-                values.append(repr(value))
+            values.append(value)
 
+        valuemarkers = ["${0}".format(i + 1) for i in range(len(values))]
         query = ("INSERT INTO %s_%s (%s) VALUES (%s);" %
-                 (self.table, relation, ', '.join(fields), ', '.join(values))
+                 (self.table,
+                  relation,
+                  ', '.join(fields),
+                  ', '.join(valuemarkers)
+                  )
                  )
-        self._query(query)
+        self._query(query, *values)
 
     def unlink(self, session, relation, *args, **kw):
         """Remove a row in the named relation.
 
         NOT API
         """
+        condvals = []
         conds = []
         for obj in args:
             oid = obj.id
@@ -406,19 +415,23 @@ class PostgresStore(SimpleStore):
                 oid = self.idNormalizer.process_string(session, oid)
             #cond += ("%s = %r, " % (obj.recordStore, oid))
             # Allows to unlink for objects other than Records
-            conds.append("%s = %r" % (self.table, oid))
+            condvals.append(oid)
+            conds.append("%s = $%d" % (self.table, len(condvals)))
+
         for (name, value) in kw.iteritems():
-            conds.append("%s = %r" % (name, value))
+            condvals.append(value)
+            conds.append("%s = $%d" % (name, len(condvals)))
         query = ("DELETE FROM %s_%s WHERE %s;" %
                  (self.table, relation, ' AND '.join(conds))
                  )
-        self._query(query)
+        self._query(query, *condvals)
 
     def get_links(self, session, relation, *args, **kw):
         """Get linked rows in the named relation.
 
         NOT API
         """
+        condvals = []
         conds = []
         for obj in args:
             oid = obj.id
@@ -426,13 +439,16 @@ class PostgresStore(SimpleStore):
                 oid = self.idNormalizer.process_string(session, oid)
             #cond += ("%s = %r, " % (obj.recordStore, oid))
             # Allows get_links for objects other than Records
-            conds.append("%s = %r" % (self.table, oid))
+            condvals.append(oid)
+            conds.append("%s = $%d" % (self.table, len(condvals)))
+
         for (name, value) in kw.iteritems():
-            conds.append("%s = %r" % (name, value))
+            condvals.append(value)
+            conds.append("%s = $%d" % (name, len(condvals)))
         query = ("SELECT * FROM %s_%s WHERE %s;" %
                  (self.table, relation, ', '.join(conds))
                  )
-        res = self._query(query)
+        res = self._query(query, *condvals)
 
         links = []
         reln = self.relations[relation]

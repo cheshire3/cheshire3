@@ -117,35 +117,34 @@ class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
 
         query = ("INSERT INTO %s (identifier, data, size, class, "
                  "timeCreated, timeAccessed, expires) VALUES "
-                 "('%s', '%s', %s, '%s', '%s', '%s', '%s')" %
-                 (self.table,
-                  id,
-                  ndata,
-                  len(rset),
-                  cl,
-                  nowStr,
-                  nowStr,
-                  expiresStr
-                  )
+                 "($1, $2, $3, $4, $5, $6, $7)" %
+                 (self.table)
                  )
+        args = (id,
+                ndata,
+                len(rset),
+                cl,
+                nowStr,
+                nowStr,
+                expiresStr
+                )
         try:
-            self._query(query)
+            self._query(query, *args)
         except pg.ProgrammingError as e:
             # already exists, retry for overwrite, create
             if self.get_setting(session, 'overwriteOkay', 0):
-                query = ("UPDATE %s SET data = '%s', size = %s, "
-                         "class = '%s', timeAccessed = '%s', expires = '%s' "
-                         "WHERE identifier = '%s';" %
-                         (self.table,
-                          ndata,
-                          len(rset),
-                          cl,
-                          nowStr,
-                          expiresStr,
-                          id
-                          )
+                query = ("UPDATE %s SET data = $1, size = $2, "
+                         "class = $3, timeAccessed = $4, expires = $5 "
+                         "WHERE identifier = $6;" % (self.table)
                          )
-                self._query(query)
+                args = (ndata,
+                        len(rset),
+                        cl,
+                        nowStr,
+                        expiresStr,
+                        id
+                        )
+                self._query(query, *args)
             elif hasattr(rset, 'retryOnFail'):
                 # generate new id, re-store
                 id = self.generate_id(session)
@@ -153,18 +152,18 @@ class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
                     id = self.idNormalizer.process_string(session, id)
                 query = ("INSERT INTO %s (identifier, data, size, class, "
                          "timeCreated, timeAccessed, expires) VALUES "
-                         "('%s', '%s', %s, '%s', '%s', '%s', '%s')" %
-                         (self.table,
-                          id,
-                          ndata,
-                          len(rset),
-                          cl,
-                          nowStr,
-                          nowStr,
-                          expiresStr
-                          )
+                         "($1, $2, $3, $4, $5, $6, $7)" %
+                         (self.table)
                          )
-                self._query(query)
+                args = (id,
+                        ndata,
+                        len(rset),
+                        cl,
+                        nowStr,
+                        nowStr,
+                        expiresStr
+                        )
+                self._query(query, *args)
             else:
                 raise ObjectAlreadyExistsException(self.id + '/' + id)
         return rset
@@ -175,10 +174,10 @@ class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
         sid = str(id)
         if (self.idNormalizer is not None):
             sid = self.idNormalizer.process_string(session, sid)
-        query = ("SELECT class, data FROM %s WHERE identifier = '%s';" %
-                 (self.table, sid)
+        query = ("SELECT class, data FROM %s WHERE identifier = $1;" %
+                 (self.table)
                  )
-        res = self._query(query)
+        res = self._query(query, sid)
         try:
             rdict = res.dictresult()[0]
         except IndexError:
@@ -206,11 +205,10 @@ class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
         rset.timeExpires = expires
         expiresStr = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(expires))
 
-        query = ("UPDATE %s SET timeAccessed = '%s', expires = '%s' "
-                 "WHERE identifier = '%s';" %
-                 (self.table, nowStr, expiresStr, sid)
+        query = ("UPDATE %s SET timeAccessed = $1, expires = $2 "
+                 "WHERE identifier = $3;" % (self.table)
                  )
-        self._query(query)
+        self._query(query, nowStr, expiresStr, sid)
         return rset
 
     def delete_resultSet(self, session, id):
@@ -218,5 +216,5 @@ class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
         sid = str(id)
         if (self.idNormalizer is not None):
             sid = self.idNormalizer.process_string(session, sid)
-        query = "DELETE FROM %s WHERE identifier = '%s';" % (self.table, sid)
-        self._query(query)
+        query = "DELETE FROM %s WHERE identifier = $1;" % (self.table)
+        self._query(query, sid)
