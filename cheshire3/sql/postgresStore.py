@@ -268,22 +268,8 @@ class PostgresStore(SimpleStore):
             # Uhhh...
             print query
             raise
-        if metadata:
-            extra = []
-            args = []
-            for (n, v) in metadata.iteritems():
-                args.append(v)
-                extra.append('%s = $%d' % (n, len(args)))
-            query = ("UPDATE %s SET %s"
-                     "WHERE identifier = '%s';" %
-                     (self.table, ', '.join(extra))
-                     )
-            try:
-                self._query(query, *args)
-            except pg.ProgrammingError:
-                # Uhhh...
-                print query
-                raise
+        for (mType, value) in metadata.iteritems():
+            self.store_metadata(session, id, mType, value)
         return None
 
     def fetch_data(self, session, id):
