@@ -312,6 +312,10 @@ class PostgresStore(SimpleStore):
         else:
             id = str(id)
         self._openContainer(session)
+        if mType == "creationDate":
+            mType = "timeCreated"
+        elif mType == "modificationDate":
+            mType = "timeModified"
         query = ("SELECT %s FROM %s WHERE identifier = $1;" %
                  (mType, self.table)
                  )
@@ -332,6 +336,11 @@ class PostgresStore(SimpleStore):
         else:
             id = str(id)
         self._openContainer(session)
+        if mType == "creationDate":
+            mType = "timeCreated"
+        elif mType == "modificationDate":
+            mType = "timeModified"
+
         query = ("UPDATE %s SET %s = $1 WHERE identifier = $2;" %
                  (self.table, mType)
                  )
