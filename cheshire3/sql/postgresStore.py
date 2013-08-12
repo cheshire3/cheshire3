@@ -328,13 +328,13 @@ class PostgresStore(SimpleStore):
             return None
         return data
 
-    def store_metadata(self, session, key, mType, value):
+    def store_metadata(self, session, id_, mType, value):
         if (self.idNormalizer is not None):
-            id = self.idNormalizer.process_string(session, id)
-        elif type(id) == unicode:
-            id = id.encode('utf-8')
+            id_ = self.idNormalizer.process_string(session, id_)
+        elif isinstance(id_, unicode):
+            id_ = id_.encode('utf-8')
         else:
-            id = str(id)
+            id_ = str(id_)
         self._openContainer(session)
         if mType == "creationDate":
             mType = "timeCreated"
@@ -344,7 +344,7 @@ class PostgresStore(SimpleStore):
         query = ("UPDATE %s SET %s = $1 WHERE identifier = $2;" %
                  (self.table, mType)
                  )
-        args = (value, id)
+        args = (value, id_)
         try:
             self._query(query, *args)
         except:
