@@ -6,9 +6,9 @@ be instantiated using configurations defined within this testing module,
 and tests carried out on those instances using data defined in this module.
 """
 
-import binascii
-import re
 import hashlib
+import re
+import sys
 
 try:
     import unittest2 as unittest
@@ -621,6 +621,8 @@ class B64DecodePreParserTestCase(ImplementedPreParserTestCase):
             u"Returned document content not as expected")
 
 
+@unittest.skipIf(sys.platform.startswith("sunos"),
+                 "variable LZ4 support on SunOS")
 class LZ4CompressPreParserTestCase(ImplementedPreParserTestCase):
     """Cheshire3 LZ4CompressPreParser Unittests."""
 
@@ -642,6 +644,8 @@ class LZ4CompressPreParserTestCase(ImplementedPreParserTestCase):
             u"Returned document content not as expected")
 
 
+@unittest.skipIf(sys.platform.startswith("sunos"),
+                 "variable LZ4 support on SunOS")
 class LZ4DecompressPreParserTestCase(ImplementedPreParserTestCase):
     """Cheshire3 LZ4DecompressPreParser Unittests."""
 
