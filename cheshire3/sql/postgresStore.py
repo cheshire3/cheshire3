@@ -237,17 +237,19 @@ class PostgresStore(SimpleStore):
             self.currentId += 1
             return self.currentId
 
-    def store_data(self, session, id, data, metadata={}):
+    def store_data(self, session, id_, data, metadata={}):
         self._openContainer(session)
-        id = str(id)
-        now = time.strftime("%Y-%m-%d %H:%M:%S")
         if (self.idNormalizer is not None):
-            id = self.idNormalizer.process_string(session, id)
+            id_ = self.idNormalizer.process_string(session, id_)
+        elif isinstance(id_, unicode):
+            id_ = id_.encode('utf-8')
+        else:
+            id_ = str(id_)
+        now = time.strftime("%Y-%m-%d %H:%M:%S")
         data = data.replace(nonTextToken, '\\\\000\\\\001')
-
         query = ("INSERT INTO %s (identifier, timeCreated) VALUES "
                  "($1, $2);" % (self.table))
-        args = (id, now)
+        args = (id_, now)
         try:
             self._query(query, *args)
         except:
@@ -258,12 +260,11 @@ class PostgresStore(SimpleStore):
         except:
             # Insufficient PyGreSQL version
             ndata = data.replace("'", "\\'")
-
         query = ("UPDATE %s SET data = $1, timeModified = $2 "
                  "WHERE  identifier = $3;" %
                  (self.table)
                  )
-        args = (ndata, now, id)
+        args = (ndata, now, id_)
         try:
             self._query(query, *args)
         except pg.ProgrammingError:
@@ -271,14 +272,17 @@ class PostgresStore(SimpleStore):
             print query
             raise
         for (mType, value) in metadata.iteritems():
-            self.store_metadata(session, id, mType, value)
+            self.store_metadata(session, id_, mType, value)
         return None
 
-    def fetch_data(self, session, id):
+    def fetch_data(self, session, id_):
         self._openContainer(session)
-        sid = str(id)
         if (self.idNormalizer is not None):
-            sid = self.idNormalizer.process_string(session, sid)
+            sid = self.idNormalizer.process_string(session, id_)
+        elif isinstance(id_, unicode):
+            sid = id_.encode('utf-8')
+        else:
+            sid = str(id_)
         query = ("SELECT data FROM %s WHERE identifier = $1;" %
                  (self.table)
                  )
@@ -286,7 +290,7 @@ class PostgresStore(SimpleStore):
         try:
             data = res.dictresult()[0]['data']
         except IndexError:
-            raise ObjectDoesNotExistException(id)
+            raise ObjectDoesNotExistException(id_)
         try:
             ndata = pg.unescape_bytea(data)
         except:
@@ -297,22 +301,25 @@ class PostgresStore(SimpleStore):
         ndata = ndata.replace('\\012', '\n')
         return ndata
 
-    def delete_data(self, session, id):
+    def delete_data(self, session, id_):
         self._openContainer(session)
-        sid = str(id)
         if (self.idNormalizer is not None):
-            sid = self.idNormalizer.process_string(session, str(id))
+            sid = self.idNormalizer.process_string(session, id_)
+        elif isinstance(id_, unicode):
+            sid = id_.encode('utf-8')
+        else:
+            sid = str(id_)
         query = "DELETE FROM %s WHERE identifier = $1;" % (self.table)
         self._query(query, sid)
         return None
 
-    def fetch_metadata(self, session, id, mType):
+    def fetch_metadata(self, session, id_, mType):
         if (self.idNormalizer is not None):
-            id = self.idNormalizer.process_string(session, id)
-        elif type(id) == unicode:
-            id = id.encode('utf-8')
+            id_ = self.idNormalizer.process_string(session, id_)
+        elif isinstance(id_, unicode):
+            id_ = id_.encode('utf-8')
         else:
-            id = str(id)
+            id_ = str(id_)
         self._openContainer(session)
         if mType == "creationDate":
             mType = "timeCreated"
@@ -321,7 +328,7 @@ class PostgresStore(SimpleStore):
         query = ("SELECT %s FROM %s WHERE identifier = $1;" %
                  (mType, self.table)
                  )
-        res = self._query(query, id)
+        res = self._query(query, id_)
         try:
             data = res.dictresult()[0][mType]
         except IndexError:
