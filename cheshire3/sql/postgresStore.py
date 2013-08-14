@@ -5,6 +5,8 @@ import pg
 import time
 from lxml import etree
 
+from dateutil import parser as dateparser
+
 from cheshire3.baseStore import SimpleStore
 from cheshire3.exceptions import *
 from cheshire3.utils import (
@@ -332,6 +334,8 @@ class PostgresStore(SimpleStore):
                 if mType.endswith(("Count", "Position", "Amount", "Offset")):
                     return 0
                 return None
+        if mType.startswith("time"):
+            data = dateparser.parse(data)
         return data
 
     def store_metadata(self, session, id_, mType, value):
