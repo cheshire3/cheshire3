@@ -322,10 +322,16 @@ class PostgresStore(SimpleStore):
         res = self._query(query, id)
         try:
             data = res.dictresult()[0][mType]
-        except:
-            if mType.endswith(("Count", "Position", "Amount", "Offset")):
-                return 0
-            return None
+        except IndexError:
+            raise ObjectDoesNotExistException()
+        except KeyError:
+            # PostgreSQL may have lower-cased all column names...
+            try:
+                data = res.dictresult()[0][mType.lower()]
+            except KeyError:
+                if mType.endswith(("Count", "Position", "Amount", "Offset")):
+                    return 0
+                return None
         return data
 
     def store_metadata(self, session, id_, mType, value):
