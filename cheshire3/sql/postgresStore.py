@@ -36,7 +36,6 @@ class PostgresStore(SQLStore):
         SimpleStore.__init__(self, session, config, parent)
         # Try databaseName for backward compatibility
         self.database = self.get_path(session, 'databaseName', "cheshire3")
-        print self.database
         self.table = self.get_path(session,
                                    'tableName',
                                    parent.id + '_' + self.id
