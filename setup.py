@@ -80,7 +80,7 @@ setup(
         'graph': ['rdflib'],
         'datamining': ['svm'],
         'lucene': ['lucene'],
-        'sql': ['PyGreSQL >= 4.1'],
+        'sql': ['psycopg2 >= 2.5'],
         'textmining': ['numpy', 'nltk >= 2.0'],
         'web': ['pyoai', 'PyZ3950 >= 2.04', 'ZSI < 2.0']
     },

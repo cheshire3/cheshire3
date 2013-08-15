@@ -64,28 +64,24 @@ class PostgresIndexStore(IndexStore, PostgresStore):
         return base.replace('-', '_').lower()
 
     def contains_index(self, session, index):
-        self._openContainer(session)
         table = self._generate_tableName(session, index)
         query = ("SELECT relname FROM pg_stat_user_tables WHERE "
-                 "relname = '%s'" % table
+                 "relname = %s"
                  )
-        res = self._query(query)
+        res = self._query(query, (table,))
         return len(res.dictresult()) == 1
 
     def create_index(self, session, index):
-        self._openContainer(session)
         table = self._generate_tableName(session, index)
-        query = ("CREATE TABLE %s (identifier SERIAL PRIMARY KEY, term "
+        query = ("CREATE TABLE {0} (identifier SERIAL PRIMARY KEY, term "
                  "VARCHAR, occurences INT, recordId VARCHAR, stem VARCHAR, "
-                 "pos VARCHAR)" % table
+                 "pos VARCHAR)".format(table)
                  )
-        query2 = "CREATE INDEX %s ON %s (term)" % (table + "_INDEX", table)
-        self._openContainer(session)
         self._query(query)
+        query2 = "CREATE INDEX {0}_INDEX ON {0} (term)".format(table)
         self._query(query2)
 
     def begin_indexing(self, session, index):
-        self._openContainer(session)
         if not self.transaction:
             self._query('BEGIN')
             self.transaction = 1
@@ -96,40 +92,39 @@ class PostgresIndexStore(IndexStore, PostgresStore):
             self.transaction = 0
         table = self._generate_tableName(session, index)
         termIdx = table + "_INDEX"
-        self._query('CLUSTER %s ON %s' % (termIdx, table))
+        self._query('CLUSTER {0} ON {1}'.format(termIdx, table))
 
     def store_terms(self, session, index, termhash, record):
         # write directly to db, as sort comes as CLUSTER later
         table = self._generate_tableName(session, index)
-        queryTmpl = ("INSERT INTO %s (term, occurences, recordId) "
-                     "VALUES ('%%s', %%s, '%r')" % (table, record)
-                     )
+        query = ("INSERT INTO {0} (term, occurences, recordId) "
+                 "VALUES (%s, %s, %s)".format(table) % (table, record)
+                 )
 
         for t in termhash.values():
             term = t['text'].replace("'", "''")
-            query = queryTmpl % (term, t['occurences'])
-            self._query(query)
+            self._query(query, (term, t['occurences'], repr(record)))
 
     def delete_terms(self, session, index, termHash, record):
         table = self._generate_tableName(session, index)
-        query = "DELETE FROM %s WHERE recordId = '%r'" % (table, record)
-        self._query(query)
+        query = "DELETE FROM {0} WHERE recordId = %s".format(table)
+        self._query(query, (repr(record),))
 
     def fetch_term(self, session, index, term, prox=True):
         # should return info to create result set
         # --> [(rec, occs), ...]
         table = self._generate_tableName(session, index)
         term = term.replace("'", "\\'")
-        query = ("SELECT recordId, occurences FROM %s WHERE term='%s'" %
-                 (table, term)
+        query = ("SELECT recordId, occurences FROM {0} WHERE term=%s"
+                 "".format(table)
                  )
-        res = self._query(query)
+        res = self._query(query, (repr(term),))
         dr = res.dictresult()
         totalRecs = len(dr)
-        occq = ("SELECT SUM(occurences) as sum FROM %s WHERE term='%s'" %
-                (table, term)
+        occq = ("SELECT SUM(occurences) as sum FROM {0} WHERE term='%s'"
+                "".format(table)
                 )
-        res = self._query(occq)
+        res = self._query(occq, (term,))
         totalOccs = res.dictresult()[0]['sum']
         return {'totalRecs': totalRecs, 'records': dr, 'totalOccs': totalOccs}
 
@@ -154,11 +149,12 @@ class PostgresIndexStore(IndexStore, PostgresStore):
             order = ""
         # Assumes summary, atm :|
         # term, total recs, total occurences
-        occq = ("SELECT term, count(term), sum(occurences) FROM %s "
-                "WHERE term%s'%s' group by term %sLIMIT %s" %
-                (table, relation, term, order, numReq)
+        occq = ("SELECT term, count(term), sum(occurences) FROM {0} "
+                "WHERE term{1}%s group by term {2}LIMIT {3}"
+                "".format
+                (table, relation, order, numReq)
                 )
-        res = self._query(occq)
+        res = self._query(occq, (term,))
         # Now construct list from query result
         tlist = res.getresult()
         tlist = [(x[0], (0, x[1], x[2])) for x in tlist]
