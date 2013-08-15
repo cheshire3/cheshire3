@@ -2,7 +2,9 @@
 
 import psycopg2
 
+from contextlib import contextmanager
 from datetime import datetime
+from psycopg2.pool import ThreadedConnectionPool
 
 from lxml import etree
 
@@ -24,7 +26,7 @@ class PostgresIter(object):
     """Iterator for Cheshire3 PostgresStores."""
 
     def _connect(self):
-        return psycopg2.connect("dbname={0}".format(self.store.database))
+        return self.store._connect(self.session)
 
 
 class PostgresStore(SQLStore):
@@ -40,7 +42,15 @@ class PostgresStore(SQLStore):
                                    'tableName',
                                    parent.id + '_' + self.id
                                    )
+        self.connectionPool = ThreadedConnectionPool(
+            2,
+            10,
+            "dbname={0}".format(self.database)
+        )
         self._verifyDatabases(session)
+
+    def __del__(self):
+        self.connectionPool.closeall()
 
     def __iter__(self):
         # Return an iterator object to iter through
@@ -93,13 +103,19 @@ class PostgresStore(SQLStore):
                     self.relations[relName] = fields
         #- end _handleLxmlConfigNode ----------------------------------------
 
+    @contextmanager
     def _connect(self, session):
         try:
-            return psycopg2.connect("dbname={0}".format(self.database))
+            cxn = self.connectionPool.getconn()
         except psycopg2.OperationalError as e:
             raise ConfigFileException("Cannot connect to Postgres: %r" %
                                       e.args
                                       )
+        yield cxn
+        # Commit transactions
+        cxn.commit()
+        # Return the cxn top the pool
+        self.connectionPool.putconn(cxn)
 
     def _initialise(self, session):
         query = """
