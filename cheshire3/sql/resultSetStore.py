@@ -108,8 +108,8 @@ class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
                 )
         try:
             self._query(query, args)
-        except psycopg2.ProgrammingError as e:
-            # already exists, retry for overwrite, create
+        except (psycopg2.ProgrammingError, psycopg2.IntegrityError) as e:
+            # Already exists, retry for overwrite, create
             if self.get_setting(session, 'overwriteOkay', 0):
                 query = ("UPDATE {0} SET data = %s, size = %s, "
                          "class = %s, timeAccessed = %s, expires = %s "
