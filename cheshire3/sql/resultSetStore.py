@@ -66,8 +66,8 @@ class PostgresResultSetStore(PostgresStore, SimpleResultSetStore):
                 res = self._query(query, tuple(args))
 
     def store_data(self, session, id_, data, metadata={}):
-        # Should call store_resultSet
-        raise NotImplementedError
+        # User should call store_resultSet instead
+        raise NotImplementedError("Use `store_resultSet()` method")
 
     def create_resultSet(self, session, rset):
         id_ = self.generate_id(session)
