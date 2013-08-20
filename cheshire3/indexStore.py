@@ -1663,7 +1663,11 @@ class BdbIndexStore(IndexStore):
         dataLen = index.longStructSize * self.reservedLongs
 
         c = cxn.cursor()
-        term = term.encode('utf-8')
+        if not term:
+            # Special escape for first term (i.e. empty string)
+            term = c.first()[0]
+        else:
+            term = term.encode('utf-8')
         try:
             if summary:
                 (key, data) = c.set_range(term, dlen=dataLen, doff=0)
