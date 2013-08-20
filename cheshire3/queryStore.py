@@ -45,9 +45,10 @@ class SimpleQueryStore(QueryStore):
         if (not hasattr(query, 'id')) or (query.id is None):
             # Where to get ID from??? 
             raise NotImplementedError
-        
+
         id = query.id
-        data = query.toCQL()
+        data = query.toCQL().encode('utf-8')
+        # Encode to utf-8
         if hasattr(query, 'resultSet'):
             rsid = query.resultSet.id
             query.resultSetId = rsid
