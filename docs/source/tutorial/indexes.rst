@@ -112,4 +112,10 @@ After these processes have happened, the system will store the transformed
 terms in the :py:class:`~cheshire3.baseObjects.IndexStore` referenced in the
 :ref:`config-paths` section.
 
-Finally, in the first example, we have a setting called 's
+Finally, in the first example, we have a setting called ``sortStore``. If this
+is given, then the system will create a map of record to term for the
+:py:class:`~cheshire3.baseObjects.Index` to allow the term to be quickly
+retrieved for the purposes of sorting a
+:py:class:`~cheshire.baseObjects.ResultSet`. For detailed information about
+available settings for :py:class:`~cheshire3.baseObjects.Index`\ es see
+the :ref:`Index Configuration, Settings section<config-indexes-settings>`.
