@@ -1,5 +1,4 @@
 
-import sys
 import os
 import time
 import datetime
@@ -7,10 +6,8 @@ import dateutil
 
 try:
     import irods
-    import irods_error
 except ImportError:
     irods = None
-    irods_error = None
 
 import bsddb as bdb
 
@@ -179,13 +176,41 @@ class IrodsStore(SimpleStore):
     def _open(self, session):
         if self.cxn is None:
             # connect to iRODS
-            myEnv, status = irods.getRodsEnv()
-            host = self.host if self.host else myEnv.getRodsHost()
-            port = self.port if self.port else myEnv.getRodsPort()
-            user = self.user if self.user else myEnv.getRodsUserName()
-            zone = self.zone if self.zone else myEnv.getRodsZone()
+            status, myEnv = irods.getRodsEnv()
+            # Host
+            if self.host:
+                host = self.host
+            else:
+                try:
+                    host = myEnv.getRodsHost()
+                except AttributeError:
+                    host = myEnv.rodsHost
+            # Port
+            if self.port:
+                port = self.port
+            else:
+                try:
+                    myEnv.getRodsPort()
+                except AttributeError:
+                    port = myEnv.rodsPort
+            # User
+            if self.user:
+                username = myEnv.rodsUserName
+            else:
+                try:
+                    username = myEnv.getRodsUserName()
+                except AttributeError:
+                    username = myEnv.rodsUserName
+            # Zone
+            if self.zone:
+                zone = self.zone
+            else:
+                try:
+                    zone = myEnv.getRodsZone()
+                except AttributeError:
+                    zone = myEnv.rodsZone
 
-            conn, errMsg = irods.rcConnect(host, port, user, zone)
+            conn, errMsg = irods.rcConnect(host, port, username, zone)
             if self.passwd:
                 status = irods.clientLoginWithPassword(conn, self.passwd)
             else:
@@ -205,8 +230,11 @@ class IrodsStore(SimpleStore):
         if self.coll is not None:
             # Already open, just skip
             return None
-
-        c = irods.irodsCollection(self.cxn, self.env.getRodsHome())
+        try:
+            rodsHome = myEnv.getRodsHome()
+        except AttributeError:
+            rodsHome = myEnv.rodsHome
+        c = irods.irodsCollection(self.cxn, rodsHome)
         self.coll = c
 
         # Move into cheshire3 section
@@ -285,9 +313,7 @@ class IrodsStore(SimpleStore):
         matches = []
         # do query
         genQueryOut, status = irods.rcGenQuery(self.cxn, genQueryInp)
-        if status == irods_error.CAT_NO_ROWS_FOUND:
-            return []
-        elif status == 0:
+        if status == 0:
             sqlResults = genQueryOut.getSqlResult()
             matches = sqlResults[0].getValues()
 

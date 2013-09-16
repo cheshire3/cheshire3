@@ -1,4 +1,5 @@
 import os
+from urlparse import urlsplit
 
 from cheshire3.document import StringDocument
 from cheshire3.documentFactory import MultipleDocumentStream
@@ -6,16 +7,15 @@ from cheshire3.documentFactory import FileDocumentStream
 from cheshire3.exceptions import ConfigFileException
 from cheshire3.exceptions import MissingDependencyException
 
-from cheshire3.grid.irods_utils import icatValToPy
+from cheshire3.grid.irods_utils import icatValToPy, parse_irodsUrl
 
 try:
     import irods
-    import irods_error
 except ImportError:
-    
+
     class IrodsStream(object):
         u"""Base class DocumentStream to load from iRODS."""
-    
+
         def __init__(self, session, stream):
             raise MissingDependencyException(
                 '{0.__module__}.{0.__class__.__name__}'.format(self),
@@ -26,20 +26,35 @@ else:
 
     class IrodsStream(object):
         u"""Base class DocumentStream to load from iRODS."""
-    
+
         def __init__(self, session, stream):
-            myEnv, status = irods.getRodsEnv()
-            conn, errMsg = irods.rcConnect(myEnv.getRodsHost(),
-                                           myEnv.getRodsPort(),
-                                           myEnv.getRodsUserName(),
-                                           myEnv.getRodsZone())
+            # Check for URL
+            if stream.startswith(('irods://', 'rods://')):
+                myEnv = parse_irodsUrl(stream)
+                stream = myEnv.relpath
+            else:
+                # Get parameters from env
+                status, myEnv = irods.getRodsEnv()
+            try:
+                host = myEnv.getRodsHost()
+                port = myEnv.getRodsPort()
+                username = myEnv.getRodsUserName()
+                zone = myEnv.getRodsZone()
+                home = myEnv.getRodsHome()
+            except AttributeError:
+                host = myEnv.rodsHost
+                port = myEnv.rodsPort
+                username = myEnv.rodsUserName
+                zone = myEnv.rodsZone
+                home = myEnv.rodsHome
+            conn, errMsg = irods.rcConnect(host, port, username, zone)
             status = irods.clientLogin(conn)
             if status:
                 raise ConfigFileException("Cannot connect to iRODS: ({0}) {1}"
                                           "".format(status, errMsg)
                                           )
-            home = myEnv.getRodsHome()
-            c = irods.irodsCollection(conn, home)
+
+            c = irods.irodsCollection(conn)
             self.cxn = conn
             self.coll = c
             instream = stream
@@ -157,6 +172,23 @@ class IrodsDirectoryDocumentStream(IrodsStream, MultipleDocumentStream):
                 c.upCollection()
 
 
+class IrodsDeterminingDocumentStream(IrodsFileDocumentStream,
+                                     IrodsDirectoryDocumentStream):
+    """DocumentStream to load a Document from a file or directory in iRODS."""
+
+    def __init__(self, session, stream, format,
+                 tagName=None, codec=None, factory=None):
+        IrodsStream.__init__(self, session, stream)
+        # Check the stream location to init correct subclass
+        fn = os.path.basename(stream)
+        if fn in self.coll.getObjects():
+            FileDocumentStream.__init__(self, session, stream, format,
+                                        tagName, codec, factory)
+        else:
+            MultipleDocumentStream.__init__(self, session, stream, format,
+                                            tagName, codec, factory)
+
+
 class IrodsConsumingFileDocumentStream(IrodsFileDocumentStream):
     u"""DocumentStream to load a Document by consuming a file in iRODS.
 
@@ -245,7 +277,8 @@ class SrbDocumentStream(MultipleDocumentStream):
     pass
 
 
-streamHash = {"ifile": IrodsFileDocumentStream,
+streamHash = {"irods": IrodsDeterminingDocumentStream,
+              "ifile": IrodsFileDocumentStream,
               "idir": IrodsDirectoryDocumentStream,
               "ifile-": IrodsConsumingFileDocumentStream,
               "idir-": IrodsConsumingDirectoryDocumentStream
