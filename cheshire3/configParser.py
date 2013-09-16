@@ -5,9 +5,12 @@ import time
 import glob
 import hashlib
 import inspect
+import urllib2
 
 from string import Template
 from types import MethodType
+from urlparse import urlsplit
+
 from lxml import etree
 
 from cheshire3.session import Session
@@ -20,6 +23,7 @@ from cheshire3.permissionHandler import PermissionHandler
 from cheshire3.internal import defaultArchitecture, get_api, cheshire3Home,\
                                cheshire3Root, cheshire3Dbs, cheshire3Www,\
                                CONFIG_NS
+
 
 cheshire3Paths = {'cheshire3Home': cheshire3Home,
                   'cheshire3Root': cheshire3Root,
@@ -128,22 +132,50 @@ class C3Object(object):
             'docs': ('Space separated list of function names to enable '
                      'function logging for.')}
     }
-    
+
     _possibleDefaults = {}
 
     def _getDomFromFile(self, session, fileName, parser=''):
         """Read, parse and return configuration from a file.
-        
-        Read in an XML file from disk to get the configuration for this 
-        object.
-        """
-        # We need to be able to read in configurations from disk
-        if not os.path.exists(fileName):
-            raise FileDoesNotExistException(fileName)
-        
-        f = open(fileName, 'r')
-        doc = BootstrapDocument(f)
 
+        Read in an XML file from disk to get the configuration for this
+        object.
+
+        Delegates to ``_getDomFromUrl``.
+        """
+        return self._getDomFromUrl(session, "file://" + fileName, parser)
+
+    def _getDomFromUrl(self, session, url, parser=''):
+        """Read, parse and return configuration from a file.
+
+        Read in an XML file to get the configuration for this object.
+        """
+        # We need to be able to read in configurations
+        urlparts = urlsplit(url)
+        if urlparts.scheme in ('http', 'https'):
+            f = urllib2.urlopen(url)
+        elif urlparts.scheme == "irods":
+            try:
+                from cheshire3.grid.irods_utils import open_irodsUrl
+            except ImportError:
+                self.log_error(session,
+                               "Unable to include file at {0}, "
+                               "Missing Dependency: irods (PyRods)"
+                               )
+                return
+            else:
+                f = open_irodsUrl(url)
+            if not f:
+                self.log_error(session,
+                               "Unable to include file at {0}, "
+                               "File not found".format(url)
+                               )
+                return
+        else:
+            if not os.path.isfile(urlparts.path):
+                raise FileDoesNotExistException(urlparts.path)
+            f = open(urlparts.path, 'r')
+        doc = BootstrapDocument(f)
         # Look on self for instantiated parser, otherwise use bootstrap
         p = self.get_path(session, 'parser', None)
         try:
@@ -154,14 +186,14 @@ class C3Object(object):
             else:
                 record = BSLxmlParser.process_document(session, doc)
         except Exception as e:
-            raise ConfigFileException("Cannot parse %s: %s" % (fileName, e))
+            raise ConfigFileException("Cannot parse %s: %s" % (url, e))
         dom = record.get_dom(session)
         f.close()
         return dom
 
     def _handleConfigNode(self, session, node):
         """Handle DOM (4Suite/minidom/Domlette) configuration node.
-        
+
         Handle config node when parsed as a DOM (4Suite/minidom/Domlette)
         DEPRECATED in favour of lxml.etree parsed configurations.
         """
@@ -203,7 +235,10 @@ class C3Object(object):
                 return value
 
     def _parseIncludes(self, session, path):
-        dom = self._getDomFromFile(session, path)
+        if urlsplit(path).scheme:
+            dom = self._getDomFromUrl(session, path)
+        else:
+            dom = self._getDomFromFile(session, path)
         for child2 in dom.childNodes[0].childNodes:
             if child2.nodeType == elementType:
                 if child2.localName == "subConfigs":
@@ -234,7 +269,7 @@ class C3Object(object):
                 elif type == '':
                     msg = "Object must have a type attribute: %s" % id
                     raise ConfigFileException(msg)
-                    
+
             elif mod.nodeType == elementType and mod.localName == "path":
                 if (mod.hasAttributeNS(None, 'type') and
                     mod.getAttributeNS(None, 'type') == 'includeConfigs'):
@@ -249,9 +284,12 @@ class C3Object(object):
                         path = getFirstData(mod)
                         # Expand user-specific paths
                         path = os.path.expanduser(path)
-                        if not os.path.isabs(path):
-                            path = os.path.join(
-                                self.get_path(session, 'defaultPath'), path)
+                        if not (urlsplit(path).scheme or os.path.isabs(path)):
+                            dfp = self.get_path(session, 'defaultPath')
+                            if urlsplit(dfp).scheme:
+                                path = '/'.join((dfp, path))
+                            else:
+                                path = os.path.join(dfp, path)
                         if os.path.isdir(path):
                             # include all configs in it at our space
                             files = glob.glob("%s/*.xml" % path)
@@ -263,10 +301,16 @@ class C3Object(object):
                     path = getFirstData(mod)
                     # Expand user-specific paths
                     path = os.path.expanduser(path)
-                    if  not os.path.isabs(path):
-                        path = os.path.join(
-                            self.get_path(session, 'defaultPath'), path)
-                    dom = self._getDomFromFile(session, path)
+                    if not (urlsplit(path).scheme or os.path.isabs(path)):
+                        dfp = self.get_path(session, 'defaultPath')
+                        if urlsplit(dfp).scheme:
+                            path = '/'.join((dfp, path))
+                        else:
+                            path = os.path.join(dfp, path)
+                    if urlsplit(path).scheme:
+                        dom = self._getDomFromUrl(session, path)
+                    else:
+                        dom = self._getDomFromFile(session, path)
                     id = mod.getAttributeNS(None, 'id')
                     self.subConfigs[id] = dom.childNodes[0]
                     ot = mod.getAttributeNS(None, 'type')
@@ -274,9 +318,11 @@ class C3Object(object):
                         self.databaseConfigs[id] = dom.childNodes[0]
 
     def _parseLxmlIncludes(self, session, path):
-        dom = self._getDomFromFile(session, path)
+        if urlsplit(path).scheme:
+            dom = self._getDomFromUrl(session, path)
+        else:
+            dom = self._getDomFromFile(session, path)
         idt = dom.attrib.get('id', '')
-        
         if dom.tag in ['config', '{%s}config' % CONFIG_NS] and idt:
             self.subConfigs[idt] = dom
         else:
@@ -310,9 +356,12 @@ class C3Object(object):
                         path = e.text
                         # Expand user-specific paths
                         path = os.path.expanduser(path)
-                        if not os.path.isabs(path):
-                            path = os.path.join(
-                                self.get_path(session, 'defaultPath'), path)
+                        if not (urlsplit(path).scheme or os.path.isabs(path)):
+                            dfp = self.get_path(session, 'defaultPath')
+                            if urlsplit(dfp).scheme:
+                                path = '/'.join((dfp, path))
+                            else:
+                                path = os.path.join(dfp, path)
                         if os.path.isdir(path):
                             files = glob.glob("%s/*.xml" % path)
                             for f in files:
@@ -321,12 +370,23 @@ class C3Object(object):
                             self._parseLxmlIncludes(session, path)
                 else:
                     path = e.text
-                    # Expand user-specific paths
-                    path = os.path.expanduser(path)
-                    if not os.path.isabs(path):
-                        path = os.path.join(
-                            self.get_path(session, 'defaultPath'), path)
-                    dom = self._getDomFromFile(session, path)
+                    # Check whether path is a URL
+                    if urlsplit(path).scheme:
+                        dom = self._getDomFromUrl(session, path)
+                    else:
+                        # A local filesystem path
+                        # Expand user-specific paths
+                        path = os.path.expanduser(path)
+                        if not (urlsplit(path).scheme or os.path.isabs(path)):
+                            dfp = self.get_path(session, 'defaultPath')
+                            if urlsplit(dfp).scheme:
+                                path = '/'.join((dfp, path))
+                            else:
+                                path = os.path.join(dfp, path)
+                        if urlsplit(path).scheme:
+                            dom = self._getDomFromUrl(session, path)
+                        else:
+                            dom = self._getDomFromFile(session, path)
                     id = e.attrib['id']
                     self.subConfigs[id] = dom
                     ot = e.attrib.get('type', '')
@@ -335,13 +395,13 @@ class C3Object(object):
 
     def __init__(self, session, config, parent=None):
         """Constructor inherited by all configured Cheshire3 objects.
-        
+
         The constructor for all Cheshire3 objects take the same arguments:
         session:  A Session object
         topNode:  The <config> or <subConfig> domNode for the configuration
         parent:   The object that provides the scope for this object.
         """
-        
+
         self.docstring = ""
         self.parent = parent
         self.subConfigs = CaselessDictionary()
@@ -651,9 +711,14 @@ class C3Object(object):
             except (TypeError, AttributeError):
                 pass
             # Special handling for defaultPath :/
-            if (id == "defaultPath" and not os.path.isabs(path)):
+            if (id == "defaultPath" and
+                not (urlsplit(path).scheme or os.path.isabs(path))
+            ):
                 p1 = self.parent.get_path(session, id, default)
-                path = os.path.join(p1, path)
+                if urlsplit(p1).scheme:
+                    path = '/'.join((p1, path))
+                else:
+                    path = os.path.join(p1, path)
             return path
         elif (id in self.unresolvedObjects):
             o = self.get_object(session, self.unresolvedObjects[id])

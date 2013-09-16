@@ -9,6 +9,7 @@ import dateutil.tz
 import shutil
 
 from urllib import quote, unquote
+from urlparse import urlsplit
 
 try:
     import cPickle as pickle
@@ -63,16 +64,19 @@ class SummaryObject(object):
         if not mp:
             self.paths['metadataPath'] = ''
             return
-        if (not os.path.isabs(mp)):
+        if not (urlsplit(mp).scheme or os.path.isabs(mp)):
             # Prepend defaultPath from parents
             dfp = self.get_path(session, 'defaultPath')
             if (not dfp):
                 msg = ("Store has relative metadata path, and no visible "
                        "defaultPath.")
                 raise ConfigFileException(msg)
-            mp = os.path.join(dfp, mp)
+            elif urlsplit(dfp).scheme:
+                # Default path is a URL
+                mp = '/'.join((dfp, mp))
+            else:
+                mp = os.path.join(dfp, mp)
         self.paths['metadataPath'] = mp
-
         if (not os.path.exists(mp)):
             # We don't exist, try and instantiate new database
             self._create(session, mp)
@@ -81,7 +85,6 @@ class SummaryObject(object):
             try:
                 cxn.open(mp)
                 # Now load values.
-                
                 self.totalItems = long(cxn.get("totalItems"))
                 self.totalWordCount = long(cxn.get("totalWordCount"))
                 self.minWordCount = long(cxn.get("minWordCount"))
@@ -90,7 +93,7 @@ class SummaryObject(object):
                 self.totalByteCount = long(cxn.get("totalByteCount"))
                 self.minByteCount = long(cxn.get("minByteCount"))
                 self.maxByteCount = long(cxn.get("maxByteCount"))
-                
+
                 self.lastModified = str(cxn.get("lastModified"))
 
                 if self.totalItems != 0:
