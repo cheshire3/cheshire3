@@ -19,7 +19,7 @@ from cheshire3.commands.cmd_utils import Cheshire3ArgumentParser
 
 def create_defaultConfig(identifier, args):
     """Create and return a generic database configuration.
-    
+
     identifier := string
     args := argparse.Namespace
     """
@@ -129,7 +129,6 @@ def create_defaultConfig(identifier, args):
         config.insert(0, CONF.docs(args.title))
     elif args.description:
         config.insert(0, CONF.docs(args.description))
-        
     return config
 
 
@@ -476,10 +475,10 @@ def create_defaultConfigWorkflows():
 
 def create_defaultZeerex(identifier, args):
     """Create and return ZeeRex (to be used for CQL + SRU protocolMap).
-    
+
     For more information on ProtocolMap, see:
     http://cheshire3.org/docs/build/build_protocolMap.html
-    
+
     This is dependent on indexes created by create_defaultConfigIndexes() and
     should be kept up-to-date with it.
     """
@@ -645,17 +644,20 @@ def create_defaultZeerex(identifier, args):
 
 def include_configByPath(config, path):
     """Modify 'config' to include file found at 'path', return 'config'.
-    
+
     config := lxml.etree.Element
     path := string/unicode
     """
+    global CONFIG_NS
     try:
-        subConfigs = config.xpath('/config/subConfigs')[-1]
+        subConfigs = config.xpath(
+            '/config/subConfigs|/c3:config/c3:subConfigs',
+            namespaces={'c3': CONFIG_NS}
+            )[-1]
     except IndexError:
         # Element for subConfigs does not exist - create it
         subConfigs = CONF.subConfigs()
         config.append(subConfigs)
-        
     subConfigs.append(CONF.path(
                           {'type': "includeConfigs"},
                           path
@@ -683,7 +685,7 @@ def main(argv=None):
                           "{0}".format(dbid)))
     else:
         dbid = args.database
-        
+
     try:
         db = server.get_object(session, dbid)
     except ObjectDoesNotExistException:
@@ -695,7 +697,7 @@ def main(argv=None):
 Please specify a different id using the --database option.""".format(dbid)
         server.log_critical(session, msg)
         raise ValueError(msg)
-    
+
     # Create a .cheshire3 directory and populate it
     c3_dir = os.path.join(os.path.abspath(args.directory), '.cheshire3')
     for dir_path in [c3_dir, 
@@ -708,46 +710,46 @@ Please specify a different id using the --database option.""".format(dbid)
             # Directory already exists
             server.log_warning(session, 
                              "directory already exists {0}".format(dir_path))
-    
+
     # Generate config file(s)
     xmlFilesToWrite = {}
-    
+
     # Generate Protocol Map(s) (ZeeRex)
     zrx = create_defaultZeerex(dbid, args)
     zrxPath = os.path.join(c3_dir, 'zeerex_sru.xml')
     args.zeerexPath = zrxPath
     xmlFilesToWrite[zrxPath] = zrx
-    
+
     # Generate generic database config
     dbConfig = create_defaultConfig(dbid, args)
     dbConfigPath = os.path.join(c3_dir, 'config.xml')
     xmlFilesToWrite[dbConfigPath] = dbConfig 
-    
+
     # Generate config for generic selectors
     selectorConfig = create_defaultConfigSelectors()
     path = os.path.join(c3_dir, 'configSelectors.xml')
     dbConfig = include_configByPath(dbConfig, path)
     xmlFilesToWrite[path] = selectorConfig 
-    
+
     # Generate config for generic indexes
     indexConfig = create_defaultConfigIndexes()
     path = os.path.join(c3_dir, 'configIndexes.xml')
     dbConfig = include_configByPath(dbConfig, path)
     xmlFilesToWrite[path] = indexConfig
-    
+
     # Generate config for default Workflows
     workflowConfig = create_defaultConfigWorkflows()
     path = os.path.join(c3_dir, 'configWorkflows.xml')
     dbConfig = include_configByPath(dbConfig, path)
     xmlFilesToWrite[path] = workflowConfig
-    
+
     # Write configs to files
     for path, node in xmlFilesToWrite.iteritems():
         with open(path, 'w') as conffh:
             conffh.write(etree.tostring(node, 
                                         pretty_print=True,
                                         encoding="utf-8"))
-    
+
     # Tell the server to register the config file
     server.register_databaseConfigFile(session, dbConfigPath)
     return 0
