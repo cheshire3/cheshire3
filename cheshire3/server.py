@@ -3,6 +3,8 @@ from __future__ import with_statement
 
 import os
 
+from urlparse import urlsplit
+
 from lxml import etree
 from lxml.builder import ElementMaker
 
@@ -12,7 +14,8 @@ from cheshire3.configParser import C3Object
 from cheshire3.exceptions import (ConfigFileException,
                                   ObjectDoesNotExistException,
                                   XMLSyntaxError,
-                                  FileSystemException)
+                                  FileSystemException,
+                                  FileDoesNotExistException)
 from cheshire3.internal import cheshire3Root, CONFIG_NS
 
 
@@ -48,6 +51,22 @@ class SimpleServer(Server):
             db = self.get_object(session, dbid)
             self.databases[dbid] = db
 
+    def _get_newDatabaseId(self, session, dbConfig):
+        dbid = dbConfig.attrib.get('id', None)
+        # Check that the identifier is not already in use by existing database
+        try:
+            self.get_object(session, dbid)
+        except ObjectDoesNotExistException:
+            # Doesn't exists, so OK to register it
+            pass
+        else:
+            msg = ("Database with id '{0}' is already registered. "
+                   "Please specify a different id in your configurations "
+                   "file.".format(dbid))
+            self.log_critical(session, msg)
+            raise ConfigFileException(msg)
+        return dbid
+
     def register_databaseConfigFile(self, session, file_path):
         """Register a Cheshire3 Database config file.
 
@@ -59,34 +78,22 @@ class SimpleServer(Server):
         you don't need to re-register when you make changes to the file.
         """
         # Read in proposed config file
-        with open(file_path, 'r') as fh:
-            confdoc = BootstrapDocument(fh)
-            # Check it's parsable
-            try:
-                confrec = BSLxmlParser.process_document(session, confdoc)
-            except XMLSyntaxError as e:
-                msg = ("Config file {0} is not well-formed and valid XML: "
-                       "{1}".format(file_path, e.message))
-                self.log_critical(session, msg)
-                raise ConfigFileException(msg)
+        docFac = self.get_object(session, 'defaultDocumentFactory')
+        docFac.load(session, file_path)
+        confdoc = docFac.get_document(session)
+        try:
+            confrec = BSLxmlParser.process_document(session, confdoc)
+        except XMLSyntaxError as e:
+            msg = ("Config file {0} is not well-formed and valid XML: "
+                   "{1}".format(file_path, e.message))
+            self.log_critical(session, msg)
+            raise ConfigFileException(msg)
         # Extract the database identifier
         confdom = confrec.get_dom(session)
-        dbid = confdom.attrib.get('id', None)
+        dbid = self._get_newDatabaseId(session, confdom)
         if dbid is None:
             msg = ("Config file {0} must have an 'id' attribute at the "
                    "top-level".format(file_path))
-            self.log_critical(session, msg)
-            raise ConfigFileException(msg)
-        # Check that the identifier is not already in use by existing database
-        try:
-            self.get_object(session, dbid)
-        except ObjectDoesNotExistException:
-            # Doesn't exists, so OK to register it
-            pass
-        else:
-            msg = ("Database with id '{0}' is already registered. "
-                   "Please specify a different id in your configurations "
-                   "file.".format(dbid))
             self.log_critical(session, msg)
             raise ConfigFileException(msg)
         # Generate plugin XML
@@ -118,8 +125,10 @@ class SimpleServer(Server):
                 self.log_critical(session, msg)
                 raise FileSystemException(msg)
         pluginfh.write(etree.tostring(plugin,
-                                pretty_print=True,
-                                encoding="utf-8"))
+                                      pretty_print=True,
+                                      encoding="utf-8"
+                                      )
+                      )
         pluginfh.close()
         self.log_info(session,
                       "Database configured in {0} registered with Cheshire3 "
