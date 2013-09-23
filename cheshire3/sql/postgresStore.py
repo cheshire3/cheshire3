@@ -43,7 +43,7 @@ class PostgresStore(SQLStore):
                                    parent.id + '_' + self.id
                                    )
         self.connectionPool = ThreadedConnectionPool(
-            2,
+            5,
             10,
             "dbname={0}".format(self.database)
         )
