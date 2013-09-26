@@ -13,11 +13,13 @@ import sys, os
 from warnings import filterwarnings
 filterwarnings('ignore', 'the md5 module is deprecated; use hashlib instead',  DeprecationWarning, 'yacc')
 
+import cheshire3.internal
+
 home = os.environ.get("C3HOME")
 
 __name__ = "cheshire3"
 __package__ = "cheshire3"
-
+__version__ = "{0}.{1}.{2}".format(*cheshire3.internal.cheshire3Version)
 __all__ = ['cqlParser', 'database', 'document', 'documentFactory', 'documentStore',
            'exceptions', 'extractor', 'index', 'indexStore', 'internal', 'logger', 
            'normalizer', 'objectStore', 'parser', 'permissionsHandler', 'preParser', 'protocolMap', 
@@ -37,8 +39,6 @@ if not os.path.exists(_user_cheshire3_dir):
     # Server-level logs
     os.makedirs(os.path.join(_user_cheshire3_dir, 'logs'))
 
-
-import cheshire3.internal
 # sps = cheshire3.internal.get_subpackages()
 
 sps= ['web', 'formats']
