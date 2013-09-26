@@ -46,7 +46,7 @@ Example index configurations::
         <source>
             <xpath>titleproper</xpath>
             <process>
-                <object type="extractor" ref="SimpleExtractor" />
+                <object type="extractor" ref="ProxExtractor" />
                 <object type="tokenizer" ref="RegexpFindOffsetTokenizer"/>
                 <object type="tokenMerger" ref="OffsetProxTokenMerger"/>
                 <object type="normalizer" ref="CaseNormalizer"/>
@@ -92,14 +92,16 @@ The first :py:class:`~cheshire3.baseObjects.Index` uses the
 appears exactly as a single term. This is followed by a
 :py:class:`~cheshire3.normalizer.SpaceNormalizer` on line 10, to
 remove leading and trailing whitespace and normalize multiple adjacent
-whitespace characters (e.g. newlines folloed by tabs, spaces etc.) into single
-whitespaces The second :py:class:`~cheshire3.baseObjects.Index` also uses the
-:py:class:`~cheshire3.extractor.SimpleExtractor`, however it then
-uses a :py:class:`~cheshire3.tokenizer.RegexpFindOffsetTokenizer` to identify
-word tokens, their positions and character offsets. It then uses the necessary
-:py:class:`~cheshire3.tokenMerger.OffsetProxTokenMerger` to merge identical
-tokens into discreet index entries, maintaining the word positions and
-character offsets identified by the Tokenizer. Both indexes then send the
+whitespace characters (e.g. newlines followed by tabs, spaces etc.) into single
+whitespaces The second :py:class:`~cheshire3.baseObjects.Index` uses the
+``ProxExtractor``; this is a special instance of
+:py:class:`~cheshire3.extractor.SimpleExtractor`, that has been configured to
+also extract the position of the XML elements from which is extracting. Then
+it uses a :py:class:`~cheshire3.tokenizer.RegexpFindOffsetTokenizer` to
+identify word tokens, their positions and character offsets. It then uses the
+necessary :py:class:`~cheshire3.tokenMerger.OffsetProxTokenMerger` to merge
+identical tokens into discreet index entries, maintaining the word positions
+and character offsets identified by the Tokenizer. Both indexes then send the
 extracted terms to a :py:class:`~cheshire3.normalizer.CaseNormalizer`, which
 will reduce all characters to lowercase. The second
 :py:class:`~cheshire3.baseObjects.Index` then gives the lowercase terms to a
@@ -112,10 +114,13 @@ After these processes have happened, the system will store the transformed
 terms in the :py:class:`~cheshire3.baseObjects.IndexStore` referenced in the
 :ref:`config-paths` section.
 
-Finally, in the first example, we have a setting called ``sortStore``. If this
-is given, then the system will create a map of record to term for the
-:py:class:`~cheshire3.baseObjects.Index` to allow the term to be quickly
-retrieved for the purposes of sorting a
-:py:class:`~cheshire.baseObjects.ResultSet`. For detailed information about
+Finally, in the first example, we have a setting called ``sortStore``. When
+this is provided and set to a true value, it instructs the system to create a
+map of :py:class:`~cheshire3.baseObjects.Record` identifier to terms
+enabling the :py:class:`~cheshire3.baseObjects.Index` to be used to quickly
+re-order :py:class:`~cheshire3.baseObjects.ResultSet`\ s based on the values
+extracted.
+
+For detailed information about
 available settings for :py:class:`~cheshire3.baseObjects.Index`\ es see
 the :ref:`Index Configuration, Settings section<config-indexes-settings>`.

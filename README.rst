@@ -1,7 +1,7 @@
 Cheshire3
 =========
 
-5th August 2013 (2013-08-05)
+26th September 2013 (2013-09-26)
 
 .. image:: https://travis-ci.org/cheshire3/cheshire3.png?branch=master,develop
    :target: https://travis-ci.org/cheshire3/cheshire3?branch=master,develop
@@ -778,7 +778,7 @@ Transforming Records
 ''''''''''''''''''''
 
 Records can be processed back into documents, typically in a different
-form, using Transformers:::
+form, using Transformers::
 
     >>> dctxr = db.get_object(session, 'DublinCoreTxr')
     >>> doc = dctxr.process_record(session, rec)
@@ -848,7 +848,7 @@ Facets and Filtering
 
 Assuming that you have configured your Index with the setting `vectors` set to
 `1`, it is possible to obtain search facets for the Index. That is to say that
-given a ResultSet obtained from a `Search`_, one can obtain a list of the terms
+given a ResultSet obtained from a `Searching`_, one can obtain a list of the terms
 that occur within the Records in that ResultSet. This list can be used to
 present a search user with options for refining their search.::
 

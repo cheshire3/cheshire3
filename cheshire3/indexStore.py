@@ -890,10 +890,8 @@ class BdbIndexStore(IndexStore):
                     try:
                         (tid, tdocs, tfreq) = tdata[:3]
                     except:
-                        self.log_critical(session,
-                                          "Broken: %r %r %r" % (term,
-                                                                index.id,
-                                                                tdata))
+                        msg = u"Broken: %r %r %r" % (term, index.id, tdata)
+                        self.log_critical(session, msg.encode('utf-8'))
                         raise
                 else:
                     termCache[term] = (0, 0)
@@ -1475,9 +1473,8 @@ class BdbIndexStore(IndexStore):
                             # Maybe it's an integer, e.g. wordCount, byteCount
                             kw = unicode(kw).decode('utf-8')
                     except:
-                        self.log_critical(session,
-                                          "%s failed to decode "
-                                          "%s" % (self.id, repr(kw)))
+                        msg = u"%s failed to decode %s" % (self.id, repr(kw))
+                        self.log_critical(session, msg.encode('utf-8'))
                         raise
                 self.outFiles[index].write(kw)
                 # ensure that docids are sorted to numeric order
@@ -1791,9 +1788,10 @@ class BdbIndexStore(IndexStore):
             try:
                 unpacked = index.deserialize_term(session, val, prox=prox)
             except:
-                self.log_critical(session,
-                                  "%s failed to deserialise "
-                                  "%s %s %s" % (self.id, index.id, term, val))
+                msg = (u"{0} failed to deserialise {1} {2} {3}"
+                       u"".format(self.id, index.id, term, val)
+                       )
+                self.log_critical(session, msg.encode('utf-8'))
                 raise
         return unpacked
 

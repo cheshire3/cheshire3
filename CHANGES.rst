@@ -27,6 +27,35 @@ ENHANCEMENTS
        non solid-state storage. 
 
 
+1.0.15 - Thursday 26 September 2013
+-----------------------------------
+
+BUG FIXES
+~~~~~~~~~
+
+* Fixed ``UnicodeDecodeError`` when logging errors in ``BdbIndexStore``
+
+
+DOCUMENTATION
+~~~~~~~~~~~~~
+
+* Improved "Configuring Indexes" tutorial:
+
+  * Fixed incorrect information regarding ``ProximityIndex``es.
+
+  * Completed truncated section on ``sortStore`` setting.
+
+
+1.0.14 - Monday 5 August 2013
+-----------------------------
+
+DOCUMENTATION
+~~~~~~~~~~~~~
+
+* Replaced documentation in docs/ folder with Sphinx-based documentation.
+>>>>>>> 1.0.15
+
+
 1.0.13 - Friday 7 June 2013
 ---------------------------
 
@@ -34,7 +63,7 @@ BUG FIXES
 ~~~~~~~~~
 
 * Fixed typo in ``index.SimpleIndex.construct_resultSetItem``
-    
+
   rsitype -> rsiType
 
 
@@ -72,11 +101,11 @@ BUG FIXES
 
 BUG FIXES
 ~~~~~~~~~
-  
+
 * Fixed typo in cheshire3.resultSet:
   ValueErorr -> ValueError
 
-* Fixed mutable type default data argument to SimpleResultSet constructor  
+* Fixed mutable type default data argument to SimpleResultSet constructor
 
 
 1.0.8 - Thursday 22 November 2012
@@ -84,9 +113,9 @@ BUG FIXES
 
 DOCUMENTATION
 ~~~~~~~~~~~~~
-  
+
 * Updated installations instructions in README.
-  
+
 * Added CHANGES file.
 
 
@@ -95,7 +124,7 @@ DOCUMENTATION
 
 BUG FIXES
 ~~~~~~~~~
-  
+
 * Fixed bug in serialization of ResultSet class for storage in
   cheshire3.sql.resultSetStore.
 
@@ -153,9 +182,9 @@ BUG FIXES
 ENHANCEMENTS
 ~~~~~~~~~~~~
 
-* Allowed all configured paths to be specified relative to user's home 
+* Allowed all configured paths to be specified relative to user's home
   directory (i.e. by use of ~/).
-  
+
 * Added an implementation agnostic XMLSyntaxError to cheshire3.exceptions.
 
 BUG FIXES
@@ -185,5 +214,5 @@ ENHANCEMENTS
   * ``cheshire3-search``
   * ``cheshire3-serve``
 
-  
+
 .. _`PyPI`: http://pypi.python.org/pypi/cheshire3
