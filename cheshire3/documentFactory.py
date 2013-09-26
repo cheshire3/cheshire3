@@ -601,7 +601,7 @@ class ClusterDocumentStream(BaseDocumentStream):
             doc.append("<key>%s</key>\n" % (key))
             ldata = ldata[1:-1]
             for bit in range(len(ldata) / 2):
-                d = docdata.get(ldata[bit * 2], [])                
+                d = docdata.get(ldata[bit * 2], [])
                 d.append(ldata[bit * 2 + 1])
                 docdata[ldata[bit * 2]] = d
             l = f.readline()

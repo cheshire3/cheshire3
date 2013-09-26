@@ -11,7 +11,11 @@ import sys, os
 
 # Ignore md5 DeprecationWarning from PyZ3950.yacc
 from warnings import filterwarnings
-filterwarnings('ignore', 'the md5 module is deprecated; use hashlib instead',  DeprecationWarning, 'yacc')
+filterwarnings('ignore',
+               'the md5 module is deprecated; use hashlib instead',
+               DeprecationWarning,
+               'yacc'
+               )
 
 import cheshire3.internal
 
@@ -20,13 +24,15 @@ home = os.environ.get("C3HOME")
 __name__ = "cheshire3"
 __package__ = "cheshire3"
 __version__ = "{0}.{1}.{2}".format(*cheshire3.internal.cheshire3Version)
-__all__ = ['cqlParser', 'database', 'document', 'documentFactory', 'documentStore',
-           'exceptions', 'extractor', 'index', 'indexStore', 'internal', 'logger', 
-           'normalizer', 'objectStore', 'parser', 'permissionsHandler', 'preParser', 'protocolMap', 
-           'queryFactory', 'queryStore', 'record', 'recordStore', 'resultSet', 'resultSetStore',
-           'selector', 'server', 'session', 'tokenizer', 'tokenMerger', 'transformer', 'user',
-           'utils', 'workflow', 'xpathProcessor']
-
+__all__ = ['cqlParser', 'database', 'document', 'documentFactory',
+           'documentStore', 'exceptions', 'extractor', 'index', 'indexStore',
+           'internal', 'logger', 'normalizer', 'objectStore', 'parser',
+           'permissionsHandler', 'preParser', 'protocolMap', 'queryFactory',
+           'queryStore', 'record', 'recordStore', 'resultSet',
+           'resultSetStore', 'selector', 'server', 'session', 'tokenizer',
+           'tokenMerger', 'transformer', 'user', 'utils', 'workflow',
+           'xpathProcessor'
+           ]
 
 # Check for user-specific Cheshire3 server directory
 _user_cheshire3_dir = os.path.expanduser('~/.cheshire3-server') 
