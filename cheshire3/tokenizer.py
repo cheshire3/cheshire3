@@ -187,7 +187,7 @@ class RegexpFindTokenizer(SimpleTokenizer):
 
     def process_string(self, session, data):
         if self.gaps:
-            return [tok for tok in self.regexp.split(text) if tok]
+            return [tok for tok in self.regexp.split(data) if tok]
         else:
             return self.regexp.findall(data)
 
