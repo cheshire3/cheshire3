@@ -60,17 +60,22 @@ class NLTKNamedEntityExtractor(SimpleExtractor):
     def _process_simpleHash(self, simpleHash):
         # Extract entities from keys resulting from SimpleExtractor process_*
         entityHash = {}
+        # Setup aliases for NLTK methods
+        sent_tokenize = nltk.tokenize.sent_tokenize
+        word_tokenize = nltk.tokenize.word_tokenize
+        pos_tag = nltk.pos_tag
+        ne_chunk = nltk.chunk.ne_chunk
         for data in simpleHash:
             occs = simpleHash[data]['occurences']
             proxLoc = simpleHash[data]['proxLoc']
             # Tokenize sentences
-            for sent in nltk.tokenize.sent_tokenize(data):
+            for sent in sent_tokenize(data):
                 # Tokenize words
-                tokens = nltk.tokenize.word_tokenize(sent)
+                tokens = word_tokenize(sent)
                 # Tag words with Parts of Speech
-                tagged = nltk.pos_tag(tokens)
+                tagged = pos_tag(tokens)
                 # Identify named entities
-                entities = nltk.chunk.ne_chunk(tagged)
+                entities = ne_chunk(tagged)
                 for ent in entities:
                     if isinstance(ent, nltk.tree.Tree):
                         # Is it a wanted type?
