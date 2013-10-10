@@ -358,7 +358,7 @@ class DateTokenizer(SimpleTokenizer):
             if len(bits):
                 # Use a new default, just under a year on for the end of the
                 # range
-                td = timedelta(days=364, hours=23, minutes=59, seconds=59, 
+                td = timedelta(days=365, hours=23, minutes=59, seconds=59,
                                microseconds=999999)
                 tks = self._tokenize(bits[0]) + \
                     self._tokenize(bits[1], self.default + td)
@@ -398,7 +398,7 @@ class DateRangeTokenizer(DateTokenizer):
         if not data:
             return []
         # use a new default, just under a year on for the end of the range
-        td = timedelta(days=364, hours=23, minutes=59, seconds=59, 
+        td = timedelta(days=365, hours=23, minutes=59, seconds=59,
                        microseconds=999999)
         midpoint = len(data) / 2
         if data[midpoint] in ['/', '-', ' ']:
