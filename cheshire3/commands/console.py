@@ -19,7 +19,7 @@ from cheshire3.licensing import cheshire3_license, cheshire3_license_text,\
 
 class Cheshire3Console(InteractiveConsole):
     """Cheshire3 Interactive Console."""
-    
+
     def __init__(self, args, locals_=None, filename="<console>"):
         InteractiveConsole.__init__(self, locals_, filename)
         # Standard Cheshire3 initialization code
@@ -33,7 +33,7 @@ class Cheshire3Console(InteractiveConsole):
         # Seed console with standard initialization code
         for line in init_code_lines:
             self.push(line)
-            
+
     def push(self, line):
         if line.strip() == 'help':
             # Write some Cheshire3 help
@@ -62,10 +62,10 @@ class Cheshire3Console(InteractiveConsole):
         elif line.strip() == "python_license()":
             return InteractiveConsole.push(self, "license()")
         return InteractiveConsole.push(self, line)
-            
+
     def interact(self, banner=None):
         """Emulate the standard interactive Python console.
-        
+
         The optional banner argument specify the banner to print
         before the first interaction; by default it prints a banner
         similar to the one printed by the real Python interpreter.
@@ -79,7 +79,7 @@ class Cheshire3Console(InteractiveConsole):
                                  'Type "help", "copyright", "credits" or '
                                  '"license" for more information.']))
         return InteractiveConsole.interact(self, banner)
-        
+
 
 def main(argv=None):
     """Main method for cheshire3 command."""
@@ -97,7 +97,7 @@ def main(argv=None):
             dbid = identify_database(session, os.getcwd())
         except EnvironmentError as e:
             dbid = None
-        
+
     if dbid is not None:
         dbline = 'db = server.get_object(session, "{0}")'.format(dbid)
         console.push(dbline)
@@ -111,7 +111,7 @@ def main(argv=None):
         ]
         for line in recordStoreLines:
             console.push(line)
-    
+
     if args.script is not None:
         with open(args.script, 'r') as fh:
             retval = console.runsource(fh.read(), args.script)
@@ -144,6 +144,6 @@ argparser.add_argument('-i', '--interactive',
 session = None
 server = None
 db = None
-   
+
 if __name__ == '__main__':
     main(sys.argv)

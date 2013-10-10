@@ -1,7 +1,7 @@
 Cheshire3
 =========
 
-26th September 2013 (2013-09-26)
+10th October 2013 (2013-10-10)
 
 .. image:: https://travis-ci.org/cheshire3/cheshire3.png?branch=master,develop
    :target: https://travis-ci.org/cheshire3/cheshire3?branch=master,develop
@@ -219,12 +219,16 @@ pre-requisites.
 Documentation
 -------------
 
-Documentation is available on our website:
+Documentation is available hosted by `Read the Docs`_:
+http://docs.cheshire3.org
+
+Some additional, but possibly redundant and outdated documentation is
+available on our website:
 http://cheshire3.org/docs/
 
 If you downloaded the source code, either as a tarball, or by checking
-out the repository, you'll find a copy of the HTML Documentation in the
-local docs directory.
+out the repository, you'll find a copy of the Sphinx based Documentation in
+the local docs directory.
 
 There is additional documentation for the source code in the form of
 comments and docstrings. Documentation for most default object
@@ -1022,3 +1026,4 @@ all Records should be reharvested next time.
 .. _CQL: http://www.loc.gov/standards/sru/specs/cql.html
 .. _OAI: http://www.openarchives.org/pmh/
 .. _virtualenv: http://www.virtualenv.org/en/latest/
+.. _`Read the Docs`: https://readthedocs.org/

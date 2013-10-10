@@ -26,12 +26,13 @@ from cheshire3.baseObjects import Tokenizer
 
 
 class SimpleTokenizer(Tokenizer):
-    
+
     _possibleSettings = {
         'char': {
             'docs': ('character to split with, or empty for default of '
-                     'whitespace')
-            }
+                     'whitespace'
+                     )
+        }
     }
 
     def __init__(self, session, config, parent):
@@ -59,7 +60,7 @@ class OffsetTokenizer(Tokenizer):
         kw = {}
         for (key, val) in data.iteritems():
             nval = val.copy()
-            (tokens, positions) = self.process_string(session, val['text']) 
+            (tokens, positions) = self.process_string(session, val['text'])
             nval['text'] = tokens
             nval['charOffsets'] = positions
             kw[key] = nval
@@ -68,7 +69,7 @@ class OffsetTokenizer(Tokenizer):
 
 class RegexpSubTokenizer(SimpleTokenizer):
     u"""Substitute regex matches with a character, then split on whitespace.
-    
+
     A Tokenizer that replaces regular expression matches in the data with a
     configurable character (defaults to whitespace), then splits the result at
     whitespace.
@@ -105,13 +106,13 @@ class RegexpSubTokenizer(SimpleTokenizer):
 
 class RegexpSplitTokenizer(SimpleTokenizer):
     """A Tokenizer that simply splits at the regex matches."""
-     
+
     _possibleSettings = {
         'regexp': {
             'docs': 'Regular expression used to split string'
         }
     }
-     
+
     def __init__(self, session, config, parent):
         SimpleTokenizer.__init__(self, session, config, parent)
         pre = self.get_setting(session,
@@ -137,10 +138,10 @@ class RegexpFindTokenizer(SimpleTokenizer):
     # 'tis, 'twas, 'til, 'phone
     #  --- IMO should be indexed with leading '
     #  --- eg 'phone == phone
-    # 
+    #
     # XXX: Should come up with better solution
-    # l'il ? y'all ?  
-    # 
+    # l'il ? y'all ?
+    #
 
     # XXX: Decide what to do with 8am 8:00am 1.2M $1.2 $1.2M
     # As related to 8 am, 8:00 am, 1.2 Million, $ 1.2, $1.2 Million
@@ -171,15 +172,15 @@ class RegexpFindTokenizer(SimpleTokenizer):
          |\w+(?:-\w+)+                                  # hypenated word
           (?:'(?:t|ll've|ll|ve|s|d've|d|re))?           # with/without 'suffix
          |[$\xa3\xa5\u20AC]?[0-9]+(?:[.,:-][0-9]+)+[%]? # date/num/money/time
-         |[$\xa3\xa5\u20AC][0-9]+                       # single money
-         |[0-9]+(?=[a-zA-Z]+)                           # split: 8am 1Million
-         |[0-9]+%                                       # single percentage 
-         |(?:[A-Z]\.)+[A-Z\.]                           # acronym
-         |[oOd]'[a-zA-Z]+                       # o'clock, O'Brien, d'Artagnan   
-         |[a-zA-Z]+://[^\s]+                            # URI
-         |\w+'(?:d've|d|t|ll've|ll|ve|s|re)             # don't, we've
+         |[$\xa3\xa5\u20AC][0-9]+               # single money
+         |[0-9]+(?=[a-zA-Z]+)                   # split: 8am 1Million
+         |[0-9]+%                               # single percentage
+         |(?:[A-Z]\.)+[A-Z\.]                   # abbreviation
+         |[oOd]'[a-zA-Z]+                       # o'clock, O'Brien, d'Artagnan
+         |[a-zA-Z]+://[^\s]+                    # URI
+         |\w+'(?:d've|d|t|ll've|ll|ve|s|re)     # don't, we've
          |(?:[hH]allowe'en|[mM]a'am|[Ii]'m|[fF]o'c's'le|[eE]'en|[sS]'pose)
-         |[\w+]+                                     # basic words, including +
+         |[\w+]+                                # basic words, including +
         )""")
 
         self.regexp = re.compile(pre, re.UNICODE)
@@ -194,11 +195,11 @@ class RegexpFindTokenizer(SimpleTokenizer):
 
 class RegexpFindOffsetTokenizer(OffsetTokenizer, RegexpFindTokenizer):
     """Find tokens that match regex with character offsets.
-    
-    A Tokenizer that returns all words that match the regex, and also the 
+
+    A Tokenizer that returns all words that match the regex, and also the
     character offset at which each word occurs.
     """
-    
+
     def __init__(self, session, config, parent):
         # Only init once!
         RegexpFindTokenizer.__init__(self, session, config, parent)
@@ -210,7 +211,7 @@ class RegexpFindOffsetTokenizer(OffsetTokenizer, RegexpFindTokenizer):
             tokens.append(m.group())
             positions.append(m.start())
         return (tokens, positions)
-                         
+
 
 class RegexpFindPunctuationOffsetTokenizer(RegexpFindOffsetTokenizer):
 
@@ -232,15 +233,17 @@ class SentenceTokenizer(SimpleTokenizer):
     def __init__(self, session, config, parent):
         self.paraRe = re.compile('\n\n+', re.UNICODE)
         self.sentenceRe = re.compile(
-                              '.+?(?<!\.\.)[\.!?:]["\'\)]?(?=\s+|$)(?![a-z])',
-                              re.UNICODE | re.DOTALL
-                          )
-        self.abbrMashRe = re.compile('''
-        (?xu)                                          # verbose, unicode
-        (^|\s)                                         # leading spaces
-        ([^\s]+?\.[a-zA-Z]+|
-            Prof|Dr|Sr|Mr|Mrs|Ms|Jr|Capt|Gen|Col|Sgt|  # commonly abbreviated
-            [ivxjCcl]+|[A-Z])\.                        # Acronyms?
+            '.+?(?<!\.\.)[\.!?:]["\'\)]?(?=\s+|$)(?![a-z])',
+            re.UNICODE | re.DOTALL
+        )
+        self.abbrMashRe = re.compile(
+            '''
+            (?xu)                                      # verbose, unicode
+            (^|\s)                                     # leading spaces
+            ([^\s]+?\.[a-zA-Z]+|
+                Prof|Dr|Sr|Mr|Mrs|Ms|Jr|Capt|Gen|Col|Sgt|  # common abbrevs
+                [ivxjCcl]+|[A-Z]
+            )\.                                        # Acronyms?
             (\s|$)                                     # trailing space
             ''',
             re.UNICODE
@@ -254,7 +257,7 @@ class SentenceTokenizer(SimpleTokenizer):
             sl = self.sentenceRe.findall(s)
             if not sl:
                 s += '.'
-                sl = self.sentenceRe.findall(s)                
+                sl = self.sentenceRe.findall(s)
             sents.extend(sl)
         ns = []
         for s in sents:
@@ -262,15 +265,16 @@ class SentenceTokenizer(SimpleTokenizer):
         return ns
 
 
-# trivial, but potentially useful
 class LineTokenizer(SimpleTokenizer):
+    "Trivial but potentially useful Tokenizer to split data on whitespace."
+
     def process_string(self, session, data):
         return data.split('\n')
 
 
 class DateTokenizer(SimpleTokenizer):
     """Tokenizer to identify date tokens, and return only these.
-    
+
     Capable of extracting multiple dates, but slowly and less reliably than
     single ones.
     """
@@ -281,7 +285,7 @@ class DateTokenizer(SimpleTokenizer):
                      "data")
         }
     }
-    
+
     _possibleSettings = {
         'fuzzy': {
             "docs": "Should the parser use fuzzy matching.",
@@ -313,14 +317,14 @@ class DateTokenizer(SimpleTokenizer):
                                             fuzzy=self.fuzzy)
         else:
             self.default = dateparser.parse('2000-01-01', fuzzy=True)
-            
+
     def _convertIsoDates(self, mo):
         dateparts = [mo.group(1)]
         for x in range(2, 4):
             if mo.group(x):
                 dateparts.append(mo.group(x))
         return '-'.join(dateparts)
-    
+
     def _tokenize(self, data, default=None):
         if default is None:
             default = self.default
@@ -332,9 +336,11 @@ class DateTokenizer(SimpleTokenizer):
             for x in range(len(wds), 0, -1):
                 txt = ' '.join(wds[:x]).encode('utf-8')
                 try:
-                    t = dateparser.parse(txt, default=default, 
-                                         dayfirst=self.dayfirst, 
-                                         fuzzy=self.fuzzy).isoformat()
+                    t = dateparser.parse(txt,
+                                         default=default,
+                                         dayfirst=self.dayfirst,
+                                         fuzzy=self.fuzzy
+                                         ).isoformat()
                 except:
                     continue
                 else:
@@ -344,7 +350,7 @@ class DateTokenizer(SimpleTokenizer):
         return tks
 
     def process_string(self, session, data):
-        # Convert ISO 8601 date elements to extended format (YYYY-MM-DD) for 
+        # Convert ISO 8601 date elements to extended format (YYYY-MM-DD) for
         # better recognition by date parser
         data = self.isoDateRe.sub(self._convertIsoDates, data)
         if len(data):
@@ -358,7 +364,7 @@ class DateTokenizer(SimpleTokenizer):
             if len(bits):
                 # Use a new default, just under a year on for the end of the
                 # range
-                td = timedelta(days=364, hours=23, minutes=59, seconds=59, 
+                td = timedelta(days=365, hours=23, minutes=59, seconds=59,
                                microseconds=999999)
                 tks = self._tokenize(bits[0]) + \
                     self._tokenize(bits[1], self.default + td)
@@ -371,35 +377,32 @@ class DateTokenizer(SimpleTokenizer):
 
 class DateRangeTokenizer(DateTokenizer):
     """Tokenizer to identify ranges of date tokens, and return only these.
-    
+
     e.g.
-    
+
     >>> self.process_string(session, '2003/2004')
-    ['2003-01-01T00:00:00', '2004-12-30T23:59:59.999999']
+    ['2003-01-01T00:00:00', '2004-12-31T23:59:59.999999']
     >>> self.process_string(session, '2003-2004')
-    ['2003-01-01T00:00:00', '2004-12-30T23:59:59.999999']
+    ['2003-01-01T00:00:00', '2004-12-31T23:59:59.999999']
     >>> self.process_string(session, '2003 2004')
-    ['2003-01-01T00:00:00', '2004-12-30T23:59:59.999999']
+    ['2003-01-01T00:00:00', '2004-12-31T23:59:59.999999']
     >>> self.process_string(session, '2003 to 2004')
-    ['2003-01-01T00:00:00', '2004-12-30T23:59:59.999999']
-    
-    For single dates, attempts to expand this into the largest possible range 
+    ['2003-01-01T00:00:00', '2004-12-31T23:59:59.999999']
+
+    For single dates, attempts to expand this into the largest possible range
     that the data could specify. e.g. 1902-04 means the whole of April 1902.
-    
+
     >>> self.process_string(session, "1902-04")
     ['1902-04-01T00:00:00', '1902-04-30T23:59:59.999999']
-    
+
     """
-        
+
     def process_string(self, session, data):
-        # convert ISO 8601 date elements to extended format (YYYY-MM-DD)
+        # Convert ISO 8601 date elements to extended format (YYYY-MM-DD)
         # for better recognition by date parser
         data = self.isoDateRe.sub(self._convertIsoDates, data)
         if not data:
             return []
-        # use a new default, just under a year on for the end of the range
-        td = timedelta(days=364, hours=23, minutes=59, seconds=59, 
-                       microseconds=999999)
         midpoint = len(data) / 2
         if data[midpoint] in ['/', '-', ' ']:
             startK = data[:midpoint]
@@ -413,8 +416,22 @@ class DateRangeTokenizer(DateTokenizer):
             startK, endK = data.split('-')
         else:
             startK = endK = data
-        return self._tokenize(startK) + self._tokenize(endK, self.default + td)
-        
+        starts = self._tokenize(startK)
+        ends = []
+        days = 365
+        # For end point use a new default, just under a year on for the end
+        # of the range. Also account for varying month lengths.
+        while not ends and days > 361:
+            td = timedelta(days=days,
+                           hours=23,
+                           minutes=59,
+                           seconds=59,
+                           microseconds=999999
+                           )
+            ends = self._tokenize(endK, self.default + td)
+            days -= 1
+        return starts + ends
+
 
 class PythonTokenizer(OffsetTokenizer):
     """ Tokenize python source code into token/TYPE with offsets """
@@ -426,7 +443,7 @@ class PythonTokenizer(OffsetTokenizer):
 
     def process_string(self, session, data):
         io = StringIO.StringIO(data)
-        toks = []        
+        toks = []
         posns = []
         totalChrs = 0
         currLine = 0
@@ -441,9 +458,8 @@ class PythonTokenizer(OffsetTokenizer):
             if not ttype in self.ignoreTypes:
                 tname = tokenize.tok_name[ttype]
                 if tname == "NAME" and keyword.iskeyword(txt):
-                    toks.append("%s/KEYWORD" % (txt))                    
+                    toks.append("%s/KEYWORD" % (txt))
                 else:
                     toks.append("%s/%s" % (txt, tokenize.tok_name[ttype]))
                 posns.append(totalChrs + start[1])
         return (toks, posns)
-
