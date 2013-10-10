@@ -2,6 +2,10 @@
 
 import sys
 import os
+try:
+    import readline
+except ImportError:
+    pass
 
 from code import InteractiveConsole
 
@@ -66,10 +70,12 @@ class Cheshire3Console(InteractiveConsole):
         """
         if banner is None:
             c3_version = '.'.join([str(p) for p in cheshire3Version])
-            banner = ("Python {0} on {1}\n".format(sys.version, sys.platform),
-                      "Cheshire3 {0} Interactive Console\n".format(c3_version),
-                      'Type "help", "copyright", "credits" or "license" for '
-                      'more information.')
+            banner = ("\n".join(["Python {0} on {1}"
+                                 "".format(sys.version, sys.platform),
+                                 "Cheshire3 {0} Interactive Console"
+                                 "".format(c3_version),
+                                 'Type "help", "copyright", "credits" or '
+                                 '"license" for more information.']))
         return InteractiveConsole.interact(self, banner)
         
 

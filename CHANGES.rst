@@ -1,6 +1,21 @@
 CHANGES
 =======
 
+1.0.16 - Thursday 10 October 2013
+---------------------------------
+
+ENHANCEMENTS
+~~~~~~~~~~~~
+
+* Usability improvements in the ``cheshire3`` interactive console.
+
+
+BUG FIXES
+~~~~~~~~~
+
+* Fixed assumed end datetime for ranges in ``DateRangeTokenizer``
+
+
 1.0.15 - Thursday 26 September 2013
 -----------------------------------
 
