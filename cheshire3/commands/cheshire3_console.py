@@ -2,7 +2,10 @@
 
 import sys
 import os
-import readline
+try:
+    import readline
+except ImportError:
+    pass
 
 from code import InteractiveConsole
 
