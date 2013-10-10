@@ -375,13 +375,13 @@ class DateRangeTokenizer(DateTokenizer):
     e.g.
     
     >>> self.process_string(session, '2003/2004')
-    ['2003-01-01T00:00:00', '2004-12-30T23:59:59.999999']
+    ['2003-01-01T00:00:00', '2004-12-31T23:59:59.999999']
     >>> self.process_string(session, '2003-2004')
-    ['2003-01-01T00:00:00', '2004-12-30T23:59:59.999999']
+    ['2003-01-01T00:00:00', '2004-12-31T23:59:59.999999']
     >>> self.process_string(session, '2003 2004')
-    ['2003-01-01T00:00:00', '2004-12-30T23:59:59.999999']
+    ['2003-01-01T00:00:00', '2004-12-31T23:59:59.999999']
     >>> self.process_string(session, '2003 to 2004')
-    ['2003-01-01T00:00:00', '2004-12-30T23:59:59.999999']
+    ['2003-01-01T00:00:00', '2004-12-31T23:59:59.999999']
     
     For single dates, attempts to expand this into the largest possible range 
     that the data could specify. e.g. 1902-04 means the whole of April 1902.
@@ -397,9 +397,6 @@ class DateRangeTokenizer(DateTokenizer):
         data = self.isoDateRe.sub(self._convertIsoDates, data)
         if not data:
             return []
-        # use a new default, just under a year on for the end of the range
-        td = timedelta(days=365, hours=23, minutes=59, seconds=59,
-                       microseconds=999999)
         midpoint = len(data) / 2
         if data[midpoint] in ['/', '-', ' ']:
             startK = data[:midpoint]
@@ -413,8 +410,22 @@ class DateRangeTokenizer(DateTokenizer):
             startK, endK = data.split('-')
         else:
             startK = endK = data
-        return self._tokenize(startK) + self._tokenize(endK, self.default + td)
-        
+        starts = self._tokenize(startK)
+        ends = []
+        days = 365
+        # For end point use a new default, just under a year on for the end
+        # of the range. Also account for varying month lengths.
+        while not ends and days > 361:
+            td = timedelta(days=days,
+                           hours=23,
+                           minutes=59,
+                           seconds=59,
+                           microseconds=999999
+                           )
+            ends = self._tokenize(endK, self.default + td)
+            days -= 1
+        return starts + ends
+
 
 class PythonTokenizer(OffsetTokenizer):
     """ Tokenize python source code into token/TYPE with offsets """
