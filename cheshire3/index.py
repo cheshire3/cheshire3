@@ -1086,8 +1086,8 @@ class SimpleIndex(Index):
     def fetch_metadata(self, session):
         return self.indexStore.fetch_indexMetadata(session, self)
 
-    def fetch_sortValue(self, session, rec):
-        return self.indexStore.fetch_sortValue(session, self, rec)
+    def fetch_sortValue(self, session, rec, ascending=True):
+        return self.indexStore.fetch_sortValue(session, self, rec, ascending)
 
     def merge_tempFiles(self, session):
         return self.indexStore.merge_tempFiles(session, self)
@@ -2009,10 +2009,10 @@ class PassThroughIndex(SimpleIndex):
             newscans[-1].append(endMarker)
         return newscans[:nTerms]
 
-    def fetch_sortValue(self, session, rec):
+    def fetch_sortValue(self, session, rec, ascending=True):
         if not self.remoteKeyIndex:
             return ''
-        key = self.localIndex.fetch_sortValue(session, rec)
+        key = self.localIndex.fetch_sortValue(session, rec, ascending)
         if not key:
             return ''
         currDb = session.database
@@ -2020,7 +2020,7 @@ class PassThroughIndex(SimpleIndex):
         q = cql.parse('c3.%s exact "%s"' % (self.remoteKeyIndex.id, key))
         rs = self.remoteKeyIndex.search(session, q, self.database)
         if rs:
-            sv = self.remoteIndex.fetch_sortValue(session, rs[0])
+            sv = self.remoteIndex.fetch_sortValue(session, rs[0], ascending)
         else:
             sv = ''
         session.database = currDb

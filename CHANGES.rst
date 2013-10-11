@@ -20,6 +20,10 @@ ENHANCEMENTS
 
   * Attempts to create title index entries by default
 
+  * Store low and high values for each Record when ``sortStore`` setting is
+    given for an Index. This provides more intuitive results when ordering
+    ResultSets
+
   * Faster retrieval[*]_ by compressing stored records using the lz4
     algorithm to reduce read time from disk.
 

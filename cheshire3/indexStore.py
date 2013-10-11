@@ -28,7 +28,7 @@ from cheshire3.baseStore import SwitchingBdbConnection
 from cheshire3.utils import getShellResult
 
 
-nonTextToken = "\x00\t"    
+nonTextToken = "\x00\t"
 NumTypes = [types.IntType, types.LongType]
 
 
@@ -152,17 +152,19 @@ class BdbIndexStore(IndexStore):
         # Splittable files (Bdb connection objects)
         # Controlled by switching
         self.switching = (
-            self.get_setting(session, 'bucketType', '') or \
-            self.get_setting(session, 'maxBuckets', 0) or \
-            self.get_setting(session, 'maxItemsPerBucket', 0))
+            self.get_setting(session, 'bucketType', '') or
+            self.get_setting(session, 'maxBuckets', 0) or
+            self.get_setting(session, 'maxItemsPerBucket', 0)
+        )
         self.switchingClass = SwitchingBdbConnection
         self.indexCxn = {}          # term -> rec list
 
         # Controlled by vectorSwitching
         self.vectorSwitching = (
-            self.get_setting(session, 'vectorBucketType', '') or \
-            self.get_setting(session, 'vectorMaxBuckets', 0) or \
-            self.get_setting(session, 'vectorMaxItemsPerBucket', 0))
+            self.get_setting(session, 'vectorBucketType', '') or
+            self.get_setting(session, 'vectorMaxBuckets', 0) or
+            self.get_setting(session, 'vectorMaxItemsPerBucket', 0)
+        )
         self.vectorSwitchingClass = SwitchingBdbConnection
         self.sortStoreCxn = {}      # recid -> sort value
         self.termIdCxn = {}         # termid -> term value
@@ -182,7 +184,7 @@ class BdbIndexStore(IndexStore):
 
         self.dirPerIndex = self.get_setting(session, 'dirPerIndex', 0)
 
-        # Record Hash (in bdb) 
+        # Record Hash (in bdb)
         fnbase = "recordIdentifiers_" + self.id + "_"
         fnlen = len(fnbase)
         dfp = self.get_path(session, "defaultPath")
@@ -254,12 +256,13 @@ class BdbIndexStore(IndexStore):
             if self.switching:
                 # check for overrides
                 vbt = index.get_setting(session, 'bucketType', '')
-                vmb = index.get_setting(session, 'maxBuckets', 0) 
+                vmb = index.get_setting(session, 'maxBuckets', 0)
                 vmi = index.get_setting(session, 'maxItemsPerBucket', 0)
                 if vbt or vmb or vmi:
-                    cxn = self.switchingClass(session, self, dbp, 
-                                              bucketType=vbt, maxBuckets=vmb,
-                                              maxItemsPerBucket=vmi)
+                    cxn = self.switchingClass(
+                        session, self, dbp,
+                        bucketType=vbt, maxBuckets=vmb, maxItemsPerBucket=vmi
+                    )
                 else:
                     cxn = self.switchingClass(session, self, dbp)
             else:
@@ -277,7 +280,7 @@ class BdbIndexStore(IndexStore):
             return os.path.join(index.id, index.id + ".index")
         else:
             return "%s--%s.index" % (self.id, index.id)
-        
+
     def _listExistingFiles(self, session, index):
         dfp = self.get_path(session, "defaultPath")
         name = self._generateFilename(index)
@@ -301,7 +304,7 @@ class BdbIndexStore(IndexStore):
                 cxn.open(dbp, flags=bdb.db.DB_NOMMAP)
             else:
                 cxn.open(dbp)
-            self.identifierMapCxn[rec.recordStore] = cxn    
+            self.identifierMapCxn[rec.recordStore] = cxn
         # Now we have cxn, check it rec exists
         recid = rec.id
         if type(recid) == unicode:
@@ -327,7 +330,7 @@ class BdbIndexStore(IndexStore):
         cxn.put(recid, intid)
         cxn.put("__i2s_%s" % intid, recid)
         return long(intid)
-    
+
     def _get_externalId(self, session, recordStore, identifier):
         if recordStore in self.identifierMapCxn:
             cxn = self.identifierMapCxn[recordStore]
@@ -343,7 +346,7 @@ class BdbIndexStore(IndexStore):
             else:
                 cxn.open(dbp)
             self.identifierMapCxn[recordStore] = cxn
-        identifier = "%015d" % identifier        
+        identifier = "%015d" % identifier
         data = cxn.get("__i2s_%s" % identifier)
         if data:
             return data
@@ -379,10 +382,10 @@ class BdbIndexStore(IndexStore):
 
         self._closeIndex(session, index)
         return terms
-        
+
     def begin_indexing(self, session, index):
         """Begin indexing process.
-        
+
         Open BerkeleyDB connections, create temp files  etc.
         """
         p = self.permissionHandlers.get('info:srw/operation/2/index', None)
@@ -424,7 +427,7 @@ class BdbIndexStore(IndexStore):
         basename = os.path.join(temp, self._generateFilename(index))
         if (hasattr(session, 'task')):
             basename += str(session.task)
-            
+
         # In case we're called twice
         if (not index in self.outFiles):
             self.outFiles[index] = codecs.open(basename + "_TEMP",
@@ -440,15 +443,21 @@ class BdbIndexStore(IndexStore):
 
                 if self.vectorSwitching:
                     vbt = self.get_setting(session,
-                                           'vectorBucketType', '')
+                                           'vectorBucketType',
+                                           ''
+                                           )
                     vmb = self.get_setting(session,
-                                           'vectorMaxBuckets', 0) 
-                    vmi = self.get_setting(session, 
-                                           'vectorMaxItemsPerBucket', 0)
-                    cxn = self.vectorSwitchingClass(session, self, fullname, 
-                                                    bucketType=vbt, 
-                                                    maxBuckets=vmb,
-                                                    maxItemsPerBucket=vmi)
+                                           'vectorMaxBuckets',
+                                           0
+                                           )
+                    vmi = self.get_setting(session,
+                                           'vectorMaxItemsPerBucket',
+                                           0
+                                           )
+                    cxn = self.vectorSwitchingClass(
+                        session, self, fullname,
+                        bucketType=vbt, maxBuckets=vmb, maxItemsPerBucket=vmi
+                    )
                 else:
                     cxn = bdb.db.DB()
                 if session.environment == "apache" or session.task:
@@ -459,7 +468,7 @@ class BdbIndexStore(IndexStore):
                 self.sortStoreCxn[index] = cxn
 
     def commit_indexing(self, session, index):
-        # Need to do this per index so one store can be doing multiple 
+        # Need to do this per index so one store can be doing multiple
         # things at once
         # Should only be called if begin_indexing() has been
         p = self.permissionHandlers.get('info:srw/operation/2/index', None)
@@ -516,7 +525,7 @@ class BdbIndexStore(IndexStore):
             raise ValueError(msg)
         if not index.get_setting(session, 'vectors'):
             os.remove(tempfile)
-        if ((hasattr(session, 'task') and session.task) or 
+        if ((hasattr(session, 'task') and session.task) or
             (hasattr(session, 'phase') and
              session.phase == 'commit_indexing1')):
             return sorted
@@ -584,14 +593,14 @@ class BdbIndexStore(IndexStore):
                 temp = os.path.join(dfp, temp)
             basename = self._generateFilename(index)
             filePath = os.path.join(temp, basename + "_SORT")
-            
+
         cxn = self._openIndex(session, index)
         cursor = cxn.cursor()
         try:
             nonEmpty = cursor.first()
         except:
             nonEmpty = False
-        metadataCxn = self._openMetadata(session)        
+        metadataCxn = self._openMetadata(session)
 
         tidIdx = index.get_path(session, 'termIdIndex', None)
         vectors = index.get_setting(session, 'vectors', 0)
@@ -613,7 +622,7 @@ class BdbIndexStore(IndexStore):
                 # of terms from regular index
                 (term, value) = cursor.last(doff=0,
                                             dlen=(3 * index.longStructSize))
-                (last, x, y) = index.deserialize_term(session, value)                    
+                (last, x, y) = index.deserialize_term(session, value)
             else:
                 tidcursor = tidcxn.cursor()
                 (finaltid, term) = tidcursor.last()
@@ -649,7 +658,7 @@ class BdbIndexStore(IndexStore):
         totalChars = 0
         maxNRecs = 0
         maxNOccs = 0
-        
+
         # Finalize sorted data in _SORT into Index file(s)
         f = file(filePath)
         while(l):
@@ -666,7 +675,7 @@ class BdbIndexStore(IndexStore):
                                    'Unexpected value in raw index, '
                                    'attempting to recover...')
                     # Attempt to recover
-                    # Find the first thing that could be a long but not 
+                    # Find the first thing that could be a long but not
                     # entirely composed of 0s
                     try:
                         mylong = long(re.search('\d*[1-9]\d*', x).group(0))
@@ -688,7 +697,7 @@ class BdbIndexStore(IndexStore):
                     currData.extend(fullinfo)
             else:
                 # Store
-                if currData:                
+                if currData:
                     if (nonEmpty):
                         val = cxn.get(currTerm)
                         if (val is not None):
@@ -782,7 +791,7 @@ class BdbIndexStore(IndexStore):
                     self._closeTermFreq(session, index, 'rec')
 
                 if fl.find('occ') > -1:
-                    terms.sort(key=lambda x: x['o'], reverse=True)                
+                    terms.sort(key=lambda x: x['o'], reverse=True)
                     cxn = self._openTermFreq(session, index, 'occ')
                     #cxn = bdb.db.DB()
                     #cxn.open(dbname + "_FREQ_OCC")
@@ -790,7 +799,7 @@ class BdbIndexStore(IndexStore):
                         termidstr = struct.pack('<ll', term['i'], term['o'])
                         cxn.put("%012d" % t, termidstr)
                     self._closeTermFreq(session, index, 'occ')
-                    
+
             except TypeError:
                 # no data in index
                 pass
@@ -810,7 +819,7 @@ class BdbIndexStore(IndexStore):
 
         rand = random.Random()
 
-        # settings for what to go into vector store
+        # Settings for what to go into vector store
         # -1 for just put everything in
         minGlobalFreq = int(index.get_setting(session,
                                               'vectorMinGlobalFreq', '-1'))
@@ -827,10 +836,10 @@ class BdbIndexStore(IndexStore):
 
         proxVectors = index.get_setting(session, 'proxVectors', 0)
 
-        # temp filepath
+        # Temp filepath
         base = filePath
         fh = codecs.open(base, 'r', 'utf-8', 'xmlcharrefreplace')
-        # read in each line, look up 
+        # Read in each line, look up
         currDoc = "000000000000"
         currStore = "0"
         docArray = []
@@ -845,7 +854,7 @@ class BdbIndexStore(IndexStore):
 
         totalTerms = 0
         totalFreq = 0
-        while True:            
+        while True:
             try:
                 l = fh.readline()[:-1]
                 bits = l.split(nonTextToken)
@@ -859,7 +868,7 @@ class BdbIndexStore(IndexStore):
                 docArray.sort()
                 flat = []
                 [flat.extend(x) for x in docArray]
-                fmt = '<' + "L" * len(flat)                    
+                fmt = '<' + "L" * len(flat)
                 packed = struct.pack(fmt, *flat)
                 cxn.put(str("%s|%s" % (currStore, currDoc.encode('utf8'))),
                         packed)
@@ -877,7 +886,7 @@ class BdbIndexStore(IndexStore):
                         [flat.extend(x) for x in parr]
                         proxVal = struct.pack('<' + 'L' * len(flat), *flat)
                         proxCxn.put(proxKey, proxVal)
-                    proxHash = {}                        
+                    proxHash = {}
             currDoc = docid
             currStore = storeid
             tid = termCache.get(term, None)
@@ -916,19 +925,20 @@ class BdbIndexStore(IndexStore):
                 (maxGlobalOccs == -1 or tfreq <= maxGlobalOccs) and
                 (minLocalFreq == -1 or tfreq >= minLocalFreq) and
                 (maxLocalFreq == -1 or tfreq <= maxLocalFreq)
-                ):
+            ):
                 docArray.append([tid, long(freq)])
                 totalTerms += 1
-                totalFreq += long(freq)                    
+                totalFreq += long(freq)
             if proxVectors:
                 nProxInts = index.get_setting(session, 'nProxInts', 2)
                 proxInfo = [long(x) for x in bits[4:]]
-                tups = [proxInfo[x:x + nProxInts] for x in range(0, 
-                                                                 len(proxInfo),
-                                                                 nProxInts)]
+                tups = [proxInfo[x:x + nProxInts]
+                        for x
+                        in range(0, len(proxInfo), nProxInts)
+                        ]
                 for t in tups:
                     val = [t[1], tid]
-                    val.extend(t[2:])                        
+                    val.extend(t[2:])
                     try:
                         proxHash[t[0]].append(val)
                     except KeyError:
@@ -959,10 +969,10 @@ class BdbIndexStore(IndexStore):
         fh.close()
         cxn.close()
         os.remove(base)
-    
+
     def _closeVectors(self, session, index):
         for cxnx in [self.termIdCxn, self.vectorCxn, self.proxVectorCxn]:
-            try: 
+            try:
                 cxnx[index].close()
             except KeyError:
                 continue
@@ -978,10 +988,12 @@ class BdbIndexStore(IndexStore):
         dbp = dbname + "_TERMIDS"
         if self.vectorSwitching:
             vbt = self.get_setting(session, 'vectorBucketType', '')
-            vmb = self.get_setting(session, 'vectorMaxBuckets', 0) 
-            vmi = self.get_setting(session, 'vectorMaxItemsPerBucket', 0)            
-            cxn = self.vectorSwitchingClass(session, self, dbp, bucketType=vbt,
-                                         maxBuckets=vmb, maxItemsPerBucket=vmi)
+            vmb = self.get_setting(session, 'vectorMaxBuckets', 0)
+            vmi = self.get_setting(session, 'vectorMaxItemsPerBucket', 0)
+            cxn = self.vectorSwitchingClass(
+                session, self, dbp,
+                bucketType=vbt, maxBuckets=vmb, maxItemsPerBucket=vmi
+            )
         else:
             cxn = bdb.db.DB()
 
@@ -991,9 +1003,10 @@ class BdbIndexStore(IndexStore):
         if index.get_setting(session, 'vectors'):
             dbp = dbname + "_VECTORS"
             if self.vectorSwitching:
-                cxn = self.vectorSwitchingClass(session, self, dbp,
-                                                bucketType=vbt, maxBuckets=vmb,
-                                                maxItemsPerBucket=vmi)
+                cxn = self.vectorSwitchingClass(
+                    session, self, dbp,
+                    bucketType=vbt, maxBuckets=vmb, maxItemsPerBucket=vmi
+                )
             else:
                 cxn = bdb.db.DB()
             cxn.open(dbp)
@@ -1023,11 +1036,11 @@ class BdbIndexStore(IndexStore):
 
         docid = rec.id
         if (not type(docid) in NumTypes):
-            if (type(docid) == types.StringType and docid.isdigit()):
+            if (isinstance(docid, basestring) and docid.isdigit()):
                 docid = long(docid)
             else:
                 # Look up identifier in local bdb
-                docid = self._get_internalId(session, rec)         
+                docid = self._get_internalId(session, rec)
         docid = "%012d" % docid
         # now add in store
         docid = "%s|%s" % (self.storeHashReverse[rec.recordStore], docid)
@@ -1037,8 +1050,10 @@ class BdbIndexStore(IndexStore):
         else:
             data = cxn.get(docid)
         if data:
-            flat = struct.unpack('<' + 'L' * (len(data) / index.longStructSize),
-                                 data)
+            flat = struct.unpack(
+                '<' + 'L' * (len(data) / index.longStructSize),
+                data
+            )
             lf = len(flat)
             unflatten = [(flat[x], flat[x + 1]) for x in xrange(0, lf, 2)]
             # totalTerms, totalFreq, [(termId, freq),...]
@@ -1049,7 +1064,7 @@ class BdbIndexStore(IndexStore):
 
     def fetch_proxVector(self, session, index, rec, elemId=-1):
         """Fetch and return the proximity vector.
-        
+
         Fetch proximity vector for rec from index.
         rec can be resultSetItem or record
         """
@@ -1061,17 +1076,20 @@ class BdbIndexStore(IndexStore):
 
         docid = rec.id
         if (not type(docid) in NumTypes):
-            if (type(docid) == types.StringType and docid.isdigit()):
+            if (isinstance(docid, basestring) and docid.isdigit()):
                 docid = long(docid)
             else:
                 # Look up identifier in local bdb
-                docid = self._get_internalId(session, rec)         
+                docid = self._get_internalId(session, rec)
 
         nProxInts = index.get_setting(session, 'nProxInts', 2)
         longStructSize = index.longStructSize
 
         def unpack(data):
-            flat = struct.unpack('<' + 'L' * (len(data) / longStructSize), data)
+            flat = struct.unpack(
+                '<' + 'L' * (len(data) / longStructSize),
+                data
+            )
             lf = len(flat)
             unflat = [flat[x:x + nProxInts] for x in range(0, lf, nProxInts)]
             return unflat
@@ -1093,7 +1111,7 @@ class BdbIndexStore(IndexStore):
                 except TypeError:
                     break
             return vals
-            
+
         else:
             key = struct.pack('<LL', docid, elemId)
             # now add in store
@@ -1130,7 +1148,7 @@ class BdbIndexStore(IndexStore):
         del self.termFreqCxn[index][which]
 
     def _openTermFreq(self, session, index, which):
-        fl = index.get_setting(session, "freqList", "") 
+        fl = index.get_setting(session, "freqList", "")
         if fl.find(which) == -1:
             return None
 
@@ -1146,11 +1164,12 @@ class BdbIndexStore(IndexStore):
 
         if self.vectorSwitching:
             vbt = self.get_setting(session, 'vectorBucketType', '')
-            vmb = self.get_setting(session, 'vectorMaxBuckets', 0) 
+            vmb = self.get_setting(session, 'vectorMaxBuckets', 0)
             vmi = self.get_setting(session, 'vectorMaxItemsPerBucket', 0)
-            tfcxn = self.vectorSwitchingClass(session, self, dbp,
-                                              bucketType=vbt, maxBuckets=vmb,
-                                              vectorMaxItemsPerBucket=vmi)
+            tfcxn = self.vectorSwitchingClass(
+                session, self, dbp,
+                bucketType=vbt, maxBuckets=vmb, vectorMaxItemsPerBucket=vmi
+            )
         else:
             tfcxn = bdb.db.DB()
         if which == 'rec':
@@ -1175,7 +1194,7 @@ class BdbIndexStore(IndexStore):
         else:
             c = cxn.cursor()
             freqs = []
-            
+
             if start < 0:
                 # go to end and reverse
                 (t, v) = c.last()
@@ -1234,28 +1253,33 @@ class BdbIndexStore(IndexStore):
         dfp = self.get_path(session, "defaultPath")
         name = self._generateFilename(index)
         return os.path.exists(os.path.join(dfp, name))
-    
+
     def _create(self, session, dbname, flags=[], vectorType=1):
         # for use by self.create_index
         if os.path.exists(dbname):
-            raise FileAlreadyExistsException(dbname) 
+            raise FileAlreadyExistsException(dbname)
         if vectorType == 0 and self.switching:
             cxn = self.switchingClass(session, self, dbname)
         elif vectorType and self.vectorSwitching:
             dbp = dbname + "_VECTORS"
             vbt = self.get_setting(session, 'vectorBucketType', '')
-            vmb = self.get_setting(session, 'vectorMaxBuckets', 0) 
+            vmb = self.get_setting(session, 'vectorMaxBuckets', 0)
             vmi = self.get_setting(session, 'vectorMaxItemsPerBucket', 0)
-            cxn = self.vectorSwitchingClass(session, self, dbp, bucketType=vbt,
-                                         maxBuckets=vmb, maxItemsPerBucket=vmi)
+            cxn = self.vectorSwitchingClass(
+                session, self, dbp,
+                bucketType=vbt, maxBuckets=vmb, maxItemsPerBucket=vmi
+            )
         else:
             cxn = bdb.db.DB()
 
         for f in flags:
             cxn.set_flags(f)
         try:
-            cxn.open(dbname, dbtype=bdb.db.DB_BTREE,
-                     flags=bdb.db.DB_CREATE, mode=0660)
+            cxn.open(dbname,
+                     dbtype=bdb.db.DB_BTREE,
+                     flags=bdb.db.DB_CREATE,
+                     mode=0660
+                     )
         except:
             raise ConfigFileException(dbname)
         else:
@@ -1286,13 +1310,13 @@ class BdbIndexStore(IndexStore):
             self._create(session, fullname, vectorType=0)
         except FileAlreadyExistsException:
             pass
-        
+
         if (index.get_setting(session, "sortStore")):
             try:
                 self._create(session, fullname + "_VALUES")
             except FileAlreadyExistsException:
                 pass
-            
+
         vecs = index.get_setting(session, "vectors")
         tids = index.get_setting(session, "termIds")
         if vecs or tids:
@@ -1319,9 +1343,9 @@ class BdbIndexStore(IndexStore):
 
             except:
                 raise(ValueError)
-        fl = index.get_setting(session, "freqList", "") 
+        fl = index.get_setting(session, "freqList", "")
         if fl:
-            if fl.find('rec') > -1: 
+            if fl.find('rec') > -1:
                 try:
                     self._create(session, fullname + "_FREQ_REC",
                                  flags=[bdb.db.DB_RECNUM])
@@ -1347,7 +1371,7 @@ class BdbIndexStore(IndexStore):
             cxn.remove(dbname)
         self.create_index(session, index)
         return None
-    
+
     def delete_index(self, session, index):
         # Send Index object to delete, null return
         p = self.permissionHandlers.get('info:srw/operation/1/delete', None)
@@ -1360,7 +1384,7 @@ class BdbIndexStore(IndexStore):
             if not okay:
                 msg = "Permission required to delete index from %s" % self.id
                 raise PermissionException(msg)
-        
+
         for dbname in self._listExistingFiles(session, index):
             os.remove(dbname)
 
@@ -1386,8 +1410,8 @@ class BdbIndexStore(IndexStore):
             cxn.open(fullname)
         self.sortStoreCxn[index] = cxn
         return cxn
-        
-    def fetch_sortValue(self, session, index, rec):
+
+    def fetch_sortValue(self, session, index, rec, lowest=True):
         try:
             cxn = self.sortStoreCxn[index]
         except:
@@ -1395,12 +1419,16 @@ class BdbIndexStore(IndexStore):
 
         val = cxn.get("%s/%s" % (str(rec.recordStore), rec.id))
         if val is None:
-            val = cxn.get("%s/%s" % (str(rec.recordStore), rec.numericId)) 
-        return val
+            val = cxn.get("%s/%s" % (str(rec.recordStore), rec.numericId))
+        values = val.split('\0')  # Split value at non-text token
+        if lowest:
+            return values[0]
+        else:
+            return values[-1]
 
     def store_terms(self, session, index, terms, rec):
         # Store terms from hash
-        # Need to store: 
+        # Need to store:
         # term, totalOccs, totalRecs,
         #     (record id, recordStore id, number of occs in record)
         # hash is now {tokenA:tokenA, ...}
@@ -1433,34 +1461,51 @@ class BdbIndexStore(IndexStore):
                 msg = ("indexStore %s does not recognise recordStore: "
                        "%s" % (self.id, storeid))
                 raise ConfigFileException(msg)
-        
+
         docid = rec.id
         if (not type(docid) in NumTypes):
-            if (type(docid) == types.StringType and docid.isdigit()):
+            if (isinstance(docid, basestring) and docid.isdigit()):
                 docid = long(docid)
             else:
                 # Look up identifier in local bdb
-                docid = self._get_internalId(session, rec)         
+                docid = self._get_internalId(session, rec)
         elif (docid == -1):
             # Unstored record
             raise ValueError(str(rec))
-        
+
         if index in self.outFiles:
             # Batch loading
+            if (index in self.sortStoreCxn):
+                # Concatenate lowest and highest values, separated by a
+                # non-text tokento enable ascending and descending sort
+
+                # Fetch existing values
+                existingVal = self.sortStoreCxn[index].get(
+                    "%s/%s" % (str(rec.recordStore), docid)
+                )
+                if existingVal:
+                    sortVals = existingVal.split('\0')
+                else:
+                    sortVals = []
+                for valueHash in terms.itervalues():
+                    if 'sortValue' in valueHash:
+                        sortVal = valueHash['sortValue']
+                    else:
+                        sortVal = valueHash['text']
+
+                    if type(sortVal) == unicode:
+                        sortVal = sortVal.encode('utf-8')
+                    sortVals.append(sortVal)
+                # Sort the combined list
+                sortVals.sort()
+                # Concatenate lowest and highest values
+                self.sortStoreCxn[index].put(
+                    "%s/%s" % (str(rec.recordStore), docid),
+                    sortVals[0] + '\0' + sortVals[-1]
+                )
 
             valueHash = terms.values()[0]
             value = valueHash['text']
-            if (index in self.sortStoreCxn):
-                if 'sortValue' in valueHash:
-                    sortVal = valueHash['sortValue']
-                else:
-                    sortVal = value
-                if type(sortVal) == unicode:
-                    sortVal = sortVal.encode('utf-8')
-                self.sortStoreCxn[index].put(
-                    "%s/%s" % (str(rec.recordStore), docid),
-                    sortVal)
-
             prox = 'positions' in terms[value]
             for k in terms.values():
                 kw = k['text']
@@ -1503,7 +1548,7 @@ class BdbIndexStore(IndexStore):
                     pass
                 val = cxn.get(key.encode('utf-8'))
                 if (val is not None):
-                    current = index.deserialize_term(session, val)               
+                    current = index.deserialize_term(session, val)
                     unpacked = index.merge_term(session, current, stuff,
                                                 op="replace", nRecs=1,
                                                 nOccs=k['occurences'])
@@ -1523,10 +1568,10 @@ class BdbIndexStore(IndexStore):
                         # of terms from regular index
                         cursor = cxn.cursor()
                         (term, value) = cursor.last(
-                                            doff=0,
-                                            dlen=(3 * index.longStructSize)
-                                        )
-                        (last, x, y) = index.deserialize_term(session, value)                    
+                            doff=0,
+                            dlen=(3 * index.longStructSize)
+                        )
+                        (last, x, y) = index.deserialize_term(session, value)
                     else:
                         tidcursor = tidcxn.cursor()
                         (finaltid, term) = tidcursor.last()
@@ -1536,7 +1581,7 @@ class BdbIndexStore(IndexStore):
                     unpacked = stuff
                     totalRecs = 1
                     totalOccs = k['occurences']
-                   
+
                 packed = index.serialize_term(session, termid, unpacked,
                                               nRecs=totalRecs, nOccs=totalOccs)
                 cxn.put(key.encode('utf-8'), packed)
@@ -1546,8 +1591,8 @@ class BdbIndexStore(IndexStore):
         p = self.permissionHandlers.get('info:srw/operation/2/unindex', None)
         if p:
             if not session.user:
-                msg = ("Authenticated user required to delete from indexStore "
-                       "%s" % self.id)
+                msg = ("Authenticated user required to delete from indexStore"
+                       " %s" % self.id)
                 raise PermissionException(msg)
             okay = p.hasPermission(session, session.user)
             if not okay:
@@ -1559,14 +1604,14 @@ class BdbIndexStore(IndexStore):
 
         docid = rec.id
         # Hash
-        if (type(docid) == types.StringType and docid.isdigit()):
+        if (isinstance(docid, basestring) and docid.isdigit()):
             docid = long(docid)
         elif (type(docid) in NumTypes):
-            pass        
+            pass
         else:
             # Look up identifier in local bdb
-            docid = self._get_internalId(session, rec)               
-        
+            docid = self._get_internalId(session, rec)
+
         storeid = rec.recordStore
         if (not type(storeid) in NumTypes):
             # Map
@@ -1587,7 +1632,7 @@ class BdbIndexStore(IndexStore):
             for k in terms.keys():
                 val = cxn.get(k.encode('utf-8'))
                 if (val is not None):
-                    current = index.deserialize_term(session, val)               
+                    current = index.deserialize_term(session, val)
                     gone = [docid, storeid, terms[k]['occurences']]
                     unpacked = index.merge_term(session, current,
                                                 gone, 'delete')
@@ -1601,7 +1646,7 @@ class BdbIndexStore(IndexStore):
             self._closeIndex(session, index)
 
     # NB:  c.set_range('a', dlen=12, doff=0)
-    # --> (key, 12bytestring)    
+    # --> (key, 12bytestring)
     # --> unpack for termid, docs, occs
 
     def fetch_termList(self, session, index, term,
@@ -1639,12 +1684,13 @@ class BdbIndexStore(IndexStore):
 
             if self.switching:
                 vbt = index.get_setting(session, 'bucketType', '')
-                vmb = index.get_setting(session, 'maxBuckets', 0) 
+                vmb = index.get_setting(session, 'maxBuckets', 0)
                 vmi = index.get_setting(session, 'maxItemsPerBucket', 0)
                 if vbt or vmb or vmi:
-                    cxn = self.switchingClass(session, self, fullname,
-                                              bucketType=vbt, maxBuckets=vmb,
-                                              maxItemsPerBucket=vmi)
+                    cxn = self.switchingClass(
+                        session, self, fullname,
+                        bucketType=vbt, maxBuckets=vmb, maxItemsPerBucket=vmi
+                    )
                 else:
                     cxn = self.switchingClass(session, self, fullname)
 
