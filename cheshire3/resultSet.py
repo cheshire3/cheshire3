@@ -322,14 +322,14 @@ class SimpleResultSet(RankedResultSet):
 
     def _lrAssign(self, session, others, clause, cql, db):
         """Assign Logistic Regression weights and combine items in others.
-        
+
         Assign Logistic Regression weights and merge items in resultSets in
         others into self in a single method.
         """
         if (db):
             totalDocs = db.totalItems
             if totalDocs == 0:
-                raise ValueError("No documents in database?")
+                raise ValueError("0 documents in database")
         else:
             # Uhoh
             raise NameError("Database not supplied to relevancy algorithm")
