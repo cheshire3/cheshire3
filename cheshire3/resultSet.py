@@ -8,7 +8,7 @@ try:
     import cPickle as pickle
 except ImportError:
     import pickle
-    
+
 from itertools import combinations
 from xml.sax.saxutils import escape, unescape
 from lxml import etree
@@ -44,7 +44,7 @@ class RankedResultSet(ResultSet):
         item.weight = sum([x.weight for x in items])
         return item
         #item.weight = sum([x.weight for x in items if (x.weight != 0.5)])
-        
+
     def _meanWeights(self, items, n):
         """Mean average the values."""
         item = items[0]
@@ -89,7 +89,7 @@ class RankedResultSet(ResultSet):
 
     def _pivotWeights(self, a, b):
         """Pivot weight of components if the document also occurs in the set.
-        
+
         Determine which item is component set, and which item is from document
         set. If the component's parent document's id is the same as the one in
         the full document list, then adjust.
@@ -154,13 +154,13 @@ class SimpleResultSet(RankedResultSet):
             self._list = []
         self.id = id
         self.recordStore = recordStore
-        
+
         self.relevanceContextSets = {
-            "info:srw/cql-context-set/2/relevance-1.0": 1.0, 
-            "info:srw/cql-context-set/2/relevance-1.1": 1.1, 
+            "info:srw/cql-context-set/2/relevance-1.0": 1.0,
+            "info:srw/cql-context-set/2/relevance-1.1": 1.1,
             "info:srw/cql-context-set/2/relevance-1.2": 1.2
         }
-        
+
         self.termid = -1
         self.totalOccs = 0
         self.totalRecs = 0
@@ -207,7 +207,7 @@ class SimpleResultSet(RankedResultSet):
                 if type(val) in [dict, list, tuple]:
                     # Use later version of pickle protocol to deal with
                     # new-style classes, unicode etc.
-                    valstr = pickle.dumps(val)  # , pickle.HIGHEST_PROTOCOL) 
+                    valstr = pickle.dumps(val)  # , pickle.HIGHEST_PROTOCOL)
                     xml.append(u'<d n="%s" t="pickle">%s</d>' %
                                (a, ucescape(valstr)))
                 elif isinstance(val, Index):
@@ -224,13 +224,13 @@ class SimpleResultSet(RankedResultSet):
                     else:
                         xml.append(escape(val))
                     xml.append(u'</d>')
-                        
+
         for item in self:
             xml.append(item.serialize(session, pickleOk))
         xml.append(u'</resultSet>')
         all = u''.join(xml)
         return all.encode('utf-8')
-    
+
     def deserialise(self, session, data):
         """Deserialize XML in ``data`` to return the populated ResultSet.
 
@@ -346,9 +346,9 @@ class SimpleResultSet(RankedResultSet):
             db._cacheProtocolMaps(session)
             pm = db.protocolMaps.get('http://www.loc.gov/zing/srw/')
             db.paths['protocolMap'] = pm
-            
+
         idx = pm.resolveIndex(session, clause)
-        
+
         if (idx):
             for x in range(7):
                 temp = idx.get_setting(session, 'lr_constant%d' % x)
@@ -407,7 +407,7 @@ class SimpleResultSet(RankedResultSet):
                 except IndexError:
                     # There are no more items in this rs
                     continue
-                
+
                 if nitem == items[0]:
                     items.append(nitem)
                     rspos.append(o)
@@ -494,8 +494,8 @@ class SimpleResultSet(RankedResultSet):
             rsizes = self.recordStoreSizes
 
         recStoreSizes = {}
-            
-        recStores = {}        
+
+        recStores = {}
         for rs in others:
             matches = float(len(rs))
             if not matches:
@@ -549,7 +549,7 @@ class SimpleResultSet(RankedResultSet):
                 if rs.minWeight > weight:
                     rs.minWeight = weight
         return 0
-    
+
     def _okapiAssign(self, session, others, clause, cql, db):
         """Assign Okapi BM-25 weighting to items in resultSets in others."""
         if (db):
@@ -559,26 +559,26 @@ class SimpleResultSet(RankedResultSet):
                 raise ValueError("0 documents in database")
         else:
             raise NameError("Database not supplied to relevancy algorithm")
-            
-        # tuning parameters [b, k1, k3]
+
+        # Tuning parameters [b, k1, k3]
         # default
         constants = [0.75, 1.5, 1.5]
-        
+
         # Index Configuration proposes:
         pm = db.get_path(session, 'protocolMap')
         if not pm:
             db._cacheProtocolMaps(session)
             pm = db.protocolMaps.get('http://www.loc.gov/zing/srw/')
             db.paths['protocolMap'] = pm
-            
+
         idx = pm.resolveIndex(session, clause)
-        
+
         if (idx):
             for i, const in enumerate(['b', 'k1', 'k3']):
                 temp = idx.get_setting(session, 'okapi_constant_' + const)
                 if (temp):
                     constants[i] = float(temp)
-                    
+
         # Query proposes:
         for m in cql.modifiers:
             # Already been pinged for resolve()
@@ -606,14 +606,14 @@ class SimpleResultSet(RankedResultSet):
                 rs.minWeight = 1.0
                 rs.maxWeight = -1.0
                 continue
-            
+
             idf = math.log(totalDocs / matches)
             # idf = max(0.0,
             #           math.log(totalDocs - matches + 0.5 / matches + 0.5)
             #           )  # give it a floor of 0
 
             qtw = ((k3 + 1) * rs.queryFreq) / (k3 + rs.queryFreq)
-            
+
             rs.minWeight = 1000000.0
             rs.maxWeight = -1.0
             for item in rs:
@@ -627,27 +627,27 @@ class SimpleResultSet(RankedResultSet):
                                                      'wordCount')
                 if rsizes:
                     avgSize = recStore.meanWordCount
-                    
+
                 T = (((k1 + 1) * docFreq) /
                      ((k1 * ((1 - b) + b * (size / avgSize))) + docFreq)
                      )
-                     
+
                 item.weight = idf * T * qtw
 
                 if item.weight > rs.maxWeight:
                     rs.maxWeight = item.weight
                 if item.weight < rs.minWeight:
                     rs.minWeight = item.weight
-            
+
         return 0
-    
+
     def combine(self, session, others, clause, db=None):
         """Combine resultSets in others into self and return."""
         try:
             cql = clause.boolean
         except AttributeError:
             cql = clause.relation
-            
+
         self.query = clause
 
         all = cql.value in ['all', 'and', '=', 'prox', 'adj', 'window']
@@ -677,7 +677,7 @@ class SimpleResultSet(RankedResultSet):
                 relevancy = 1
             elif m.type.value == 'proxinfo':
                 pi = 1
-            
+
         # Check if any others are relevance ranked already and preserve
         if (not relevancy):
             for x in others:
@@ -685,7 +685,7 @@ class SimpleResultSet(RankedResultSet):
                     relevancy = 1
                     break
 
-        # sort result sets by length
+        # Sort result sets by length
         if not cql.value in ['not', 'prox']:
             others.sort(key=lambda x: len(x), reverse=not all)
 
@@ -763,7 +763,7 @@ class SimpleResultSet(RankedResultSet):
         for o in others:
             self.termIdHash[o.termid] = o.queryTerm
             if o.fromStore:
-                #re-sort before combining as likely out of order
+                # Re-sort before combining as likely out of order
                 if o[0].numericId is not None:
                     o.order(session, 'numericId')
                 else:
@@ -775,14 +775,14 @@ class SimpleResultSet(RankedResultSet):
         elif unit == "element" and distance == 0 and comparison == "=":
             proxtype = 2
         elif unit == "character":
-            # can do this with offsets :)
+            # Can do this with offsets :)
             proxtype = 3
         else:
             raise NotImplementedError()
         hasGetItemList = [hasattr(o, 'get_item') for o in others]
         cont = 1
 
-        while cont:                
+        while cont:
             items = [others[0][positions[0]]]
             rspos = [0]
             for o in oidxs:
@@ -791,7 +791,7 @@ class SimpleResultSet(RankedResultSet):
                         nitem = others[o].get_item(items[0])
                         if not nitem:
                             continue
-                    else:    
+                    else:
                         try:
                             nitem = others[o][positions[o]]
                         except IndexError:
@@ -869,13 +869,13 @@ class SimpleResultSet(RankedResultSet):
 
                 litem = items.pop(0)
                 ltermid = litem.resultSet.termid
-                nomatch = 0                    
+                nomatch = 0
 
                 while len(items):
                     ritem = items.pop(0)
                     rtermid = ritem.resultSet.termid
                     matchlocs = []
-                    for rpiFull in ritem.proxInfo:                        
+                    for rpiFull in ritem.proxInfo:
                         rpi = list(rpiFull[-1])
                         (relem, rwpos) = rpi[:2]
                         for lpiFull in litem.proxInfo:
@@ -961,10 +961,10 @@ class SimpleResultSet(RankedResultSet):
                                                         d.append(r)
                                             if anyOkay:
                                                 matchlocs.append(d)
-                                        
-                    if matchlocs:                                    
+
+                    if matchlocs:
                         ritem.proxInfo = matchlocs
-                        litem = ritem                                
+                        litem = ritem
                     else:
                         # no match, break to next set of items
                         nomatch = 1
@@ -976,8 +976,8 @@ class SimpleResultSet(RankedResultSet):
                     m[0].append(ltermid)
                 litem.proxInfo = matchlocs
                 items = [litem]
-            
-            # do stuff on items to reduce to single representative
+
+            # Do stuff on items to reduce to single representative
             if relevancy:
                 item = fn(items, nors)
                 if item.weight > maxWeight:
@@ -998,7 +998,7 @@ class SimpleResultSet(RankedResultSet):
                         for pii in o.proxInfo:
                             for x in pii:
                                 x.append(o.resultSet.termid)
-                    item.proxInfo.extend(o.proxInfo)                        
+                    item.proxInfo.extend(o.proxInfo)
             item.resultSet = self
             tmplist.append(item)
 
@@ -1012,7 +1012,7 @@ class SimpleResultSet(RankedResultSet):
     def order(self, session, spec,
               ascending=None, missing=None, case=None, accents=None):
         """Re-order based on the given specification (spec) and arguments.
-        
+
         spec can be:  index, xpath, workflow, item attribute
         clause is a CQL clause with sort attributes on the relation
 
@@ -1022,7 +1022,7 @@ class SimpleResultSet(RankedResultSet):
         Not handling yet:
           case=1/0, accents=1/0
           locale=VALUE, unicodeCollate[=VALUE]
-        """ 
+        """
 
         l = self._list
         if not l:
@@ -1045,7 +1045,7 @@ class SimpleResultSet(RankedResultSet):
             # Extract data as per indexing, MUCH slower
             recs = []
             storeHash = {}
-            for r in l:                
+            for r in l:
                 store = r.recordStore
                 o = storeHash.get(store, spec.get_object(session, store))
                 storeHash[store] = o
@@ -1054,7 +1054,7 @@ class SimpleResultSet(RankedResultSet):
                        for x
                        in range(len(l))]
         elif isinstance(spec, Workflow):
-            # process a workflow on records
+            # Process a workflow on records
             tmplist = []
             for r in l:
                 rec = r.fetch_record(session)
@@ -1078,7 +1078,7 @@ class SimpleResultSet(RankedResultSet):
             # Don't know what?
             raise NotImplementedError
 
-        if missing:            
+        if missing:
             if missing == -1:
                 val = '\x00'
             elif missing == 1:
@@ -1088,8 +1088,8 @@ class SimpleResultSet(RankedResultSet):
             fill = lambda x: x if x else val
             tmplist = [(fill(x[0]), x[1]) for x in tmplist]
         elif missing == 0:
-            # omit
-            tmplist = [x for x in tmplist if x[0]]        
+            # Omit
+            tmplist = [x for x in tmplist if x[0]]
         if case == 0:
             tmplist = [(x[0].lower(), x[1]) for x in tmplist]
         if accents == 0:
@@ -1195,17 +1195,17 @@ class SimpleResultSetItem(ResultSetItem):
                             xml.append(u'<w e="%s" w="%s"/>' %
                                        tuple(w))
                         except:
-                            # should really error!
+                            # Should really error!
                             xml.append(u'<w e="%s" w="%s" o="%s" t="%s"/>' %
                                        tuple(w[:4]))
-                            
+
                 xml.append(u'</hit>')
             xml.append(u'</proxInfo>')
         xml.append(u'</item>')
         return u''.join(xml)
 
     def fetch_record(self, session):
-        # return record from store
+        # Return record from store
         if (session.server):
             # db = session.server.get_object(session, self.database)
             db = session.server.get_object(session, session.database)
@@ -1229,7 +1229,7 @@ class SimpleResultSetItem(ResultSetItem):
         return "Ptr:%s/%s" % (self.recordStore, self.id)
 
     def __cmp__(self, other):
-        # default sort by docid
+        # Default sort by docid
         if self.numericId is not None:
             if other.numericId is not None:
                 oid = other.numericId
@@ -1242,7 +1242,7 @@ class SimpleResultSetItem(ResultSetItem):
             return cmp(self.recordStore, other.recordStore)
         else:
             return c
-        
+
     def __hash__(self):
         # Hash of recordstore + id
         return hash(str(self))
@@ -1277,7 +1277,7 @@ class BitmapResultSet(ResultSet):
 
     def __getitem__(self, k):
         if self.currItems is None:
-            self.currItems = self.bitfield.trueItems()            
+            self.currItems = self.bitfield.trueItems()
         return SimpleResultSetItem(None,
                                    self.currItems[k],
                                    self.recordStore,
@@ -1288,13 +1288,13 @@ class BitmapResultSet(ResultSet):
 
     def serialise(self, session):
         return self.serialize(session)
-    
+
     def serialize(self, session):
         return str(self.bitfield)
 
     def deserialise(self, data):
         return self.deserialize(data)
-        
+
     def deserialize(self, data):
         self.bitfield = SimpleBitfield(data)
 
@@ -1327,7 +1327,7 @@ class BitmapResultSet(ResultSet):
                 break
 
         if allbits:
-            if (v in ['all', 'and']):            
+            if (v in ['all', 'and']):
                 s = others[0].bitfield
                 for o in others[1:]:
                     s.intersection(o.bitfield)
@@ -1346,7 +1346,7 @@ class BitmapResultSet(ResultSet):
             # XXX Merging Bitmap with non bitmap
             pass
         return self
-    
+
     def order(self, spec):
         # Reorder a bitmap?!
         raise NotImplementedError()
