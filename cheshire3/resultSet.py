@@ -1028,19 +1028,23 @@ class SimpleResultSet(RankedResultSet):
         if not l:
             # don't try to sort empty set
             return
-
         if (
             isinstance(spec, Index) and
             spec.get_setting(session, 'sortStore')
         ):
-            # check pre-processed db
-            tmplist = [(spec.fetch_sortValue(session, x), x) for x in l]
+            # Check pre-processed db
+            tmplist = [(spec.fetch_sortValue(session, x, ascending), x)
+                       for x
+                       in l
+                       ]
         elif isinstance(spec, Index) and spec.get_setting(session, 'vectors'):
             # This assumes termid is ordered properly
             # if it isn't write a normalizer, see pyuca normalizer
             miss = lambda x: x[2][0][0] if x[2] else None
-            tmplist = [(miss(spec.fetch_vector(session, x)), x) for x in l]
-
+            tmplist = [(miss(spec.fetch_vector(session, x)), x)
+                       for x
+                       in l
+                       ]
         elif isinstance(spec, Index):
             # Extract data as per indexing, MUCH slower
             recs = []
@@ -1052,7 +1056,8 @@ class SimpleResultSet(RankedResultSet):
                 recs.append(o.fetch_record(session, r.id))
             tmplist = [(spec.extract_data(session, recs[x]), l[x])
                        for x
-                       in range(len(l))]
+                       in range(len(l))
+                       ]
         elif isinstance(spec, Workflow):
             # Process a workflow on records
             tmplist = []
@@ -1066,10 +1071,11 @@ class SimpleResultSet(RankedResultSet):
                 # Check if default sort order should be ascending
                 # Allow for str vs unicode
                 if str(spec) in ['id', 'numericId']:
-                    ascending = 1
+                    ascending = True
                 else:
-                    ascending = 0
+                    ascending = False
         elif isinstance(spec, basestring):
+            # XPath
             tmplist = []
             for r in l:
                 rec = r.fetch_record(session)
@@ -1078,30 +1084,36 @@ class SimpleResultSet(RankedResultSet):
             # Don't know what?
             raise NotImplementedError
 
-        if missing:
+        if missing is not None:
             if missing == -1:
+                # Sort low
                 val = '\x00'
+            elif missing == 0:
+                # Omit
+                tmplist = [x for x in tmplist if x[0]]
             elif missing == 1:
+                # Sort high
                 val = '\xff'
             else:
                 val = missing
             fill = lambda x: x if x else val
             tmplist = [(fill(x[0]), x[1]) for x in tmplist]
-        elif missing == 0:
-            # Omit
-            tmplist = [x for x in tmplist if x[0]]
-        if case == 0:
+
+        if not case and case is not None:
             tmplist = [(x[0].lower(), x[1]) for x in tmplist]
-        if accents == 0:
+
+        if not accents and accents is not None:
             db = session.server.get_object(session, session.database)
             n = db.get_object(session, 'DiacriticNormalizer')
             unaccent = n.process_string
             tmplist = [(unaccent(session, x[0]), x[1]) for x in tmplist]
 
-        if ascending == 0:
-            tmplist.sort(reverse=True)
-        else:
-            tmplist.sort()
+        if ascending is None:
+            # If ascending not set, assume ascending unless over-ridden
+            # due to spec later...
+            ascending = True
+
+        tmplist.sort(reverse=not(ascending))
         self._list = [x for (key, x) in tmplist]
 
     def reverse(self, session):
