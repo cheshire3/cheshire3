@@ -1386,8 +1386,8 @@ class BdbIndexStore(IndexStore):
             cxn.open(fullname)
         self.sortStoreCxn[index] = cxn
         return cxn
-        
-    def fetch_sortValue(self, session, index, rec):
+
+    def fetch_sortValue(self, session, index, rec, lowest=True):
         try:
             cxn = self.sortStoreCxn[index]
         except:
@@ -1395,8 +1395,12 @@ class BdbIndexStore(IndexStore):
 
         val = cxn.get("%s/%s" % (str(rec.recordStore), rec.id))
         if val is None:
-            val = cxn.get("%s/%s" % (str(rec.recordStore), rec.numericId)) 
-        return val
+            val = cxn.get("%s/%s" % (str(rec.recordStore), rec.numericId))
+        values = val.split('\0')  # Split value at non-text token
+        if lowest:
+            return values[0]
+        else:
+            return values[-1]
 
     def store_terms(self, session, index, terms, rec):
         # Store terms from hash
@@ -1444,23 +1448,40 @@ class BdbIndexStore(IndexStore):
         elif (docid == -1):
             # Unstored record
             raise ValueError(str(rec))
-        
+
         if index in self.outFiles:
             # Batch loading
+            if (index in self.sortStoreCxn):
+                # Concatenate lowest and highest values, separated by a
+                # non-text tokento enable ascending and descending sort
+
+                # Fetch existing values
+                existingVal = self.sortStoreCxn[index].get(
+                    "%s/%s" % (str(rec.recordStore), docid)
+                )
+                if existingVal:
+                    sortVals = existingVal.split('\0')
+                else:
+                    sortVals = []
+                for valueHash in terms.itervalues():
+                    if 'sortValue' in valueHash:
+                        sortVal = valueHash['sortValue']
+                    else:
+                        sortVal = valueHash['text']
+
+                    if type(sortVal) == unicode:
+                        sortVal = sortVal.encode('utf-8')
+                    sortVals.append(sortVal)
+                # Sort the combined list
+                sortVals.sort()
+                # Concatenate lowest and highest values
+                self.sortStoreCxn[index].put(
+                    "%s/%s" % (str(rec.recordStore), docid),
+                    sortVals[0] + '\0' + sortVals[-1]
+                )
 
             valueHash = terms.values()[0]
             value = valueHash['text']
-            if (index in self.sortStoreCxn):
-                if 'sortValue' in valueHash:
-                    sortVal = valueHash['sortValue']
-                else:
-                    sortVal = value
-                if type(sortVal) == unicode:
-                    sortVal = sortVal.encode('utf-8')
-                self.sortStoreCxn[index].put(
-                    "%s/%s" % (str(rec.recordStore), docid),
-                    sortVal)
-
             prox = 'positions' in terms[value]
             for k in terms.values():
                 kw = k['text']
