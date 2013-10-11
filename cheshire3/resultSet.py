@@ -1011,17 +1011,26 @@ class SimpleResultSet(RankedResultSet):
 
     def order(self, session, spec,
               ascending=None, missing=None, case=None, accents=None):
-        """Re-order based on the given specification (spec) and arguments.
+        """Re-order based on the given specification and arguments.
 
-        spec can be:  index, xpath, workflow, item attribute
-        clause is a CQL clause with sort attributes on the relation
+        :param spec: specification on which to order the ResultSet
+        :type spec: Index, xpath, Workflow, attribute of ResultSetItem
+        :param ascending: sort in ascending order
+        :type ascending: True, False or None (best guess)
+        :param missing: behaviour when sort value is missing
+        :type missing: integer (-1: low, 0: omit, 1: high) or string (default)
+        :param case: case sensitive? (assuming spec permits it)
+        :type case: True or False
+        :param accents: exclude accented characters
+        :type accents: True or False
+        :rtype: None
 
-        sort args:
-          missingHigh (1), missingLow (-1), missingOmit (0)
-          missingValue=(str) ascending=1/0
         Not handling yet:
-          case=1/0, accents=1/0
-          locale=VALUE, unicodeCollate[=VALUE]
+
+        * locale=VALUE
+        * unicodeCollate[=VALUE]
+
+        Clause is a CQL clause with sort attributes on the relation
         """
 
         l = self._list
