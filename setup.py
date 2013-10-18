@@ -78,6 +78,7 @@ setup(
     ],
     extras_require={
         'graph': ['rdflib'],
+        'grid': ['PyRods'],
         'datamining': ['svm'],
         'lucene': ['lucene'],
         'sql': ['psycopg2 >= 2.5'],
@@ -93,7 +94,8 @@ setup(
             'cheshire3-load = cheshire3.commands.load:main',
             'cheshire3-register = cheshire3.commands.register:main',
             'cheshire3-search = cheshire3.commands.search:main',
-            'cheshire3-serve = cheshire3.commands.serve:main'
+            'cheshire3-serve = cheshire3.commands.serve:main',
+            'icheshire3-load = cheshire3.grid.commands.load:main [grid]'
         ],
     },
     keywords="xml document search information retrieval engine data text",
