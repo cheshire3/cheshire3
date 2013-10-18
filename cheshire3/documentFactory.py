@@ -402,7 +402,7 @@ You could try using zip.'''
         elif (mimetype[0] == 'application/marc'):
             trip = ('stream', MarcDocumentStream, 'marc')
         else:
-            if self.tagName is not None:
+            if self.tagName:
                 trip = ('stream', XmlDocumentStream, 'xml')
             else:
                 trip = ('document', None, mimetype[0])
