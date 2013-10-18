@@ -3,13 +3,16 @@
 Start an HTTP server to expose Cheshire3 databases via SRU, OAI-PMH (and maybe
 more in future) protocols for development and demonstration purposes.
 
-The current implementation uses CherryPy. 
+The current implementation uses Paste.
 """
 import sys
 import socket
 import signal
+import webbrowser
 
-from cherrypy.wsgiserver import CherryPyWSGIServer, WSGIPathInfoDispatcher
+import paste.httpserver
+from paste.urlmap import URLMap
+from paste.urlparser import make_pkg_resources
 
 from cheshire3.server import SimpleServer
 from cheshire3.session import Session
@@ -36,31 +39,39 @@ def main(argv=None):
     # Init OAI-PMH App
     dbs, oaipmh_configs = get_databasesAndConfigs(c3_session, c3_server)
     oaipmh_app = OAIPMHWsgiApplication(c3_session, oaipmh_configs, dbs)
-    dispatcher = WSGIPathInfoDispatcher([
-        ('/api/sru', sru_app),
-        ('/api/oaipmh/2.0', oaipmh_app),
-    ])
-    wsgi_server = CherryPyWSGIServer((args.hostname, args.port),
-                                     dispatcher,
-                                     server_name="Cheshire3 for Archives")
-    def signal_handler(signal, frame):
-        wsgi_server.stop()
-        sys.exit(0)
-    signal.signal(signal.SIGINT, signal_handler)
-    wsgi_server.start()
+    # Mount various Apps and static directories
+    urlmap = URLMap()
+    urlmap['/docs'] = make_pkg_resources(None, 'cheshire3', 'docs/build/html')
+    urlmap['/api/sru'] = sru_app
+    urlmap['/api/oaipmh/2.0'] = oaipmh_app
+    url = "http://{0}:{1}/".format(args.hostname, args.port)
+    if args.browser:
+        webbrowser.open(url)
+        print ("Hopefully a new browser window/tab should have opened "
+               "displaying the application.")
+    paste.httpserver.serve(urlmap,
+                           host=args.hostname,
+                           port=args.port,
+                           )
 
 
 argparser = Cheshire3ArgumentParser(conflict_handler='resolve',
                                     description=__doc__.splitlines()[0])
 argparser.add_argument('--hostname', type=str,
-                  action='store', dest='hostname',
-                  default='127.0.0.1', metavar='HOSTNAME',
-                  help=("name of host to listen on. default derived by "
-                        "inspection of local system"))
+                       action='store', dest='hostname',
+                       default='127.0.0.1', metavar='HOSTNAME',
+                       help=("name of host to listen on. default derived by "
+                             "inspection of local system")
+                       )
 argparser.add_argument('-p', '--port', type=int,
-                  action='store', dest='port',
-                  default=8000, metavar='PORT',
-                  help="number of port to listen on. default: 8000")
+                       action='store', dest='port',
+                       default=8000, metavar='PORT',
+                       help="number of port to listen on. default: 8000"
+                       )
+argparser.add_argument('--browser',
+                       action='store_true', dest='browser',
+                       help=("open a browser window/tab containing the app.")
+                       )
 
 c3_session = None
 c3_server = None

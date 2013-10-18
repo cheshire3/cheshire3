@@ -4,4 +4,4 @@ nltk>=2.0.2
 numpy==1.6.2
 zopyx.txng3.ext>=3.3.1
 lz4>=0.4
-paste>=1.0
+Paste>=1.7.5
