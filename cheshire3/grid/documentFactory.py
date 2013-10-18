@@ -1,5 +1,4 @@
 import os
-from urlparse import urlsplit
 
 from cheshire3.document import StringDocument
 from cheshire3.documentFactory import MultipleDocumentStream
@@ -12,72 +11,67 @@ from cheshire3.grid.irods_utils import icatValToPy, parse_irodsUrl
 try:
     import irods
 except ImportError:
+    irods = None
 
-    class IrodsStream(object):
-        u"""Base class DocumentStream to load from iRODS."""
+class IrodsStream(object):
+    u"""Base class DocumentStream to load from iRODS."""
 
-        def __init__(self, session, stream):
+    def __init__(self, session, stream):
+        # Check for dependency
+        if irods is None:
             raise MissingDependencyException(
                 '{0.__module__}.{0.__class__.__name__}'.format(self),
                 'irods (PyRods)'
             )
-
-else:
-
-    class IrodsStream(object):
-        u"""Base class DocumentStream to load from iRODS."""
-
-        def __init__(self, session, stream):
-            # Check for URL
-            if stream.startswith(('irods://', 'rods://')):
-                myEnv = parse_irodsUrl(stream)
-                stream = myEnv.relpath
-            else:
-                # Get parameters from env
-                status, myEnv = irods.getRodsEnv()
-            try:
-                host = myEnv.getRodsHost()
-                port = myEnv.getRodsPort()
-                username = myEnv.getRodsUserName()
-                zone = myEnv.getRodsZone()
-                home = myEnv.getRodsHome()
-            except AttributeError:
-                host = myEnv.rodsHost
-                port = myEnv.rodsPort
-                username = myEnv.rodsUserName
-                zone = myEnv.rodsZone
-                home = myEnv.rodsHome
-            conn, errMsg = irods.rcConnect(host, port, username, zone)
-            status = irods.clientLogin(conn)
-            if status:
-                raise ConfigFileException("Cannot connect to iRODS: ({0}) {1}"
-                                          "".format(status, errMsg)
-                                          )
-
-            c = irods.irodsCollection(conn)
-            self.cxn = conn
-            self.coll = c
-            instream = stream
-            # Check if abs path to home dir
-            if stream.startswith(home):
-                stream = stream[len(home):]
-                if stream[0] == "/":
-                    stream = stream[1:]
-            colls = stream.split('/')
-            for i, cln in enumerate(colls):
-                exit_status = c.openCollection(cln)
-                if exit_status < 0:
-                    if (
-                        (i < len(colls) - 1) or
-                        (cln not in [obj[0] for obj in c.getObjects()])
-                    ):
-                        raise IOError("When opening {0}: {1} does not exists "
-                                      "in collection {2}"
-                                      "".format(instream,
-                                                cln,
-                                                c.getCollName()
-                                                )
+        # Check for URL
+        if stream.startswith(('irods://', 'rods://')):
+            myEnv = parse_irodsUrl(stream)
+            stream = myEnv.relpath
+        else:
+            # Get parameters from env
+            status, myEnv = irods.getRodsEnv()
+        try:
+            host = myEnv.getRodsHost()
+            port = myEnv.getRodsPort()
+            username = myEnv.getRodsUserName()
+            zone = myEnv.getRodsZone()
+            home = myEnv.getRodsHome()
+        except AttributeError:
+            host = myEnv.rodsHost
+            port = myEnv.rodsPort
+            username = myEnv.rodsUserName
+            zone = myEnv.rodsZone
+            home = myEnv.rodsHome
+        conn, errMsg = irods.rcConnect(host, port, username, zone)
+        status = irods.clientLogin(conn)
+        if status:
+            raise ConfigFileException("Cannot connect to iRODS: ({0}) {1}"
+                                      "".format(status, errMsg)
                                       )
+
+        c = irods.irodsCollection(conn)
+        self.cxn = conn
+        self.coll = c
+        instream = stream
+        # Check if abs path to home dir
+        if stream.startswith(home):
+            stream = stream[len(home):]
+            if stream[0] == "/":
+                stream = stream[1:]
+        colls = stream.split('/')
+        for i, cln in enumerate(colls):
+            exit_status = c.openCollection(cln)
+            if exit_status < 0:
+                if (
+                    (i < len(colls) - 1) or
+                    (cln not in [obj[0] for obj in c.getObjects()])
+                ):
+                    raise IOError("When opening {0}: {1} does not exists in "
+                                  "collection {2}".format(instream,
+                                                          cln,
+                                                          c.getCollName()
+                                                          )
+                                  )
 
 
 class IrodsFileDocumentStream(IrodsStream, FileDocumentStream):
