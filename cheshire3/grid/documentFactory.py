@@ -176,11 +176,21 @@ class IrodsDeterminingDocumentStream(IrodsFileDocumentStream,
         # Check the stream location to init correct subclass
         fn = os.path.basename(stream)
         if fn in self.coll.getObjects():
+            # Fake dynamic inheritance
+            self.baseClass = IrodsFileDocumentStream
             FileDocumentStream.__init__(self, session, stream, format,
                                         tagName, codec, factory)
         else:
+            # Fake dynamic inheritance
+            self.baseClass = IrodsDirectoryDocumentStream
             MultipleDocumentStream.__init__(self, session, stream, format,
                                             tagName, codec, factory)
+
+    def open_stream(self, path):
+        return self.baseClass.open_stream(self, path)
+
+    def find_documents(self, session, cache=0):
+        return self.baseClass.find_documents(self, session, cache=0)
 
 
 class IrodsConsumingFileDocumentStream(IrodsFileDocumentStream):
