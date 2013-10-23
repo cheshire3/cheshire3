@@ -1420,7 +1420,11 @@ class BdbIndexStore(IndexStore):
         val = cxn.get("%s/%s" % (str(rec.recordStore), rec.id))
         if val is None:
             val = cxn.get("%s/%s" % (str(rec.recordStore), rec.numericId))
-        values = val.split('\0')  # Split value at non-text token
+        if val is None:
+            # Missing value
+            return val
+        # Split value at non-text token
+        values = val.split('\0')
         if lowest:
             return values[0]
         else:
