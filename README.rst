@@ -27,10 +27,10 @@ Contents
 
    -  `Command-line UI`_
 
-       -  `Creating a new Database`_
-       -  `Loading Data into the Database`_
-       -  `Searching the Database`_
-       -  `Exposing the Database via SRU`_
+      -  `Creating a new Database`_
+      -  `Loading Data into the Database`_
+      -  `Searching the Database`_
+      -  `Exposing the Database via SRU`_
 
    -  `Python API`_
 
