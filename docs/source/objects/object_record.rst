@@ -33,5 +33,5 @@ provides the following implementations:
 
 .. autoclass:: cheshire3.graph.record.GraphRecord
 
-.. autoclass:: cheshire3.graph.record.OREGraphRecord
+.. autoclass:: cheshire3.graph.record.OreGraphRecord
 
