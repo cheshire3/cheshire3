@@ -4,6 +4,7 @@ python:
 # Install dependencies
 install:
   - "pip install -r requirements.txt --use-mirrors"
+  - "python ez_setup.py"
   - "pip install . --use-mirrors"
 # Run tests
 script: python setup.py test
