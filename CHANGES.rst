@@ -1,8 +1,8 @@
 CHANGES
 =======
 
-1.1.0 - TBC
------------
+1.1.0c1 - Tuesday 21st November 2013
+------------------------------------
 
 ENHANCEMENTS
 ~~~~~~~~~~~~
@@ -18,17 +18,45 @@ ENHANCEMENTS
     * OpenDocument Format (LibreOffice, OpenOffice 3+)
     * Office Open XML (Microsoft Office 2007+ - docx, pptx, xlsx etc.)
 
-  * Attempts to create title index entries by default
+  * Easily load and index data from an iRODS data grid.
 
-  * Store low and high values for each Record when ``sortStore`` setting is
-    given for an Index. This provides more intuitive results when ordering
-    ResultSets
+  * Attempts to create title index entries by default.
 
   * Faster retrieval[*]_ by compressing stored records using the lz4
     algorithm to reduce read time from disk.
 
+* Store low and high values for each Record when ``sortStore`` setting is
+  given for an Index. This provides more intuitive results when ordering
+  ResultSets.
+
+* NLTK Integration enabling configuration of indexes for automatically
+ extracted named entities.
+
+* Improved `sql` sub-package through use of `psycopg2`.
+
 .. [*] Faster retrieval assuming reasonable processing power (>=2.5GHz) and
        non solid-state storage. 
+
+
+BUG FIXES
+~~~~~~~~~
+
+Many minor bug fixes.
+
+
+TESTS
+~~~~~
+
+New regression unittests:
+
+* Workflows
+* ResultSets
+* ResultSetStores
+* Loggers
+* Indexes
+
+For fuller details see the `GitHub Issue Tracker
+<https://github.com/cheshire3/cheshire3/issues?milestone=8&state=closed>`
 
 
 1.0.16 - Thursday 10 October 2013
@@ -72,7 +100,6 @@ DOCUMENTATION
 ~~~~~~~~~~~~~
 
 * Replaced documentation in docs/ folder with Sphinx-based documentation.
->>>>>>> 1.0.15
 
 
 1.0.13 - Friday 7 June 2013
@@ -122,6 +149,7 @@ BUG FIXES
 ~~~~~~~~~
 
 * Fixed typo in cheshire3.resultSet:
+
   ValueErorr -> ValueError
 
 * Fixed mutable type default data argument to SimpleResultSet constructor
@@ -234,4 +262,6 @@ ENHANCEMENTS
   * ``cheshire3-serve``
 
 
+.. Links
 .. _`PyPI`: http://pypi.python.org/pypi/cheshire3
+.. _`psycopg2`: https://pypi.python.org/pypi/psycopg2
