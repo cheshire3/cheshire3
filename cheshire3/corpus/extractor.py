@@ -6,6 +6,7 @@ import types
 
 from cheshire3.baseObjects import Extractor
 from cheshire3.extractor import SimpleExtractor
+from cheshire3.internal import CONFIG_NS
 
 
 class SpanXPathTaggedTermExtractor(SimpleExtractor):
