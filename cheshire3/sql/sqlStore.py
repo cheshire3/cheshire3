@@ -110,8 +110,17 @@ class SQLStore(SimpleStore):
     def _query(self, query, args=tuple()):
         query = query.encode('utf-8')
         with self._connect(self.session) as cxn:
-            with cxn.cursor() as cur:
+            cur = cxn.cursor()
+            try:
                 cur.execute(query, args)
+            except:
+                # Attempt to rollback
+                try:
+                    cxn.rollback()
+                except AttributeError:
+                    # Rollback unsupported by implementation
+                    pass
+            else:
                 try:
                     return cur.fetchall()
                 except:
@@ -159,11 +168,7 @@ class SQLStore(SimpleStore):
                  "".format(self.table)
                  )
         args = (id_, now)
-        try:
-            self._query(query, args)
-        except:
-            # Already exists
-            pass
+        self._query(query, args)
         query = ("UPDATE {0} SET data = %s, timeModified = %s "
                  "WHERE identifier = %s;".format(self.table)
                  )
