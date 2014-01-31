@@ -95,10 +95,13 @@ class SQLStore(SimpleStore):
         return SQLIter(self.session, self)
 
     def _verifyDatabases(self, session):
+        """Verify that necessary relation(s)/table(s) exists."""
         query = "SELECT identifier FROM {0} LIMIT 1".format(self.table)
-        try:
-            self._query(query)
-        except:
+        # Executing a query will only raise a db connect error
+        rows = self._query(query)
+        # rows == [] means initialized but empty
+        # rows == None means relations(s)/table(s) uninitialized
+        if rows is None:
             self._initialise(session)
 
     def _connect(self, session):
