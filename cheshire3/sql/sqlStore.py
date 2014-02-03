@@ -22,7 +22,7 @@ class SQLIter(object):
                  "".format(self.store.table)
                  )
         query = query.encode('utf-8')
-        with self._connect(store.database) as cxn:
+        with self._connect() as cxn:
             with cxn.cursor() as cur:
                 cur.execute(query)
                 self.idList = [row[0] for row in cur]

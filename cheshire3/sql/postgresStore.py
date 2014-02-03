@@ -21,7 +21,7 @@ from cheshire3.sql.sqlStore import SQLIter, SQLStore
 from cheshire3.resultSet import SimpleResultSetItem
 
 
-class PostgresIter(object):
+class PostgresIter(SQLIter):
     """Iterator for Cheshire3 PostgresStores."""
 
     def _connect(self):
