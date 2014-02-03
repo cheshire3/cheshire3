@@ -15,7 +15,7 @@ class PostgresRecordIter(PostgresIter):
         """
         d = PostgresIter.next(self)
         data = d[1]
-        data = data.replace('\\000\\001', nonTextToken)
+        data = str(data).replace('\\000\\001', nonTextToken)
         data = data.replace('\\012', '\n')
         rec = self.store._process_data(self.session, d[0], data)
         return rec
