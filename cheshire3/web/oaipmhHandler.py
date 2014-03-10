@@ -319,7 +319,7 @@ class Cheshire3OaiServer(object):
         if (metadataPrefix and not
             (metadataPrefix in self.protocolMap.recordNamespaces)):
             raise CannotDisseminateFormatError()
-        # Cheshire3 does not support sets
+        # Cheshire3 does not support sets by default
         if set:
             raise NoSetHierarchyError()
         # Get list of datestamp, resultSet tuples

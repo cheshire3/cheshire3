@@ -9,10 +9,18 @@ from oaipmhHandler import *
 
 class OAIPMHWsgiApplication(object):
 
-    def __init__(self, session, configs, dbs):
+    def __init__(self, session, configs, dbs, serverClass=None):
         self.session = session
         self.configs = configs
         self.dbs = dbs
+        if serverClass and not issubclass(serverClass, Cheshire3OaiServer):
+            raise ValueError("serverClass argument is not a sub-class of "
+                             "cheshire3.web.oaipmhHandler.Cheshire3OaiServer"
+                             )
+        elif serverClass:
+            self.serverClass = serverClass
+        else:
+            self.serverClass = Cheshire3OaiServer
 
     def __call__(self, environ, start_response):
         global configs, oaiDcReader, c3OaiServers
@@ -56,8 +64,8 @@ class OAIPMHWsgiApplication(object):
                 oaixml = MinimalOaiServer(c3OaiServers[path],
                                           c3OaiServers[path].metadataRegistry)
             except KeyError:
-                oai = Cheshire3OaiServer(self.session, self.configs,
-                                         self.dbs, path)
+                oai = self.serverClass(self.session, self.configs,
+                                       self.dbs, path)
                 c3OaiServers[path] = oai
                 oaixml = MinimalOaiServer(oai, oai.metadataRegistry)
             try:
@@ -81,6 +89,7 @@ class OAIPMHWsgiApplication(object):
                                     )
             start_response('200 OK', response_headers)
             return out
+
 
 def main():
     """Start up a simple app server to serve the SRU application."""
