@@ -1,8 +1,14 @@
 """Cheshire3 Textmining TokenMerger Implementations."""
 
-import nltk
+try:
+    import nltk
+except:
+    nltk = None
 
-from cheshire3.exceptions import ConfigFileException
+from cheshire3.exceptions import (
+    ConfigFileException,
+    MissingDependencyException
+    )
 from cheshire3.tokenMerger import SimpleTokenMerger
 
 
@@ -99,6 +105,8 @@ class NLTKNamedEntityTokenMerger(SimpleTokenMerger):
 
     def __init__(self, session, node, parent):
         SimpleTokenMerger.__init__(self, session, node, parent)
+        if nltk is None:
+            raise MissingDependencyException(self.objectType, 'nltk')
         types = self.get_setting(session, 'entityTypes')
         if types:
             self.types = []

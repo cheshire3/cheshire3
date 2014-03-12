@@ -1,9 +1,15 @@
 """Cheshire3 Textmining Extractor Implementations."""
 
-import nltk
+try:
+    import nltk
+except ImportError:
+    nltk = None
 
 from cheshire3.extractor import SimpleExtractor
-from cheshire3.exceptions import ConfigFileException
+from cheshire3.exceptions import (
+    ConfigFileException,
+    MissingDependencyException
+    )
 
 
 class NLTKNamedEntityExtractor(SimpleExtractor):
@@ -32,6 +38,8 @@ class NLTKNamedEntityExtractor(SimpleExtractor):
 
     def __init__(self, session, node, parent):
         SimpleExtractor.__init__(self, session, node, parent)
+        if nltk is None:
+            raise MissingDependencyException(self.objectType, 'nltk')
         # Load types from config
         types = self.get_setting(session, 'entityTypes')
         if types:

@@ -2,10 +2,16 @@
 import os
 import types
 import re
-import nltk
+try:
+    import nltk
+except ImportError:
+    nltk = None
 
 from cheshire3.configParser import C3Object
-from cheshire3.exceptions import ConfigFileException
+from cheshire3.exceptions import (
+    ConfigFileException,
+    MissingDependencyException
+    )
 from cheshire3.normalizer import SimpleNormalizer
 from cheshire3.textmining.TsujiiC3 import TsujiiObject, GeniaObject, EnjuObject
 
@@ -227,6 +233,8 @@ class NLTKPosNormalizer(PosNormalizer):
 
     def __init__(self, session, node, parent):
         PosNormalizer.__init__(self, session, node, parent)
+        if nltk is None:
+            raise MissingDependencyException(self.objectType, 'nltk')
         cls = self.get_setting(session, 'taggerClass', None)
         if cls is not None:
             try:

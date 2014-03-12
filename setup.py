@@ -82,6 +82,7 @@ setup(
         'grid': ['PyRods'],
         'datamining': ['svm'],
         'lucene': ['lucene'],
+        'nlp': ['numpy', 'nltk >= 2.0.2'],
         'sql': ['psycopg2 >= 2.5'],
         'textmining': ['numpy', 'nltk >= 2.0.2'],
         'web': ['pyoai', 'PyZ3950 >= 2.04', 'ZSI < 2.0']
