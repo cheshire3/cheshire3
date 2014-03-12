@@ -1,8 +1,8 @@
 CHANGES
 =======
 
-1.1.0c1 - Tuesday 21st November 2013
-------------------------------------
+1.1.0c5 - Wednesday 12th March 2014
+-----------------------------------
 
 ENHANCEMENTS
 ~~~~~~~~~~~~
@@ -30,9 +30,16 @@ ENHANCEMENTS
   ResultSets.
 
 * NLTK Integration enabling configuration of indexes for automatically
- extracted named entities.
+  extracted named entities. This feature can be enabled by installing
+  cheshire3 with 'nlp' or 'textmining' extras, e.g.::
 
-* Improved `sql` sub-package through use of `psycopg2`.
+      pip install cheshire3[nlp] >= 1.1.0
+
+* Improved speed, readability and security of ``sql`` sub-package through use
+  of ``psycopg2``.
+
+* Better support for custom OAI-PMH servers (available as part of 'web'
+  extras).
 
 .. [*] Faster retrieval assuming reasonable processing power (>=2.5GHz) and
        non solid-state storage. 
