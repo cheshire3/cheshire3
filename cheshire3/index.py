@@ -390,7 +390,7 @@ class SimpleIndex(Index):
             self.longStructSize = int(lss)
         else:
             #self.longStructSize = len(struct.pack('L', 1))
-            self.longStructSize = struct.calcsize('l')
+            self.longStructSize = struct.calcsize('<l')
 
         self.recordStoreSizes = self.get_setting(session,
                                                  'recordStoreSizes',
