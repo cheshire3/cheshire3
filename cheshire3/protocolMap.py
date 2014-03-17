@@ -9,8 +9,10 @@ import sys
 import os
 
 from cheshire3.baseObjects import ProtocolMap
-from cheshire3.exceptions import ConfigFileException,\
-                                 ObjectDoesNotExistException
+from cheshire3.exceptions import (
+    ConfigFileException,
+    ObjectDoesNotExistException
+    )
 from cheshire3.utils import elementType, textType, flattenTexts
 from cheshire3.cqlParser import modifierClauseType, indexType, relationType
 from cheshire3 import dynamic
@@ -23,7 +25,7 @@ except:
 
 class ZeerexProtocolMap(ProtocolMap):
     """Abstract Base Class for ProtocolMaps based on the ZeeRex specification.
-    
+
     http://zeerex.z3950.org/
     """
     protocol = ""
@@ -45,15 +47,15 @@ class ZeerexProtocolMap(ProtocolMap):
             dom = self._getDomFromFile(session, p, parser='minidom')
         for c in dom.childNodes:
             if c.nodeType == elementType:
-                self._walkZeeRex(session, c)    
+                self._walkZeeRex(session, c)
 
 
 class UpdateProtocolMap(ZeerexProtocolMap):
     """ProtocolMap for the SRU Record Update protocol.
-    
+
     http://www.loc.gov/standards/sru/record-update/index.html
     """
-    
+
     transformerHash = {}
     workflowHash = {}
 
@@ -98,7 +100,7 @@ class UpdateProtocolMap(ZeerexProtocolMap):
                 wflw = node.getAttributeNS(self.c3Namespace, 'workflow')
                 if (wflw):
                     flow = self.get_object(session, wflw)
-                    if (flow is None):                        
+                    if (flow is None):
                         raise ConfigFileException("No workflow to map to for "
                                                   "%s" % wflw)
                     self.workflowHash[data] = self.get_object(session, wflw)
@@ -127,14 +129,14 @@ class UpdateProtocolMap(ZeerexProtocolMap):
             for c in node.childNodes:
                 if c.nodeType == elementType:
                     self._walkZeeRex(session, c)
-                    
+
 
 class CQLProtocolMap(ZeerexProtocolMap):
     """ProtocolMap for the Contextual Query Language.
-    
+
     http://www.loc.gov/standards/sru/specs/cql.html
     """
-    
+
     prefixes = {}
     indexHash = {}
     transformerHash = {}
@@ -144,7 +146,7 @@ class CQLProtocolMap(ZeerexProtocolMap):
     scanExtensionHash = {}
     explainExtensionHash = {}
     responseExtensionHash = {}
-    
+
     def __init__(self, session, node, parent):
         self.protocol = "http://www.loc.gov/zing/srw/"
         self.indexHash = {}
@@ -190,7 +192,7 @@ class CQLProtocolMap(ZeerexProtocolMap):
         while (target.parent):
             target = target.parent
         target.config = self
-        
+
         query.index.resolvePrefix()
         uri = query.index.prefixURI
         name = query.index.value
@@ -204,24 +206,26 @@ class CQLProtocolMap(ZeerexProtocolMap):
                 val = query.index.origValue.split('.')[1]
                 idx = self.parent.get_object(session, val)
             return idx
-        elif (uri in ['info:srw/cql-context-set/1/cql-v1.1',
-                     'info:srw/cql-context-set/1/cql-v1.2'] and
-              name == 'serverchoice' and
-              hasattr(self, 'defaultIndex')):
+        elif (
+            uri in ['info:srw/cql-context-set/1/cql-v1.1',
+                    'info:srw/cql-context-set/1/cql-v1.2'] and
+            name == 'serverchoice' and
+            hasattr(self, 'defaultIndex')
+        ):
             dp, dn = self.defaultIndex.split('.')
             du = self.resolvePrefix(dp)
             query.index.prefix = dp
             query.index.value = dn
             query.index.prefixURI = du
             return self.resolveIndex(session, query)
-        
+
         rel = query.relation.value
         relMods = query.relation.modifiers
 
         # FIXME:  Better CQL->Index resolution
         # Check relevance, check stem, check str/word, check relation,
         # Check index
-        
+
         relv = stem = 0
         rms = []
         for r in relMods:
@@ -232,7 +236,7 @@ class CQLProtocolMap(ZeerexProtocolMap):
                 stem = 1
             else:
                 rms.append(r.type.value)
-        
+
         idx = None
         if (relv):
             idx = self.indexHash.get((uri, name,
@@ -305,8 +309,10 @@ class CQLProtocolMap(ZeerexProtocolMap):
             for c in node.childNodes:
                 if (c.nodeType == elementType and c.localName == 'configInfo'):
                     for c2 in c.childNodes:
-                        if (c2.nodeType == elementType and
-                            c2.localName == 'supports'):
+                        if (
+                            c2.nodeType == elementType and
+                            c2.localName == 'supports'
+                        ):
                             idxName2 = c2.getAttributeNS(self.c3Namespace,
                                                          'index')
                             if (not idxName2):
@@ -316,8 +322,8 @@ class CQLProtocolMap(ZeerexProtocolMap):
                                                                idxName2)
                                 if indexObject2 is None:
                                     raise ConfigFileException(
-                                              "[%s] No Index to map to for "
-                                              "%s" % (self.id, idxName2)
+                                        "[%s] No Index to map to for "
+                                        "%s" % (self.id, idxName2)
                                     )
                             st = str(c2.getAttribute('type'))
                             val = str(flattenTexts(c2))
@@ -368,7 +374,7 @@ class CQLProtocolMap(ZeerexProtocolMap):
                 xn = node.getAttributeNS(self.c3Namespace, 'type')
                 if (not xn in ['record', 'term', 'searchRetrieve', 'scan',
                                'explain', 'response']):
-                    raise ConfigFileException('Unknown extension type %s' % xn)               
+                    raise ConfigFileException('Unknown extension type %s' % xn)
                 sru = node.getAttributeNS(self.c3Namespace, 'sruName')
                 fn = node.getAttributeNS(self.c3Namespace, 'function')
                 data = flattenTexts(node)
@@ -401,7 +407,7 @@ class CQLProtocolMap(ZeerexProtocolMap):
                         raise ConfigFileException('Cannot find transformation '
                                                   'function %s in '
                                                   'srwExtensions.' % xform)
-                    hashAttr = xn + "ExtensionHash"                
+                    hashAttr = xn + "ExtensionHash"
                     curr = getattr(self, hashAttr)
                     curr[data] = fn
                     setattr(self, hashAttr, curr)
@@ -422,49 +428,49 @@ class CQLProtocolMap(ZeerexProtocolMap):
 
 
 protocolNamespaces = {
-  'srw': 'http://www.loc.gov/zing/srw/',
-  'xcql': 'http://www.loc.gov/zing/srw/xcql/',
-  'diag': 'http://www.loc.gov/zing/srw/diagnostic/',
-  'ucp': 'http://www.loc.gov/zing/srw/update/'
+    'srw': 'http://www.loc.gov/zing/srw/',
+    'xcql': 'http://www.loc.gov/zing/srw/xcql/',
+    'diag': 'http://www.loc.gov/zing/srw/diagnostic/',
+    'ucp': 'http://www.loc.gov/zing/srw/update/'
 }
 
 recordNamespaces = {
-  'dc': 'info:srw/schema/1/dc-v1.1',
-  'diag': 'info:srw/schema/1/diagnostic-v1.1',
-  'mods': 'info:srw/schema/1/mods-v3.0',
-  'onix': 'info:srw/schema/1/onix-v2.0',
-  'marcxml': 'info:srw/schema/1/marcxml-v1.1',
-  'ead': 'info:srw/schema/1/ead-2002',
-  'ccg': 'http://srw.o-r-g.org/schemas/ccg/1.0/',
-  'marcsgml': 'http://srw.o-r-g.org/schemas/marcsgml/12.0/',
-  'metar': 'http://srw.o-r-g.org/schemas/metar/1.0/',
-  'unesco': 'http://srw.o-r-g.org/schemas/unesco/1.0/',
-  'zthes': 'http://zthes.z3950.org/xml/zthes-05.dtd',
-  'zeerex': 'http://explain.z3950.org/dtd/2.0/',
-  'rec': 'info:srw/schema/2/rec-1.0',
-  'xpath': 'info:srw/schema/1/xpath-1.0'
+    'dc': 'info:srw/schema/1/dc-v1.1',
+    'diag': 'info:srw/schema/1/diagnostic-v1.1',
+    'mods': 'info:srw/schema/1/mods-v3.0',
+    'onix': 'info:srw/schema/1/onix-v2.0',
+    'marcxml': 'info:srw/schema/1/marcxml-v1.1',
+    'ead': 'info:srw/schema/1/ead-2002',
+    'ccg': 'http://srw.o-r-g.org/schemas/ccg/1.0/',
+    'marcsgml': 'http://srw.o-r-g.org/schemas/marcsgml/12.0/',
+    'metar': 'http://srw.o-r-g.org/schemas/metar/1.0/',
+    'unesco': 'http://srw.o-r-g.org/schemas/unesco/1.0/',
+    'zthes': 'http://zthes.z3950.org/xml/zthes-05.dtd',
+    'zeerex': 'http://explain.z3950.org/dtd/2.0/',
+    'rec': 'info:srw/schema/2/rec-1.0',
+    'xpath': 'info:srw/schema/1/xpath-1.0'
 }
 
 contextSetNamespaces = {
-  'cql': 'info:srw/cql-context-set/1/cql-v1.2',
-  'srw': 'info:srw/cql-context-set/1/cql-v1.1',
-  'dc': 'info:srw/cql-context-set/1/dc-v1.1',
-  'bath': 'http://www.loc.gov/zing/cql/context-sets/bath/v1.1/',
-  'zthes': 'http://zthes.z3950.org/cql/1.0/',
-  'ccg': 'http://srw.cheshire3.org/contextSets/ccg/1.1/',
-  'ccg_l5r': 'http://srw.cheshire3.org/contextSets/ccg/l5r/1.0/',
-  'rec': 'info:srw/cql-context-set/2/rec-1.0',
-  'net': 'info:srw/cql-context-set/2/net-1.0'
+    'cql': 'info:srw/cql-context-set/1/cql-v1.2',
+    'srw': 'info:srw/cql-context-set/1/cql-v1.1',
+    'dc': 'info:srw/cql-context-set/1/dc-v1.1',
+    'bath': 'http://www.loc.gov/zing/cql/context-sets/bath/v1.1/',
+    'zthes': 'http://zthes.z3950.org/cql/1.0/',
+    'ccg': 'http://srw.cheshire3.org/contextSets/ccg/1.1/',
+    'ccg_l5r': 'http://srw.cheshire3.org/contextSets/ccg/l5r/1.0/',
+    'rec': 'info:srw/cql-context-set/2/rec-1.0',
+    'net': 'info:srw/cql-context-set/2/net-1.0'
 }
 
 profileNamespaces = {
-  'bath': 'http://zing.z3950.org/srw/bath/2.0/',
-  'zthes': ' http://zthes.z3950.org/srw/0.5',
-  'ccg': 'http://srw.cheshire3.org/profiles/ccg/1.0/',
-  'srw': 'info:srw/profiles/1/base-profile-v1.1'
+    'bath': 'http://zing.z3950.org/srw/bath/2.0/',
+    'zthes': ' http://zthes.z3950.org/srw/0.5',
+    'ccg': 'http://srw.cheshire3.org/profiles/ccg/1.0/',
+    'srw': 'info:srw/profiles/1/base-profile-v1.1'
 }
 
 extensionNamespaces = {
-  'schemaNegotiation': 'info:srw/extension/2/schemaNegotiation-1.0',
-  'authenticationToken': 'info:srw/extension/2/auth-1.0'
+    'schemaNegotiation': 'info:srw/extension/2/schemaNegotiation-1.0',
+    'authenticationToken': 'info:srw/extension/2/auth-1.0'
 }

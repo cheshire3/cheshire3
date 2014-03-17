@@ -4,14 +4,22 @@ import os
 import re
 import types
 
-from cheshire3.baseObjects import Normalizer
-from cheshire3.exceptions import ConfigFileException
+try:
+    from zopyx.txng3.ext import stemmer as Stemmer
+except ImportError:
+    Stemmer = None
 
- 
+from cheshire3.baseObjects import Normalizer
+from cheshire3.exceptions import (
+    ConfigFileException,
+    MissingDependencyException
+    )
+
+
 class SimpleNormalizer(Normalizer):
     """Abstract Base Class for Normalizer.
-    
-    Simply returns the data and should never be used as it will simply waste 
+
+    Simply returns the data and should never be used as it will simply waste
     CPU time.
     """
 
@@ -27,7 +35,7 @@ class SimpleNormalizer(Normalizer):
         kw = {}
         if not data:
             return kw
-        process = self.process_string        
+        process = self.process_string
         #items = data.items()
         #prox = items[0][1].has_key('positions')
         for (k, d) in data.iteritems():
@@ -45,7 +53,7 @@ class SimpleNormalizer(Normalizer):
                             d['charOffsets'].pop(x)
                         except KeyError:
                             pass
-                new.reverse()        
+                new.reverse()
                 nd = d.copy()
                 nd['text'] = new
                 kw[k] = nd
@@ -54,7 +62,7 @@ class SimpleNormalizer(Normalizer):
                 new = process(session, d['text'])
             if not new:
                 continue
-            if type(new) == types.DictType:
+            if isinstance(new, dict):
                 # From string to hash
                 for nv in new.itervalues():
                     txt = nv['text']
@@ -162,8 +170,8 @@ class UndocumentNormalizer(SimpleNormalizer):
     """ Take a document as if it were a string and turn into a string """
     def process_string(self, session, data):
         return data.get_raw(session)
-    
-    
+
+
 class CaseNormalizer(SimpleNormalizer):
     """ Reduce text to lower case """
 
@@ -176,7 +184,7 @@ class ReverseNormalizer(SimpleNormalizer):
     def process_string(self, session, data):
         return data[::-1]
 
-    
+
 class SpaceNormalizer(SimpleNormalizer):
     """ Reduce multiple whitespace to single space character """
     def __init__(self, session, config, parent):
@@ -193,7 +201,7 @@ class SpaceNormalizer(SimpleNormalizer):
 
 class ArticleNormalizer(SimpleNormalizer):
     """Remove leading english articles (the, a, an)"""
-    
+
     def process_string(self, session, data):
         d = data.lower()
         if (d[:4] == "the "):
@@ -204,12 +212,12 @@ class ArticleNormalizer(SimpleNormalizer):
             return data[3:]
         else:
             return data
-        
+
 
 class NumericEntityNormalizer(SimpleNormalizer):
     """Replaces named XML entities with numeric ones.
-    
-    Replace encoded XML entities matching a regular expression with the 
+
+    Replace encoded XML entities matching a regular expression with the
     equivalent numeric character entity
     """
 
@@ -217,7 +225,7 @@ class NumericEntityNormalizer(SimpleNormalizer):
         'regexp': {
             'docs': ("Regular expression of that matches characters to turn "
                      "into XML numeric character entities")
-         }
+        }
     }
 
     def __init__(self, session, config, parent):
@@ -251,7 +259,7 @@ class PointlessCharacterNormalizer(SimpleNormalizer):
         t = t.replace(u'\u2019', "'")
         t = t.replace(u'\u2026', " ")
         return t
-    
+
 
 class RegexpNormalizer(SimpleNormalizer):
     """Strip, replace or keep data matching a regular expression."""
@@ -306,7 +314,7 @@ class RegexpNormalizer(SimpleNormalizer):
 
 class NamedRegexpNormalizer(RegexpNormalizer):
     """A RegexpNormalizer with templating for named groups.
-    
+
     As RegexpNormalizer, but allow named groups and reconstruction of token
     using a template and those groups.
     """
@@ -322,9 +330,9 @@ class NamedRegexpNormalizer(RegexpNormalizer):
     def __init__(self, session, config, parent):
         RegexpNormalizer.__init__(self, session, config, parent)
         self.template = self.get_setting(session, 'template', '')
-        
+
     def process_string(self, session, data):
-        m = self.regexp.match(data)        
+        m = self.regexp.match(data)
         if m:
             try:
                 return self.template % m.groupdict()
@@ -336,13 +344,13 @@ class NamedRegexpNormalizer(RegexpNormalizer):
 
 class RegexpFilterNormalizer(SimpleNormalizer):
     """Normalizer to filter data with a regular expression.
-    
+
     If 'keep' setting is True:
         filters out data that DOES NOT match 'regexp' setting
     If 'keep' setting is False:
         filters out data that DOES match the 'regexp' setting
     """
-    
+
     _possibleSettings = {
         'regexp': {
             'docs': "Regular expression to match in the data."
@@ -353,7 +361,7 @@ class RegexpFilterNormalizer(SimpleNormalizer):
             'type': int
         }
     }
-    
+
     def __init__(self, session, config, parent):
         SimpleNormalizer.__init__(self, session, config, parent)
         regex = self.get_setting(session,
@@ -407,16 +415,16 @@ class StringIntNormalizer(SimpleNormalizer):
             return "%012d" % (d)
         except:
             return None
-      
-      
+
+
 class FileAssistedNormalizer(SimpleNormalizer):
     """Base Class for Normalizers configured with an additional file.
-    
+
     Abstract class for Normalizers that can be configured using an additional
     file e.g. for specifying a stoplist, or a list of acronyms and their
     expansions.
     """
-    
+
     def _processPath(self, session, path):
         fp = self.get_path(session, path)
         if fp is None:
@@ -426,18 +434,18 @@ class FileAssistedNormalizer(SimpleNormalizer):
         if (not os.path.isabs(fp)):
             dfp = self.get_path(session, "defaultPath")
             fp = os.path.join(dfp, fp)
-            
+
         try:
             fh = open(fp, 'r')
         except IOError as e:
             raise ConfigFileException("{0} for object with id '{1}'."
                                       "".format(str(e), self.id))
-            
+
         l = fh.readlines()
         fh.close()
         return l
 
-        
+
 class StoplistNormalizer(FileAssistedNormalizer):
     """Normalizer to remove words that occur in a stopword list."""
     stoplist = {}
@@ -456,21 +464,21 @@ class StoplistNormalizer(FileAssistedNormalizer):
         lines = self._processPath(session, 'stoplist')
         for sw in lines:
             self.stoplist[sw.strip()] = 1
-            
+
     def process_string(self, session, data):
         if (data in self.stoplist):
             return None
         else:
-            return data     
+            return data
 
 
 class TokenExpansionNormalizer(FileAssistedNormalizer):
     """ Expand acronyms or compound words.
-    
-    Only works with tokens NOT exact strings. 
+
+    Only works with tokens NOT exact strings.
     """
     expansions = {}
-    
+
     _possiblePaths = {
         'expansions': {
             'docs': ("Path to file containing set of expansions, one "
@@ -490,7 +498,7 @@ class TokenExpansionNormalizer(FileAssistedNormalizer):
             'options': "0|1"
         }
     }
-    
+
     def __init__(self, session, config, parent):
         FileAssistedNormalizer.__init__(self, session, config, parent)
         self.expansions = {}
@@ -499,18 +507,18 @@ class TokenExpansionNormalizer(FileAssistedNormalizer):
         for exp in lines:
             bits = unicode(exp).split()
             self.expansions[bits[0]] = bits[1:]
-    
+
     def process_string(self, session, data):
         try:
             return ' '.join(self.expansions[data])
         except KeyError:
-            return data 
+            return data
 
     def process_hash(self, session, data):
         kw = {}
         if not len(data):
             return kw
-                    
+
         keep = self.keepOriginal
         process = self.process_string
         map = self.expansions
@@ -529,102 +537,98 @@ class TokenExpansionNormalizer(FileAssistedNormalizer):
                         kw[new] = nd
                 if keep:
                     kw[t] = d
-                    
+
             else:
                 kw[t] = d
         return kw
 
 
-try:
-    from zopyx.txng3.ext import stemmer as Stemmer
-except ImportError:
+class StemNormalizer(SimpleNormalizer):
+    """Use a Snowball stemmer to stem the terms."""
 
-    class StemNormalizer(SimpleNormalizer):
-        def __init__(self, session, config, parent):
-            raise ConfigFileException('Stemmer library not available')
+    stemmer = None
 
-
-    class PhraseStemNormalizer(SimpleNormalizer):
-        def __init__(self, session, config, parent):
-            raise(ConfigFileException('Stemmer library not available'))
-else:
-    class StemNormalizer(SimpleNormalizer):
-        """Use a Snowball stemmer to stem the terms."""
-        stemmer = None
-
-        _possibleSettings = {
-            'language': {
-                'docs': ("Language to create a stemmer for, defaults to "
-                         "english."),
-                'options': ("danish|dutch|english|finnish|french|german|"
-                            "italian|norwegian|porter|portuguese|russian|"
-                            "spanish|swedish")
-            }
+    _possibleSettings = {
+        'language': {
+            'docs': ("Language to create a stemmer for, defaults to "
+                     "english."),
+            'options': ("danish|dutch|english|finnish|french|german|"
+                        "italian|norwegian|porter|portuguese|russian|"
+                        "spanish|swedish")
         }
+    }
 
-        def __init__(self, session, config, parent):
-            SimpleNormalizer.__init__(self, session, config, parent)
-            lang = self.get_setting(session, 'language', 'english')
-            try:
-                self.stemmer = Stemmer.Stemmer(lang)
-            except:
-                raise ConfigFileException("Unknown stemmer language: "
-                                          "%s" % (lang))
+    def __init__(self, session, config, parent):
+        SimpleNormalizer.__init__(self, session, config, parent)
+        if Stemmer is None:
+            raise MissingDependencyException(self.objectType,
+                                             "zopyx.txng3.ext"
+                                             )
+        lang = self.get_setting(session, 'language', 'english')
+        try:
+            self.stemmer = Stemmer.Stemmer(lang)
+        except:
+            raise ConfigFileException("Unknown stemmer language: "
+                                      "%s" % (lang))
 
-        def process_string(self, session, data):
-            if (type(data) != type(u"")):
-                data = unicode(data, 'utf-8')            
-            return self.stemmer.stem([data])[0]
+    def process_string(self, session, data):
+        if (type(data) != type(u"")):
+            data = unicode(data, 'utf-8')
+        return self.stemmer.stem([data])[0]
 
 
-    class PhraseStemNormalizer(SimpleNormalizer):
-        """Use a Snowball stemmer to stem multiple words in a phrase.
-        
-        Deprecated: Should instead use normalizer after tokenizer and before
-        tokenMerger.
-        """
+class PhraseStemNormalizer(SimpleNormalizer):
+    """Use a Snowball stemmer to stem multiple words in a phrase.
 
-        stemmer = None
+    Deprecated: Should instead use normalizer after tokenizer and before
+    tokenMerger.
+    """
 
-        def __init__(self, session, config, parent):
-            SimpleNormalizer.__init__(self, session, config, parent)
-            lang = self.get_setting(session, 'language', 'english')
-            self.punctuationRe = re.compile(
-                            "((?<!s)'|[-.,]((?=\s)|$)|(^|(?<=\s))[-.,']|"
-                            "[~`!@+=\#\&\^*()\[\]{}\\\|\":;<>?/])"
-            )
-            try:
-                self.stemmer = Stemmer.Stemmer(lang)
-            except:
-                raise ConfigFileException("Unknown stemmer language: %s" % 
-                                          (lang))
+    stemmer = None
 
-        def process_string(self, session, data):
-            if (type(data) != type(u"")):
-                data = unicode(data, 'utf-8')            
-            s = self.punctuationRe.sub(' ', data)
-            wds = data.split()
-            stemmed = self.stemmer.stem(wds)
-            return ' '.join(stemmed)
+    def __init__(self, session, config, parent):
+        SimpleNormalizer.__init__(self, session, config, parent)
+        if Stemmer is None:
+            raise MissingDependencyException(self.objectType,
+                                             "zopyx.txng3.ext"
+                                             )
+        lang = self.get_setting(session, 'language', 'english')
+        self.punctuationRe = re.compile(
+            "((?<!s)'|[-.,]((?=\s)|$)|(^|(?<=\s))[-.,']|"
+            "[~`!@+=\#\&\^*()\[\]{}\\\|\":;<>?/])"
+        )
+        try:
+            self.stemmer = Stemmer.Stemmer(lang)
+        except:
+            raise ConfigFileException("Unknown stemmer language: %s" %
+                                      (lang))
+
+    def process_string(self, session, data):
+        if (type(data) != type(u"")):
+            data = unicode(data, 'utf-8')
+        s = self.punctuationRe.sub(' ', data)
+        wds = data.split()
+        stemmed = self.stemmer.stem(wds)
+        return ' '.join(stemmed)
 
 
 class PhoneticNormalizer(SimpleNormalizer):
     u"""Carries out phonetic normalization.
-    
+
     Currently fairly simple normalization after "Introduction to Information
     Retrieval" by Christopher D. Manning, Prabhakar Raghavan & Hinrich Schütze
     except that length of final term is configurable (not hard-coded to 4
     characters.)"""
-    
+
     _possibleSettings = {
         'termSize': {
             'docs': ("Number of characters to reduce/pad the phonetically "
                      "normalized term to. If not a positive integer no "
                      "reduction/padding applied (default)."),
-             'type': int
+            'type': int
         }
     }
-    
+
     def __init__(self, session, config, parent):
         SimpleNormalizer.__init__(self, session, config, parent)
         self.nChars = self.get_setting(session, 'termSize', 0)
@@ -649,7 +653,7 @@ class PhoneticNormalizer(SimpleNormalizer):
         #    R -> 6.
         # 4. Repeatedly remove one out of each pair of consecutive identical
         #    digits.
-        tail = data[1:] 
+        tail = data[1:]
         for i, regex in enumerate([self.re0, self.re1, self.re2, self.re3,
                                    self.re4, self.re5, self.re6]):
             tail = regex.sub(str(i), tail)
@@ -659,25 +663,25 @@ class PhoneticNormalizer(SimpleNormalizer):
         if self.nChars:
             # Pad the resulting string with trailing zeros and return the first
             # self.nChars positions
-            result = '{0:0<{1}}'.format(result[:self.nChars], self.nChars) 
+            result = '{0:0<{1}}'.format(result[:self.nChars], self.nChars)
 
         if type(data) == unicode:
             return unicode(result)
         else:
-            return result 
-        
+            return result
+
 
 class DateStringNormalizer(SimpleNormalizer):
     """Turns a Date object into ISO8601 format."""
-    
+
     def process_string(self, session, data):
         # str() defaults to iso8601 format
-        return str(data)   
+        return str(data)
 
 
 class DateYearNormalizer(SimpleNormalizer):
     """Normalizes a date in ISO8601 format to simply a year
-    
+
     Very crude implementation, simply returns first 4 characters.
     """
     def process_string(self, session, data):
@@ -686,10 +690,10 @@ class DateYearNormalizer(SimpleNormalizer):
 
 class IdToFilenameNormalizer(SimpleNormalizer):
     """Turn an id into a filename with appropriate extension(s).
-    
+
     Extension to use is a configurable setting, defaults to .xml
     """
-    
+
     _possibleSettings = {
         'extension': {
             'docs': ("File extension (including leading period / stop) to "
@@ -699,28 +703,28 @@ class IdToFilenameNormalizer(SimpleNormalizer):
             'default': '.xml'
         }
     }
-    
+
     def __init__(self, session, config, parent):
         SimpleNormalizer.__init__(self, session, config, parent)
         self.ext = self.get_setting(session, 'extension', '.xml')
-        
+
     def process_string(self, session, data):
         return str(data) + self.ext
 
 
 class FilenameToIdNormalizer(SimpleNormalizer):
     """ Turn a filename into an id by stripping off the filename extension.
-    
+
     Only strips off the final extension, including the period / stop.
     """
-    
+
     def process_string(self, session, data):
         id, ext = os.path.splitext(data)
         return id
 
 
 class RangeNormalizer(SimpleNormalizer):
-    """ XXX: This is actually a job for a TokenMerger. Deprecated""" 
+    """ XXX: This is actually a job for a TokenMerger. Deprecated"""
 
     def process_hash(self, session, data):
         # Need to step through positions in order
@@ -756,7 +760,7 @@ class RangeNormalizer(SimpleNormalizer):
             kw[text] = base
 
         return kw
-        
+
 
 class UnicodeCollationNormalizer(SimpleNormalizer):
     """ Use pyuca to create sort key for string
@@ -776,15 +780,15 @@ class UnicodeCollationNormalizer(SimpleNormalizer):
         ints = self.collator.sort_key(data)
         exp = ["%04d" % i for i in ints]
         return ''.join(exp)
-    
+
 
 class DiacriticNormalizer(SimpleNormalizer):
     """Normalizer to turn XML entities into their closes ASCII approximation.
-    
+
     Slow implementation of Unicode 4.0 character decomposition.
     Eg that &amp;eacute; -> e
     """
-    
+
     map = {}
 
     def __init__(self, session, config, parent):
@@ -1337,7 +1341,7 @@ class DiacriticNormalizer(SimpleNormalizer):
             u"\u1EF8": u"\u0059",
             u"\u1EF9": u"\u0079"
             }
-        
+
     def process_string(self, session, data):
         d = []
         m = self.map
@@ -1350,4 +1354,3 @@ class DiacriticNormalizer(SimpleNormalizer):
             else:
                 d.append(c)
         return ''.join(d)
-

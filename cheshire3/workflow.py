@@ -9,8 +9,11 @@ from lxml import etree
 from cheshire3.baseObjects import Workflow, Server
 from cheshire3.configParser import C3Object
 from cheshire3.utils import elementType, flattenTexts
-from cheshire3.exceptions import C3Exception, ConfigFileException,\
-                                 ObjectDoesNotExistException
+from cheshire3.exceptions import (
+    C3Exception,
+    ConfigFileException,
+    ObjectDoesNotExistException
+    )
 from cheshire3.internal import CONFIG_NS
 
 
@@ -86,7 +89,9 @@ class SimpleWorkflow(Workflow):
                 code.append("    " + s)
             code.append('    return input')
             self.code = "\n".join(code)
-            exec(self.code)
+            filename = self.__class__.__name__ + ': ' + self.id
+            compiled = compile(self.code, filename=filename, mode='exec')
+            exec(compiled)
             setattr(self,
                     'process',
                     MethodType(locals()['handler'], self, self.__class__))
@@ -104,7 +109,9 @@ class SimpleWorkflow(Workflow):
                 code.append("    " + s)
             code.append('    return input')
             self.code = "\n".join(code)
-            exec(self.code)
+            filename = self.__class__.__name__ + ': ' + self.id
+            compiled = compile(self.code, filename=filename, mode='exec')
+            exec(compiled)
             setattr(self,
                     'process',
                     MethodType(locals()['handler'], self, self.__class__))
@@ -133,10 +140,17 @@ class SimpleWorkflow(Workflow):
                     for s in sub:
                         code.append("    " + s)
                 elif n == "except":
-                    code.append("except Exception as err:")
+                    type_ = node.getAttributeNS(None, 'type')
+                    if type_:
+                        code.append("except {0} as err:".format(type_))
+                    else:
+                        code.append("except Exception as err:")
                     sub = self._handleFlow(c)
-                    for s in sub:
-                        code.append("    " + s)
+                    if sub:
+                        for s in sub:
+                            code.append("    " + s)
+                    else:
+                        code.append("    pass")
                 elif n == "else":
                     code.append("else:")
                     sub = self._handleFlow(c)
@@ -211,10 +225,17 @@ class SimpleWorkflow(Workflow):
                 for s in sub:
                     code.append("    " + s)
             elif n == "except":
-                code.append("except Exception as err:")
+                type_ = node.attrib.get('type', '')
+                if type_:
+                    code.append("except {0} as err:".format(type_))
+                else:
+                    code.append("except Exception as err:")
                 sub = self._handleLxmlFlow(c)
-                for s in sub:
-                    code.append("    " + s)
+                if sub:
+                    for s in sub:
+                        code.append("    " + s)
+                else:
+                    code.append("    pass")
             elif n == "else":
                 code.append("else:")
                 sub = self._handleLxmlFlow(c)
@@ -449,9 +470,10 @@ class CachingWorkflow(SimpleWorkflow):
 
     def _handleGlobals(self, node):
         code = SimpleWorkflow._handleGlobals(self, node)
-        code.extend(
-                    ["if not self.objcache:",
-                     "    self.load_cache(session, db)"])
+        code.extend(["if not self.objcache:",
+                     "    self.load_cache(session, db)"
+                     ]
+                    )
         return code
 
     def _handleLog(self, node):

@@ -1,9 +1,14 @@
+"""Cheshire3 wrappers for Lucene vector space model."""
 
 __all__ = ['normalizer', 'tokenizer', 'workflow', 'wrapper', 'indexStore']
 
 # Initialize JVM ___ONCE___
-import lucene
-vm = lucene.initVM(lucene.CLASSPATH)
+try:
+    import lucene
+except ImportError:
+    pass
+else:
+    vm = lucene.initVM(lucene.CLASSPATH)
 
 import cheshire3.lucene.normalizer
 import cheshire3.lucene.tokenizer

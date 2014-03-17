@@ -1,14 +1,13 @@
+"""Object Oriented wrapper to Python SRB Interface.
 
-################################################################
-#
-# Description: Object Oriented wrapper to Python SRB Interface
-# Author:      Rob Sanderson (azaroth@liv.ac.uk)
-# Date:        2005-05-12
-# Version:     0.8 
-# Copyright:   (c) University of Liverpool
-# Licence:     GPL
-#
-################################################################
+Description: Object Oriented wrapper to Python SRB Interface
+Author:      Rob Sanderson (azaroth@liv.ac.uk)
+Date:        2005-05-12
+Version:     0.8 
+Copyright:   (c) University of Liverpool
+Licence:     GPL
+
+"""
 
 
 import srb
@@ -18,22 +17,22 @@ import atexit
 from srbErrors import errmsgs
 
 
-# To Do:
-# !! Will fail at greater than MAX_GET_RESULT objects per collection
-
+# TODO: Will fail at greater than MAX_GET_RESULT objects per collection
 
 # Ensure polite disconnect behaviour
 connections = []
+
+
 def disconnect_all():
     for c in connections:
         try:
             c.disconnect()
         except:
             pass
-atexit.register(disconnect_all)
 
 
 class SrbException(Exception):
+
     def __init__(self, type, info=""):
         self.type = type
         self.message = errmsgs[type]
@@ -41,12 +40,13 @@ class SrbException(Exception):
 
     def __repr__(self):
         return "<<SrbException: (%s) %s>>" % (self.message, self.info)
+
     def __str__(self):
         return "<<SrbException: (%s) %s>>" % (self.message, self.info)
 
 
-
 class SrbFile(object):
+
     conn = None
     fd = -1
     name = ""
@@ -62,7 +62,6 @@ class SrbFile(object):
             raise TypeError("Connection does not have a collection set.")
         else:
             self.collection = conn.collection
-
 
     def _connect(self, flag):
         fd = srb.obj_open(self.conn.id, self.collection, self.name, flag)        
@@ -103,7 +102,8 @@ class SrbFile(object):
             while 1:
                 buffer = srb.obj_read(self.conn.id, self.fd, 1024)
                 self.position += 1024
-                if buffer == "": break
+                if buffer == "":
+                    break
                 data += buffer
         return data
 
@@ -123,7 +123,8 @@ class SrbFile(object):
         #    try:
         #        value = value.encode('utf-8')
         #    except:
-        #        raise TypeError("Cannot map unicode object to srb-writable string.")
+        #        raise TypeError("Cannot map unicode object to srb-writable "
+        #                        "string.")
         #elif type(value) != types.StringType:
         #    raise TypeError("Can only write strings to SRB")
 
@@ -143,13 +144,14 @@ class SrbFile(object):
             self.position = whence + offset
         
     def delete(self, copynum=0):
-        resp = srb.obj_delete(self.conn.id, self.name, copynum, self.collection)
+        resp = srb.obj_delete(self.conn.id, self.name, copynum,
+                              self.collection)
         if resp < 0:
             raise SrbException(resp)
 
     def get_umetadata(self):
         md = srb.get_user_metadata(self.conn.id, self.name, self.connection)
-        if typeof(md) == types.IntType:
+        if isinstance(md, types.IntType):
             if (md == -3005):
                 md = {}
             else:
@@ -161,7 +163,8 @@ class SrbFile(object):
             self.delete_umetadata(f)
         except:
             pass
-        status = srb.set_user_metadata(self.conn.id, self.name, self.collection, f, v)
+        status = srb.set_user_metadata(self.conn.id, self.name,
+                                       self.collection, f, v)
         if status < 0:
             raise SrbException(status)
         else:
@@ -170,7 +173,8 @@ class SrbFile(object):
     def delete_umetadata(self, f):
         md = self.get_umetadata()
         if (md.has_key(f)):
-            status = srb.rm_user_metadata(self.conn.id, self.name, self.connection, f, md[f])
+            status = srb.rm_user_metadata(self.conn.id, self.name,
+                                          self.connection, f, md[f])
         else:
             status = 0
         if status < 0:
@@ -192,7 +196,8 @@ class SrbConnection(object):
     passwd = ""
     dn = ""
 
-    def __init__(self, host, port, domain, auth="ENCRYPT1", user="", passwd="", dn=""):
+    def __init__(self, host, port, domain,
+                 auth="ENCRYPT1", user="", passwd="", dn=""):
 
         # Lookup host to ensure safe
         try:
@@ -201,9 +206,9 @@ class SrbConnection(object):
         except socket.gaierror, e:
             raise TypeError("Unknown host: %s" % host)
 
-        if type(port) == types.IntType:
+        if isinstance(port, types.IntType):
             self.port = str(port)
-        elif type(port) == types.StringType:
+        elif isinstance(port, types.StringType):
             if port.isdigit():
                 self.port = port
             else:
@@ -235,7 +240,8 @@ class SrbConnection(object):
         elif self.auth == "GSI_AUTH":
             assert dn
 
-        sid = srb.connect(self.host, self.port, self.domain, self.auth, user, passwd, dn)
+        sid = srb.connect(self.host, self.port, self.domain, self.auth,
+                          user, passwd, dn)
         if sid < 0:
             raise SrbException(sid)
         else:
@@ -300,7 +306,7 @@ class SrbConnection(object):
 
     def n_objects(self):
         # Order of objects by name
-        n = srb.get_objs_in_coll(self.id, 0,2, self.collection)
+        n = srb.get_objs_in_coll(self.id, 0, 2, self.collection)
         if n < 0:
             raise SrbException(n)
         else:
@@ -313,7 +319,8 @@ class SrbConnection(object):
             raise TypeError("Must open a collection first")
         elif idx >= self.objects:
             raise IndexError("Object index out of range")
-        t = ['name', 'collection', 'size', 'type', 'owner', 'timestamp', 'replica', 'resource'].index(type)
+        t = ['name', 'collection', 'size', 'type', 'owner', 'timestamp',
+             'replica', 'resource'].index(type)
         return srb.get_obj_metadata(self.id, t, idx)
 
     def collection_name(self, idx):
@@ -322,7 +329,6 @@ class SrbConnection(object):
         elif idx >= self.subcolls:
             raise IndexError("Subcollection index out of range")
         return srb.get_subcoll_name(self.id, idx)
-    
         
     def walk_names(self):
         # Return tuple of colls, files
@@ -345,7 +351,6 @@ class SrbConnection(object):
             self.open_collection(name)
             for x in self.walk():
                 yield x
-        
 
     def rmrf(self):
         for path, dirs, files in self.walk():
@@ -353,3 +358,6 @@ class SrbConnection(object):
                 f = self.open(file)
                 f.close()
                 f.delete()
+
+
+atexit.register(disconnect_all)

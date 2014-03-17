@@ -10,6 +10,7 @@ from cheshire3.test import __all__
 
 def load_tests(loader, tests, pattern):
     # Create a suite with default tests
+    loadTestsFromName = unittest.defaultTestLoader.loadTestsFromName
     suite = unittest.TestSuite()
     for modname in __all__:
         if modname == 'testAll':
@@ -19,7 +20,11 @@ def load_tests(loader, tests, pattern):
             module = __import__(modname, globals(), locals(), [])
         except ImportError:
             # Load all tests from the module
-            modsuite = unittest.defaultTestLoader.loadTestsFromName(modname)
+            modname = "cheshire3.test.{0}".format(modname)
+            try:
+                modsuite = loadTestsFromName(modname + '.suite')
+            except AttributeError:
+                modsuite = loadTestsFromName(modname)
         else:
             try:
                 load_tests_fn = getattr(module, 'load_tests')

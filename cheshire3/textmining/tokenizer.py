@@ -1,16 +1,39 @@
 
+try:
+    import nltk
+except ImportError:
+    nltk = None
+
+from cheshire3.exceptions import MissingDependencyException
 from cheshire3.tokenizer import SimpleTokenizer
 
 
 class UnparsedGeniaTokenizer(SimpleTokenizer):
     # take tab delimmed lines and turn into list of words ?
 
-    _possibleSettings = {'useStem' : {"docs" : "Should the text be reconstructed with the stem (1) or not (0, default)", 'type': int, 'options' : "0|1"},
-                         'pos' : {"docs" : 'Should the text include the PoS tag', 'type': int, 'options' : "0|1"},
-                         'structuredOutput' : {'docs' : '', 'type' : int, 'options' : '0|1'},
-                         'justPos' : {"docs" : 'Should the text be JUST the PoS tag', 'type' : int, 'options' : "0|1"}
-                         }
-
+    _possibleSettings = {
+        'useStem': {
+            "docs": ("Should the text be reconstructed with the stem (1)"
+                     " or not (0, default)"),
+            'type': int,
+            'options': "0|1"
+        },
+        'pos': {
+            "docs": 'Should the text include the PoS tag',
+            'type': int,
+            'options': "0|1"
+        },
+        'structuredOutput': {
+            'docs': '',
+            'type': int,
+            'options': '0|1'
+        },
+        'justPos': {
+            "docs": 'Should the text be JUST the PoS tag',
+            'type': int,
+            'options': "0|1"
+        }
+    }
 
     def __init__(self, session, config, parent):
         SimpleTokenizer.__init__(self, session, config, parent)
@@ -27,7 +50,6 @@ class UnparsedGeniaTokenizer(SimpleTokenizer):
                     (word, stem, pos, phr, ner) = l.split('\t', 4)
                 except:
                     continue
-                
                 if self.structure:
                     txt = (word, stem, pos, phr)
                 else:
@@ -90,28 +112,31 @@ class PhraseUnparsedGeniaTokenizer(UnparsedGeniaTokenizer):
         if len(curr) >= self.minWords:
             results.append(' '.join(curr))
         return results
-        
-
-try:
-    import nltk
-except ImportError:
-    pass
-else:
-        
-    class PunktWordTokenizer(SimpleTokenizer):
-
-        def __init__(self, session, config, parent):
-            SimpleTokenizer.__init__(self, session, config, parent)
-            self.punkt = nltk.tokenize.PunktWordTokenizer()
-
-        def process_string(self, session, data):
-            return self.punkt.tokenize(data)
 
 
-    class PunktSentenceTokenizer(SimpleTokenizer):
-        def __init__(self, session, config, parent):
-            SimpleTokenizer.__init__(self, session, config, parent)
-            self.punkt = nltk.data.load('tokenizers/punkt/english.pickle')
+class NltkPunktWordTokenizer(SimpleTokenizer):
 
-        def process_string(self, session, data):
-            return self.punkt.tokenize(data)
+    def __init__(self, session, config, parent):
+        SimpleTokenizer.__init__(self, session, config, parent)
+        if nltk is None:
+            raise MissingDependencyException(self.objectType, 'nltk')
+        self.punkt = nltk.tokenize.PunktWordTokenizer()
+
+    def process_string(self, session, data):
+        return self.punkt.tokenize(data)
+
+
+class NltkPunktSentenceTokenizer(SimpleTokenizer):
+    def __init__(self, session, config, parent):
+        SimpleTokenizer.__init__(self, session, config, parent)
+        if nltk is None:
+            raise MissingDependencyException(self.objectType, 'nltk')
+        self.punkt = nltk.data.load('tokenizers/punkt/english.pickle')
+
+    def process_string(self, session, data):
+        return self.punkt.tokenize(data)
+
+
+# Backward compatibility
+PunktWordTokenizer = NltkPunktWordTokenizer
+PunktSentenceTokenizer = NltkPunktSentenceTokenizer

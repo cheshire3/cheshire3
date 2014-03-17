@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://www.cheshire3.org/schemas/config/">
+  <subConfigs>
+
+	<subConfig type="transformer" id="RdfXmlTransformer">
+        <objectType>cheshire3.graph.transformer.RdfXmlTransformer</objectType>
+    </subConfig>
+        
+  </subConfigs>  
+</config>

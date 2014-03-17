@@ -1,5 +1,11 @@
 
-__all__ = ['documentFactory', 'extractor', 'normalizer', 'preParser', 'tokenizer', 'tokenMerger', 'transformer']
+__all__ = ['documentFactory',
+           'extractor',
+           'normalizer',
+           'preParser',
+           'tokenizer',
+           'tokenMerger',
+           'transformer']
 
 from TsujiiC3 import *
 

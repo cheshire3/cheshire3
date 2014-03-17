@@ -1,9 +1,23 @@
+import os
+import time
+import commands
+try:
+    # Python 2.3 vs 2.2
+    import bsddb as bdb
+except ImportError:
+    import bsddb3 as bdb
+
+from cheshire3.baseObjects import Database
+from cheshire3.exceptions import ConfigFileException, PermissionException
+from cheshire3.indexStore import BdbIndexStore
 
 try:
     from srboo import *
-
     from utils import parseSrbUrl
-
+except:
+    pass
+else:
+    
     # Split index files into chunks based on first two letters,
     # one for each number, one for non letter/non number.
     # Then construct across the grid per initial chr
@@ -31,7 +45,10 @@ try:
 
         def _connect(self):
             try:
-                self.connection = SrbConnection(self.host, self.port, self.domain, user = self.user, passwd = self.passwd, dn = self.dn)
+                self.connection = SrbConnection(self.host, self.port,
+                                                self.domain, user=self.user,
+                                                passwd=self.passwd, dn=self.dn
+                                                )
                 self.connection.resource = self.resource
             except SrbException:
                 # Couldn't connect :/
@@ -49,10 +66,8 @@ try:
             self.connection.open_collection(orig)
             self.connection.open_collection(self.subcollection)
 
-
         def __init__(self, session, config, parent):
             BdbIndexStore.__init__(self, session, config, parent)
-
             self.tempChunks = self.get_setting(session, 'tempChunks')
             uri = self.get_path(session, 'srbServer')
             uri = uri.encode('utf-8')
@@ -61,7 +76,7 @@ try:
                 raise ConfigFileException("No srbServer to connect to.")
             else:
                 info = parseSrbUrl(uri)
-                for (a,v) in info.items():
+                for (a, v) in info.items():
                     setattr(self, a, v)
 
                 if (isinstance(parent, Database)):
@@ -71,7 +86,6 @@ try:
                 self.subcollection = "cheshire3/" + sc
                 self.connection = None
                 self._connect()
-
 
         def _openIndexChunk(self, session, index, chunk): 
             dfp = self.get_path(session, 'defaultPath')
@@ -87,7 +101,8 @@ try:
             dfp = self.get_path(session, 'defaultPath')
             dbname = os.path.join(dfp, index.id, "%s.index" % chunk)
             cxn = bdb.db.DB()
-            cxn.open(dbname, dbtype=bdb.db.DB_BTREE, flags = bdb.db.DB_CREATE, mode=0660)
+            cxn.open(dbname, dbtype=bdb.db.DB_BTREE,
+                     flags=bdb.db.DB_CREATE, mode=0660)
             return cxn
         
         def _storeIndexChunk(self, session, index, chunk):
@@ -186,25 +201,25 @@ try:
             self.connection.up_collection()
             return 1
 
-
         def begin_indexing(self, session, index):
             if not self.tempChunks:
                 return BdbIndexStore.begin_indexing(self, session, index)
             temp = self.get_path(session, 'tempPath')
             if not os.path.isabs(temp):
-                temp = os.path.join(self.get_path(session, 'defaultPath'), temp)
+                temp = os.path.join(self.get_path(session, 'defaultPath'),
+                                    temp)
             self.tempPath = temp
             if (not os.path.exists(temp)):
                 try:
                     os.mkdir(temp)
                 except:
-                    raise(ConfigFileException('TempPath does not exist and is not creatable.'))
+                    raise(ConfigFileException('TempPath does not exist and is '
+                                              'not creatable.'))
             elif (not os.path.isdir(temp)):
                 raise(ConfigFileException('TempPath is not a directory.'))
 
             # Make temp files on demand, in hash
             self.outFiles[index] = {}
-
 
         def commit_indexing(self, session, index):
             if self.tempChunks:
@@ -294,13 +309,16 @@ try:
             storeChunk(session, index, currChunk)
 
         def create_index(self, session, index):
-            p = self.permissionHandlers.get('info:srw/operation/1/create', None)
+            p = self.permissionHandlers.get('info:srw/operation/1/create',
+                                            None)
             if p:
                 if not session.user:
-                    raise PermissionException("Authenticated user required to create index in %s" % self.id)
+                    raise PermissionException("Authenticated user required to "
+                                              "create index in %s" % self.id)
                 okay = p.hasPermission(session, session.user)
                 if not okay:
-                    raise PermissionException("Permission required to create index in %s" % self.id)
+                    raise PermissionException("Permission required to create "
+                                              "index in %s" % self.id)
             # Create local temp space
             dfp = self.get_path(session, "defaultPath")
             dirname = os.path.join(dfp, index.id)
@@ -343,7 +361,7 @@ try:
                 
                 # Make sure you know what you're doing
                 storeid = record.recordStore
-                if (type(storeid) != types.IntType):
+                if not isinstance(storeid, types.IntType):
                     storeid = self.storeHashReverse[storeid]
                 docid = long(record.id)
 
@@ -355,9 +373,16 @@ try:
                         text = ""
                     if not text:
                         continue
-                    lineList = [text, str(docid), str(storeid), str(k['occurences'])]
+                    lineList = [text,
+                                str(docid),
+                                str(storeid),
+                                str(k['occurences'])
+                                ]
                     try:
-                        lineList.append(nonTextToken.join(map(str, k['positions'])))
+                        lineList.append(nonTextToken.join(map(str,
+                                                              k['positions'])
+                                                          )
+                                        )
                     except KeyError:
                         # non prox
                         pass
@@ -370,7 +395,12 @@ try:
                         outh = self.outFiles[index][tf]
                     except:
                         if session.task:
-                            fname = '_'.join([self.id, index.id, tf, session.task, 'TEMP'])
+                            fname = '_'.join([self.id,
+                                              index.id,
+                                              tf,
+                                              session.task,
+                                              'TEMP']
+                                             )
                         else:
                             fname = '_'.join([self.id, index.id, tf, 'TEMP'])
                         fname = os.path.join(self.tempPath, fname)
@@ -383,7 +413,8 @@ try:
             else:
                 raise NotImplementedError()
 
-        def fetch_termList(self, session, index, term, numReq=0, relation="", end="", summary=0, reverse=0):
+        def fetch_termList(self, session, index, term, numReq=0, relation="",
+                           end="", summary=0, reverse=0):
             if reverse:
                 raise NotImplementedError("reverseIndex")
             if (not (numReq or relation or end)):
@@ -412,7 +443,7 @@ try:
             term = term.encode('utf-8')
             try:
                 if summary:
-                    (key, data) = c.set_range(term, dlen=dataLen,doff=0)
+                    (key, data) = c.set_range(term, dlen=dataLen, doff=0)
                 else:
                     (key, data) = c.set_range(term)
             except Exception, e:
@@ -450,7 +481,7 @@ try:
                     (key, rec) = tup
                     if (end and dir == '>' and key >= end):
                         fetching = 0
-                    elif (end and dir  == "<" and key <= end):
+                    elif (end and dir == "<" and key <= end):
                         fetching = 0
                     else:
                         unpacked = index.deserialise_terms(rec)
@@ -483,7 +514,3 @@ try:
             cxn = self._openIndexChunk(session, index, chunk)
             val = cxn.get(term)
             return val
-
-
-except:
-    pass

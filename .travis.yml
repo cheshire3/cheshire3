@@ -3,7 +3,9 @@ python:
   - "2.7"
 # Install dependencies
 install:
-  - "pip install . --use-mirrors"
+  - "python ez_setup.py"
+  - "pip install -r requirements.txt"
+  - "pip install ."
 # Run tests
 script: python setup.py test
 

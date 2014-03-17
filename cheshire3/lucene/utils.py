@@ -1,5 +1,84 @@
 
-import lucene
+try:
+    import lucene
+except ImportError:
+    pass
+else:
+    
+    class NullC3Analyzer(lucene.PythonAnalyzer):
+    
+        def tokenStream(self, fieldName, reader):
+            print fieldName
+            print reader
+            
+    
+    class SimpleTokenStream(lucene.PythonTokenStream):
+        def __init__(self, terms, incrs=[]):
+            super(SimpleTokenStream, self).__init__()
+            self.tokens = terms
+            self.increments = incrs            
+            self.i = 0
+            
+        def next(self):
+            if self.i == len(self.tokens):
+                return None
+            t = lucene.Token(self.tokens[self.i], self.i, self.i)
+            # t.setPositionIncrement(n)   -- num words from last token, dflt 1
+            self.i += 1
+            return t
+    
+        def reset(self):
+            self.i = 0
+    
+        def close(self):
+            pass
+    
+    
+    class C3TokenStream(lucene.PythonTokenStream):
+        def __init__(self, terms):
+            super(C3TokenStream, self).__init__()
+    
+            self.termHash = terms
+    
+            ol = []        
+            try:
+                for item in terms.values():
+                    ol.extend([(item['text'], y)
+                               for y
+                               in item['positions'][1:2]])
+                ol.sort(key=lambda x: x[1])
+                self.tokens = [x[0] for x in ol]
+                incs = []
+                for idx in range(len(ol)):                
+                    try:
+                        incs.append(ol[idx] - ol[idx-1])
+                    except:
+                        # first position
+                        incs.append(1)                    
+                self.increments = incs
+    
+            except KeyError:
+                # no positions
+                for item in terms.values():
+                    ol.extend([item['text']] * item['occurences'])
+                self.tokens = ol
+                self.increments = [1 * len(ol)]
+    
+            self.i = 0
+            
+        def next(self):
+            if self.i == len(self.tokens):
+                return None
+            t = lucene.Token(self.tokens[self.i], self.i, self.i)
+            t.setPositionIncrement(self.increments[self.i])
+            self.i += 1
+            return t
+    
+        def reset(self):
+            self.i = 0
+    
+        def close(self):
+            pass
 
 
 def cqlToLucene(session, query, config):
@@ -64,79 +143,3 @@ def cqlToLucene(session, query, config):
         else:
             raise NotImplementedError()
         return qstr
-            
-
-
-
-class NullC3Analyzer(lucene.PythonAnalyzer):
-
-    def tokenStream(self, fieldName, reader):
-        print fieldName
-        print reader
-        
-
-class SimpleTokenStream(lucene.PythonTokenStream):
-    def __init__(self, terms, incrs=[]):
-        super(SimpleTokenStream, self).__init__()
-        self.tokens = terms
-        self.increments = incrs            
-        self.i = 0
-        
-    def next(self):
-        if self.i == len(self.tokens):
-            return None
-        t = lucene.Token(self.tokens[self.i], self.i, self.i)
-        # t.setPositionIncrement(n)   -- num words from last token, dflt 1
-        self.i += 1
-        return t
-
-    def reset(self):
-        self.i = 0
-
-    def close(self):
-        pass
-
-class C3TokenStream(lucene.PythonTokenStream):
-    def __init__(self, terms):
-        super(C3TokenStream, self).__init__()
-
-        self.termHash = terms
-
-        ol = []        
-        try:
-            for item in terms.values():
-                ol.extend([(item['text'], y) for y in item['positions'][1:2]])
-            ol.sort(key=lambda x: x[1])
-            self.tokens = [x[0] for x in ol]
-            incs = []
-            for idx in range(len(ol)):                
-                try:
-                    incs.append(ol[idx] - ol[idx-1])
-                except:
-                    # first position
-                    incs.append(1)                    
-            self.increments = incs
-
-        except KeyError:
-            # no positions
-            for item in terms.values():
-                ol.extend([item['text']] * item['occurences'])
-            self.tokens = ol
-            self.increments = [1 * len(ol)]
-
-        self.i = 0
-        
-    def next(self):
-        if self.i == len(self.tokens):
-            return None
-        t = lucene.Token(self.tokens[self.i], self.i, self.i)
-        t.setPositionIncrement(self.increments[self.i])
-        self.i += 1
-        return t
-
-    def reset(self):
-        self.i = 0
-
-    def close(self):
-        pass
-    

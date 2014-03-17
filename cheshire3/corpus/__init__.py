@@ -1,3 +1,8 @@
+"""Cheshire3 corpus linguistics sub-package.
+
+This sub-package contains objects useful when using Cheshire3 for corpus
+linguistics.
+"""
 
 __all__ = ['extractor', 'tokenizer', 'transformer']
 

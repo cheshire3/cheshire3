@@ -6,9 +6,9 @@ be instantiated using configurations defined within this testing module,
 and tests carried out on those instances using data defined in this module.
 """
 
-import binascii
-import re
 import hashlib
+import re
+import sys
 
 try:
     import unittest2 as unittest
@@ -26,10 +26,12 @@ from base64 import b64encode
 from cheshire3.document import Document, StringDocument
 from cheshire3.preParser import PreParser, UnicodeDecodePreParser, \
     CmdLinePreParser, FileUtilPreParser,\
-    HtmlSmashPreParser, RegexpSmashPreParser, SgmlPreParser, AmpPreParser, \
+    HtmlSmashPreParser, HtmlFixupPreParser, RegexpSmashPreParser,\
+    SgmlPreParser, AmpPreParser, \
     MarcToXmlPreParser, MarcToSgmlPreParser, TxtToXmlPreParser,\
     PicklePreParser, UnpicklePreParser, \
     B64EncodePreParser, B64DecodePreParser,\
+    LZ4CompressPreParser, LZ4DecompressPreParser,\
     CharacterEntityPreParser, DataChecksumPreParser
     
 from cheshire3.test.testConfigParser import Cheshire3ObjectTestCase
@@ -292,6 +294,29 @@ class HtmlSmashPreParserTestCase(ImplementedPreParserTestCase):
     @classmethod
     def _get_class(self):
         return HtmlSmashPreParser
+
+
+class HtmlFixupPreParserTestCase(ImplementedPreParserTestCase):
+    """Cheshire3 HtmlFixupPreParser Unittests.
+
+    An HtmlFixupPreParser attempts to fix up HTML to make it complete and
+    parseable XML.
+    """
+
+    @classmethod
+    def _get_class(self):
+        return HtmlFixupPreParser
+
+    @classmethod
+    def _get_testUnicode(self):
+        return u'<body>A Document with an <img alt=image></body>'
+
+    def test_process_document_returnContent(self):
+        if self.inDoc is None:
+            self.skipTest("No test Document available")
+        self.assertEqual(
+            self.outDoc.text,
+            u'<html><body>A Document with an <img alt="image"/></body></html>')
 
 
 class RegexpSmashPreParserTestCase(ImplementedPreParserTestCase):
@@ -596,6 +621,52 @@ class B64DecodePreParserTestCase(ImplementedPreParserTestCase):
             u"Returned document content not as expected")
 
 
+@unittest.skipIf(sys.platform.startswith("sunos"),
+                 "variable LZ4 support on SunOS")
+class LZ4CompressPreParserTestCase(ImplementedPreParserTestCase):
+    """Cheshire3 LZ4CompressPreParser Unittests."""
+
+    @classmethod
+    def _get_class(self):
+        return LZ4CompressPreParser
+
+    @classmethod
+    def _get_testUnicode(self):
+        return u'red lorry, yellow lorry,' * 50
+
+    def test_process_document_returnContent(self):
+        if self.inDoc is None:
+            self.skipTest("No test Document available")
+        self.assertEqual(
+            self.outDoc.text,
+            '\xb0\x04\x00\x00\xf3\x02red lorry, yellow\x0e\x00\x0f\x18\x00'
+            '\xff\xff\xff\xff\x84Porry,',
+            u"Returned document content not as expected")
+
+
+@unittest.skipIf(sys.platform.startswith("sunos"),
+                 "variable LZ4 support on SunOS")
+class LZ4DecompressPreParserTestCase(ImplementedPreParserTestCase):
+    """Cheshire3 LZ4DecompressPreParser Unittests."""
+
+    @classmethod
+    def _get_class(self):
+        return LZ4DecompressPreParser
+
+    @classmethod
+    def _get_testUnicode(self):
+        return ('\xb0\x04\x00\x00\xf3\x02red lorry, yellow\x0e\x00\x0f\x18\x00'
+                '\xff\xff\xff\xff\x84Porry,')
+
+    def test_process_document_returnContent(self):
+        if self.inDoc is None:
+            self.skipTest("No test Document available")
+        self.assertEqual(
+            self.outDoc.text,
+            u'red lorry, yellow lorry,' * 50,
+            u"Returned document content not as expected")
+
+
 class CharacterEntityPreParserTestCase(ImplementedPreParserTestCase):
     
     @classmethod
@@ -724,6 +795,7 @@ def load_tests(loader, tests, pattern):
     suite.addTests(ltc(CmdLinePreParserInOutDocTestCase))
     suite.addTests(ltc(FileUtilPreParserTestCase))
     suite.addTests(ltc(HtmlSmashPreParserTestCase))
+    suite.addTests(ltc(HtmlFixupPreParserTestCase))
     suite.addTests(ltc(RegexpSmashPreParserTestCase))
     suite.addTests(ltc(RegexpSmashPreParserStripTestCase))
     suite.addTests(ltc(RegexpSmashPreParserSubTestCase))
@@ -737,6 +809,8 @@ def load_tests(loader, tests, pattern):
     suite.addTests(ltc(UnpicklePreParserTestCase))
     suite.addTests(ltc(B64EncodePreParserTestCase))
     suite.addTests(ltc(B64DecodePreParserTestCase))
+    suite.addTests(ltc(LZ4CompressPreParserTestCase))
+    suite.addTests(ltc(LZ4DecompressPreParserTestCase))
     suite.addTests(ltc(CharacterEntityPreParserTestCase))
     suite.addTests(ltc(DataChecksumPreParserTestCase))
     suite.addTests(ltc(SHA1DataChecksumPreParserTestCase))

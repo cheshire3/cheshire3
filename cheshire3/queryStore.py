@@ -4,7 +4,8 @@ from cheshire3.baseStore import BdbStore, DeletedObject
 import cheshire3.cqlParser as cqlParser
 from cheshire3.exceptions import *
 
-class SimpleQueryStore(BdbStore, QueryStore):
+
+class SimpleQueryStore(QueryStore):
 
     def create_query(self, session, query=None):
         """Create a record like <query> text </query>."""
@@ -40,13 +41,23 @@ class SimpleQueryStore(BdbStore, QueryStore):
         return q
 
     def store_query(self, session, query):
-        """Store query data, assuming query object has an id. Return the query."""
+        """Store and return the query.
+
+        Store query data, using the ``id`` attribute of the query object.
+        Return the query.
+
+        :param query: Query to store
+        :returns: query
+        :raises NotImplementedError: if ``query.id`` is missing or is NoneType
+
+        """
         if (not hasattr(query, 'id')) or (query.id is None):
-            # Where to get ID from??? 
+            # No ID
             raise NotImplementedError
-        
+
         id = query.id
-        data = query.toCQL()
+        data = query.toCQL().encode('utf-8')
+        # Encode to utf-8
         if hasattr(query, 'resultSet'):
             rsid = query.resultSet.id
             query.resultSetId = rsid
@@ -56,3 +67,6 @@ class SimpleQueryStore(BdbStore, QueryStore):
         self.store_data(session, id, data)
         return query
 
+
+class BdbQueryStore(BdbStore, SimpleQueryStore):
+    pass

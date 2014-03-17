@@ -10,6 +10,7 @@ import mimetypes
 import tempfile
 import hashlib
 import subprocess
+import lz4
 
 try:
     import cStringIO as StringIO
@@ -24,15 +25,20 @@ except ImportError:
 from xml.sax.saxutils import escape
 from warnings import warn
 from lxml import etree
+from lxml import html
+from lxml.builder import ElementMaker
 from base64 import b64encode, b64decode
+from zipfile import ZipFile
+from docutils.core import publish_string
 
 # Intra-package imports
 from cheshire3.baseObjects import PreParser
 from cheshire3.document import StringDocument
 from cheshire3.internal import CONFIG_NS
 from cheshire3.marc_utils import MARC
-from cheshire3.utils import getShellResult
-from cheshire3.exceptions import ConfigFileException, ExternalSystemException
+from cheshire3.utils import getShellResult, gen_uuid
+from cheshire3.exceptions import ConfigFileException, ExternalSystemException,\
+    MissingDependencyException
 
 
 # TODO: All PreParsers should set mimetype, and record in/out mimetype
@@ -45,7 +51,7 @@ class TypedPreParser(PreParser):
         "outMimeType": {
             'docs': "The mimetype set on outgoing documents"
         }
-     }
+    }
 
     def __init__(self, session, config, parent):
         PreParser.__init__(self, session, config, parent)
@@ -58,9 +64,9 @@ class NormalizerPreParser(PreParser):
 
     _possiblePaths = {
         'normalizer': {
-             'docs': "Normalizer identifier to call to do the transformation",
-             'required': True
-         }
+            'docs': "Normalizer identifier to call to do the transformation",
+            'required': True
+        }
     }
 
     def __init__(self, session, config, parent):
@@ -81,8 +87,8 @@ class NormalizerPreParser(PreParser):
 class UnicodeDecodePreParser(PreParser):
     """PreParser to turn non-unicode into Unicode Documents.
 
-    A UnicodeDecodePreParser should accept a Document with content encoded in 
-    a non-unicode character encoding scheme and return a Document with the 
+    A UnicodeDecodePreParser should accept a Document with content encoded in
+    a non-unicode character encoding scheme and return a Document with the
     same content decoded to Python's Unicode implementation.
     """
 
@@ -117,8 +123,8 @@ class CmdLinePreParser(TypedPreParser):
     _possibleSettings = {
         'commandLine': {
             'docs': """\
-Command line to use. %INDOC% is substituted to create a temporary file to 
-read, and %OUTDOC% is substituted for a temporary file for the process to 
+Command line to use. %INDOC% is substituted to create a temporary file to
+read, and %OUTDOC% is substituted for a temporary file for the process to
 write to"""
         }
     }
@@ -143,7 +149,7 @@ write to"""
         if not stdIn:
             # Create temp file for incoming data
             if doc.mimeType or doc.filename:
-                # Guess our extn~n                
+                # Guess our extn~n
                 try:
                     suff = mimetypes.guess_extension(doc.mimeType)
                 except:
@@ -155,9 +161,9 @@ write to"""
                 if suff:
                     (qq, infn) = tempfile.mkstemp(suff)
                 else:
-                    (qq, infn) = tempfile.mkstemp()                    
+                    (qq, infn) = tempfile.mkstemp()
             else:
-                (qq, infn) = tempfile.mkstemp()                 
+                (qq, infn) = tempfile.mkstemp()
 
             os.close(qq)
             fh = open(infn, 'w')
@@ -172,19 +178,19 @@ write to"""
                 (qq, outfn) = tempfile.mkstemp(suff)
             else:
                 (qq, outfn) = tempfile.mkstemp()
-            cmd = cmd.replace("%OUTDOC%", outfn)               
+            cmd = cmd.replace("%OUTDOC%", outfn)
             os.close(qq)
 
         if self.working:
             old = os.getcwd()
-            os.chdir(self.working)            
+            os.chdir(self.working)
         else:
             old = ''
 
         if stdIn:
-            pipe = subprocess.Popen(cmd, bufsize=0, shell=True, 
-                                    stdin=subprocess.PIPE, 
-                                    stdout=subprocess.PIPE, 
+            pipe = subprocess.Popen(cmd, bufsize=0, shell=True,
+                                    stdin=subprocess.PIPE,
+                                    stdout=subprocess.PIPE,
                                     stderr=subprocess.PIPE)
             pipe.stdin.write(doc.get_raw(session))
             pipe.stdin.close()
@@ -221,7 +227,7 @@ write to"""
                     os.remove(outfn)
                     try:
                         # Clean up when data written elsewhere
-                        os.remove(fh.name) 
+                        os.remove(fh.name)
                     except OSError:
                         pass
         if old:
@@ -231,7 +237,7 @@ write to"""
             mt = doc.mimeType
         return StringDocument(result, self.id, doc.processHistory,
                               mimeType=mt, parent=doc.parent,
-                              filename=doc.filename) 
+                              filename=doc.filename)
 
 
 class FileUtilPreParser(TypedPreParser):
@@ -239,11 +245,12 @@ class FileUtilPreParser(TypedPreParser):
 
     def __init__(self, session, config, parent):
         TypedPreParser.__init__(self, session, config, parent)
-        warn('''\
-{0} is deprecated in favour of objects available from the 
-cheshire3.formats package.'''.format(self.__class__.__name__), 
-            DeprecationWarning, 
-            stacklevel=6)
+        warn(
+            '{0} is deprecated in favour of objects available from the'
+            'cheshire3.formats package.'.format(self.__class__.__name__),
+            DeprecationWarning,
+            stacklevel=6
+        )
 
     def process_document(self, session, doc):
         cmd = "file -i -b %INDOC%"
@@ -307,21 +314,39 @@ class MagicRedirectPreParser(TypedPreParser):
                     self.mimeTypeHash[mt] = ref
 
     def __init__(self, session, config, parent):
-        self.mimeTypeHash = {"application/x-gzip": "GunzipPreParser",
-                             "application/postscript": "PsPdfPreParser",
-                             "application/pdf": "PdfXmlPreParser",
-                             "text/html": "HtmlSmashPreParser",
-                             "text/plain": "TxtToXmlPreParser",
-                             "text/sgml": "SgmlPreParser",
-                             "application/x-bzip2": "BzipPreParser"
-                             # "application/x-zip": "single zip preparser ?"
-                             }
+        self.mimeTypeHash = {
+            "application/x-gzip": "GunzipPreParser",
+            "application/postscript": "PsPdfPreParser",
+            "application/pdf": "PdfXmlPreParser",
+            "text/html": "HtmlSmashPreParser",
+            "text/plain": "TxtToXmlPreParser",
+            "text/prs.fallenstein.rst": "RstToXmlPreParser",
+            "text/sgml": "SgmlPreParser",
+            "application/x-bzip2": "BzipPreParser",
+            "application/zip": "ZIPToMETSPreParser",
+            ("application/vnd.openxmlformats-officedocument."
+             "wordprocessingml.document"): "ZIPToMETSPreParser",    # Word
+            ("application/vnd.openxmlformats-officedocument."
+             "presentationml.presentation"): "ZIPToMETSPreParser",  # PPT
+            ("application/vnd.openxmlformats-officedocument."
+             "spreadsheetml.sheet"): "ZIPToMETSPreParser",          # Excel
+            ("application/vnd.oasis.opendocument."
+             "text"): "ZIPToMETSPreParser",             # ODF Text
+            ("application/vnd.oasis.opendocument."
+             "presentation"): "ZIPToMETSPreParser",     # ODF Presentation
+            ("application/vnd.oasis.opendocument."
+             "spreadsheet"): "ZIPToMETSPreParser",      # ODF Spreadsheet(s)
+            ("application/vnd.oasis.opendocument."
+             "graphics"): "ZIPToMETSPreParser"          # ODF Graphic
+            # "application/x-zip": "single zip preparser ?"
+        }
 
         # Now override from config in init:
         TypedPreParser.__init__(self, session, config, parent)
 
     def process_document(self, session, doc):
         mt = doc.mimeType
+        # Need Database from which to fetch potentially custom PreParsers
         db = session.server.get_object(session, session.database)
         if not mt:
             # Nasty kludge - use FileUtilPreParser to determine MIME type
@@ -333,16 +358,20 @@ class MagicRedirectPreParser(TypedPreParser):
                 mts = mimetypes.guess_type(doc.filename)
                 if mts and mts[0]:
                     mt = mts[0]
-        if mt in self.mimeTypeHash:
-            db = session.server.get_object(session, session.database)
+        if mt in self.mimeTypeHash or "*" in self.mimeTypeHash:
+            if mt not in self.mimeTypeHash:
+                # There is a * mime-type
+                # Something to be done for any unmatched type
+                mt = '*'
             redirect = db.get_object(session, self.mimeTypeHash[mt])
             if isinstance(redirect, PreParser):
                 return redirect.process_document(session, doc)
             else:
-                # Only other thing is workflow
+                # Only other thing it could legitimately be is workflow
                 return redirect.process(session, doc)
         else:
-            # XXX: Should we return or raise?
+            # Return unaltered Document
+            # It may be that it is already the desired mime-type (e.g. XML)
             return doc
 
 
@@ -374,7 +403,7 @@ class HtmlSmashPreParser(PreParser):
             body = data[m.start():m.end()]
         else:
             body = data
-        text = self.tagstrip.sub(' ', body)	
+        text = self.tagstrip.sub(' ', body)
         text = text.replace('<', '&lt;')
         text = text.replace('>', '&gt;')
         text = text.replace("&nbsp;", ' ')
@@ -384,7 +413,27 @@ class HtmlSmashPreParser(PreParser):
         data = "<html><head>%s</head><body>%s</body></html>" % (title, text)
         return StringDocument(data, self.id, doc.processHistory,
                               mimeType=doc.mimeType, parent=doc.parent,
-                              filename=doc.filename) 
+                              filename=doc.filename)
+
+
+class HtmlFixupPreParser(PreParser):
+    """Attempt to fix up HTML to make it complete and parseable XML.
+
+    Uses the lxml.html package so as to preserve as much of the intended
+    structure as possible.
+    """
+
+    def process_document(self, session, doc):
+        root = html.document_fromstring(doc.get_raw(session))
+        try:
+            # Remove any xmlns to avoid duplication, and hence failed parsing
+            del root.attrib['xmlns']
+        except KeyError:
+            pass
+        data = etree.tostring(root)
+        return StringDocument(data, self.id, doc.processHistory,
+                              mimeType=doc.mimeType, parent=doc.parent,
+                              filename=doc.filename)
 
 
 class RegexpSmashPreParser(PreParser):
@@ -393,7 +442,7 @@ class RegexpSmashPreParser(PreParser):
     _possibleSettings = {
         'char': {
             'docs': """\
-Character(s) to replace matches in the regular expression with. Defaults to 
+Character(s) to replace matches in the regular expression with. Defaults to
 empty string (i.e. strip matches)"""
         },
         'regexp': {
@@ -434,7 +483,7 @@ Should instead keep only the matches. Boolean, defaults to False""",
             d2 = self.regexp.sub(self.char, data)
         return StringDocument(d2, self.id, doc.processHistory,
                               mimeType=doc.mimeType, parent=doc.parent,
-                              filename=doc.filename) 
+                              filename=doc.filename)
 
 
 try:
@@ -445,8 +494,8 @@ except ImportError:
     class HtmlTidyPreParser(PreParser):
 
         def __init__(self, session, config, parent):
-            raise NotImplementedError("""\
-HtmlTidyPreParser not supported due to a missing library on your system.""")
+            raise MissingDependencyException(self.__class__.__name__,
+                                             "tidy")
 
 else:
     class HtmlTidyPreParser(PreParser):
@@ -479,7 +528,7 @@ class SgmlPreParser(PreParser):
     _possibleSettings = {
         'emptyElements': {
             'docs': '''\
-Space separated list of empty elements in the SGML to turn into empty XML 
+Space separated list of empty elements in the SGML to turn into empty XML
 elements.'''
         }
     }
@@ -512,8 +561,8 @@ elements.'''
         # - remove spurious whitespace
         # - quote unquoted values
         #return match.groups()[0].lower() + '="' + match.groups()[1] + '"'
-        return ' %s="%s"%s' % (match.group(1).lower(), 
-                               match.group(2), 
+        return ' %s="%s"%s' % (match.group(1).lower(),
+                               match.group(2),
                                match.group(3))
 
     def _emptyElement(self, match):
@@ -612,6 +661,24 @@ class TxtToXmlPreParser(PreParser):
                               filename=doc.filename)
 
 
+class RstToXmlPreParser(PreParser):
+    """Convert reStructuredText into Docutils-native XML."""
+
+    inMimeType = "text/prs.fallenstein.rst"
+    outMimeType = "application/xml"
+
+    def process_document(self, session, doc):
+        rst = doc.get_raw(session)
+        data = publish_string(rst, writer_name="xml")
+        return StringDocument(data,
+                              self.id,
+                              doc.processHistory,
+                              mimeType=self.outMimeType,
+                              parent=doc.parent,
+                              filename=doc.filename
+                              )
+
+
 #  --- Compression PreParsers ---
 
 
@@ -644,16 +711,14 @@ except ImportError:
     class GzipPreParser(PreParser):
         """Gzip a not-gzipped document."""
         def __init__(self, session, config, parent):
-            raise NotImplementedError('''\
-Compression by gzip is not supported due to a missing library in your system.\
-''')
+            raise MissingDependencyException(self.__class__.__name__,
+                                             "gzip")
 
     class GunzipPreParser(PreParser):
         """Gunzip a gzipped document."""
         def __init__(self, session, config, parent):
-            raise NotImplementedError('''\
-Decompression by gzip is not supported due to a missing library in your \
-system.''')
+            raise MissingDependencyException(self.__class__.__name__,
+                                             "gzip")
 
 else:
     class GzipPreParser(PreParser):
@@ -667,7 +732,7 @@ else:
 
         def process_document(self, session, doc):
             outDoc = StringIO.StringIO()
-            zfile = gzip.GzipFile(mode='wb', fileobj=outDoc, 
+            zfile = gzip.GzipFile(mode='wb', fileobj=outDoc,
                                   compresslevel=self.compressLevel)
             zfile.write(doc.get_raw(session))
             zfile.close()
@@ -704,9 +769,8 @@ except ImportError:
     class Bzip2PreParser(PreParser):
         """Unzip a bz2 zipped document."""
         def __init__(self, session, config, parent):
-            raise NotImplementedError('''\
-Decompression by bzip2 is not supported due to a missing library in your \
-system.''')
+            raise MissingDependencyException(self.__class__.__name__,
+                                             "bzip2")
 
 else:
     class Bzip2PreParser(PreParser):
@@ -734,6 +798,26 @@ class B64DecodePreParser(PreParser):
     def process_document(self, session, doc):
         data = doc.get_raw(session)
         new = b64decode(data)
+        return StringDocument(new, self.id, doc.processHistory,
+                              parent=doc.parent, filename=doc.filename)
+
+
+class LZ4CompressPreParser(PreParser):
+    """Compress data using the lz4 algorithm."""
+
+    def process_document(self, session, doc):
+        data = doc.get_raw(session)
+        new = lz4.compress(data)
+        return StringDocument(new, self.id, doc.processHistory,
+                              parent=doc.parent, filename=doc.filename)
+
+
+class LZ4DecompressPreParser(PreParser):
+    """Decompress lz4 compressed data."""
+
+    def process_document(self, session, doc):
+        data = doc.get_raw(session)
+        new = lz4.decompress(data)
         return StringDocument(new, self.id, doc.processHistory,
                               parent=doc.parent, filename=doc.filename)
 
@@ -772,9 +856,9 @@ class UrlPreParser(PreParser):
         for (key, filename, value) in files:
             L.append('--' + BOUNDARY)
             L.append(
-                 'Content-Disposition: form-data; name="%s"; filename="%s"' % 
-                 (key, filename)
-                 )
+                'Content-Disposition: form-data; name="%s"; filename="%s"' %
+                (key, filename)
+            )
             L.append('Content-Type: %s' % self._get_content_type(filename))
             L.append('')
             L.append(value)
@@ -830,7 +914,7 @@ class PrintableOnlyPreParser(PreParser):
         'strip': {
             'docs': """\
 Should the preParser strip the characters or replace with numeric character \
-entities (default)""", 
+entities (default)""",
             'type': int,
             'options': "0|1"
         }
@@ -855,7 +939,7 @@ entities (default)""",
             data = data.replace(u"\xe2\x80\x98", u"'")
             data = data.replace(u"\xe2\x80\x99", u"'")
             data = data.replace(u"\xe2\x80\x9a", u",")
-            data = data.replace(u"\x99", u"'")        
+            data = data.replace(u"\x99", u"'")
             data = data.replace(u'\xa0', u' ')
         else:
             data = data.replace("\xe2\x80\x9c", '&quot;')
@@ -865,7 +949,7 @@ entities (default)""",
             data = data.replace("\xe2\x80\x98", "'")
             data = data.replace("\xe2\x80\x99", "'")
             data = data.replace("\xe2\x80\x9a", ",")
-            data = data.replace("\x99", "'")        
+            data = data.replace("\x99", "'")
             data = data.replace('\xa0', ' ')
         data = self.nonxmlRe.sub(' ', data)
         if self.strip:
@@ -881,7 +965,7 @@ entities (default)""",
 class CharacterEntityPreParser(PreParser):
     """Change named and broken entities to numbered.
 
-    Transform latin-1 and broken character entities into numeric character 
+    Transform latin-1 and broken character entities into numeric character
     entities. eg
     &amp;something; --> &amp;#123;
     """
@@ -1037,3 +1121,183 @@ class DataChecksumPreParser(PreParser):
             doc.metadata['checksum'] = md
         doc.processHistory.append(self.id)
         return doc
+
+
+class METSWrappingPreParser(TypedPreParser):
+    """PreParser to wrap any Document content in METS XML."""
+
+    def __init__(self, session, config, parent):
+        TypedPreParser.__init__(self, session, config, parent)
+        # Over-ride if missing outgoing mime-type
+        if not self.outMimeType:
+            self.outMimeType = 'application/xml'
+
+    def _get_metsWrapper(self, doc):
+        # Get a generic METS wrapper for the given Document
+        # Find/Generate identifiers and labels
+        objid = gen_uuid()
+        # Set up METS root and header
+        mets = METS.mets(
+            {'ID': '/'.join([objid, 'mets']),
+             'OBJID': objid,
+             'TYPE': 'ZIPFILE'
+             },
+            METS.metsHdr(
+                {'ID': '/'.join([objid, 'metsHdr']),
+                 'CREATEDDATE': time.strftime('%Y-%m-%dT%H:%M:%S%Z')
+                 },
+                METS.agent(
+                    {'ROLE': "CREATOR",
+                     'TYPE': "OTHER",
+                     'OTHERTYPE': 'SOFTWARE'
+                     },
+                    METS.name("Cheshire3"),
+                    METS.note(
+                        "METS instance was created by a Cheshire3 object"
+                        " of type {0} identified as {1}"
+                        "".format(type(self).__name__, self.id)
+                    )
+                )
+            ),
+            METS.dmdSec(),
+            METS.amdSec(),
+            METS.fileSec(
+                METS.fileGrp({'ID': '/'.join([objid, 'fileGrp', '0001'])})
+            )
+        )
+        # Set a human readable label if possible
+        if doc.filename:
+            mets.set("LABEL", os.path.abspath(doc.filename))
+        elif doc.id:
+            mets.set("LABEL", doc.id)
+        return mets
+
+    def _get_metsFile(self, identifier, rawdata, size=0, mimeType=""):
+        # Get a METS file element for the given data
+        file_ = METS.file({'ID': identifier,
+                           }
+                          )
+        # Create a METS FContent element
+        FContent = METS.FContent()
+        file_.append(FContent)
+        # Try to set size
+        if size:
+            file_.attrib["SIZE"] = str(size)
+        else:
+            file_.attrib["SIZE"] = str(len(rawdata))
+        # Attempt to add the MIME-Type
+        if mimeType == "text/xml":
+            # Fix broken MIME-Type
+            file_.attrib['MIMETYPE'] = 'application/xml'
+        elif mimeType:
+            file_.attrib['MIMETYPE'] = mimeType
+        # Add the content as either XML or binary (Base 64) data
+        try:
+            # Attempt to parse file content as XML
+            xmldata = etree.fromstring(rawdata)
+        except etree.XMLSyntaxError:
+            # Encode as Base64
+            FContent.append(METS.binData(b64encode(rawdata)))
+        else:
+            FContent.append(METS.xmlData(xmldata))
+        return file_
+
+    def process_document(self, session, doc):
+        global METS_NAMESPACES
+        mets = self._get_metsWrapper(doc)
+        objid = mets.get("OBJID")
+        # Get the fileSec element
+        fileGrp = mets.xpath('/mets:mets/mets:fileSec/mets:fileGrp[1]',
+                             namespaces=METS_NAMESPACES)[0]
+        file_ = self._get_metsFile(
+            '/'.join([objid,
+                      mets.attrib.get("LABEL", "file0001")
+                      ]),
+            doc.get_raw(session),
+            doc.byteCount,
+            doc.mimeType
+        )
+        # Append the file element to fileGrp
+        fileGrp.append(file_)
+        # Update last modification date
+        mets.attrib['LASTMODDATE'] = time.strftime('%Y-%m-%dT%H:%M:%S%Z')
+        # Serialize METS
+        data = etree.tostring(mets, pretty_print=True)
+        # Return a Document
+        return StringDocument(
+            data,
+            self.id,
+            doc.processHistory,
+            self.outMimeType,
+            parent=doc.parent,
+            filename=doc.filename,
+            byteCount=len(data),
+            byteOffset=0
+        )
+
+
+class ZIPToMETSPreParser(METSWrappingPreParser):
+    """PreParser to process a ZIP file to METS XML.
+
+    As Office Open XML format and OpenDocument format Documents are based on
+    ZIP files, this PreParser can also be used to unpack them, and wrap their
+    component parts in METS.
+
+    Office Open XML (a.k.a. OpenXML, OOXML) is the name for ECMA 376 office
+    file formats used by default in Microsoft Office 2007 onwards (.docx,
+    .xlsx , .pptx etc.) It is available as an import/export format in
+    LibreOffice, OpenOffice >= 3.2, Google Docs and more.
+
+    """
+
+    def process_document(self, session, doc):
+        global METS_NAMESPACES
+        mets = self._get_metsWrapper(doc)
+        objid = mets.get("OBJID")
+        # Get the fileSec element
+        fileGrp = mets.xpath('/mets:mets/mets:fileSec/mets:fileGrp[1]',
+                             namespaces=METS_NAMESPACES)[0]
+        # Make raw data of incoming document file-like
+        stringio = StringIO.StringIO(doc.get_raw(session))
+        # Read file-like object as a ZIP file
+        with ZipFile(stringio, 'r') as zf:
+            # Iterate through the zipped files
+            for zipinfo in zf.infolist():
+                # Attempt to get the MIME-Type
+                mts = mimetypes.guess_type(zipinfo.filename)
+                if mts and mts[0]:
+                    mimeType = mts[0]
+                else:
+                    mimeType = ""
+                file_ = self._get_metsFile(
+                    '/'.join([objid, zipinfo.filename]),
+                    zf.read(zipinfo),
+                    str(zipinfo.file_size),
+                    mimeType
+                )
+                # Append the file element to fileGrp
+                fileGrp.append(file_)
+        # Update last modification date
+        mets.attrib['LASTMODDATE'] = time.strftime('%Y-%m-%dT%H:%M:%S%Z')
+        # Serialize METS
+        data = etree.tostring(mets, pretty_print=True)
+        # Return a Document
+        return StringDocument(
+            data,
+            self.id,
+            doc.processHistory,
+            self.outMimeType,
+            parent=doc.parent,
+            filename=doc.filename,
+            byteCount=len(data),
+            byteOffset=0
+        )
+
+
+# Set up ElementMaker for METS and XLink namespaces
+METS_NAMESPACES = {'mets': "http://www.loc.gov/METS/",
+                   'xlink': "http://www.w3.org/1999/xlink"
+                   }
+METS = ElementMaker(namespace=METS_NAMESPACES['mets'],
+                    nsmap=METS_NAMESPACES
+                    )

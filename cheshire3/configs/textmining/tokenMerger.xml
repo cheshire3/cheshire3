@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://www.cheshire3.org/schemas/config/">
+  <subConfigs>
+
+    <subConfig type="tokenMerger" id="NamedEntityTokenMerger">
+        <objectType>cheshire3.textmining.tokenMerger.NLTKNamedEntityTokenMerger</objectType>
+    </subConfig>
+
+    <subConfig type="tokenMerger" id="PersonNameTokenMerger">
+        <objectType>cheshire3.textmining.tokenMerger.NLTKNamedEntityTokenMerger</objectType>
+        <options>
+            <setting type="entityTypes">PERSON</setting>
+        </options>
+    </subConfig>
+
+    <subConfig type="tokenMerger" id="PlaceNameTokenMerger">
+        <objectType>cheshire3.textmining.tokenMerger.NLTKNamedEntityTokenMerger</objectType>
+        <options>
+            <setting type="entityTypes">PLACE</setting>
+        </options>
+    </subConfig>
+
+    <subConfig type="tokenMerger" id="OrganizationNameTokenMerger">
+        <objectType>cheshire3.textmining.tokenMerger.NLTKNamedEntityTokenMerger</objectType>
+        <options>
+            <setting type="entityTypes">ORGANIZATION</setting>
+        </options>
+    </subConfig>
+
+    <!-- Positional Proximity TokenMergers -->
+
+    <subConfig type="tokenMerger" id="ProxNamedEntityTokenMerger">
+        <objectType>cheshire3.textmining.tokenMerger.ProximityNLTKNamedEntityTokenMerger</objectType>
+    </subConfig>
+
+    <subConfig type="tokenMerger" id="ProxPersonNameTokenMerger">
+        <objectType>cheshire3.textmining.tokenMerger.ProximityNLTKNamedEntityTokenMerger</objectType>
+        <options>
+            <setting type="entityTypes">PERSON</setting>
+        </options>
+    </subConfig>
+
+    <subConfig type="tokenMerger" id="ProxPlaceNameTokenMerger">
+        <objectType>cheshire3.textmining.tokenMerger.ProximityNLTKNamedEntityTokenMerger</objectType>
+        <options>
+            <setting type="entityTypes">PLACE</setting>
+        </options>
+    </subConfig>
+
+    <subConfig type="tokenMerger" id="ProxOrganizationNameTokenMerger">
+        <objectType>cheshire3.textmining.tokenMerger.ProximityNLTKNamedEntityTokenMerger</objectType>
+        <options>
+            <setting type="entityTypes">ORGANIZATION</setting>
+        </options>
+    </subConfig>
+
+    <!-- Offset Proximity TokenMergers -->
+
+    <subConfig type="tokenMerger" id="OffsetProxNamedEntityTokenMerger">
+        <objectType>cheshire3.textmining.tokenMerger.OffsetProximityNLTKNamedEntityTokenMerger</objectType>
+    </subConfig>
+
+    <subConfig type="tokenMerger" id="OffsetProxPersonNameTokenMerger">
+        <objectType>cheshire3.textmining.tokenMerger.OffsetProximityNLTKNamedEntityTokenMerger</objectType>
+        <options>
+            <setting type="entityTypes">PERSON</setting>
+        </options>
+    </subConfig>
+
+    <subConfig type="tokenMerger" id="OffsetProxPlaceNameTokenMerger">
+        <objectType>cheshire3.textmining.tokenMerger.OffsetProximityNLTKNamedEntityTokenMerger</objectType>
+        <options>
+            <setting type="entityTypes">PLACE</setting>
+        </options>
+    </subConfig>
+
+    <subConfig type="tokenMerger" id="OffsetProxOrganizationNameTokenMerger">
+        <objectType>cheshire3.textmining.tokenMerger.OffsetProximityNLTKNamedEntityTokenMerger</objectType>
+        <options>
+            <setting type="entityTypes">ORGANIZATION</setting>
+        </options>
+    </subConfig>
+
+  </subConfigs>
+</config>

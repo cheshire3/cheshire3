@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://www.cheshire3.org/schemas/config/">
+  <subConfigs>
+
+    <subConfig type="tokenizer" id="WordPosGeniaTokenizer">
+       <objectType>cheshire3.textmining.tokenizer.UnparsedGeniaTokenizer</objectType>
+       <options>
+         <setting type="pos">1</setting>
+       </options>
+    </subConfig>  
+
+
+    <subConfig type="tokenizer" id="PosOnlyGeniaTokenizer">
+       <objectType>cheshire3.textmining.tokenizer.UnparsedGeniaTokenizer</objectType>
+       <options>
+         <setting type="justPos">1</setting>
+       </options>
+    </subConfig>  
+
+    <subConfig type="tokenizer" id="PhraseGeniaTokenizer">
+       <objectType>cheshire3.textmining.tokenizer.PhraseUnparsedGeniaTokenizer</objectType>
+       <paths>
+         <path type="executablePath">${cheshire3Root}/textmining</path>
+       </paths>
+    </subConfig>
+
+    <subConfig type="tokenizer" id="PunktTokenizer">
+      <objectType>tokenizer.PunktWordTokenizer</objectType>
+    </subConfig>
+    
+    <subConfig type="tokenizer" id="PunktSentenceTokenizer">
+      <objectType>tokenizer.PunktSentenceTokenizer</objectType>
+    </subConfig>
+
+  </subConfigs>
+</config>

@@ -17,13 +17,24 @@ from lxml import etree
 import cheshire3.cqlParser as cql
 
 from cheshire3.baseObjects import Index, Session
-from cheshire3.utils import elementType, flattenTexts, vectorSimilarity,\
-                            SimpleBitfield
-from cheshire3.exceptions import ConfigFileException, QueryException, \
-                                 C3ObjectTypeError, PermissionException
+from cheshire3.utils import (
+    elementType,
+    flattenTexts,
+    vectorSimilarity,
+    SimpleBitfield
+)
+from cheshire3.exceptions import (
+    ConfigFileException,
+    QueryException,
+    C3ObjectTypeError,
+    PermissionException
+)
 from cheshire3.internal import CONFIG_NS
-from cheshire3.resultSet import SimpleResultSet, SimpleResultSetItem,\
-                                BitmapResultSet
+from cheshire3.resultSet import (
+    SimpleResultSet,
+    SimpleResultSetItem,
+    BitmapResultSet
+)
 from cheshire3.workflow import CachingWorkflow
 from cheshire3.xpathProcessor import SimpleXPathProcessor
 
@@ -40,9 +51,13 @@ class IndexIter(object):
         self.session = Session()
         self.summary = 0
         # populate with first term
-        self.nextData = self.indexStore.fetch_termList(self.session,
-                                                       self.index,
-                                                       "", 1)[0]
+        try:
+            self.nextData = self.indexStore.fetch_termList(self.session,
+                                                           self.index,
+                                                           "",
+                                                           1)[0]
+        except IndexError:
+            self.nextData = None
 
     def __iter__(self):
         return self
@@ -158,12 +173,12 @@ class SimpleIndex(Index):
             'type': float
         },
         'okapi_constant_k1': {
-             "docs": "",
-             'type': float
+            "docs": "",
+            'type': float
         },
         'okapi_constant_k3': {
-             "docs": "",
-             'type': float
+            "docs": "",
+            'type': float
         },
         'noIndexDefault': {
             "docs": ("If true, the index should not be called from "
@@ -347,8 +362,8 @@ class SimpleIndex(Index):
                         e = etree.XML(etree.tostring(child))
                         e.tag = 'workflow'
                         e.set('id', self.id + "-preworkflow")
-                        preprocess = CachingWorkflow(session, child, self)
-                        preprocess._handleLxmlConfigNode(session, child)
+                        preprocess = CachingWorkflow(session, e, self)
+                        preprocess._handleLxmlConfigNode(session, e)
                 elif child.tag in ['process', '{%s}process' % CONFIG_NS]:
                     # turn xpath chain to workflow
                     ref = child.attrib.get('{%s}ref' % CONFIG_NS,
@@ -386,7 +401,7 @@ class SimpleIndex(Index):
             self.longStructSize = int(lss)
         else:
             #self.longStructSize = len(struct.pack('L', 1))
-            self.longStructSize = struct.calcsize('l')
+            self.longStructSize = struct.calcsize('<l')
 
         self.recordStoreSizes = self.get_setting(session,
                                                  'recordStoreSizes',
@@ -575,8 +590,10 @@ class SimpleIndex(Index):
         store = self.get_path(session, 'indexStore')
         matches = []
         rel = clause.relation
-        if (rel.prefix == 'cql' or
-            rel.prefixURI == 'info:srw/cql-context-set/1/cql-v1.1'):
+        if (
+            rel.prefix == 'cql' or
+            rel.prefixURI == 'info:srw/cql-context-set/1/cql-v1.1'
+        ):
             if (rel.value == 'scr'):
                 pm = db.get_path(session, 'protocolMap')
                 try:
@@ -590,8 +607,11 @@ class SimpleIndex(Index):
         for m in rel.modifiers:
             m.type.parent = clause
             m.type.resolvePrefix()
-            if (m.type.prefixURI.startswith(
-                                    'info:srw/cql-context-set/2/relevance')):
+            if (
+                m.type.prefixURI.startswith(
+                    'info:srw/cql-context-set/2/relevance'
+                )
+            ):
                 if m.type.value == "feedback":
                     try:
                         feedback = int(m.value)
@@ -599,10 +619,13 @@ class SimpleIndex(Index):
                         feedback = 1
 
         construct_resultSet = self.construct_resultSet
-        if (rel.value in ['any', 'all', '=', 'exact', 'window'] and
-            (rel.prefix == 'cql' or
-             rel.prefixURI == 'info:srw/cql-context-set/1/cql-v1.1'
-            )):
+        if (
+            rel.value in ['any', 'all', '=', 'exact', 'window'] and
+            (
+                rel.prefix == 'cql' or
+                rel.prefixURI == 'info:srw/cql-context-set/1/cql-v1.1'
+            )
+        ):
             for k, qHash in res.iteritems():
                 if k[0] == '^':
                     k = k[1:]
@@ -629,8 +652,10 @@ class SimpleIndex(Index):
                         # FIXME: need to do something cleverer than this if
                         # first character is masked. This implementation will
                         # be incredibly slow for these cases...
-                        if ((firstMask < len(k) - 1) or
-                            (k[firstMask] in ['?', '^'])):
+                        if (
+                            (firstMask < len(k) - 1) or
+                            (k[firstMask] in ['?', '^'])
+                        ):
                             # not simply right hand truncation
                             kRe = re.compile(self._regexify_wildcards(k))
                             mymatch = kRe.match
@@ -638,8 +663,10 @@ class SimpleIndex(Index):
                                               termList)
 
                     maskBase = self.resultSetClass(
-                                               session, [],
-                                               recordStore=self.recordStore)
+                        session,
+                        [],
+                        recordStore=self.recordStore
+                    )
                     maskClause = cql.parse(clause.toCQL())
                     maskClause.relation.value = u'any'
                     if (clause.relation.value == u'='):
@@ -697,8 +724,10 @@ class SimpleIndex(Index):
         if not matches:
             return base
         else:
-            if (clause.relation.value == "=" and not
-                isinstance(self, ProximityIndex)):
+            if (
+                clause.relation.value == "=" and not
+                isinstance(self, ProximityIndex)
+            ):
                 # Can't do proximity, treat as a search for 'all'
                 clause.relation.value = "all"
             rs = base.combine(session, matches, clause, db)
@@ -852,11 +881,12 @@ class SimpleIndex(Index):
         # results will end up with duplicates)
         try:
             fbrs = self.searchByExamples(
-                                 session,
-                                 sorted(rs, key=lambda x: x.weight)[:nRecs],
-                                 clause,
-                                 db,
-                                 nTerms)
+                session,
+                sorted(rs, key=lambda x: x.weight)[:nRecs],
+                clause,
+                db,
+                nTerms
+            )
         except ConfigFileException as e:
             self.log_warning(session,
                              "Unable to complete blind relevance feedback "
@@ -910,7 +940,7 @@ class SimpleIndex(Index):
             nRecs = len(data) / 3
         if not nOccs:
             nOccs = sum(data[2::3])
-        fmt = 'lll' * (nRecs + 1)
+        fmt = '<' + 'lll' * (nRecs + 1)
         params = [fmt, termId, nRecs, nOccs] + data
         try:
             return struct.pack(*params)
@@ -933,10 +963,10 @@ class SimpleIndex(Index):
         prox  := boolean flag to include proximity information
         """
         if nRecs == -1:
-            fmt = 'lll' * (len(data) / (3 * self.longStructSize))
+            fmt = '<' + 'lll' * (len(data) / (3 * self.longStructSize))
             return struct.unpack(fmt, data)
         else:
-            fmt = "lll" * (nRecs + 1)
+            fmt = '<' + "lll" * (nRecs + 1)
             endpoint = (nRecs + 1) * 3 * self.longStructSize
             return struct.unpack(fmt, data[:endpoint])
 
@@ -977,8 +1007,10 @@ class SimpleIndex(Index):
                 storeid = newData[n + 1]
                 replaced = 0
                 for x in range(3, len(currentData), 3):
-                    if (currentData[x] == docid and
-                        currentData[x + 1] == storeid):
+                    if (
+                        currentData[x] == docid and
+                        currentData[x + 1] == storeid
+                    ):
                         currentData[x + 2] = newData[n + 2]
                         replaced = 1
                         break
@@ -991,8 +1023,10 @@ class SimpleIndex(Index):
                 docid = newData[n]
                 storeid = newData[n + 1]
                 for x in range(0, len(currentData), 3):
-                    if (currentData[x] == docid and
-                        currentData[x + 1] == storeid):
+                    if (
+                        currentData[x] == docid and
+                        currentData[x + 1] == storeid
+                    ):
                         del currentData[x:(x + 3)]
                         break
             trecs = len(currentData) / 3
@@ -1082,8 +1116,8 @@ class SimpleIndex(Index):
     def fetch_metadata(self, session):
         return self.indexStore.fetch_indexMetadata(session, self)
 
-    def fetch_sortValue(self, session, rec):
-        return self.indexStore.fetch_sortValue(session, self, rec)
+    def fetch_sortValue(self, session, rec, ascending=True):
+        return self.indexStore.fetch_sortValue(session, self, rec, ascending)
 
     def merge_tempFiles(self, session):
         return self.indexStore.merge_tempFiles(session, self)
@@ -1119,7 +1153,7 @@ class SingleRecordStoreIndex(SimpleIndex):
             nOccs = sum(data[2::3])
         # strip out RecordStore pointer
         del data[1::3]
-        fmt = 'lll' + ('ll' * nRecs)
+        fmt = '<' + 'lll' + ('ll' * nRecs)
         params = [fmt, termId, nRecs, nOccs] + data
         try:
             return struct.pack(*params)
@@ -1144,10 +1178,10 @@ class SingleRecordStoreIndex(SimpleIndex):
         """
         lss = self.longStructSize
         if nRecs == -1:
-            fmt = 'l' * (len(data) / lss)
+            fmt = '<' + 'l' * (len(data) / lss)
             out = list(struct.unpack(fmt, data))
         else:
-            fmt = "lll" + "ll" * nRecs
+            fmt = '<' + "lll" + "ll" * nRecs
             endpoint = (3 * lss) + (nRecs * 2 * lss)
             out = list(struct.unpack(fmt, data[:endpoint]))
         # Insert assumed RecordStore pointers
@@ -1188,7 +1222,7 @@ class ProximityIndex(SimpleIndex):
 
     def serialize_term(self, session, termId, data, nRecs=0, nOccs=0):
         # in: list of longs
-        fmt = 'l' * (len(data) + 3)
+        fmt = '<' + 'l' * (len(data) + 3)
         params = [fmt, termId, nRecs, nOccs] + data
         try:
             val = struct.pack(*params)
@@ -1199,7 +1233,7 @@ class ProximityIndex(SimpleIndex):
         return val
 
     def deserialize_term(self, session, data, nRecs=-1, prox=1):
-        fmt = 'l' * (len(data) / self.longStructSize)
+        fmt = '<' + 'l' * (len(data) / self.longStructSize)
         flat = struct.unpack(fmt, data)
         (termid, totalRecs, totalOccs) = flat[:3]
         idx = 3
@@ -1308,10 +1342,10 @@ class ProximityIndex(SimpleIndex):
             item = ci(session, t[0], t[1], t[2])
             pi = t[3:]
             item.proxInfo = [
-                             [pi[x:(x + self.nProxInts)]]
-                             for x
-                             in range(0, len(pi), self.nProxInts)
-                            ]
+                [pi[x:(x + self.nProxInts)]]
+                for x
+                in range(0, len(pi), self.nProxInts)
+            ]
             item.resultSet = s
             rsilist.append(item)
         s.fromList(rsilist)
@@ -1382,7 +1416,7 @@ class XmlIndex(SimpleIndex):
 
     def serialize_term(self, session, termId, data, nRecs=0, nOccs=0):
         # in: list of longs
-        val = struct.pack('lll', termId, nRecs, nOccs)
+        val = struct.pack('<lll', termId, nRecs, nOccs)
         xml = ['<rs tid="%s" recs="%s" occs="%s">' % (termId, nRecs, nOccs)]
         idx = 0
         for i in range(0, len(data), 3):
@@ -1395,7 +1429,7 @@ class XmlIndex(SimpleIndex):
 
     def deserialize_term(self, session, data, nRecs=-1, prox=1):
         lss3 = 3 * self.longStructSize
-        fmt = 'lll'
+        fmt = '<lll'
         (termid, totalRecs, totalOccs) = struct.unpack(fmt, data[:lss3])
         xmlstr = self._maybeUncompress(data[lss3:])
         return [termid, totalRecs, totalOccs, xmlstr]
@@ -1486,7 +1520,7 @@ class XmlProximityIndex(XmlIndex):
     def serialize_term(self, session, termId, data, nRecs=0, nOccs=0):
         # in: list of longs
         npi = self.get_setting(session, 'nProxInts', 2)
-        val = struct.pack('lll', termId, nRecs, nOccs)
+        val = struct.pack('<lll', termId, nRecs, nOccs)
         xml = ['<rs tid="%s" recs="%s" occs="%s">' % (termId, nRecs, nOccs)]
         idx = 0
         while idx < len(data):
@@ -1541,10 +1575,9 @@ class RangeIndex(SimpleIndex):
             # Try to get process for relation/modifier, failing that relation,
             # fall back to that used for data
             for src in self.sources.get(
-                                        clause.relation.toCQL(),
-                                        self.sources.get(clause.relation.value,
-                                                         self.sources[u'data'])
-                                    ):
+                clause.relation.toCQL(),
+                self.sources.get(clause.relation.value, self.sources[u'data'])
+            ):
                 res.update(src[1].process(session, [[clause.term.value]]))
             store = self.get_path(session, 'indexStore')
             matches = []
@@ -1639,7 +1672,7 @@ class BitmapIndex(SimpleIndex):
             bf = SimpleBitfield()
             for item in data[::3]:
                 bf[item] = 1
-        pack = struct.pack('lll', termId, nRecs, nOccs)
+        pack = struct.pack('<lll', termId, nRecs, nOccs)
         val = pack + str(bf)
         return val
 
@@ -1653,7 +1686,7 @@ class BitmapIndex(SimpleIndex):
     def deserialize_term(self, session, data, nRecs=-1, prox=0):
         lsize = 3 * self.longStructSize
         longs = data[:lsize]
-        terms = list(struct.unpack('lll', longs))
+        terms = list(struct.unpack('<lll', longs))
         if len(data) > lsize:
             bf = SimpleBitfield(data[lsize:])
             terms.append(bf)
@@ -1857,7 +1890,8 @@ class PassThroughIndex(SimpleIndex):
     def _handleLxmlConfigNode(self, session, node):
         # Source
         if node.tag in ['xpath', '{%s}xpath' % CONFIG_NS,
-                         'selector', '{%s}selector' % CONFIG_NS]:
+                        'selector', '{%s}selector' % CONFIG_NS
+                        ]:
             ref = node.attrib.get('{%s}ref' % CONFIG_NS,
                                   node.attrib.get('ref', ''))
             if ref:
@@ -2005,10 +2039,10 @@ class PassThroughIndex(SimpleIndex):
             newscans[-1].append(endMarker)
         return newscans[:nTerms]
 
-    def fetch_sortValue(self, session, rec):
+    def fetch_sortValue(self, session, rec, ascending=True):
         if not self.remoteKeyIndex:
             return ''
-        key = self.localIndex.fetch_sortValue(session, rec)
+        key = self.localIndex.fetch_sortValue(session, rec, ascending)
         if not key:
             return ''
         currDb = session.database
@@ -2016,7 +2050,7 @@ class PassThroughIndex(SimpleIndex):
         q = cql.parse('c3.%s exact "%s"' % (self.remoteKeyIndex.id, key))
         rs = self.remoteKeyIndex.search(session, q, self.database)
         if rs:
-            sv = self.remoteIndex.fetch_sortValue(session, rs[0])
+            sv = self.remoteIndex.fetch_sortValue(session, rs[0], ascending)
         else:
             sv = ''
         session.database = currDb

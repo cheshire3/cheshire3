@@ -68,9 +68,20 @@
 	  <objectType>cheshire3.preParser.GzipPreParser</objectType>
 	</subConfig>
 	
+	<subConfig type="preParser" id="GunzipPreParser">
+	  <objectType>cheshire3.preParser.GunzipPreParser</objectType>
+	</subConfig>
+	
 	<subConfig type="preParser" id="Bzip2PreParser">
       <objectType>cheshire3.preParser.Bzip2PreParser</objectType>
     </subConfig>
+	
+	<subConfig type="preParser" id="LZ4CompressPreParser">
+	  <objectType>cheshire3.preParser.LZ4CompressPreParser</objectType>
+	</subConfig>
+	<subConfig type="preParser" id="LZ4DecompressPreParser">
+	  <objectType>cheshire3.preParser.LZ4DecompressPreParser</objectType>
+	</subConfig>
 	
 	<subConfig type="preParser" id="MarcToSgmlPreParser">
 	  <objectType>cheshire3.preParser.MarcToSgmlPreParser</objectType>
@@ -80,6 +91,9 @@
 	</subConfig>
 	<subConfig type="preParser" id="HtmlSmashPreParser">
 	  <objectType>cheshire3.preParser.HtmlSmashPreParser</objectType>
+	</subConfig>
+	<subConfig type="preParser" id="HtmlFixupPreParser">
+	  <objectType>cheshire3.preParser.HtmlFixupPreParser</objectType>
 	</subConfig>
 	
 	<subConfig type="preParser" id="Latin1PreParser">
@@ -202,6 +216,18 @@
 
 	<subConfig type="preParser" id="TxtToXmlPreParser">
 	  <objectType>cheshire3.preParser.TxtToXmlPreParser</objectType>
+	</subConfig>
+	
+	<subConfig type="preParser" id="RstToXmlPreParser">
+	  <objectType>cheshire3.preParser.RstToXmlPreParser</objectType>
+	</subConfig>
+	
+	<subConfig type="preParser" id="METSWrappingPreParser">
+	  <objectType>cheshire3.preParser.METSWrappingPreParser</objectType>
+	</subConfig>
+	
+	<subConfig type="preParser" id="ZIPToMETSPreParser">
+	  <objectType>cheshire3.preParser.ZIPToMETSPreParser</objectType>
 	</subConfig>
 	
 	<!-- Extractor objects -->
@@ -435,6 +461,10 @@
       <docs>A transformer to return a Document containing the raw XML string of the record, compressed using the bzip2 algorithm.</docs>
     </subConfig>
     
+    <subConfig type="transformer" id="ComponentParentTransformer">
+        <objectType>cheshire3.transformer.ComponentParentFetchingTransformer</objectType>
+        <docs>A Transformer to fetch and return the data for a given component Record's parent.</docs>
+    </subConfig>
 
   </subConfigs>
 

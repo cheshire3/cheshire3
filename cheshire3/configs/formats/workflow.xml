@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://www.cheshire3.org/schemas/config/">
+  <subConfigs>
+
+    <subConfig type="workflow" id="msOfficeDocWorkflow">
+        <objectType>cheshire3.workflow.CachingWorkflow</objectType>
+        <workflow>
+            <!-- input type:  document -->
+            <object type="preParser" ref="OpenOfficeToPdfPreParser"/>
+            <object type="workflow" ref="pdfDocWorkflow"/>
+        </workflow>
+    </subConfig>
+    
+    <subConfig type="workflow" id="pdfDocWorkflow">
+        <objectType>cheshire3.workflow.CachingWorkflow</objectType>
+        <workflow>
+            <!-- input type:  document -->
+            <object type="preParser" ref="PdfXmlPreParser"/>
+        </workflow>
+    </subConfig>
+    
+  </subConfigs>
+</config>

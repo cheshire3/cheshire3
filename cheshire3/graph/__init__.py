@@ -1,3 +1,8 @@
+"""Cheshire3 Graph / RDF Support
+
+Provides support for creating and handling RDF graph-based Records in
+Cheshire3.
+"""
 
 __all__ = ['parser', 'selector', 'extractor', 'record', 'transformer']
 

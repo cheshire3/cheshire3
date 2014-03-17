@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://www.cheshire3.org/schemas/config/">
+    <subConfigs>
+
+        <subConfig type="extractor" id="WordPosTaggedExtractor">
+            <objectType>cheshire3.textmining.extractor.TaggedExtractor</objectType>
+            <options>
+                <setting type="format">%(word)s/%(pos)s</setting>
+                <setting type="prox">1</setting>
+                <setting type="reversable">1</setting>
+            </options>
+        </subConfig>
+
+        <subConfig type="extractor" id="StemPosTaggedExtractor">
+            <objectType>cheshire3.textmining.extractor.TaggedExtractor</objectType>
+            <options>
+                <setting type="format">%(stem)s/%(pos)s</setting>
+                <setting type="prox">1</setting>
+                <setting type="reversable">1</setting>
+            </options>
+        </subConfig>
+
+        <subConfig type="extractor" id="WordTaggedExtractor">
+            <objectType>cheshire3.textmining.extractor.TaggedExtractor</objectType>
+            <options>
+                <setting type="format">%(word)s</setting>
+                <setting type="prox">1</setting>
+                <setting type="reversable">1</setting>
+            </options>
+        </subConfig>
+
+        <subConfig type="extractor" id="StemTaggedExtractor">
+            <objectType>cheshire3.textmining.extractor.TaggedExtractor</objectType>
+            <options>
+                <setting type="format">%(stem)s</setting>
+                <setting type="prox">1</setting>
+                <setting type="reversable">1</setting>
+            </options>
+        </subConfig>
+
+        <subConfig type="extractor" id="PosTaggedExtractor">
+            <objectType>cheshire3.textmining.extractor.TaggedExtractor</objectType>
+            <options>
+                <setting type="format">%(pos)s</setting>
+                <setting type="prox">1</setting>
+                <setting type="reversable">1</setting>
+            </options>
+        </subConfig>
+
+        <subConfig type="extractor" id="NamedEntityExtractor">
+            <objectType>cheshire3.textmining.extractor.NLTKNamedEntityExtractor</objectType>
+        </subConfig>
+
+        <subConfig type="extractor" id="PersonNameExtractor">
+            <objectType>cheshire3.textmining.extractor.NLTKNamedEntityExtractor</objectType>
+            <options>
+                <setting type="entityTypes">PERSON</setting>
+            </options>
+        </subConfig>
+
+        <subConfig type="extractor" id="PlaceNameExtractor">
+            <objectType>cheshire3.textmining.extractor.NLTKNamedEntityExtractor</objectType>
+            <options>
+                <setting type="entityTypes">PLACE</setting>
+            </options>
+        </subConfig>
+
+        <subConfig type="extractor" id="OrganizationNameExtractor">
+            <objectType>cheshire3.textmining.extractor.NLTKNamedEntityExtractor</objectType>
+            <options>
+                <setting type="entityTypes">ORGANIZATION</setting>
+            </options>
+        </subConfig>
+
+    </subConfigs>
+</config>

@@ -1,6 +1,73 @@
 CHANGES
 =======
 
+1.1.0 - Monday 17th March 2014
+------------------------------
+
+ENHANCEMENTS
+~~~~~~~~~~~~
+
+* Improved out-of-the-box indexing capabilities.
+
+  * Support for a number of common file formats. This is achieved by
+    preParsing to XML where possible, and wrapping all formats in METS.
+
+    * PDF
+    * HTML
+    * plain-text
+    * OpenDocument Format (LibreOffice, OpenOffice 3+)
+    * Office Open XML (Microsoft Office 2007+ - docx, pptx, xlsx etc.)
+
+  * Easily load and index data from an iRODS data grid.
+
+  * Attempts to create title index entries by default.
+
+  * Faster retrieval[*]_ by compressing stored records using the lz4
+    algorithm to reduce read time from disk.
+
+* Store low and high values for each Record when ``sortStore`` setting is
+  given for an Index. This provides more intuitive results when ordering
+  ResultSets.
+
+* NLTK Integration enabling configuration of indexes for automatically
+  extracted named entities. This feature can be enabled by installing
+  cheshire3 with 'nlp' or 'textmining' extras, e.g.::
+
+      pip install cheshire3[nlp] >= 1.1.0
+
+* Improved speed, readability and security of ``sql`` sub-package through use
+  of ``psycopg2``.
+
+* Better support for custom OAI-PMH servers (available as part of 'web'
+  extras).
+
+.. [*] Faster retrieval assuming reasonable processing power (>=2.5GHz) and
+       non solid-state storage.
+
+
+BUG FIXES
+~~~~~~~~~
+
+* Fixed major bug with indexing on 64-bit platforms.
+
+* Many more minor bug fixes.
+
+
+TESTS
+~~~~~
+
+New regression unittests:
+
+* Workflows
+* ResultSets
+* ResultSetStores
+* Loggers
+* Indexes
+
+For fuller details see the `GitHub Issue Tracker
+<https://github.com/cheshire3/cheshire3/issues?milestone=8&state=closed>`
+
+
 1.0.16 - Thursday 10 October 2013
 ---------------------------------
 
@@ -91,6 +158,7 @@ BUG FIXES
 ~~~~~~~~~
 
 * Fixed typo in cheshire3.resultSet:
+
   ValueErorr -> ValueError
 
 * Fixed mutable type default data argument to SimpleResultSet constructor
@@ -203,4 +271,6 @@ ENHANCEMENTS
   * ``cheshire3-serve``
 
 
+.. Links
 .. _`PyPI`: http://pypi.python.org/pypi/cheshire3
+.. _`psycopg2`: https://pypi.python.org/pypi/psycopg2

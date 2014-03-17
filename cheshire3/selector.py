@@ -29,7 +29,7 @@ class SimpleSelector(Selector):
             except:
                 raise ConfigFileException("Location element in {0} must have "
                                           "'type' attribute".format(self.id))
-            
+
         if data['type'] == 'xpath':
             for a in child.attributes.keys():
                 # ConfigStore using 4Suite
@@ -62,13 +62,14 @@ class SimpleSelector(Selector):
 
         if data['type'] in ['xpath', 'sparql']:
             for a in child.nsmap:
-                data['maps'][a] = child.nsmap[a]
+                if a is not None:
+                    data['maps'][a] = child.nsmap[a]
         for a in child.attrib:
             if not a in ['type', 'maps', 'string']:
                 data[a] = child.attrib['a']
         return data
 
-    def _handleConfigNode(self, session, node):    
+    def _handleConfigNode(self, session, node):
         if (node.localName == "source"):
             paths = []
             for child in node.childNodes:
@@ -79,7 +80,7 @@ class SimpleSelector(Selector):
                         paths.append(xp)
             self.sources.append(paths)
 
-    def _handleLxmlConfigNode(self, session, node):    
+    def _handleLxmlConfigNode(self, session, node):
         if node.tag in ["source", '{%s}source' % CONFIG_NS]:
             xpaths = []
             for child in node.iterchildren(tag=etree.Element):
@@ -97,7 +98,7 @@ class SimpleSelector(Selector):
 
 class TransformerSelector(SimpleSelector):
     u"""Selector that applies a Transformer to the Record to select data."""
-    
+
     def __init__(self, session, config, parent):
         SimpleSelector.__init__(self, session, config, parent)
         self.transformer = self.get_path(session, 'transformer')
@@ -113,7 +114,7 @@ class TransformerSelector(SimpleSelector):
 
 class MetadataSelector(SimpleSelector):
     u"""Selector specifying and attribute or function.
-    
+
     Selector that specifies an attribute or function to use to select data from
     Records.
     """
@@ -161,33 +162,33 @@ class XPathSelector(SimpleSelector):
     def __init__(self, session, config, parent):
         self.sources = []
         SimpleSelector.__init__(self, session, config, parent)
-    
+
     def process_record(self, session, record):
         u"Select and return data from elements matching configured XPaths."
         if not isinstance(record, LxmlRecord):
             raise TypeError("XPathSelector '{0}' only supports selection from "
                             "LxmlRecords")
         vals = []
-        
+
         for src in self.sources:
             # list of {}s
             for xp in src:
                 vals.append(record.process_xpath(session,
                                                  xp['string'],
                                                  xp['maps']))
-        return vals    
-    
+        return vals
+
 
 class SpanXPathSelector(SimpleSelector):
     u"""Selects data from between two given XPaths.
-    
+
     Requires exactly two XPaths.
     The span starts at first configured XPath and ends at the second.
-    The same XPath may be given as both start and end point, in which case 
-    each matching element acts as a start and stop point (e.g. an XPath for a 
+    The same XPath may be given as both start and end point, in which case
+    each matching element acts as a start and stop point (e.g. an XPath for a
     page break).
     """
-    
+
     def __init__(self, session, config, parent):
         self.sources = []
         SimpleSelector.__init__(self, session, config, parent)
@@ -198,7 +199,7 @@ class SpanXPathSelector(SimpleSelector):
         except IndexError:
             raise ConfigFileException("SpanXPathSelector '{0}' requires "
                                       "exactly 1 <source>".format(self.id))
-        
+
     def process_record(self, session, record):
         vals = []
         startPath = self.sources[0][0]['string']
@@ -237,18 +238,18 @@ class SpanXPathSelector(SimpleSelector):
                         # Add this as the end node
                         startEndPair = (startEndPair[0], elem)
                         # Append the startEndPair to the list
-                        vals.append(startEndPair) 
-                        # Start a new startEndPair with this as the start node 
+                        vals.append(startEndPair)
+                        # Start a new startEndPair with this as the start node
                         startEndPair = (elem, None)
         else:
             # Start path and end path are different
             #
             # N.B. this algorithm is non-greedy.
-            # The shortest span is always selected. If another start node is 
+            # The shortest span is always selected. If another start node is
             # hit before an end node occurs it will overwrite the first
             #
-            # N.B. developers: this works slightly differently from the 
-            # previous SAX base version which treated the end of the record 
+            # N.B. developers: this works slightly differently from the
+            # previous SAX base version which treated the end of the record
             # as an end tag, this does not
             #
             # Find all the end nodes
@@ -265,6 +266,5 @@ class SpanXPathSelector(SimpleSelector):
                     # Append the startEndPair to the list
                     vals.append(startEndPair)
                     # Reset the startEndPair
-                    startEndPair = (None, None)       
+                    startEndPair = (None, None)
         return vals
-    

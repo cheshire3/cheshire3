@@ -186,7 +186,7 @@ class SimpleExtractor(Extractor):
         new = {}
         for xp in data:
             for d in xp:
-                if (type(d) == types.ListType):
+                if isinstance(d, list):
                     # SAX event
                     new = self._mergeHash(new,
                                           self.process_eventList(session, d))
@@ -264,16 +264,22 @@ class TeiExtractor(SimpleExtractor):
                 elif name == "figdesc":
                     processStack.append((name, None))
             elif (e[0] == "2"):
-                if (processStack and
-                    processStack[-1][0] == e[2:len(processStack[-1][0]) + 2]):
+                if (
+                    processStack and
+                    processStack[-1][0] == e[2:len(processStack[-1][0]) + 2]
+                ):
                     processStack.pop()
             elif e[0] == '5':
-                if (processStack and
-                    processStack[-1][0] == e[9:len(processStack[-1][0]) + 9]):
+                if (
+                    processStack and
+                    processStack[-1][0] == e[9:len(processStack[-1][0]) + 9]
+                ):
                     processStack.pop()
             elif (e[0] == "3"):
-                if (len(txt) and txt[-1] and
-                    txt[-1][-1] != ' ' and repr(e[2]).isalnum()):
+                if (
+                    len(txt) and txt[-1] and
+                    txt[-1][-1] != ' ' and repr(e[2]).isalnum()
+                ):
                     txt.append(' ')
                 bit = e[2:]
                 if processStack:
@@ -307,7 +313,7 @@ class SpanXPathExtractor(SimpleExtractor):
             except AttributeError:
                 # Maybe endNode not matched
                 # Should continue to the end
-                common_ancestor = sancs[-1] 
+                common_ancestor = sancs[-1]
             else:
                 # Common ancestor must exist in the shorter of the 2 lists
                 # Trim both to this size
@@ -353,7 +359,7 @@ class SpanXPathExtractor(SimpleExtractor):
                         if el in extraSpaceNodes:
                             text.append(' ')
                         text.append(el.tail)
-            
+
             txt = ''.join(text)
             # We MUST turn newlines into space or can't index
             txt = txt.replace('\n', ' ')

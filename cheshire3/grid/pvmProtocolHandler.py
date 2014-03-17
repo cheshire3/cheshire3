@@ -1,6 +1,8 @@
 
-import sys, time
-from baseObjects import Session
+import sys
+import time
+
+from cheshire3.baseObjects import Session
 
 try:
     import pypvm
@@ -8,9 +10,11 @@ except ImportError:
     # Don't need it to import, just to use (???)
     pass
 
+
 def shutdown():
     # Handle any other pypvm cleanup
     pypvm.exit()
+
 
 class Message:
     source = None
@@ -21,12 +25,17 @@ class Message:
         self.data = data
         self.manager = manager
         self.source = source
-        if (isinstance(data, list) and isinstance(data[0], Exception) and len(data) == 2):
+        if (
+            isinstance(data, list) and
+            isinstance(data[0], Exception) and
+            len(data) == 2
+        ):
             data[0].tb = data[1]
             raise data[0]
-        
+
     def reply(self, data):
         self.source.send(data)
+
 
 class TaskManager:
     tid = -1
@@ -53,7 +62,7 @@ class TaskManager:
         #for s in range(len(resp)):
         #    if not resp[s]:
         #        self.hosts.append(hostnames[s])
-                
+
     def start(self):
         if self.hosts and self.splitTasksEvenly:
             tph = self.ntasks / len(self.hosts)
@@ -61,14 +70,15 @@ class TaskManager:
             tids = []
             for h in self.hosts:
                 htids = pypvm.spawn(self.slaveFile, [], pypvm.PvmTaskHost,
-                                   h, tph)
+                                    h, tph)
                 tids.extend(htids)
             if rem:
-                rtids = pypvm.spawn(self.slaveFile, [], pypvm.PymTaskDefault, "", rem)
+                rtids = pypvm.spawn(self.slaveFile, [], pypvm.PymTaskDefault,
+                                    "", rem)
                 tids.extend(rtids)
         else:
             tids = pypvm.spawn(self.slaveFile, [], pypvm.PvmTaskDefault, "",
-                           self.ntasks)
+                               self.ntasks)
         for n in range(len(tids)):
             name = 'Task%s' % n
             self.tasks[tids[n]] = Task(tids[n], name)
@@ -82,7 +92,7 @@ class TaskManager:
         # and pull back the acks
         for t in v:
             self.recv()
-            
+
     def waitall(self):
         start = time.time()
         d = []
@@ -104,7 +114,7 @@ class TaskManager:
             return self.tasks[t]
 
     def relinquish_task(self, t):
-        self.idle.append(t.tid)   
+        self.idle.append(t.tid)
 
     def call(self, what, fn, *args, **kw):
         # call to one idle task
@@ -144,13 +154,14 @@ class TaskManager:
         # Get response data from any task, put back into idle.
         bufid = pypvm.recv()
         (bytes, msgtag, src) = pypvm.bufinfo(bufid)
-        if (not self.tasks.has_key(src)):
+        if src not in self.tasks:
             self.tasks[src] = Task(src)
         source = self.tasks[src]
         if (not src in self.idle):
             self.idle.append(src)
         data = pypvm.upk()
         return Message(data, source, self)
+
 
 class Task:
     tid = -1
@@ -168,8 +179,7 @@ class Task:
         if debug:
             self.fileh = file("fuxored_%s" % self.name, 'w')
 
-
-    def setname(self, name = None):
+    def setname(self, name=None):
         if (name):
             self.name = name
         else:
@@ -192,7 +202,7 @@ class Task:
         pypvm.initsend(pypvm.PvmDataDefault)
         pypvm.pk(data)
         pypvm.send(self.tid, 1)
-        
+
     def kill(self):
         pypvm.kill(self.tid)
 
@@ -205,4 +215,3 @@ class Task:
             self.fileh.write("--> %r\n" % data)
             self.fileh.flush()
         return Message(data, src, None)
-

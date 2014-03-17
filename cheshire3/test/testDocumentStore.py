@@ -17,11 +17,12 @@ from lxml import etree
 from datetime import datetime
 
 from cheshire3.document import Document, StringDocument
-from cheshire3.documentStore import BdbDocumentStore
+from cheshire3.documentStore import BdbDocumentStore, DirectoryDocumentStore
 from cheshire3.exceptions import ObjectAlreadyExistsException,\
                                  ObjectDoesNotExistException,\
                                  ObjectDeletedException
 from cheshire3.test.testBaseStore import SimpleStoreTestCase, BdbStoreTestCase
+from cheshire3.test.testBaseStore import DirectoryStoreTestCase
 
 
 class DocumentStoreTestCase(SimpleStoreTestCase):
@@ -160,11 +161,46 @@ class DeletionsBdbDocumentStoreTestCase(BdbDocumentStoreTestCase):
                               self.session, inDoc.id)
 
 
+class DirectoryDocumentStoreTestCase(DocumentStoreTestCase,
+                                     DirectoryStoreTestCase):
+    "Tests for simple file system directory based DocumentStore."
+
+    @classmethod
+    def _get_class(cls):
+        return DirectoryDocumentStore
+
+    def _get_config(self):
+        return etree.XML('''\
+        <subConfig type="documentStore" id="{0.__name__}">
+          <objectType>{0.__module__}.{0.__name__}</objectType>
+          <paths>
+              <path type="defaultPath">{1}</path>
+              <path type="databasePath">{1}/store</path>
+          </paths>
+        </subConfig>'''.format(self._get_class(), self.defaultPath))
+
+    def test_store_data(self):
+        "Check that Doc is stored without corruption to copy in memory."
+        theoreticalSize = 0
+        for inDoc in self._get_test_docs():
+            # Store the Document
+            outDoc = self.testObj.create_document(self.session, inDoc)
+            theoreticalSize += 1
+            # Check that Store returns the correct size
+            self.assertEqual(self.testObj.get_dbSize(self.session),
+                             theoreticalSize)
+            # Check that returned doc is unaltered
+            self.assertEqual(outDoc.get_raw(self.session),
+                             inDoc.get_raw(self.session),
+                             u"Returned document content not as expected")
+
+
 def load_tests(loader, tests, pattern):
     # Alias loader.loadTestsFromTestCase for sake of line lengths
     ltc = loader.loadTestsFromTestCase 
     suite = ltc(BdbDocumentStoreTestCase)
     suite.addTests(ltc(DeletionsBdbDocumentStoreTestCase))
+    suite.addTests(ltc(DirectoryDocumentStoreTestCase))
     return suite
 
 

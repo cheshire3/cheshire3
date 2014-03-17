@@ -1,8 +1,11 @@
+"""Cheshire3 Text Mining DocumentFactory implementations."""
+
+import os
+import re
 
 from cheshire3.documentFactory import BaseDocumentStream
 from cheshire3.document import StringDocument
 
-import os, re
 
 class EnjuRecordDocumentStream(BaseDocumentStream):
 
@@ -12,10 +15,9 @@ class EnjuRecordDocumentStream(BaseDocumentStream):
         return stream
 
     def find_documents(self, session, cache=0):
-
-	rec = self.stream
+        rec = self.stream
         # Find verbs, one verb per document
-        vs = rec.process_xpath(session, 'phrase[@cat="VP"]/word')   
+        vs = rec.process_xpath(session, 'phrase[@cat="VP"]/word')
         docs = []
         processed = []
         sentn = 0
@@ -29,8 +31,12 @@ class EnjuRecordDocumentStream(BaseDocumentStream):
             vid = attrs['id']
             if vid in processed:
                 continue
-            verb = ['<verb>', '<w pos="%s" base="%s">%s</w>' % (attrs['pos'], attrs['base'], vtxt)]
-            el1 = rec.process_xpath(session, 'phrase[@id="%s"]/descendant::word' % arg1)
+            verb = ['<verb>',
+                    '<w pos="%s" base="%s">%s</w>' % (attrs['pos'],
+                                                      attrs['base'],
+                                                      vtxt)]
+            el1 = rec.process_xpath(session,
+                                    'phrase[@id="%s"]/descendant::word' % arg1)
             txt = ['<subject>']
             for w in el1:
                 (name, nattrs) = rec._convert_elem(w[0])
@@ -46,9 +52,14 @@ class EnjuRecordDocumentStream(BaseDocumentStream):
                 (name, nattrs) = rec._convert_elem(el2[0][0])
                 nid = nattrs['id']
                 while nattrs[u'cat'] == "VP":
-                    allv = rec.process_xpath(session, 'phrase[@id="%s"]/descendant::word' % nid)
+                    allv = rec.process_xpath(
+                               session,
+                               'phrase[@id="%s"]/descendant::word' % nid)
                     (name, avattrs) = rec._convert_elem(allv[0][0])
-                    verb.append('<w pos="%s" base="%s">%s</w>' % (avattrs['pos'], avattrs['base'], allv[0][1][2:]))
+                    verb.append('<w pos="%s" base="%s">%s</w>'
+                                '' % (avattrs['pos'],
+                                      avattrs['base'],
+                                      allv[0][1][2:]))
                     processed.append(avattrs['id'])
                     avarg2 = avattrs['arg2']
                     if avarg2 == arg1:
@@ -56,31 +67,38 @@ class EnjuRecordDocumentStream(BaseDocumentStream):
                         if avarg2 == '-1':
                             # no arg2, fall back
                             break
-                    el2 = rec.process_xpath(session, 'phrase[@id="%s"]' % avarg2 )
+                    el2 = rec.process_xpath(session,
+                                            'phrase[@id="%s"]' % avarg2)
                     (name, nattrs) = rec._convert_elem(el2[0][0])
                     nid = nattrs['id']
-                    
-                el2 = rec.process_xpath(session, 'phrase[@id="%s"]/descendant::word' % nid)
+                el2 = rec.process_xpath(session,
+                                        'phrase[@id="%s"]/'
+                                        'descendant::word' % nid)
                 txt = ['<object>']
                 for w in el2:
                     (name, nattrs) = rec._convert_elem(w[0])
-                    txt.append('<w pos="%s">%s</w>' % (nattrs['pos'], w[1][2:]))
+                    txt.append('<w pos="%s">%s</w>' % (nattrs['pos'],
+                                                       w[1][2:]))
                 txt.append("</object>")
                 obj = ' '.join(txt)
             except KeyError:
                 obj = "<object/>"
             # Try for Prep + Iobjstr
-            ppxp = rec.process_xpath(session, "word[@arg1='%s%s']" % (vid[0], int(vid[1:]) -1))
+            ppxp = rec.process_xpath(session,
+                                     "word[@arg1='%s%s']" % (vid[0],
+                                                             int(vid[1:]) - 1))
             if ppxp:
                 (name, attrs) = rec._convert_elem(ppxp[0][0])
                 ptag = '<w pos="%s">%s</w>' % (attrs['pos'], ppxp[0][1][2:])
                 prepstr = "<prep>%s</prep>\n" % ptag
                 try:
-                    iobjxp = rec.process_xpath(session, "phrase[@id='%s']/descendant::word" % attrs['arg2'])
+                    xpth = "phrase[@id='%s']/descendant::word" % attrs['arg2']
+                    iobjxp = rec.process_xpath(session, xpth)
                     iobjlist = ['<iobject>']
                     for w in iobjxp:
                         (name, nattrs) = rec._convert_elem(w[0])
-                        iobjlist.append('<w pos="%s">%s</w>' % (nattrs['pos'], w[1][2:]))
+                        iobjlist.append('<w pos="%s">%s</w>' % (nattrs['pos'],
+                                                                w[1][2:]))
                     iobjlist.append('</iobject>')
                     iobjstr = ' '.join(iobjlist) + "\n"
                 except:
@@ -89,7 +107,12 @@ class EnjuRecordDocumentStream(BaseDocumentStream):
 
             verb.append('</verb>')
             verb = ' '.join(verb)
-            docstr = "<svopi recId=\"%s\" sentenceId=\"%s\">\n  %s\n  %s\n  %s\n%s%s</svopi>" % (rec.id, sentn, subj, verb, obj, prepstr, iobjstr)
+            docstr = ('<svopi recId="%s" sentenceId="%s">\n'
+                      '  %s\n'
+                      '  %s\n'
+                      '  %s\n'
+                      '%s%s</svopi>' % (rec.id, sentn, subj, verb,
+                                        obj, prepstr, iobjstr))
             sentn += 1
             doc = StringDocument(docstr)
             if cache == 0:
@@ -99,6 +122,4 @@ class EnjuRecordDocumentStream(BaseDocumentStream):
             else:
                 docs.append(doc)
         self.documents = docs
-	raise StopIteration
-
-
+        raise StopIteration

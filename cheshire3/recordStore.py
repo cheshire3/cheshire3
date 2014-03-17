@@ -1,27 +1,31 @@
+import os
+import string
+import time
 
 from cheshire3.configParser import C3Object
-from cheshire3.baseObjects import RecordStore, Record, ResultSetItem
+from cheshire3.baseObjects import RecordStore, Record, ResultSetItem, Session
 from cheshire3.baseStore import SimpleStore, BdbStore, DeletedObject
+from cheshire3.baseStore import DirectoryStore, directoryStoreIter
 from cheshire3.record import SaxRecord
 from cheshire3.exceptions import *
 from cheshire3.document import StringDocument
 from cheshire3.utils import nonTextToken
 
-import string, os
-import time
+
 from cheshire3.bootstrap import BSLxmlParser
+from cheshire3.baseStore import BdbIter
 
 try:
-    # 3.0 deprecation
+    # Deal with Python 3.0 deprecation
     import cPickle as pickle
 except:
     import pickle
 
 try:
-    # name when installed by hand
+    # Name when installed by hand
     import bsddb3 as bdb
 except:
-    # name that comes in python 2.3
+    # Name that comes in python 2.3
     import bsddb as bdb
 
 # Fastest to pickle elementHash, append to list, then join with nonTextToken
@@ -31,11 +35,24 @@ class SimpleRecordStore(RecordStore):
     inTransformer = None
     outParser = None
 
-    _possiblePaths = {'inTransformer' : {'docs' : "Identifier for transformer to use to transform incoming record into document for storage"}
-                      , 'outParser'  : {'docs' : "Identifier for parser to use to transform outgoing data into a record"},
-                      'inWorkflow' : {'docs' : "Identifier for a transforming workflow to use to transform incoming record in to document for storage"},
-                      'outWorkflow' : {'docs' : 'Identifier for a parsing workflow to use to transform outgoing data into a record'} 
-                      }
+    _possiblePaths = {
+        'inTransformer': {
+            'docs': ("Identifier for transformer to use to transform incoming "
+                     "record into document for storage")
+        },
+        'outParser': {
+            'docs': ("Identifier for parser to use to transform outgoing data "
+                     "into a record")
+        },
+        'inWorkflow': {
+            'docs': ("Identifier for a transforming workflow to use to "
+                     "transform incoming record in to document for storage")
+        },
+        'outWorkflow': {
+            'docs': ("Identifier for a parsing workflow to use to transform "
+                     "outgoing data into a record")
+        }
+    }
 
     def __init__(self, session, config, parent):
         if (not self.paths):
@@ -50,12 +67,12 @@ class SimpleRecordStore(RecordStore):
         p = self.permissionHandlers.get('info:srw/operation/1/create', None)
         if p:
             if not session.user:
-                raise PermissionException("Authenticated user required to create an object in %s" % self.id)
+                raise PermissionException("Authenticated user required to "
+                                          "create an object in %s" % self.id)
             okay = p.hasPermission(session, session.user)
             if not okay:
-                raise PermissionException("Permission required to create an object in %s" % self.id)
-
-
+                raise PermissionException("Permission required to create an "
+                                          "object in %s" % self.id)
         id = self.generate_id(session)
         if (rec is None):
             # Create a placeholder
@@ -80,20 +97,21 @@ class SimpleRecordStore(RecordStore):
         p = self.permissionHandlers.get('info:srw/operation/1/replace', None)
         if p:
             if not session.user:
-                raise PermissionException("Authenticated user required to replace an object in %s" % self.id)
+                raise PermissionException("Authenticated user required to "
+                                          "replace an object in %s" % self.id)
             okay = p.hasPermission(session, session.user)
             if not okay:
-                raise PermissionException("Permission required to replace an object in %s" % self.id)
+                raise PermissionException("Permission required to replace an "
+                                          "object in %s" % self.id)
         self.store_record(session, rec)
 
     def store_record(self, session, rec, transformer=None):
-        rec.recordStore = self.id        
-
+        rec.recordStore = self.id
         # Maybe add metadata, etc.
         if transformer is not None:
             # Allow custom transformer
             doc = transformer.process_record(session, rec)
-            data = doc.get_raw(session)            
+            data = doc.get_raw(session)
         elif self.inTransformer is not None:
             doc = self.inTransformer.process_record(session, rec)
             data = doc.get_raw(session)
@@ -104,40 +122,42 @@ class SimpleRecordStore(RecordStore):
             data = rec.get_xml(session)
 
         dig = self.generate_checkSum(session, data)
-        md = {'byteCount' : rec.byteCount,
-              'wordCount' : rec.wordCount,
-              'digest' : dig}
+        md = {'byteCount': rec.byteCount,
+              'wordCount': rec.wordCount,
+              'digest': dig}
         # check for expires
         e = self.generate_expires(session, rec)
         if e:
             md['expires'] = e
-
         # Object metadata will overwrite generated (intentionally)
         md2 = rec.metadata
         md.update(md2)
-
         # Might raise ObjectAlreadyExistsException
         self.store_data(session, rec.id, data, metadata=md)
         # Now accumulate metadata
         self.accumulate_metadata(session, rec)
-	return rec
+        return rec
 
     def fetch_record(self, session, id, parser=None):
         p = self.permissionHandlers.get('info:srw/operation/2/retrieve', None)
         if p:
             if not session.user:
-                raise PermissionException("Authenticated user required to retrieve an object from %s" % self.id)
+                raise PermissionException("Authenticated user required to "
+                                          "retrieve an object from "
+                                          "%s" % self.id)
             okay = p.hasPermission(session, session.user)
             if not okay:
-                raise PermissionException("Permission required to retrieve an object from %s" % self.id)
-      
+                raise PermissionException("Permission required to retrieve an "
+                                          "object from %s" % self.id)
         data = self.fetch_data(session, id)
         if (data):
             rec = self._process_data(session, id, data, parser)
             # fetch metadata
             for attr in ['byteCount', 'wordCount', 'digest']:
                 try:
-                    setattr(rec, attr, self.fetch_recordMetadata(session, id, attr))
+                    setattr(rec,
+                            attr,
+                            self.fetch_recordMetadata(session, id, attr))
                 except:
                     continue
             return rec
@@ -145,16 +165,17 @@ class SimpleRecordStore(RecordStore):
             raise ObjectDeletedException(data)
         else:
             raise ObjectDoesNotExistException(id)
-        
 
     def delete_record(self, session, id):
         p = self.permissionHandlers.get('info:srw/operation/1/delete', None)
         if p:
             if not session.user:
-                raise PermissionException("Authenticated user required to delete an object from %s" % self.id)
+                raise PermissionException("Authenticated user required to "
+                                          "delete an object from %s" % self.id)
             okay = p.hasPermission(session, session.user)
             if not okay:
-                raise PermissionException("Permission required to replace an object from %s" % self.id)
+                raise PermissionException("Permission required to replace an "
+                                          "object from %s" % self.id)
 
         # FIXME: API: This if sucks but not sure how to avoid for workflow
         if isinstance(id, Record) or isinstance(id, ResultSetItem):
@@ -192,7 +213,6 @@ class SimpleRecordStore(RecordStore):
         return rec
 
 
-from baseStore import BdbIter
 class BdbRecordIter(BdbIter):
     # Get data from bdbIter and turn into record
 
@@ -200,6 +220,7 @@ class BdbRecordIter(BdbIter):
         d = BdbIter.next(self)
         rec = self.store._process_data(self.session, d[0], d[1])
         return rec
+
 
 class BdbRecordStore(BdbStore, SimpleRecordStore):
     def __init__(self, session, config, parent):
@@ -218,21 +239,27 @@ class BdbRecordStore(BdbStore, SimpleRecordStore):
         # return an iter object
         return BdbRecordIter(self.session, self)
 
+
 try:
-    from baseStore import PostgresStore
+    from cheshire3.baseStore import PostgresStore
+except:
+    pass
+else:
     class PostgresRecordStore(PostgresStore, SimpleRecordStore):
         def __init__(self, session, config, parent):
             PostgresStore.__init__(self, session, config, parent)
             SimpleRecordStore.__init__(self, session, config, parent)
-except:
-    pass
-
 
 
 class RedirectRecordStore(SimpleRecordStore, SimpleStore):
     # Store in unparsed format. Parse on load
     # cf buildassoc vs datastore in C2
-    _possiblePaths = {'documentStore' : {'docs' : "documentStore identifier where the data is held"}}
+    _possiblePaths = {
+        'documentStore': {
+            'docs': "documentStore identifier where the data is held"
+        }
+    }
+
     documentStore = None
 
     def __iter__(self):
@@ -246,7 +273,7 @@ class RedirectRecordStore(SimpleRecordStore, SimpleStore):
     def create_record(self, session, rec):
         # maybe just copy some stuff around...
         rec.recordStore = self.id
-        if rec.parent and rec.parent[2]:            
+        if rec.parent and rec.parent[2]:
             rec.id = rec.parent[2]
             if rec.id == -1:
                 raise ValueError
@@ -294,8 +321,17 @@ class RemoteSlaveRecordStore(BdbRecordStore):
     taskType = None
     protocol = ""
 
-    _possiblePaths = {'remoteStore' : {'docs' : "Remote store to send data to."}}
-    _possibleSettings = {'protocol' : {'docs' : "Protocol to use for sending data. Currently MPI or PVM"}}
+    _possiblePaths = {
+        'remoteStore': {
+            'docs': "Remote store to send data to."
+        }
+    }
+
+    _possibleSettings = {
+        'protocol': {
+            'docs': "Protocol to use for sending data. Currently MPI or PVM"
+        }
+    }
 
     def __init__(self, session, config, parent):
         SimpleRecordStore.__init__(self, session, config, parent)
@@ -304,7 +340,6 @@ class RemoteSlaveRecordStore(BdbRecordStore):
         if not self.recordStore:
             raise ConfigFileException('Missing recordStore identifier')
 
-            
     def begin_storing(self, session):
         # set tasks
         self.writeTask = session.processManager.namedTasks['writeTask']
@@ -319,13 +354,12 @@ class RemoteSlaveRecordStore(BdbRecordStore):
         return rec
 
     def store_record(self, session, rec, transformer=None):
-        rec.recordStore = self.recordStore.id        
-
+        rec.recordStore = self.recordStore.id
         # Maybe add metadata, etc.
         if transformer is not None:
             # Allow custom transformer
             doc = transformer.process_record(session, rec)
-            data = doc.get_raw(session)            
+            data = doc.get_raw(session)
         elif self.inTransformer is not None:
             doc = self.inTransformer.process_record(session, rec)
             data = doc.get_raw(session)
@@ -335,18 +369,22 @@ class RemoteSlaveRecordStore(BdbRecordStore):
         else:
             sax = [x.encode('utf8') for x in rec.get_sax(session)]
             sax.append("9 " + pickle.dumps(rec.elementHash))
-            data = nonTextToken.join(sax)       
-            
+            data = nonTextToken.join(sax)
         dig = self.generate_checkSum(session, data)
-        md = {'byteCount' : rec.byteCount,
-              'wordCount' : rec.wordCount,
-              'digest' : dig}
-            
-        if (self.writeTask is not None):            
-            self.writeTask.call(self.recordStore, 'store_data', session, rec.id, data, md)
+        md = {'byteCount': rec.byteCount,
+              'wordCount': rec.wordCount,
+              'digest': dig}
+        if (self.writeTask is not None):
+            self.writeTask.call(self.recordStore,
+                                'store_data',
+                                session,
+                                rec.id,
+                                data,
+                                md)
             msg = self.writeTask.recv()
         else:
-            raise ValueError('WriteTask is None... did you call begin_storing?')
+            raise ValueError('WriteTask is None... '
+                             'did you call begin_storing?')
         if rec.id is None:
             rec.id = msg.data
         return rec
@@ -355,3 +393,25 @@ class RemoteSlaveRecordStore(BdbRecordStore):
         raise NotImplementedError
 
 
+class DirectoryRecordStore(DirectoryStore, SimpleRecordStore):
+    def __init__(self, session, config, parent):
+        DirectoryStore.__init__(self, session, config, parent)
+        SimpleRecordStore.__init__(self, session, config, parent)
+
+    def get_storageTypes(self, session):
+        types = ['database', 'wordCount', 'byteCount']
+        if self.get_setting(session, 'digest'):
+            types.append('digest')
+        if self.get_setting(session, 'expires'):
+            types.append('expires')
+        return types
+
+    def __iter__(self):
+        # return an iter object
+        return directoryRecordStoreIter(self)
+
+
+def directoryRecordStoreIter(store):
+    session = Session()
+    for id_, data in directoryStoreIter(store):
+        yield store._process_data(session, id_, data)

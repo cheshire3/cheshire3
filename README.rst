@@ -1,7 +1,7 @@
 Cheshire3
 =========
 
-10th October 2013 (2013-10-10)
+17th March 2014 (2014-04-17)
 
 .. image:: https://travis-ci.org/cheshire3/cheshire3.png?branch=master,develop
    :target: https://travis-ci.org/cheshire3/cheshire3?branch=master,develop
@@ -27,10 +27,10 @@ Contents
 
    -  `Command-line UI`_
 
-       -  `Creating a new Database`_
-       -  `Loading Data into the Database`_
-       -  `Searching the Database`_
-       -  `Exposing the Database via SRU`_
+      -  `Creating a new Database`_
+      -  `Loading Data into the Database`_
+      -  `Searching the Database`_
+      -  `Exposing the Database via SRU`_
 
    -  `Python API`_
 
@@ -158,13 +158,27 @@ several choices:
 
 **Developers**:
 
+We recommend that you use virtualenv_ to isolate your development environment
+from system Python and any packages that may be installed there.
+
 1. In GitHub_, fork the `Cheshire3 GitHub repository`_
 
-2. Locally clone your Cheshire3 GitHub fork
+2. Clone your fork of Cheshire3:
 
-3. Run ``python setup.py develop``
+	``git clone git@github.com:<username>/cheshire3.git``
 
-4. Read the Development section of this README
+3. Install dependencies [#]_:
+
+	``pip install -r requirements.txt``
+
+4. Install Cheshire3 in develop / editable mode:
+
+    ``pip install -e .``
+
+5. Read the Development section of this README
+
+.. [#] While step 4 should theoretically resolve dependencies, we've found it 
+   more reliable to run this explicitly.
 
 
 Requirements / Dependencies
@@ -173,7 +187,7 @@ Requirements / Dependencies
 Cheshire3 requires Python_ 2.6.0 or later. It has not yet been verified
 as Python 3 compliant.
 
-As of the version 1.0 release Cheshire3's core dependencies *should* be
+As of the version 1.0 release Cheshire3's python dependencies *should* be
 resolved automatically by the standard Python package management
 mechanisms (e.g. pip_, `easy_install`_, distribute_/setuptools_).
 
@@ -194,8 +208,8 @@ Additional / Optional Features
 
 Certain features within the `Cheshire3 Information Framework`_ will have
 additional dependencies (e.g. web APIs will require a web application
-server). We'll try to maintain an accurate list of these in the README
-file for each sub-package.
+server). We'll try to maintain an accurate list of these in the module
+docstring of the ``__init__.py`` file in each sub-package.
 
 The bundles available from the `Cheshire3 download site`_ should
 continue to be a useful place to get hold of the source code for these
@@ -273,7 +287,7 @@ tracker: https://github.com/cheshire3/cheshire3/issues
 Licensing
 ---------
 
-Copyright © 2005-2012, the `University of Liverpool`_. All rights reserved.
+Copyright © 2005-2013, the `University of Liverpool`_. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -354,6 +368,7 @@ of available options which can be accessed using the ``--help`` option.
 e.g.::
 
     ``cheshire3 --help``
+
 
 Creating a new Database
 '''''''''''''''''''''''
@@ -521,6 +536,10 @@ Another useful path to know is the database's default path:::
     >>> dfp = db.get_path(session, 'defaultPath')
 
 
+**Note:** You can often avoid having to type all of the above boiler-plate code,
+by `Using the cheshire3 command`_
+
+
 Using the ``cheshire3`` command
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -536,10 +555,13 @@ script or just drop you into the interactive console.
    ``--interactive`` option.
 
 When initializing the architecture in this way, ``session`` and ``server``
-variables will be created, as will a ``db`` object if you ran the script from
-inside a Cheshire3 database directory, or provided a database identifier
-using the ``--database`` option. The variable will correspond to instances of
-Session, Server and Database respectively.
+variables will be created corresponding to instances of Session and Server
+respectively.
+
+Additionally, if you ran the script from inside a Cheshire3 Database
+directory, or provided the Database identifier using the ``--database`` option,
+the Database will be available as ``db``. The default RecordStore will also be
+available as ``recordStore`` if it was possible to discover from the Database.
 
 
 Loading Data
@@ -775,24 +797,6 @@ And you can get the data from the document with get\_raw():::
 This transformer uses XSLT, which is common, but other transformers are
 equally possible.
 
-It is also possible to iterate through stores. This is useful for adding
-new indexes or otherwise processing all of the data without reloading
-it.
-
-First find our index, and the indexStore:::
-
-    >>> idx = db.get_object(session, 'idx-creationDate')
-
-
-Then start indexing for just that index, step through each record, and
-then commit the terms extracted.::
-
-    >>> idxStore.begin_indexing(session, idx)
-    >>> for rec in recStore:
-    ...     idx.index_record(session, rec)
-    recordStore/...   
-    >>> idxStore.commit_indexing(session, idx)
-
 
 Indexes
 '''''''
@@ -971,6 +975,33 @@ the locations of that type.::
 After token merging, the multiple terms are ready to be stored in the
 index!
 
+
+It is also possible to iterate through stores. This is useful for adding
+new indexes or otherwise processing all of the data without reloading
+it.
+
+First find our index, and the indexStore:::
+
+    >>> idx = db.get_object(session, 'idx-modificationDate')
+    >>> idxStore = idx.get_path(session, 'indexStore')
+
+
+Then start indexing for just that index, step through each record, and
+then commit the terms extracted.::
+
+    >>> idxStore.begin_indexing(session, idx)
+    >>> for rec in recStore:
+    ...     idx.index_record(session, rec)
+    recordStore/...   
+    >>> idxStore.commit_indexing(session, idx)
+
+
+This example will have the effect of 'touching' each Record, as if it had
+been updated. This might be useful if for example, you knew that your Database
+was being harvested periodically using OAI-PMH, and you wanted to indicate that
+all Records should be reharvested next time.
+
+
 .. Links
 .. _Python: http://www.python.org/
 .. _`Python Package Index`: http://pypi.python.org/pypi/cheshire3
@@ -978,7 +1009,7 @@ index!
 .. _`University of Liverpool`: http://www.liv.ac.uk
 .. _`Cheshire3 Information Framework`: http://cheshire3.org
 .. _`Cheshire3 Object Model`: http://cheshire3.org/docs/objects/
-.. _`Cheshire3 download site`: http://www.cheshire3.org/download/
+.. _`Cheshire3 download site`: http://download.cheshire3.org/
 .. _API: http://cheshire3.org/docs/objects/api/
 .. _`Cheshire3 GitHub repository`: http://github.com/cheshire3/cheshire3
 .. _`GitHub issue tracker`: http://github.com/cheshire3/cheshire3/issues
@@ -994,4 +1025,5 @@ index!
 .. _SRU: http://www.loc.gov/standards/sru/
 .. _CQL: http://www.loc.gov/standards/sru/specs/cql.html
 .. _OAI: http://www.openarchives.org/pmh/
+.. _virtualenv: http://www.virtualenv.org/en/latest/
 .. _`Read the Docs`: https://readthedocs.org/

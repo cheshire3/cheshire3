@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://www.cheshire3.org/schemas/config/">
+  <subConfigs>
+
+    <subConfig type="normalizer" id="WordNetNormalizer">
+      <objectType>cheshire3.textmining.normalizer.WordNetNormalizer</objectType>
+    </subConfig>  
+
+    <subConfig type="normalizer" id="HypernymNormalizer">
+      <objectType>cheshire3.textmining.normalizer.HypernymNormalizer</objectType>
+    </subConfig>  
+
+    <!-- string with /POS tags -->
+    <subConfig type="normalizer" id="TsuPosNormalizer">
+      <objectType>cheshire3.textmining.normalizer.TsujiiPosNormalizer</objectType>
+     <paths>
+       <path type="executablePath">${cheshire3Root}/textmining</path>
+     </paths>
+    </subConfig>  
+
+    <subConfig type="normalizer" id="PosTagStripNormalizer">
+      <objectType>cheshire3.normalizer.RegexpNormalizer</objectType>
+      <options>
+        <setting type="regexp">/[^/]+$</setting>
+      </options>
+    </subConfig>
+
+    <subConfig type="normalizer" id="PosTagKeepNormalizer">
+      <objectType>cheshire3.normalizer.RegexpNormalizer</objectType>
+      <options>
+        <setting type="regexp">([^ ]*)/</setting>
+      </options>
+    </subConfig>
+
+    <!-- string with XML for clauses -->
+    <subConfig type="normalizer" id="EnjuNormalizer">
+      <objectType>cheshire3.textmining.normalizer.EnjuNormalizer</objectType>
+       <paths>
+         <path type="executablePath">${cheshire3Home}/install/bin</path>
+         <path type="executable">enju</path>
+       </paths>
+    </subConfig>
+    
+    <!-- raw genia output -->
+    <subConfig type="normalizer" id="UnparsedGeniaNormalizer">
+       <objectType>cheshire3.textmining.normalizer.GeniaNormalizer</objectType>
+       <paths>
+         <path type="executablePath">${cheshire3Root}/textmining</path>
+       </paths>
+    </subConfig>  
+
+    <subConfig type="normalizer" id="TokenizingUnparsedGeniaNormalizer">
+       <objectType>cheshire3.textmining.normalizer.GeniaNormalizer</objectType>
+       <paths>
+         <path type="executablePath">${cheshire3Root}/textmining</path>
+       </paths>
+       <options>
+          <setting type="tokenize">1</setting>
+       </options>
+    </subConfig>  
+
+    <!-- recombine into string -->
+    <subConfig type="normalizer" id="PosStringGeniaNormalizer">
+       <objectType>cheshire3.textmining.normalizer.ReconstructGeniaNormalizer</objectType>
+       <paths>
+         <path type="executablePath">${cheshire3Root}/textmining</path>
+       </paths>
+       <options>
+         <setting type="pos">1</setting>
+       </options>
+    </subConfig> 
+
+    <!-- stems recombined -->
+    <subConfig type="normalizer" id="StemStringGeniaNormalizer">
+       <objectType>cheshire3.textmining.normalizer.ReconstructGeniaNormalizer</objectType>
+       <paths>
+         <path type="executablePath">${cheshire3Root}/textmining</path>
+       </paths>
+       <options>
+         <setting type="useStem">1</setting>
+       </options>
+    </subConfig> 
+
+    <subConfig type="normalizer" id="StemPosStringGeniaNormalizer">
+       <objectType>cheshire3.textmining.normalizer.ReconstructGeniaNormalizer</objectType>
+       <paths>
+         <path type="executablePath">${cheshire3Root}/textmining</path>
+       </paths>
+       <options>
+         <setting type="useStem">1</setting>
+         <setting type="pos">1</setting>
+       </options>
+    </subConfig> 
+
+    <subConfig type="normalizer" id="XmlStringGeniaNormalizer">
+       <objectType>cheshire3.textmining.normalizer.ReconstructGeniaNormalizer</objectType>
+       <paths>
+         <path type="executablePath">${cheshire3Root}/textmining</path>
+       </paths>
+       <options>
+         <setting type="xml">1</setting>
+       </options>
+    </subConfig> 
+
+    <!-- keyword, with 'stem' key in hash, /POS in term -->
+    <subConfig type="normalizer" id="KeywordGeniaNormalizer">
+       <objectType>cheshire3.textmining.normalizer.HashGeniaNormalizer</objectType>
+       <paths>
+         <path type="executablePath">${cheshire3Root}/textmining</path>
+       </paths>
+    </subConfig> 
+
+    <subConfig type="normalizer" id="GeniaStemNormalizer">
+       <objectType>cheshire3.textmining.normalizer.StemGeniaNormalizer</objectType>
+    </subConfig>  
+
+    <!-- take POS tagged string and discover phrases -->
+    <subConfig type="normalizer" id="PosPhraseNormalizer">
+       <objectType>cheshire3.textmining.normalizer.PosPhraseNormalizer</objectType>
+       <options>
+         <setting type="pattern">JJ*NN+</setting>
+         <setting type="subPhrases">1</setting>
+         <setting type="minimumWords">2</setting>
+       </options>
+    </subConfig>  
+
+    <subConfig type="normalizer" id="PhraseStemNormalizer">
+       <objectType>cheshire3.normalizer.PhraseStemNormalizer</objectType>
+    </subConfig>  
+
+    <subConfig type="normalizer" id="NounVerbFilterNormalizer">
+       <objectType>cheshire3.textmining.normalizer.PosTypeNormalizer</objectType>
+       <options>
+         <setting type="posTypes">NN NNP NNS VB VBD VBZ VBG VBN VBP</setting>
+         <!-- Can keep the pos tags: -->
+         <!-- <setting type="pos">1</setting> -->
+       </options>
+    </subConfig>  
+
+    <subConfig type="normalizer" id="NounVerbAdjFilterNormalizer">
+       <objectType>cheshire3.textmining.normalizer.PosTypeNormalizer</objectType>
+       <options>
+         <setting type="posTypes">NN NNP NNS VB VBD VBZ VBG VBN VBP JJ JJR JJS</setting>
+         <!-- Can keep the pos tags: -->
+         <!-- <setting type="pos">1</setting> -->
+       </options>
+    </subConfig>  
+
+    <subConfig type="normalizer" id="NounFilterNormalizer">
+       <objectType>cheshire3.textmining.normalizer.PosTypeNormalizer</objectType>
+       <options>
+         <setting type="posTypes">NN NNP NNS</setting>
+         <!-- Can keep the pos tags: -->
+         <!-- <setting type="pos">1</setting> -->
+       </options>
+    </subConfig>  
+
+    <subConfig type="normalizer" id="VerbFilterNormalizer">
+       <objectType>cheshire3.textmining.normalizer.PosTypeNormalizer</objectType>
+       <options>
+         <setting type="posTypes">VB VBD VBZ VBG VBN VBP</setting>
+         <!-- Can keep the pos tags: -->
+         <!-- <setting type="pos">1</setting> -->
+       </options>
+    </subConfig>  
+    
+  </subConfigs>
+</config>

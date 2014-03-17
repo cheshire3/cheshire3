@@ -16,8 +16,11 @@ except:
 from cheshire3.configParser import C3Object, CaselessDictionary
 from cheshire3.baseObjects import Database, Index, ProtocolMap, Record
 from cheshire3.baseStore import SummaryObject
-from cheshire3.exceptions import ConfigFileException,\
-                                 ObjectDoesNotExistException, QueryException
+from cheshire3.exceptions import (
+    ConfigFileException,
+    ObjectDoesNotExistException,
+    QueryException
+    )
 from cheshire3.internal import CONFIG_NS
 from cheshire3.bootstrap import BSParser, BootstrapDocument
 from cheshire3.resultSet import SimpleResultSet, BitmapResultSet
@@ -79,7 +82,7 @@ class SimpleDatabase(SummaryObject, Database):
             'docs': "Single (default) protocolMap identifier"
         }
     }
-    
+
     indexes = {}
     protocolMaps = {}
     indexConfigs = {}
@@ -124,11 +127,12 @@ class SimpleDatabase(SummaryObject, Database):
                     if c.tag in ['paths', '{%s}paths' % CONFIG_NS]:
                         for c2 in c.iterchildren(tag=etree.Element):
                             if c2.tag in ['object', '{%s}object' % CONFIG_NS]:
-                                istore = c2.attrib.get('ref',
-                                                       c2.attrib.get(
-                                                         '{%s}ref' % CONFIG_NS,
-                                                         ''
-                                                       )
+                                istore = c2.attrib.get(
+                                    'ref',
+                                    c2.attrib.get(
+                                        '{%s}ref' % CONFIG_NS,
+                                        ''
+                                    )
                                 )
                                 if istore in storeList:
                                     o = self.get_object(session, id)
@@ -160,7 +164,7 @@ class SimpleDatabase(SummaryObject, Database):
         self.accumulate_metadata(session, rec)
         return rec
 
-    def index_record(self, session, rec):        
+    def index_record(self, session, rec):
         if not self.indexes:
             self._cacheIndexes(session)
         for idx in self.indexes.itervalues():
@@ -170,7 +174,7 @@ class SimpleDatabase(SummaryObject, Database):
 
     def remove_record(self, session, rec):
         self.totalItems -= 1
-        (storeid, id) = (rec.recordStore, rec.id)        
+        (storeid, id) = (rec.recordStore, rec.id)
         # XXX remove from self.records
         # XXX this should be SummaryObject.unaccumulate_metadata() ?
         if (rec.wordCount):
@@ -184,7 +188,7 @@ class SimpleDatabase(SummaryObject, Database):
         for idx in self.indexes.itervalues():
             if not idx.get_setting(session, 'noUnindexDefault', 0):
                 idx.delete_record(session, rec)
-        return None       
+        return None
 
     def begin_indexing(self, session):
         if not self.indexes:
@@ -303,7 +307,7 @@ class SimpleDatabase(SummaryObject, Database):
                 query.resultSet = rs
                 rs.queryTime = time.time() - start
                 return rs
-            
+
             sk.reverse()  # stable sort = keys in reverse order
             pm = self.get_path(session, 'protocolMap')
             if not pm:
@@ -324,7 +328,7 @@ class SimpleDatabase(SummaryObject, Database):
                     ascending = False
                 elif hasattr(pm, 'defaultSortDirection'):
                     ascending = pm.defaultSortDirection[:3].lower() == 'asc'
-                else:    
+                else:
                     ascending = True
 
                 if idx['missingomit']:
@@ -400,7 +404,7 @@ class OptimisingDatabase(SimpleDatabase):
     def __init__(self, session, config, parent):
         SimpleDatabase.__init__(self, session, config, parent)
         self.maskRe = re.compile(r'(?<!\\)[*?]')
-        
+
     def _rewriteQuery(self, session, query):
         if not hasattr(query, 'leftOperand'):
             if query.relation.value == "all":
@@ -459,27 +463,31 @@ class OptimisingDatabase(SimpleDatabase):
             leftResultCount = query.leftOperand.resultCount
             rightResultCount = query.rightOperand.resultCount
             self._attachResultCount(session, query.leftOperand)
-            if (query.boolean.value in ['and', 'prox'] and
-                leftResultCount == 0):
+            if (
+                query.boolean.value in ['and', 'prox'] and
+                leftResultCount == 0
+            ):
                 query.resultCount = 0
                 return
 
             self._attachResultCount(session, query.rightOperand)
             if query.boolean.value in ['and', 'prox']:
                 query.resultCount = min(leftResultCount, rightResultCount)
-                if (query.boolean.value == "and" and
-                    rightResultCount < leftResultCount):
+                if (
+                    query.boolean.value == "and" and
+                    rightResultCount < leftResultCount
+                ):
                     # Can't reorder prox
                     temp = query.leftOperand
                     query.leftOperand = query.rightOperand
-                    query.rightOperand = temp                    
+                    query.rightOperand = temp
                     del temp
             elif query.boolean.value == 'or':
                 query.resultCount = leftResultCount + rightResultCount
                 if rightResultCount > leftResultCount:
                     temp = query.leftOperand
                     query.leftOperand = query.rightOperand
-                    query.rightOperand = temp                    
+                    query.rightOperand = temp
                     del temp
             else:
                 # Can't really predict not and can't reorder. just take LHS
@@ -492,7 +500,7 @@ class OptimisingDatabase(SimpleDatabase):
             return SimpleResultSet([])
         else:
             return SimpleDatabase._search(self, session, query)
-                
+
     def search(self, session, query):
         # Check for optimized indexStore based search (eg SQL translation)
         storeList = self.get_path(session, 'indexStoreList')
@@ -511,8 +519,10 @@ class OptimisingDatabase(SimpleDatabase):
         if hasattr(idxStore, 'search'):
             return idxStore.search(session, query, self)
         else:
-            if ((not hasattr(query, 'leftOperand')) and
-                query.relation.value == "any"):
+            if (
+                (not hasattr(query, 'leftOperand')) and
+                query.relation.value == "any"
+            ):
                 # Don't try to rewrite, futile.
                 pass
             else:
@@ -559,7 +569,7 @@ class OptimisingDatabase(SimpleDatabase):
                     ascending = False
                 elif hasattr(pm, 'defaultSortDirection'):
                     ascending = pm.defaultSortDirection[:3].lower() == 'asc'
-                else:    
+                else:
                     ascending = True
 
                 if idx['missingomit']:

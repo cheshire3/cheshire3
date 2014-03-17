@@ -16,11 +16,12 @@ from cheshire3.exceptions import C3Exception
 import cheshire3.utils
 from cheshire3.utils import flattenTexts, elementType, textType
 from cheshire3.marc_utils import MARC, MARC8_to_Unicode
+from __builtin__ import isinstance
 
 
 class SaxContentHandler(ContentHandler):
     """Cheshire3 SAX implementation.
-    
+
     1 <name> <attrHash> parent predicate end
     Element
     4 <as 1>
@@ -34,7 +35,7 @@ class SaxContentHandler(ContentHandler):
     9 <element hash>
     pickled hash of locations
     """
-    
+
     currentText = []
     currentPath = []
     pathLines = []
@@ -69,7 +70,7 @@ class SaxContentHandler(ContentHandler):
         if (pfx is None):
             pfx = ''
         self.currentText.append("6 %r, %r" % (pfx, uri))
-        
+
     # We want to fwd elems to NS elem handlers with default NS?
     def startElement(self, name, attrs):
         self.currentLine += 1
@@ -131,7 +132,7 @@ class SaxContentHandler(ContentHandler):
         try:
             self.elementHash[name].append([start, self.currentLine])
         except:
-            self.elementHash[name] = [[start, self.currentLine]]        
+            self.elementHash[name] = [[start, self.currentLine]]
         if self.hashAttributes and self.hashAttributes[-1][0] == start:
             attrs = self.hashAttributes.pop()[1]
             for sa in attrs:
@@ -197,7 +198,7 @@ class SaxContentHandler(ContentHandler):
 
     def endElementNS(self, name, qname):
         self.currentLine += 1
-        start = self.pathLines.pop()        
+        start = self.pathLines.pop()
         self.currentText.append("5 %r, %r, %r %d" %
                                 (name[0], name[1], qname, start))
         self.currentText[start] = ("%s %d" %
@@ -217,29 +218,31 @@ class SaxContentHandler(ContentHandler):
 
     def characters(self, text, start=0, length=-1):
         # if text.isspace():
-        #     text = " "            
+        #     text = " "
         prev = self.currentText[-1]
         if self.stripWS and text.isspace():
             return
         self.currentLine += 1
-        if (len(text) != 1 and len(prev) != 3 and
-            prev[0] == "3" and not prev[-1] in [' ', '-']):
+        if (
+            len(text) != 1 and len(prev) != 3 and
+            prev[0] == "3" and not prev[-1] in [' ', '-']
+        ):
             # Adjacent lines of text, ensure spaces
-            text = ' ' + text            
-        self.currentText.append("3 %s" % (text))        
+            text = ' ' + text
+        self.currentText.append("3 %s" % (text))
         self.recordWordCount += len(text.split())
-        
+
     def ignorableWhitespace(self, ws):
         # ... ignore! :D
         pass
-                    
+
     def processingInstruction(self, target, data):
         pass
 
     def skippedEntity(self, name):
         pass
 
-    
+
 class SaxToDomHandler:
     nodeStack = []
     document = None
@@ -249,7 +252,7 @@ class SaxToDomHandler:
         self.nodeStack = []
         self.document = None
         self.top = None
-        
+
     def startElement(self, name, attribs={}):
         if (not self.document):
             self.document = implementation.createDocument(None, name, None)
@@ -263,7 +266,7 @@ class SaxToDomHandler:
         else:
             self.document.appendChild(elem)
         self.nodeStack.append(elem)
-        
+
     def endElement(self, foo):
         self.nodeStack.pop()
 
@@ -294,7 +297,7 @@ class SaxToDomHandler:
 
     def endElementNS(self, name, qname):
         self.nodeStack.pop()
-        
+
     def startPrefixMapping(self, pref, uri):
         pass
 
@@ -312,7 +315,7 @@ class SaxToXmlHandler:
         self.namespaces = {}
         self.currNs = 0
         self.newNamespaces = {}
-        
+
     def startPrefixMapping(self, pref, uri):
         self.namespaces[uri] = pref
         self.newNamespaces[pref] = uri
@@ -325,7 +328,7 @@ class SaxToXmlHandler:
         if (attribtxt):
             attribtxt = " " + attribtxt
         self.xml.append("<%s%s>" % (name, attribtxt))
-        
+
     def endElement(self, name):
         self.xml.append("</%s>" % (name))
 
@@ -364,7 +367,7 @@ class SaxToXmlHandler:
         if (attribtxt):
             attribtxt = " " + attribtxt
         self.xml.append("<%s%s>" % (name, attribtxt))
-        
+
     def endElementNS(self, n, qn=None):
         pref = self._getPrefix(n[0])
         if (pref):
@@ -372,7 +375,7 @@ class SaxToXmlHandler:
         else:
             name = n[1]
         self.xml.append("</%s>" % (name))
-        
+
     def characters(self, text, zero=0, length=0):
         text = escape(text)
         self.xml.append(text)
@@ -387,7 +390,7 @@ class NumericPredicateException(C3Exception):
 
 class DomRecord(Record):
     context = None
-    size = 0    
+    size = 0
 
     def __init__(self, data, xml="", docId=None, wordCount=0, byteCount=0):
         self.dom = data
@@ -416,7 +419,7 @@ class DomRecord(Record):
                 self._walkTop(c)
             self.sax = self.handler.currentText
             self.sax.append("9 %r" % self.handler.elementHash)
-            self.handler = None            
+            self.handler = None
         return self.sax
 
     def get_dom(self, session):
@@ -444,14 +447,14 @@ class MinidomRecord(DomRecord):
         if node.nodeType == elementType:
             self.namespaces = node.namespaceURI is not None
             self._walk(node)
-        
+
     def _walk(self, node):
         if (node.nodeType == elementType):
             name = node.localName
             ns = node.namespaceURI
             attrHash = {}
             for ai in range(node.attributes.length):
-                attr = node.attributes.item(ai)                
+                attr = node.attributes.item(ai)
                 if self.namespaces:
                     if attr.namespaceURI == 'http://www.w3.org/2000/xmlns/':
                         self.handler.startPrefixMapping(attr.localName,
@@ -478,7 +481,7 @@ class MinidomRecord(DomRecord):
                 self.handler.endElement(node.localName)
         elif node.nodeType == utils.textType:
             self.handler.characters(node.data)
-            
+
     def process_xpath(self, session, xpath, maps={}):
         raise NotImplementedError
 
@@ -492,7 +495,9 @@ try:
             global prefixRe
             if (isinstance(xpath, list)):
                 xpath = repr(xpath[0])
-            if xpath[0] != "/" and xpath[-1] != ')':
+            if not any(
+                [xpath.startswith('/'), xpath.endswith(')')]
+            ):
                 xpath = "//" + xpath
             if maps:
                 retval = self.dom.xpath(xpath, namespaces=maps)
@@ -513,7 +518,7 @@ try:
                 self.sax = handler.currentText
                 self.sax.append("9 %r" % handler.elementHash)
             return self.sax
-        
+
         def get_dom(self, session):
             try:
                 return self.dom.getroot()
@@ -526,12 +531,14 @@ except:
 
 
 try:
-    from xpath import ParsedRelativeLocationPath as PRLP,\
-                      ParsedAbsoluteLocationPath as PALP, \
-                      ParsedStep, ParsedNodeTest, ParsedExpr, Compile,\
-                      ParsedAbbreviatedAbsoluteLocationPath as PAALP,\
-                      ParsedAbbreviatedRelativeLocationPath as PARLP,\
-                      ParsedNodeTest
+    from xpath import (
+        ParsedRelativeLocationPath as PRLP,
+        ParsedAbsoluteLocationPath as PALP,
+        ParsedStep, ParsedNodeTest, ParsedExpr, Compile,
+        ParsedAbbreviatedAbsoluteLocationPath as PAALP,
+        ParsedAbbreviatedRelativeLocationPath as PARLP,
+        ParsedNodeTest
+        )
 except:
     # This means we can't do xpaths on SaxRecords...
     # making them a bit pointless, but not fatal as we likely don't need them
@@ -557,7 +564,7 @@ def traversePath(node):
             right = traversePath(node._child)
         else:
             return left
-        if (type(right[0]) == types.StringType):
+        if isinstance(right[0], basestring):
             return [left, right]
         else:
             left.extend(right)
@@ -604,20 +611,24 @@ def traversePath(node):
         # @id="fish"
         op = node._op
         # Override check for common: [position()=int]
-        if (op == '=' and
+        if (
+            op == '=' and
             isinstance(node._left, ParsedExpr.FunctionCall) and
             node._left._name == 'position' and
-            isinstance(node._right, ParsedExpr.ParsedNLiteralExpr)):
+            isinstance(node._right, ParsedExpr.ParsedNLiteralExpr)
+        ):
             return node._right._literal
         left = traversePath(node._left)
-        if (type(left) == types.ListType and left[0] == "attribute"):
+        if (isinstance(left, list) and left[0] == "attribute"):
             left = left[1]
         right = traversePath(node._right)
         if not op in ('=', '!='):
             op = ['<', '<=', '>', '>='][op]
         return [left, op, right]
-    elif (isinstance(node, ParsedExpr.ParsedNLiteralExpr) or
-          isinstance(node, ParsedExpr.ParsedLiteralExpr)):
+    elif (
+        isinstance(node, ParsedExpr.ParsedNLiteralExpr) or
+        isinstance(node, ParsedExpr.ParsedLiteralExpr)
+    ):
         # 7 or "fish"
         return node._literal
     elif (isinstance(node, ParsedExpr.FunctionCall)):
@@ -656,7 +667,7 @@ def traversePath(node):
 def parseOldXPath(p):
     xpObj = Compile(p)
     t = traversePath(xpObj)
-    if (t[0] <> '/' and type(t[0]) in types.StringTypes):
+    if (t[0] != '/' and type(t[0]) in types.StringTypes):
         t = [t]
     return [xpObj, t]
 
@@ -677,7 +688,7 @@ class SaxRecord(Record):
 #        self.attrRe = re.compile("u(?P<quote>['\"])(.+?)(?P=quote): "
 #                                 "u(?P<quoteb>['\"])(.*?)(?P=quoteb)(, |})")
         self.recordStore = ""
-        
+
     def process_xpath(self, session, xpath, maps={}):
         if (not isinstance(xpath, list)):
             # Raw XPath
@@ -707,7 +718,7 @@ class SaxRecord(Record):
                 # Return top level element
                 for x in xrange(len(self.sax)):
                     if self.sax[x][0] in ['1', '4']:
-                        return self.sax[x:]                                    
+                        return self.sax[x:]
             elif(xp[-1][0] in ['child', 'descendant']):
                 data = []
                 # Extracting element
@@ -725,7 +736,7 @@ class SaxRecord(Record):
                 if elemName == '*' and attr:
                     for p in attr:
                         if p[0] == 'FUNCTION' and p[2] == '__name()':
-                            names = self.elementHash.keys()                            
+                            names = self.elementHash.keys()
                             if p[1] == 'starts-with' and p[2] == '__name()':
                                 for x in names:
                                     if x.find(p[3]) == 0:
@@ -737,9 +748,11 @@ class SaxRecord(Record):
                 elif (not elemName in self.elementHash):
                     return []
 
-                if (len(attr) == 1 and
-                    type(attr[0]) == types.ListType and
-                    attr[0][1] == "="):
+                if (
+                    len(attr) == 1 and
+                    isinstance(attr[0], list) and
+                    attr[0][1] == "="
+                ):
                     n = u"%s[@%s='%s']" % (elemName, attr[0][0], attr[0][2])
                     elemLines = self.elementHash.get(n, [])
 
@@ -750,14 +763,16 @@ class SaxRecord(Record):
                         # might really be empty
                         pass
                 for e in elemLines:
-                    if (not nsUri or
-                        self.sax[e[0]][4:4 + len(nsUri)] == nsUri):
+                    if (
+                        not nsUri or
+                        self.sax[e[0]][4:4 + len(nsUri)] == nsUri
+                    ):
                         match = self._checkSaxXPathLine(xp, e[0])
                         if (match):
                             # Return event chunk
                             l = self.sax[e[0]]
                             end = int(l[l.rfind(' ') + 1:])
-                            data.append(self.sax[e[0]:end + 1])                        
+                            data.append(self.sax[e[0]:end + 1])
             else:
                 # Unsupported final axis
                 raise(NotImplementedError)
@@ -774,7 +789,7 @@ class SaxRecord(Record):
                 return ndata
             else:
                 return data
-            
+
         except NotImplementedError:
             # Convert to DOM (slow) and reapply (slower still)
             dom = self.get_dom(session)
@@ -801,7 +816,10 @@ class SaxRecord(Record):
         if (len(xp) == 1):
             # Extracting all occs of attribute anywhere!?
             # Check predicates... (only support one numeric predicate)
-            if (len(xp[0][2]) == 1 and type(xp[0][2][0]) == types.FloatType):
+            if (
+                len(xp[0][2]) == 1 and
+                isinstance(xp[0][2][0], float)
+            ):
                 nth = int(xp[0][2][0])
             elif (len(xp[0][2])):
                 # Non index or multiple predicates??
@@ -821,7 +839,7 @@ class SaxRecord(Record):
                             break
                         elif (not nth):
                             data.append(content)
-                                
+
         else:
             elemName = xp[-2][1]
             flatten = 0
@@ -840,8 +858,10 @@ class SaxRecord(Record):
             if (elemName in self.elementHash):
                 elemLines = self.elementHash[elemName]
                 for e in elemLines:
-                    if (not elemNsUri or
-                        self.sax[e[0]][4:4 + len(elemNsUri)] == elemNsUri):
+                    if (
+                        not elemNsUri or
+                        self.sax[e[0]][4:4 + len(elemNsUri)] == elemNsUri
+                    ):
                         line = self.sax[e[0]]
                         (name, attrs) = self._convert_elem(line)
                         if (attrName == '*'):
@@ -867,7 +887,7 @@ class SaxRecord(Record):
                                                                     e[0])
                                     if (match):
                                         data.append(content)
-        
+
         return data
 
     def _checkSaxXPathLine(self, xp, line):
@@ -895,28 +915,30 @@ class SaxRecord(Record):
                             end = elem.find(" ", start)
                             line = int(elem[start:end])
                             if line != -1:
-                                elem = self.sax[line]                            
+                                elem = self.sax[line]
                                 (name, attrs) = self._convert_elem(elem)
                                 match = self._checkSaxXPathNode(node, name,
                                                                 attrs, line,
                                                                 posn)
                             else:
                                 return 0
-                                
+
                 if xpath:
                     start = elem.rfind("}") + 2
                     end = elem.find(" ", start)
                     line = int(elem[start:end])
                 climb = (node and node[0] == "descendant")
-                
+
         return 1
 
     def _checkSaxXPathNode(self, step, name, attrs, line, posn):
         # name already checked, strip
         if step in ['/', ['/']] and name:
             return 0
-        if (step[1] != name and step[1] != '*' and
-            step[1][step[1].find(":") + 1:] != name):
+        if (
+            step[1] != name and step[1] != '*' and
+            step[1][step[1].find(":") + 1:] != name
+        ):
             return 0
         elif (not step[0] in ['child', 'descendant']):
             # Unsupported axis
@@ -933,8 +955,7 @@ class SaxRecord(Record):
         return 1
 
     def _checkSaxXPathPredicate(self, pred, name, attrs, line, posn, predPosn):
-
-        if (type(pred) != types.ListType):
+        if not isinstance(pred, list):
             # Numeric Predicate. (eg /foo/bar[1])
             if (predPosn != 1):
                 # Can't do numeric predicate on already predicated nodeset
@@ -996,7 +1017,7 @@ class SaxRecord(Record):
             # No idea!!
             raise(NotImplementedError)
         return 1
-        
+
     def _checkSaxXPathAttr(self, pred, attrs):
         # Namespacey
         if (not pred[0] in attrs):
@@ -1007,7 +1028,7 @@ class SaxRecord(Record):
         rel = pred[1]
 
         # -Much- faster than eval
-        if (type(pred[2]) == types.FloatType):
+        if isinstance(pred[2], float):
             attrValue = float(attrs[pred[0]])
         else:
             attrValue = attrs[pred[0]]
@@ -1030,7 +1051,7 @@ class SaxRecord(Record):
 
     def _convert_elem(self, line):
         # Currently: 1 name {attrs} parent npred end
-        if (line[0] == '1'):           
+        if (line[0] == '1'):
             start = line.find("{")
             name = line[2:start - 1]
             if line[start + 1] == '}':
@@ -1044,7 +1065,7 @@ class SaxRecord(Record):
         elif (line[0] == '4'):
             end = line.rfind("}")
             stuff = eval(line[2:end + 1])
-            return [stuff[1], stuff[3]]        
+            return [stuff[1], stuff[3]]
         else:
             raise ValueError("Called convert on non element.")
 
@@ -1053,7 +1074,7 @@ class SaxRecord(Record):
             handler = self
         if not sax:
             sax = self.get_sax(session)
-            
+
         for l in sax:
             line = l
             # line = l.strip()
@@ -1116,7 +1137,7 @@ class SaxRecord(Record):
                 return self.xml
             else:
                 return s2xhandler.get_xmlString()
-            
+
     def get_sax(self, session):
         return self.sax
 
@@ -1160,7 +1181,7 @@ class MarcRecord(Record):
             # not a NNN not an int
             return []
         if fld in self.marc.fields:
-            data = self.marc.fields[fld]        
+            data = self.marc.fields[fld]
         else:
             return []
         if len(xp) > 1:
@@ -1212,7 +1233,7 @@ class MarcRecord(Record):
                     nvals.append(unicodedata.normalize('NFC', convtd))
                 except:
                     # strip out any totally @^%(ed characters
-                    v = self.asciiRe.sub('?', v) 
+                    v = self.asciiRe.sub('?', v)
                     nvals.append(v)
         return nvals
 

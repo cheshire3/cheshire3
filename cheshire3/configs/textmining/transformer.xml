@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://www.cheshire3.org/schemas/config/">
+  <subConfigs>
+
+    <subConfig type="transformer" id="TsuTransformer">
+      <objectType>cheshire3.textmining.transformer.TsujiiXPathTransformer</objectType>
+      <paths>
+        <path type="taggerPath">${cheshire3Root}/textmining</path>
+      </paths>
+      <xpath type="copy">PMID</xpath>
+      <xpath type="tag">ArticleTitle</xpath>
+      <xpath type="tag">AbstractText</xpath>
+    </subConfig>  
+
+  </subConfigs>
+</config>

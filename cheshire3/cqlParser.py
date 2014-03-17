@@ -10,6 +10,7 @@ import types
 from shlex import shlex
 from xml.sax.saxutils import escape
 from StringIO import StringIO
+from __builtin__ import isinstance
 
 serverChoiceRelation = "="
 serverChoiceIndex = "cql.serverchoice"
@@ -72,10 +73,12 @@ class PrefixableObject:
         xml.append("{s}</prefixes>\n")
         return ''.join(xml).format(s=space, name=escape(p),
                                    ident=escape(self.prefixes[p]))
-        
+
     def addPrefix(self, name, identifier):
-        if (errorOnDuplicatePrefix and (self.prefixes.has_key(name) or
-                                        reservedPrefixes.has_key(name))):
+        if (
+            errorOnDuplicatePrefix and
+            (name in self.prefixes or name in reservedPrefixes)
+        ):
             # Maybe error
             diag = Diagnostic()
             diag.code = 45
@@ -85,13 +88,13 @@ class PrefixableObject:
 
     def resolvePrefix(self, name):
         # Climb tree
-        if (reservedPrefixes.has_key(name)):
+        if name in reservedPrefixes:
             return reservedPrefixes[name]
-        elif (self.prefixes.has_key(name)):
+        elif name in self.prefixes:
             return self.prefixes[name]
-        elif (self.parent <> None):
+        elif self.parent is not None:
             return self.parent.resolvePrefix(name)
-        elif (self.config <> None):
+        elif self.config is not None:
             # Config is some sort of server config which specifies defaults
             return self.config.resolvePrefix(name)
         else:
@@ -100,7 +103,7 @@ class PrefixableObject:
             #diag = Diagnostic15()
             #diag.details = name
             #raise diag
-            return None      
+            return None
 
 
 class PrefixedObject:
@@ -158,7 +161,7 @@ class ModifiableObject:
     modifiers = []
 
     def __getitem__(self, k):
-        if (type(k) == types.IntType):
+        if isinstance(k, int):
             try:
                 return self.modifiers[k]
             except:
@@ -167,8 +170,8 @@ class ModifiableObject:
             if (str(m.type) == k or m.type.value == k):
                 return m
         return None
-      
-        
+
+
 class Triple (PrefixableObject):
     "Object to represent a CQL triple"
     leftOperand = None
@@ -183,7 +186,7 @@ class Triple (PrefixableObject):
             xml = ['<triple xmlns="%s">\n' % (XCQLNamespace)]
         else:
             xml = ['%s<triple>\n' % (space)]
-            
+
         if self.prefixes:
             xml.append(PrefixableObject.toXCQL(self, depth + 1))
 
@@ -209,7 +212,7 @@ class Triple (PrefixableObject):
         if (self.prefixes):
             ptxt = []
             for p in self.prefixes.keys():
-                if (p <> ''):
+                if p != '':
                     ptxt.append('>%s="%s"' % (p, self.prefixes[p]))
                 else:
                     ptxt.append('>"%s"' % (self.prefixes[p]))
@@ -224,10 +227,12 @@ class Triple (PrefixableObject):
             for sk in self.sortKeys:
                 txt.append(sk.toCQL())
         return "({0})".format(" ".join(txt))
-        
+
     def getResultSetId(self, top=None):
-        if (fullResultSetNameCheck == 0 or
-            self.boolean.value in ['not', 'prox']):
+        if (
+            fullResultSetNameCheck == 0 or
+            self.boolean.value in ['not', 'prox']
+        ):
             return ""
 
         if top is None:
@@ -245,7 +250,7 @@ class Triple (PrefixableObject):
         if isinstance(self.rightOperand, Triple):
             rsList.extend(self.rightOperand.getResultSetId(top))
         else:
-            rsList.append(self.rightOperand.getResultSetId(top))            
+            rsList.append(self.rightOperand.getResultSetId(top))
 
         if topLevel == 1:
             # Check all elements are the same
@@ -294,14 +299,14 @@ class SearchClause (PrefixableObject):
             for key in self.sortKeys:
                 xml.append(key.toXCQL(depth + 2))
             xml.append("  %s</sortKeys>\n" % space)
-            
+
         xml.append("%s</searchClause>\n" % (space))
         return ''.join(xml)
 
     def toCQL(self):
         text = []
         for p in self.prefixes.keys():
-            if (p <> ''):
+            if p != '':
                 text.append('>%s="%s"' % (p, self.prefixes[p]))
             else:
                 text.append('>"%s"' % (self.prefixes[p]))
@@ -318,8 +323,10 @@ class SearchClause (PrefixableObject):
     def getResultSetId(self, top=None):
         idx = self.index
         idx.resolvePrefix()
-        if (idx.prefixURI == reservedPrefixes['cql'] and
-            idx.value.lower() == 'resultsetid'):
+        if (
+            idx.prefixURI == reservedPrefixes['cql'] and
+            idx.value.lower() == 'resultsetid'
+        ):
             return self.term.value
         else:
             return ""
@@ -335,7 +342,7 @@ class Index(PrefixedObject, ModifiableObject):
             diag.message = "Invalid characters in index name"
             diag.details = self.value
             raise diag
-        
+
     def toXCQL(self, depth=0):
         space = "  " * depth
         if (depth == 0):
@@ -376,7 +383,7 @@ class Relation(PrefixedObject, ModifiableObject):
             ns = ""
 
         space = "  " * depth
-        
+
         xml = ["%s<relation%s>\n" % (space, ns)]
         xml.append("%s  <value>%s</value>\n" % (space, escape(self.value)))
         if self.modifiers:
@@ -394,9 +401,9 @@ class Relation(PrefixedObject, ModifiableObject):
 
 
 class Term:
-    
+
     value = ""
-    
+
     def __init__(self, v):
         if (v != ""):
             # Unquoted literal
@@ -421,8 +428,8 @@ class Term:
             # Unescape quotes
             if (v[0] == '"' and v[-1] == '"'):
                 v = v[1:-1]
-            v = v.replace('\\"', '"') 
-                
+            v = v.replace('\\"', '"')
+
             # Check for badly placed \s
             startidx = 0
             idx = v.find("\\", startidx)
@@ -459,10 +466,10 @@ class Term:
 
 class Boolean(ModifiableObject):
     "Object to represent a CQL boolean"
-    
+
     value = ""
     parent = None
-    
+
     def __init__(self, bool, mods=[]):
         self.value = bool
         self.modifiers = mods
@@ -521,7 +528,7 @@ class ModifierClause:
             return '\n'.join(["%s<modifier>" % ("  " * depth),
                               "%s<type>%s</type>" %
                               ("  " * (depth + 1), escape(str(self.type))),
-                              "%s<comparison>%s</comparison>" % 
+                              "%s<comparison>%s</comparison>" %
                               ("  " * (depth + 1), escape(self.comparison)),
                               "%s<value>%s</value>" %
                               ("  " * (depth + 1), escape(self.value)),
@@ -529,7 +536,7 @@ class ModifierClause:
                               ])
         else:
             return '\n'.join(["%s<modifier>" % ("  " * depth),
-                "             %s<type>%s</type>" %
+                              "             %s<type>%s</type>" %
                               ("  " * (depth + 1), escape(str(self.type))),
                               "%s</modifier>" % ("  " * depth)
                               ])
@@ -568,7 +575,7 @@ class CQLshlex(shlex):
                 if self.token == "/":
                     self.state = ' '
                     break
-                
+
             nextchar = self.instream.read(1)
             if nextchar == '\n':
                 self.lineno = self.lineno + 1
@@ -631,7 +638,7 @@ class CQLshlex(shlex):
                 else:
                     self.state = ' '
                     break
-            
+
             elif self.state in self.quotes:
                 self.token = self.token + nextchar
                 # Allow escaped quotes
@@ -720,13 +727,15 @@ class CQLParser:
                 identifier.append(self.currentToken)
             self.fetch_token()
             # URIs can have slashes, and may be unquoted (standard BNF checked)
-            while self.currentToken == '/' or identifier.endswith('/'): 
+            while self.currentToken == '/' or identifier.endswith('/'):
                 identifier.append(self.currentToken)
                 self.fetch_token()
             identifier = ''.join(identifier)
-            if (len(identifier) > 1 and
+            if (
+                len(identifier) > 1 and
                 identifier[0] == '"' and
-                identifier.endswith('"')):
+                identifier.endswith('"')
+            ):
                 identifier = identifier[1:-1]
             prefs[name.lower()] = identifier
         return prefs
@@ -803,7 +812,7 @@ class CQLParser:
         """ Find searchClause """
         bool = self.is_boolean(self.nextToken)
         sort = self.is_sort(self.nextToken)
-        if not sort and not bool and not (self.nextToken in [')', '(', '']):        
+        if not sort and not bool and not (self.nextToken in [')', '(', '']):
             index = indexType(self.currentToken)
             self.fetch_token()   # Skip Index
             rel = self.relation()
@@ -812,7 +821,7 @@ class CQLParser:
                 diag.details = "Expected Term, got end of query."
                 raise(diag)
             term = termType(self.currentToken)
-            self.fetch_token()   # Skip Term 
+            self.fetch_token()   # Skip Term
             irt = searchClauseType(index, rel, term)
 
         elif (self.currentToken and
@@ -828,7 +837,7 @@ class CQLParser:
             for p in prefs.keys():
                 object.addPrefix(p, prefs[p])
             return object
-            
+
         else:
             diag = Diagnostic()
             diag.details = ("Expected Boolean or Relation but got: " +
@@ -900,7 +909,7 @@ def parse(query):
     if parser.currentToken != '':
         diag = Diagnostic()
         diag.code = 10
-        diag.details = ("Unprocessed tokens remain: " + 
+        diag.details = ("Unprocessed tokens remain: " +
                         repr(parser.currentToken))
         raise diag
     else:

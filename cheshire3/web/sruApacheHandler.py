@@ -121,7 +121,8 @@ class reqHandler(SRUProtocolHandler):
                     pass
 
 
-srwh = reqHandler()
+configs = get_configsFromServer(session, serv)
+srwh = reqHandler(session, configs)
 
 
 def handler(req):

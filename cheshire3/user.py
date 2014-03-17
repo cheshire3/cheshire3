@@ -5,6 +5,8 @@ import hashlib
 
 from lxml import etree
 
+from paste.auth.digest import digest_password as http_digest_password
+
 from cheshire3.baseObjects import User
 from cheshire3.exceptions import ConfigFileException
 from cheshire3.internal import CONFIG_NS
@@ -70,8 +72,10 @@ class SimpleUser(User):
                                 obj = getFirstData(c2)
                             elif c2.localName == "value":
                                 flag = getFirstData(c2)
-                                if ((flag not in self.allFlags) and
-                                    (flag[:4] != "c3fn")):
+                                if (
+                                    (flag not in self.allFlags) and
+                                    (flag[:4] != "c3fn")
+                                ):
                                     msg = "Unknown flag: %s" % flag
                                     raise ConfigFileException(msg)
                     if obj is None or flag is None:
@@ -109,8 +113,10 @@ class SimpleUser(User):
                             obj = flattenTexts(c2).strip()
                         elif c2.tag in ["value", '{%s}value' % CONFIG_NS]:
                             flag = flattenTexts(c2).strip()
-                            if (flag not in self.allFlags and
-                                flag[:4] != "c3fn"):
+                            if (
+                                flag not in self.allFlags and
+                                flag[:4] != "c3fn"
+                            ):
                                 msg = "Unknown flag: %s" % flag
                                 raise ConfigFileException(msg)
                     if obj is None or flag is None:
@@ -150,13 +156,24 @@ class SimpleUser(User):
 
     def check_password(self, session, password):
         """Check the supplied en-clair password.
-        
+
         Check the supplied en-clair password by obfuscating it using the same
-        algorithm and comparing it with the stored version. Return True/False. 
+        algorithm and comparing it with the stored version. Return True/False.
         """
         # Check password type
-        if self.passwordType == 'md5':
-            m = hashlib.md5(password)
-            return m.hexdigest() == self.password
+        try:
+            h = hashlib.new(self.passwordType)
+        except ValueError:
+            # Not a hashlib supported algorithm
+            if self.passwordType == 'http':
+                # HTTP Digest algorithm
+                return http_digest_password('cheshire3',
+                                            self.username,
+                                            password) == self.password
+            else:
+                #  UNIX-style salted password encryption
+                cryptedpasswd = crypt.crypt(password, self.password[:2])
+                return cryptedpasswd == self.password
         else:
-            return crypt.crypt(password, self.password[:2]) == self.password
+            h.update(password)
+            return h.hexdigest() == self.password

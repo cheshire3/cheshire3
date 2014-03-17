@@ -3,7 +3,7 @@
 
   <paths>
     <path type="defaultPath">${cheshire3Home}/cheshire3</path>
-    <path type="sortPath">/bin/sort</path>
+    <path type="sortPath">/usr/bin/sort</path>
     <path type="zserverConfig">configs/zserver.xml</path>
     <object type="defaultLogger" ref="stdoutLogger"/>
     <object type="z3950Logger" ref="z3950Logger"/>
@@ -60,7 +60,22 @@
     <path type="includeConfigs" ref="defaultConfigStore"/>
     <path type="includeConfigs">configs/basicConfigs.xml</path>
     <path type="includeConfigs">configs/workflow.xml</path>
-    <path type="includeConfigs">configs/extra</path>
+    
+    <!-- datamining sub-package configurations -->
+    <path type="includeConfigs">configs/datamining</path>
+
+    <!-- formats sub-package configurations -->
+    <path type="includeConfigs">configs/formats</path>
+    
+    <!-- graph sub-package configurations -->
+    <path type="includeConfigs">configs/graph</path>
+    
+    <!-- textmining sub-package configurations -->
+    <path type="includeConfigs">configs/textmining</path>
+    
+    <!-- web sub-package configurations -->
+    <path type="includeConfigs">configs/web</path>
+    
     <!-- databases plugins directory -->
     <path type="includeConfigs">configs/databases</path>
     <!-- user-specific databases plugins directory -->

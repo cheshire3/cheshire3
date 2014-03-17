@@ -1,7 +1,13 @@
 
-from cheshire3.selector import SimpleSelector, MetadataSelector, TransformerSelector, SpanXPathSelector
+from cheshire3.selector import (
+    SimpleSelector,
+    MetadataSelector,
+    TransformerSelector,
+    SpanXPathSelector
+    )
 from cheshire3.record import LxmlRecord, SaxRecord
 from cheshire3.utils import elementType, getFirstData
+
 
 class XPathProcessor(SimpleSelector):
     """An XPathProcessor is a simple wrapper around an XPath.  It is used
@@ -23,10 +29,20 @@ class SimpleXPathProcessor(XPathProcessor):
             # list of {}s
             for xp in src:
                 if isinstance(record, LxmlRecord):
-                    vals.append(record.process_xpath(session, xp['string'], xp['maps']))
+                    vals.append(
+                        record.process_xpath(session,
+                                             xp['string'],
+                                             xp['maps']
+                                             )
+                    )
                 else:
                     raise ValueError("Only LXML")
-                    # vals.append(record.process_xpath(session, xp['xpath'], xp['maps']))
+                    #vals.append(
+                    #    record.process_xpath(session,
+                    #                         xp['xpath'],
+                    #                         xp['maps']
+                    #                         )
+                    #)
         return vals
 
 ## two xpaths, span between them
@@ -38,7 +54,7 @@ class SimpleXPathProcessor(XPathProcessor):
 #    #                   Defaults to 0 (eg start at beginning)
 #    #   window="N"   -- This is the number of elements in a single comp.
 #    #                   Defaults to 1  (eg adjacent)
-#    
+#
 #    def process_record(self, session, rec):
 #        if isinstance(rec, LxmlRecord):
 #            sax = rec.get_sax(session)
@@ -52,7 +68,9 @@ class SimpleXPathProcessor(XPathProcessor):
 #
 #        endTag = self.sources[0][1]['string']
 #        if endTag != startTag:
-#            endRaw = record.process_xpath(session, self.sources[0][1]['string'])
+#             endRaw = record.process_xpath(session,
+#                                           self.sources[0][1]['string']
+#                                           )
 #        else:
 #            #copy all the stuff from raw
 #            endRaw = raw[:]
@@ -66,8 +84,8 @@ class SimpleXPathProcessor(XPathProcessor):
 #        comps = []
 #        #raw is all the opening tags
 #        for r in raw[initialSlide::slide]:
-#            
-#            start = int(r[-1][r[-1].rfind(' ')+1:])            
+#
+#            start = int(r[-1][r[-1].rfind(' ')+1:])
 #            comp = r
 #            startTag = record._convert_elem(comp[0])[0]
 #            usingNs = comp[0][0]
@@ -75,10 +93,10 @@ class SimpleXPathProcessor(XPathProcessor):
 #            n = len(comp)-1
 #            currNum = 0
 #            okay = 1
-#            
+#
 #            saxlen = len(record.sax) -1
 #            openTags = []
-#            
+#
 #            while okay and start + n < saxlen:
 #                n += 1
 #                line = record.sax[start+n]
@@ -101,7 +119,7 @@ class SimpleXPathProcessor(XPathProcessor):
 #                        comp.append(line)
 #                    else:
 #                        openTags.append(record._convert_elem(line)[0])
-#                        comp.append(line)                       
+#                        comp.append(line)
 #                elif (line[0] in ['2', '5']):
 #                    # check we're open
 #                    if (line[0] == '2'):
@@ -109,7 +127,10 @@ class SimpleXPathProcessor(XPathProcessor):
 #                        tag = line[2:end]
 #                    else:
 #                        tag = eval(line[2:line.rfind(',')])[0:2]
-#                    if ((n == 1 and tag[1] == startTag) or (openTags and openTags[-1] == tag)):
+#                    if (
+#                        (n == 1 and tag[1] == startTag) or
+#                        (openTags and openTags[-1] == tag)
+#                    ):
 #                        comp.append(line)
 #                        if openTags:
 #                            openTags.pop(-1)
@@ -126,9 +147,9 @@ class SimpleXPathProcessor(XPathProcessor):
 #                    else:
 #                        comp.append("2 %s %s" % (o, start))
 #            comps.append(comp)
-#        
+#
 #        return [comps]
-    
+
 
 # DEPRECATED:  Should use selectors
 MetadataXPathProcessor = MetadataSelector
@@ -137,4 +158,3 @@ SpanXPathProcessor = SpanXPathSelector
 MetadataXPath = MetadataSelector
 TransformerXPath = TransformerSelector
 SpanXPath = SpanXPathSelector
-

@@ -28,16 +28,24 @@ modules = ['database', 'documentFactory', 'documentStore', 'extractor',
            'grid.srbIndex', 'grid.srbStore']
 
 _major_version = 1
-_minor_version = 0
-_patch_version = 16
+_minor_version = 1
+_patch_version = 0
 
 cheshire3Version = (_major_version, _minor_version, _patch_version)
 cheshireVersion = cheshire3Version   # Included for backward compatibility
 
 # Find Cheshire3 environment
-cheshire3Home = os.environ.get(
-                       'C3HOME',
-                       resource_filename(Requirement.parse('cheshire3'), ''))
+try:
+    cheshire3Home = resource_filename(Requirement.parse('cheshire3'), '')
+except:
+    # Cheshire3 not yet installed; maybe in a source distro/repo checkout
+    # Assume local directory
+    cheshire3Home = '.'
+
+# Allow cheshire3Home to be over-ridden by environmental variable
+# e.g. for source code distro/repo checkout
+cheshire3Home = os.environ.get('C3HOME', cheshire3Home)
+
 cheshire3Root = os.path.join(cheshire3Home, "cheshire3")
 cheshire3Code = os.path.join(cheshire3Root)
 cheshire3Dbs = os.path.join(cheshire3Home, "dbs")
@@ -67,7 +75,7 @@ def get_api(object, all=False):
         if nm[0] == '_':
             continue
         aspec = inspect.getargspec(fn)
-        if len(aspec.args) > 1 and aspec.args[1] == 'session':            
+        if len(aspec.args) > 1 and aspec.args[1] == 'session':
             if all:
                 names.append(nm)
             else:
@@ -86,7 +94,7 @@ def get_subpackages():
 
 
 class Architecture(object):
-    """Class to facilitate Architecture Introspection.""" 
+    """Class to facilitate Architecture Introspection."""
 
     moduleObjects = []
     classDefns = []
@@ -174,7 +182,7 @@ class Architecture(object):
             try:
                 for (k, v) in cls._possiblePaths.iteritems():
                     if not k in paths:
-                        paths[k] = v                        
+                        paths[k] = v
                 for (k, v) in cls._possibleSettings.iteritems():
                     if not k in settings:
                         settings[k] = v
@@ -185,7 +193,7 @@ class Architecture(object):
                 # not a c3object, eg mix-ins/interfaces/etc
                 if cls.__name__ == "ArrayIndex":
                     raise
-                
+
                 continue
             bases.extend(list(cls.__bases__))
         return (paths, settings, defaults)

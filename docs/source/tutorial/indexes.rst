@@ -120,3 +120,7 @@ map of :py:class:`~cheshire3.baseObjects.Record` identifier to terms
 enabling the :py:class:`~cheshire3.baseObjects.Index` to be used to quickly
 re-order :py:class:`~cheshire3.baseObjects.ResultSet`\ s based on the values
 extracted.
+
+For detailed information about
+available settings for :py:class:`~cheshire3.baseObjects.Index`\ es see
+the :ref:`Index Configuration, Settings section<config-indexes-settings>`.

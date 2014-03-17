@@ -9,8 +9,13 @@ from xml.parsers.expat import ExpatError
 from lxml import etree
 
 from cheshire3.baseObjects import Parser
-from cheshire3.record import SaxRecord, SaxContentHandler, MinidomRecord, \
-                             MarcRecord
+from cheshire3.record import (
+    SaxRecord,
+    SaxContentHandler,
+    DomRecord,
+    MinidomRecord,
+    MarcRecord
+    )
 from cheshire3.record import LxmlRecord
 from cheshire3.utils import nonTextToken
 from exceptions import XMLSyntaxError
@@ -20,6 +25,7 @@ class BaseParser(Parser):
 
     def _copyData(self, doc, rec):
         # Utility function to update data on record from document
+        rec.id = doc.id
         rec.filename = doc.filename
         rec.tagName = doc.tagName
         rec.processHistory = doc.processHistory
@@ -208,7 +214,7 @@ class PassThroughParser(BaseParser):
     def process_document(self, session, doc):
         # Simply copy data into a record of appropriate type
         data = doc.get_raw(session)
-        if (typeof(data) == types.ListType):
+        if isinstance(data, list):
             rec = SaxRecord(data)
         else:
             rec = DomRecord(data)

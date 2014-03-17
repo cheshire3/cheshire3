@@ -57,10 +57,31 @@ class SimpleLogger(Logger):
             if not os.path.isabs(fp):
                 dfp = self.get_path(session, 'defaultPath')
                 fp = os.path.join(dfp, fp)
+                # Absolutize path
+                fp = os.path.abspath(fp)
             self.fileh = open(fp, 'a')
         self.cacheLen = self.get_setting(session, 'cacheLength', 0)
         self.minLevel = self.get_setting(session, 'minLevel', 0)
         self.defaultLevel = self.get_default(session, 'level', 0)
+
+    def __del__(self):
+        self._close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type_, value, traceback):
+        self._flush()
+
+    def _close(self):
+        # Flush any remaining log lines
+        try:
+            self._flush()
+        finally:
+            try:
+                self.fileh.close()
+            except AttributeError:
+                pass
 
     def _myRepr(self, a):
         # Create a representation for an object to use in log messages
@@ -73,6 +94,15 @@ class SimpleLogger(Logger):
         else:
             return repr(a)
 
+    def _flush(self):
+        for l in self.lineCache:
+            if type(l) == unicode:
+                l = l.encode('utf8')
+            self.fileh.write(l + "\n")
+        if hasattr(self.fileh, 'flush'):
+            self.fileh.flush()
+        self.lineCache = []
+
     def _logLine(self, lvl, line, *args, **kw):
         # Templating for individual log entries
         now = time.strftime("%Y-%m-%d %H:%M:%S")
@@ -84,13 +114,8 @@ class SimpleLogger(Logger):
         else:
             self.lineCache.append(line)
         if (len(self.lineCache) > self.cacheLen):
-            for l in self.lineCache:
-                if type(l) == unicode:
-                    l = l.encode('utf8')
-                self.fileh.write(l + "\n")
-            if hasattr(self.fileh, 'flush'):
-                self.fileh.flush()
-            self.lineCache = []
+            # Flush messages to disk
+            self._flush()
 
     def log_fn(self, session, object, fn, *args, **kw):
         """Log a function call."""
@@ -204,16 +229,18 @@ class DateTimeFileLogger(SimpleLogger):
     def __del__(self):
         self._close()
 
-    def __exit__(self):
+    def __exit__(self, type_, value, traceback):
         self._close()
 
     def _open(self, session):
         # We don't actually want to open a file until there's something to log
         # just find log base path
         fp = self.get_path(session, 'filePath', self.id)
-        if (not os.path.isabs(fp)):
+        if not os.path.isabs(fp):
             dfp = self.get_path(session, 'defaultPath')
             fp = os.path.join(dfp, fp)
+            # Absolutize path
+            fp = os.path.abspath(fp)
         self.logBasePath = fp
 
     def _close(self):
@@ -253,7 +280,7 @@ class DateTimeFileLogger(SimpleLogger):
 
     def _logLine(self, lvl, line, *args, **kw):
         # Templating for individual log entries
-        now = time.gmtime()
+        now = time.localtime()
         if (now[:self.dateTimeLevel]) > self.lastLogTime[:self.dateTimeLevel]:
             self._flush()
         # Set last log time to correct level
@@ -284,8 +311,24 @@ class MultipleLogger(SimpleLogger):
             raise ConfigFileException("Missing path 'loggerList' for "
                                       "{0}.".format(self.id))
         getObj = self.parent.get_object
-        self.loggers = [getObj(session, id) for id in loggerList.split(' ')]
+        self.loggers = [getObj(session, id_) for id_ in loggerList.split(' ')]
+
+    def __del__(self):
+        # Delete all Loggers
+        for i in range(len(self.loggers)):
+            del self.loggers[i]
+
+    def __exit__(self, type_, value, traceback):
+        # Flush all Loggers
+        for lgr in self.loggers:
+            lgr._flush()
+
+    def _flush(self):
+        # Flush all Loggers
+        for lgr in self.loggers:
+            lgr._flush()
 
     def log_lvl(self, session, lvl, msg, *args, **kw):
+        # Log to all Loggers
         for lgr in self.loggers:
             lgr.log_lvl(session, lvl, msg, *args, **kw)

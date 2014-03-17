@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://www.cheshire3.org/schemas/config/">
+  <subConfigs>
+
+    <subConfig type="extractor" id="RdfExtractor">
+        <objectType>cheshire3.graph.extractor.RdfExtractor</objectType>
+    </subConfig>
+  
+    <subConfig type="extractor" id="RdfProxExtractor">
+      <objectType>cheshire3.graph.extractor.RdfExtractor</objectType>
+      <options>
+        <setting type="prox">1</setting>
+        <setting type="reversable">1</setting>
+      </options>
+    </subConfig>  
+  
+  </subConfigs>
+</config>

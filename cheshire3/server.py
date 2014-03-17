@@ -3,16 +3,21 @@ from __future__ import with_statement
 
 import os
 
+from urlparse import urlsplit
+
 from lxml import etree
 from lxml.builder import ElementMaker
 
 from cheshire3.baseObjects import Server
 from cheshire3.bootstrap import BSLxmlParser, BootstrapDocument
 from cheshire3.configParser import C3Object
-from cheshire3.exceptions import (ConfigFileException,
-                                  ObjectDoesNotExistException,
-                                  XMLSyntaxError,
-                                  FileSystemException)
+from cheshire3.exceptions import (
+    ConfigFileException,
+    ObjectDoesNotExistException,
+    XMLSyntaxError,
+    FileSystemException,
+    FileDoesNotExistException
+    )
 from cheshire3.internal import cheshire3Root, CONFIG_NS
 
 
@@ -48,35 +53,8 @@ class SimpleServer(Server):
             db = self.get_object(session, dbid)
             self.databases[dbid] = db
 
-    def register_databaseConfigFile(self, session, file_path):
-        """Register a Cheshire3 Database config file.
-
-        Register a configuration file for a Cheshire3 Database with
-        the server.
-
-        This process simply tells the server that it should include the
-        configuration(s) in your file (it does not ingest your file) so
-        you don't need to re-register when you make changes to the file.
-        """
-        # Read in proposed config file
-        with open(file_path, 'r') as fh:
-            confdoc = BootstrapDocument(fh)
-            # Check it's parsable
-            try:
-                confrec = BSLxmlParser.process_document(session, confdoc)
-            except XMLSyntaxError as e:
-                msg = ("Config file {0} is not well-formed and valid XML: "
-                       "{1}".format(file_path, e.message))
-                self.log_critical(session, msg)
-                raise ConfigFileException(msg)
-        # Extract the database identifier
-        confdom = confrec.get_dom(session)
-        dbid = confdom.attrib.get('id', None)
-        if dbid is None:
-            msg = ("Config file {0} must have an 'id' attribute at the "
-                   "top-level".format(file_path))
-            self.log_critical(session, msg)
-            raise ConfigFileException(msg)
+    def _get_newDatabaseId(self, session, dbConfig):
+        dbid = dbConfig.attrib.get('id', None)
         # Check that the identifier is not already in use by existing database
         try:
             self.get_object(session, dbid)
@@ -89,14 +67,46 @@ class SimpleServer(Server):
                    "file.".format(dbid))
             self.log_critical(session, msg)
             raise ConfigFileException(msg)
+        return dbid
+
+    def register_databaseConfigFile(self, session, file_path):
+        """Register a Cheshire3 Database config file.
+
+        Register a configuration file for a Cheshire3 Database with
+        the server.
+
+        This process simply tells the server that it should include the
+        configuration(s) in your file (it does not ingest your file) so
+        you don't need to re-register when you make changes to the file.
+        """
+        # Read in proposed config file
+        docFac = self.get_object(session, 'defaultDocumentFactory')
+        docFac.load(session, file_path)
+        confdoc = docFac.get_document(session)
+        try:
+            confrec = BSLxmlParser.process_document(session, confdoc)
+        except XMLSyntaxError as e:
+            msg = ("Config file {0} is not well-formed and valid XML: "
+                   "{1}".format(file_path, e.message))
+            self.log_critical(session, msg)
+            raise ConfigFileException(msg)
+        # Extract the database identifier
+        confdom = confrec.get_dom(session)
+        dbid = self._get_newDatabaseId(session, confdom)
+        if dbid is None:
+            msg = ("Config file {0} must have an 'id' attribute at the "
+                   "top-level".format(file_path))
+            self.log_critical(session, msg)
+            raise ConfigFileException(msg)
         # Generate plugin XML
         plugin = E.config(
-                         E.subConfigs(
-                             E.path({'type': "database", 'id': dbid},
-                                    file_path
-                             )
-                         )
-                     )
+            E.subConfigs(
+                E.path(
+                    {'type': "database", 'id': dbid},
+                    file_path
+                )
+            )
+        )
         # Try to do this by writing config plugin file if possible
         serverDefaultPath = self.get_path(session,
                                           'defaultPath',
@@ -117,9 +127,13 @@ class SimpleServer(Server):
                        "".format(os.path.join(userSpecificPath, pluginPath)))
                 self.log_critical(session, msg)
                 raise FileSystemException(msg)
-        pluginfh.write(etree.tostring(plugin,
-                                pretty_print=True,
-                                encoding="utf-8"))
+        pluginfh.write(
+            etree.tostring(
+                plugin,
+                pretty_print=True,
+                encoding="utf-8"
+            )
+        )
         pluginfh.close()
         self.log_info(session,
                       "Database configured in {0} registered with Cheshire3 "
