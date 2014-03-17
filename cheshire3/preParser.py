@@ -51,7 +51,7 @@ class TypedPreParser(PreParser):
         "outMimeType": {
             'docs': "The mimetype set on outgoing documents"
         }
-     }
+    }
 
     def __init__(self, session, config, parent):
         PreParser.__init__(self, session, config, parent)
@@ -64,9 +64,9 @@ class NormalizerPreParser(PreParser):
 
     _possiblePaths = {
         'normalizer': {
-             'docs': "Normalizer identifier to call to do the transformation",
-             'required': True
-         }
+            'docs': "Normalizer identifier to call to do the transformation",
+            'required': True
+        }
     }
 
     def __init__(self, session, config, parent):
@@ -87,8 +87,8 @@ class NormalizerPreParser(PreParser):
 class UnicodeDecodePreParser(PreParser):
     """PreParser to turn non-unicode into Unicode Documents.
 
-    A UnicodeDecodePreParser should accept a Document with content encoded in 
-    a non-unicode character encoding scheme and return a Document with the 
+    A UnicodeDecodePreParser should accept a Document with content encoded in
+    a non-unicode character encoding scheme and return a Document with the
     same content decoded to Python's Unicode implementation.
     """
 
@@ -123,8 +123,8 @@ class CmdLinePreParser(TypedPreParser):
     _possibleSettings = {
         'commandLine': {
             'docs': """\
-Command line to use. %INDOC% is substituted to create a temporary file to 
-read, and %OUTDOC% is substituted for a temporary file for the process to 
+Command line to use. %INDOC% is substituted to create a temporary file to
+read, and %OUTDOC% is substituted for a temporary file for the process to
 write to"""
         }
     }
@@ -149,7 +149,7 @@ write to"""
         if not stdIn:
             # Create temp file for incoming data
             if doc.mimeType or doc.filename:
-                # Guess our extn~n                
+                # Guess our extn~n
                 try:
                     suff = mimetypes.guess_extension(doc.mimeType)
                 except:
@@ -161,9 +161,9 @@ write to"""
                 if suff:
                     (qq, infn) = tempfile.mkstemp(suff)
                 else:
-                    (qq, infn) = tempfile.mkstemp()                    
+                    (qq, infn) = tempfile.mkstemp()
             else:
-                (qq, infn) = tempfile.mkstemp()                 
+                (qq, infn) = tempfile.mkstemp()
 
             os.close(qq)
             fh = open(infn, 'w')
@@ -178,19 +178,19 @@ write to"""
                 (qq, outfn) = tempfile.mkstemp(suff)
             else:
                 (qq, outfn) = tempfile.mkstemp()
-            cmd = cmd.replace("%OUTDOC%", outfn)               
+            cmd = cmd.replace("%OUTDOC%", outfn)
             os.close(qq)
 
         if self.working:
             old = os.getcwd()
-            os.chdir(self.working)            
+            os.chdir(self.working)
         else:
             old = ''
 
         if stdIn:
-            pipe = subprocess.Popen(cmd, bufsize=0, shell=True, 
-                                    stdin=subprocess.PIPE, 
-                                    stdout=subprocess.PIPE, 
+            pipe = subprocess.Popen(cmd, bufsize=0, shell=True,
+                                    stdin=subprocess.PIPE,
+                                    stdout=subprocess.PIPE,
                                     stderr=subprocess.PIPE)
             pipe.stdin.write(doc.get_raw(session))
             pipe.stdin.close()
@@ -227,7 +227,7 @@ write to"""
                     os.remove(outfn)
                     try:
                         # Clean up when data written elsewhere
-                        os.remove(fh.name) 
+                        os.remove(fh.name)
                     except OSError:
                         pass
         if old:
@@ -237,7 +237,7 @@ write to"""
             mt = doc.mimeType
         return StringDocument(result, self.id, doc.processHistory,
                               mimeType=mt, parent=doc.parent,
-                              filename=doc.filename) 
+                              filename=doc.filename)
 
 
 class FileUtilPreParser(TypedPreParser):
@@ -245,11 +245,12 @@ class FileUtilPreParser(TypedPreParser):
 
     def __init__(self, session, config, parent):
         TypedPreParser.__init__(self, session, config, parent)
-        warn('''\
-{0} is deprecated in favour of objects available from the 
-cheshire3.formats package.'''.format(self.__class__.__name__), 
-            DeprecationWarning, 
-            stacklevel=6)
+        warn(
+            '{0} is deprecated in favour of objects available from the'
+            'cheshire3.formats package.'.format(self.__class__.__name__),
+            DeprecationWarning,
+            stacklevel=6
+        )
 
     def process_document(self, session, doc):
         cmd = "file -i -b %INDOC%"
@@ -402,7 +403,7 @@ class HtmlSmashPreParser(PreParser):
             body = data[m.start():m.end()]
         else:
             body = data
-        text = self.tagstrip.sub(' ', body)	
+        text = self.tagstrip.sub(' ', body)
         text = text.replace('<', '&lt;')
         text = text.replace('>', '&gt;')
         text = text.replace("&nbsp;", ' ')
@@ -412,12 +413,12 @@ class HtmlSmashPreParser(PreParser):
         data = "<html><head>%s</head><body>%s</body></html>" % (title, text)
         return StringDocument(data, self.id, doc.processHistory,
                               mimeType=doc.mimeType, parent=doc.parent,
-                              filename=doc.filename) 
+                              filename=doc.filename)
 
 
 class HtmlFixupPreParser(PreParser):
     """Attempt to fix up HTML to make it complete and parseable XML.
-    
+
     Uses the lxml.html package so as to preserve as much of the intended
     structure as possible.
     """
@@ -441,7 +442,7 @@ class RegexpSmashPreParser(PreParser):
     _possibleSettings = {
         'char': {
             'docs': """\
-Character(s) to replace matches in the regular expression with. Defaults to 
+Character(s) to replace matches in the regular expression with. Defaults to
 empty string (i.e. strip matches)"""
         },
         'regexp': {
@@ -482,7 +483,7 @@ Should instead keep only the matches. Boolean, defaults to False""",
             d2 = self.regexp.sub(self.char, data)
         return StringDocument(d2, self.id, doc.processHistory,
                               mimeType=doc.mimeType, parent=doc.parent,
-                              filename=doc.filename) 
+                              filename=doc.filename)
 
 
 try:
@@ -527,7 +528,7 @@ class SgmlPreParser(PreParser):
     _possibleSettings = {
         'emptyElements': {
             'docs': '''\
-Space separated list of empty elements in the SGML to turn into empty XML 
+Space separated list of empty elements in the SGML to turn into empty XML
 elements.'''
         }
     }
@@ -560,8 +561,8 @@ elements.'''
         # - remove spurious whitespace
         # - quote unquoted values
         #return match.groups()[0].lower() + '="' + match.groups()[1] + '"'
-        return ' %s="%s"%s' % (match.group(1).lower(), 
-                               match.group(2), 
+        return ' %s="%s"%s' % (match.group(1).lower(),
+                               match.group(2),
                                match.group(3))
 
     def _emptyElement(self, match):
@@ -731,7 +732,7 @@ else:
 
         def process_document(self, session, doc):
             outDoc = StringIO.StringIO()
-            zfile = gzip.GzipFile(mode='wb', fileobj=outDoc, 
+            zfile = gzip.GzipFile(mode='wb', fileobj=outDoc,
                                   compresslevel=self.compressLevel)
             zfile.write(doc.get_raw(session))
             zfile.close()
@@ -855,9 +856,9 @@ class UrlPreParser(PreParser):
         for (key, filename, value) in files:
             L.append('--' + BOUNDARY)
             L.append(
-                 'Content-Disposition: form-data; name="%s"; filename="%s"' % 
-                 (key, filename)
-                 )
+                'Content-Disposition: form-data; name="%s"; filename="%s"' %
+                (key, filename)
+            )
             L.append('Content-Type: %s' % self._get_content_type(filename))
             L.append('')
             L.append(value)
@@ -913,7 +914,7 @@ class PrintableOnlyPreParser(PreParser):
         'strip': {
             'docs': """\
 Should the preParser strip the characters or replace with numeric character \
-entities (default)""", 
+entities (default)""",
             'type': int,
             'options': "0|1"
         }
@@ -938,7 +939,7 @@ entities (default)""",
             data = data.replace(u"\xe2\x80\x98", u"'")
             data = data.replace(u"\xe2\x80\x99", u"'")
             data = data.replace(u"\xe2\x80\x9a", u",")
-            data = data.replace(u"\x99", u"'")        
+            data = data.replace(u"\x99", u"'")
             data = data.replace(u'\xa0', u' ')
         else:
             data = data.replace("\xe2\x80\x9c", '&quot;')
@@ -948,7 +949,7 @@ entities (default)""",
             data = data.replace("\xe2\x80\x98", "'")
             data = data.replace("\xe2\x80\x99", "'")
             data = data.replace("\xe2\x80\x9a", ",")
-            data = data.replace("\x99", "'")        
+            data = data.replace("\x99", "'")
             data = data.replace('\xa0', ' ')
         data = self.nonxmlRe.sub(' ', data)
         if self.strip:
@@ -964,7 +965,7 @@ entities (default)""",
 class CharacterEntityPreParser(PreParser):
     """Change named and broken entities to numbered.
 
-    Transform latin-1 and broken character entities into numeric character 
+    Transform latin-1 and broken character entities into numeric character
     entities. eg
     &amp;something; --> &amp;#123;
     """
@@ -1124,7 +1125,7 @@ class DataChecksumPreParser(PreParser):
 
 class METSWrappingPreParser(TypedPreParser):
     """PreParser to wrap any Document content in METS XML."""
-    
+
     def __init__(self, session, config, parent):
         TypedPreParser.__init__(self, session, config, parent)
         # Over-ride if missing outgoing mime-type
@@ -1151,9 +1152,10 @@ class METSWrappingPreParser(TypedPreParser):
                      'OTHERTYPE': 'SOFTWARE'
                      },
                     METS.name("Cheshire3"),
-                    METS.note("METS instance was created by a Cheshire3 object"
-                              " of type {0} identified as {1}"
-                              "".format(type(self).__name__, self.id)
+                    METS.note(
+                        "METS instance was created by a Cheshire3 object"
+                        " of type {0} identified as {1}"
+                        "".format(type(self).__name__, self.id)
                     )
                 )
             ),
@@ -1174,7 +1176,7 @@ class METSWrappingPreParser(TypedPreParser):
         # Get a METS file element for the given data
         file_ = METS.file({'ID': identifier,
                            }
-        )
+                          )
         # Create a METS FContent element
         FContent = METS.FContent()
         file_.append(FContent)
@@ -1236,7 +1238,7 @@ class METSWrappingPreParser(TypedPreParser):
 
 class ZIPToMETSPreParser(METSWrappingPreParser):
     """PreParser to process a ZIP file to METS XML.
-    
+
     As Office Open XML format and OpenDocument format Documents are based on
     ZIP files, this PreParser can also be used to unpack them, and wrap their
     component parts in METS.
@@ -1245,7 +1247,7 @@ class ZIPToMETSPreParser(METSWrappingPreParser):
     file formats used by default in Microsoft Office 2007 onwards (.docx,
     .xlsx , .pptx etc.) It is available as an import/export format in
     LibreOffice, OpenOffice >= 3.2, Google Docs and more.
-    
+
     """
 
     def process_document(self, session, doc):

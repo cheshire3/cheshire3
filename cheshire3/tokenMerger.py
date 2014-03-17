@@ -4,7 +4,7 @@ try:
     import cPickle as pickle
 except ImportError:
     import pickle
-    
+
 
 from cheshire3.baseObjects import TokenMerger
 from cheshire3.exceptions import ConfigFileException, FileDoesNotExistException
@@ -38,7 +38,7 @@ class SimpleTokenMerger(TokenMerger):
                                 'text': t,
                                 'occurences': val['occurences'],
                                 'positions': val['positions']
-                            }            
+                            }
         return new
 
 
@@ -91,7 +91,7 @@ class OffsetProximityTokenMerger(ProximityTokenMerger):
                         wordOffs = val['wordOffs']
                     except:
                         wordOffs = []
-                    
+
                     if t in new:
                         new[t]['occurences'] += val['occurences']
                     else:
@@ -103,8 +103,9 @@ class OffsetProximityTokenMerger(ProximityTokenMerger):
                     try:
                         if len(wordOffs):
                             pls = [(pl, wordOffs[x], posns[x])
-                                  for pl in val['proxLoc']
-                                  ]
+                                   for pl
+                                   in val['proxLoc']
+                                   ]
                         else:
                             pls = [(pl, x, posns[x]) for pl in val['proxLoc']]
                         for p in pls:
@@ -113,10 +114,10 @@ class OffsetProximityTokenMerger(ProximityTokenMerger):
                         new[t]['positions'].extend(val['positions'])
                     x += 1
         return new
-        
-        
+
+
 class RangeTokenMerger(SimpleTokenMerger):
-    
+
     _possibleSettings = {
         'char': {
             'docs': ('Character to use as the interval designator. Defaults '
@@ -124,7 +125,7 @@ class RangeTokenMerger(SimpleTokenMerger):
             'type': str
         }
     }
-    
+
     def __init__(self, session, config, parent):
         SimpleTokenMerger.__init__(self, session, config, parent)
         self.char = self.get_setting(session, 'char', '/')
@@ -132,11 +133,11 @@ class RangeTokenMerger(SimpleTokenMerger):
 
 class SequenceRangeTokenMerger(RangeTokenMerger):
     """Merges tokens into a range for use in RangeIndexes.
-    
+
     Assumes that we've tokenized a single value into pairs,
     which need to be concatenated into ranges.
     """
-    
+
     def process_hash(self, session, data):
         new = {}
         for d, val in data.iteritems():
@@ -151,17 +152,17 @@ class SequenceRangeTokenMerger(RangeTokenMerger):
                     new[newkey]['occurences'] += 1
                 else:
                     nval = val.copy()
-                    nval['text'] = newkey                
+                    nval['text'] = newkey
                     new[newkey] = nval
         return new
 
 
 class MinMaxRangeTokenMerger(RangeTokenMerger):
     """Merges tokens into a range for use in RangeIndexes.
-    
+
     Uses a forward slash (/) as the interval designator after ISO 8601.
     """
-    
+
     def process_hash(self, session, data):
         keys = data.keys()
         if (not len(keys)):
@@ -186,7 +187,7 @@ class NGramTokenMerger(SimpleTokenMerger):
     def __init__(self, session, config, parent):
         SimpleTokenMerger.__init__(self, session, config, parent)
         self.n = self.get_setting(session, 'nValue', 2)
-               
+
     def process_hash(self, session, data):
         kw = {}
         n = self.n
@@ -211,7 +212,7 @@ class ReconstructTokenMerger(SimpleTokenMerger):
         kw = {}
         for (k, val) in data.iteritems():
             pl = 'charOffsets' in val
-            # FIXME: XXX for faked offsets 
+            # FIXME: XXX for faked offsets
             pl = 0
             currLen = 0
             new = []
@@ -248,7 +249,7 @@ class PhraseTokenMerger(ProximityTokenMerger):
         elif not os.path.exists(mp):
             msg = " mergeHashPickle path on %s does not exist" % self.id
             raise FileDoesNotExistException(msg)
-            
+
         inh = file(mp)
         data = inh.read()
         inh.close()
@@ -262,7 +263,7 @@ class PhraseTokenMerger(ProximityTokenMerger):
                 merging = []
                 for t in val['text']:
                     # Check if t in self.mergeHash
-                    if self.mergeHash.has_key(t) and len(val['text']) > x + 1:
+                    if t in self.mergeHash and len(val['text']) > x + 1:
                         nexts = self.mergeHash[t]
                         next = val['text'][x + 1]
                         if next in nexts:

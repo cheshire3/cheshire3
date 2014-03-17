@@ -10,7 +10,13 @@ class Session:
     database = ""
     environment = ""
 
-    def __init__(self, user=None, logger=None, task="", database="", environment="terminal"):
+    def __init__(self,
+                 user=None,
+                 logger=None,
+                 task="",
+                 database="",
+                 environment="terminal"
+                 ):
         self.user = user
         self.logger = logger
         self.task = task

@@ -83,7 +83,8 @@ to provide documentation for their own custom object configurations.
 
 from __future__ import absolute_import
 
-import sys, os
+import os
+import sys
 
 # Tests for Python 3.0 incompatibility
 #sys.py3kwarning = True
@@ -114,7 +115,7 @@ __all__ = ['cqlParser', 'database', 'document', 'documentFactory',
            ]
 
 # Check for user-specific Cheshire3 server directory
-_user_cheshire3_dir = os.path.expanduser('~/.cheshire3-server') 
+_user_cheshire3_dir = os.path.expanduser('~/.cheshire3-server')
 if not os.path.exists(_user_cheshire3_dir):
     # Create it and sub-dirs for:
     # Database plugins

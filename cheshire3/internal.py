@@ -75,7 +75,7 @@ def get_api(object, all=False):
         if nm[0] == '_':
             continue
         aspec = inspect.getargspec(fn)
-        if len(aspec.args) > 1 and aspec.args[1] == 'session':            
+        if len(aspec.args) > 1 and aspec.args[1] == 'session':
             if all:
                 names.append(nm)
             else:
@@ -94,7 +94,7 @@ def get_subpackages():
 
 
 class Architecture(object):
-    """Class to facilitate Architecture Introspection.""" 
+    """Class to facilitate Architecture Introspection."""
 
     moduleObjects = []
     classDefns = []
@@ -182,7 +182,7 @@ class Architecture(object):
             try:
                 for (k, v) in cls._possiblePaths.iteritems():
                     if not k in paths:
-                        paths[k] = v                        
+                        paths[k] = v
                 for (k, v) in cls._possibleSettings.iteritems():
                     if not k in settings:
                         settings[k] = v
@@ -193,7 +193,7 @@ class Architecture(object):
                 # not a c3object, eg mix-ins/interfaces/etc
                 if cls.__name__ == "ArrayIndex":
                     raise
-                
+
                 continue
             bases.extend(list(cls.__bases__))
         return (paths, settings, defaults)

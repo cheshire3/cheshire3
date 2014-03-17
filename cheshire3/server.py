@@ -11,11 +11,13 @@ from lxml.builder import ElementMaker
 from cheshire3.baseObjects import Server
 from cheshire3.bootstrap import BSLxmlParser, BootstrapDocument
 from cheshire3.configParser import C3Object
-from cheshire3.exceptions import (ConfigFileException,
-                                  ObjectDoesNotExistException,
-                                  XMLSyntaxError,
-                                  FileSystemException,
-                                  FileDoesNotExistException)
+from cheshire3.exceptions import (
+    ConfigFileException,
+    ObjectDoesNotExistException,
+    XMLSyntaxError,
+    FileSystemException,
+    FileDoesNotExistException
+    )
 from cheshire3.internal import cheshire3Root, CONFIG_NS
 
 
@@ -98,12 +100,13 @@ class SimpleServer(Server):
             raise ConfigFileException(msg)
         # Generate plugin XML
         plugin = E.config(
-                         E.subConfigs(
-                             E.path({'type': "database", 'id': dbid},
-                                    file_path
-                             )
-                         )
-                     )
+            E.subConfigs(
+                E.path(
+                    {'type': "database", 'id': dbid},
+                    file_path
+                )
+            )
+        )
         # Try to do this by writing config plugin file if possible
         serverDefaultPath = self.get_path(session,
                                           'defaultPath',
@@ -124,11 +127,13 @@ class SimpleServer(Server):
                        "".format(os.path.join(userSpecificPath, pluginPath)))
                 self.log_critical(session, msg)
                 raise FileSystemException(msg)
-        pluginfh.write(etree.tostring(plugin,
-                                      pretty_print=True,
-                                      encoding="utf-8"
-                                      )
-                      )
+        pluginfh.write(
+            etree.tostring(
+                plugin,
+                pretty_print=True,
+                encoding="utf-8"
+            )
+        )
         pluginfh.close()
         self.log_info(session,
                       "Database configured in {0} registered with Cheshire3 "

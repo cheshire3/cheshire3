@@ -23,10 +23,12 @@ class SimpleDocumentStore(DocumentStore):
         'inPreParser': {
             'docs': ("Identifier for a preParser through which to pass the "
                      "documents being ingested."
-        )},
+                     )
+        },
         'outPreParser': {
             'docs': ("Identifier for a preParser through which to pass the "
-                     "documents being requested")
+                     "documents being requested"
+                     )
         }
     }
 

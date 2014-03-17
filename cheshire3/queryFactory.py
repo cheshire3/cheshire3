@@ -17,11 +17,11 @@ class CqlQueryStream(QueryStream):
 
 class Cheshire2QueryStream(QueryStream):
     u"""A QueryStream to process queries in the Cheshire 2 Query Syntax.
-    
+
 http://cheshire.berkeley.edu/cheshire2.html#zfind
 
 top        ::= query ['resultsetid' name]
-query      ::= query boolean clause | clause 
+query      ::= query boolean clause | clause
 clause     ::=  '(' query ')'
                | attributes [relation] term
                | resultset
@@ -33,8 +33,7 @@ relation   ::= '>' | '<' | ...
 [bib1 1=5, bib1 3=6] > term and title @ fish
     """
 
-    booleans = {
-                'AND': 'and',
+    booleans = {'AND': 'and',
                 '.AND.': 'and',
                 '&&': 'and',
                 'OR': 'or',
@@ -46,9 +45,8 @@ relation   ::= '>' | '<' | ...
                 '.ANDNOT.': 'not',
                 '!!': 'not'
                 }
-    
-    relations = {
-                 '<': '<',
+
+    relations = {'<': '<',
                  'LT': '<',
                  '.LT.': '<',
                  '<=': '<=',
@@ -90,7 +88,7 @@ relation   ::= '>' | '<' | ...
                  # relevance feedback
                  '@*': 'all/rel.algorithm=trec2/rel.feedback',
                  '.TREC2FBK.': 'all/rel.algorithm=trec2/rel.feedback',
-                 # Okapi BM-25 for result ranking  
+                 # Okapi BM-25 for result ranking
                  '@+': 'all/rel.algorithm=okapi',
                  '.OKAPI.': 'all/rel.algorithm=okapi',
                  # TF-IDF for result ranking
@@ -100,40 +98,39 @@ relation   ::= '>' | '<' | ...
                  '@&': 'all/rel.algorithm=lucene',
                  '.LUCENE.': 'all/rel.algorithm=lucene',
                  # CORI algorithm for result ranking
-                 # -- N.B. primarily intended for collection summary data 
+                 # -- N.B. primarily intended for collection summary data
                  # (e.g. distributed search)
                  '@#': 'all/rel.algorithm=cori',
                  '.CORI.': 'all/rel.algorithm=cori'
                  }
-    
+
     geoRelations = {'>#<': 'within',
                     '.FULLY_ENCLOSED_WITHIN.': 'within',
                     '<#>': 'encloses',
                     '.ENCLOSES.': 'encloses',
-#                    '>=<': 7,
-#                    '.OVERLAPS.': 7,
-#                    '<>#': 10,
-#                    '.OUTSIDE_OF.': 10,
-#                    '+-+': 11
-#                    '.NEAR.': 11,
-#                    '.#.': 12,
-#                    '.MEMBERS_CONTAIN.': 12,
-#                    '!.#.': 13,
-#                    '.MEMBERS_NOT_CONTAIN.': 13,
-#                    ':<:': 14,
-#                    '.BEFORE.': 14,
-#                    ':<=:': 15,
-#                    '.BEFORE_OR_DURING.': 15,
-#                    ':=:': 16,
-#                    '.DURING.': 16,
-#                    ':>=:': 17,
-#                    '.DURING_OR_AFTER.': 17,
-#                    ':>:': 18,
-#                    '.AFTER.': 18
-                    }
-    
-    proxBooleans = {
-                    '!PROX': (2, 0, 2),  # prox
+#                     '>=<': 7,
+#                     '.OVERLAPS.': 7,
+#                     '<>#': 10,
+#                     '.OUTSIDE_OF.': 10,
+#                     '+-+': 11
+#                     '.NEAR.': 11,
+#                     '.#.': 12,
+#                     '.MEMBERS_CONTAIN.': 12,
+#                     '!.#.': 13,
+#                     '.MEMBERS_NOT_CONTAIN.': 13,
+#                     ':<:': 14,
+#                     '.BEFORE.': 14,
+#                     ':<=:': 15,
+#                     '.BEFORE_OR_DURING.': 15,
+#                     ':=:': 16,
+#                     '.DURING.': 16,
+#                     ':>=:': 17,
+#                     '.DURING_OR_AFTER.': 17,
+#                     ':>:': 18,
+#                     '.AFTER.': 18
+    }
+
+    proxBooleans = {'!PROX': (2, 0, 2),  # prox
                     '!ADJ': (2, 0, 2),   # prox/unit=word/distance=1
                     '!NEAR': (20, 0, 2),  # err, what counts as near
                     '!FAR': (20, 0, 4),  # err, what counts as far
@@ -142,15 +139,15 @@ relation   ::= '>' | '<' | ...
                     '!ONEAR': (20, 1, 2),  # err, what counts as near
                     '!OFAR': (20, 1, 4)  # err, what counts as far
                     }
-    
+
     def parse(self, session, data, codec, db):
         pass
-    
-    #- end Cheshire2QueryStream() ---------------------------------------------
+
+    #- end Cheshire2QueryStream() --------------------------------------------
 
 
 class SimpleQueryFactory(QueryFactory):
-    
+
     streamHash = {}
 
     def __init__(self, session, config, parent):
@@ -171,8 +168,8 @@ class SimpleQueryFactory(QueryFactory):
 
 
 streamHash = {
-              'cql': CqlQueryStream
-              }
+    'cql': CqlQueryStream
+}
 
 for format, cls in streamHash.iteritems():
     SimpleQueryFactory.register_stream(format, cls)

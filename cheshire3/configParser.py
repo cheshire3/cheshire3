@@ -20,25 +20,31 @@ from cheshire3.bootstrap import BSParser, BootstrapDocument
 from cheshire3.bootstrap import BSLxmlParser
 from cheshire3.exceptions import *
 from cheshire3.permissionHandler import PermissionHandler
-from cheshire3.internal import defaultArchitecture, get_api, cheshire3Home,\
-                               cheshire3Root, cheshire3Dbs, cheshire3Www,\
-                               CONFIG_NS
+from cheshire3.internal import (
+    defaultArchitecture,
+    get_api,
+    cheshire3Home,
+    cheshire3Root,
+    cheshire3Dbs,
+    cheshire3Www,
+    CONFIG_NS
+    )
 
 
 cheshire3Paths = {'cheshire3Home': cheshire3Home,
                   'cheshire3Root': cheshire3Root,
                   'cheshire3Dbs': cheshire3Dbs,
                   'cheshire3Www': cheshire3Www
-                  } 
+                  }
 
 
 class CaselessDictionary(dict):
     """A case-insensitive dictionary.
-    
-    A dictionary that is case-insensitive when searching, but also preserves 
+
+    A dictionary that is case-insensitive when searching, but also preserves
     the keys as inserted.
     """
-    
+
     def __init__(self, initval={}):
         if isinstance(initval, dict):
             for key, value in initval.iteritems():
@@ -46,13 +52,13 @@ class CaselessDictionary(dict):
         elif isinstance(initval, list):
             for (key, value) in initval:
                 self.__setitem__(key, value)
-            
+
     def __contains__(self, key):
         return dict.__contains__(self, key.lower())
-  
+
     def __getitem__(self, key):
-        return dict.__getitem__(self, key.lower())['val'] 
-  
+        return dict.__getitem__(self, key.lower())['val']
+
     def __setitem__(self, key, value):
         return dict.__setitem__(self, key.lower(), {'key': key, 'val': value})
 
@@ -63,32 +69,32 @@ class CaselessDictionary(dict):
             return default
         else:
             return v['val']
-    
+
     def items(self):
         return [(v['key'], v['val']) for v in dict.itervalues(self)]
-    
+
     def keys(self):
         return [v['key'] for v in dict.itervalues(self)]
-    
+
     def values(self):
         return [v['val'] for v in dict.itervalues(self)]
-    
+
     def iteritems(self):
         for v in dict.itervalues(self):
             yield v['key'], v['val']
-        
+
     def iterkeys(self):
         for v in dict.itervalues(self):
             yield v['key']
-        
+
     def itervalues(self):
         for v in dict.itervalues(self):
             yield v['val']
-    
+
 
 class C3Object(object):
     """Abstract Base Class for Cheshire3 Objects."""
-    
+
     id = ""
     version = ""
     complexity = ""
@@ -109,7 +115,7 @@ class C3Object(object):
     unresolvedObjects = {}
     _settings = {}
     _defaults = {}
-    
+
     # temp storage
     _includeConfigStores = []
     _objectRefs = []
@@ -246,8 +252,10 @@ class C3Object(object):
                 elif (child2.localName == "objects"):
                     # record object ref to instantiate
                     for obj in child2.childNodes:
-                        if (obj.nodeType == elementType and
-                            obj.localName == "path"):
+                        if (
+                            obj.nodeType == elementType and
+                            obj.localName == "path"
+                        ):
                             type = obj.getAttributeNS(None, 'type')
                             id = obj.getAttributeNS(None, 'ref')
                             self._objectRefs.append((id, type))
@@ -271,8 +279,10 @@ class C3Object(object):
                     raise ConfigFileException(msg)
 
             elif mod.nodeType == elementType and mod.localName == "path":
-                if (mod.hasAttributeNS(None, 'type') and
-                    mod.getAttributeNS(None, 'type') == 'includeConfigs'):
+                if (
+                    mod.hasAttributeNS(None, 'type') and
+                    mod.getAttributeNS(None, 'type') == 'includeConfigs'
+                ):
                     # Import into our space
                     if (mod.hasAttributeNS(None, 'ref')):
                         # <path type="includeConfigs" ref="configStore"/>
@@ -421,11 +431,11 @@ class C3Object(object):
         self.version = ""
         self.complexity = ""
         self.stability = ""
-        
+
         self.initTime = time.time()
-        
+
         pathObjects = {}
-        
+
         # LXML
         if hasattr(config, 'attrib'):
             self.id = config.attrib.get('id', '')
@@ -451,7 +461,7 @@ class C3Object(object):
                                 self.pathCheckSums[pt] = [(ct, e2.text)]
                         else:
                             self.checkSums[ct] = e2.text
-                    
+
                 elif e.tag in ['paths', '{%s}paths' % CONFIG_NS]:
                     for e2 in e.iterchildren(tag=etree.Element):
                         try:
@@ -493,9 +503,9 @@ class C3Object(object):
                     self.docstring = e.text
                 else:
                     self._handleLxmlConfigNode(session, e)
-            
+
             del walker
-            
+
         else:
             if (config.hasAttributeNS(None, 'id')):
                 self.id = config.getAttributeNS(None, 'id')
@@ -527,8 +537,10 @@ class C3Object(object):
 
                     elif (child.localName == "objects"):
                         for obj in child.childNodes:
-                            if (obj.nodeType == elementType and
-                                obj.localName == "path"):
+                            if (
+                                obj.nodeType == elementType and
+                                obj.localName == "path"
+                            ):
                                 type = obj.getAttributeNS(None, 'type')
                                 id = obj.getAttributeNS(None, 'ref')
                                 self._objectRefs.append((id, type))
@@ -558,14 +570,14 @@ class C3Object(object):
                         self.docstring = getFirstData(child)
                     else:
                         self._handleConfigNode(session, child)
-        
+
         if ('pythonPath' in self.paths):
             sys.path.append(self.paths['pythonPath'][1])
 
         # Allow any object to be set to debug
         # Functionality of this dependent on object
         self.debug = self.get_setting(session, "debug", 0)
-        
+
         for p in self.permissionHandlers.keys():
             if p[0:5] == 'c3fn:':
                 self.add_auth(p[5:])
@@ -604,7 +616,7 @@ class C3Object(object):
             code = inspect.getsource(self.__class__)
             for (ct, val) in self.checkSums.items():
                 m = hashlib.new(ct)
-                m.update(code)               
+                m.update(code)
                 digest = m.hexdigest()
                 if digest != val:
                     raise IntegrityException(self.id + ": " + digest)
@@ -622,7 +634,7 @@ class C3Object(object):
                             dp = self.get_path('session', 'executablePath', '')
                             if not dp:
                                 dp = getShellResult('which {0}'.format(fn))
-                      
+
                         else:
                             dp = self.get_path(session, 'defaultPath')
                         fn = os.path.join(dp, fn)
@@ -635,7 +647,7 @@ class C3Object(object):
                     if digest != val:
                         msg = "%s/%s (%s): %s" % (self.id, pt, fn, digest)
                         raise IntegrityException(msg)
-            
+
         # Now check for configStore objects
 ##         for csid in self._includeConfigStores:
 ##             confStore = self.get_object(session, csid)
@@ -662,14 +674,14 @@ class C3Object(object):
     def get_setting(self, session, id, default=None):
         """Return the value for a setting on this object."""
         return self.settings.get(id, default)
-    
-    def get_default(self, session, id, default=None): 
+
+    def get_default(self, session, id, default=None):
         """Return the default value for an option on this object"""
         return self.defaults.get(id, default)
 
     def get_object(self, session, id):
         """Return the object with the given id.
-        
+
         Searches first within this object's scope, or search upwards for it.
         """
         if (id in self.objects):
@@ -711,7 +723,8 @@ class C3Object(object):
             except (TypeError, AttributeError):
                 pass
             # Special handling for defaultPath :/
-            if (id == "defaultPath" and
+            if (
+                id == "defaultPath" and
                 not (urlsplit(path).scheme or os.path.isabs(path))
             ):
                 p1 = self.parent.get_path(session, id, default)
@@ -742,9 +755,11 @@ class C3Object(object):
         else:
             names = [name]
         for name in names:
-            if (hasattr(self, name) and
+            if (
+                hasattr(self, name) and
                 callable(getattr(self, name)) and
-                name[0] != '_'):
+                name[0] != '_'
+            ):
                 func = getattr(self, name)
                 setattr(self, "__postlog_%s" % (name), getattr(self, name))
                 code = """
@@ -768,15 +783,19 @@ def mylogfn(self, *args, **kw):
         else:
             names = [name]
         for name in names:
-            if (hasattr(self, name) and callable(getattr(self, name)) and
-                name[0] != '_' and hasattr(self, '__postlog_%s' % name)):
+            if (
+                hasattr(self, name) and callable(getattr(self, name)) and
+                name[0] != '_' and hasattr(self, '__postlog_%s' % name)
+            ):
                 setattr(self, name, getattr(self, '__postlog_%s' % name))
                 delattr(self, '__postlog_%s' % name)
 
     def add_auth(self, session, name):
         """Add an authorisation layer on top of a named function."""
-        if (hasattr(self, name) and callable(getattr(self, name)) and
-            name[0] != '_'):
+        if (
+            hasattr(self, name) and callable(getattr(self, name)) and
+            name[0] != '_'
+        ):
             func = getattr(self, name)
             setattr(self, "__postauth_%s" % (name), func)
             code = """\
@@ -786,7 +805,7 @@ def myauthfn(self, session, *args, **kw):
         if not session or not session.user:
             raise PermissionException('Authenticated user required to call %s')
         if not p.hasPermission(session, session,user):
-            raise PermissionException('Permission required to call %s')   
+            raise PermissionException('Permission required to call %s')
     return self.__postauth_%s(*args, **kw);
 """ % (name, name, name, name)
             exec(code)
@@ -800,8 +819,10 @@ def myauthfn(self, session, *args, **kw):
         else:
             names = [name]
         for name in names:
-            if (hasattr(self, name) and callable(getattr(self, name)) and
-                name[0] != '_' and hasattr(self, '__postauth_%s' % name)):
+            if (
+                hasattr(self, name) and callable(getattr(self, name)) and
+                name[0] != '_' and hasattr(self, '__postauth_%s' % name)
+            ):
                 setattr(self, name, getattr(self, '__postauth_%s' % name))
                 delattr(self, '__postauth_%s' % name)
 
