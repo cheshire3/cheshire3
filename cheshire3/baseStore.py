@@ -380,7 +380,7 @@ class SimpleStore(C3Object, SummaryObject):
                                      session, 
                                      cmax,
                                      locals().get(cmax,
-                                     chunkByThreshold)
+                                     chunkThreshold)
                 )
             else:
                 # Generic chunking
