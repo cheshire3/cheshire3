@@ -11,10 +11,15 @@ except ImportError:
 from code import InteractiveConsole
 
 from cheshire3.internal import cheshire3Version
-from cheshire3.commands.cmd_utils import Cheshire3ArgumentParser, \
-                                         identify_database
-from cheshire3.licensing import cheshire3_license, cheshire3_license_text,\
-                                marc_utils_license
+from cheshire3.commands.cmd_utils import (
+    Cheshire3ArgumentParser,
+    identify_database
+    )
+from cheshire3.licensing import (
+    cheshire3_license,
+    cheshire3_license_text,
+    marc_utils_license
+    )
 
 
 class Cheshire3Console(InteractiveConsole):
@@ -24,11 +29,11 @@ class Cheshire3Console(InteractiveConsole):
         InteractiveConsole.__init__(self, locals_, filename)
         # Standard Cheshire3 initialization code
         init_code_lines = [
-           'from cheshire3.session import Session',
-           'from cheshire3.server import SimpleServer',
-           'from cheshire3.exceptions import *',
-           'session = Session()',
-           'server = SimpleServer(session, "{0}")'.format(args.serverconfig),
+            'from cheshire3.session import Session',
+            'from cheshire3.server import SimpleServer',
+            'from cheshire3.exceptions import *',
+            'session = Session()',
+            'server = SimpleServer(session, "{0}")'.format(args.serverconfig),
         ]
         # Seed console with standard initialization code
         for line in init_code_lines:

@@ -5,10 +5,14 @@ import os
 
 from cheshire3.server import SimpleServer
 from cheshire3.session import Session
-from cheshire3.exceptions import ObjectDoesNotExistException,\
+from cheshire3.exceptions import (
+    ObjectDoesNotExistException,
     MissingDependencyException
-from cheshire3.commands.cmd_utils import Cheshire3ArgumentParser, \
-                                         identify_database
+    )
+from cheshire3.commands.cmd_utils import (
+    Cheshire3ArgumentParser,
+    identify_database
+    )
 
 
 def main(argv=None):
@@ -27,11 +31,12 @@ def main(argv=None):
             server.log_critical(session, e.message)
             return 1
         server.log_debug(
-            session, 
-            "database identifier not specified, discovered: {0}".format(dbid))
+            session,
+            "database identifier not specified, discovered: {0}".format(dbid)
+        )
     else:
         dbid = args.database
-        
+
     try:
         db = server.get_object(session, dbid)
     except ObjectDoesNotExistException:
@@ -45,13 +50,19 @@ Please provide a different database identifier using the --database option.
         docFac = db.get_object(session, 'defaultDocumentFactory')
         for dataArg in args.data:
             try:
-                docFac.load(session, dataArg,
-                            args.cache, args.format, args.tagname, args.codec)
+                docFac.load(session,
+                            dataArg,
+                            args.cache,
+                            args.format,
+                            args.tagname,
+                            args.codec
+                            )
             except MissingDependencyException as e:
                 server.log_critical(session, e.reason)
-                missingDependencies =  e.dependencies
+                missingDependencies = e.dependencies
                 raise MissingDependencyException('cheshire3-load script',
-                                                 missingDependencies)
+                                                 missingDependencies
+                                                 )
             wf = db.get_object(session, 'buildIndexWorkflow')
             wf.process(session, docFac)
 
@@ -62,10 +73,12 @@ argparser = Cheshire3ArgumentParser(conflict_handler='resolve',
 argparser.add_argument('-d', '--database', type=str,
                        action='store', dest='database',
                        default=None, metavar='DATABASE',
-                       help="identifier of Cheshire3 database")
+                       help="identifier of Cheshire3 database"
+                       )
 argparser.add_argument('data', type=str, action='store', nargs='+',
-                       help="data to load into the Cheshire3 database.")
-argparser.add_argument('-l', '--cache-level', type=int, 
+                       help="data to load into the Cheshire3 database."
+                       )
+argparser.add_argument('-l', '--cache-level', type=int,
                        action='store', dest='cache',
                        default=0, metavar='CACHE',
                        help=(
@@ -77,25 +90,26 @@ argparser.add_argument('-l', '--cache-level', type=int,
 argparser.add_argument('-f', '--format', type=str,
                        action='store', dest='format',
                        default=None, metavar='FORMAT',
-                       help=(
-                           "format of the data parameter. For details, see:" 
-                           "http://github.com/cheshire3/cheshire3#loading-data"
-                           )
+                       help=("format of the data parameter. For details, "
+                             "see: http://docs.cheshire3.org/en/latest/"
+                             "commands.html#cheshire3-load"
+                             )
                        )
 argparser.add_argument('-t', '--tagname', type=str,
                        action='store', dest='tagname',
                        default=None, metavar='TAGNAME',
-                       help=("the name of the tag which starts (and ends!) a "
-                             "record. This is useful for extracting sections "
-                             "of files as Documents and ignoring the rest of "
-                             "the XML in the file.")
+                       help=("the name of the tag which starts (and ends!) "
+                             "a record. This is useful for extracting "
+                             "sections of files as Documents and ignoring "
+                             "the rest of the XML in the file."
+                             )
                        )
 argparser.add_argument('-c', '--codec', type=str,
                        action='store', dest='codec',
                        default=None, metavar='CODEC',
                        help=("the name of the codec in which the data is "
                              "encoded. Commonly 'ascii' or 'utf-8'"
-                           )
+                             )
                        )
 
 session = None

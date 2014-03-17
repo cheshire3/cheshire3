@@ -6,11 +6,21 @@ import os
 from cheshire3.server import SimpleServer
 from cheshire3.session import Session
 from cheshire3.exceptions import ObjectDoesNotExistException
-from cheshire3.commands.cmd_utils import Cheshire3ArgumentParser, \
-identify_database
+from cheshire3.commands.cmd_utils import (
+    Cheshire3ArgumentParser,
+    identify_database
+    )
 
 
 def _formatResultSetItem(resultSetItem):
+    """Format a resultSetItem as a string.
+
+    :param resultSetItem: ResultSetItem to format
+    :type resultSetItem: instance/sub-class of
+        cheshire3.baseObjects.ResultSetItem
+    :returns: formatted item
+    :rtype: str
+    """
     rec = resultSetItem.fetch_record(session)
     # Try to get a title using a selector
     ext = db.get_object(session, 'SimpleExtractor')
@@ -43,15 +53,19 @@ def _formatResultSetItem(resultSetItem):
     return "{0} {1}\n".format(resultSetItem.resultSetPosition + 1, title)
 
 
-def _format_resultSet(resultSet, outStream=sys.stdout, 
+def _format_resultSet(resultSet, outStream=sys.stdout,
                       maximumRecords=10, startRecord=1):
     """Format and write resultSet to outstream.
-    
-    resultSet := instance of (sub-class of) cheshire3.baseObjects.ResultSet
-    outStream := file-like object for writing to. defaults to sys.stdout
-    maxRecords := maximum number of hits to display (int)
-    startRecord := where in the recordStore to start from (enables result 
-                   paging) first record in resultSet = 1 (not 0) 
+
+    :param resultSet: ResultSet to format
+    :type resultSet: instance/sub-class of cheshire3.baseObjects.ResultSet
+    :param outStream: stream to write output. defaults to sys.stdout.
+    :type outStream: file-like object.
+    :param maxRecords: maximum number of hits to display
+    :type maxRecords: int
+    :param startRecord: where in resultSet to start from (enables result
+        paging). First record in resultSet = 1 (not 0)
+    :type startRecord: int
     """
     hits = len(resultSet)
     outStream.write("searched: {0}\n".format(resultSet.query.toCQL()))
@@ -83,11 +97,12 @@ def main(argv=None):
             server.log_critical(session, e.message)
             return 1
         server.log_debug(
-            session, 
-            "database identifier not specified, discovered: {0}".format(dbid))
+            session,
+            "database identifier not specified, discovered: {0}".format(dbid)
+        )
     else:
         dbid = args.database
-        
+
     try:
         db = server.get_object(session, dbid)
     except ObjectDoesNotExistException:
