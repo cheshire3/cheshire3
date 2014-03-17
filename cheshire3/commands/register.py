@@ -31,7 +31,7 @@ def main(argv=None):
     # Tell the server to register the config file
     server.register_databaseConfigFile(session, args.configfile)
     return 0
-        
+
 
 argparser = Cheshire3ArgumentParser(conflict_handler='resolve',
                                     description=__doc__.splitlines()[0])

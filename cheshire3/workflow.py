@@ -9,8 +9,11 @@ from lxml import etree
 from cheshire3.baseObjects import Workflow, Server
 from cheshire3.configParser import C3Object
 from cheshire3.utils import elementType, flattenTexts
-from cheshire3.exceptions import C3Exception, ConfigFileException,\
-                                 ObjectDoesNotExistException
+from cheshire3.exceptions import (
+    C3Exception,
+    ConfigFileException,
+    ObjectDoesNotExistException
+    )
 from cheshire3.internal import CONFIG_NS
 
 
@@ -467,9 +470,10 @@ class CachingWorkflow(SimpleWorkflow):
 
     def _handleGlobals(self, node):
         code = SimpleWorkflow._handleGlobals(self, node)
-        code.extend(
-                    ["if not self.objcache:",
-                     "    self.load_cache(session, db)"])
+        code.extend(["if not self.objcache:",
+                     "    self.load_cache(session, db)"
+                     ]
+                    )
         return code
 
     def _handleLog(self, node):

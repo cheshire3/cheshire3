@@ -17,13 +17,24 @@ from lxml import etree
 import cheshire3.cqlParser as cql
 
 from cheshire3.baseObjects import Index, Session
-from cheshire3.utils import elementType, flattenTexts, vectorSimilarity,\
-                            SimpleBitfield
-from cheshire3.exceptions import ConfigFileException, QueryException, \
-                                 C3ObjectTypeError, PermissionException
+from cheshire3.utils import (
+    elementType,
+    flattenTexts,
+    vectorSimilarity,
+    SimpleBitfield
+)
+from cheshire3.exceptions import (
+    ConfigFileException,
+    QueryException,
+    C3ObjectTypeError,
+    PermissionException
+)
 from cheshire3.internal import CONFIG_NS
-from cheshire3.resultSet import SimpleResultSet, SimpleResultSetItem,\
-                                BitmapResultSet
+from cheshire3.resultSet import (
+    SimpleResultSet,
+    SimpleResultSetItem,
+    BitmapResultSet
+)
 from cheshire3.workflow import CachingWorkflow
 from cheshire3.xpathProcessor import SimpleXPathProcessor
 
@@ -162,12 +173,12 @@ class SimpleIndex(Index):
             'type': float
         },
         'okapi_constant_k1': {
-             "docs": "",
-             'type': float
+            "docs": "",
+            'type': float
         },
         'okapi_constant_k3': {
-             "docs": "",
-             'type': float
+            "docs": "",
+            'type': float
         },
         'noIndexDefault': {
             "docs": ("If true, the index should not be called from "
@@ -390,7 +401,7 @@ class SimpleIndex(Index):
             self.longStructSize = int(lss)
         else:
             #self.longStructSize = len(struct.pack('L', 1))
-            self.longStructSize = struct.calcsize('l')
+            self.longStructSize = struct.calcsize('<l')
 
         self.recordStoreSizes = self.get_setting(session,
                                                  'recordStoreSizes',
@@ -579,8 +590,10 @@ class SimpleIndex(Index):
         store = self.get_path(session, 'indexStore')
         matches = []
         rel = clause.relation
-        if (rel.prefix == 'cql' or
-            rel.prefixURI == 'info:srw/cql-context-set/1/cql-v1.1'):
+        if (
+            rel.prefix == 'cql' or
+            rel.prefixURI == 'info:srw/cql-context-set/1/cql-v1.1'
+        ):
             if (rel.value == 'scr'):
                 pm = db.get_path(session, 'protocolMap')
                 try:
@@ -594,8 +607,11 @@ class SimpleIndex(Index):
         for m in rel.modifiers:
             m.type.parent = clause
             m.type.resolvePrefix()
-            if (m.type.prefixURI.startswith(
-                                    'info:srw/cql-context-set/2/relevance')):
+            if (
+                m.type.prefixURI.startswith(
+                    'info:srw/cql-context-set/2/relevance'
+                )
+            ):
                 if m.type.value == "feedback":
                     try:
                         feedback = int(m.value)
@@ -603,10 +619,13 @@ class SimpleIndex(Index):
                         feedback = 1
 
         construct_resultSet = self.construct_resultSet
-        if (rel.value in ['any', 'all', '=', 'exact', 'window'] and
-            (rel.prefix == 'cql' or
-             rel.prefixURI == 'info:srw/cql-context-set/1/cql-v1.1'
-            )):
+        if (
+            rel.value in ['any', 'all', '=', 'exact', 'window'] and
+            (
+                rel.prefix == 'cql' or
+                rel.prefixURI == 'info:srw/cql-context-set/1/cql-v1.1'
+            )
+        ):
             for k, qHash in res.iteritems():
                 if k[0] == '^':
                     k = k[1:]
@@ -633,8 +652,10 @@ class SimpleIndex(Index):
                         # FIXME: need to do something cleverer than this if
                         # first character is masked. This implementation will
                         # be incredibly slow for these cases...
-                        if ((firstMask < len(k) - 1) or
-                            (k[firstMask] in ['?', '^'])):
+                        if (
+                            (firstMask < len(k) - 1) or
+                            (k[firstMask] in ['?', '^'])
+                        ):
                             # not simply right hand truncation
                             kRe = re.compile(self._regexify_wildcards(k))
                             mymatch = kRe.match
@@ -642,8 +663,10 @@ class SimpleIndex(Index):
                                               termList)
 
                     maskBase = self.resultSetClass(
-                                               session, [],
-                                               recordStore=self.recordStore)
+                        session,
+                        [],
+                        recordStore=self.recordStore
+                    )
                     maskClause = cql.parse(clause.toCQL())
                     maskClause.relation.value = u'any'
                     if (clause.relation.value == u'='):
@@ -701,8 +724,10 @@ class SimpleIndex(Index):
         if not matches:
             return base
         else:
-            if (clause.relation.value == "=" and not
-                isinstance(self, ProximityIndex)):
+            if (
+                clause.relation.value == "=" and not
+                isinstance(self, ProximityIndex)
+            ):
                 # Can't do proximity, treat as a search for 'all'
                 clause.relation.value = "all"
             rs = base.combine(session, matches, clause, db)
@@ -856,11 +881,12 @@ class SimpleIndex(Index):
         # results will end up with duplicates)
         try:
             fbrs = self.searchByExamples(
-                                 session,
-                                 sorted(rs, key=lambda x: x.weight)[:nRecs],
-                                 clause,
-                                 db,
-                                 nTerms)
+                session,
+                sorted(rs, key=lambda x: x.weight)[:nRecs],
+                clause,
+                db,
+                nTerms
+            )
         except ConfigFileException as e:
             self.log_warning(session,
                              "Unable to complete blind relevance feedback "
@@ -981,8 +1007,10 @@ class SimpleIndex(Index):
                 storeid = newData[n + 1]
                 replaced = 0
                 for x in range(3, len(currentData), 3):
-                    if (currentData[x] == docid and
-                        currentData[x + 1] == storeid):
+                    if (
+                        currentData[x] == docid and
+                        currentData[x + 1] == storeid
+                    ):
                         currentData[x + 2] = newData[n + 2]
                         replaced = 1
                         break
@@ -995,8 +1023,10 @@ class SimpleIndex(Index):
                 docid = newData[n]
                 storeid = newData[n + 1]
                 for x in range(0, len(currentData), 3):
-                    if (currentData[x] == docid and
-                        currentData[x + 1] == storeid):
+                    if (
+                        currentData[x] == docid and
+                        currentData[x + 1] == storeid
+                    ):
                         del currentData[x:(x + 3)]
                         break
             trecs = len(currentData) / 3
@@ -1312,10 +1342,10 @@ class ProximityIndex(SimpleIndex):
             item = ci(session, t[0], t[1], t[2])
             pi = t[3:]
             item.proxInfo = [
-                             [pi[x:(x + self.nProxInts)]]
-                             for x
-                             in range(0, len(pi), self.nProxInts)
-                            ]
+                [pi[x:(x + self.nProxInts)]]
+                for x
+                in range(0, len(pi), self.nProxInts)
+            ]
             item.resultSet = s
             rsilist.append(item)
         s.fromList(rsilist)
@@ -1545,10 +1575,9 @@ class RangeIndex(SimpleIndex):
             # Try to get process for relation/modifier, failing that relation,
             # fall back to that used for data
             for src in self.sources.get(
-                                        clause.relation.toCQL(),
-                                        self.sources.get(clause.relation.value,
-                                                         self.sources[u'data'])
-                                    ):
+                clause.relation.toCQL(),
+                self.sources.get(clause.relation.value, self.sources[u'data'])
+            ):
                 res.update(src[1].process(session, [[clause.term.value]]))
             store = self.get_path(session, 'indexStore')
             matches = []
@@ -1861,7 +1890,8 @@ class PassThroughIndex(SimpleIndex):
     def _handleLxmlConfigNode(self, session, node):
         # Source
         if node.tag in ['xpath', '{%s}xpath' % CONFIG_NS,
-                         'selector', '{%s}selector' % CONFIG_NS]:
+                        'selector', '{%s}selector' % CONFIG_NS
+                        ]:
             ref = node.attrib.get('{%s}ref' % CONFIG_NS,
                                   node.attrib.get('ref', ''))
             if ref:

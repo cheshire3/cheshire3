@@ -1,6 +1,10 @@
 
-import nltk
+try:
+    import nltk
+except ImportError:
+    nltk = None
 
+from cheshire3.exceptions import MissingDependencyException
 from cheshire3.tokenizer import SimpleTokenizer
 
 
@@ -114,6 +118,8 @@ class NltkPunktWordTokenizer(SimpleTokenizer):
 
     def __init__(self, session, config, parent):
         SimpleTokenizer.__init__(self, session, config, parent)
+        if nltk is None:
+            raise MissingDependencyException(self.objectType, 'nltk')
         self.punkt = nltk.tokenize.PunktWordTokenizer()
 
     def process_string(self, session, data):
@@ -123,6 +129,8 @@ class NltkPunktWordTokenizer(SimpleTokenizer):
 class NltkPunktSentenceTokenizer(SimpleTokenizer):
     def __init__(self, session, config, parent):
         SimpleTokenizer.__init__(self, session, config, parent)
+        if nltk is None:
+            raise MissingDependencyException(self.objectType, 'nltk')
         self.punkt = nltk.data.load('tokenizers/punkt/english.pickle')
 
     def process_string(self, session, data):

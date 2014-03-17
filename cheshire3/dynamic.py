@@ -21,7 +21,7 @@ def makeObjectFromDom(session, topNode, parentObject):
     except IndexError:
         # May have namespace
         try:
-            objectType = topNode.xpath('./c3:objectType/text()', 
+            objectType = topNode.xpath('./c3:objectType/text()',
                                        namespaces={'c3': CONFIG_NS})[0]
         except IndexError:
             from lxml import etree
@@ -109,7 +109,7 @@ def importObject(session, objectType):
     else:
         if isinstance(parentClass, ModuleType):
             raise ConfigFileException("%s defines a module, should define a "
-                                      "class within a module" % objectType) 
+                                      "class within a module" % objectType)
     return parentClass
 
 

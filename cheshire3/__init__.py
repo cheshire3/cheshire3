@@ -81,7 +81,10 @@ to provide documentation for their own custom object configurations.
 #from __future__ import print_function
 #from __future__ import unicode_literals
 
-import sys, os
+from __future__ import absolute_import
+
+import os
+import sys
 
 # Tests for Python 3.0 incompatibility
 #sys.py3kwarning = True
@@ -94,13 +97,13 @@ filterwarnings('ignore',
                'yacc'
                )
 
-import cheshire3.internal
+from .internal import cheshire3Version, get_subpackages
 
 home = os.environ.get("C3HOME")
 
 __name__ = "cheshire3"
 __package__ = "cheshire3"
-__version__ = "{0}.{1}.{2}".format(*cheshire3.internal.cheshire3Version)
+__version__ = "{0}.{1}.{2}".format(*cheshire3Version)
 __all__ = ['cqlParser', 'database', 'document', 'documentFactory',
            'documentStore', 'exceptions', 'extractor', 'index', 'indexStore',
            'internal', 'logger', 'normalizer', 'objectStore', 'parser',
@@ -112,7 +115,7 @@ __all__ = ['cqlParser', 'database', 'document', 'documentFactory',
            ]
 
 # Check for user-specific Cheshire3 server directory
-_user_cheshire3_dir = os.path.expanduser('~/.cheshire3-server') 
+_user_cheshire3_dir = os.path.expanduser('~/.cheshire3-server')
 if not os.path.exists(_user_cheshire3_dir):
     # Create it and sub-dirs for:
     # Database plugins
@@ -124,7 +127,7 @@ if not os.path.exists(_user_cheshire3_dir):
 
 # Import sub-packages to initiate on-init hooks
 # e.g. to add DocumentStreams, QueryStreams to base factories
-for sp in cheshire3.internal.get_subpackages():
+for sp in get_subpackages():
     # Don't catch errors here. Each sub-package is responsible for degrading
     # gracefully in absence of dependencies (i.e. don't fail until missing
     # functionality is explicitly called).

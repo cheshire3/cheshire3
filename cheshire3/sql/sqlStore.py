@@ -22,7 +22,7 @@ class SQLIter(object):
                  "".format(self.store.table)
                  )
         query = query.encode('utf-8')
-        with self._connect(store.database) as cxn:
+        with self._connect() as cxn:
             with cxn.cursor() as cur:
                 cur.execute(query)
                 self.idList = [row[0] for row in cur]
@@ -43,7 +43,7 @@ class SQLIter(object):
                          )
                 query = query.encode('utf-8')
                 with cxn.cursor() as cursor:
-                    cursor.execute(query, (self.idList[self.position]))
+                    cursor.execute(query, (self.idList[self.position],))
                     self.position += 1
                     d = cursor.fetchone()
                 while d and (d[0][:2] == "__"):
@@ -52,7 +52,7 @@ class SQLIter(object):
                              )
                     query = query.encode('utf-8')
                     with cxn.cursor() as cursor:
-                        cursor.execute(query, (self.idList[self.position]))
+                        cursor.execute(query, (self.idList[self.position],))
                         self.position += 1
                         d = self.cursor.fetchone()
                 if not d:
@@ -95,10 +95,13 @@ class SQLStore(SimpleStore):
         return SQLIter(self.session, self)
 
     def _verifyDatabases(self, session):
+        """Verify that necessary relation(s)/table(s) exists."""
         query = "SELECT identifier FROM {0} LIMIT 1".format(self.table)
-        try:
-            self._query(query)
-        except:
+        # Executing a query will only raise a db connect error
+        rows = self._query(query)
+        # rows == [] means initialized but empty
+        # rows == None means relations(s)/table(s) uninitialized
+        if rows is None:
             self._initialise(session)
 
     def _connect(self, session):
@@ -206,7 +209,7 @@ class SQLStore(SimpleStore):
         else:
             sid = str(id_)
         query = "DELETE FROM {0} WHERE identifier = %s".format(self.table)
-        self._query(query, (sid))
+        self._query(query, (sid,))
 
     def fetch_metadata(self, session, id_, mType):
         if (self.idNormalizer is not None):

@@ -79,7 +79,7 @@ class XMLSyntaxError(C3Exception):
 
 
 class MissingDependencyException(C3Exception):
-    
+
     def __init__(self, objectType="Unknown", dependencies=None):
         if isinstance(dependencies, list):
             self.dependencies = dependencies

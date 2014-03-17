@@ -41,9 +41,18 @@ class SimpleQueryStore(QueryStore):
         return q
 
     def store_query(self, session, query):
-        """Store query data, assuming query object has an id. Return the query."""
+        """Store and return the query.
+
+        Store query data, using the ``id`` attribute of the query object.
+        Return the query.
+
+        :param query: Query to store
+        :returns: query
+        :raises NotImplementedError: if ``query.id`` is missing or is NoneType
+
+        """
         if (not hasattr(query, 'id')) or (query.id is None):
-            # Where to get ID from??? 
+            # No ID
             raise NotImplementedError
 
         id = query.id

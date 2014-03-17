@@ -9,6 +9,7 @@ from lxml import etree
 
 from cheshire3.exceptions import XMLSyntaxError
 
+
 class BootstrapParser:
 
     def process_document(self, session, doc):

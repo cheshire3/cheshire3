@@ -17,7 +17,7 @@ from cheshire3.exceptions import ConfigFileException
 
 class FilepathTransformer(Transformer):
     """Returns record.id as an identifier, in raw SAX events.
-    
+
     For use as the inTransformer of a recordStore.
     """
     def process_record(self, session, rec):
@@ -35,32 +35,32 @@ class XmlTransformer(Transformer):
 
 class Bzip2XmlTransformer(Transformer):
     """Return a Document containing bzip2 compressed XML.
-    
+
     Return a Document containing the raw XML string of the record, compressed
     using the bzip2 algorithm.
     """
-    
+
     def process_record(self, session, rec):
         data = rec.get_xml(session)
         bzdata = bz2.compress(data)
         return StringDocument(bzdata, self.id)
-    
+
 
 class SaxTransformer(Transformer):
     def process_record(self, session, rec):
         sax = [x.encode('utf8') for x in rec.get_sax(session)]
         sax.append("9 " + pickle.dumps(rec.elementHash))
-        data = nonTextToken.join(sax)       
+        data = nonTextToken.join(sax)
         return StringDocument(data)
 
 
 class WorkflowTransformer(Transformer):
     """Transformer to execute a workflow."""
-    
+
     def __init__(self, session, config, parent):
         Transformer.__init__(self, session, config, parent)
         self.workflow = self.get_path(session, 'workflow')
-        
+
     def process_record(self, session, record):
         u"""Apply Workflow to the Record, return the resulting Document."""
         output = self.workflow.process(session, record)
@@ -68,17 +68,17 @@ class WorkflowTransformer(Transformer):
             output = StringDocument(output)
         elif isinstance(output, Record):
             output = StringDocument(output.get_xml(session))
-        
+
         return output
 
 
 class ComponentParentFetchingTransformer(Transformer):
     """Given a Cheshire3 component, fetch and return the parent Document.
-    
+
     Given a Cheshire3 component Record, fetch and return the data for its
     parent in a new Document.
     """
-    
+
     def process_record(self, session, record):
         # Get RecordStore and identifier of parent record
         try:
@@ -127,11 +127,11 @@ def myTimeFn(dummy):
     # call as <xsl:value-of select="c3fn:now()"/>
     # with c3fn defined as http://www.cheshire3.org/ns/function/xsl/
     return time.strftime("%Y-%m-%dT%H:%M:%SZ")
- 
+
 
 class LxmlXsltTransformer(Transformer):
     """XSLT transformer using Lxml implementation. Requires LxmlRecord.
-    
+
     Use Record's resultSetItem's proximity information to highlight query term
     matches.
     """
@@ -141,7 +141,7 @@ class LxmlXsltTransformer(Transformer):
             'docs': "Path to the XSLT file to use."
         }
     }
-    
+
     _possibleSettings = {
         'parameter': {
             'docs': "Parameters to be passed to the transformer."
@@ -154,13 +154,13 @@ class LxmlXsltTransformer(Transformer):
         if xfrPath is None:
             raise ConfigFileException("Missing path 'xsltPath' for "
                                       "{0}.".format(self.id))
-        
+
         if os.path.isabs(xfrPath):
             path = xfrPath
         else:
             dfp = self.get_path(session, "defaultPath")
             path = os.path.join(dfp, xfrPath)
-        
+
         ns = etree.FunctionNamespace(
             'http://www.cheshire3.org/ns/function/xsl/'
         )
@@ -182,7 +182,7 @@ class LxmlXsltTransformer(Transformer):
         dom = rec.get_dom(session)
         if (session.environment == 'apache'):
             self.txr = etree.XSLT(self.parsedXslt)
-            
+
         if self.params:
             result = self.txr(dom, **self.params)
         else:
@@ -192,9 +192,9 @@ class LxmlXsltTransformer(Transformer):
 
 class LxmlQueryTermHighlightingTransformer(Transformer):
     "Abstract Class for query term highlighting Transformers for LxmlRecords."
-    
+
     HIGHLIGHT_NS = "http://www.cheshire3.org/schemas/highlight/"
-    
+
     _possibleSettings = {
         'highlightTag': {
             'docs': ("Tag to indicate highlighted section (will be inserted "
@@ -212,7 +212,7 @@ class LxmlQueryTermHighlightingTransformer(Transformer):
                      'response is more important than complete tagging.')
         }
     }
-    
+
     def __init__(self, session, config, parent):
         Transformer.__init__(self, session, config, parent)
         htag = self.get_setting(session, 'highlightTag', None)
@@ -220,9 +220,9 @@ class LxmlQueryTermHighlightingTransformer(Transformer):
             self.highlightTag = 'c3:highlight'
             self.attrs = {'xmlns:c3': self.HIGHLIGHT_NS}
         else:
-            self.highlightTag = htag 
+            self.highlightTag = htag
             self.attrs = {}
-        
+
         tagAttrs = self.get_setting(session, 'tagAttrList', None)
         if tagAttrs is not None:
             for attr in tagAttrs.split(' '):
@@ -230,11 +230,11 @@ class LxmlQueryTermHighlightingTransformer(Transformer):
                 k = bits[0]
                 v = bits[1][1:-1]    # strip off "s
                 self.attrs[k] = v
-                
+
         self.breakElements = self.get_setting(session,
                                               'breakElementsList',
                                               '').split(' ')
-        
+
     def _insertHighlightElement(self, element, located, start, end):
         text = getattr(element, located)
         setattr(element, located, text[:start])
@@ -250,10 +250,10 @@ LxmlHighlighTxr = LxmlQueryTermHighlightingTransformer
 
 class LxmlPositionQueryTermHighlightingTransformer(LxmlHighlighTxr):
     """Return Document with search hits higlighted based on word position.
-    
+
     Use word position from Record's resultSetItem's proximity information to
     highlight query term matches.
-    
+
     Note Well: this can be unreliable when used in conjunction with stoplists.
     """
 
@@ -276,22 +276,28 @@ class LxmlOffsetQueryTermHighlightingTransformer(LxmlHighlighTxr):
             db = session.server.get_object(session, session.database)
         except:
             self.wordRe = re.compile(u"""
-              (?xu)                                            #verbose, unicode
-              (?:
-                [a-zA-Z0-9!#$%*/?|^{}`~&'+-=_]+@[0-9a-zA-Z.-]+ #email
-               |(?:[\w+-]+)?[+-]/[+-]                          #alleles
-               |\w+(?:-\w+)+(?:'(?:t|ll've|ll|ve|s|d've|d|re))?  #hypenated word (maybe 'xx on the end)
-               |[$\xa3\xa5\u20AC]?[0-9]+(?:[.,:-][0-9]+)+[%]?  #date/num/money/time
-               |[$\xa3\xa5\u20AC][0-9]+                        #single money
-               |[0-9]+(?=[a-zA-Z]+)                            #split: 8am 1Million
-               |[0-9]+%                                        #single percentage 
-               |(?:[A-Z]\.)+[A-Z\.]                            #acronym
-               |[oOd]'[a-zA-Z]+                                #o'clock, O'brien, d'Artagnan   
-               |[a-zA-Z]+://[^\s]+                             #URI
-               |\w+'(?:d've|d|t|ll've|ll|ve|s|re)              #don't, we've
-               |(?:[hH]allowe'en|[mM]a'am|[Ii]'m|[fF]o'c's'le|[eE]'en|[sS]'pose)
-               |[\w+]+                                         #basic words, including +
-              )""")
+            (?xu)                                        #verbose, unicode
+            (?:
+              [a-zA-Z0-9!#$%*/?|^{}`~&'+-=_]+@[0-9a-zA-Z.-]+ #email
+             |(?:[\w+-]+)?[+-]/[+-]                          #alleles
+             #hypenated word (maybe 'xx on the end)
+             |\w+(?:-\w+)+(?:'(?:t|ll've|ll|ve|s|d've|d|re))?
+             #date/num/money/time
+             |[$\xa3\xa5\u20AC]?[0-9]+(?:[.,:-][0-9]+)+[%]?
+             |[$\xa3\xa5\u20AC][0-9]+                        #single money
+             #split: 8am 1Million
+             |[0-9]+(?=[a-zA-Z]+)
+             #single percentage
+             |[0-9]+%
+             |(?:[A-Z]\.)+[A-Z\.]                            #acronym
+             #o'clock, O'brien, d'Artagnan
+             |[oOd]'[a-zA-Z]+
+             |[a-zA-Z]+://[^\s]+                             #URI
+             |\w+'(?:d've|d|t|ll've|ll|ve|s|re)              #don't, we've
+             |(?:[hH]allowe'en|[mM]a'am|[Ii]'m|[fF]o'c's'le|[eE]'en|[sS]'pose)
+             #basic words, including +
+             |[\w+]+
+            )""")
         else:
             self.wordRe = db.get_object(session,
                                         'RegexpFindOffsetTokenizer').regexp
@@ -403,22 +409,22 @@ class LxmlOffsetQueryTermHighlightingTransformer(LxmlHighlighTxr):
 
 class TemplatedTransformer(Transformer):
     """Trasnform a Record using a Selector and a Python string.Template.
-    
+
     Transformer to insert the output of a Selector into a template string
     containing place-holders.
-    
-    Template can be specified directly in the configuration using the 
-    template setting (whitespace is respected), or in a file using the 
-    templatePath path. If the template is specified in the configuration, 
+
+    Template can be specified directly in the configuration using the
+    template setting (whitespace is respected), or in a file using the
+    templatePath path. If the template is specified in the configuration,
     XML reserved characters (<, >, & etc.) must be escaped.
-    
+
     This can be useful for Record types that are not easily transformed using
     more standard mechanism (e.g. XSLT), a prime example being GraphRecords
-    
+
     Example
-    
+
     config:
-    
+
     <subConfig type="transformer" id="myTemplatedTransformer">
         <objectType>cheshire3.transformer.TemplatedTransformer</objectType>
         <paths>
@@ -431,9 +437,9 @@ class TemplatedTransformer(Transformer):
             </setting>
         </options>
     </subConfig>
-    
+
     selector config:
-    
+
     <subConfig type="selector" id="mySelector">
         <objectType>cheshire3.selector.XpathSelector</objectType>
         <source>
@@ -441,9 +447,9 @@ class TemplatedTransformer(Transformer):
             <location type="xpath">//author</location>
         </source>
     </subConfig>
-    
+
     """
-    
+
     _possiblePaths = {
         'selector': {
             'docs': "Selector to use to get data from the record."
@@ -460,14 +466,14 @@ class TemplatedTransformer(Transformer):
                      )
         }
     }
-    
+
     _possibleSettings = {
         'template': {
             'docs': ("A string representing the template for the output "
                      "Document with place-holders for selected data items.")
         }
     }
-    
+
     def __init__(self, session, config, parent):
         Transformer.__init__(self, session, config, parent)
         self.selector = self.get_path(session, 'selector')
@@ -477,7 +483,7 @@ class TemplatedTransformer(Transformer):
             dfp = self.get_path(session, "defaultPath")
             path = os.path.join(dfp, tmplPath)
             with open(path, 'r') as fh:
-                self.template = unicode(fh.read()) 
+                self.template = unicode(fh.read())
         else:
             tmpl = self.get_setting(session, 'template', '')
             if not tmpl:
@@ -486,7 +492,7 @@ class TemplatedTransformer(Transformer):
                                           "'template' setting."
                                           "".format(self.id))
             self.template = unicode(tmpl)
-            
+
     def process_record(self, session, rec):
         process_eventList = self.extractor.process_eventList
         process_string = self.extractor.process_string
@@ -507,7 +513,7 @@ class TemplatedTransformer(Transformer):
                     vals2.append(process_string(session, match).keys()[0])
                 elif isinstance(match, types.TupleType):
                     # RDF graph results (?)
-                    vals3 = [] 
+                    vals3 = []
                     for item in match:
                         if item is not None:
                             vals3.append(process_node(session, item).keys()[0])
@@ -534,11 +540,11 @@ class TemplatedTransformer(Transformer):
 
 class MarcTransformer(Transformer):
     """Transformer to converts records in marc21xml to marc records."""
-    
-    def __init__(self, session, config, parent):       
+
+    def __init__(self, session, config, parent):
         Transformer.__init__(self, session, config, parent)
         self.session = session
-    
+
     def _process_tagName(self, tagname):
         for i, c in enumerate(tagname):
             if c != '0':
@@ -551,7 +557,7 @@ class MarcTransformer(Transformer):
             walker = tree.getiterator("controlfield")
         except AttributeError:
             # lxml 1.3 or later
-            walker = tree.iter("controlfield")  
+            walker = tree.iter("controlfield")
         for element in walker:
             tag = self._process_tagName(element.get('tag'))
             contents = element.text
@@ -559,25 +565,25 @@ class MarcTransformer(Transformer):
                 fields[tag].append(contents)
             else:
                 fields[tag] = [contents]
-                
+
         try:
             walker = tree.getiterator("datafield")
         except AttributeError:
             # lxml 1.3 or later
-            walker = tree.iter("datafield")  
+            walker = tree.iter("datafield")
         for element in walker:
             tag = self._process_tagName(element.get('tag'))
             try:
                 children = element.getiterator('subfield')
             except AttributeError:
                 # lxml 1.3 or later
-                walker = element.iter('subfield') 
+                walker = element.iter('subfield')
             subelements = [(c.get('code'), c.text) for c in children]
-            contents = (element.get('ind1'), element.get('ind2'), subelements)         
+            contents = (element.get('ind1'), element.get('ind2'), subelements)
             if tag in fields:
                 fields[tag].append(contents)
             else:
-                fields[tag] = [contents] 
+                fields[tag] = [contents]
 
         leader = tree.xpath('//leader')[0]
         l = leader.text

@@ -1838,7 +1838,7 @@ class BdbIndexStore(IndexStore):
             try:
                 unpacked = index.deserialize_term(session, val, prox=prox)
             except:
-                msg = (u"{0} failed to deserialise {1} {2} {3}"
+                msg = (u"{0} failed to deserialise {1} {2}"
                        u"".format(self.id, index.id, term, val)
                        )
                 self.log_critical(session, msg.encode('utf-8'))

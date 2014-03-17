@@ -28,7 +28,7 @@ class DeletedObject(object):
     id = ""
     time = ""
     store = ""
-    
+
     def __nonzero__(self):
         return False
 
@@ -37,7 +37,7 @@ class DeletedObject(object):
         self.id = id
         self.time = time
 
-        
+
 class SummaryObject(object):
     """ Allow database to have summary, but no storage """
 
@@ -121,7 +121,7 @@ class SummaryObject(object):
                     raise ConfigFileException(msg)
                 databasePath = os.path.join(dfp, databasePath)
             self.paths[dbp] = databasePath
-                    
+
     def _create(self, session, dbPath):
         cxn = bdb.db.DB()
         cxn.set_flags(bdb.db.DB_RECNUM)
@@ -143,7 +143,7 @@ class SummaryObject(object):
             except ZeroDivisionError:
                 self.meanWordCount = 1
                 self.meanByteCount = 1
-                
+
             self.lastModified = time.strftime('%Y-%m-%d %H:%M:%S')
             try:
                 cxn.open(mp)
@@ -177,7 +177,7 @@ class SummaryObject(object):
 
 class SimpleStore(C3Object, SummaryObject):
     """ Base Store implementation.  Provides non-storage-specific functions """
-    
+
     # Instantiate some type of simple record store
     idNormalizer = None
     outIdNormalizer = None
@@ -250,14 +250,15 @@ class SimpleStore(C3Object, SummaryObject):
             'type': int
         }
     }
-    
+
     def __init__(self, session, config, parent):
         # Don't inherit metadataPath!
         C3Object.__init__(self, session, config, parent)
         self.switching = (
-            self.get_setting(session, 'bucketType', '') or \
-            self.get_setting(session, 'maxBuckets', 0) or \
-            self.get_setting(session, 'maxItemsPerBucket', 0))
+            self.get_setting(session, 'bucketType', '') or
+            self.get_setting(session, 'maxBuckets', 0) or
+            self.get_setting(session, 'maxItemsPerBucket', 0)
+        )
 
         SummaryObject.__init__(self, session, config, parent)
         self.idNormalizer = self.get_path(session, 'idNormalizer', None)
@@ -297,7 +298,7 @@ class SimpleStore(C3Object, SummaryObject):
 
             if type(data) == unicode:
                 data = data.encode('utf-8')
-            m.update(data)               
+            m.update(data)
             digest = m.hexdigest()
             return digest
         else:
@@ -305,7 +306,7 @@ class SimpleStore(C3Object, SummaryObject):
 
     def generate_expires(self, session, obj=None):
         now = time.time()
-        if obj and hasattr(obj, 'expires'):            
+        if obj and hasattr(obj, 'expires'):
             return now + obj.expires
         elif self.expires > 0:
             return now + self.expires
@@ -339,7 +340,7 @@ class SimpleStore(C3Object, SummaryObject):
 
     def get_reverseMetadataTypes(self, session):
         return ['digest', 'expires']
-        
+
     def get_dbSize(self, session):
         """Return number of items in storage."""
         raise NotImplementedError
@@ -354,11 +355,11 @@ class SimpleStore(C3Object, SummaryObject):
         self._closeAll(session)
         self.commit_metadata(session)
         return None
-    
+
     def get_idChunkGenerator(self, session, taskManager=None):
         """Generator to yield chunks of ids from the store.
-        
-        Can be used during parallel processing to split processing into 
+
+        Can be used during parallel processing to split processing into
         chunks to be distributed across processes or processing nodes.
         """
         # Defaults
@@ -377,10 +378,9 @@ class SimpleStore(C3Object, SummaryObject):
                 # Chunking based on metadata
                 cmax = 'maxChunk{0}'.format(chunkBy[0].upper() + chunkBy[1:])
                 chunkThreshold = taskManager.get_setting(
-                                     session, 
-                                     cmax,
-                                     locals().get(cmax,
-                                     chunkByThreshold)
+                    session,
+                    cmax,
+                    locals().get(cmax, chunkThreshold)
                 )
             else:
                 # Generic chunking
@@ -391,7 +391,7 @@ class SimpleStore(C3Object, SummaryObject):
                     nIters = 1
                 nTasks = taskManager.nTasks
                 maxChunkSize = min(maxChunkSize, (total / (nIters * nTasks)))
-        
+
         numericId = 0
         iterator = self.__iter__()
         idNormalizer = self.idNormalizer
@@ -414,7 +414,7 @@ class SimpleStore(C3Object, SummaryObject):
                 chunk.append(id)
                 numericId += 1
             yield chunk
-                
+
     def delete_data(self, session, id):
         """Delete data stored against id."""
         raise NotImplementedError
@@ -434,7 +434,7 @@ class SimpleStore(C3Object, SummaryObject):
     def store_metadata(self, session, id, mType, value):
         """Store value for mType metadata against id."""
         raise NotImplementedError
-    
+
     def clean(self, session):
         """Delete expired data objects."""
         raise NotImplementedError
@@ -489,7 +489,7 @@ class SwitchingBdbConnection(object):
 
         # Allow per call overrides, eg if parent object has multiple types
         if maxBuckets == 0:
-            self.maxBuckets = parent.get_setting(session, 'maxBuckets', 0) 
+            self.maxBuckets = parent.get_setting(session, 'maxBuckets', 0)
         else:
             self.maxBuckets = maxBuckets
 
@@ -518,7 +518,7 @@ class SwitchingBdbConnection(object):
         else:
             dfp = parent.get_path(session, 'defaultPath')
             basename = parent.id
-            self.basePath = os.path.join(dfp, basename)        
+            self.basePath = os.path.join(dfp, basename)
 
         self.cxns = {}
         self.createArgs = {}
@@ -675,7 +675,7 @@ class SwitchingBdbConnection(object):
             if (not os.path.exists(dbp)):
                 cxn.open(dbp, **self.store.createArgs[self.basePath])
                 cxn.close()
-                cxn = bdb.db.DB()                
+                cxn = bdb.db.DB()
 
             cxn.open(dbp, **self.openArgs)
             self.cxns[b] = cxn
@@ -734,7 +734,7 @@ class SwitchingBdbConnection(object):
 
     def set_flags(self, f):
         self.preOpenFlags = f
-        return None        
+        return None
 
 
 class SwitchingBdbCursor(object):
@@ -763,7 +763,7 @@ class SwitchingBdbCursor(object):
             self.currCursor.close()
         self.currCursor = cur
         return cur
-        
+
     def first(self, doff=-1, dlen=-1):
         if self.currBucketIdx != 0:
             cursor = self.set_cursor(self.buckets[0])
@@ -807,7 +807,7 @@ class SwitchingBdbCursor(object):
                 x = self.currCursor.prev(doff=doff, dlen=dlen)
             else:
                 x = self.currCursor.prev()
-            if x is None and self.currBucketIdx != 0:                
+            if x is None and self.currBucketIdx != 0:
                 c = self.set_cursor(self.buckets[self.currBucketIdx - 1])
                 if dlen != -1:
                     return c.last(doff=doff, dlen=dlen)
@@ -817,7 +817,7 @@ class SwitchingBdbCursor(object):
                 return x
         else:
             return self.last(doff=doff, dlen=dlen)
-        
+
     def set_range(self, where, dlen=-1, doff=-1):
         # jump to where bucket
         b = self.switch.bucket(where)
@@ -834,7 +834,7 @@ class SwitchingBdbCursor(object):
             else:
                 nb = self.buckets[-1]
             cursor = self.set_cursor(nb)
-           
+
         if dlen != -1:
             x = cursor.set_range(where, dlen=dlen, doff=doff)
         else:
@@ -873,7 +873,7 @@ class BdbStore(SimpleStore):
             cxn = bdb.db.DB()
         cxn.set_flags(bdb.db.DB_RECNUM)
         try:
-            cxn.open(dbp, dbtype=bdb.db.DB_BTREE, 
+            cxn.open(dbp, dbtype=bdb.db.DB_BTREE,
                      flags=bdb.db.DB_CREATE, mode=0660)
         except:
             raise ValueError("Could not create: %s" % dbp)
@@ -914,8 +914,10 @@ class BdbStore(SimpleStore):
                 dbType in self.storageTypes or
                 (dbType[-7:] == 'Reverse' and
                  dbType[:-7] in self.reverseMetadataTypes)):
-                if (self.switching and
-                    dbType in self.get_noSwitchTypes(session)):
+                if (
+                    self.switching and
+                    dbType in self.get_noSwitchTypes(session)
+                ):
                     self.switching = False
                     cxn = self._open(session, dbp)
                     self.switching = True
@@ -997,7 +999,7 @@ class BdbStore(SimpleStore):
         self.currentId = key
         return key
 
-    def store_data(self, session, id, data, metadata={}):        
+    def store_data(self, session, id, data, metadata={}):
         dig = metadata.get('digest', "")
         if dig:
             cxn = self._openDb(session, 'digestReverse')
@@ -1035,16 +1037,18 @@ class BdbStore(SimpleStore):
             id = str(id)
         data = cxn.get(id)
 
-        if (data and
-            data[:44] == "\0http://www.cheshire3.org/ns/status/DELETED:"):
+        if (
+            data and
+            data[:44] == "\0http://www.cheshire3.org/ns/status/DELETED:"
+        ):
             data = DeletedObject(self, id, data[41:])
-            
+
         if data and self.expires:
             # update touched
             expires = self.generate_expires(session)
             self.store_metadata(session, id, 'expires', expires)
         return data
-    
+
     def delete_data(self, session, id):
         self._openAll(session)
         cxn = self._openDb(session, 'database')
@@ -1063,7 +1067,7 @@ class BdbStore(SimpleStore):
                 if dbt in self.reverseMetadataTypes:
                     # fetch value here, delete reverse
                     data = cxn.get(id)
-                    cxn2 = self._openDb(session, dbt + "Reverse")                
+                    cxn2 = self._openDb(session, dbt + "Reverse")
                     if cxn2 is not None:
                         cxn2.delete(data)
                 cxn.delete(id)
@@ -1073,7 +1077,7 @@ class BdbStore(SimpleStore):
         if self.get_setting(session, 'storeDeletions', 0):
             cxn = self._openDb(session, 'database')
             now = datetime.datetime.now(dateutil.tz.tzutc())
-            now = now.strftime("%Y-%m-%dT%H:%M:%S%Z").replace('UTC', 'Z')            
+            now = now.strftime("%Y-%m-%dT%H:%M:%S%Z").replace('UTC', 'Z')
             cxn.put(id,
                     "\0http://www.cheshire3.org/ns/status/DELETED:%s" % now)
             cxn.sync()
@@ -1100,7 +1104,7 @@ class BdbStore(SimpleStore):
                     data = long(data)
                 elif mType.endswith("Date"):
                     data = dateparser.parse(data)
-            return data       
+            return data
         else:
             return None
 
@@ -1123,13 +1127,13 @@ class BdbStore(SimpleStore):
                 cxn = self._openDb(session, mType + "Reverse")
                 if cxn is not None:
                     cxn.put(value, id)
-        
+
     def flush(self, session):
         # Call sync to flush all to disk
         for cxn in self.cxns.values():
             if cxn is not None:
                 cxn.sync()
-                
+
     def clear(self, session):
         self._closeAll(session)
         self.cxns = {}
@@ -1144,7 +1148,7 @@ class BdbStore(SimpleStore):
             self._initDb(session, "%sReverse" % t)
             self._verifyDb(session, "%sReverse" % t)
         return self
-                
+
     def clean(self, session):
         self._openAll(session)
         now = time.time()
@@ -1172,7 +1176,7 @@ class BdbStore(SimpleStore):
             except:
                 # Reached beginning
                 break
-        self._closeAll(session)        
+        self._closeAll(session)
         return self
 
 
@@ -1211,7 +1215,7 @@ class FileSystemIter(object):
 
 
 class FileSystemStore(BdbStore):
-    # Leave the data somewhere on disk    
+    # Leave the data somewhere on disk
     # Use metadata to map identifier to file, offset, length
     # Object to be stored needs this information, obviously!
 
@@ -1227,7 +1231,7 @@ class FileSystemStore(BdbStore):
     def get_reverseMetadataTypes(self, session):
         return ['digest', 'expires']
 
-    def store_data(self, session, id, data, metadata={}):        
+    def store_data(self, session, id, data, metadata={}):
         dig = metadata.get('digest', "")
         if dig:
             cxn = self._openDb(session, 'digestReverse')
@@ -1264,7 +1268,7 @@ class FileSystemStore(BdbStore):
         filename = self.fetch_metadata(session, id, 'filename')
         start = self.fetch_metadata(session, id, 'byteOffset')
         length = self.fetch_metadata(session, id, 'byteCount')
-        
+
         if filename is None and start is None and length is None:
             # Data has been deleted
             return None
@@ -1281,8 +1285,10 @@ class FileSystemStore(BdbStore):
             self.currFileHandle.seek(start)
         data = self.currFileHandle.read(length)
 
-        if (data and
-            data[:44] == "\0http://www.cheshire3.org/ns/status/DELETED:"):
+        if (
+            data and
+            data[:44] == "\0http://www.cheshire3.org/ns/status/DELETED:"
+        ):
             data = DeletedObject(self, id, data[41:])
         elif self.outWorkflow:
             data = self.outWorkflow.process(session, data)
@@ -1292,7 +1298,7 @@ class FileSystemStore(BdbStore):
             expires = self.generate_expires(session)
             self.store_metadata(session, id, 'expires', expires)
         return data
-        
+
     def delete_data(self, session, id):
         self._openAll(session)
 
@@ -1314,7 +1320,7 @@ class FileSystemStore(BdbStore):
                 if dbt in self.reverseMetadataTypes:
                     # Fetch value here, delete reverse
                     data = cxn.get(id)
-                    cxn2 = self._openDb(session, dbt + "Reverse")                
+                    cxn2 = self._openDb(session, dbt + "Reverse")
                     if cxn2 is not None:
                         cxn2.delete(data)
                 cxn.delete(id)
@@ -1323,7 +1329,7 @@ class FileSystemStore(BdbStore):
         # Maybe store the fact that this object used to exist.
         if self.get_setting(session, 'storeDeletions', 0):
             now = datetime.datetime.now(dateutil.tz.tzutc())
-            now = now.strftime("%Y-%m-%dT%H:%M:%S%Z").replace('UTC', 'Z')            
+            now = now.strftime("%Y-%m-%dT%H:%M:%S%Z").replace('UTC', 'Z')
             out = "\0http://www.cheshire3.org/ns/status/DELETED:%s" % now
 
             if len(out) < length:
@@ -1383,13 +1389,13 @@ class DirectoryStore(BdbStore):
     possibly sub-directories). An important thing to remember is that
     files may be added/modified/deleted by an external entity.
     """
-    
+
     _possibleSettings = {
         'createSubDir': {
             'docs': ('Should a sub-directory/sub-collection be used for this '
                      'store'),
             'type': int,
-            'options' : "0|1"
+            'options': "0|1"
         },
         'allowStoreSubDirs': {
             'docs': ('Allow Store to create sub-directories if it encounters '
@@ -1397,7 +1403,7 @@ class DirectoryStore(BdbStore):
                      ' false (0) operating system path separators are escaped.'
                      ),
             'type': int,
-            'options' : '0|1'
+            'options': '0|1'
         }
     }
 
@@ -1460,8 +1466,8 @@ class DirectoryStore(BdbStore):
             return BdbStore._closeDb(self, session, dbType)
 
     def _normalizeIdentifier(self, session, identifier):
-        # Apply any necessary normalization to the identifier 
-        if (self.idNormalizer != None):
+        # Apply any necessary normalization to the identifier
+        if self.idNormalizer is not None:
             identifier = self.idNormalizer.process_string(session, identifier)
         elif type(id) == unicode:
             identifier = identifier.encode('utf-8')
@@ -1534,9 +1540,10 @@ class DirectoryStore(BdbStore):
         except IOError:
             # No file
             data = None
-        if (data and
+        if (
+            data and
             data.startswith("\0http://www.cheshire3.org/ns/status/DELETED:")
-            ):
+        ):
             data = DeletedObject(self, identifier, data[41:])
         if data and self.expires:
             expires = self.generate_expires(session)

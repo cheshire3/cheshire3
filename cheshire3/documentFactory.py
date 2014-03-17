@@ -21,8 +21,11 @@ from cheshire3.utils import elementType, getFirstData
 from cheshire3.utils import flattenTexts, getShellResult
 from cheshire3.workflow import CachingWorkflow
 from cheshire3.xpathProcessor import SimpleXPathProcessor
-from cheshire3.exceptions import FileDoesNotExistException, \
-ConfigFileException, PermissionException
+from cheshire3.exceptions import (
+    FileDoesNotExistException,
+    ConfigFileException,
+    PermissionException
+    )
 from cheshire3.internal import CONFIG_NS
 
 mimetypes.add_type('application/marc', '.marc')
@@ -49,7 +52,7 @@ class BaseDocumentStream:
     startOffset = 0
     endOffset = -1
 
-    def __init__(self, session, stream, format_, 
+    def __init__(self, session, stream, format_,
                  tagName="", codec=None, factory=None):
         self.startOffset = 0
         self.endOffset = -1
@@ -78,15 +81,15 @@ class BaseDocumentStream:
                 self.endOffset = int(end)
             else:
                 self.startOffset = 0
-                self.endOffset = -1               
+                self.endOffset = -1
 
             if exists:
                 # is a file
                 self.streamLocation = stream
                 if not os.path.isdir(stream):
                     if self.codec:
-                        return codecs.open(self.streamLocation, 
-                                           'r', 
+                        return codecs.open(self.streamLocation,
+                                           'r',
                                            self.codec)
                     else:
                         return file(self.streamLocation)
@@ -147,7 +150,7 @@ class TermHashDocumentStream(BaseDocumentStream):
     def open_stream(self, stream):
         # is a hash...
         self.streamLocation = "TERM-STRING"
-        return stream.keys()        
+        return stream.keys()
 
     def find_documents(self, session, cache=0):
         # step through terms
@@ -178,8 +181,8 @@ class XmlDocumentStream(BaseDocumentStream):
         else:
             self.start = re.compile("<%s[\s>]" % tagName)
             self.endtag = "</" + tagName + ">"
-        self.maxGarbageBytes = factory.get_setting(session, 
-                                                   'maxGarbageBytes', 
+        self.maxGarbageBytes = factory.get_setting(session,
+                                                   'maxGarbageBytes',
                                                    10000)
 
     def _getStreamLen(self):
@@ -213,18 +216,18 @@ class XmlDocumentStream(BaseDocumentStream):
 
         while True:
             ol = len(line)
-            # Should exit if self.maxGarbageBytes (default 10000) bytes of 
+            # Should exit if self.maxGarbageBytes (default 10000) bytes of
             # garbage between docs
             if self.tagName or ol < self.maxGarbageBytes:
                 line += self.stream.read(1024)
             else:
                 msg = ("Exiting from XML Document Stream before end of "
                        "stream ({0}), reached maximum garbage bytes "
-                       "({1})".format(self.streamLocation, 
+                       "({1})".format(self.streamLocation,
                                       self.maxGarbageBytes))
                 self.factory.log_critical(session, msg)
                 break
-            pi = line.find("<?xml ")                
+            pi = line.find("<?xml ")
             if (pi > -1):
                 # Store info
                 endpi = line.find("?>")
@@ -234,9 +237,9 @@ class XmlDocumentStream(BaseDocumentStream):
             if m:
                 if not self.endtag:
                     endtag = "</%s>" % m.group()[1:-1]
-                    let = len(endtag)                
+                    let = len(endtag)
                 s = m.start()
-                line = line[s:]                
+                line = line[s:]
                 myTell += s
                 start = myTell
                 end = -1
@@ -257,8 +260,10 @@ class XmlDocumentStream(BaseDocumentStream):
                         except:
                             byteCount = tlen
 
-                        if (self.endOffset > 0 and 
-                            myTell >= (self.endOffset - self.startOffset)):
+                        if (
+                            self.endOffset > 0 and
+                            myTell >= (self.endOffset - self.startOffset)
+                        ):
                             if cache == 0:
                                 self.stream.close()
                                 raise StopIteration
@@ -327,10 +332,10 @@ class MarcDocumentStream(BaseDocumentStream):
                 tlen = len(txt)
                 if cache == 0:
                     yield StringDocument(txt, mimeType="application/marc")
-                elif cache == 1:                    
+                elif cache == 1:
                     locs.append((myTell, tlen))
                 elif cache == 2:
-                    docs.append(StringDocument(txt, 
+                    docs.append(StringDocument(txt,
                                                mimeType="application/marc"))
                 data = data[rt + 1:]
                 myTell += tlen
@@ -355,12 +360,12 @@ class MarcDocumentStream(BaseDocumentStream):
 
 class MultipleDocumentStream(BaseDocumentStream):
 
-    def __init__(self, session, stream, format_, 
+    def __init__(self, session, stream, format_,
                  tagName=None, codec=None, factory=None):
-        BaseDocumentStream.__init__(self, session, stream, format_, 
+        BaseDocumentStream.__init__(self, session, stream, format_,
                                     tagName, codec, factory)
-        filterStr = factory.get_setting(session, 
-                                        'filterRegexp', 
+        filterStr = factory.get_setting(session,
+                                        'filterRegexp',
                                         "\.([a-zA-Z0-9]+|tar.gz|tar.bz2)$")
         if filterStr:
             self.filterRe = re.compile(filterStr)
@@ -380,9 +385,9 @@ class MultipleDocumentStream(BaseDocumentStream):
             if not m:
                 return None
         mimetype = mimetypes.guess_type(name, 0)
-        if (mimetype[0] in ['text/sgml', 
-                            'text/xml', 
-                            'application/sgml', 
+        if (mimetype[0] in ['text/sgml',
+                            'text/xml',
+                            'application/sgml',
                             'application/xml']):
             if mimetype[1] == 'gzip':
                 msg = '''\
@@ -409,9 +414,9 @@ You could try using zip.'''
         s = self._fetchStream(item)
         if trip[0] == 'stream':
             cls = trip[1]
-            nstream = cls(session, s, format_=trip[2], 
-                          tagName=self.tagName, 
-                          codec=self.codec, 
+            nstream = cls(session, s, format_=trip[2],
+                          tagName=self.tagName,
+                          codec=self.codec,
                           factory=self.factory)
             # copy streamLocation in to copy to document
             nstream.streamLocation = item
@@ -464,10 +469,11 @@ You could try using zip.'''
 class DirectoryDocumentStream(MultipleDocumentStream):
 
     def find_documents(self, session, cache=0):
-        if  not os.path.isabs(self.streamLocation):
+        if not os.path.isabs(self.streamLocation):
             self.streamLocation = os.path.join(
                 self.factory.get_path(session, 'defaultPath'),
-                self.streamLocation)
+                self.streamLocation
+            )
         for root, dirs, files in os.walk(self.streamLocation):
             for d in dirs:
                 if os.path.islink(os.path.join(root, d)):
@@ -499,7 +505,7 @@ class TarDocumentStream(MultipleDocumentStream):
             return tarfile.open(fileobj=stream, mode="r|%s" % modeSuf)
         elif os.path.exists(stream):
             # Transparent
-            return tarfile.open(stream, mode="r") 
+            return tarfile.open(stream, mode="r")
         else:
             s = StringIO(stream)
             return tarfile.open(fileobj=s, mode="r|%s" % modeSuf)
@@ -553,7 +559,7 @@ class ZipDocumentStream(DirectoryDocumentStream):
 class LocateDocumentStream(DirectoryDocumentStream):
     u"""Find files whose name matches the data argument to 'load'."""
     def find_documents(self, session, cache=0):
-        fl = getShellResult("locate {0} | grep {1}$".format(self.stream, 
+        fl = getShellResult("locate {0} | grep {1}$".format(self.stream,
                                                             self.stream))
         docs = fl.split('\n')
         while docs and docs[0][:8] == "warning:":
@@ -573,7 +579,7 @@ class ClusterDocumentStream(BaseDocumentStream):
             # FIXME: API: Required None for session to get_path()
             dfp = self.factory.get_path(None, 'defaultPath')
             # TODO: testme
-            # dfp = self.factory.get_path(self.factory.loadSession, 
+            # dfp = self.factory.get_path(self.factory.loadSession,
             #                             'defaultPath')
             abspath = os.path.join(dfp, stream)
             if os.path.exists(abspath):
@@ -618,7 +624,7 @@ class ClusterDocumentStream(BaseDocumentStream):
             l = l[:-1]
             ldata2 = l.split('\x00')
             key2 = ldata2[0]
-            while key == key2:   
+            while key == key2:
                 ldata2 = ldata2[1:-1]
                 for bit in range(len(ldata2) / 2):
                     d = docdata.get(ldata2[bit * 2], [])
@@ -630,7 +636,7 @@ class ClusterDocumentStream(BaseDocumentStream):
                 key2 = ldata2[0]
             for k in docdata.keys():
                 doc.append("<%s>" % (k))
-                for i in docdata[k]:                    
+                for i in docdata[k]:
                     doc.append("%s" % i)
                 doc.append("</%s>" % (k))
             doc.append("</cluster>")
@@ -639,7 +645,7 @@ class ClusterDocumentStream(BaseDocumentStream):
                 yield sdoc
             else:
                 self.documents.append(sdoc)
-            doc = ["<cluster>"]            
+            doc = ["<cluster>"]
             l = f.readline()
             l = l[:-1]
         f.close()
@@ -650,15 +656,15 @@ class ComponentDocumentStream(BaseDocumentStream):
 
     sources = []
 
-    def __init__(self, session, stream, format_, 
+    def __init__(self, session, stream, format_,
                  tagName=None, codec=None, factory=None):
-        BaseDocumentStream.__init__(self, session, stream, format_, 
+        BaseDocumentStream.__init__(self, session, stream, format_,
                                     tagName, codec, factory)
         self.sources = factory.sources
 
     def open_stream(self, stream):
         return stream
-    
+
     def _make_startTag(self, element, addText=True):
         # Return a string representing the start tag for this element
         if not isinstance(element, etree._Element):
@@ -687,7 +693,7 @@ class ComponentDocumentStream(BaseDocumentStream):
                                         attrs,
                                         text
                                         )
-    
+
     def _make_endTag(self, element, addTail=True):
         # Return a string representing the end tag for this element
         if not isinstance(element, etree._Element):
@@ -708,8 +714,8 @@ class ComponentDocumentStream(BaseDocumentStream):
                 return "</{0}:{1}>{2}".format(prefix, tag, tail)
         else:
             return "</{0}>{1}".format(element.tag,
-                                        tail
-                                        )
+                                      tail
+                                      )
 
     def find_documents(self, session, cache=0):
         # Should extract records by xpath or span and store as X/SGML
@@ -721,9 +727,11 @@ class ComponentDocumentStream(BaseDocumentStream):
         for src in self.sources:
             raw = src.process_record(session, rec)
             for xp in raw:
-                if (isinstance(xp, tuple) and 
-                    len(xp) == 2 and 
-                    isinstance(xp[0], etree._Element)):
+                if (
+                    isinstance(xp, tuple) and
+                    len(xp) == 2 and
+                    isinstance(xp[0], etree._Element)
+                ):
                     # Result of a SpanXPathSelector: (startNode, endNode)
                     startNode, endNode = xp
                     # Find common ancestor
@@ -758,10 +766,12 @@ class ComponentDocumentStream(BaseDocumentStream):
                                                           'start-ns',
                                                           'end-ns')):
                         if (el == startNode and not recording):
-                            if (includeStartTag and
-                                evt in ['start', 'start-ns']):
+                            if (
+                                includeStartTag and
+                                evt in ['start', 'start-ns']
+                            ):
                                 recording = True
-                            elif (not includeStartTag and 
+                            elif (not includeStartTag and
                                   evt in ['end', 'end-ns']):
                                 # No start node
                                 # Append tail and skip to next node
@@ -769,8 +779,10 @@ class ComponentDocumentStream(BaseDocumentStream):
                                 if el.tail:
                                     doc.append(el.tail)
                                 continue
-                        elif (el == endNode and 
-                              evt in ['start', 'start-ns']):
+                        elif (
+                            el == endNode and
+                            evt in ['start', 'start-ns']
+                        ):
                             if includeEndTag:
                                 doc.append(self._make_startTag(el))
                                 doc.append(self._make_endTag(el,
@@ -803,15 +815,16 @@ class ComponentDocumentStream(BaseDocumentStream):
                             if pref is None:
                                 namespaceList.append("xmlns=\"%s\"" % (ns))
                             else:
-                                namespaceList.append("xmlns:%s=\"%s\"" % (pref, 
+                                namespaceList.append("xmlns:%s=\"%s\"" % (pref,
                                                                           ns))
                         namespaces = " ".join(namespaceList)
                         docstr = """\
 <c3:component xmlns:c3="http://www.cheshire3.org/schemas/component/" \
 %s parent="%r" xpath="%s">%s</c3:component>""" % (namespaces,
-                                                 rec,
-                                                 path,
-                                                 docstr)
+                                                  rec,
+                                                  path,
+                                                  docstr
+                                                  )
                     else:
                         docstr = """\
 <c3component parent="%r" xpath="%s">%s</c3component>""" % (rec, path, docstr)
@@ -834,8 +847,8 @@ class ComponentDocumentStream(BaseDocumentStream):
 parent=\"%r\" event=\"%s\">%s</c3:component>""" % (rec, saxid, docstr)
                         else:
                             docstr = """\
-<c3component parent=\"%r\" event=\"%s\">%s</c3component>""" % (rec, 
-                                                               saxid, 
+<c3component parent=\"%r\" event=\"%s\">%s</c3component>""" % (rec,
+                                                               saxid,
                                                                docstr)
                     elif isinstance(r, basestring):
                         docstr = """\
@@ -911,10 +924,10 @@ class SimpleDocumentFactory(DocumentFactory):
 
     _possibleDefaults = {
         'cache': {
-            'docs': "Default value for cache parameter for load()", 
-            'type': int, 
+            'docs': "Default value for cache parameter for load()",
+            'type': int,
             'options': "0|1|2"
-        }, 
+        },
         'format': {
             'docs': "Default value for format parameter"
         },
@@ -947,7 +960,7 @@ class SimpleDocumentFactory(DocumentFactory):
         },
         'maxGarbageBytes': {
             'docs': ('Number of bytes of non document content after which to '
-                     'exit'), 
+                     'exit'),
             'type': int}
         }
 
@@ -966,7 +979,7 @@ class SimpleDocumentFactory(DocumentFactory):
     def register_stream(cls, format_, streamClass):
         cls.streamHash[format_] = streamClass
 
-    def load(self, session, data=None, cache=None, 
+    def load(self, session, data=None, cache=None,
              format_=None, tagName=None, codec=None):
         self.loadSession = session
         if data is None:
@@ -1012,8 +1025,8 @@ class SimpleDocumentFactory(DocumentFactory):
                         plist = [x.split('=')[0] for x in bits[3].split('&')]
                         if 'verb' in plist and 'metadataPrefix' in plist:
                             format_ = 'oai'
-                        elif ('operation' in plist and 
-                              'version' in plist and 
+                        elif ('operation' in plist and
+                              'version' in plist and
                               'query' in plist):
                             format_ = 'sru'
 
@@ -1099,8 +1112,8 @@ class ComponentDocumentFactory(SimpleDocumentFactory):
                 if child.tag in ["xpath", '{%s}xpath' % CONFIG_NS]:
                     # add XPath
                     ref = child.attrib.get(
-                             'ref',
-                             child.attrib.get('{%s}ref' % CONFIG_NS, '')
+                        'ref',
+                        child.attrib.get('{%s}ref' % CONFIG_NS, '')
                     )
                     if ref:
                         xp = self.get_object(session, ref)
@@ -1115,7 +1128,7 @@ class ComponentDocumentFactory(SimpleDocumentFactory):
 
 
 class AccumulatingStream(BaseDocumentStream):
-    def __init__(self, session, stream, format_, 
+    def __init__(self, session, stream, format_,
                  tagName=None, codec=None, factory=None):
         self.factory = factory
         self.format = format_
@@ -1124,7 +1137,7 @@ class AccumulatingStream(BaseDocumentStream):
         # And call accumulate to record stream
         self.accumulate(session, stream, format_, tagName, codec, factory)
 
-    def accumulate(self, session, stream, format_, 
+    def accumulate(self, session, stream, format_,
                    tagName=None, codec=None, factory=None):
         raise NotImplementedError
 
@@ -1141,8 +1154,8 @@ class AccTransformerStream(AccumulatingStream):
             msg = """\
 Cannot build transformer stream without associated documentFactory"""
             raise ValueError(msg)
-        self.transformer = factory.get_path(session, 
-                                            'accumulatingTransformer', 
+        self.transformer = factory.get_path(session,
+                                            'accumulatingTransformer',
                                             None)
         if not self.transformer:
             msg = """\
@@ -1152,10 +1165,10 @@ for AccTransformerStream"""
         self.data = []
 
         # now init the AccStream after discovering txr
-        AccumulatingStream.__init__(self, session, stream, format_, 
+        AccumulatingStream.__init__(self, session, stream, format_,
                                     tagName, codec, factory)
 
-    def accumulate(self, session, stream, format_, 
+    def accumulate(self, session, stream, format_,
                    tagName=None, codec=None, factory=None):
         # stream should be record instance
         doc = self.transformer.process_record(session, stream)
@@ -1168,14 +1181,14 @@ for AccTransformerStream"""
 class AccVectorTransformerStream(AccumulatingStream):
     """Accumulate data to be fed to DM, via a vector transformer."""
 
-    def __init__(self, session, stream, format_, 
+    def __init__(self, session, stream, format_,
                  tagName=None, codec=None, factory=None):
         if not factory:
             msg = """\
 Cannot build transformer stream without associated documentFactory"""
             raise ValueError(msg)
-        self.transformer = factory.get_path(session, 
-                                            'accumulatingTransformer', 
+        self.transformer = factory.get_path(session,
+                                            'accumulatingTransformer',
                                             None)
         if not self.transformer:
             msg = """\
@@ -1186,10 +1199,10 @@ for AccTransformerStream"""
         self.vectors = []
         self.totalAttributes = 0
         # now init the AccStream after discovering txr
-        AccumulatingStream.__init__(self, session, stream, format_, 
+        AccumulatingStream.__init__(self, session, stream, format_,
                                     tagName, codec, factory)
 
-    def accumulate(self, session, stream, format_, 
+    def accumulate(self, session, stream, format_,
                    tagName=None, codec=None, factory=None):
         # session should be record instance
         doc = self.transformer.process_record(session, stream)
@@ -1199,7 +1212,7 @@ for AccTransformerStream"""
                 for (l, v) in raw:
                     self.classes.append(l)
                     self.vectors.append(v)
-                    self.totalAttributes += len(v.keys())                
+                    self.totalAttributes += len(v.keys())
         else:
             # we're a tuple
             self.classes.append(raw[0])
@@ -1219,23 +1232,24 @@ class AccumulatingDocumentFactory(SimpleDocumentFactory):
     """
 
     _possiblePaths = {
-        'accumulatingTransformer':
-            {'docs': ("Transformer through which to pass records before "
-                      "accumulating.")
-            }
+        'accumulatingTransformer': {
+            'docs': ("Transformer through which to pass records before "
+                     "accumulating."
+                     )
         }
+    }
 
     def __init__(self, session, config, parent):
         SimpleDocumentFactory.__init__(self, session, config, parent)
 
-    def loadMany(self, session, data=None, cache=None, 
+    def loadMany(self, session, data=None, cache=None,
                  format_=None, tagName=None, codec=None):
         for item in data:
             self.load(session, item, cache, format_, tagName, codec)
         # Return self for workflows, mostly can ignore
         return self
 
-    def load(self, session, data=None, cache=None, 
+    def load(self, session, data=None, cache=None,
              format_=None, tagName=None, codec=None):
 
         self.loadSession = session
@@ -1275,15 +1289,15 @@ class AccumulatingDocumentFactory(SimpleDocumentFactory):
                         plist = [x.split('=')[0] for x in bits[3].split('&')]
                         if 'verb' in plist and 'metadataPrefix' in plist:
                             format_ = 'oai'
-                        elif ('operation' in plist and 
-                              'version' in plist and 
+                        elif ('operation' in plist and
+                              'version' in plist and
                               'query' in plist):
                             format_ = 'sru'
         if not self.docStream:
             cls = self.streamHash[format_]
             self.docStream = cls(session, data, format_, tagName, codec, self)
         else:
-            self.docStream.accumulate(session, data, format_, 
+            self.docStream.accumulate(session, data, format_,
                                       tagName, codec, self)
         self.previousIdx = -1
         self.cache = cache
@@ -1293,14 +1307,14 @@ class AccumulatingDocumentFactory(SimpleDocumentFactory):
     def get_document(self, session, n=-1):
         if self.previousIdx == -1:
             # call find docs for real
-            self.generator = self.docStream.find_documents(session, 
+            self.generator = self.docStream.find_documents(session,
                                                            cache=self.cache)
         return SimpleDocumentFactory.get_document(self, session, n)
 
 
-AccumulatingDocumentFactory.register_stream('transformer', 
+AccumulatingDocumentFactory.register_stream('transformer',
                                             AccTransformerStream)
-AccumulatingDocumentFactory.register_stream('vectorTransformer', 
+AccumulatingDocumentFactory.register_stream('vectorTransformer',
                                             AccVectorTransformerStream)
 
 
@@ -1309,9 +1323,9 @@ class ClusterExtractionDocumentFactory(AccumulatingDocumentFactory):
 
     _possiblePaths = {
         'tempPath': {
-            'docs': 
-                """Path to a file where cluster data will be stored \
-temporarily during subsequent load() calls."""
+            'docs': ("Path to a file where cluster data will be stored "
+                     "temporarily during subsequent load() calls."
+                     )
         }
     }
 
@@ -1352,15 +1366,19 @@ temporarily during subsequent load() calls."""
         if (node.localName == "cluster"):
             maps = []
             for child in node.childNodes:
-                if (child.nodeType == elementType and 
-                    child.localName == "map"):
+                if (
+                    child.nodeType == elementType and
+                    child.localName == "map"
+                ):
                     t = child.getAttributeNS(None, 'type')
                     map_ = []
                     for xpchild in child.childNodes:
-                        if (xpchild.nodeType == elementType and 
-                            xpchild.localName == "xpath"):
+                        if (
+                            xpchild.nodeType == elementType and
+                            xpchild.localName == "xpath"
+                        ):
                             map_.append(flattenTexts(xpchild))
-                        elif (xpchild.nodeType == elementType and 
+                        elif (xpchild.nodeType == elementType and
                               xpchild.localName == "process"):
                             # Turn xpath chain to workflow
                             ref = xpchild.getAttributeNS(None, 'ref')
@@ -1376,12 +1394,12 @@ temporarily during subsequent load() calls."""
                                     for kid in xpchild.childNodes:
                                         newTop.appendChild(kid)
                                     xpchild = newTop
-                                process = CachingWorkflow(session, 
-                                                          xpchild, 
+                                process = CachingWorkflow(session,
+                                                          xpchild,
                                                           self)
                                 process._handleConfigNode(session, xpchild)
                             map_.append(process)
-                    # XXX FIX ME 
+                    # XXX FIX ME
                     # vxp = verifyXPaths([map_[0]])
                     vxp = [map_[0]]
                     if (len(map_) < 3):
@@ -1401,7 +1419,7 @@ temporarily during subsequent load() calls."""
                     t = child.attrib.get(
                         'type',
                         child.attrib.get('{%s}type' % CONFIG_NS, '')
-                    )  
+                    )
                     map_ = []
                     for xpchild in child.iterchildren(tag=etree.Element):
                         if xpchild.tag in ["xpath", '{%s}xpath' % CONFIG_NS]:
@@ -1412,15 +1430,15 @@ temporarily during subsequent load() calls."""
                             ref = xpchild.attrib.get(
                                 'ref',
                                 xpchild.attrib.get('{%s}ref' % CONFIG_NS, None)
-                            ) 
+                            )
                             if ref is not None:
                                 process = self.get_object(session, ref)
                             else:
                                 xpchild.tag = 'workflow'
-                                process = CachingWorkflow(session, 
-                                                          xpchild, 
+                                process = CachingWorkflow(session,
+                                                          xpchild,
                                                           self)
-                                process._handleLxmlConfigNode(session, 
+                                process._handleLxmlConfigNode(session,
                                                               xpchild)
                             map_.append(process)
 
@@ -1434,7 +1452,7 @@ temporarily during subsequent load() calls."""
                         maps.append([map_[0], map_[1], map_[2]])
             self.maps = maps
 
-    def load(self, session, data=None, cache=None, 
+    def load(self, session, data=None, cache=None,
              format_=None, tagName=None, codec=None):
         # Extract cluster information, append to temp file
         # data must be a record
@@ -1469,7 +1487,7 @@ temporarily during subsequent load() calls."""
                     self.fileHandle.write(u"%s\x00%s\n" % (k, d))
                     self.fileHandle.flush()
                 except:
-                    self.log_critical(session, 
+                    self.log_critical(session,
                                       "%s failed to write: %r" % (self.id, k))
                     raise
 
@@ -1477,7 +1495,7 @@ temporarily during subsequent load() calls."""
         if self.previousIdx == -1:
             self.fileHandle.close()
             # now store and call generator
-            ds = ClusterDocumentStream(session, self.tempPath, 'cluster', 
+            ds = ClusterDocumentStream(session, self.tempPath, 'cluster',
                                        'cluster', self.codec, self)
             self.docStream = ds
 

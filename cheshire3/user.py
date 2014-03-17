@@ -72,8 +72,10 @@ class SimpleUser(User):
                                 obj = getFirstData(c2)
                             elif c2.localName == "value":
                                 flag = getFirstData(c2)
-                                if ((flag not in self.allFlags) and
-                                    (flag[:4] != "c3fn")):
+                                if (
+                                    (flag not in self.allFlags) and
+                                    (flag[:4] != "c3fn")
+                                ):
                                     msg = "Unknown flag: %s" % flag
                                     raise ConfigFileException(msg)
                     if obj is None or flag is None:
@@ -111,8 +113,10 @@ class SimpleUser(User):
                             obj = flattenTexts(c2).strip()
                         elif c2.tag in ["value", '{%s}value' % CONFIG_NS]:
                             flag = flattenTexts(c2).strip()
-                            if (flag not in self.allFlags and
-                                flag[:4] != "c3fn"):
+                            if (
+                                flag not in self.allFlags and
+                                flag[:4] != "c3fn"
+                            ):
                                 msg = "Unknown flag: %s" % flag
                                 raise ConfigFileException(msg)
                     if obj is None or flag is None:
@@ -152,9 +156,9 @@ class SimpleUser(User):
 
     def check_password(self, session, password):
         """Check the supplied en-clair password.
-        
+
         Check the supplied en-clair password by obfuscating it using the same
-        algorithm and comparing it with the stored version. Return True/False. 
+        algorithm and comparing it with the stored version. Return True/False.
         """
         # Check password type
         try:
@@ -168,7 +172,7 @@ class SimpleUser(User):
                                             password) == self.password
             else:
                 #  UNIX-style salted password encryption
-                cryptedpasswd = crypt.crypt(password, self.password[:2]) 
+                cryptedpasswd = crypt.crypt(password, self.password[:2])
                 return cryptedpasswd == self.password
         else:
             h.update(password)

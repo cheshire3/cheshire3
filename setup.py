@@ -8,8 +8,9 @@ import inspect
 from warnings import warn
 
 # Import Distribute / Setuptools
-import distribute_setup
-distribute_setup.use_setuptools()
+from ez_setup import use_setuptools
+use_setuptools()
+
 from setuptools import setup, find_packages
 from pkg_resources import DistributionNotFound
 
@@ -81,8 +82,9 @@ setup(
         'grid': ['PyRods'],
         'datamining': ['svm'],
         'lucene': ['lucene'],
+        'nlp': ['numpy', 'nltk >= 2.0.2'],
         'sql': ['psycopg2 >= 2.5'],
-        'textmining': ['numpy', 'nltk >= 2.0'],
+        'textmining': ['numpy', 'nltk >= 2.0.2'],
         'web': ['pyoai', 'PyZ3950 >= 2.04', 'ZSI < 2.0']
     },
     test_suite="cheshire3.test.testAll.suite",

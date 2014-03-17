@@ -63,7 +63,7 @@ class RankedResultSet(ResultSet):
                         )
         return self._meanWeights(items, n)
 
-    def  _cmbzWeights(self, a, b):
+    def _cmbzWeights(self, a, b):
         """Normalise and rescale values."""
         a.weight = a.weight * (self.minWeight / self.maxWeight)
         if b:

@@ -33,12 +33,14 @@ def create_defaultConfig(identifier, args):
             CONF.path({'type': "defaultPath"}, os.path.abspath(defaultPath)),
             # subsequent paths may be relative to defaultPath
             CONF.path({'type': "metadataPath"},
-                   os.path.join('.cheshire3', 'stores', 'metadata.bdb')
-                   ),
+                      os.path.join('.cheshire3', 'stores', 'metadata.bdb')
+                      ),
             CONF.object({'type': "recordStore",
-                      'ref': "recordStore"}),
+                         'ref': "recordStore"}
+                        ),
             CONF.object({'type': "protocolMap",
-                      'ref': "cqlProtocolMap"}),
+                         'ref': "cqlProtocolMap"}
+                        ),
             CONF.path({'type': "indexStoreList"}, "indexStore"),
         ),
         CONF.subConfigs(
@@ -49,15 +51,20 @@ def create_defaultConfig(identifier, args):
                 CONF.objectType("cheshire3.recordStore.BdbRecordStore"),
                 CONF.paths(
                     CONF.path({'type': "defaultPath"},
-                           os.path.join('.cheshire3', 'stores')),
+                              os.path.join('.cheshire3', 'stores')
+                              ),
                     CONF.path({'type': "databasePath"},
-                           'recordStore.bdb'),
+                              'recordStore.bdb'
+                              ),
                     CONF.object({'type': "idNormalizer",
-                              'ref': "StringIntNormalizer"}),
+                                 'ref': "StringIntNormalizer"}
+                                ),
                     CONF.object({'type': "inWorkflow",
-                                 'ref': "XmlToLZ4Workflow"}),
+                                 'ref': "XmlToLZ4Workflow"}
+                                ),
                     CONF.object({'type': "outWorkflow",
-                                 'ref': "LZ4ToLxmlWorkflow"}),
+                                 'ref': "LZ4ToLxmlWorkflow"}
+                                ),
                 ),
                 CONF.options(
                     CONF.setting({'type': "digest"}, 'md5'),
@@ -70,11 +77,14 @@ def create_defaultConfig(identifier, args):
                 CONF.objectType("cheshire3.indexStore.BdbIndexStore"),
                 CONF.paths(
                     CONF.path({'type': "defaultPath"},
-                           os.path.join('.cheshire3', 'indexes')),
+                              os.path.join('.cheshire3', 'indexes')
+                              ),
                     CONF.path({'type': "tempPath"},
-                           'temp'),
+                              'temp'
+                              ),
                     CONF.path({'type': "recordStoreHash"},
-                           'recordStore'),
+                              'recordStore'
+                              ),
                 )
             ),
             # protocolMap
@@ -95,15 +105,20 @@ def create_defaultConfig(identifier, args):
                 CONF.objectType("cheshire3.preParser.MagicRedirectPreParser"),
                 CONF.hash(
                     CONF.object({'mimeType': "application/pdf",
-                              'ref': "PdfToMetsPreParserWorkflow"}),
+                                 'ref': "PdfToMetsPreParserWorkflow"}
+                                ),
                     CONF.object({'mimeType': "text/prs.fallenstein.rst",
-                              'ref': "ReSTToMetsPreParserWorkflow"}),
+                                 'ref': "ReSTToMetsPreParserWorkflow"}
+                                ),
                     CONF.object({'mimeType': "text/plain",
-                                 'ref': "TxtToMetsPreParserWorkflow"}),
+                                 'ref': "TxtToMetsPreParserWorkflow"}
+                                ),
                     CONF.object({'mimeType': "text/html",
-                                 'ref': "HtmlToMetsPreParserWorkflow"}),
+                                 'ref': "HtmlToMetsPreParserWorkflow"}
+                                ),
                     CONF.object({'mimeType': "*",
-                                 'ref': "METSWrappingPreParser"}),
+                                 'ref': "METSWrappingPreParser"}
+                                ),
                 ),
             ),
         ),
@@ -215,13 +230,15 @@ def create_defaultConfigIndexes():
                 CONF.objectType("cheshire3.index.SimpleIndex"),
                 CONF.paths(
                     CONF.object({'type': "indexStore",
-                            'ref': "indexStore"}),
+                                 'ref': "indexStore"}
+                                ),
                 ),
                 CONF.source(
                     CONF.selector({'ref': "idSelector"}),
                     CONF.process(
                         CONF.object({'type': "extractor",
-                                  'ref': "SimpleExtractor"}),
+                                     'ref': "SimpleExtractor"}
+                                    ),
                     ),
                 ),
             ),
@@ -233,17 +250,21 @@ def create_defaultConfigIndexes():
                 CONF.objectType("cheshire3.index.SimpleIndex"),
                 CONF.paths(
                     CONF.object({'type': "indexStore",
-                            'ref': "indexStore"}),
+                                 'ref': "indexStore"}
+                                ),
                 ),
                 CONF.source(
                     CONF.selector({'ref': "nowTimeSelector"}),
                     CONF.process(
                         CONF.object({'type': "extractor",
-                                  'ref': "SimpleExtractor"}),
+                                     'ref': "SimpleExtractor"}
+                                    ),
                         CONF.object({'type': "tokenizer",
-                                  'ref': "DateTokenizer"}),
+                                     'ref': "DateTokenizer"}
+                                    ),
                         CONF.object({'type': "tokenMerger",
-                                  'ref': "SimpleTokenMerger"}),
+                                     'ref': "SimpleTokenMerger"}
+                                    ),
                     ),
                 ),
                 CONF.options(
@@ -262,17 +283,21 @@ def create_defaultConfigIndexes():
                 CONF.objectType("cheshire3.index.SimpleIndex"),
                 CONF.paths(
                     CONF.object({'type': "indexStore",
-                            'ref': "indexStore"}),
+                                 'ref': "indexStore"}
+                                ),
                 ),
                 CONF.source(
                     CONF.selector({'ref': "nowTimeSelector"}),
                     CONF.process(
                         CONF.object({'type': "extractor",
-                                  'ref': "SimpleExtractor"}),
+                                     'ref': "SimpleExtractor"}
+                                    ),
                         CONF.object({'type': "tokenizer",
-                                  'ref': "DateTokenizer"}),
+                                     'ref': "DateTokenizer"}
+                                    ),
                         CONF.object({'type': "tokenMerger",
-                                  'ref': "SimpleTokenMerger"}),
+                                     'ref': "SimpleTokenMerger"}
+                                    ),
                     ),
                 ),
                 CONF.options(
@@ -288,7 +313,8 @@ def create_defaultConfigIndexes():
                 CONF.objectType("cheshire3.index.SimpleIndex"),
                 CONF.paths(
                     CONF.object({'type': "indexStore",
-                            'ref': "indexStore"}),
+                                 'ref': "indexStore"}
+                                ),
                 ),
                 # Source when processing data
                 CONF.source(
@@ -296,15 +322,20 @@ def create_defaultConfigIndexes():
                     CONF.selector({'ref': "anywhereXPathSelector"}),
                     CONF.process(
                         CONF.object({'type': "extractor",
-                                  'ref': "SimpleExtractor"}),
+                                     'ref': "SimpleExtractor"}
+                                    ),
                         CONF.object({'type': "tokenizer",
-                                  'ref': "RegexpFindTokenizer"}),
+                                     'ref': "RegexpFindTokenizer"}
+                                    ),
                         CONF.object({'type': "tokenMerger",
-                                  'ref': "SimpleTokenMerger"}),
+                                     'ref': "SimpleTokenMerger"}
+                                    ),
                         CONF.object({'type': "normalizer",
-                                  'ref': "DiacriticNormalizer"}),
+                                     'ref': "DiacriticNormalizer"}
+                                    ),
                         CONF.object({'type': "normalizer",
-                                  'ref': "CaseNormalizer"}),
+                                     'ref': "CaseNormalizer"}
+                                    ),
                     ),
                 ),
                 # Source when processing all, any, = queries
@@ -312,15 +343,20 @@ def create_defaultConfigIndexes():
                     {'mode': "all|any|="},
                     CONF.process(
                         CONF.object({'type': "extractor",
-                                  'ref': "SimpleExtractor"}),
+                                     'ref': "SimpleExtractor"}
+                                    ),
                         CONF.object({'type': "tokenizer",
-                                  'ref': "PreserveMaskingTokenizer"}),
+                                     'ref': "PreserveMaskingTokenizer"}
+                                    ),
                         CONF.object({'type': "tokenMerger",
-                                  'ref': "SimpleTokenMerger"}),
+                                     'ref': "SimpleTokenMerger"}
+                                    ),
                         CONF.object({'type': "normalizer",
-                                  'ref': "DiacriticNormalizer"}),
+                                     'ref': "DiacriticNormalizer"}
+                                    ),
                         CONF.object({'type': "normalizer",
-                                  'ref': "CaseNormalizer"}),
+                                     'ref': "CaseNormalizer"}
+                                    ),
                     ),
                 ),
                 # Source when processing exact queries
@@ -328,17 +364,23 @@ def create_defaultConfigIndexes():
                     {'mode': "exact"},
                     CONF.process(
                         CONF.object({'type': "extractor",
-                                  'ref': "SimpleExtractor"}),
+                                     'ref': "SimpleExtractor"}
+                                    ),
                         CONF.object({'type': "tokenizer",
-                                  'ref': "PreserveMaskingTokenizer"}),
+                                     'ref': "PreserveMaskingTokenizer"}
+                                    ),
                         CONF.object({'type': "tokenMerger",
-                                  'ref': "SimpleTokenMerger"}),
+                                     'ref': "SimpleTokenMerger"}
+                                    ),
                         CONF.object({'type': "normalizer",
-                                  'ref': "SpaceNormalizer"}),
+                                     'ref': "SpaceNormalizer"}
+                                    ),
                         CONF.object({'type': "normalizer",
-                                  'ref': "DiacriticNormalizer"}),
+                                     'ref': "DiacriticNormalizer"}
+                                    ),
                         CONF.object({'type': "normalizer",
-                                  'ref': "CaseNormalizer"}),
+                                     'ref': "CaseNormalizer"}
+                                    ),
                     ),
                 ),
             ),
@@ -357,13 +399,17 @@ def create_defaultConfigIndexes():
                     CONF.selector({'ref': "titleXPathSelector"}),
                     CONF.process(
                         CONF.object({'type': "extractor",
-                                  'ref': "SimpleExtractor"}),
+                                     'ref': "SimpleExtractor"}
+                                    ),
                         CONF.object({'type': "normalizer",
-                                  'ref': "SpaceNormalizer"}),
+                                     'ref': "SpaceNormalizer"}
+                                    ),
                         CONF.object({'type': "normalizer",
-                                  'ref': "DiacriticNormalizer"}),
+                                     'ref': "DiacriticNormalizer"}
+                                    ),
                         CONF.object({'type': "normalizer",
-                                  'ref': "CaseNormalizer"}),
+                                     'ref': "CaseNormalizer"}
+                                    ),
                     ),
                 ),
                 CONF.options(
@@ -386,15 +432,20 @@ def create_defaultConfigIndexes():
                     CONF.selector({'ref': "titleXPathSelector"}),
                     CONF.process(
                         CONF.object({'type': "extractor",
-                                  'ref': "SimpleExtractor"}),
+                                     'ref': "SimpleExtractor"}
+                                    ),
                         CONF.object({'type': "tokenizer",
-                                  'ref': "RegexpFindTokenizer"}),
+                                     'ref': "RegexpFindTokenizer"}
+                                    ),
                         CONF.object({'type': "tokenMerger",
-                                  'ref': "SimpleTokenMerger"}),
+                                     'ref': "SimpleTokenMerger"}
+                                    ),
                         CONF.object({'type': "normalizer",
-                                  'ref': "DiacriticNormalizer"}),
+                                     'ref': "DiacriticNormalizer"}
+                                    ),
                         CONF.object({'type': "normalizer",
-                                  'ref': "CaseNormalizer"}),
+                                     'ref': "CaseNormalizer"}
+                                    ),
                     ),
                 ),
                 # Source when processing all, any, = queries
@@ -402,15 +453,20 @@ def create_defaultConfigIndexes():
                     {'mode': "all|any"},
                     CONF.process(
                         CONF.object({'type': "extractor",
-                                  'ref': "SimpleExtractor"}),
+                                     'ref': "SimpleExtractor"}
+                                    ),
                         CONF.object({'type': "tokenizer",
-                                  'ref': "PreserveMaskingTokenizer"}),
+                                     'ref': "PreserveMaskingTokenizer"}
+                                    ),
                         CONF.object({'type': "tokenMerger",
-                                  'ref': "SimpleTokenMerger"}),
+                                     'ref': "SimpleTokenMerger"}
+                                    ),
                         CONF.object({'type': "normalizer",
-                                  'ref': "DiacriticNormalizer"}),
+                                     'ref': "DiacriticNormalizer"}
+                                    ),
                         CONF.object({'type': "normalizer",
-                                  'ref': "CaseNormalizer"}),
+                                     'ref': "CaseNormalizer"}
+                                    ),
                     ),
                 ),
                 # Source when processing exact queries
@@ -418,17 +474,23 @@ def create_defaultConfigIndexes():
                     {'mode': "exact|="},
                     CONF.process(
                         CONF.object({'type': "extractor",
-                                  'ref': "SimpleExtractor"}),
+                                     'ref': "SimpleExtractor"}
+                                    ),
                         CONF.object({'type': "tokenizer",
-                                  'ref': "PreserveMaskingTokenizer"}),
+                                     'ref': "PreserveMaskingTokenizer"}
+                                    ),
                         CONF.object({'type': "tokenMerger",
-                                  'ref': "SimpleTokenMerger"}),
+                                     'ref': "SimpleTokenMerger"}
+                                    ),
                         CONF.object({'type': "normalizer",
-                                  'ref': "SpaceNormalizer"}),
+                                     'ref': "SpaceNormalizer"}
+                                    ),
                         CONF.object({'type': "normalizer",
-                                  'ref': "DiacriticNormalizer"}),
+                                     'ref': "DiacriticNormalizer"}
+                                    ),
                         CONF.object({'type': "normalizer",
-                                  'ref': "CaseNormalizer"}),
+                                     'ref': "CaseNormalizer"}
+                                    ),
                     ),
                 ),
             ),
@@ -493,152 +555,149 @@ def create_defaultZeerex(identifier, args):
     else:
         port = "80"
     serverInfo = Z.serverInfo(
-                     {'protocol': "srw/u",
-                      'version': "1.1",
-                      'transport': "http"},
-                     Z.host(host),
-                     Z.port(port),
-                     Z.database('api/sru/{0}'.format(identifier)),
-                 )
+        {'protocol': "srw/u", 'version': "1.1", 'transport': "http"},
+        Z.host(host),
+        Z.port(port),
+        Z.database('api/sru/{0}'.format(identifier)),
+    )
     # Assemble to complete ZeeRex base on created nodes
     zeerex = Z.explain(
-                 {'id': identifier,
-                  'authoritative': "true"},
-                 serverInfo,
-                 Z.databaseInfo(
-                     Z.title(args.title),
-                     Z.description(args.description),
-                 ),
-                 Z.metaInfo(
-                     Z.dateModified(datetime.utcnow().isoformat()),
-                 ),
-                 # Don't know schemaInfo but should include the node
-                 Z.schemaInfo(),
-                 Z.indexInfo(
-                     Z.set({'identifier':
-                            "info:srw/cql-context-set/1/cql-v1.2",
-                            'name': "cql"}),
-                     Z.set({'identifier': "info:srw/cql-context-set/1/dc-v1.1",
-                            'name': "dc"}),
-                     Z.set({'identifier': "info:srw/cql-context-set/2/rec-1.1",
-                            'name': "rec"}),
-                     Z.index(
-                         {'{http://www.cheshire3.org/schemas/explain/}index':
-                          "idx-identifier"},
-                         Z.title("Record Identifier"),
-                         Z.map(
-                             Z.name({'set': "rec"}, "identifier"),
-                         ),
-                         Z.configInfo(
-                             Z.supports({'type': "relation"}, "exact"),
-                             Z.supports({'type': "relation"}, "="),
-                             Z.supports({'type': "relation"}, "any"),
-                             Z.supports({'type': "relation"}, "all"),
-                             Z.supports({'type': "relation"}, "<"),
-                             Z.supports({'type': "relation"}, "<="),
-                             Z.supports({'type': "relation"}, ">"),
-                             Z.supports({'type': "relation"}, ">="),
-                             Z.supports({'type': "relation"}, "within"),
-                         ),
-                     ),
-                     Z.index(
-                         {'{http://www.cheshire3.org/schemas/explain/}index':
-                          "idx-creationDate"},
-                         Z.title("Record Creation Date"),
-                         Z.map(
-                             Z.name({'set': "rec"}, "creationDate"),
-                         ),
-                         Z.configInfo(
-                             Z.supports({'type': "relation"}, "exact"),
-                             Z.supports({'type': "relation"}, "="),
-                             Z.supports({'type': "relation"}, "<"),
-                             Z.supports({'type': "relation"}, "<="),
-                             Z.supports({'type': "relation"}, ">"),
-                             Z.supports({'type': "relation"}, ">="),
-                             Z.supports({'type': "relation"}, "within"),
-                         ),
-                     ),
-                     Z.index(
-                         {'{http://www.cheshire3.org/schemas/explain/}index':
-                          "idx-modificationDate"},
-                         Z.title("Record Modification Date"),
-                         Z.map(
-                             Z.name({'set': "rec"}, "modificationDate"),
-                         ),
-                         Z.configInfo(
-                             Z.supports({'type': "relation"}, "exact"),
-                             Z.supports({'type': "relation"}, "="),
-                             Z.supports({'type': "relation"}, "<"),
-                             Z.supports({'type': "relation"}, "<="),
-                             Z.supports({'type': "relation"}, ">"),
-                             Z.supports({'type': "relation"}, ">="),
-                             Z.supports({'type': "relation"}, "within"),
-                         ),
-                     ),
-                     Z.index(
-                         {'{http://www.cheshire3.org/schemas/explain/}index':
-                          "idx-anywhere"},
-                         Z.title("Anywhere / Full-text Keywords"),
-                         Z.map(
-                             Z.name({'set': "cql"}, "anywhere"),
-                         ),
-                         Z.configInfo(
-                             Z.supports({'type': "relation"}, "="),
-                             Z.supports({'type': "relation"}, "any"),
-                             Z.supports({'type': "relation"}, "all"),
-                             Z.supports({'type': "relationModifier"}, "word"),
-                         ),
-                     ),
-                     Z.index(
-                         {'{http://www.cheshire3.org/schemas/explain/}index':
-                          "idx-title"},
-                         Z.title("Title"),
-                         Z.map(
-                             Z.name({'set': "dc"}, "title"),
-                         ),
-                         Z.configInfo(
-                             Z.supports({'type': "relation"}, "exact"),
-                             Z.supports({'type': "relation"}, "="),
-                             Z.supports(
-                                 {'type': "relation",
-                                  '{{{0}}}index'.format(Z._nsmap['c3']):
-                                  "idx-title-kwd"},
-                                 "any"),
-                             Z.supports(
-                                 {'type': "relation",
-                                  '{{{0}}}index'.format(Z._nsmap['c3']):
-                                  "idx-title-kwd"},
-                                 "all"),
-                             Z.supports({'type': "relationModifier"},
-                                        "string"),
-                             Z.supports(
-                                 {'type': "relationModifier",
-                                  '{{{0}}}index'.format(Z._nsmap['c3']):
-                                  "idx-title-kwd"},
-                                 "word"),
-                             Z.supports(
-                                 {'type': "relationModifier",
-                                  '{{{0}}}index'.format(Z._nsmap['c3']):
-                                  "idx-title-kwd"},
-                                 "stem"),
-                         ),
-                     ),
-                 ),
-                 Z.configInfo(
-                     Z.default({'type': "numberOfRecords"}, "1"),
-                     Z.default({'type': "contextSet"}, "cql"),
-                     Z.default({'type': "index"}, "cql.anywhere"),
-                     Z.default({'type': "relation"}, "all"),
-                     Z.default({'type': "sortCaseSensitive"}, "false"),
-                     Z.default({'type': "sortAscending"}, "true"),
-                     Z.default({'type': "sortMissingValue"}, "HighValue"),
-                     Z.setting({'type': "maximumRecords"}, "50"),
-                     Z.supports({'type': "resultSets"}),
-                     Z.supports({'type': "sort"}),
-                     Z.supports({'type': "relationModifier"}, "relevant"),
-                     Z.supports({'type': "relationModifier"}, "word"),
-                 ),
-             )
+        {'id': identifier, 'authoritative': "true"},
+        serverInfo,
+        Z.databaseInfo(
+            Z.title(args.title),
+            Z.description(args.description),
+        ),
+        Z.metaInfo(
+            Z.dateModified(datetime.utcnow().isoformat()),
+        ),
+        # Don't know schemaInfo but should include the node
+        Z.schemaInfo(),
+        Z.indexInfo(
+            Z.set({'identifier':
+                   "info:srw/cql-context-set/1/cql-v1.2",
+                   'name': "cql"}),
+            Z.set({'identifier': "info:srw/cql-context-set/1/dc-v1.1",
+                   'name': "dc"}),
+            Z.set({'identifier': "info:srw/cql-context-set/2/rec-1.1",
+                   'name': "rec"}),
+            Z.index(
+                {'{http://www.cheshire3.org/schemas/explain/}index':
+                 "idx-identifier"},
+                Z.title("Record Identifier"),
+                Z.map(
+                    Z.name({'set': "rec"}, "identifier"),
+                ),
+                Z.configInfo(
+                    Z.supports({'type': "relation"}, "exact"),
+                    Z.supports({'type': "relation"}, "="),
+                    Z.supports({'type': "relation"}, "any"),
+                    Z.supports({'type': "relation"}, "all"),
+                    Z.supports({'type': "relation"}, "<"),
+                    Z.supports({'type': "relation"}, "<="),
+                    Z.supports({'type': "relation"}, ">"),
+                    Z.supports({'type': "relation"}, ">="),
+                    Z.supports({'type': "relation"}, "within"),
+                ),
+            ),
+            Z.index(
+                {'{http://www.cheshire3.org/schemas/explain/}index':
+                 "idx-creationDate"},
+                Z.title("Record Creation Date"),
+                Z.map(
+                    Z.name({'set': "rec"}, "creationDate"),
+                ),
+                Z.configInfo(
+                    Z.supports({'type': "relation"}, "exact"),
+                    Z.supports({'type': "relation"}, "="),
+                    Z.supports({'type': "relation"}, "<"),
+                    Z.supports({'type': "relation"}, "<="),
+                    Z.supports({'type': "relation"}, ">"),
+                    Z.supports({'type': "relation"}, ">="),
+                    Z.supports({'type': "relation"}, "within"),
+                ),
+            ),
+            Z.index(
+                {'{http://www.cheshire3.org/schemas/explain/}index':
+                 "idx-modificationDate"},
+                Z.title("Record Modification Date"),
+                Z.map(
+                    Z.name({'set': "rec"}, "modificationDate"),
+                ),
+                Z.configInfo(
+                    Z.supports({'type': "relation"}, "exact"),
+                    Z.supports({'type': "relation"}, "="),
+                    Z.supports({'type': "relation"}, "<"),
+                    Z.supports({'type': "relation"}, "<="),
+                    Z.supports({'type': "relation"}, ">"),
+                    Z.supports({'type': "relation"}, ">="),
+                    Z.supports({'type': "relation"}, "within"),
+                ),
+            ),
+            Z.index(
+                {'{http://www.cheshire3.org/schemas/explain/}index':
+                 "idx-anywhere"},
+                Z.title("Anywhere / Full-text Keywords"),
+                Z.map(
+                    Z.name({'set': "cql"}, "anywhere"),
+                ),
+                Z.configInfo(
+                    Z.supports({'type': "relation"}, "="),
+                    Z.supports({'type': "relation"}, "any"),
+                    Z.supports({'type': "relation"}, "all"),
+                    Z.supports({'type': "relationModifier"}, "word"),
+                ),
+            ),
+            Z.index(
+                {'{http://www.cheshire3.org/schemas/explain/}index':
+                 "idx-title"},
+                Z.title("Title"),
+                Z.map(
+                    Z.name({'set': "dc"}, "title"),
+                ),
+                Z.configInfo(
+                    Z.supports({'type': "relation"}, "exact"),
+                    Z.supports({'type': "relation"}, "="),
+                    Z.supports(
+                        {'type': "relation",
+                         '{{{0}}}index'.format(Z._nsmap['c3']):
+                         "idx-title-kwd"},
+                        "any"),
+                    Z.supports(
+                        {'type': "relation",
+                         '{{{0}}}index'.format(Z._nsmap['c3']):
+                         "idx-title-kwd"},
+                        "all"),
+                    Z.supports({'type': "relationModifier"},
+                               "string"),
+                    Z.supports(
+                        {'type': "relationModifier",
+                         '{{{0}}}index'.format(Z._nsmap['c3']):
+                         "idx-title-kwd"},
+                        "word"),
+                    Z.supports(
+                        {'type': "relationModifier",
+                         '{{{0}}}index'.format(Z._nsmap['c3']):
+                         "idx-title-kwd"},
+                        "stem"),
+                ),
+            ),
+        ),  # end indexInfo
+        Z.configInfo(
+            Z.default({'type': "numberOfRecords"}, "1"),
+            Z.default({'type': "contextSet"}, "cql"),
+            Z.default({'type': "index"}, "cql.anywhere"),
+            Z.default({'type': "relation"}, "all"),
+            Z.default({'type': "sortCaseSensitive"}, "false"),
+            Z.default({'type': "sortAscending"}, "true"),
+            Z.default({'type': "sortMissingValue"}, "HighValue"),
+            Z.setting({'type': "maximumRecords"}, "50"),
+            Z.supports({'type': "resultSets"}),
+            Z.supports({'type': "sort"}),
+            Z.supports({'type': "relationModifier"}, "relevant"),
+            Z.supports({'type': "relationModifier"}, "word"),
+        ),
+    )
     return zeerex
 
 
@@ -658,10 +717,11 @@ def include_configByPath(config, path):
         # Element for subConfigs does not exist - create it
         subConfigs = CONF.subConfigs()
         config.append(subConfigs)
-    subConfigs.append(CONF.path(
-                          {'type': "includeConfigs"},
-                          path
-                      )
+    subConfigs.append(
+        CONF.path(
+            {'type': "includeConfigs"},
+            path
+        )
     )
     return config
 
@@ -700,7 +760,7 @@ Please specify a different id using the --database option.""".format(dbid)
 
     # Create a .cheshire3 directory and populate it
     c3_dir = os.path.join(os.path.abspath(args.directory), '.cheshire3')
-    for dir_path in [c3_dir, 
+    for dir_path in [c3_dir,
                      os.path.join(c3_dir, 'stores'),
                      os.path.join(c3_dir, 'indexes'),
                      os.path.join(c3_dir, 'logs')]:
@@ -708,8 +768,10 @@ Please specify a different id using the --database option.""".format(dbid)
             os.makedirs(dir_path)
         except OSError:
             # Directory already exists
-            server.log_warning(session, 
-                             "directory already exists {0}".format(dir_path))
+            server.log_warning(
+                session,
+                "directory already exists {0}".format(dir_path)
+            )
 
     # Generate config file(s)
     xmlFilesToWrite = {}
@@ -723,13 +785,13 @@ Please specify a different id using the --database option.""".format(dbid)
     # Generate generic database config
     dbConfig = create_defaultConfig(dbid, args)
     dbConfigPath = os.path.join(c3_dir, 'config.xml')
-    xmlFilesToWrite[dbConfigPath] = dbConfig 
+    xmlFilesToWrite[dbConfigPath] = dbConfig
 
     # Generate config for generic selectors
     selectorConfig = create_defaultConfigSelectors()
     path = os.path.join(c3_dir, 'configSelectors.xml')
     dbConfig = include_configByPath(dbConfig, path)
-    xmlFilesToWrite[path] = selectorConfig 
+    xmlFilesToWrite[path] = selectorConfig
 
     # Generate config for generic indexes
     indexConfig = create_defaultConfigIndexes()
@@ -746,9 +808,11 @@ Please specify a different id using the --database option.""".format(dbid)
     # Write configs to files
     for path, node in xmlFilesToWrite.iteritems():
         with open(path, 'w') as conffh:
-            conffh.write(etree.tostring(node, 
+            conffh.write(etree.tostring(node,
                                         pretty_print=True,
-                                        encoding="utf-8"))
+                                        encoding="utf-8"
+                                        )
+                         )
 
     # Tell the server to register the config file
     server.register_databaseConfigFile(session, dbConfigPath)
@@ -764,23 +828,29 @@ argparser.add_argument('directory', type=str,
                        help=("name of directory in which to init the Cheshire3"
                              " database. default: current-working-dir"))
 argparser.add_argument('-d', '--database', type=str,
-                  action='store', dest='database',
-                  default=None, metavar='DATABASE',
-                  help=("identifier of Cheshire3 database to init. default: "
-                        "db_<database-directory-name>"))
+                       action='store', dest='database',
+                       default=None, metavar='DATABASE',
+                       help=("identifier of Cheshire3 database to init. "
+                             "default: db_<database-directory-name>"
+                             )
+                       )
 argparser.add_argument('-t', '--title', type=str,
-                  action='store', dest='title',
-                  default="", metavar='TITLE',
-                  help="Title for the Cheshire3 database to init.")
+                       action='store', dest='title',
+                       default="", metavar='TITLE',
+                       help="Title for the Cheshire3 database to init."
+                       )
 argparser.add_argument('-c', '--description', type=str,
-                  action='store', dest='description',
-                  default="", metavar='DESCRIPTION',
-                  help="Description of the Cheshire3 database to init.")
+                       action='store', dest='description',
+                       default="", metavar='DESCRIPTION',
+                       help="Description of the Cheshire3 database to init."
+                       )
 argparser.add_argument('-p', '--port', type=int,
-                  action='store', dest='port',
-                  default=0, metavar='PORT',
-                  help=("Port on which Cheshire3 database will be served via "
-                        "SRU."))
+                       action='store', dest='port',
+                       default=0, metavar='PORT',
+                       help=("Port on which Cheshire3 database will be "
+                             "served via SRU."
+                             )
+                       )
 
 
 # Set up ElementMaker for Cheshire3 config and METS namespaces
@@ -793,8 +863,9 @@ CONF = ElementMaker(namespace=CONFIG_NS,
 
 # Set up ElementMaker for ZeeRex and Cheshire3 Explain namespaces
 Z = ElementMaker(namespace="http://explain.z3950.org/dtd/2.0/",
-                  nsmap={'zrx': "http://explain.z3950.org/dtd/2.0/",
-                         'c3': "http://www.cheshire3.org/schemas/explain/"})
+                 nsmap={'zrx': "http://explain.z3950.org/dtd/2.0/",
+                        'c3': "http://www.cheshire3.org/schemas/explain/"}
+                 )
 
 session = None
 server = None
