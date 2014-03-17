@@ -28,7 +28,7 @@ modules = ['database', 'documentFactory', 'documentStore', 'extractor',
            'grid.srbIndex', 'grid.srbStore']
 
 _major_version = 1
-_minor_version = 1
+_minor_version = 2
 _patch_version = 0
 
 cheshire3Version = (_major_version, _minor_version, _patch_version)
