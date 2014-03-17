@@ -1,8 +1,8 @@
 CHANGES
 =======
 
-1.1.0c5 - Wednesday 12th March 2014
------------------------------------
+1.1.0c6 - Monday 17th March 2014
+--------------------------------
 
 ENHANCEMENTS
 ~~~~~~~~~~~~
@@ -42,13 +42,15 @@ ENHANCEMENTS
   extras).
 
 .. [*] Faster retrieval assuming reasonable processing power (>=2.5GHz) and
-       non solid-state storage. 
+       non solid-state storage.
 
 
 BUG FIXES
 ~~~~~~~~~
 
-Many minor bug fixes.
+* Fixed major bug with indexing on 64-bit platforms.
+
+* Many more minor bug fixes.
 
 
 TESTS
