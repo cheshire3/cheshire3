@@ -72,12 +72,14 @@ class SimpleServer(Server):
     def register_databaseConfigFile(self, session, file_path):
         """Register a Cheshire3 Database config file.
 
-        Register a configuration file for a Cheshire3 Database with
-        the server.
+        Register a configuration file for a Cheshire3
+        :py:class:`~cheshire3.baseObjects.Database` with the
+        :py:class:`~cheshire3.baseObjects.Server`.
 
-        This process simply tells the server that it should include the
-        configuration(s) in your file (it does not ingest your file) so
-        you don't need to re-register when you make changes to the file.
+        This process simply tells the :py:class:`~cheshire3.baseObjects.Server`
+        that it should include the configuration(s) in your file (it does not
+        ingest your file) so you don't need to re-register when you make
+        changes to the file.
         """
         # Read in proposed config file
         docFac = self.get_object(session, 'defaultDocumentFactory')
@@ -138,6 +140,53 @@ class SimpleServer(Server):
         self.log_info(session,
                       "Database configured in {0} registered with Cheshire3 "
                       "Server {1}".format(file_path, self.id))
+
+    def unregister_databaseConfig(self, session, identifier):
+        """Unregister a Cheshire3 Database.
+
+        Unregister a Cheshire3 :py:class:`~cheshire3.baseObjects.Database` from
+        the :py:class:`~cheshire3.baseObjects.Server`.
+
+        This process tells the :py:class:`~cheshire3.baseObjects.Server` that
+        it should drop the configuration(s) for the specified
+        `~cheshire3.baseObjects.Database`.
+        """
+        # Try to do this by writing config plugin file if possible
+        serverDefaultPath = self.get_path(session,
+                                          'defaultPath',
+                                          cheshire3Root
+                                          )
+        userSpecificPath = os.path.join(os.path.expanduser('~'),
+                                        '.cheshire3-server'
+                                        )
+        pluginPath = os.path.join('configs',
+                                  'databases',
+                                  '{0}.xml'.format(identifier)
+                                  )
+        try:
+            os.remove(os.path.join(userSpecificPath, pluginPath))
+        except OSError:
+            # File doesn't exist
+            # Try server plugin directory
+            try:
+                os.remove(os.path.join(serverDefaultPath, pluginPath))
+            except OSError:
+                # File doesn't exist, or insufficient permission
+                if os.path.exists(os.path.join(serverDefaultPath, pluginPath)):
+                    msg = ("Insufficient write permissions for Server's "
+                           "Database plugin directory"
+                           )
+                else:
+                    msg = ("No Database plugin file for Database {0}"
+                           "".format(identifier)
+                           )
+                self.log_critical(session, msg)
+                raise FileSystemException(msg)
+
+        self.log_info(session,
+                      "Database {0} unregistered from Cheshire3 "
+                      "Server {1}".format(identifier, self.id)
+                      )
 
 
 # Set up ElementMaker for Cheshire3 config namespace

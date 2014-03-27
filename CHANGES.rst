@@ -1,6 +1,15 @@
 CHANGES
 =======
 
+1.1.1 - Monday 27th March 2014
+------------------------------
+
+ENHANCEMENTS
+~~~~~~~~~~~~
+
+* ``cheshire3-unregister`` command to unregister existing databases.
+
+
 1.1.0 - Monday 17th March 2014
 ------------------------------
 
