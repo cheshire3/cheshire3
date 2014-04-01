@@ -179,11 +179,7 @@ class C3Object(object):
                 return
         else:
             if not os.path.isfile(urlparts.path):
-                self.log_error(session,
-                               "Unable to include file at {0}, "
-                               "File not found\n".format(urlparts.path)
-                               )
-                return
+                raise FileDoesNotExistException(urlparts.path)
             f = open(urlparts.path, 'r')
         doc = BootstrapDocument(f)
         # Look on self for instantiated parser, otherwise use bootstrap
