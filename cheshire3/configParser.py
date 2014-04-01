@@ -382,7 +382,15 @@ class C3Object(object):
                     path = e.text
                     # Check whether path is a URL
                     if urlsplit(path).scheme:
-                        dom = self._getDomFromUrl(session, path)
+                        try:
+                            dom = self._getDomFromUrl(session, path)
+                        except FileDoesNotExistException:
+                            self.log_error(session,
+                                "Unable to include file at {0}, "
+                                "File not found\n".format(path)
+                            )
+                            continue
+
                     else:
                         # A local filesystem path
                         # Expand user-specific paths
@@ -394,9 +402,24 @@ class C3Object(object):
                             else:
                                 path = os.path.join(dfp, path)
                         if urlsplit(path).scheme:
-                            dom = self._getDomFromUrl(session, path)
+                            try:
+                                dom = self._getDomFromUrl(session, path)
+                            except FileDoesNotExistException:
+                                self.log_error(session,
+                                    "Unable to include file at {0}, "
+                                    "File not found\n".format(path)
+                                )
+                                continue
                         else:
-                            dom = self._getDomFromFile(session, path)
+                            try:
+                                dom = self._getDomFromFile(session, path)
+                            except FileDoesNotExistException:
+                                self.log_error(session,
+                                    "Unable to include file at {0}, "
+                                    "File not found\n".format(path)
+                                )
+                                continue
+
                     id = e.attrib['id']
                     self.subConfigs[id] = dom
                     ot = e.attrib.get('type', '')
