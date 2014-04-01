@@ -831,9 +831,9 @@ def myauthfn(self, session, *args, **kw):
                 delattr(self, '__postauth_%s' % name)
 
     def log_lvl(self, session, lvl, msg, *args, **kw):
-        if session.logger:
+        if hasattr(session, 'logger') and session.logger:
             session.logger.log_lvl(session, lvl, msg, *args, **kw)
-        elif self.logger:
+        elif hasattr(self, 'logger') and self.logger:
             self.logger.log_lvl(session, lvl, msg, *args, **kw)
         else:
             if type(msg) == unicode:
