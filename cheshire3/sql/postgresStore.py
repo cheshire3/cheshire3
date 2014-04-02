@@ -127,15 +127,17 @@ class PostgresStore(SQLStore):
             try:
                 query = ("SELECT identifier FROM {0}_{1} LIMIT 1"
                          "".format(self.table, name))
-                res = self._query(query)
+                rows = self._query(query)
+                # rows == [] means initialized but empty
+                # rows == None means relations(s)/table(s) uninitialized
             except psycopg2.ProgrammingError as e:
+                rows = None
+            if rows is None:
                 # No table for relation, initialise
                 query = ("CREATE TABLE {0}_{1} (identifier SERIAL PRIMARY KEY, "
                          "".format(self.table, name))
-                args = []
                 for f in fields:
-                    query += "%s %s"
-                    args.extend((f[0], f[1]))
+                    query += "{0} {1}".format(*f)
                     if f[2]:
                         # Foreign Key
                         query += (" REFERENCES {0} (identifier) ON DELETE "
@@ -143,7 +145,7 @@ class PostgresStore(SQLStore):
                                   )
                     query += ", "
                 query = query[:-2] + ")"
-                res = self._query(query, tuple(args))
+                _ = self._query(query)
 
     def _escape_data(self, data):
         data = data.replace(nonTextToken, '\\\\000\\\\001')
