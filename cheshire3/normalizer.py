@@ -13,7 +13,7 @@ from cheshire3.baseObjects import Normalizer
 from cheshire3.exceptions import (
     ConfigFileException,
     MissingDependencyException
-    )
+)
 
 
 class SimpleNormalizer(Normalizer):
@@ -1340,7 +1340,7 @@ class DiacriticNormalizer(SimpleNormalizer):
             u"\u1EF7": u"\u0079",
             u"\u1EF8": u"\u0059",
             u"\u1EF9": u"\u0079"
-            }
+        }
 
     def process_string(self, session, data):
         d = []

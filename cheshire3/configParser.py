@@ -28,7 +28,7 @@ from cheshire3.internal import (
     cheshire3Dbs,
     cheshire3Www,
     CONFIG_NS
-    )
+)
 
 
 cheshire3Paths = {'cheshire3Home': cheshire3Home,
@@ -179,11 +179,7 @@ class C3Object(object):
                 return
         else:
             if not os.path.isfile(urlparts.path):
-                self.log_error(session,
-                               "Unable to include file at {0}, "
-                               "File not found\n".format(urlparts.path)
-                               )
-                return
+                raise FileDoesNotExistException(urlparts.path)
             f = open(urlparts.path, 'r')
         doc = BootstrapDocument(f)
         # Look on self for instantiated parser, otherwise use bootstrap
@@ -386,7 +382,16 @@ class C3Object(object):
                     path = e.text
                     # Check whether path is a URL
                     if urlsplit(path).scheme:
-                        dom = self._getDomFromUrl(session, path)
+                        try:
+                            dom = self._getDomFromUrl(session, path)
+                        except FileDoesNotExistException:
+                            self.log_error(
+                                session,
+                                "Unable to include file at {0}, "
+                                "File not found\n".format(path)
+                            )
+                            continue
+
                     else:
                         # A local filesystem path
                         # Expand user-specific paths
@@ -398,9 +403,26 @@ class C3Object(object):
                             else:
                                 path = os.path.join(dfp, path)
                         if urlsplit(path).scheme:
-                            dom = self._getDomFromUrl(session, path)
+                            try:
+                                dom = self._getDomFromUrl(session, path)
+                            except FileDoesNotExistException:
+                                self.log_error(
+                                    session,
+                                    "Unable to include file at {0}, "
+                                    "File not found\n".format(path)
+                                )
+                                continue
                         else:
-                            dom = self._getDomFromFile(session, path)
+                            try:
+                                dom = self._getDomFromFile(session, path)
+                            except FileDoesNotExistException:
+                                self.log_error(
+                                    session,
+                                    "Unable to include file at {0}, "
+                                    "File not found\n".format(path)
+                                )
+                                continue
+
                     id = e.attrib['id']
                     self.subConfigs[id] = dom
                     ot = e.attrib.get('type', '')
@@ -831,9 +853,9 @@ def myauthfn(self, session, *args, **kw):
                 delattr(self, '__postauth_%s' % name)
 
     def log_lvl(self, session, lvl, msg, *args, **kw):
-        if session.logger:
+        if hasattr(session, 'logger') and session.logger:
             session.logger.log_lvl(session, lvl, msg, *args, **kw)
-        elif self.logger:
+        elif hasattr(self, 'logger') and self.logger:
             self.logger.log_lvl(session, lvl, msg, *args, **kw)
         else:
             if type(msg) == unicode:

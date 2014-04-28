@@ -12,7 +12,7 @@ from cheshire3.baseObjects import ProtocolMap
 from cheshire3.exceptions import (
     ConfigFileException,
     ObjectDoesNotExistException
-    )
+)
 from cheshire3.utils import elementType, textType, flattenTexts
 from cheshire3.cqlParser import modifierClauseType, indexType, relationType
 from cheshire3 import dynamic

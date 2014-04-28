@@ -25,7 +25,7 @@ from cheshire3.exceptions import (
     FileDoesNotExistException,
     ConfigFileException,
     PermissionException
-    )
+)
 from cheshire3.internal import CONFIG_NS
 
 mimetypes.add_type('application/marc', '.marc')
@@ -961,8 +961,9 @@ class SimpleDocumentFactory(DocumentFactory):
         'maxGarbageBytes': {
             'docs': ('Number of bytes of non document content after which to '
                      'exit'),
-            'type': int}
+            'type': int
         }
+    }
 
     def __init__(self, session, config, parent):
         DocumentFactory.__init__(self, session, config, parent)
