@@ -488,6 +488,12 @@ class MinidomRecord(DomRecord):
 
 try:
     from lxml import etree, sax
+except:
+
+    class LxmlRecord(DomRecord):
+        pass
+
+else:
 
     class LxmlRecord(DomRecord):
 
@@ -525,10 +531,6 @@ try:
             except AttributeError:
                 return self.dom
 
-except:
-    class LxmlRecord(DomRecord):
-        pass
-
 
 try:
     from xpath import (
@@ -538,7 +540,7 @@ try:
         ParsedAbbreviatedAbsoluteLocationPath as PAALP,
         ParsedAbbreviatedRelativeLocationPath as PARLP,
         ParsedNodeTest
-        )
+    )
 except:
     # This means we can't do xpaths on SaxRecords...
     # making them a bit pointless, but not fatal as we likely don't need them

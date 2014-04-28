@@ -17,7 +17,7 @@ from cheshire3.exceptions import (
     XMLSyntaxError,
     FileSystemException,
     FileDoesNotExistException
-    )
+)
 from cheshire3.internal import cheshire3Root, CONFIG_NS
 
 

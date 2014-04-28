@@ -108,27 +108,27 @@ relation   ::= '>' | '<' | ...
                     '.FULLY_ENCLOSED_WITHIN.': 'within',
                     '<#>': 'encloses',
                     '.ENCLOSES.': 'encloses',
-#                     '>=<': 7,
-#                     '.OVERLAPS.': 7,
-#                     '<>#': 10,
-#                     '.OUTSIDE_OF.': 10,
-#                     '+-+': 11
-#                     '.NEAR.': 11,
-#                     '.#.': 12,
-#                     '.MEMBERS_CONTAIN.': 12,
-#                     '!.#.': 13,
-#                     '.MEMBERS_NOT_CONTAIN.': 13,
-#                     ':<:': 14,
-#                     '.BEFORE.': 14,
-#                     ':<=:': 15,
-#                     '.BEFORE_OR_DURING.': 15,
-#                     ':=:': 16,
-#                     '.DURING.': 16,
-#                     ':>=:': 17,
-#                     '.DURING_OR_AFTER.': 17,
-#                     ':>:': 18,
-#                     '.AFTER.': 18
-    }
+                    # '>=<': 7,
+                    # '.OVERLAPS.': 7,
+                    # '<>#': 10,
+                    # '.OUTSIDE_OF.': 10,
+                    # '+-+': 11
+                    # '.NEAR.': 11,
+                    # '.#.': 12,
+                    # '.MEMBERS_CONTAIN.': 12,
+                    # '!.#.': 13,
+                    # '.MEMBERS_NOT_CONTAIN.': 13,
+                    # ':<:': 14,
+                    # '.BEFORE.': 14,
+                    # ':<=:': 15,
+                    # '.BEFORE_OR_DURING.': 15,
+                    # ':=:': 16,
+                    # '.DURING.': 16,
+                    # ':>=:': 17,
+                    # '.DURING_OR_AFTER.': 17,
+                    # ':>:': 18,
+                    # '.AFTER.': 18
+                    }
 
     proxBooleans = {'!PROX': (2, 0, 2),  # prox
                     '!ADJ': (2, 0, 2),   # prox/unit=word/distance=1

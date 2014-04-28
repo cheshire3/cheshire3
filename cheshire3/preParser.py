@@ -931,7 +931,7 @@ entities (default)""",
         data = doc.get_raw(session)
         # This is bizarre, but otherwise:
         # UnicodeDecodeError: 'ascii' codec can't decode byte ...
-        if type(data) == unicode:
+        if isinstance(data, unicode):
             data = data.replace(u"\xe2\x80\x9c", u'&quot;')
             data = data.replace(u"\xe2\x80\x9d", u'&quot;')
             data = data.replace(u"\xe2\x80\x9e", u'&quot;')
