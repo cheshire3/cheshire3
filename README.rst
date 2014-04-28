@@ -1,7 +1,7 @@
 Cheshire3
 =========
 
-27th March 2014 (2014-03-27)
+28th April 2014 (2014-04-28)
 
 .. image:: https://travis-ci.org/cheshire3/cheshire3.png?branch=master,develop
    :target: https://travis-ci.org/cheshire3/cheshire3?branch=master,develop
@@ -287,7 +287,7 @@ tracker: https://github.com/cheshire3/cheshire3/issues
 Licensing
 ---------
 
-Copyright © 2005-2013, the `University of Liverpool`_. All rights reserved.
+Copyright © 2005-2014, the `University of Liverpool`_. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -298,7 +298,7 @@ met:
 -  Redistributions in binary form must reproduce the above copyright
    notice, this list of conditions and the following disclaimer in the
    documentation and/or other materials provided with the distribution.
--  Neither the name of the University of Liverpool nor the names of its
+-  Neither the name of the `University of Liverpool`_ nor the names of its
    contributors may be used to endorse or promote products derived from
    this software without specific prior written permission.
 
