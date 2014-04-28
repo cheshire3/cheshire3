@@ -1,6 +1,22 @@
 CHANGES
 =======
 
+1.1.2 - Monday 28th April 2014
+------------------------------
+
+BUG FIXES
+~~~~~~~~~
+
+* Don't mask errors due to a Logger being unavailable.
+
+* Warn instead of error when a subconfig file is missing.
+
+* Init additional tables used for linking in PostgreSQL base Stores.
+
+* Avoid non-namespaced Records from inheriting the OAI-PMH namespace be
+  prefixing the OAI-PMH namespace in responses.
+
+
 1.1.1 - Monday 27th March 2014
 ------------------------------
 
