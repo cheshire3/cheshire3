@@ -18,7 +18,7 @@ NS_OAIDC = 'http://www.openarchives.org/OAI/2.0/oai_dc/'
 NS_DC = "http://purl.org/dc/elements/1.1/"
 
 nsmap = {
-    None: NS_OAIPMH,
+    'oai': NS_OAIPMH,
     'xsi': NS_XSI,
     'oai_dc': NS_OAIDC,
     'dc': NS_DC
