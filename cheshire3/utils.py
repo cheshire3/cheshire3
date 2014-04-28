@@ -196,7 +196,7 @@ def euclideanLength(vector):
     >>> euclideanLength({1:1,2:2})
     2.2360679774997898
     """
-    return math.sqrt(sum(v**2 for v in vector.itervalues()))
+    return math.sqrt(sum(v ** 2 for v in vector.itervalues()))
 
 
 def vectorSimilarity(vector1, vector2):

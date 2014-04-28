@@ -15,7 +15,7 @@ from cheshire3.record import (
     DomRecord,
     MinidomRecord,
     MarcRecord
-    )
+)
 from cheshire3.record import LxmlRecord
 from cheshire3.utils import nonTextToken
 from exceptions import XMLSyntaxError

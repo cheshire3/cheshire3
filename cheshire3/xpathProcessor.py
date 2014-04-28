@@ -4,7 +4,7 @@ from cheshire3.selector import (
     MetadataSelector,
     TransformerSelector,
     SpanXPathSelector
-    )
+)
 from cheshire3.record import LxmlRecord, SaxRecord
 from cheshire3.utils import elementType, getFirstData
 

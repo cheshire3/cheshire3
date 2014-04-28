@@ -28,7 +28,7 @@ from cheshire3.internal import (
     cheshire3Dbs,
     cheshire3Www,
     CONFIG_NS
-    )
+)
 
 
 cheshire3Paths = {'cheshire3Home': cheshire3Home,
@@ -385,7 +385,8 @@ class C3Object(object):
                         try:
                             dom = self._getDomFromUrl(session, path)
                         except FileDoesNotExistException:
-                            self.log_error(session,
+                            self.log_error(
+                                session,
                                 "Unable to include file at {0}, "
                                 "File not found\n".format(path)
                             )
@@ -405,7 +406,8 @@ class C3Object(object):
                             try:
                                 dom = self._getDomFromUrl(session, path)
                             except FileDoesNotExistException:
-                                self.log_error(session,
+                                self.log_error(
+                                    session,
                                     "Unable to include file at {0}, "
                                     "File not found\n".format(path)
                                 )
@@ -414,7 +416,8 @@ class C3Object(object):
                             try:
                                 dom = self._getDomFromFile(session, path)
                             except FileDoesNotExistException:
-                                self.log_error(session,
+                                self.log_error(
+                                    session,
                                     "Unable to include file at {0}, "
                                     "File not found\n".format(path)
                                 )

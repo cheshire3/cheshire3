@@ -1742,7 +1742,7 @@ class RecordIdentifierIndex(Index):
         'recordStore': {
             "docs": ("The recordStore in which the records are kept "
                      "(as this info not maintained in the index)")
-            }
+        }
     }
 
     def begin_indexing(self, session):

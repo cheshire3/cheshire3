@@ -13,7 +13,7 @@ from cheshire3.exceptions import (
     C3Exception,
     ConfigFileException,
     ObjectDoesNotExistException
-    )
+)
 from cheshire3.internal import CONFIG_NS
 
 

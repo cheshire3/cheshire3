@@ -20,7 +20,7 @@ from cheshire3.exceptions import (
     ConfigFileException,
     ObjectDoesNotExistException,
     QueryException
-    )
+)
 from cheshire3.internal import CONFIG_NS
 from cheshire3.bootstrap import BSParser, BootstrapDocument
 from cheshire3.resultSet import SimpleResultSet, BitmapResultSet
