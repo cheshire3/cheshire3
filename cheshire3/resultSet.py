@@ -518,6 +518,11 @@ class SimpleResultSet(RankedResultSet):
                                                      'wordCount')
                 if rsizes:
                     avgSize = recStore.meanWordCount
+
+                if size is None:
+                    # Record deleted? Assume average size
+                    size = avgSize
+
                 T = df / (df + 50.0 + ((150.0 * size) / avgSize))
                 item.weight = 0.4 + (0.6 * T * I)
                 if item.weight > rs.maxWeight:
@@ -625,8 +630,13 @@ class SimpleResultSet(RankedResultSet):
                 size = recStore.fetch_recordMetadata(session,
                                                      item.id,
                                                      'wordCount')
+
                 if rsizes:
                     avgSize = recStore.meanWordCount
+
+                if size is None:
+                    # Record deleted? Assume average size
+                    size = avgSize
 
                 T = (((k1 + 1) * docFreq) /
                      ((k1 * ((1 - b) + b * (size / avgSize))) + docFreq)
