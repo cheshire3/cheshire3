@@ -1,7 +1,7 @@
 Cheshire3
 =========
 
-28th April 2014 (2014-04-28)
+1st May 2014 (2014-05-01)
 
 .. image:: https://travis-ci.org/cheshire3/cheshire3.png?branch=master,develop
    :target: https://travis-ci.org/cheshire3/cheshire3?branch=master,develop

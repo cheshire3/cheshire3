@@ -1041,7 +1041,7 @@ class BdbStore(SimpleStore):
             data and
             data[:44] == "\0http://www.cheshire3.org/ns/status/DELETED:"
         ):
-            data = DeletedObject(self, id, data[41:])
+            data = DeletedObject(self, id, data[44:])
 
         if data and self.expires:
             # update touched

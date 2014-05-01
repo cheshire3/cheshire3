@@ -1,6 +1,26 @@
 CHANGES
 =======
 
+1.1.3 - Thursday 1st May 2014
+-----------------------------
+
+BUG FIXES
+~~~~~~~~~
+
+* Improved handling of deleted records:
+
+  * Relevance score calculations no longer raise TypeError.
+
+  * SRU supplies a surrogate diagnostic for deleted results.
+
+  * OAI-PMH:
+
+    * Checks RecordStore for deletion support, and reports this in the
+      Identify response.
+
+    * Includes an appropriate status in the header for deleted records.
+
+
 1.1.2 - Monday 28th April 2014
 ------------------------------
 
