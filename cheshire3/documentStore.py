@@ -210,4 +210,5 @@ def directoryDocumentStoreIter(store):
         doc.id = id_
         internalId = store._normalizeIdentifier(session, id_)
         doc.filename = store._getFilePath(session, internalId)
+        doc.documentStore = store.id
         yield doc
