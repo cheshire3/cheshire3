@@ -291,21 +291,30 @@ class SRUProtocolHandler(object):
 
             for rIdx in range(startRecord, end):
                 rsi = rs[rIdx]
-                r = rsi.fetch_record(session)
-
-                if (txr is not None):
-                    doc = txr.process_record(session, r)
-                    xml = doc.get_raw(session)
+                try:
+                    r = rsi.fetch_record(session)
+                except c3errors.ObjectDeletedException:
+                    diag = self.diagnostic(65, "Record deleted.", rsi.id)
+                    rec = self.record(
+                        schema='info:srw/schema/1/diagnostics-v1.1',
+                        data=self.diagnosticToXml(diag),
+                        identifier=str(rsi),
+                        position=rIdx + 1
+                    )
                 else:
-                    xml = r.get_xml(session)
-                xml = xmlVerRe.sub("", xml)
-                # Fencepost. SRW starts at 1, C3 starts at 0
-                rec = self.record(schema=schema,
-                                  packing=recordPacking,
-                                  data=xml,
-                                  identifier=str(rsi),
-                                  position=rIdx + 1)
-                self.extraData('record', opts, rec, rsi, r)
+                    if (txr is not None):
+                        doc = txr.process_record(session, r)
+                        xml = doc.get_raw(session)
+                    else:
+                        xml = r.get_xml(session)
+                    xml = xmlVerRe.sub("", xml)
+                    # Fencepost. SRW starts at 1, C3 starts at 0
+                    rec = self.record(schema=schema,
+                                      packing=recordPacking,
+                                      data=xml,
+                                      identifier=str(rsi),
+                                      position=rIdx + 1)
+                    self.extraData('record', opts, rec, rsi, r)
                 recs.append(rec)
 
             if rsn:
