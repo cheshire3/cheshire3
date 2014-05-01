@@ -173,8 +173,11 @@ class Cheshire3OaiServer(object):
         self.repositoryName = self.protocolMap.title
         self.protocolVersion = self.protocolMap.version
         self.adminEmails = self.protocolMap.contacts
-        # Cheshire3 does not support deletions at this time
-        self.deletedRecord = "no"
+        # Check for deletion support
+        recordStore = self.db.get_path(session, 'recordStore')
+        deletions = recordStore.get_setting(session, 'storeDeletions')
+        # Cheshire3 cannot guarantee that deletions will persist
+        self.deletedRecord = "transient" if deletions else "no"
         # Finest level of granularity
         self.granularity = "YYYY-MM-DDThh:mm:ssZ"
         # Cheshire3 does not support compressions at this time
@@ -223,7 +226,17 @@ class Cheshire3OaiServer(object):
                                       '' % (len(rs)))
 
         r = rs[0]
-        rec = r.fetch_record(session)
+        # Handle non-ascii characters in identifier
+        identifier = unicode(r.id, 'utf-8')
+        identifier = identifier.encode('ascii', 'xmlcharrefreplace')
+        try:
+            rec = r.fetch_record(session)
+        except ObjectDeletedException as e:
+            datestamp = datetime.datetime.strptime(e.time,
+                                                   '%Y-%m-%dT%H:%M:%SZ'
+                                                   )
+            return (Header(identifier, datestamp, [], True), None, None)
+
         # Now reverse lookup lastModificationDate
         q = cqlparse('rec.lastModificationDate < "%s"'
                      '' % (datetime.datetime.utcnow())
@@ -236,9 +249,7 @@ class Cheshire3OaiServer(object):
             datestamp = datetime.datetime.strptime(term, '%Y-%m-%dT%H:%M:%S')
         except ValueError:
             datestamp = datetime.datetime.strptime(term, '%Y-%m-%d %H:%M:%S')
-        # Handle non-ascii characters in identifier
-        identifier = unicode(r.id, 'utf-8')
-        identifier = identifier.encode('ascii', 'xmlcharrefreplace')
+
         return (Header(identifier, datestamp, [], None), rec, None)
 
     def identify(self):
@@ -353,7 +364,12 @@ class Cheshire3OaiServer(object):
                 # Handle non-ascii characters in identifier
                 identifier = unicode(r.id, 'utf-8')
                 identifier = identifier.encode('ascii', 'xmlcharrefreplace')
-                headers.append(Header(identifier, datestamp, [], None))
+                try:
+                    r.fetch_record(session)
+                except ObjectDeletedException as e:
+                    headers.append(Header(identifier, datestamp, [], True))
+                else:
+                    headers.append(Header(identifier, datestamp, [], None))
                 i += 1
                 if (len(headers) >= batch_size):
                     return headers
@@ -460,13 +476,21 @@ class Cheshire3OaiServer(object):
                 if i < cursor:
                     i += 1
                     continue
-                rec = r.fetch_record(session)
                 # Handle non-ascii characters in identifier
                 identifier = unicode(r.id, 'utf-8')
                 identifier = identifier.encode('ascii', 'xmlcharrefreplace')
-                records.append((Header(identifier, datestamp, [], None),
-                                rec,
-                                None))
+                try:
+                    rec = r.fetch_record(session)
+                except ObjectDeletedException as e:
+                    records.append((Header(identifier, datestamp, [], True),
+                                    None,
+                                    None
+                                    ))
+                else:
+                    records.append((Header(identifier, datestamp, [], None),
+                                    rec,
+                                    None
+                                    ))
                 i += 1
                 if (len(records) == batch_size):
                     return records
