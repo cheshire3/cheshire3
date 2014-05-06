@@ -17,6 +17,7 @@ var
 sdist
 develop-eggs
 .installed.cfg
+setuptools-*.tar.gz
 
 # Eclipse
 *.pydevproject
@@ -29,3 +30,7 @@ PyZ3950_parsetab.*
 
 # O/S file buffers
 *~
+
+# tox
+.tox
+

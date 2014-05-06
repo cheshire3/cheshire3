@@ -1,11 +1,15 @@
 language: python
 python:
   - "2.7"
-# Install dependencies
 install:
+  # We have to fix up bsddb support, use system Python
+  - "MY_VIRTUAL_ENV=$VIRTUAL_ENV"
+  - "deactivate"
+  - "virtualenv --clear --python /usr/bin/python $MY_VIRTUAL_ENV"
+  - "source $MY_VIRTUAL_ENV/bin/activate"
+  - "pip install pytest nose mock"
   - "python ez_setup.py"
   - "pip install -r requirements.txt"
   - "pip install ."
-# Run tests
 script: python setup.py test
 
