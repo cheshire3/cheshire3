@@ -1,6 +1,16 @@
 CHANGES
 =======
 
+1.1.4 - Friday 6th June 2014
+----------------------------
+
+BUG FIXES
+~~~~~~~~~
+
+* Update package, download and dependency links to avoid DNS problem causing
+  builds to fail for Cheshire3 and packages dependent on it.
+
+
 1.1.3 - Thursday 1st May 2014
 -----------------------------
 
