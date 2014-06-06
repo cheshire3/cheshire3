@@ -33,7 +33,7 @@ _description = ('Cheshire3 Search and Retrieval Engine and Information '
 with open(os.path.join(setupdir, 'VERSION.txt'), 'r') as vfh:
     _version = vfh.read().strip()
 
-_download_url = ('http://download.cheshire3.org/{0}/src/{1}-{2}.tar.gz'
+_download_url = ('http://cheshire3.liv.ac.uk/download/{0}/src/{1}-{2}.tar.gz'
                  ''.format(_version[:3], _name, _version))
 
 # More detailed description from README
@@ -75,7 +75,7 @@ setup(
     dependency_links=[
         "http://labix.org/python-dateutil",
         "http://www.panix.com/~asl2/software/PyZ3950/",
-        "http://download.cheshire3.org/latest/reqs/"
+        "http://cheshire3.liv.ac.uk/download/latest/reqs/"
     ],
     extras_require={
         'graph': ['rdflib'],
@@ -122,6 +122,6 @@ setup(
         "Topic :: Text Processing :: Linguistic",
         "Topic :: Text Processing :: Markup"
     ],
-    url="http://www.cheshire3.org/",
+    url="http://cheshire3.liv.ac.uk /",
     download_url=_download_url
 )
