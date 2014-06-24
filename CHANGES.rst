@@ -1,6 +1,15 @@
 CHANGES
 =======
 
+1.1.5 - Tuesday 24th June 2014
+------------------------------
+
+BUG FIXES
+~~~~~~~~~
+
+* Fix bug in phrase extraction when generating CQL from HTML forms.
+
+
 1.1.4 - Friday 6th June 2014
 ----------------------------
 
