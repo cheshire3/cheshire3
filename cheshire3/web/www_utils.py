@@ -32,8 +32,27 @@
 #
 
 
-import re, time
-phraseRe = re.compile('".*?"')
+import re
+import time
+
+from urllib import unquote
+
+
+class FieldStorageDict(dict):
+    """A sub-class of dict to behave like FieldStorage for testing.
+
+    Note, does not support multiple values for the same key.
+    """
+
+    def getfirst(self, key, default=None):
+        return self.get(key, default)
+
+    def getlist(self, key):
+        val = self.get(key)
+        if val:
+            return [val]
+        return []
+
 
 def generate_cqlQuery(form):
     global phraseRe
@@ -85,8 +104,6 @@ def generate_cqlQuery(form):
     qString = ' '.join(qClauses)
     formcodec = form.getfirst('_charset_', 'utf-8')
     return qString.decode(formcodec).encode('utf8')
-           
-#- end generateCqlQuery()
 
 
 def parse_url(url):
@@ -113,6 +130,9 @@ def parse_url(url):
     params = dict(params)
     anchor = bits[4]
     return (transport, user, passwd, host, port, dirname, filename, params, anchor)
+
+
+phraseRe = re.compile('".*?"')
 
 cgiReplacements = {
 #'%': '%25',
