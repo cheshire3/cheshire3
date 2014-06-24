@@ -84,13 +84,17 @@ def generate_cqlQuery(form):
             else:
                 phrases = phraseRe.findall(cont)
                 for ph in phrases:
-                    subClauses.append('(%s =/relevant/proxinfo %s)' % (idx, ph))
-                
-                cont = phraseRe.sub('', cont)
-                     
-            if (idx and rel and cont):
-                subClauses.append('%s %s "%s"' % (idx, rel, cont.strip()))
-                
+                    subClauses.append(
+                        '({0} =/relevant/proxinfo {1})'.format(idx, ph)
+                    )
+
+                subcont = phraseRe.sub('', cont)
+
+            if (idx and rel and subcont):
+                subClauses.append(
+                    '{0} {1} {2}'.format(idx, rel, subcont.strip())
+                )
+
             if (len(subClauses)):
                 idxClauses.append('(%s)' % (subBool.join(subClauses)))
             
@@ -100,7 +104,7 @@ def generate_cqlQuery(form):
         except: break
         
         i += 1
-        
+
     qString = ' '.join(qClauses)
     formcodec = form.getfirst('_charset_', 'utf-8')
     return qString.decode(formcodec).encode('utf8')
