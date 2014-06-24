@@ -32,61 +32,110 @@
 #
 
 
-import re, time
-phraseRe = re.compile('".*?"')
+import re
+import time
+
+from urllib import unquote
+
+
+class FieldStorageDict(dict):
+    """A sub-class of dict to behave like FieldStorage for testing.
+
+    Note, does not support multiple values for the same key.
+    """
+
+    def getfirst(self, key, default=None):
+        return self.get(key, default)
+
+    def getlist(self, key):
+        val = self.get(key)
+        if val:
+            return [val]
+        return []
+
 
 def generate_cqlQuery(form):
     global phraseRe
     qClauses = []
     bools = []
     i = 1
-    while (form.has_key('fieldcont%d' % i)):
-        bools.append(form.getfirst('fieldbool%d' % (i-1), 'and/relevant/proxinfo'))
+    while 'fieldcont{0}'.format(i) in form:
+        boolean = form.getfirst('fieldbool{0}'.format(i - 1),
+                                'and/relevant/proxinfo'
+                                )
+        bools.append(boolean)
         i += 1
-        
+
     i = 1
-    while (form.has_key('fieldcont%d' % i)):
-        cont = form.getfirst('fieldcont%d' % i)
-        idxs = cgi_decode(form.getfirst('fieldidx%d' % i, 'cql.anywhere'))
-        rel = cgi_decode(form.getfirst('fieldrel%d'  % i, 'all/relevant/proxinfo'))
+    while 'fieldcont{0}'.format(i) in form:
+        cont = form.getfirst('fieldcont{0}'.format(i))
+        idxs = unquote(
+            form.getfirst('fieldidx{0}'.format(i),
+                          'cql.anywhere'
+                          )
+        )
+        rel = unquote(
+            form.getfirst('fieldrel{0}'.format(i),
+                          'all/relevant/proxinfo'
+                          )
+        )
         idxClauses = []
-        if (rel.startswith('exact') or rel.startswith('=') or rel.find('/string') != -1):
-            # don't allow phrase searching for exact or /string searches
+        # In case they're trying to do phrase searching
+        if (
+            rel.startswith('exact') or
+            rel.startswith('=') or
+            '/string' in rel
+        ):
+            # Don't allow phrase searching for exact or /string searches
             cont = cont.replace('"', '\\"')
+
         for idx in idxs.split('||'):
             subClauses = []
-            if (rel[:3] == 'all'): subBool = ' and/relevant/proxinfo '
-            else: subBool = ' or/relevant/proxinfo '
+            if (rel.startswith('all')):
+                subBool = ' and/relevant/proxinfo '
+            else:
+                subBool = ' or/relevant/proxinfo '
 
-            # in case they're trying to do phrase searching
-            if (rel.find('exact') != -1 or rel.find('=') != -1 or rel.find('/string') != -1):
-                # don't allow phrase searching for exact or /string searches
-                pass # we already did quote escaping
+            # In case they're trying to do phrase searching
+            if (
+                'exact' in rel or
+                '=' in rel or
+                '/string' in rel
+            ):
+                # Don't allow phrase searching for exact or /string searches
+                # we already did quote escaping
+                pass
             else:
                 phrases = phraseRe.findall(cont)
                 for ph in phrases:
-                    subClauses.append('(%s =/relevant/proxinfo %s)' % (idx, ph))
-                
-                cont = phraseRe.sub('', cont)
-                     
-            if (idx and rel and cont):
-                subClauses.append('%s %s "%s"' % (idx, rel, cont.strip()))
-                
+                    subClauses.append(
+                        '({0} =/relevant/proxinfo {1})'.format(idx, ph)
+                    )
+
+                subcont = phraseRe.sub('', cont)
+
+            if (idx and rel and subcont):
+                subClauses.append(
+                    '{0} {1} {2}'.format(idx, rel, subcont.strip())
+                )
+
             if (len(subClauses)):
-                idxClauses.append('(%s)' % (subBool.join(subClauses)))
-            
-        qClauses.append('(%s)' % (' or/rel.combine=sum/proxinfo '.join(idxClauses)))
-        # if there's another clause and a corresponcding boolean
-        try: qClauses.append(bools[i])
-        except: break
-        
+                idxClauses.append('({0})'.format(subBool.join(subClauses)))
+
+        qClauses.append(
+            '({0})'.format(' or/rel.combine=sum/proxinfo '.join(idxClauses))
+        )
+        # If there's another clause and a corresponding boolean
+        try:
+            qClauses.append(bools[i])
+        except:
+            break
+
         i += 1
-        
+
     qString = ' '.join(qClauses)
     formcodec = form.getfirst('_charset_', 'utf-8')
     return qString.decode(formcodec).encode('utf8')
-           
-#- end generateCqlQuery()
 
 
 def parse_url(url):
@@ -113,6 +162,9 @@ def parse_url(url):
     params = dict(params)
     anchor = bits[4]
     return (transport, user, passwd, host, port, dirname, filename, params, anchor)
+
+
+phraseRe = re.compile('".*?"')
 
 cgiReplacements = {
 #'%': '%25',
