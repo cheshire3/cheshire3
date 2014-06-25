@@ -1,6 +1,20 @@
 CHANGES
 =======
 
+1.1.6 - Wednesday 25th June 2014
+--------------------------------
+
+ENHANCEMENTS
+~~~~~~~~~~~~
+
+* Unittests added for `web.queryFactory`
+
+BUG FIXES
+~~~~~~~~~
+
+* Fix bug when generating CQL from HTML forms introduced in 1.1.5.
+
+
 1.1.5 - Tuesday 24th June 2014
 ------------------------------
 
