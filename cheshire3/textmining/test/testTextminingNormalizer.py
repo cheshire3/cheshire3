@@ -14,9 +14,19 @@ except ImportError:
 from lxml import etree
 from collections import Hashable
 
-from cheshire3.textmining.normalizer import NltkPosNormalizer
+from cheshire3.textmining.normalizer import nltk, NltkPosNormalizer
 from cheshire3.test.testNormalizer import NormalizerTestCase
 
+
+try:
+    nltk.sent_tokenize('Look at me. I work!')
+except:
+    has_nltk_models = False
+else:
+    has_nltk_models = True
+
+
+@unittest.skipUnless(has_nltk_models, "NLTK dependency not present")
 class NltkPosNormalizerTestCase(NormalizerTestCase):
     """Base Class for Cheshire3 NLTK PoS Normalizer Test Cases."""
     
@@ -64,6 +74,7 @@ class NltkPosNormalizerTestCase(NormalizerTestCase):
                         })    
 
 
+@unittest.skipUnless(has_nltk_models, "NLTK dependency not present")
 class NltkJustPosNormalizerTestCase(NltkPosNormalizerTestCase):
     """Cheshire3 NLTK PoS Normalizer Test Case to return only the PoS."""
     
