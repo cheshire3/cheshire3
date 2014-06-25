@@ -5,6 +5,7 @@ try:
 except ImportError:
     import unittest
 
+from cheshire3.internal import get_subpackages
 from cheshire3.test import __all__
 
 
@@ -35,6 +36,39 @@ def load_tests(loader, tests, pattern):
                 modsuite = load_tests_fn(loader, tests, pattern)
             
         suite.addTest(modsuite)
+
+    # Load tests from sub-packages
+    for sub_pkg_name in get_subpackages():
+        if not sub_pkg_name.endswith('.test'):
+            continue
+
+        # sub_pkg = import_module(sub_pkg_name, 'cheshire3')
+        sub_pkg = __import__(
+            'cheshire3.' + sub_pkg_name,
+            globals(),
+            locals(),
+            [sub_pkg_name]
+        )
+        for modname in sub_pkg.__all__:
+            try:
+                module = __import__(
+                    '.'.join(['cheshire3', sub_pkg_name, modname]),
+                    globals(),
+                    locals(),
+                    [modname]
+                )
+            except ImportError as e:
+                # It is likely that the sub-package has unmet dependencies
+                continue
+            else:
+                try:
+                    load_tests_fn = getattr(module, 'load_tests')
+                except AttributeError:
+                    # No tests to load for this module
+                    continue
+                else:
+                    modsuite = load_tests_fn(loader, tests, pattern)
+                    suite.addTest(modsuite)
     # Return the complete test suite
     return suite
 

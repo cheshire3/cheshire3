@@ -14,10 +14,19 @@ except ImportError:
 from lxml import etree
 
 from cheshire3.exceptions import ConfigFileException
-from cheshire3.textmining.extractor import NLTKNamedEntityExtractor
+from cheshire3.textmining.extractor import nltk, NLTKNamedEntityExtractor
 from cheshire3.test.testExtractor import SimpleExtractorTestCase
 
 
+try:
+    nltk.sent_tokenize('Look at me. I work!')
+except:
+    has_nltk_models = False
+else:
+    has_nltk_models = True
+
+
+@unittest.skipUnless(has_nltk_models, "NLTK dependency not present")
 class NLTKNamedEntityExtractorTestCase(SimpleExtractorTestCase):
 
     text = """\
@@ -122,6 +131,7 @@ process of change--not a knocker, but Marley's face.
             self.assertDictEqual(output, expected)
 
 
+@unittest.skipUnless(has_nltk_models, "NLTK dependency not present")
 class NLTKPersonNameExtractorTestCase(NLTKNamedEntityExtractorTestCase):
     """Test a NamedEntityExtractor configured to extract only People."""
 
@@ -165,6 +175,7 @@ class NLTKPersonNameExtractorTestCase(NLTKNamedEntityExtractorTestCase):
                   })]
 
 
+@unittest.skipUnless(has_nltk_models, "NLTK dependency not present")
 class NLTKPeopleNameExtractorTestCase(NLTKPersonNameExtractorTestCase):
     """Test a NamedEntityExtractor configured to extract only People.
 
@@ -181,6 +192,7 @@ class NLTKPeopleNameExtractorTestCase(NLTKPersonNameExtractorTestCase):
         </subConfig>'''.format(self._get_class()))
 
 
+@unittest.skipUnless(has_nltk_models, "NLTK dependency not present")
 class NLTKPlaceNameExtractorTestCase(NLTKNamedEntityExtractorTestCase):
     """Test a NamedEntityExtractor configured to extract only Places."""
 
@@ -214,6 +226,7 @@ class NLTKPlaceNameExtractorTestCase(NLTKNamedEntityExtractorTestCase):
                   })]
 
 
+@unittest.skipUnless(has_nltk_models, "NLTK dependency not present")
 class NLTKGeoNameExtractorTestCase(NLTKPlaceNameExtractorTestCase):
     """Test a NamedEntityExtractor configured to extract only Places.
 
@@ -230,6 +243,7 @@ class NLTKGeoNameExtractorTestCase(NLTKPlaceNameExtractorTestCase):
         </subConfig>'''.format(self._get_class()))
 
 
+@unittest.skipUnless(has_nltk_models, "NLTK dependency not present")
 class NLTKOrganizationNameExtractorTestCase(NLTKNamedEntityExtractorTestCase):
     """Test a NamedEntityExtractor configured to extract only Organizations."""
 
@@ -279,6 +293,7 @@ class NLTKCompanyNameExtractorTestCase(NLTKOrganizationNameExtractorTestCase):
         </subConfig>'''.format(self._get_class()))
 
 
+@unittest.skipUnless(has_nltk_models, "NLTK dependency not present")
 class NLTKInvalidNameExtractorTestCase(NLTKNamedEntityExtractorTestCase):
     """Named Entity Extractor with an unsupported entityType."""
 
