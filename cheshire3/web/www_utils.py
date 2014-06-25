@@ -116,7 +116,7 @@ def generate_cqlQuery(form):
 
             if (idx and rel and subcont):
                 subClauses.append(
-                    '{0} {1} {2}'.format(idx, rel, subcont.strip())
+                    '{0} {1} "{2}"'.format(idx, rel, subcont.strip())
                 )
 
             if (len(subClauses)):
