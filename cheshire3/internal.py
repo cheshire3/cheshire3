@@ -28,8 +28,13 @@ modules = ['database', 'documentFactory', 'documentStore', 'extractor',
            'grid.srbIndex', 'grid.srbStore']
 
 _major_version = 1
+<<<<<<< HEAD
 _minor_version = 2
 _patch_version = 0
+=======
+_minor_version = 1
+_patch_version = 7
+>>>>>>> 1.1.7
 
 cheshire3Version = (_major_version, _minor_version, _patch_version)
 cheshireVersion = cheshire3Version   # Included for backward compatibility
