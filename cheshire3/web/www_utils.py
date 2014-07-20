@@ -104,7 +104,7 @@ def generate_cqlQuery(form):
             ):
                 # Don't allow phrase searching for exact or /string searches
                 # we already did quote escaping
-                pass
+                subcont = cont
             else:
                 phrases = phraseRe.findall(cont)
                 for ph in phrases:
