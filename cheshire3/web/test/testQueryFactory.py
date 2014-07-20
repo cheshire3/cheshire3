@@ -81,6 +81,56 @@ class WwwQueryFactoryTestCase(SimpleQueryFactoryTestCase):
         self.assertIsInstance(query.term, Term)
         self.assertEqual(query.term.value, 'spam eggs')
 
+    def test_get_query_clause_www_exact(self):
+        "Test simple clause with 'exact' relation."
+        form  = FieldStorageDict(
+            fieldidx1='cql.anywhere',
+            fieldrel1='exact',
+            fieldcont1='spam eggs'
+        )
+        query = self.testObj.get_query(
+            self.session,
+            form,
+            format='www'
+        )
+        # Check query instance
+        self.assertIsInstance(query, SearchClause)
+        # Check Index
+        self.assertIsInstance(query.index, Index)
+        self.assertEqual(query.index.prefix, 'cql')
+        self.assertEqual(query.index.value, 'anywhere')
+        # Check Relation
+        self.assertIsInstance(query.relation, Relation)
+        self.assertEqual(query.relation.value, 'exact')
+        # Check Value
+        self.assertIsInstance(query.term, Term)
+        self.assertEqual(query.term.value, 'spam eggs')
+
+    def test_get_query_clause_www_exact_quotes(self):
+        "Test simple clause with 'exact' relation and quotes."
+        form  = FieldStorageDict(
+            fieldidx1='cql.anywhere',
+            fieldrel1='exact',
+            fieldcont1='"spam eggs"'
+        )
+        query = self.testObj.get_query(
+            self.session,
+            form,
+            format='www'
+        )
+        # Check query instance
+        self.assertIsInstance(query, SearchClause)
+        # Check Index
+        self.assertIsInstance(query.index, Index)
+        self.assertEqual(query.index.prefix, 'cql')
+        self.assertEqual(query.index.value, 'anywhere')
+        # Check Relation
+        self.assertIsInstance(query.relation, Relation)
+        self.assertEqual(query.relation.value, 'exact')
+        # Check Value
+        self.assertIsInstance(query.term, Term)
+        self.assertEqual(query.term.value, '"spam eggs"')
+
     def test_get_query_triple_www(self):
         "Test query with boolean."
         form  = FieldStorageDict(
