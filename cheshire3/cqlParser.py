@@ -213,9 +213,9 @@ class Triple (PrefixableObject):
             ptxt = []
             for p in self.prefixes.keys():
                 if p != '':
-                    ptxt.append('>%s="%s"' % (p, self.prefixes[p]))
+                    ptxt.append(u'>%s="%s"' % (p, self.prefixes[p]))
                 else:
-                    ptxt.append('>"%s"' % (self.prefixes[p]))
+                    ptxt.append(u'>"%s"' % (self.prefixes[p]))
             prefs = ' '.join(ptxt)
             txt.append(prefs)
         txt.append(self.leftOperand.toCQL())
@@ -223,10 +223,10 @@ class Triple (PrefixableObject):
         txt.append(self.rightOperand.toCQL())
         # Add sortKeys
         if self.sortKeys:
-            txt.append("sortBy")
+            txt.append(u"sortBy")
             for sk in self.sortKeys:
                 txt.append(sk.toCQL())
-        return "({0})".format(" ".join(txt))
+        return u"({0})".format(u" ".join(txt))
 
     def getResultSetId(self, top=None):
         if (
@@ -307,18 +307,21 @@ class SearchClause (PrefixableObject):
         text = []
         for p in self.prefixes.keys():
             if p != '':
-                text.append('>%s="%s"' % (p, self.prefixes[p]))
+                text.append(u'>%s="%s"' % (p, self.prefixes[p]))
             else:
-                text.append('>"%s"' % (self.prefixes[p]))
-        text.append('%s %s "%s"' % (self.index,
-                                    self.relation.toCQL(),
-                                    self.term.toCQL()))
+                text.append(u'>"%s"' % (self.prefixes[p]))
+        text.append(
+            u'%s %s "%s"' % (self.index,
+                             self.relation.toCQL(),
+                             self.term.toCQL()
+                             )
+        )
         # Add sortKeys
         if self.sortKeys:
-            text.append("sortBy")
+            text.append(u"sortBy")
             for sk in self.sortKeys:
                 text.append(sk.toCQL())
-        return ' '.join(text)
+        return u' '.join(text)
 
     def getResultSetId(self, top=None):
         idx = self.index
@@ -363,7 +366,7 @@ class Index(PrefixedObject, ModifiableObject):
         txt = [str(self)]
         for m in self.modifiers:
             txt.append(m.toCQL())
-        return '/'.join(txt)
+        return u'/'.join(txt)
 
 
 class Relation(PrefixedObject, ModifiableObject):
@@ -397,7 +400,7 @@ class Relation(PrefixedObject, ModifiableObject):
     def toCQL(self):
         txt = [self.value]
         txt.extend(map(str, self.modifiers))
-        return '/'.join(txt)
+        return u'/'.join(txt)
 
 
 class Term:
@@ -461,7 +464,7 @@ class Term:
         return "%s<term%s>%s</term>\n" % ("  " * depth, ns, escape(self.value))
 
     def toCQL(self):
-        return self.value.replace('"', '\\"')
+        return self.value.replace(u'"', u'\\"')
 
 
 class Boolean(ModifiableObject):
@@ -492,7 +495,7 @@ class Boolean(ModifiableObject):
         txt = [self.value]
         for m in self.modifiers:
             txt.append(m.toCQL())
-        return '/'.join(txt)
+        return u'/'.join(txt)
 
     def resolvePrefix(self, name):
         return self.parent.resolvePrefix(name)
@@ -518,10 +521,13 @@ class ModifierClause:
         self.value = val
 
     def __str__(self):
+        return unicode(self).encode('utf-8')
+
+    def __unicode__(self):
         if (self.value):
-            return "%s%s%s" % (str(self.type), self.comparison, self.value)
+            return u"%s%s%s" % (unicode(self.type), self.comparison, self.value)
         else:
-            return "%s" % (str(self.type))
+            return u"%s" % (unicode(self.type))
 
     def toXCQL(self, depth=0):
         if (self.value):
@@ -542,7 +548,7 @@ class ModifierClause:
                               ])
 
     def toCQL(self):
-        return str(self)
+        return unicode(self)
 
     def resolvePrefix(self, name):
         # Need to skip parent, which has its own resolvePrefix
