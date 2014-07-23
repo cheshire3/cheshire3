@@ -35,12 +35,14 @@ class SimpleQueryFactoryTestCase(Cheshire3ObjectTestCase):
         self.assertRaises(Diagnostic,
                           self.testObj.get_query,
                           self.session,
-                          "cql.anywhere all spam eggs")
+                          "cql.anywhere all spam eggs"
+                          )
 
     def test_get_query_clause(self):
         "Check that simple clause is parsed correctly."
         query = self.testObj.get_query(self.session,
-                                       u"cql.anywhere all spam")
+                                       u"cql.anywhere all spam"
+                                       )
         # Check query instance
         self.assertIsInstance(query, SearchClause)
         # Check Index
@@ -53,6 +55,34 @@ class SimpleQueryFactoryTestCase(Cheshire3ObjectTestCase):
         # Check Value
         self.assertIsInstance(query.term, Term)
         self.assertEqual(query.term.value, 'spam')
+        cqlString = query.toCQL()
+        self.assertIsInstance(cqlString, unicode)
+        self.assertEqual(cqlString,
+                         u'cql.anywhere all "spam"'
+                         )
+
+    def test_get_query_clause_utf8(self):
+        "Check that simple clause with utf8 is parsed correctly."
+        query = self.testObj.get_query(self.session,
+                                       u"cql.anywhere all sp\xe4m"
+                                       )
+        # Check query instance
+        self.assertIsInstance(query, SearchClause)
+        # Check Index
+        self.assertIsInstance(query.index, Index)
+        self.assertEqual(query.index.prefix, 'cql')
+        self.assertEqual(query.index.value, 'anywhere')
+        # Check Relation
+        self.assertIsInstance(query.relation, Relation)
+        self.assertEqual(query.relation.value, 'all')
+        # Check Value
+        self.assertIsInstance(query.term, Term)
+        self.assertEqual(query.term.value, u"sp\xe4m")
+        cqlString = query.toCQL()
+        self.assertIsInstance(cqlString, unicode)
+        self.assertEqual(cqlString,
+                         u'cql.anywhere all "sp\xe4m"'
+                         )
 
     def test_get_query_clause_modifiers(self):
         "Check that relation modifiers are parsed correctly."
@@ -70,6 +100,13 @@ class SimpleQueryFactoryTestCase(Cheshire3ObjectTestCase):
                          '=')
         self.assertEqual(str(query.relation.modifiers[1].value),
                          'okapi')
+        cqlString = query.toCQL()
+        self.assertIsInstance(cqlString, unicode)
+        self.assertEqual(cqlString,
+                         u'cql.anywhere '
+                         u'all/cql.stem/rel.algorithm=okapi '
+                         u'"spam"'
+                         )
         
     def test_get_query_triple(self):
         "Check that query with boolean is parsed correctly."
@@ -89,9 +126,55 @@ class SimpleQueryFactoryTestCase(Cheshire3ObjectTestCase):
         self.assertEqual(query.boolean.value, 'and')
         # Check right clause
         self.assertIsInstance(query.rightOperand, SearchClause)
-        # remember terms get quoted during parsing
+        # Remember terms get quoted during parsing
         self.assertEqual(query.rightOperand.toCQL(),
                          u'cql.anywhere all "eggs"')
+        cqlString = query.toCQL()
+        self.assertIsInstance(cqlString, unicode)
+        self.assertEqual(
+            cqlString,
+            (
+                 u'('
+                 u'cql.anywhere all "spam"'
+                 u' and '
+                 u'cql.anywhere all "eggs"'
+                 u')'
+            )
+        )
+
+    def test_get_query_triple_utf8(self):
+        "Check that query with boolean and utf8 is parsed correctly."
+        query = self.testObj.get_query(self.session,
+                                       u'cql.anywhere all sp\xe4m'
+                                       u' and '
+                                       u'cql.anywhere all "\xe9ggs"')
+        # Check query instance
+        self.assertIsInstance(query, Triple)
+        # Check left clause
+        self.assertIsInstance(query.leftOperand, SearchClause)
+        # remember terms get quoted during parsing
+        self.assertEqual(query.leftOperand.toCQL(),
+                         u'cql.anywhere all "sp\xe4m"')
+        # Check boolean
+        self.assertIsInstance(query.boolean, Boolean)
+        self.assertEqual(query.boolean.value, 'and')
+        # Check right clause
+        self.assertIsInstance(query.rightOperand, SearchClause)
+        # remember terms get quoted during parsing
+        self.assertEqual(query.rightOperand.toCQL(),
+                         u'cql.anywhere all "\xe9ggs"')
+        cqlString = query.toCQL()
+        self.assertIsInstance(cqlString, unicode)
+        self.assertEqual(
+            cqlString,
+            (
+                 u'('
+                 u'cql.anywhere all "sp\xe4m"'
+                 u' and '
+                 u'cql.anywhere all "\xe9ggs"'
+                 u')'
+            )
+        )
 
     def test_get_query_triple_modifiers(self):
         "Check that query with boolean modifiers is parsed correctly."
