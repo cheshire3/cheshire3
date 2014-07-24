@@ -1,6 +1,21 @@
 CHANGES
 =======
 
+1.1.8 - Thursday 24th July 2014
+-----------------------------
+
+ENHANCEMENTS
+~~~~~~~~~~~~
+
+* More rigorous unittests for parsing queries containing UTF-8.
+
+BUG FIXES
+~~~~~~~~~
+
+* Fix another bug when generating CQL from HTML forms.
+* `toCQL()` consistently returns unicode
+
+
 1.1.7 - Sunday 20th July 2014
 -----------------------------
 
