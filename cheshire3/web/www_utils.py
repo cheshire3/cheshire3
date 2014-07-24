@@ -34,6 +34,7 @@
 
 import re
 import time
+import urlparse
 
 from urllib import unquote
 
@@ -145,25 +146,28 @@ def generate_cqlQuery(form):
 def parse_url(url):
     u"""Parse a URL to split it into its component parts."""
     bits = urlparse.urlsplit(url)
+    print bits
     transport = bits[0]
     uphp = bits[1].split('@')
     user = ''
     passwd = ''
     if len(uphp) == 2:
-        (user, passwd) = uphp[0].split(':')
-        uphp.pop(0)
+        (user, passwd) = uphp.pop(0).split(':')
+
     hp = uphp[0].split(':')
     host = hp[0]
     if len(hp) == 2:
         port = int(hp[1])
     else:
-        # require subclass to default
+        # Require subclass to default
         port = 0
-    # now cwd to the directory, check if last chunk is dir or file
-    (dirname,filename) = os.path.split(bits[2])
+    dirname, filename = bits[2].rsplit('/', 1)
     # params = map(lambda x: x.split('='), bits[3].split('&'))
     params = [x.split('=') for x in bits[3].split('&')]
-    params = dict(params)
+    try:
+        params = dict(params)
+    except ValueError:
+        params = {}
     anchor = bits[4]
     return (transport, user, passwd, host, port, dirname, filename, params, anchor)
 
