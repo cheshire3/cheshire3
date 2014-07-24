@@ -34,6 +34,7 @@
 
 import re
 import time
+import urlparse
 
 from urllib import unquote
 
@@ -56,6 +57,7 @@ class FieldStorageDict(dict):
 
 def generate_cqlQuery(form):
     global phraseRe
+    formcodec = form.getfirst('_charset_', 'utf-8')
     qClauses = []
     bools = []
     i = 1
@@ -69,6 +71,10 @@ def generate_cqlQuery(form):
     i = 1
     while 'fieldcont{0}'.format(i) in form:
         cont = form.getfirst('fieldcont{0}'.format(i))
+        if isinstance(cont, unicode):
+            # Encode any unicode back to raw byte string for compatibility
+            # with legacy code
+            cont = cont.encode(formcodec)
         idxs = unquote(
             form.getfirst('fieldidx{0}'.format(i),
                           'cql.anywhere'
@@ -134,32 +140,34 @@ def generate_cqlQuery(form):
         i += 1
 
     qString = ' '.join(qClauses)
-    formcodec = form.getfirst('_charset_', 'utf-8')
     return qString.decode(formcodec).encode('utf8')
 
 
 def parse_url(url):
     u"""Parse a URL to split it into its component parts."""
     bits = urlparse.urlsplit(url)
+    print bits
     transport = bits[0]
     uphp = bits[1].split('@')
     user = ''
     passwd = ''
     if len(uphp) == 2:
-        (user, passwd) = uphp[0].split(':')
-        uphp.pop(0)
+        (user, passwd) = uphp.pop(0).split(':')
+
     hp = uphp[0].split(':')
     host = hp[0]
     if len(hp) == 2:
         port = int(hp[1])
     else:
-        # require subclass to default
+        # Require subclass to default
         port = 0
-    # now cwd to the directory, check if last chunk is dir or file
-    (dirname,filename) = os.path.split(bits[2])
+    dirname, filename = bits[2].rsplit('/', 1)
     # params = map(lambda x: x.split('='), bits[3].split('&'))
     params = [x.split('=') for x in bits[3].split('&')]
-    params = dict(params)
+    try:
+        params = dict(params)
+    except ValueError:
+        params = {}
     anchor = bits[4]
     return (transport, user, passwd, host, port, dirname, filename, params, anchor)
 
