@@ -56,6 +56,7 @@ class FieldStorageDict(dict):
 
 def generate_cqlQuery(form):
     global phraseRe
+    formcodec = form.getfirst('_charset_', 'utf-8')
     qClauses = []
     bools = []
     i = 1
@@ -69,6 +70,10 @@ def generate_cqlQuery(form):
     i = 1
     while 'fieldcont{0}'.format(i) in form:
         cont = form.getfirst('fieldcont{0}'.format(i))
+        if isinstance(cont, unicode):
+            # Encode any unicode back to raw byte string for compatibility
+            # with legacy code
+            cont = cont.encode(formcodec)
         idxs = unquote(
             form.getfirst('fieldidx{0}'.format(i),
                           'cql.anywhere'
@@ -134,7 +139,6 @@ def generate_cqlQuery(form):
         i += 1
 
     qString = ' '.join(qClauses)
-    formcodec = form.getfirst('_charset_', 'utf-8')
     return qString.decode(formcodec).encode('utf8')
 
 
